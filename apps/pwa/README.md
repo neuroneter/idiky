@@ -16,6 +16,16 @@ npm run dev      # http://localhost:5173
 | `npm run build` | Verifica tipos y compila a `dist/` |
 | `npm run preview` | Sirve `dist/` (aquí sí se activa el service worker) |
 | `npm run typecheck` | Solo verificación de tipos |
+| `npm run empaquetar` | Genera `dist/idiky-demo.html`: **el demo entero en un solo archivo** |
+
+### Mostrar el demo a alguien que no tiene Node
+
+`npm run empaquetar` deja un único `dist/idiky-demo.html` con el CSS y el JS
+adentro. Ese archivo se abre **con doble clic** — sin Node, sin npm, sin servidor —
+y se puede mandar por correo o WhatsApp. Es la forma de que el equipo vea el demo
+sin instalar nada.
+
+Solo quien compila necesita Node. Quien mira, no.
 
 ## Perfiles del demo
 

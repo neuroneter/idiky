@@ -39,6 +39,16 @@ Para generar la versión instalable:
 npm run build && npm run preview
 ```
 
+### ¿Solo quieres ver el demo, sin instalar nada?
+
+```bash
+cd apps/pwa && npm run empaquetar
+```
+
+Deja `dist/idiky-demo.html`: **el demo completo en un archivo**, que se abre con
+doble clic en cualquier navegador. No necesita Node ni servidor, así que es lo que
+se le manda a quien vaya a mirarlo y no vaya a programar.
+
 ## 3. Documentación esencial
 
 Antes de escribir código, lee en este orden:
