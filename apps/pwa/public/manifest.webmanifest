@@ -1,0 +1,16 @@
+{
+  "name": "Idiky — Gestion de copropiedad",
+  "short_name": "Idiky",
+  "description": "Administra tu copropiedad horizontal desde el telefono: cuenta, reservas, PQRS, visitantes y comunicados.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f4f6f6",
+  "theme_color": "#0f3d3e",
+  "lang": "es",
+  "icons": [
+    { "src": "./icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "./icono-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ]
+}

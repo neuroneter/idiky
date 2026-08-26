@@ -49,6 +49,16 @@ Antes de escribir código, lee en este orden:
 4. [Arquitectura](./docs/06-arquitectura.md) — cómo está organizado el código.
 5. [Estado del proyecto](./docs/09-estado-del-proyecto.md) — **qué está hecho y qué sigue.**
 
+Si vas a trabajar en equipo:
+
+6. [Equipo y orquestación](./docs/10-equipo-y-orquestacion.md) — zonas de propiedad, flujo de git y protocolo para archivos compartidos.
+7. [Tablero de trabajo](./docs/11-tablero-de-trabajo.md) — quién tiene qué tarea.
+8. [Levantamiento pendiente](./docs/12-levantamiento-pendiente.md) — **lo que falta definir del producto.**
+
+> ⚠️ El demo v0.1 se construyó sobre supuestos de un conjunto residencial típico, para tener
+> algo tangible con qué conversar. **No es la definición del producto.** Antes de agregar
+> funcionalidad nueva hay que responder el levantamiento pendiente.
+
 ## 4. Hoja de ruta en una línea
 
 `Demo PWA (v0.1)` → `Backend real + Auth (v0.2)` → `Android/iOS con Capacitor (v0.3)` → `Pagos y facturación (v0.4)`

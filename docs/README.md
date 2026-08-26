@@ -18,7 +18,14 @@ aquí antes o junto con el código.
 | 07 | [Roadmap](./07-roadmap.md) | Fases, entregables y criterios de salida | Al cerrar una fase |
 | 08 | [Convenciones](./08-convenciones.md) | Git, código, nombres, documentación | Rara vez |
 | 09 | [Estado del proyecto](./09-estado-del-proyecto.md) | **Bitácora viva: qué está hecho y qué sigue** | En cada sesión de trabajo |
+| 10 | [Equipo y orquestación](./10-equipo-y-orquestacion.md) | **Cómo trabajamos Jeimy, Mary y Daniel en paralelo** | Al cambiar la forma de trabajo |
+| 11 | [Tablero de trabajo](./11-tablero-de-trabajo.md) | Tareas en curso, quién las tiene y en qué estado | Todos los días |
+| 12 | [Levantamiento pendiente](./12-levantamiento-pendiente.md) | **Preguntas abiertas del producto, por responder** | Hasta cerrarlo |
 | — | [ADR](./adr/) | Decisiones de arquitectura con su justificación | Al tomar una decisión relevante |
+
+> ⚠️ **Antes de construir funcionalidad nueva:** el demo v0.1 se hizo sobre supuestos, no
+> sobre el alcance definitivo. Hay que cerrar primero
+> [`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md).
 
 ## Cómo usar esta documentación en una sesión nueva (humano o IA)
 
