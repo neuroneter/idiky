@@ -77,8 +77,20 @@ intercambiables:
 | `--color-acento` | Fucsia `#c41e8c` | **Acción y atención: qué puedes hacer.** Contadores, botón de acento, chips de acento |
 
 Los dos juntos aparecen en **una sola superficie por pantalla**: `.tarjeta--marca` (el saldo
-del residente) y la barra lateral de la consola, ambas con un degradado de azul a fucsia. Es
-la firma de la marca; si aparece en más sitios deja de serlo.
+del residente) y la barra lateral de la consola. Es la firma de la marca; si aparece en más
+sitios deja de serlo.
+
+**El degradado manda el azul.** No es mitad y mitad: el azul se mantiene puro más de la mitad
+del recorrido y el fucsia solo entra al final, sin llegar nunca a fucsia pleno. Los dos
+degradados están en `tokens.css` como `--degradado-marca` (la tarjeta) y
+`--degradado-marca-vertical` (la lateral, que aguanta más azul porque el administrador la
+tiene delante todo el día). **Los componentes solo consumen el token**, no escriben el
+degradado. Para reequilibrarlo se tocan dos números:
+
+| Parada | Qué controla | Subirla = |
+|---|---|---|
+| El segundo `--color-marca` (52 % / 62 %) | Hasta dónde llega el azul puro | Más azul |
+| El `--color-marca-claro` (145 % / 155 %) | Dónde llegaría el fucsia pleno; por encima de 100 % el degradado se corta antes | Más azul |
 
 **El rojo está reservado para la plata** — mora, cuota vencida, cartera vencida. No usar
 fucsia para alarmar: compiten en tono y se pierde la señal que más importa.

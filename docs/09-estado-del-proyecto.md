@@ -86,10 +86,22 @@ cerca en tono y competía justo con la señal que más tiene que alarmar. Por es
 quedó como acento y no como color de marca, y el rojo mandó solo. Está anotado en el
 encabezado de `tokens.css` y en [`08-convenciones.md`](./08-convenciones.md).
 
+**El degradado, reequilibrado**
+
+La primera versión repartía azul y fucsia mitad y mitad y quedaba demasiado fucsia. Ahora el
+azul se mantiene puro pasada la mitad del recorrido y el fucsia solo entra al final, sin
+llegar nunca a fucsia pleno.
+
+De paso, los dos degradados salieron del CSS de los componentes y pasaron a `tokens.css` como
+`--degradado-marca` y `--degradado-marca-vertical`. Estaban en `base.css` y `layout.css`, así
+que reequilibrar la marca obligaba a editar dos archivos y a acordarse de los dos. Ahora es
+cambiar dos números en el archivo donde vive la identidad, que es lo que dicen las
+convenciones.
+
 **Qué se tocó**
 
-`tokens.css` (paleta y el porqué del reparto), `layout.css` (degradado de la lateral), los dos
-SVG del logo, los PNG del manifest, el `theme-color` y el `background_color`. El empaquetador
+`tokens.css` (paleta, reparto y degradados), `base.css` y `layout.css` (pasan a consumir el
+token), los dos SVG del logo, los PNG del manifest, el `theme-color` y el `background_color`. El empaquetador
 del demo ahora **lee `--color-marca` de los tokens**, para que el `theme-color` no se
 desactualice en el próximo cambio de identidad.
 

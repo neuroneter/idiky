@@ -131,15 +131,10 @@
   flex: 0 0 var(--ancho-lateral);
   /* La lateral es la unica superficie de marca de la consola: lleva el mismo
      degradado azul -> fucsia que `.tarjeta--marca` en la app del residente, para
-     que las dos caras del producto se lean como la misma familia. El corte al
-     130 % deja el fucsia insinuado y no saturando una barra que el administrador
-     tiene delante todo el dia. */
-  background: linear-gradient(
-    176deg,
-    var(--color-marca) 0%,
-    var(--color-marca) 48%,
-    var(--color-marca-claro) 130%
-  );
+     que las dos caras del producto se lean como la misma familia. La version
+     vertical mantiene el azul mas tiempo: es una barra que el administrador tiene
+     delante todo el dia. El balance se ajusta en tokens.css. */
+  background: var(--degradado-marca-vertical);
   color: var(--color-texto-inverso);
   padding: var(--e5) var(--e3);
   display: flex;

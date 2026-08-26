@@ -12,10 +12,11 @@
  *   FUCSIA (--color-acento) accion y atencion: que puedes hacer.
  *                           Contadores, boton de acento, chips de acento.
  *
- * Las dos juntas aparecen en `.tarjeta--marca` (el saldo), que degrada de azul a
- * fucsia: es la firma de marca y sale una vez por pantalla. Por eso
- * `--color-marca-claro` ES fucsia y no un azul mas claro — tambien hace que el
- * boton primario pase de azul a fucsia al pasar el cursor.
+ * Las dos juntas aparecen en las superficies de firma — `.tarjeta--marca` (el
+ * saldo) y `.lateral` (la consola) — mediante `--degradado-marca`. El azul manda
+ * y el fucsia entra al final. Por eso `--color-marca-claro` ES fucsia y no un azul
+ * mas claro: tambien hace que el boton primario pase de azul a fucsia al pasar el
+ * cursor.
  *
  * El rojo de error se reserva para la plata (mora, vencida). No usar fucsia para
  * alarmar: compiten y se pierde la senal.
@@ -28,6 +29,25 @@
   --color-marca-suave: #e8ebf9;
   --color-acento: #c41e8c;
   --color-acento-suave: #fbe6f3;
+
+  /* Degradado de marca — azul que se calienta hacia el fucsia.
+     El balance se ajusta aqui y afecta a las dos superficies de firma:
+       CORTE = hasta donde se mantiene el azul puro.
+       FIN   = donde llegaria el fucsia puro. Por encima de 100 % el degradado
+               se corta antes, asi que el borde visible nunca es fucsia pleno.
+     Subir el corte o el fin = mas azul. */
+  --degradado-marca: linear-gradient(
+    140deg,
+    var(--color-marca) 0%,
+    var(--color-marca) 52%,
+    var(--color-marca-claro) 145%
+  );
+  --degradado-marca-vertical: linear-gradient(
+    176deg,
+    var(--color-marca) 0%,
+    var(--color-marca) 62%,
+    var(--color-marca-claro) 155%
+  );
 
   /* Superficies */
   --color-fondo: #f5f5fb;

@@ -100,7 +100,7 @@ textarea {
   box-shadow: none;
 }
 .tarjeta--marca {
-  background: linear-gradient(140deg, var(--color-marca), var(--color-marca-claro));
+  background: var(--degradado-marca);
   color: var(--color-texto-inverso);
   border-color: transparent;
 }
