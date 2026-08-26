@@ -1,0 +1,73 @@
+/**
+ * Design tokens de Idiky.
+ * Cambiar la identidad visual del producto = cambiar este archivo.
+ * Ninguna pantalla debe escribir colores literales.
+ */
+
+:root {
+  /* Marca */
+  --color-marca: #0f3d3e;
+  --color-marca-claro: #16585a;
+  --color-marca-suave: #e6f0ef;
+  --color-acento: #d98324;
+  --color-acento-suave: #fdf0e0;
+
+  /* Superficies */
+  --color-fondo: #f4f6f6;
+  --color-superficie: #ffffff;
+  --color-superficie-2: #f9fafa;
+  --color-borde: #e2e7e7;
+  --color-borde-fuerte: #cbd4d4;
+
+  /* Texto */
+  --color-texto: #14201f;
+  --color-texto-suave: #5c6b6a;
+  --color-texto-tenue: #8b9897;
+  --color-texto-inverso: #ffffff;
+
+  /* Estados */
+  --color-exito: #1f7a4d;
+  --color-exito-suave: #e4f4eb;
+  --color-alerta: #b26a00;
+  --color-alerta-suave: #fdf1dc;
+  --color-error: #b3261e;
+  --color-error-suave: #fbe9e8;
+  --color-info: #1f5c9e;
+  --color-info-suave: #e7f0f9;
+
+  /* Tipografia */
+  --fuente: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --texto-xs: 0.72rem;
+  --texto-sm: 0.82rem;
+  --texto-base: 0.94rem;
+  --texto-lg: 1.08rem;
+  --texto-xl: 1.32rem;
+  --texto-2xl: 1.7rem;
+  --texto-3xl: 2.2rem;
+
+  /* Espacio */
+  --e1: 0.25rem;
+  --e2: 0.5rem;
+  --e3: 0.75rem;
+  --e4: 1rem;
+  --e5: 1.5rem;
+  --e6: 2rem;
+  --e7: 3rem;
+
+  /* Formas */
+  --radio-sm: 8px;
+  --radio: 14px;
+  --radio-lg: 20px;
+  --radio-completo: 999px;
+
+  /* Sombras */
+  --sombra-1: 0 1px 2px rgba(20, 32, 31, 0.06);
+  --sombra-2: 0 4px 16px rgba(20, 32, 31, 0.08);
+  --sombra-3: 0 12px 32px rgba(20, 32, 31, 0.14);
+
+  /* Medidas de layout */
+  --ancho-movil: 480px;
+  --alto-nav-inferior: 64px;
+  --ancho-lateral: 236px;
+}
