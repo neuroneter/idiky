@@ -11,6 +11,7 @@ import { AccesoPage } from './features/auth/AccesoPage'
 import { InicioPage } from './features/residente/InicioPage'
 import { CuentaPage } from './features/residente/CuentaPage'
 import { PagoPage } from './features/residente/PagoPage'
+import { InformarAbonoPage } from './features/residente/InformarAbonoPage'
 import { ReservasPage } from './features/residente/ReservasPage'
 import { PqrsPage } from './features/residente/PqrsPage'
 import { ComunicadosPage } from './features/residente/ComunicadosPage'
@@ -19,6 +20,7 @@ import { CorrespondenciaPage } from './features/residente/CorrespondenciaPage'
 import { TableroPage } from './features/admin/TableroPage'
 import { UnidadesPage } from './features/admin/UnidadesPage'
 import { CarteraPage } from './features/admin/CarteraPage'
+import { PagosPage } from './features/admin/PagosPage'
 import { ReservasAdminPage } from './features/admin/ReservasAdminPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
@@ -57,6 +59,7 @@ export function App() {
         <Route index element={<InicioPage />} />
         <Route path="cuenta" element={<CuentaPage />} />
         <Route path="cuenta/pagar" element={<PagoPage />} />
+        <Route path="cuenta/informar" element={<InformarAbonoPage />} />
         <Route path="reservas" element={<ReservasPage />} />
         <Route path="pqrs" element={<PqrsPage />} />
         <Route path="comunicados" element={<ComunicadosPage />} />
@@ -76,6 +79,7 @@ export function App() {
         <Route index element={<TableroPage />} />
         <Route path="unidades" element={<UnidadesPage />} />
         <Route path="cartera" element={<CarteraPage />} />
+        <Route path="pagos" element={<PagosPage />} />
         <Route path="reservas" element={<ReservasAdminPage />} />
         <Route path="pqrs" element={<PqrsAdminPage />} />
         <Route path="comunicados" element={<ComunicadosAdminPage />} />

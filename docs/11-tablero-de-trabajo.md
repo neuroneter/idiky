@@ -31,6 +31,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | # | Tarea | Estado |
 |---|---|---|
 | T-00 | Estructura del repositorio, documentación base y demo PWA v0.1 | ✅ Hecho |
+| T-10 | Módulos de cartera y pagos con abonos parciales y recibos de caja (CU-R-18, CU-A-18) | ✅ Hecho |
 
 ---
 

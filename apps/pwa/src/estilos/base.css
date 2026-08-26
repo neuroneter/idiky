@@ -449,3 +449,32 @@ textarea {
     align-items: center;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Modulo de pagos (CU-R-18 / CU-A-18)
+   --------------------------------------------------------------------------- */
+
+/* Lo que el propietario escribio sobre su abono. Se cita, no se parafrasea:
+   es la razon por la que el administrador sabe donde aplicar la plata. */
+.cita-abono {
+  margin-top: var(--e3);
+  padding: var(--e3);
+  border-left: 3px solid var(--color-marca);
+  background: var(--color-marca-suave);
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+}
+.cita-abono p {
+  margin-top: var(--e1);
+  font-size: var(--texto-sm);
+}
+
+.circulo-exito {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  margin: 0 auto var(--e3);
+  display: grid;
+  place-items: center;
+  background: var(--color-exito-suave);
+  color: var(--color-exito);
+}

@@ -23,9 +23,9 @@ import type {
   Visitante,
   ZonaComun,
 } from '../dominio/tipos'
-import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
+import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 
-export const VERSION_ESQUEMA = 1
+export const VERSION_ESQUEMA = 2
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -211,10 +211,37 @@ const zonasComunes: ZonaComun[] = [
 // ---------------------------------------------------------------------------
 // Cartera: cuotas y pagos
 // ---------------------------------------------------------------------------
-function construirCartera(): { cuotas: Cuota[]; pagos: Pago[]; consecutivoComprobante: number } {
+function construirCartera(): {
+  cuotas: Cuota[]
+  pagos: Pago[]
+  consecutivoRecibo: number
+} {
   const cuotas: Cuota[] = []
   const pagos: Pago[] = []
   let consecutivo = 1
+
+  /** Cuota saldada por completo, con su recibo de caja aplicado. */
+  function pagoTotal(cuota: Cuota, medio: Pago['medio'], diasAntes: number): Pago {
+    const pago: Pago = {
+      id: `pag-${cuota.id}`,
+      unidadId: cuota.unidadId,
+      valor: cuota.valor,
+      medio,
+      referencia: `REF${String(400_000 + consecutivo)}`,
+      fecha: `${sumarDias(cuota.fechaVencimiento, -diasAntes)}T10:15:00.000Z`,
+      estado: 'aplicado',
+      origen: 'administracion',
+      recibo: numeroRecibo(consecutivo),
+      imputaciones: [{ cuotaId: cuota.id, valor: cuota.valor }],
+      saldoAFavor: 0,
+      fechaAplicacion: `${sumarDias(cuota.fechaVencimiento, -diasAntes)}T10:15:00.000Z`,
+      registradoPor: 'Sistema',
+    }
+    cuota.saldo = 0
+    cuota.estado = 'pagada'
+    consecutivo += 1
+    return pago
+  }
 
   // Periodos: tres anteriores, el actual y el proximo (facturacion anticipada).
   const periodos = [-3, -2, -1, 0, 1].map(periodoRelativo)
@@ -231,6 +258,7 @@ function construirCartera(): { cuotas: Cuota[]; pagos: Pago[]; consecutivoCompro
       const esFuturo = indice > indiceActual
       const enMora = periodosEnMora > 0 && indice >= desdeMora && indice <= indiceActual
       const pagada = !esFuturo && !enMora
+      const valor = Math.round(unidad.coeficiente * VALOR_POR_COEFICIENTE)
 
       const cuota: Cuota = {
         id: `cuo-${unidad.id}-${periodo}`,
@@ -238,62 +266,135 @@ function construirCartera(): { cuotas: Cuota[]; pagos: Pago[]; consecutivoCompro
         periodo,
         tipo: 'ordinaria',
         concepto: 'Cuota de administracion',
-        valor: Math.round(unidad.coeficiente * VALOR_POR_COEFICIENTE),
+        valor,
+        saldo: valor,
         fechaVencimiento: vencimientoDelPeriodo(periodo),
-        estado: pagada ? 'pagada' : 'pendiente',
+        estado: 'pendiente',
       }
 
-      if (pagada) {
-        const pago: Pago = {
-          id: `pag-${unidad.id}-${periodo}`,
-          unidadId: unidad.id,
-          cuotaIds: [cuota.id],
-          valor: cuota.valor,
-          medio: indice % 2 === 0 ? 'pse' : 'transferencia',
-          referencia: `REF${String(400_000 + consecutivo)}`,
-          fecha: `${sumarDias(cuota.fechaVencimiento, -3)}T10:15:00.000Z`,
-          comprobante: `CP-${String(consecutivo).padStart(5, '0')}`,
-          registradoPor: 'Sistema',
-        }
-        cuota.pagoId = pago.id
-        pagos.push(pago)
-        consecutivo += 1
-      }
-
+      if (pagada) pagos.push(pagoTotal(cuota, indice % 2 === 0 ? 'pse' : 'transferencia', 3))
       cuotas.push(cuota)
     })
 
     // Cuota extraordinaria prorrateada por coeficiente (RN-05).
+    const valorExtra = Math.round((EXTRAORDINARIA_TOTAL * unidad.coeficiente) / 100)
     const extraordinaria: Cuota = {
       id: `cuo-${unidad.id}-extra`,
       unidadId: unidad.id,
       periodo: periodoExtraordinaria,
       tipo: 'extraordinaria',
       concepto: 'Extraordinaria: impermeabilizacion de cubiertas',
-      valor: Math.round((EXTRAORDINARIA_TOTAL * unidad.coeficiente) / 100),
+      valor: valorExtra,
+      saldo: valorExtra,
       fechaVencimiento: vencimientoDelPeriodo(periodoExtraordinaria),
-      estado: periodosEnMora > 0 ? 'pendiente' : 'pagada',
+      estado: 'pendiente',
     }
-    if (extraordinaria.estado === 'pagada') {
-      const pago: Pago = {
-        id: `pag-${unidad.id}-extra`,
-        unidadId: unidad.id,
-        cuotaIds: [extraordinaria.id],
-        valor: extraordinaria.valor,
-        medio: 'transferencia',
-        referencia: `REF${String(400_000 + consecutivo)}`,
-        fecha: `${sumarDias(extraordinaria.fechaVencimiento, -5)}T09:00:00.000Z`,
-        comprobante: `CP-${String(consecutivo).padStart(5, '0')}`,
-        registradoPor: 'Sistema',
-      }
-      extraordinaria.pagoId = pago.id
-      pagos.push(pago)
-      consecutivo += 1
-    }
+    if (periodosEnMora === 0) pagos.push(pagoTotal(extraordinaria, 'transferencia', 5))
     cuotas.push(extraordinaria)
   }
 
-  return { cuotas, pagos, consecutivoComprobante: consecutivo }
+  // -------------------------------------------------------------------------
+  // Casos que el demo necesita mostrar desde el primer arranque
+  // -------------------------------------------------------------------------
+
+  // 1. Un abono parcial ya aplicado: la extraordinaria de la unidad en mora
+  //    quedo a medias, para que se vea el estado `abonada` (RN-26).
+  const extraEnMora = cuotas.find((c) => c.id === 'cuo-uni-torre2-901-extra')
+  if (extraEnMora) {
+    const abono = Math.round(extraEnMora.valor * 0.4)
+    pagos.push({
+      id: 'pag-abono-parcial',
+      unidadId: extraEnMora.unidadId,
+      valor: abono,
+      medio: 'transferencia',
+      referencia: 'REF554120',
+      fecha: `${sumarDias(hoyISO(), -12)}T15:40:00.000Z`,
+      estado: 'aplicado',
+      origen: 'residente',
+      conceptoInformado: 'Primer contado de la cuota extraordinaria de cubiertas.',
+      cuotasInformadas: [extraEnMora.id],
+      reportadoPor: 'per-2',
+      recibo: numeroRecibo(consecutivo),
+      imputaciones: [{ cuotaId: extraEnMora.id, valor: abono }],
+      saldoAFavor: 0,
+      fechaAplicacion: `${sumarDias(hoyISO(), -12)}T16:05:00.000Z`,
+      registradoPor: 'Olga Lucia Henao',
+    })
+    extraEnMora.saldo = extraEnMora.valor - abono
+    extraEnMora.estado = 'abonada'
+    consecutivo += 1
+  }
+
+  // 2. Un abono parcial sobre una cuota que todavia no vence: es el unico caso
+  //    en que se ve el estado `abonada`, porque una cuota vencida se sigue
+  //    reportando como vencida aunque tenga abonos (RN-04 manda sobre RN-26).
+  const proximaAlDia = cuotas.find(
+    (c) => c.unidadId === 'uni-torre1-402' && c.periodo === periodoRelativo(1),
+  )
+  if (proximaAlDia) {
+    const abono = Math.round(proximaAlDia.valor * 0.5)
+    pagos.push({
+      id: 'pag-abono-anticipado',
+      unidadId: proximaAlDia.unidadId,
+      valor: abono,
+      medio: 'pse',
+      referencia: 'REF554980',
+      fecha: `${sumarDias(hoyISO(), -2)}T09:10:00.000Z`,
+      estado: 'aplicado',
+      origen: 'residente',
+      conceptoInformado: 'Adelanto de la mitad de la cuota del mes entrante.',
+      cuotasInformadas: [proximaAlDia.id],
+      reportadoPor: 'per-1',
+      recibo: numeroRecibo(consecutivo),
+      imputaciones: [{ cuotaId: proximaAlDia.id, valor: abono }],
+      saldoAFavor: 0,
+      fechaAplicacion: `${sumarDias(hoyISO(), -2)}T09:12:00.000Z`,
+      registradoPor: 'Olga Lucia Henao',
+    })
+    proximaAlDia.saldo = proximaAlDia.valor - abono
+    proximaAlDia.estado = 'abonada'
+    consecutivo += 1
+  }
+
+  // 3. Dos abonos informados por propietarios y todavia sin conciliar, para que
+  //    la bandeja del administrador no arranque vacia (RN-30).
+  pagos.unshift(
+    {
+      id: 'pag-reportado-1',
+      unidadId: 'uni-torre2-901',
+      valor: 180_000,
+      medio: 'transferencia',
+      referencia: 'CONS-88213',
+      fecha: `${sumarDias(hoyISO(), -1)}T08:20:00.000Z`,
+      estado: 'reportado',
+      origen: 'residente',
+      conceptoInformado:
+        'Consigne para ponerme al dia con las dos cuotas de administracion mas viejas.',
+      cuotasInformadas: [],
+      reportadoPor: 'per-2',
+      imputaciones: [],
+      saldoAFavor: 0,
+      registradoPor: 'Andres Felipe Gomez',
+    },
+    {
+      id: 'pag-reportado-2',
+      unidadId: 'uni-torre1-302',
+      valor: 95_000,
+      medio: 'efectivo',
+      referencia: 'RECIBIDO-PORTERIA',
+      fecha: `${sumarDias(hoyISO(), -3)}T17:05:00.000Z`,
+      estado: 'reportado',
+      origen: 'residente',
+      conceptoInformado: 'Abono a la cuota de administracion del mes pasado.',
+      cuotasInformadas: [],
+      reportadoPor: 'per-1',
+      imputaciones: [],
+      saldoAFavor: 0,
+      registradoPor: 'Residente Torre 1 apto 302',
+    },
+  )
+
+  return { cuotas, pagos, consecutivoRecibo: consecutivo }
 }
 
 // ---------------------------------------------------------------------------
@@ -573,7 +674,7 @@ function construirVisitantes(): Visitante[] {
 // Semilla completa
 // ---------------------------------------------------------------------------
 export function crearSemilla(): BaseDatos {
-  const { cuotas, pagos, consecutivoComprobante } = construirCartera()
+  const { cuotas, pagos, consecutivoRecibo } = construirCartera()
   const { pqrs, consecutivo: consecutivoPqrs } = construirPqrs()
 
   return {
@@ -629,7 +730,7 @@ export function crearSemilla(): BaseDatos {
     ],
     consecutivos: {
       pqrs: consecutivoPqrs,
-      comprobante: consecutivoComprobante,
+      recibo: consecutivoRecibo,
     },
   }
 }

@@ -14,6 +14,7 @@ export type NombreIcono =
   | 'tablero'
   | 'unidades'
   | 'cartera'
+  | 'pagos'
   | 'salir'
   | 'mas'
   | 'volver'
@@ -36,6 +37,7 @@ const TRAZOS: Record<NombreIcono, string> = {
   tablero: 'M4 4h7v7H4zM13 4h7v4.5h-7zM13 10.5h7V20h-7zM4 13h7v7H4z',
   unidades: 'M4 21V4.5h9V21M13 21V10h7v11M7 8h3M7 12h3M7 16h3M16 14h1M16 17.5h1M2.5 21h19',
   cartera: 'M3.5 7.5c0-1.7 3.8-3 8.5-3s8.5 1.3 8.5 3-3.8 3-8.5 3-8.5-1.3-8.5-3zM3.5 7.5v9c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3v-9M3.5 12c0 1.7 3.8 3 8.5 3s8.5-1.3 8.5-3',
+  pagos: 'M2.5 6.5h19v11h-19zM2.5 10.5h19M6 14.5h3M16 14.5h2',
   salir: 'M15 4.5H19a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-4M11 16l-4-4 4-4M7 12h10',
   mas: 'M12 5v14M5 12h14',
   volver: 'M15 5l-7 7 7 7',

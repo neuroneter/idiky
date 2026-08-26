@@ -32,6 +32,7 @@ o `S` (sistema).
 | CU-R-15 | Registrar mis vehículos y mascotas | 2 | ⬜ Pendiente | — |
 | CU-R-16 | Recibir notificaciones push | 3 | ⬜ Pendiente | — |
 | CU-R-17 | Directorio de contactos útiles y emergencias | 2 | ⬜ Pendiente | — |
+| CU-R-18 | Informar un abono ya consignado | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-18) |
 
 ## 2. Administrador — consola web
 
@@ -41,6 +42,7 @@ o `S` (sistema).
 | CU-A-02 | Administrar unidades y residentes | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-02) |
 | CU-A-03 | Consultar cartera y morosidad | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-03) |
 | CU-A-04 | Registrar un pago manual | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-04) |
+| CU-A-18 | Conciliar abonos y administrar recibos de caja | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-18) |
 | CU-A-05 | Generar cuotas del periodo | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-05) |
 | CU-A-06 | Aprobar o rechazar reservas | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-06) |
 | CU-A-07 | Atender la bandeja de PQRS | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-07) |

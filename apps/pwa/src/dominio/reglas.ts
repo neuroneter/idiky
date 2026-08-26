@@ -8,7 +8,10 @@
 
 import type {
   Cuota,
+  EstadoCuota,
   FechaISO,
+  Imputacion,
+  Pago,
   Periodo,
   Pqrs,
   Reserva,
@@ -16,6 +19,12 @@ import type {
   Visitante,
   ZonaComun,
 } from './tipos'
+
+/** Resultado de validar una operacion contra las reglas del dominio. */
+export interface ResultadoValidacion {
+  valido: boolean
+  motivo?: string
+}
 
 /** SLA de respuesta a una PQRS en dias calendario (RN-13). */
 export const SLA_PQRS_DIAS = 15
@@ -62,28 +71,35 @@ export function diasEntre(desde: FechaISO, hasta: FechaISO): number {
 // ---------------------------------------------------------------------------
 
 /**
- * RN-04 — Una cuota es `vencida` si su vencimiento ya paso y no esta pagada.
- * Devuelve el estado real de la cuota en la fecha dada.
+ * RN-04 — Una cuota es `vencida` si su vencimiento ya paso y aun tiene saldo.
+ * RN-26 — Si tiene abonos parciales pero todavia debe algo, esta `abonada`.
+ * El estado real siempre se deriva del saldo, nunca se lee del campo guardado.
  */
-export function estadoRealCuota(cuota: Cuota, hoy: FechaISO = hoyISO()): Cuota['estado'] {
-  if (cuota.estado === 'pagada') return 'pagada'
-  return cuota.fechaVencimiento < hoy ? 'vencida' : 'pendiente'
+export function estadoRealCuota(cuota: Cuota, hoy: FechaISO = hoyISO()): EstadoCuota {
+  if (cuota.saldo <= 0) return 'pagada'
+  if (cuota.fechaVencimiento < hoy) return 'vencida'
+  return cuota.saldo < cuota.valor ? 'abonada' : 'pendiente'
 }
 
 export function cuotaPendiente(cuota: Cuota): boolean {
-  return cuota.estado !== 'pagada'
+  return cuota.saldo > 0
 }
 
-/** RN-03 — Saldo de una unidad: suma de cuotas pendientes y vencidas. */
+/** RN-03 — Saldo de una unidad: lo que queda por pagar de todas sus cuotas. */
 export function calcularSaldo(cuotas: Cuota[]): number {
-  return cuotas.filter(cuotaPendiente).reduce((total, cuota) => total + cuota.valor, 0)
+  return cuotas.reduce((total, cuota) => total + cuota.saldo, 0)
 }
 
-/** Valor de las cuotas ya vencidas (subconjunto del saldo). */
+/** Saldo de las cuotas ya vencidas (subconjunto del saldo total). */
 export function calcularSaldoVencido(cuotas: Cuota[], hoy: FechaISO = hoyISO()): number {
   return cuotas
     .filter((cuota) => estadoRealCuota(cuota, hoy) === 'vencida')
-    .reduce((total, cuota) => total + cuota.valor, 0)
+    .reduce((total, cuota) => total + cuota.saldo, 0)
+}
+
+/** Cuanto se ha abonado a una cuota. */
+export function abonadoDeCuota(cuota: Cuota): number {
+  return cuota.valor - cuota.saldo
 }
 
 /** RN-21 — Dias de mora contados desde la cuota vencida mas antigua. */
@@ -106,32 +122,101 @@ export function prorratearPorCoeficiente(valorTotal: number, coeficiente: number
   return Math.round((valorTotal * coeficiente) / 100)
 }
 
-/**
- * RN-06 — Un pago se imputa primero a la deuda mas antigua.
- * Devuelve las cuotas que cubre el valor recibido, en orden de antiguedad.
- */
-export function imputarPago(cuotas: Cuota[], valor: number): Cuota[] {
-  const pendientes = cuotas
+/** Cuotas con saldo, de la mas antigua a la mas reciente: el orden de imputacion. */
+export function cuotasPorAntiguedad(cuotas: Cuota[]): Cuota[] {
+  return cuotas
     .filter(cuotaPendiente)
     .sort((a, b) => a.fechaVencimiento.localeCompare(b.fechaVencimiento))
-  const cubiertas: Cuota[] = []
-  let restante = valor
-  for (const cuota of pendientes) {
-    if (restante < cuota.valor) break
-    cubiertas.push(cuota)
-    restante -= cuota.valor
-  }
-  return cubiertas
 }
 
-/** RN-18 — Porcentaje de recaudo sobre lo facturado en un periodo. */
+/**
+ * RN-06 — Un pago se imputa primero a la deuda mas antigua.
+ * RN-27 — El abono puede cubrir una cuota solo en parte: se reparte hasta
+ * agotar el valor recibido. Lo que sobra no se imputa y queda a favor.
+ */
+export function imputarPago(cuotas: Cuota[], valor: number): Imputacion[] {
+  const imputaciones: Imputacion[] = []
+  let restante = valor
+  for (const cuota of cuotasPorAntiguedad(cuotas)) {
+    if (restante <= 0) break
+    const aplicado = Math.min(restante, cuota.saldo)
+    imputaciones.push({ cuotaId: cuota.id, valor: aplicado })
+    restante -= aplicado
+  }
+  return imputaciones
+}
+
+/** Suma de lo repartido entre cuotas. */
+export function totalImputado(imputaciones: Imputacion[]): number {
+  return imputaciones.reduce((total, linea) => total + linea.valor, 0)
+}
+
+/** RN-27 — Parte del pago que no quedo aplicada a ninguna cuota. */
+export function saldoAFavorDelPago(valor: number, imputaciones: Imputacion[]): number {
+  return Math.max(0, valor - totalImputado(imputaciones))
+}
+
+/**
+ * Valida el reparto de un abono antes de aplicarlo: nada negativo, nada por
+ * encima del saldo de la cuota, y nada por encima del valor recibido.
+ */
+export function validarImputacion(parametros: {
+  valor: number
+  imputaciones: Imputacion[]
+  cuotas: Cuota[]
+}): ResultadoValidacion {
+  const { valor, imputaciones, cuotas } = parametros
+  if (valor <= 0) return { valido: false, motivo: 'El valor del pago debe ser mayor que cero.' }
+
+  for (const linea of imputaciones) {
+    if (linea.valor < 0) {
+      return { valido: false, motivo: 'No se puede imputar un valor negativo a una cuota.' }
+    }
+    const cuota = cuotas.find((c) => c.id === linea.cuotaId)
+    if (!cuota) return { valido: false, motivo: 'Se intento imputar a una cuota inexistente.' }
+    if (linea.valor > cuota.saldo) {
+      return {
+        valido: false,
+        motivo: `No se puede abonar mas de lo que debe la cuota "${cuota.concepto}".`,
+      }
+    }
+  }
+
+  if (totalImputado(imputaciones) > valor) {
+    return { valido: false, motivo: 'Estas repartiendo mas de lo que se recibio.' }
+  }
+  return { valido: true }
+}
+
+// ---------------------------------------------------------------------------
+// Recibos de caja
+// ---------------------------------------------------------------------------
+
+/** RN-28 — Numero de recibo de caja: consecutivo por copropiedad, sin reuso. */
+export function numeroRecibo(consecutivo: number): string {
+  return `RC-${String(consecutivo).padStart(5, '0')}`
+}
+
+/** RN-29 — Solo se puede anular un recibo que este aplicado. */
+export function sePuedeAnular(pago: Pago): boolean {
+  return pago.estado === 'aplicado'
+}
+
+/** RN-30 — Un abono informado por el propietario espera a que se aplique. */
+export function esperaAplicacion(pago: Pago): boolean {
+  return pago.estado === 'reportado'
+}
+
+/**
+ * RN-18 — Porcentaje de recaudo sobre lo facturado en un periodo.
+ * Cuenta lo efectivamente abonado, no solo las cuotas saldadas: un abono
+ * parcial tambien es recaudo.
+ */
 export function porcentajeRecaudo(cuotas: Cuota[], periodo: Periodo): number {
   const delPeriodo = cuotas.filter((cuota) => cuota.periodo === periodo)
   const facturado = delPeriodo.reduce((total, cuota) => total + cuota.valor, 0)
   if (facturado === 0) return 0
-  const recaudado = delPeriodo
-    .filter((cuota) => cuota.estado === 'pagada')
-    .reduce((total, cuota) => total + cuota.valor, 0)
+  const recaudado = delPeriodo.reduce((total, cuota) => total + abonadoDeCuota(cuota), 0)
   return Math.round((recaudado / facturado) * 100)
 }
 
@@ -189,11 +274,6 @@ export function reservasDelMes(
       reserva.fecha.startsWith(periodo) &&
       reservaOcupaFranja(reserva),
   ).length
-}
-
-export interface ResultadoValidacion {
-  valido: boolean
-  motivo?: string
 }
 
 /**

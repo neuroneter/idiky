@@ -62,13 +62,36 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 | `periodo` | `AAAA-MM` | |
 | `tipo` | `'ordinaria' \| 'extraordinaria' \| 'interes' \| 'sancion'` | |
 | `concepto` | string | Texto visible |
-| `valor` | number | Moneda menor: **pesos enteros, sin decimales** |
+| `valor` | number | Lo facturado. **Pesos enteros, sin decimales.** No cambia nunca |
+| `saldo` | number | Lo que falta por pagar. Nace igual a `valor` y baja con cada abono (RN-26) |
 | `fechaVencimiento` | fecha ISO | RN-23 |
-| `estado` | `'pendiente' \| 'pagada' \| 'vencida'` | RN-04 |
-| `pagoId` | string? | Presente cuando `estado = 'pagada'` |
+| `estado` | `'pendiente' \| 'abonada' \| 'pagada' \| 'vencida'` | RN-04, RN-26 |
 
-### Pago
-`id`, `unidadId`, `cuotaIds[]`, `valor`, `medio` (`'pse' \| 'tarjeta' \| 'transferencia' \| 'efectivo' \| 'otro'`), `referencia`, `fecha`, `comprobante` (consecutivo, RN-07).
+> `vencida` no se guarda: se deriva de la fecha con `estadoRealCuota()`. Y **una cuota
+> vencida con abonos se sigue reportando vencida** — RN-04 manda sobre RN-26, porque para
+> la mora lo que cuenta es que todavía debe.
+
+### Pago (recibo de caja)
+Un pago **es** el recibo de caja: la constancia de que el dinero entró. Por eso no se
+borra, se anula (RN-29).
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `unidadId` | string | La deuda es de la unidad, no de la persona |
+| `valor` | number | Lo efectivamente recibido |
+| `medio` | `'pse' \| 'tarjeta' \| 'transferencia' \| 'efectivo' \| 'otro'` | |
+| `referencia` | string | Consignación, comprobante del banco |
+| `estado` | `'reportado' \| 'aplicado' \| 'anulado'` | RN-29, RN-30 |
+| `origen` | `'residente' \| 'administracion'` | Quién lo originó |
+| `conceptoInformado` | string? | **Lo que el propietario dice que está pagando** (CU-R-18) |
+| `cuotasInformadas` | string[]? | Cuotas que el propietario señala |
+| `recibo` | string? | `RC-<NNNNN>`; se asigna al aplicar (RN-28) |
+| `imputaciones` | `{cuotaId, valor}[]` | Cómo se repartió entre cuotas (RN-27) |
+| `saldoAFavor` | number | Lo que no se imputó a ninguna cuota |
+| `motivoAnulacion` | string? | Obligatorio al anular (RN-29) |
+
+> `conceptoInformado` es el campo que sostiene todo el módulo: es la diferencia entre
+> aplicar el abono donde el sistema supone y aplicarlo donde el propietario quiso.
 
 ### ZonaComun
 | Campo | Tipo | Notas |
@@ -111,11 +134,11 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 |---|---|---|
 | RN-01 | Todo dato pertenece a una copropiedad; nunca se mezclan copropiedades. | `datos/repositorio.ts` |
 | RN-02 | El rol efectivo del usuario se resuelve por la unidad activa. | `estado/SesionContext.tsx` |
-| RN-03 | El saldo de una unidad = suma de cuotas `pendiente` + `vencida`. | `dominio/reglas.ts` |
-| RN-04 | Una cuota es `vencida` si su vencimiento es anterior a hoy y no está pagada. | `dominio/reglas.ts` |
+| RN-03 | El saldo de una unidad = suma del `saldo` de todas sus cuotas. | `dominio/reglas.ts` |
+| RN-04 | Una cuota es `vencida` si su vencimiento es anterior a hoy y aún tiene saldo. | `dominio/reglas.ts` |
 | RN-05 | Las cuotas extraordinarias se prorratean por coeficiente. | `dominio/reglas.ts` |
 | RN-06 | Un pago se imputa primero a la deuda más antigua. | `dominio/reglas.ts` |
-| RN-07 | Todo pago genera un comprobante con consecutivo único. | `datos/repositorio.ts` |
+| RN-07 | Todo pago aplicado genera un recibo de caja con consecutivo único. | `datos/repositorio.ts` |
 | RN-08 | Una unidad en mora no puede reservar zonas comunes. | `dominio/reglas.ts` |
 | RN-09 | No puede haber dos reservas activas de la misma zona en la misma franja. | `dominio/reglas.ts` |
 | RN-10 | La reserva exige la anticipación mínima de la zona. | `dominio/reglas.ts` |
@@ -134,10 +157,15 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-23 | Vencimiento por defecto: día 10 del periodo. | `datos/repositorio.ts` |
 | RN-24 | La primera respuesta de la administración pasa la PQRS a `en_gestion`. | `datos/repositorio.ts` |
 | RN-25 | La correspondencia entregada no se edita. | `features/admin/CorrespondenciaAdminPage.tsx` |
+| RN-26 | Un abono parcial baja el `saldo` de la cuota sin marcarla pagada: queda `abonada`. | `dominio/reglas.ts` |
+| RN-27 | Todo pago aplicado se reparte entre cuotas; lo que sobra queda como saldo a favor. | `dominio/reglas.ts` |
+| RN-28 | Recibo de caja: `RC-<NNNNN>`, consecutivo, asignado al aplicar y sin reúso. | `dominio/reglas.ts` |
+| RN-29 | Un recibo no se borra: se anula con motivo y el saldo vuelve a las cuotas. | `datos/repositorio.ts` |
+| RN-30 | Un abono informado por el propietario no afecta la cartera hasta que se aplica. | `datos/repositorio.ts` |
 
 ## 4. Convenciones de datos
 
 - **Fechas:** siempre ISO 8601 (`AAAA-MM-DD` o completa). Nunca formatos locales en el dato.
 - **Dinero:** enteros en pesos, sin decimales. El formato se aplica solo al mostrar.
-- **Identificadores:** cadenas legibles con prefijo (`uni-`, `cuo-`, `res-`, `pqr-`).
+- **Identificadores:** cadenas legibles con prefijo (`uni-`, `cuo-`, `res-`, `pqr-`, `pag-`).
 - **Nunca borrar:** los registros se anulan o cierran, no se eliminan (trazabilidad, O3).

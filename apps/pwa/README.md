@@ -24,9 +24,9 @@ acceso eliges:
 
 | Perfil | Para probar |
 |---|---|
-| **María Camila Restrepo** — Torre 1, 402 | Residente al día: pagar, reservar, PQRS, visitantes |
-| **Andrés Felipe Gómez** — Torre 2, 901 | Residente en mora: reservas bloqueadas (RN-08) |
-| **Olga Lucía Henao** | Consola de administración completa |
+| **María Camila Restrepo** — Torre 1, 402 | Residente al día: pagar, informar abonos, reservar, PQRS, visitantes. Tiene una cuota **abonada a medias** |
+| **Andrés Felipe Gómez** — Torre 2, 901 | Residente en mora: reservas bloqueadas (RN-08) y un abono informado sin conciliar |
+| **Olga Lucía Henao** | Consola de administración completa. En **Pagos** arrancan dos abonos esperando conciliación |
 
 Los datos se guardan en `localStorage`. El botón **"Reiniciar demo"** (en la pantalla de
 acceso y en la consola) devuelve todo a su estado inicial.

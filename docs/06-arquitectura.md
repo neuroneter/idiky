@@ -80,6 +80,7 @@ apps/pwa/
 | `/app` | Inicio residente | CU-R-02 |
 | `/app/cuenta` | Estado de cuenta | CU-R-03 |
 | `/app/cuenta/pagar` | Pago | CU-R-04 |
+| `/app/cuenta/informar` | Informar un abono ya consignado | CU-R-18 |
 | `/app/reservas` | Zonas comunes y reservas | CU-R-05, CU-R-06 |
 | `/app/pqrs` | PQRS | CU-R-07, CU-R-08 |
 | `/app/comunicados` | Cartelera | CU-R-09 |
@@ -87,7 +88,8 @@ apps/pwa/
 | `/app/correspondencia` | Correspondencia | CU-R-11 |
 | `/admin` | Tablero | CU-A-01 |
 | `/admin/unidades` | Unidades y residentes | CU-A-02 |
-| `/admin/cartera` | Cartera, pagos y generación | CU-A-03, CU-A-04, CU-A-05 |
+| `/admin/cartera` | Cartera: estados de cuenta y generación | CU-A-03, CU-A-05 |
+| `/admin/pagos` | Pagos: conciliación y recibos de caja | CU-A-04, CU-A-18 |
 | `/admin/reservas` | Aprobación de reservas | CU-A-06 |
 | `/admin/pqrs` | Bandeja de PQRS | CU-A-07 |
 | `/admin/comunicados` | Publicación de comunicados | CU-A-08 |

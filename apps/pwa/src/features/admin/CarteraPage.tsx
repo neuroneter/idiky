@@ -1,48 +1,43 @@
 /**
  * CU-A-03 — Consultar cartera y morosidad.
- * CU-A-04 — Registrar un pago manual.
  * CU-A-05 — Generar cuotas del periodo.
  * Doc: docs/casos-de-uso/administrador.md#cu-a-03
+ *
+ * Cartera responde dos preguntas: quien debe y por que. Registrar la plata que
+ * entra es el otro modulo (`PagosPage`), para no mezclar la consulta con la caja.
  */
 
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
+import { generarCuotas, previsualizarCuotas, type ParametrosGeneracion } from '../../datos/repositorio'
 import {
-  generarCuotas,
-  previsualizarCuotas,
-  registrarPago,
-  type ParametrosGeneracion,
-} from '../../datos/repositorio'
-import {
+  abonadoDeCuota,
   calcularSaldo,
   calcularSaldoVencido,
   cuotaPendiente,
   diasDeMora,
-  estaEnMora,
   estadoRealCuota,
+  estaEnMora,
   etiquetaUnidad,
   periodoActual,
 } from '../../dominio/reglas'
-import { formatearDinero, formatearFecha, formatearPeriodo } from '../../utilidades/formato'
-import type { MedioPago } from '../../dominio/tipos'
+import { formatearDinero, formatearFecha, formatearFechaHora, formatearPeriodo } from '../../utilidades/formato'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
-import { ChipCuota } from '../../componentes/Etiquetas'
+import { ChipCuota, ChipPago } from '../../componentes/Etiquetas'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 
 type Filtro = 'todas' | 'mora' | 'al-dia'
 
 export function CarteraPage() {
-  const { bd, ejecutar, cargando, mostrarAviso } = useDatos()
+  const { bd, ejecutar, cargando } = useDatos()
   const { sesion } = useSesion()
   const [filtro, setFiltro] = useState<Filtro>('todas')
-  const [unidadPago, setUnidadPago] = useState<string | null>(null)
-  const [seleccion, setSeleccion] = useState<string[]>([])
-  const [medio, setMedio] = useState<MedioPago>('transferencia')
-  const [referencia, setReferencia] = useState('')
+  const [unidadDetalle, setUnidadDetalle] = useState<string | null>(null)
   const [generando, setGenerando] = useState(false)
   const [generacion, setGeneracion] = useState<ParametrosGeneracion>({
     copropiedadId: '',
@@ -55,14 +50,17 @@ export function CarteraPage() {
   if (!sesion) return null
 
   const unidades = sel.unidadesDe(bd, sesion.copropiedadId)
-  const persona = sel.persona(bd, sesion.personaId)
 
   const filas = unidades
     .map((unidad) => {
       const cuotas = sel.cuotasDeUnidad(bd, unidad.id)
+      const residencia = sel.residenciasDeUnidad(bd, unidad.id)[0]
       return {
         unidad,
         cuotas,
+        propietario: residencia
+          ? nombreCompleto(sel.persona(bd, residencia.personaId))
+          : 'Sin registrar',
         saldo: calcularSaldo(cuotas),
         vencido: calcularSaldoVencido(cuotas),
         mora: diasDeMora(cuotas),
@@ -79,13 +77,8 @@ export function CarteraPage() {
   const totalSaldo = filas.reduce((total, fila) => total + fila.saldo, 0)
   const totalVencido = filas.reduce((total, fila) => total + fila.vencido, 0)
 
-  const cuotasDelPago = useMemo(() => {
-    if (!unidadPago) return []
-    return sel
-      .cuotasDeUnidad(bd, unidadPago)
-      .filter(cuotaPendiente)
-      .sort((a, b) => a.fechaVencimiento.localeCompare(b.fechaVencimiento))
-  }, [bd, unidadPago])
+  /** Abonos informados y todavia sin conciliar: no bajan la cartera pero se avisan. */
+  const porConciliar = sel.abonosReportados(bd, sesion.copropiedadId)
 
   const previsualizacion = useMemo(
     () =>
@@ -95,28 +88,23 @@ export function CarteraPage() {
     [bd, generando, generacion, sesion.copropiedadId],
   )
 
-  async function confirmarPago() {
-    if (!unidadPago || seleccion.length === 0) {
-      mostrarAviso('Selecciona al menos una cuota.', 'error')
-      return
+  const detalle = useMemo(() => {
+    if (!unidadDetalle) return null
+    const unidad = sel.unidad(bd, unidadDetalle)
+    if (!unidad) return null
+    const cuotas = sel.cuotasDeUnidad(bd, unidadDetalle)
+    const residencia = sel.residenciasDeUnidad(bd, unidadDetalle)[0]
+    return {
+      unidad,
+      cuotas,
+      recibos: sel.pagosDeUnidad(bd, unidadDetalle).filter((pago) => pago.estado !== 'reportado'),
+      propietario: residencia
+        ? nombreCompleto(sel.persona(bd, residencia.personaId))
+        : 'Sin registrar',
+      saldo: calcularSaldo(cuotas),
+      vencido: calcularSaldoVencido(cuotas),
     }
-    const pago = await ejecutar(
-      (base) =>
-        registrarPago(base, {
-          unidadId: unidadPago,
-          cuotaIds: seleccion,
-          medio,
-          referencia: referencia.trim() || undefined,
-          registradoPor: nombreCompleto(persona),
-        }),
-      'Pago registrado.',
-    )
-    if (pago) {
-      setUnidadPago(null)
-      setSeleccion([])
-      setReferencia('')
-    }
-  }
+  }, [bd, unidadDetalle])
 
   async function confirmarGeneracion() {
     const creadas = await ejecutar(
@@ -176,13 +164,31 @@ export function CarteraPage() {
         </div>
       </div>
 
+      {porConciliar.length > 0 && (
+        <div className="tarjeta">
+          <div className="fila">
+            <div className="columna">
+              <strong>
+                {porConciliar.length} abono{porConciliar.length > 1 ? 's' : ''} sin conciliar
+              </strong>
+              <span className="subtitulo">
+                Esta cartera no los descuenta todavia: hay que aplicarlos en Pagos.
+              </span>
+            </div>
+            <Link to="/admin/pagos" className="boton">
+              Ir a Pagos
+            </Link>
+          </div>
+        </div>
+      )}
+
       <div className="tarjeta" style={{ padding: 0 }}>
         <div className="contenedor-tabla">
           <table className="tabla">
             <thead>
               <tr>
                 <th>Unidad</th>
-                <th>Residente</th>
+                <th>Propietario</th>
                 <th className="numerico">Saldo</th>
                 <th className="numerico">Vencido</th>
                 <th className="numerico">Mora</th>
@@ -190,135 +196,123 @@ export function CarteraPage() {
               </tr>
             </thead>
             <tbody>
-              {filas.map((fila) => {
-                const residencia = sel.residenciasDeUnidad(bd, fila.unidad.id)[0]
-                return (
-                  <tr key={fila.unidad.id}>
-                    <td>
-                      <strong>{etiquetaUnidad(fila.unidad)}</strong>
-                    </td>
-                    <td className="suave">
-                      {residencia
-                        ? nombreCompleto(sel.persona(bd, residencia.personaId))
-                        : 'Sin registrar'}
-                    </td>
-                    <td className="numerico">{formatearDinero(fila.saldo)}</td>
-                    <td className="numerico" style={{ color: fila.vencido ? 'var(--color-error)' : undefined }}>
-                      {formatearDinero(fila.vencido)}
-                    </td>
-                    <td className="numerico suave">{fila.mora ? `${fila.mora} d` : '—'}</td>
-                    <td style={{ textAlign: 'right' }}>
-                      <button
-                        className="boton boton--pequeno"
-                        disabled={fila.saldo === 0}
-                        onClick={() => {
-                          setUnidadPago(fila.unidad.id)
-                          setSeleccion([])
-                        }}
-                      >
-                        Registrar pago
-                      </button>
-                    </td>
-                  </tr>
-                )
-              })}
+              {filas.map((fila) => (
+                <tr key={fila.unidad.id}>
+                  <td>
+                    <strong>{etiquetaUnidad(fila.unidad)}</strong>
+                  </td>
+                  <td className="suave">{fila.propietario}</td>
+                  <td className="numerico">{formatearDinero(fila.saldo)}</td>
+                  <td
+                    className="numerico"
+                    style={{ color: fila.vencido ? 'var(--color-error)' : undefined }}
+                  >
+                    {formatearDinero(fila.vencido)}
+                  </td>
+                  <td className="numerico suave">{fila.mora ? `${fila.mora} d` : '—'}</td>
+                  <td style={{ textAlign: 'right' }}>
+                    <button
+                      className="boton boton--pequeno"
+                      onClick={() => setUnidadDetalle(fila.unidad.id)}
+                    >
+                      Estado de cuenta
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
         {filas.length === 0 && <EstadoVacio titulo="Sin unidades en este filtro" />}
       </div>
 
-      {/* CU-A-04 */}
-      {unidadPago && (
+      {/* CU-A-03 — estado de cuenta de una unidad */}
+      {detalle && (
         <Modal
-          titulo="Registrar pago"
-          descripcion="Los pagos se imputan a la deuda mas antigua primero."
-          onCerrar={() => setUnidadPago(null)}
+          titulo={`Estado de cuenta · ${etiquetaUnidad(detalle.unidad)}`}
+          descripcion={detalle.propietario}
+          onCerrar={() => setUnidadDetalle(null)}
         >
+          <div className="rejilla-indicadores">
+            <div className="tarjeta tarjeta--plana">
+              <div className="indicador">
+                <span className="indicador__etiqueta">Saldo</span>
+                <span className="indicador__valor">{formatearDinero(detalle.saldo)}</span>
+              </div>
+            </div>
+            <div className="tarjeta tarjeta--plana">
+              <div className="indicador">
+                <span className="indicador__etiqueta">Vencido</span>
+                <span className="indicador__valor" style={{ color: 'var(--color-error)' }}>
+                  {formatearDinero(detalle.vencido)}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="separador" />
+          <span className="titulo-seccion">Cuotas</span>
           <div className="lista lista--compacta">
-            {cuotasDelPago.map((cuota) => {
-              const marcada = seleccion.includes(cuota.id)
+            {detalle.cuotas.map((cuota) => {
+              const estado = estadoRealCuota(cuota)
+              const abonado = abonadoDeCuota(cuota)
               return (
-                <label
-                  key={cuota.id}
-                  className="tarjeta tarjeta--plana"
-                  style={{ cursor: 'pointer', borderColor: marcada ? 'var(--color-marca)' : undefined }}
-                >
-                  <div className="fila">
-                    <div className="fila" style={{ gap: 'var(--e3)' }}>
-                      <input
-                        type="checkbox"
-                        checked={marcada}
-                        style={{ width: 'auto' }}
-                        onChange={() =>
-                          setSeleccion((actual) =>
-                            marcada
-                              ? actual.filter((id) => id !== cuota.id)
-                              : [...actual, cuota.id],
-                          )
-                        }
-                      />
-                      <div className="columna">
-                        <strong style={{ fontSize: 'var(--texto-sm)' }}>{cuota.concepto}</strong>
-                        <span className="subtitulo">
-                          {formatearPeriodo(cuota.periodo)} · vence{' '}
-                          {formatearFecha(cuota.fechaVencimiento)}
+                <div key={cuota.id} className="tarjeta tarjeta--plana">
+                  <div className="fila fila-inicio">
+                    <div className="columna" style={{ flex: 1 }}>
+                      <strong style={{ fontSize: 'var(--texto-sm)' }}>{cuota.concepto}</strong>
+                      <span className="subtitulo">
+                        {formatearPeriodo(cuota.periodo)} · vence{' '}
+                        {formatearFecha(cuota.fechaVencimiento)}
+                      </span>
+                      {abonado > 0 && cuota.saldo > 0 && (
+                        <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                          Abonado {formatearDinero(abonado)} de {formatearDinero(cuota.valor)}
                         </span>
-                      </div>
+                      )}
                     </div>
                     <div className="columna" style={{ alignItems: 'flex-end' }}>
-                      <strong className="numerico">{formatearDinero(cuota.valor)}</strong>
-                      <ChipCuota estado={estadoRealCuota(cuota)} />
+                      <strong className="numerico">
+                        {formatearDinero(cuotaPendiente(cuota) ? cuota.saldo : cuota.valor)}
+                      </strong>
+                      <ChipCuota estado={estado} />
                     </div>
                   </div>
-                </label>
+                </div>
               )
             })}
           </div>
 
-          <div className="fila-campos" style={{ marginTop: 'var(--e4)' }}>
-            <div className="campo">
-              <label htmlFor="medio-pago">Medio de pago</label>
-              <select
-                id="medio-pago"
-                value={medio}
-                onChange={(evento) => setMedio(evento.target.value as MedioPago)}
-              >
-                <option value="transferencia">Transferencia</option>
-                <option value="efectivo">Efectivo</option>
-                <option value="pse">PSE</option>
-                <option value="otro">Otro</option>
-              </select>
+          <div className="separador" />
+          <span className="titulo-seccion">Recibos de caja</span>
+          {detalle.recibos.length === 0 ? (
+            <EstadoVacio titulo="Esta unidad no tiene pagos registrados" />
+          ) : (
+            <div className="lista lista--compacta">
+              {detalle.recibos.map((pago) => (
+                <div key={pago.id} className="fila">
+                  <div className="columna">
+                    <strong className="numerico" style={{ fontSize: 'var(--texto-sm)' }}>
+                      {pago.recibo}
+                    </strong>
+                    <span className="subtitulo">{formatearFechaHora(pago.fecha)}</span>
+                  </div>
+                  <div className="columna" style={{ alignItems: 'flex-end' }}>
+                    <strong className="numerico">{formatearDinero(pago.valor)}</strong>
+                    <ChipPago estado={pago.estado} />
+                  </div>
+                </div>
+              ))}
             </div>
-            <div className="campo">
-              <label htmlFor="referencia-pago">Referencia</label>
-              <input
-                id="referencia-pago"
-                value={referencia}
-                onChange={(evento) => setReferencia(evento.target.value)}
-                placeholder="Numero de consignacion"
-              />
-            </div>
-          </div>
+          )}
 
-          <div className="fila" style={{ marginBottom: 'var(--e3)' }}>
-            <span className="subtitulo">Total</span>
-            <strong className="numerico">
-              {formatearDinero(
-                cuotasDelPago
-                  .filter((cuota) => seleccion.includes(cuota.id))
-                  .reduce((total, cuota) => total + cuota.valor, 0),
-              )}
-            </strong>
-          </div>
-
-          <button
+          <Link
+            to="/admin/pagos"
             className="boton boton--primario boton--bloque"
-            disabled={cargando || seleccion.length === 0}
-            onClick={confirmarPago}
+            style={{ marginTop: 'var(--e4)' }}
           >
-            Registrar pago
-          </button>
+            Registrar un pago de esta unidad
+          </Link>
         </Modal>
       )}
 

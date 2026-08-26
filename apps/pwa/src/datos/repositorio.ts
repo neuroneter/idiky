@@ -16,7 +16,9 @@ import type {
   Comunicado,
   Correspondencia,
   Cuota,
+  Imputacion,
   MedioPago,
+  OrigenPago,
   Pago,
   Periodo,
   Pqrs,
@@ -30,8 +32,13 @@ import type {
 import {
   ahoraISO,
   calcularFechaLimite,
+  estadoRealCuota,
   hoyISO,
+  imputarPago,
+  numeroRecibo,
   prorratearPorCoeficiente,
+  saldoAFavorDelPago,
+  validarImputacion,
   vencimientoDelPeriodo,
 } from '../dominio/reglas'
 import { guardar, leer, sembrar } from './almacen'
@@ -87,49 +94,204 @@ export async function reiniciar(): Promise<BaseDatos> {
 }
 
 // ---------------------------------------------------------------------------
-// CU-R-04 / CU-A-04 — Pagos
+// CU-R-04 / CU-R-18 / CU-A-04 / CU-A-18 — Pagos y recibos de caja
 // ---------------------------------------------------------------------------
 
-export async function registrarPago(
+/** Cuotas de una unidad, para validar e imputar contra ellas. */
+function cuotasDe(bd: BaseDatos, unidadId: string): Cuota[] {
+  return bd.cuotas.filter((cuota) => cuota.unidadId === unidadId)
+}
+
+/**
+ * Aplica el reparto sobre las cuotas: baja el saldo y ajusta el estado.
+ * Con `signo` -1 revierte, que es lo que hace la anulacion (RN-29).
+ */
+function moverSaldos(bd: BaseDatos, imputaciones: Imputacion[], signo: 1 | -1): void {
+  for (const linea of imputaciones) {
+    const cuota = bd.cuotas.find((c) => c.id === linea.cuotaId)
+    if (!cuota) continue
+    cuota.saldo = Math.min(cuota.valor, Math.max(0, cuota.saldo - linea.valor * signo))
+    cuota.estado = estadoRealCuota(cuota)
+  }
+}
+
+/** Toma el siguiente numero de recibo de caja y avanza el consecutivo (RN-28). */
+function emitirRecibo(bd: BaseDatos): string {
+  const consecutivo = bd.consecutivos.recibo
+  bd.consecutivos.recibo = consecutivo + 1
+  return numeroRecibo(consecutivo)
+}
+
+export interface ParametrosPago {
+  unidadId: string
+  valor: number
+  medio: MedioPago
+  referencia?: string
+  registradoPor: string
+  /** Quien origina el pago. Por defecto lo registra la administracion. */
+  origen?: OrigenPago
+  /**
+   * Reparto manual del abono entre cuotas. Si no viene, se imputa a la deuda
+   * mas antigua primero (RN-06).
+   */
+  imputaciones?: Imputacion[]
+  /** Lo que el propietario informa que esta pagando. */
+  conceptoInformado?: string
+}
+
+/**
+ * CU-R-18 — El propietario informa un abono que ya consigno.
+ *
+ * El pago nace `reportado`: queda a la espera de que la administracion lo
+ * concilie. No toca la cartera hasta ese momento (RN-30), justamente porque
+ * lo que el propietario informa todavia no esta verificado.
+ */
+export async function reportarAbono(
   bdActual: BaseDatos,
   parametros: {
     unidadId: string
-    cuotaIds: string[]
+    personaId: string
+    valor: number
     medio: MedioPago
-    referencia?: string
-    registradoPor: string
+    referencia: string
+    conceptoInformado: string
+    cuotasInformadas: string[]
+    reportadoPor: string
   },
 ): Promise<Resultado<Pago>> {
   await esperar()
   const bd = clonar(bdActual)
-  const cuotas = bd.cuotas.filter((cuota) => parametros.cuotaIds.includes(cuota.id))
 
-  if (cuotas.length === 0) throw new ErrorDeNegocio('No se seleccionaron cuotas para pagar.')
-  if (cuotas.some((cuota) => cuota.estado === 'pagada')) {
-    throw new ErrorDeNegocio('Alguna de las cuotas seleccionadas ya esta pagada.')
+  if (parametros.valor <= 0) throw new ErrorDeNegocio('El valor del abono debe ser mayor que cero.')
+  if (!parametros.referencia.trim()) {
+    throw new ErrorDeNegocio('Indica el numero de consignacion o referencia del pago.')
+  }
+  if (!parametros.conceptoInformado.trim()) {
+    throw new ErrorDeNegocio('Cuentanos a que corresponde tu abono.')
   }
 
-  const consecutivo = bd.consecutivos.comprobante
   const pago: Pago = {
     id: nuevoId('pag'),
     unidadId: parametros.unidadId,
-    cuotaIds: cuotas.map((cuota) => cuota.id),
-    valor: cuotas.reduce((total, cuota) => total + cuota.valor, 0),
+    valor: parametros.valor,
     medio: parametros.medio,
-    referencia: parametros.referencia || `REF${Date.now().toString().slice(-8)}`,
+    referencia: parametros.referencia.trim(),
     fecha: ahoraISO(),
-    // RN-07: comprobante con consecutivo unico.
-    comprobante: `CP-${String(consecutivo).padStart(5, '0')}`,
+    estado: 'reportado',
+    origen: 'residente',
+    conceptoInformado: parametros.conceptoInformado.trim(),
+    cuotasInformadas: parametros.cuotasInformadas,
+    reportadoPor: parametros.personaId,
+    imputaciones: [],
+    saldoAFavor: 0,
+    registradoPor: parametros.reportadoPor,
+  }
+
+  bd.pagos.unshift(pago)
+  return persistir(bd, pago)
+}
+
+/**
+ * CU-A-04 / CU-R-04 — Registra un pago que ya se recibio y lo aplica de una vez.
+ *
+ * Es el camino del pago en linea del residente y el del pago manual que la
+ * administracion digita. Emite recibo de caja en el mismo acto (RN-28).
+ */
+export async function registrarPago(
+  bdActual: BaseDatos,
+  parametros: ParametrosPago,
+): Promise<Resultado<Pago>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const cuotas = cuotasDe(bd, parametros.unidadId)
+
+  const imputaciones = parametros.imputaciones ?? imputarPago(cuotas, parametros.valor)
+  const validacion = validarImputacion({ valor: parametros.valor, imputaciones, cuotas })
+  if (!validacion.valido) throw new ErrorDeNegocio(validacion.motivo!)
+
+  const pago: Pago = {
+    id: nuevoId('pag'),
+    unidadId: parametros.unidadId,
+    valor: parametros.valor,
+    medio: parametros.medio,
+    referencia: parametros.referencia?.trim() || `REF${Date.now().toString().slice(-8)}`,
+    fecha: ahoraISO(),
+    estado: 'aplicado',
+    origen: parametros.origen ?? 'administracion',
+    conceptoInformado: parametros.conceptoInformado,
+    recibo: emitirRecibo(bd),
+    imputaciones: imputaciones.filter((linea) => linea.valor > 0),
+    saldoAFavor: saldoAFavorDelPago(parametros.valor, imputaciones),
+    fechaAplicacion: ahoraISO(),
     registradoPor: parametros.registradoPor,
   }
 
-  for (const cuota of cuotas) {
-    cuota.estado = 'pagada'
-    cuota.pagoId = pago.id
-  }
-  bd.pagos.push(pago)
-  bd.consecutivos.comprobante = consecutivo + 1
+  moverSaldos(bd, pago.imputaciones, 1)
+  bd.pagos.unshift(pago)
+  return persistir(bd, pago)
+}
 
+/**
+ * CU-A-18 — La administracion concilia un abono informado por el propietario.
+ *
+ * Aqui es donde el pago entra a la cartera: se reparte entre cuotas y se le
+ * asigna el numero de recibo de caja. Si no se indica reparto, se aplica la
+ * imputacion por antiguedad (RN-06), que casi siempre es lo que corresponde.
+ */
+export async function aplicarPago(
+  bdActual: BaseDatos,
+  parametros: {
+    pagoId: string
+    imputaciones?: Imputacion[]
+    aplicadoPor: string
+  },
+): Promise<Resultado<Pago>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const pago = bd.pagos.find((p) => p.id === parametros.pagoId)
+  if (!pago) throw new ErrorDeNegocio('El pago no existe.')
+  if (pago.estado !== 'reportado') {
+    throw new ErrorDeNegocio('Solo se pueden aplicar los abonos que estan reportados.')
+  }
+
+  const cuotas = cuotasDe(bd, pago.unidadId)
+  const imputaciones = parametros.imputaciones ?? imputarPago(cuotas, pago.valor)
+  const validacion = validarImputacion({ valor: pago.valor, imputaciones, cuotas })
+  if (!validacion.valido) throw new ErrorDeNegocio(validacion.motivo!)
+
+  pago.imputaciones = imputaciones.filter((linea) => linea.valor > 0)
+  pago.saldoAFavor = saldoAFavorDelPago(pago.valor, imputaciones)
+  pago.estado = 'aplicado'
+  pago.recibo = emitirRecibo(bd)
+  pago.fechaAplicacion = ahoraISO()
+  pago.registradoPor = parametros.aplicadoPor
+
+  moverSaldos(bd, pago.imputaciones, 1)
+  return persistir(bd, pago)
+}
+
+/**
+ * CU-A-18 — Anula un recibo de caja.
+ *
+ * RN-29: no se borra el registro, se marca anulado con su motivo y el saldo
+ * vuelve a las cuotas. El numero de recibo queda quemado, no se reutiliza.
+ */
+export async function anularPago(
+  bdActual: BaseDatos,
+  parametros: { pagoId: string; motivo: string },
+): Promise<Resultado<Pago>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const pago = bd.pagos.find((p) => p.id === parametros.pagoId)
+  if (!pago) throw new ErrorDeNegocio('El pago no existe.')
+  if (!parametros.motivo.trim()) throw new ErrorDeNegocio('Escribe el motivo de la anulacion.')
+
+  if (pago.estado === 'anulado') throw new ErrorDeNegocio('Ese recibo ya esta anulado.')
+  if (pago.estado === 'aplicado') moverSaldos(bd, pago.imputaciones, -1)
+
+  pago.estado = 'anulado'
+  pago.motivoAnulacion = parametros.motivo.trim()
+  pago.fechaAnulacion = ahoraISO()
   return persistir(bd, pago)
 }
 
@@ -172,8 +334,14 @@ export async function generarCuotas(
 
   // RN-22: no se generan dos veces las cuotas ordinarias del mismo periodo.
   if (parametros.tipo === 'ordinaria') {
+    const unidadesDeLaCopropiedad = new Set(
+      bd.unidades.filter((u) => u.copropiedadId === parametros.copropiedadId).map((u) => u.id),
+    )
     const yaExiste = bd.cuotas.some(
-      (cuota) => cuota.periodo === parametros.periodo && cuota.tipo === 'ordinaria',
+      (cuota) =>
+        cuota.periodo === parametros.periodo &&
+        cuota.tipo === 'ordinaria' &&
+        unidadesDeLaCopropiedad.has(cuota.unidadId),
     )
     if (yaExiste) {
       throw new ErrorDeNegocio(
@@ -189,6 +357,8 @@ export async function generarCuotas(
     tipo: parametros.tipo,
     concepto: parametros.concepto,
     valor: linea.valor,
+    // RN-26: nace debiendo todo su valor.
+    saldo: linea.valor,
     // RN-23: vencimiento por defecto el dia 10 del periodo.
     fechaVencimiento: vencimientoDelPeriodo(parametros.periodo),
     estado: 'pendiente',

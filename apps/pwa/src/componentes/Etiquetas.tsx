@@ -7,6 +7,7 @@ import type {
   CategoriaComunicado,
   EstadoCorrespondencia,
   EstadoCuota,
+  EstadoPago,
   EstadoPqrs,
   EstadoReserva,
   EstadoVisitante,
@@ -21,12 +22,24 @@ function Chip({ texto, variante }: { texto: string; variante: Variante }) {
 
 const CUOTA: Record<EstadoCuota, [string, Variante]> = {
   pendiente: ['Pendiente', 'alerta'],
+  abonada: ['Abonada', 'info'],
   pagada: ['Pagada', 'exito'],
   vencida: ['Vencida', 'error'],
 }
 
 export function ChipCuota({ estado }: { estado: EstadoCuota }) {
   const [texto, variante] = CUOTA[estado]
+  return <Chip texto={texto} variante={variante} />
+}
+
+const PAGO: Record<EstadoPago, [string, Variante]> = {
+  reportado: ['Por conciliar', 'alerta'],
+  aplicado: ['Aplicado', 'exito'],
+  anulado: ['Anulado', 'error'],
+}
+
+export function ChipPago({ estado }: { estado: EstadoPago }) {
+  const [texto, variante] = PAGO[estado]
   return <Chip texto={texto} variante={variante} />
 }
 
