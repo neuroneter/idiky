@@ -17,6 +17,31 @@ npm run dev      # http://localhost:5173
 | `npm run preview` | Sirve `dist/` (aquí sí se activa el service worker) |
 | `npm run typecheck` | Solo verificación de tipos |
 
+## Herramientas
+
+Scripts de apoyo en `herramientas/`. Son de librería estándar de Python a propósito: el
+proyecto no agrega dependencias sin ADR ([`CLAUDE.md`](../../CLAUDE.md)).
+
+| Script | Qué hace |
+|---|---|
+| `python3 herramientas/generar-iconos.py` | Regenera los PNG del manifest (192, 512 y maskable) desde la geometría del logo. **Correr si cambia el logo.** |
+| `python3 herramientas/empaquetar-demo.py` | Empaqueta `dist/` en un solo HTML autocontenido para compartir el demo |
+
+### Compartir el demo con alguien que no tiene el repositorio
+
+```bash
+npm run build
+python3 herramientas/empaquetar-demo.py     # -> dist/demo-idiky.html
+```
+
+Ese archivo se abre con doble clic, se manda por correo o se sube a cualquier hosting
+estático. No pide servidor porque el demo no tiene backend: los datos viven en
+`localStorage` y la navegación usa `HashRouter`.
+
+**Cada persona que lo abra tiene su propia copia de los datos**, en su navegador. Nadie ve lo
+que hace el otro — para una demostración eso es una ventaja, pero no sirve para trabajar
+sobre los mismos datos.
+
 ## Perfiles del demo
 
 No hay contraseñas ([ADR-0004](../../docs/adr/0004-autenticacion-demo.md)). En la pantalla de
@@ -42,7 +67,7 @@ src/
 ├── estilos/       tokens.css (identidad visual) · base.css · layout.css
 └── features/
     ├── auth/       CU-R-01
-    ├── residente/  CU-R-02 … CU-R-11
+    ├── residente/  CU-R-02 … CU-R-11 y CU-R-24
     └── admin/      CU-A-01 … CU-A-09
 ```
 

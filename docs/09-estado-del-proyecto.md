@@ -116,6 +116,21 @@ poderes entre copropietarios, acta y coeficientes.
 Verificado en Chromium a 390×844 con zona horaria de Bogotá: el comprobante de un pago hecho
 a las 18:35 ahora dice «26 ago, 18:35» y no la hora UTC. Sin errores de consola.
 
+**Cómo mostrar el demo**
+
+Se agregó `apps/pwa/herramientas/empaquetar-demo.py`, que empaqueta `dist/` en **un solo HTML
+autocontenido**. Sirve para mostrarle el demo a alguien que no tiene el repositorio ni Node:
+se abre con doble clic o se sube a cualquier hosting estático.
+
+```bash
+cd apps/pwa && npm run build && python3 herramientas/empaquetar-demo.py
+```
+
+Funciona porque el demo no tiene backend. **Cada persona que lo abra tiene su propia copia de
+los datos en su navegador**: nadie ve lo que hace el otro. Para una demostración es una
+ventaja; para trabajar sobre los mismos datos no sirve, y eso es justamente lo que resuelve
+la fase 2a.
+
 **Lo que quedó marcado como supuesto, no como decisión**
 
 El quórum en coeficientes y el tope de poderes se escribieron como supuestos con **(?)**, no
