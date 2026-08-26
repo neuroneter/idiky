@@ -31,22 +31,26 @@
   --color-acento-suave: #fbe6f3;
 
   /* Degradado de marca — azul que se calienta hacia el fucsia.
-     El balance se ajusta aqui y afecta a las dos superficies de firma:
-       CORTE = hasta donde se mantiene el azul puro.
-       FIN   = donde llegaria el fucsia puro. Por encima de 100 % el degradado
-               se corta antes, asi que el borde visible nunca es fucsia pleno.
-     Subir el corte o el fin = mas azul. */
+     El balance se ajusta aqui y afecta a las dos superficies de firma.
+
+     La TARJETA va de azul a fucsia en todo el recorrido: es una superficie
+     pequena que sale una vez por pantalla y ahi el fucsia tiene que leerse.
+     La LATERAL mantiene el azul hasta el 48 % y corta el fucsia al 130 %, porque
+     es una barra alta que el administrador tiene delante todo el dia.
+
+     Para dar mas azul: subir la parada intermedia de `--color-marca`, o subir la
+     de `--color-marca-claro` por encima de 100 % (el degradado se corta antes y
+     el borde visible no llega a fucsia pleno). */
   --degradado-marca: linear-gradient(
     140deg,
-    var(--color-marca) 0%,
-    var(--color-marca) 52%,
-    var(--color-marca-claro) 145%
+    var(--color-marca),
+    var(--color-marca-claro)
   );
   --degradado-marca-vertical: linear-gradient(
     176deg,
     var(--color-marca) 0%,
-    var(--color-marca) 62%,
-    var(--color-marca-claro) 155%
+    var(--color-marca) 48%,
+    var(--color-marca-claro) 130%
   );
 
   /* Superficies */

@@ -80,17 +80,20 @@ Los dos juntos aparecen en **una sola superficie por pantalla**: `.tarjeta--marc
 del residente) y la barra lateral de la consola. Es la firma de la marca; si aparece en más
 sitios deja de serlo.
 
-**El degradado manda el azul.** No es mitad y mitad: el azul se mantiene puro más de la mitad
-del recorrido y el fucsia solo entra al final, sin llegar nunca a fucsia pleno. Los dos
-degradados están en `tokens.css` como `--degradado-marca` (la tarjeta) y
-`--degradado-marca-vertical` (la lateral, que aguanta más azul porque el administrador la
-tiene delante todo el día). **Los componentes solo consumen el token**, no escriben el
-degradado. Para reequilibrarlo se tocan dos números:
+**Los dos degradados están en `tokens.css`**, como `--degradado-marca` (la tarjeta de saldo) y
+`--degradado-marca-vertical` (la lateral). **Los componentes solo consumen el token**, no
+escriben el degradado: reequilibrar la marca se hace en un archivo, no en tres.
 
-| Parada | Qué controla | Subirla = |
+No están calibrados igual, y es a propósito:
+
+| Superficie | Recorrido | Por qué |
 |---|---|---|
-| El segundo `--color-marca` (52 % / 62 %) | Hasta dónde llega el azul puro | Más azul |
-| El `--color-marca-claro` (145 % / 155 %) | Dónde llegaría el fucsia pleno; por encima de 100 % el degradado se corta antes | Más azul |
+| Tarjeta de saldo | Azul a fucsia completo | Es pequeña y sale una vez por pantalla: ahí el fucsia tiene que leerse |
+| Lateral de la consola | Azul hasta el 48 %, fucsia cortado al 130 % | Es una barra alta que el administrador tiene delante todo el día |
+
+Para dar **más azul** a cualquiera de los dos: subir la parada intermedia de `--color-marca`,
+o subir la de `--color-marca-claro` por encima de 100 % — el degradado se corta antes y el
+borde visible no llega a fucsia pleno.
 
 **El rojo está reservado para la plata** — mora, cuota vencida, cartera vencida. No usar
 fucsia para alarmar: compiten en tono y se pierde la señal que más importa.

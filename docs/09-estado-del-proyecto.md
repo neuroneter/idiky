@@ -86,17 +86,18 @@ cerca en tono y competía justo con la señal que más tiene que alarmar. Por es
 quedó como acento y no como color de marca, y el rojo mandó solo. Está anotado en el
 encabezado de `tokens.css` y en [`08-convenciones.md`](./08-convenciones.md).
 
-**El degradado, reequilibrado**
+**Sobre el degradado**
 
-La primera versión repartía azul y fucsia mitad y mitad y quedaba demasiado fucsia. Ahora el
-azul se mantiene puro pasada la mitad del recorrido y el fucsia solo entra al final, sin
-llegar nunca a fucsia pleno.
+Se probó una versión con más peso del azul (el azul puro pasada la mitad del recorrido) y se
+descartó: Mary prefirió el reparto original, donde la tarjeta de saldo recorre el degradado
+completo de azul a fucsia. La lateral de la consola sí mantiene el azul más tiempo, porque es
+una barra alta que el administrador tiene delante todo el día.
 
-De paso, los dos degradados salieron del CSS de los componentes y pasaron a `tokens.css` como
-`--degradado-marca` y `--degradado-marca-vertical`. Estaban en `base.css` y `layout.css`, así
-que reequilibrar la marca obligaba a editar dos archivos y a acordarse de los dos. Ahora es
-cambiar dos números en el archivo donde vive la identidad, que es lo que dicen las
-convenciones.
+De ese intento sí quedó algo: los dos degradados salieron del CSS de los componentes y pasaron
+a `tokens.css` como `--degradado-marca` y `--degradado-marca-vertical`. Estaban repartidos
+entre `base.css` y `layout.css`, así que reequilibrar la marca obligaba a editar dos archivos
+y acordarse de los dos. Ahora es cambiar unos números en el archivo donde vive la identidad,
+que es lo que dicen las convenciones.
 
 **Qué se tocó**
 
