@@ -95,6 +95,14 @@ Se construyó sin haber cerrado tres decisiones. Si alguna cambia, cambia el mó
 `features/residente/` — o sea las zonas de los tres. Vale la pena revisarlo juntos antes de
 seguir repartiendo tareas por zona.
 
+> **Corrección posterior, misma fecha.** Este módulo se construyó a pedido de Jeimy, pero
+> quedó dentro de la PWA, que es el producto de **Mary**. Jeimy trabaja en la **aplicación
+> contable de escritorio**, que es un programa aparte y todavía no tiene stack ni ubicación
+> definidos (ver [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md) §1.1).
+> Lo construido **sirve igual**: la consola necesitaba cartera y pagos. Pero no es el
+> entregable de Jeimy, y las reglas RN-26 a RN-30 son justamente la parte que las dos
+> aplicaciones van a compartir.
+
 **Qué sigue**
 
 1. Confirmar o corregir los tres supuestos de arriba.

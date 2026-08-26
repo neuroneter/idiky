@@ -1,7 +1,13 @@
 # 10 — Equipo y orquestación del trabajo
 
-Somos **tres personas trabajando en paralelo** sobre el mismo repositorio: **Jeimy**, **Mary**
-y **Daniel**. Este documento define cómo nos repartimos el trabajo sin pisarnos.
+Somos **tres personas trabajando en paralelo**: **Jeimy**, **Mary** y **Daniel**. Este
+documento define cómo nos repartimos el trabajo sin pisarnos.
+
+> ⚠️ **No es un solo producto.** Mary construye la **aplicación web/móvil** (la PWA de este
+> repositorio). Jeimy construye la **aplicación contable, que es de escritorio** y es un
+> programa aparte. Las dos van a **intercambiar información** en algún momento, pero no
+> comparten pantallas ni código de interfaz. Lo que se comparte es el **dominio**: qué es una
+> cuota, qué es un abono, cómo se numera un recibo de caja.
 
 > Regla base: **el conflicto se evita por diseño, no por suerte.** Cada quien es dueño de
 > unos archivos; los archivos compartidos tienen un protocolo especial.
@@ -13,15 +19,32 @@ y **Daniel**. Este documento define cómo nos repartimos el trabajo sin pisarnos
 Cada módulo tiene **un responsable**. Puedes leer todo el repositorio, pero **solo modificas
 tu zona** salvo acuerdo explícito.
 
-| Zona | Archivos | Responsable propuesto |
+| Zona | Archivos | Responsable |
 |---|---|---|
-| **A. App del residente** | `apps/pwa/src/features/residente/**` | Jeimy |
+| **A. App del residente** | `apps/pwa/src/features/residente/**` | Mary |
 | **B. Consola de administración** | `apps/pwa/src/features/admin/**` | Mary |
 | **C. Núcleo, datos y documentación** | `apps/pwa/src/{dominio,datos,estado}/**`, `docs/**` | Daniel |
 | **D. Diseño y componentes** | `apps/pwa/src/{componentes,estilos}/**` | Rotativo (ver §3) |
+| **E. Aplicación contable (escritorio)** | *por definir — ver §1.1* | Jeimy |
 
-> Esta asignación es una **propuesta inicial**. Ajústenla en la reunión de arranque y
-> actualicen esta tabla en el mismo commit en que lo decidan.
+### 1.1 La aplicación contable todavía no tiene casa
+
+La zona E está **sin ubicar a propósito**: antes de crear carpetas hay que decidir tres cosas.
+
+1. **Con qué se construye.** Es una aplicación de escritorio, no una web. La restricción
+   real es qué puede instalar y ejecutar Jeimy en su computador; eso manda sobre el gusto
+   técnico. Cuando se decida, va en un ADR (`docs/adr/0006-...`).
+2. **Dónde vive.** ¿En este repositorio, como `apps/contable/`, o en uno propio? Si comparte
+   las reglas del dominio con la PWA, estar en el mismo repositorio lo hace más fácil.
+3. **Qué información se comparte y en qué dirección.** Es la pregunta que decide la
+   integración: qué le manda la PWA a la contable (recaudo, recibos de caja) y qué necesita
+   la contable de vuelta.
+
+> **Lo que ya está listo para compartirse:** las reglas de cartera y pagos —
+> RN-03 a RN-07 y RN-26 a RN-30 en [`05-modelo-de-datos.md`](./05-modelo-de-datos.md) —
+> están escritas como definiciones del dominio, no como código de pantalla. Sirven igual
+> en la app de escritorio, sea cual sea el lenguaje: son el contrato entre las dos
+> aplicaciones.
 
 ## 2. Archivos compartidos — alto riesgo de conflicto
 
