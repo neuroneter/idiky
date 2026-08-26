@@ -261,3 +261,268 @@ localmente sin librerías externas (ver [ADR-0005](../adr/0005-codigo-qr-sin-dep
 2. Al entregarse, portería registra quién recibió y cuándo (CU-A-09).
 
 **Estado en el demo:** ✅ — `src/features/residente/CorrespondenciaPage.tsx` (solo lectura).
+
+---
+
+> **A partir de aquí: casos de uso del alcance declarado el 2026-08-26**
+> ([`../12-levantamiento-pendiente.md` §0](../12-levantamiento-pendiente.md)).
+> Ninguno está implementado todavía. Los supuestos marcados **(?)** están pendientes de
+> confirmar con el reglamento de la copropiedad — ver §3 bis y §3 ter de ese documento.
+
+---
+
+### CU-R-12
+## CU-R-12 — Descargar el paz y salvo
+
+- **Actor principal:** Copropietario (solo propietario, no arrendatario **(?)**)
+- **Precondiciones:** La unidad no tiene saldo pendiente.
+- **Disparador:** Necesita el certificado para un trámite (venta, arriendo, notaría).
+- **Resultado esperado:** Obtiene un PDF descargable que certifica que su unidad está al día.
+
+**Flujo principal**
+1. El copropietario entra a su estado de cuenta y toca "Descargar paz y salvo".
+2. El sistema verifica que el saldo de la unidad sea cero (RN-26).
+3. El sistema genera el certificado con consecutivo único (RN-36), fecha de expedición,
+   vigencia y los datos de la unidad y su propietario.
+4. El copropietario descarga o comparte el PDF.
+
+**Flujos alternativos**
+- A1. La unidad tiene saldo → el sistema explica cuánto debe y ofrece ir a pagar (CU-R-04),
+  sin generar el documento.
+- A2. El certificado requiere autorización previa del administrador **(?)** → queda en
+  estado `solicitado` y el administrador lo emite (CU-A-13).
+- A3. El copropietario consulta un paz y salvo emitido antes → lo descarga de su historial.
+
+**Reglas de negocio**
+- RN-26: solo se emite con saldo cero.
+- RN-36: consecutivo único y verificable.
+
+**Estado en el demo:** ⬜ — requiere generación de PDF (ADR-0006, pendiente).
+
+---
+
+### CU-R-13
+## CU-R-13 — Votar en una asamblea
+
+- **Actor principal:** Copropietario (por sí mismo o como apoderado, CU-R-23)
+- **Precondiciones:** Hay una asamblea instalada y una votación abierta por el
+  administrador (CU-A-18).
+- **Disparador:** El administrador abre la votación durante la asamblea.
+- **Resultado esperado:** Su voto queda registrado con el peso de su coeficiente y ya no
+  puede cambiarlo.
+
+**Flujo principal**
+1. El sistema notifica que hay una votación abierta y muestra la pregunta y sus opciones.
+2. El sistema muestra con cuánto peso vota: su coeficiente, más el de las unidades que
+   representa por poder (CU-R-23).
+3. El copropietario elige una opción y confirma.
+4. El sistema registra un voto por cada unidad que le corresponde (RN-29) y confirma.
+5. Al cerrarse la votación (CU-A-18), el copropietario ve el resultado consolidado.
+
+**Flujos alternativos**
+- A1. La votación se cierra mientras estaba decidiendo → el voto no se acepta y se le avisa.
+- A2. Ya votó → ve su elección, sin opción de cambiarla (RN-34).
+- A3. Otorgó poder a otra persona → no puede votar esa unidad (RN-32).
+- A4. La unidad está en mora → **(?)** pendiente de definir si pierde el voto.
+
+**Reglas de negocio**
+- RN-27: el voto se pondera por coeficiente **(?)**.
+- RN-29: un voto por unidad y por pregunta.
+- RN-32: quien otorgó poder no vota esa unidad directamente.
+- RN-34: una votación cerrada no se reabre.
+
+**Estado en el demo:** ⬜ — no existe el módulo de asambleas.
+
+---
+
+### CU-R-18
+## CU-R-18 — Descargar el informe de estado de cuenta
+
+- **Actor principal:** Copropietario
+- **Precondiciones:** CU-R-01 completado.
+- **Disparador:** Quiere un soporte de su cartera para un trámite o para su contabilidad.
+- **Resultado esperado:** Obtiene un PDF con el detalle del periodo que elija.
+
+**Flujo principal**
+1. Desde el estado de cuenta (CU-R-03) elige "Descargar informe".
+2. Elige el rango de periodos (por defecto, el año en curso).
+3. El sistema genera el PDF: cuotas facturadas, pagos aplicados, saldo por periodo y saldo
+   final, con el consecutivo del documento (RN-36).
+
+**Flujos alternativos**
+- A1. Sin movimientos en el rango elegido → se avisa antes de generar el documento.
+
+**Reglas de negocio**
+- RN-03 (composición del saldo), RN-06 (orden de imputación), RN-36 (consecutivo).
+
+**Estado en el demo:** ⬜ — el estado de cuenta se ve en pantalla (`CuentaPage.tsx`) pero no
+se descarga. Requiere ADR-0006.
+
+---
+
+### CU-R-19
+## CU-R-19 — Consultar y descargar mis comprobantes de pago
+
+- **Actor principal:** Copropietario
+- **Precondiciones:** La unidad tiene al menos un pago registrado.
+- **Disparador:** Necesita el soporte de un pago hecho antes.
+- **Resultado esperado:** Encuentra cualquier pago histórico de su unidad y descarga su
+  comprobante.
+
+**Flujo principal**
+1. El sistema lista los pagos de la unidad: fecha, valor, medio, cuotas cubiertas y número
+   de comprobante.
+2. El copropietario abre uno y descarga el PDF.
+
+**Flujos alternativos**
+- A1. El pago lo registró la administración manualmente (CU-A-04) → aparece igual, marcado
+  con quién lo registró.
+
+**Reglas de negocio**
+- RN-07: todo pago tiene comprobante con consecutivo único.
+
+**Estado en el demo:** 🟡 — el comprobante se muestra **una sola vez**, al terminar el pago
+(`PagoPage.tsx`); después no hay forma de volver a verlo ni de descargarlo.
+
+---
+
+### CU-R-20
+## CU-R-20 — Recibir la citación a asamblea y confirmar asistencia
+
+- **Actor principal:** Copropietario
+- **Precondiciones:** El administrador convocó la asamblea (CU-A-12).
+- **Disparador:** Se emite la convocatoria.
+- **Resultado esperado:** Conoce fecha, hora, modalidad y orden del día, y dice si asiste.
+
+**Flujo principal**
+1. El sistema le entrega la citación con: tipo de asamblea (ordinaria o extraordinaria),
+   fecha y hora, modalidad (presencial, virtual o mixta **(?)**), orden del día y el
+   documento formal de convocatoria en PDF.
+2. El copropietario confirma si asistirá, si no asistirá, o si delegará mediante poder.
+3. Si elige delegar, el sistema lo lleva a otorgar el poder (CU-R-22).
+4. El sistema le recuerda la asamblea antes de que empiece.
+
+**Flujos alternativos**
+- A1. Segunda convocatoria por falta de quórum → se emite una citación nueva **(?)**.
+- A2. Se modifica el orden del día → se reemite la citación y se avisa el cambio.
+
+**Reglas de negocio**
+- RN-33: la citación debe emitirse con la antelación mínima que exija el reglamento **(?)**.
+
+**Estado en el demo:** ⬜ — no existe el módulo de asambleas.
+
+---
+
+### CU-R-21
+## CU-R-21 — Ver la transmisión en vivo de la asamblea
+
+- **Actor principal:** Copropietario
+- **Precondiciones:** La asamblea está instalada y el administrador inició la transmisión
+  (CU-A-17).
+- **Disparador:** Entra a la asamblea desde la app a la hora convocada.
+- **Resultado esperado:** Ve y oye la asamblea desde el celular, y desde la misma pantalla
+  puede votar cuando se habilite una votación.
+
+**Flujo principal**
+1. El sistema muestra la sala de la asamblea: transmisión en vivo, orden del día con el
+   punto en curso, y el quórum actualizado (CU-S-07).
+2. Cuando el administrador abre una votación, aparece sobre la transmisión sin sacarlo de
+   ella (CU-R-13).
+3. Su presencia en la sala cuenta para el quórum **(?)** — pendiente de confirmar si la
+   asistencia virtual suma igual que la presencial.
+
+**Flujos alternativos**
+- A1. Conexión inestable → la transmisión baja de calidad pero la votación sigue disponible.
+  **La votación nunca debe depender del video.**
+- A2. Entra tarde → se une en el punto en curso; no hay reproducción hacia atrás en vivo.
+- A3. La transmisión no ha empezado → sala de espera con la hora convocada.
+
+**Reglas de negocio**
+- RN-28: el quórum se mide en coeficientes, no en número de personas conectadas.
+
+**Estado en el demo:** ⬜ — requiere decidir el proveedor de video (ADR-0007, pendiente).
+
+---
+
+### CU-R-22
+## CU-R-22 — Otorgar poder a otro copropietario
+
+- **Actor principal:** Copropietario que no podrá asistir
+- **Precondiciones:** Hay una asamblea convocada y todavía no instalada.
+- **Disparador:** No puede asistir y quiere que su unidad sea representada.
+- **Resultado esperado:** Queda un poder registrado a favor de otra persona, para esa
+  asamblea.
+
+**Flujo principal**
+1. El copropietario elige la asamblea y a quién le otorga el poder.
+2. El sistema valida que el destinatario pueda recibirlo: que no tenga inhabilidad **(?)**
+   y que no supere su tope de representación (RN-30).
+3. El copropietario confirma y firma el poder **(?)** — pendiente de definir si basta la
+   confirmación en la app o se exige firma electrónica.
+4. El sistema genera el documento del poder y notifica al apoderado (CU-R-23).
+5. El poder queda pendiente de validación por la administración (CU-A-19).
+
+**Flujos alternativos**
+- A1. Revocar el poder antes de que la asamblea se instale → el apoderado pierde ese peso.
+- A2. El apoderado ya llegó a su tope → el sistema lo rechaza y explica por qué (RN-30).
+- A3. La asamblea ya se instaló → no se aceptan poderes nuevos.
+
+**Reglas de negocio**
+- RN-30: tope de coeficientes por apoderado **(? — cifra por confirmar en la Ley 675)**.
+- RN-31: el poder vale para una asamblea y vence al cerrarse (CU-S-09).
+- RN-32: quien otorga poder no vota esa unidad directamente.
+
+**Estado en el demo:** ⬜ — no existe.
+
+---
+
+### CU-R-23
+## CU-R-23 — Recibir y ejercer poderes de otros copropietarios
+
+- **Actor principal:** Copropietario apoderado
+- **Precondiciones:** Otro copropietario le otorgó poder (CU-R-22) y la administración lo
+  validó (CU-A-19).
+- **Disparador:** Recibe la notificación del poder.
+- **Resultado esperado:** Sabe a cuántas unidades representa y con qué peso total vota.
+
+**Flujo principal**
+1. El sistema le notifica el poder recibido y le pide aceptarlo o rechazarlo.
+2. Al aceptar, el sistema suma el coeficiente de esa unidad a su peso de voto.
+3. Antes de cada votación ve el desglose: su unidad, más cada unidad representada.
+4. Al votar (CU-R-13), el sistema registra un voto por cada unidad representada.
+
+**Flujos alternativos**
+- A1. Rechaza el poder → se le avisa a quien lo otorgó, que puede dárselo a otra persona.
+- A2. El poder fue revocado → desaparece de su lista y su peso baja.
+- A3. Aceptar el poder lo pondría sobre el tope → no puede aceptarlo (RN-30).
+
+**Reglas de negocio**
+- RN-27, RN-29, RN-30, RN-31.
+
+**Estado en el demo:** ⬜ — no existe.
+
+---
+
+### CU-R-24
+## CU-R-24 — Consultar mi coeficiente de copropiedad
+
+- **Actor principal:** Copropietario
+- **Precondiciones:** CU-R-01 completado.
+- **Disparador:** Quiere saber cuánto pesa su unidad, o entender por qué su cuota es la que es.
+- **Resultado esperado:** Ve su coeficiente y qué determina.
+
+**Flujo principal**
+1. El sistema muestra el coeficiente de la unidad activa y su área privada.
+2. Explica en lenguaje simple qué determina el coeficiente: el valor de la cuota ordinaria
+   (RN-05) y el peso de su voto en la asamblea (RN-27).
+3. Muestra la suma de coeficientes de la copropiedad (100 %, RN-19) como referencia.
+
+**Flujos alternativos**
+- A1. El coeficiente cambió por una reforma al reglamento → se muestra desde cuándo aplica,
+  sin borrar el histórico (RN-37).
+
+**Reglas de negocio**
+- RN-05, RN-19, RN-27, RN-37.
+
+**Estado en el demo:** ⬜ — el dato existe en el modelo (`Unidad.coeficiente`) y lo usa la
+consola de administración, pero **el residente no lo ve en ninguna pantalla**.

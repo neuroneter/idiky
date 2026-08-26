@@ -11,18 +11,24 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 
 | # | Tarea | Responsable | Estado | Notas |
 |---|---|---|---|---|
-| T-01 | **Completar el levantamiento de requisitos** con el equipo | Los tres | 📋 Por hacer | Responder [`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md). **Bloquea decidir el alcance real.** |
-| T-02 | Validar/ajustar los casos de uso ya documentados | Los tres | 📋 Por hacer | Revisar [`04-casos-de-uso.md`](./04-casos-de-uso.md) y corregir lo que no corresponda al producto que quieren |
-| T-03 | Confirmar la asignación de zonas del equipo | Los tres | 📋 Por hacer | Tabla §1 de [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md) |
+| T-01 | **Completar el levantamiento de requisitos** con el equipo | Los tres | 🔨 En curso | El alcance funcional quedó declarado ([§0](./12-levantamiento-pendiente.md)). **Faltan §3 bis (asambleas) y §3 ter (documentos)**, que bloquean el diseño |
+| T-02 | Validar/ajustar los casos de uso ya documentados | Los tres | 🔨 En curso | Catálogo actualizado con 12 CU nuevos. Falta que el equipo los revise |
+| T-03 | Confirmar la asignación de zonas del equipo | Los tres | 📋 Por hacer | Tabla §1 de [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md). **Mary indicó que trabajará en la app móvil**, hoy asignada a Jeimy |
 | T-04 | Recorrer el demo v0.1 y anotar observaciones | Los tres | 📋 Por hacer | Cada quien anota en la bitácora qué sobra, qué falta y qué está mal planteado |
+| T-10 | **Responder las preguntas de asamblea** (§3 bis) | Los tres | 📋 Por hacer | Peso del voto, quórum, mayorías, tope de poderes. **Bloquea RN-27 a RN-34 y todo el módulo** |
+| T-11 | **Confirmar el tope legal de poderes** (Ley 675 de 2001) | Los tres | 📋 Por hacer | Hay que leer el artículo y citarlo. **No se implementa RN-30 con una cifra supuesta** |
+| T-12 | **Decidir si visitantes, correspondencia y cartelera siguen** | Los tres | 📋 Por hacer | Están implementados pero nadie los mencionó en el alcance |
+| T-13 | **ADR-0006 — cómo se generan los PDF** | Daniel | 📋 Por hacer | Bloquea paz y salvo, estado de cuenta, comprobante y acta |
+| T-14 | **ADR-0007 — proveedor de transmisión en vivo** | Daniel | 📋 Por hacer | Costo por minuto, grabación, ancho de banda |
+| T-15 | Corregir los bugs del demo detectados en la revisión | Zona A / D | 📋 Por hacer | Zona horaria en fechas, íconos PWA faltantes, vigencia del visitante, doble toque. Ver bitácora del 2026-08-26 |
 
 ## Siguiente — cuando T-01 esté cerrado
 
 | # | Tarea | Responsable sugerido | Estado |
 |---|---|---|---|
 | T-05 | Ajustar el modelo de datos al alcance real | Daniel | 📋 Por hacer |
-| T-06 | Decidir el stack de backend (ADR-0006) | Daniel | 📋 Por hacer |
-| T-07 | Documentar los casos de uso de asambleas (CU-R-13, CU-A-12) | Mary | 📋 Por hacer |
+| T-06 | Decidir el stack de backend (ADR-0008) | Daniel | 📋 Por hacer |
+| T-07 | Documentar los casos de uso de asambleas — **hecho, ver CU-R-13, CU-R-20…24 y CU-A-12, CU-A-17…21** | Mary | ✅ Hecho |
 | T-08 | Documentar el módulo de portería (minuta, validación de visitantes) | Jeimy | 📋 Por hacer |
 | T-09 | Definir la identidad visual real (colores, logo, tipografía) | Zona D | 📋 Por hacer |
 

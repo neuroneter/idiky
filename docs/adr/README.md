@@ -10,6 +10,15 @@ persona o IA — tenga que reconstruir el razonamiento más adelante.
 | [0003](./0003-capa-de-datos.md) | Capa de datos con adaptadores intercambiables | Aceptada |
 | [0004](./0004-autenticacion-demo.md) | Sin autenticación real en el demo: selección de perfil | Aceptada |
 | [0005](./0005-codigo-qr-sin-dependencias.md) | Generación del QR de visitantes sin dependencias externas | Aceptada |
+| 0006 | **Cómo se generan los documentos PDF** (paz y salvo, estado de cuenta, comprobante, acta) | ⬜ Pendiente de escribir |
+| 0007 | **Proveedor de transmisión en vivo** para las asambleas | ⬜ Pendiente de escribir |
+| 0008 | **Stack de backend** | ⬜ Pendiente de escribir |
+
+Los tres pendientes salen del alcance declarado el 2026-08-26
+([`../12-levantamiento-pendiente.md` §0](../12-levantamiento-pendiente.md)). **ADR-0006 y
+ADR-0007 bloquean trabajo**: sin ellos no se puede empezar ni el paz y salvo ni la
+transmisión. Recuerden la regla del [`CLAUDE.md`](../../CLAUDE.md): no se agregan
+dependencias sin ADR, y los tres implican dependencias nuevas.
 
 **Plantilla:**
 

@@ -13,7 +13,7 @@ nueva o una sesión de IA distinta.
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | Simulada (selección de perfil, [ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso implementados** | 20 de 33 documentados (11 de residente, 9 de administrador) |
+| **Casos de uso implementados** | 20 de **45** documentados (11 de residente, 9 de administrador) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 
 ### Lo que funciona hoy
@@ -30,24 +30,96 @@ publicación de comunicados · registro y entrega de correspondencia.
 
 ### Lo que NO existe
 
-Backend, autenticación real, pagos reales, notificaciones push, apps nativas, asambleas,
-paz y salvo, portería, presupuesto, informes exportables, modo oscuro.
+Backend, autenticación real, pagos reales, notificaciones push, apps nativas, portería,
+presupuesto, informes exportables, modo oscuro.
 
-### ⚠️ Advertencia importante sobre el alcance
+Y —**esto es lo importante desde el 2026-08-26**— no existe nada del núcleo que el equipo
+declaró como alcance: **asambleas** (citación, transmisión, votación, poderes, acta),
+**documentos descargables** (paz y salvo, estado de cuenta, comprobante) ni **coeficientes
+visibles al copropietario**.
+
+### ⚠️ El demo v0.1 no es el producto
 
 El demo se construyó sobre **supuestos de un conjunto residencial típico**, antes de tener
-el levantamiento completo de requisitos del equipo. Sirve como **base de conversación y
-esqueleto técnico**, no como definición del producto.
+el levantamiento de requisitos. El 2026-08-26 el equipo declaró el alcance real
+([`12-levantamiento-pendiente.md` §0](./12-levantamiento-pendiente.md)) y quedó claro que
+**el demo cubre la mitad fácil del producto y no cubre el núcleo**:
 
-**Antes de seguir construyendo funcionalidad nueva**, hay que cerrar
-[`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md). Es probable que varios
-casos de uso cambien, se eliminen o aparezcan otros.
+| | |
+|---|---|
+| **Lo que el demo ya resuelve** | Cuota del mes, solicitudes al administrador (PQRS), zonas comunes |
+| **Lo que el demo no resuelve y es el corazón del producto** | Asambleas completas (citación, transmisión, votación, poderes, acta) y documentos descargables |
+
+Lo que hace difícil el producto no es la cartera: es que **una asamblea produzca decisiones
+jurídicamente válidas**. Eso exige quórum verificable, poderes con tope legal, votación
+ponderada por coeficiente y un acta que resista revisión. Nada de eso está construido y
+buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 ---
 
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-08-26 · Mary + IA (Claude) · Revisión del repositorio y alcance declarado
+
+**Qué se hizo**
+
+*Revisión del código existente.* Se verificó que el demo compila (`npm run build` pasa) y
+que las reglas del [`CLAUDE.md`](../CLAUDE.md) se están cumpliendo: ninguna pantalla importa
+`semilla.ts` ni `almacen.ts`, y las 16 pantallas declaran su caso de uso. Se encontraron
+**cuatro bugs y tres deudas de arquitectura** (T-15 del tablero):
+
+| Hallazgo | Dónde |
+|---|---|
+| **Fechas y horas en UTC**: `ahoraISO()` guarda en UTC y `formatearFechaHora()` corta la cadena sin convertir. Un pago a las 8:30 p.m. del 26 se muestra como «27 ago, 01:30» | `dominio/reglas.ts:37`, `utilidades/formato.ts:37` |
+| **La PWA no tiene íconos instalables**: `index.html` apunta a `icono-192.png`, que no existe; el manifest solo declara SVG | `index.html:10`, `manifest.webmanifest` |
+| **Visitante autorizado a futuro aparece activo hoy**: no se valida `vigenciaDesde` | `dominio/reglas.ts:286` |
+| **Doble toque pierde escrituras**: `ejecutar()` clona la `bd` del closure | `estado/DatosContext.tsx:74` |
+| *Deuda:* las reglas se validan **solo en la UI** — `crearReserva()` no llama a `validarReserva()`. Al pasar a backend, la validación queda del lado equivocado | `datos/repositorio.ts:205` |
+| *Deuda:* `imputarPago()` (RN-06) es código muerto; `PagoPage` reimplementa la imputación | `dominio/reglas.ts:113` |
+| *Deuda:* RN-22 no filtra por copropiedad, viola RN-01 | `datos/repositorio.ts:175` |
+
+No hay pruebas, ni linter, ni CI.
+
+*Alcance declarado.* Mary describió el producto que se quiere construir: cuota del mes,
+informe de estado de cuenta, paz y salvo descargable, comprobante de pago, solicitudes al
+administrador, zonas comunes, citaciones de asamblea, transmisión en vivo, votaciones,
+poderes entre copropietarios, acta y coeficientes.
+
+**Decisiones que esto obligó**
+
+1. **La asamblea pasa a ser el núcleo del producto.** Seis de los doce puntos pedidos son
+   asamblea. Estaba en la fase 4 del roadmap; **se movió a la fase 2**.
+2. **Se agregaron 12 casos de uso** al catálogo (CU-R-18…24, CU-A-17…21) y 3 de sistema
+   (CU-S-07…09). El catálogo pasó de 33 a 45 casos de uso.
+3. **Se agregaron 12 reglas de negocio** (RN-26 a RN-37) para poderes, quórum, votación,
+   acta y documentos. Todas marcadas *pendiente*: ninguna está implementada.
+4. **Se modeló el módulo de asambleas y documentos** en `05-modelo-de-datos.md`: Asamblea,
+   PuntoOrdenDelDia, Asistencia, Poder, Votacion, Voto, ResultadoVotacion, Acta y Documento.
+5. **Dos ADR quedan bloqueando trabajo**: ADR-0006 (generación de PDF) y ADR-0007
+   (transmisión en vivo). Sin ellos no se puede empezar ni el paz y salvo ni la asamblea
+   transmitida.
+
+**Lo que quedó marcado como supuesto, no como decisión**
+
+El voto ponderado por coeficiente, el quórum en coeficientes y el tope de poderes se
+escribieron como supuestos con **(?)**, no como reglas cerradas. En particular, **el tope
+legal de poderes de la Ley 675 de 2001 no se escribió con una cifra concreta porque no se
+verificó el artículo** — implementar RN-30 con un número inventado sería un error con
+consecuencias jurídicas. Es la tarea T-11.
+
+**Qué sigue**
+
+1. Responder §3 bis (asambleas) y §3 ter (documentos) del levantamiento — **bloquean el
+   diseño del núcleo**.
+2. Decidir si visitantes, correspondencia y cartelera siguen en el producto: están
+   implementados pero nadie los mencionó (T-12).
+3. Escribir ADR-0006 y ADR-0007 (T-13, T-14).
+4. Confirmar la asignación de zonas: Mary indicó que trabajará en la app móvil, hoy
+   asignada a Jeimy en `10-equipo-y-orquestacion.md` (T-03).
+
+---
 
 ### 2026-08-26 · Sesión de IA (Claude) · Arranque del repositorio
 

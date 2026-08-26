@@ -30,7 +30,15 @@ el código usan estos términos en español** (ver [convenciones](./08-convencio
 | **Visitante autorizado** | Persona a la que un residente permite el ingreso, con vigencia y código. | `Visitante` |
 | **Asamblea** | Reunión de copropietarios donde se toman decisiones vinculantes. | `Asamblea` |
 | **Quórum** | Porcentaje de coeficientes presentes o representados requerido para decidir. | `Asamblea.quorum` |
-| **Poder** | Delegación del voto de un copropietario en otra persona. | `Poder` (fase 2) |
+| **Poder** | Delegación del voto de un copropietario en otra persona, para **una** asamblea. | `Poder` |
+| **Otorgante / Apoderado** | Quien delega su voto / quien lo recibe y lo ejerce. | `Poder.otorganteId` / `Poder.apoderadoId` |
+| **Convocatoria / Citación** | Aviso formal de la asamblea con fecha, modalidad y orden del día. Debe emitirse con antelación mínima. | `Asamblea` · `Documento` tipo `convocatoria` |
+| **Orden del día** | Lista de puntos a tratar. Solo se vota lo que está en él. | `PuntoOrdenDelDia` |
+| **Votación** | Pregunta sometida a decisión durante la asamblea. | `Votacion` |
+| **Mayoría simple / calificada / unanimidad** | Umbral de coeficientes que una decisión necesita. Lo fija el reglamento. | `Votacion.mayoriaExigida` |
+| **Acta** | Documento que registra lo ocurrido y lo decidido en la asamblea. Aprobada, no se edita. | `Acta` |
+| **Acta aclaratoria** | Acta nueva que corrige una anterior sin modificarla. | `Acta.actaAclaratoriaDe` |
+| **Comisión verificadora** | Copropietarios elegidos en la asamblea para revisar y aprobar el acta. | *(pendiente de definir)* |
 | **Consejo de administración** | Órgano elegido que supervisa al administrador. | rol `consejo` |
 | **Revisor fiscal** | Órgano de control contable de la copropiedad. | rol `revisor` (fase 2) |
 | **Administrador** | Representante legal que ejecuta la operación de la copropiedad. | rol `admin` |

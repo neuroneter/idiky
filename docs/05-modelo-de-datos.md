@@ -103,6 +103,96 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 `unidadId`, `nombre`, `documento`, `placa?`, `vigenciaDesde`, `vigenciaHasta`, `codigo`
 (único, RN-16/17), `recurrente`, `estado` (`'activo' \| 'vencido' \| 'revocado'`).
 
+### Entidades del módulo de asambleas y documentos
+
+> **Propuestas, no implementadas.** Salen del alcance declarado el 2026-08-26
+> ([`12-levantamiento-pendiente.md` §0](./12-levantamiento-pendiente.md)). Los campos
+> marcados **(?)** dependen de preguntas todavía abiertas (§3 bis y §3 ter).
+
+### Asamblea
+| Campo | Tipo | Notas |
+|---|---|---|
+| `copropiedadId` | string | RN-01 |
+| `tipo` | `'ordinaria' \| 'extraordinaria'` | |
+| `numeroConvocatoria` | number | 1 = primera convocatoria, 2 = segunda **(?)** |
+| `fechaHora` | fecha ISO completa | |
+| `modalidad` | `'presencial' \| 'virtual' \| 'mixta'` | **(?)** |
+| `lugar` / `enlaceTransmision` | string? | Según modalidad |
+| `ordenDelDia` | `PuntoOrdenDelDia[]` | |
+| `estado` | `'convocada' \| 'instalada' \| 'cerrada' \| 'cancelada' \| 'no_instalada'` | Nunca se borra |
+| `quorumMinimo` | number | Porcentaje de coeficientes exigido (RN-28) **(?)** |
+| `instaladaEn` / `cerradaEn` | fecha ISO? | |
+| `convocatoriaDocumentoId` | string? | El PDF de la citación |
+
+### PuntoOrdenDelDia
+`id`, `orden` (number), `titulo`, `descripcion`, `seVota` (boolean), `estado`
+(`'pendiente' | 'en_curso' | 'tratado'`).
+
+### Asistencia
+`asambleaId`, `unidadId`, `personaId`, `tipo` (`'presencial' | 'virtual'`),
+`coeficiente` (**copiado al momento de registrar**, RN-37), `registradaEn`.
+
+> El coeficiente se copia, no se referencia: si mañana cambia (CU-A-21), el quórum de una
+> asamblea pasada debe seguir siendo el que fue.
+
+### Poder
+| Campo | Tipo | Notas |
+|---|---|---|
+| `asambleaId` | string | El poder es por asamblea (RN-31) |
+| `unidadId` | string | Unidad representada |
+| `otorganteId` / `apoderadoId` | string | Personas |
+| `coeficiente` | number | Copiado al otorgarse (RN-37) |
+| `estado` | `'otorgado' \| 'aceptado' \| 'rechazado' \| 'revocado' \| 'vencido'` | Nunca se borra |
+| `soporte` | `'digital' \| 'fisico'` | Digital = otorgado en la app; físico = registrado por el administrador |
+| `documentoId` | string? | El PDF del poder **(?)** |
+| `validadoPor` / `validadoEn` | string? / fecha ISO? | CU-A-19 |
+| `motivoRechazo` | string? | |
+
+### Votacion
+| Campo | Tipo | Notas |
+|---|---|---|
+| `asambleaId` / `puntoId` | string | |
+| `pregunta` | string | |
+| `opciones` | `{ id, texto }[]` | Mínimo dos |
+| `mayoriaExigida` | `'simple' \| 'calificada' \| 'unanimidad'` | **(?)** |
+| `estado` | `'preparada' \| 'abierta' \| 'cerrada' \| 'anulada'` | RN-34 |
+| `abiertaEn` / `cerradaEn` | fecha ISO? | |
+| `resultado` | `ResultadoVotacion?` | Se calcula al cerrar (CU-S-08) |
+| `motivoAnulacion` | string? | |
+
+### Voto
+`votacionId`, `unidadId`, `opcionId`, `emitidoPor` (personaId), `porPoder` (boolean),
+`coeficiente` (copiado, RN-37), `fecha`.
+
+> **Un voto por unidad y por votación** (RN-29). Si una persona representa cinco unidades,
+> se registran cinco votos, no uno con peso quíntuple: el acta debe poder decir qué unidad
+> votó qué.
+
+### ResultadoVotacion
+`porOpcion[]` (`opcionId`, `coeficiente`, `unidades`), `coeficienteTotalVotante`,
+`coeficienteAbstenido`, `aprobada` (boolean), `consolidadoEn`.
+
+### Acta
+`asambleaId`, `numero` (consecutivo, RN-36), `estado`
+(`'borrador' | 'en_revision' | 'aprobada' | 'aclarada'`), `contenidoGenerado` (armado por el
+sistema), `contenidoManual` (lo que agrega el administrador), `aprobadaEn?`,
+`documentoId?`, `actaAclaratoriaDe?` (referencia a otra acta, RN-35).
+
+### Documento
+Entidad transversal para **todo PDF formal** — paz y salvo, estado de cuenta, comprobante,
+convocatoria, poder y acta.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `tipo` | `'paz_y_salvo' \| 'estado_cuenta' \| 'comprobante' \| 'convocatoria' \| 'poder' \| 'acta'` | |
+| `numero` | string | Consecutivo por tipo (RN-36) |
+| `copropiedadId` | string | RN-01 |
+| `unidadId` | string? | Cuando aplica a una unidad |
+| `emitidoEn` | fecha ISO | |
+| `vigenteHasta` | fecha ISO? | Paz y salvo **(?)** |
+| `estado` | `'vigente' \| 'anulado'` | **Nunca se borra** (O3) |
+| `codigoVerificacion` | string? | Para validar el documento después **(?)** |
+
 ## 3. Reglas de negocio
 
 Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este listado.**
@@ -134,6 +224,18 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-23 | Vencimiento por defecto: día 10 del periodo. | `datos/repositorio.ts` |
 | RN-24 | La primera respuesta de la administración pasa la PQRS a `en_gestion`. | `datos/repositorio.ts` |
 | RN-25 | La correspondencia entregada no se edita. | `features/admin/CorrespondenciaAdminPage.tsx` |
+| RN-26 | El paz y salvo solo se emite si el saldo de la unidad es cero. | *pendiente* |
+| RN-27 | El voto en asamblea se pondera por el coeficiente de la unidad. **(?)** | *pendiente* |
+| RN-28 | El quórum se mide en coeficientes (presentes + representados), no en personas. | *pendiente* |
+| RN-29 | Un voto por unidad y por votación; quien representa N unidades emite N votos. | *pendiente* |
+| RN-30 | Un apoderado no puede superar el tope de coeficientes que puede representar. **(? — cifra por confirmar en la Ley 675 de 2001)** | *pendiente* |
+| RN-31 | El poder vale para una sola asamblea y vence al cerrarse (CU-S-09). | *pendiente* |
+| RN-32 | Quien otorgó poder no puede votar esa unidad directamente. | *pendiente* |
+| RN-33 | La citación se emite con la antelación mínima del reglamento. **(?)** | *pendiente* |
+| RN-34 | Una votación cerrada no se reabre ni se modifica; se anula y se repite. | *pendiente* |
+| RN-35 | El acta se construye desde los datos registrados; aprobada, no se edita — se aclara con un acta nueva. | *pendiente* |
+| RN-36 | Todo documento formal lleva consecutivo único por tipo y es verificable. | *pendiente* |
+| RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | *pendiente* |
 
 ## 4. Convenciones de datos
 
