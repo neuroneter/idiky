@@ -20,9 +20,10 @@ from pathlib import Path
 
 PUBLICO = Path(__file__).resolve().parent.parent / 'public'
 
-MARCA = (0x0F, 0x3D, 0x3E)
+# Deben coincidir con --color-marca y --color-acento de src/estilos/tokens.css.
+MARCA = (0x1D, 0x2E, 0x7A)
 BLANCO = (0xFF, 0xFF, 0xFF)
-NARANJA = (0xD9, 0x83, 0x24)
+ACENTO = (0xC4, 0x1E, 0x8C)
 
 # Geometria copiada de los SVG (viewBox 0 0 192 192).
 ICONOS = {
@@ -31,7 +32,7 @@ ICONOS = {
         'radio_fondo': 42,
         'trazos': [
             (BLANCO, 10, [(48, 132), (48, 76), (96, 44), (144, 76), (144, 132)]),
-            (NARANJA, 10, [(78, 132), (78, 98), (114, 98), (114, 132)]),
+            (ACENTO, 10, [(78, 132), (78, 98), (114, 98), (114, 132)]),
             (BLANCO, 10, [(36, 138), (156, 138)]),
         ],
     },
@@ -40,7 +41,7 @@ ICONOS = {
         'radio_fondo': 42,
         'trazos': [
             (BLANCO, 10, [(48, 132), (48, 76), (96, 44), (144, 76), (144, 132)]),
-            (NARANJA, 10, [(78, 132), (78, 98), (114, 98), (114, 132)]),
+            (ACENTO, 10, [(78, 132), (78, 98), (114, 98), (114, 132)]),
             (BLANCO, 10, [(36, 138), (156, 138)]),
         ],
     },
@@ -51,7 +52,7 @@ ICONOS = {
         'radio_fondo': 0,
         'trazos': [
             (BLANCO, 9, [(56, 128), (56, 82), (96, 56), (136, 82), (136, 128)]),
-            (NARANJA, 9, [(82, 128), (82, 102), (110, 102), (110, 128)]),
+            (ACENTO, 9, [(82, 128), (82, 102), (110, 102), (110, 128)]),
         ],
     },
 }

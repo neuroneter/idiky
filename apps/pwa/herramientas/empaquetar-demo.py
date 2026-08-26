@@ -19,12 +19,22 @@ Ojo: cada persona que lo abra tiene su **propia copia** de los datos, en su nave
 Nadie ve lo que hace el otro. Para una demostracion eso es una ventaja.
 """
 
+import re
 import sys
 from pathlib import Path
 
 RAIZ = Path(__file__).resolve().parent.parent
 DIST = RAIZ / 'dist'
 TITULO = 'Demo de Idiky'
+
+
+def color_de_marca() -> str:
+    """Lee --color-marca de los tokens para que el theme-color no se desactualice."""
+    tokens = (RAIZ / 'src/estilos/tokens.css').read_text(encoding='utf-8')
+    encontrado = re.search(r'--color-marca:\s*(#[0-9a-fA-F]{3,8})\s*;', tokens)
+    if not encontrado:
+        raise SystemExit('No se pudo leer --color-marca de src/estilos/tokens.css')
+    return encontrado.group(1)
 
 
 def unico(patron: str) -> Path:
@@ -59,7 +69,7 @@ def main() -> None:
         '<head>\n'
         '<meta charset="UTF-8" />\n'
         '<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />\n'
-        '<meta name="theme-color" content="#0f3d3e" />\n'
+        f'<meta name="theme-color" content="{color_de_marca()}" />\n'
         f'<title>{TITULO}</title>\n'
         '<style>\n' + css + '\n</style>\n'
         '</head>\n'

@@ -61,7 +61,41 @@ Tipos: `feat`, `fix`, `docs`, `refactor`, `chore`, `test`.
   [`09-estado-del-proyecto.md`](./09-estado-del-proyecto.md). **Esto no es opcional:** es lo
   que permite cambiar de persona o de IA sin perder contexto.
 
-## 5. Definición de "terminado"
+## 5. Identidad visual
+
+**Nombre del producto.** Se escribe **Idiky** en texto corriente (títulos, documentación,
+manifest). El **logotipo** va en minúscula: `idiky`. No mezclar las dos formas en el mismo
+contexto.
+
+**Colores.** Todos viven en `apps/pwa/src/estilos/tokens.css`. **Ninguna pantalla escribe un
+color literal.** La identidad combina dos colores y cada uno tiene un trabajo — no son
+intercambiables:
+
+| Token | Color | Para qué |
+|---|---|---|
+| `--color-marca` | Azul tinta `#1d2e7a` | **Estructura: dónde estás.** Barra superior, lateral del admin, botón primario, pestaña activa, foco de campos, enlaces |
+| `--color-acento` | Fucsia `#c41e8c` | **Acción y atención: qué puedes hacer.** Contadores, botón de acento, chips de acento |
+
+Los dos juntos aparecen en **una sola superficie por pantalla**: `.tarjeta--marca` (el saldo
+del residente) y la barra lateral de la consola, ambas con un degradado de azul a fucsia. Es
+la firma de la marca; si aparece en más sitios deja de serlo.
+
+**El rojo está reservado para la plata** — mora, cuota vencida, cartera vencida. No usar
+fucsia para alarmar: compiten en tono y se pierde la señal que más importa.
+
+**Si cambian los colores de marca**, hay tres sitios que actualizar además de los tokens:
+
+```bash
+cd apps/pwa
+# 1. Los SVG del logo: public/icono.svg y public/icono-maskable.svg
+# 2. Los PNG del manifest (leen sus colores del propio script):
+python3 herramientas/generar-iconos.py
+# 3. El theme-color de index.html
+```
+
+El empaquetador del demo lee `--color-marca` de los tokens, así que ese no hay que tocarlo.
+
+## 6. Definición de "terminado"
 
 Una funcionalidad está terminada cuando:
 

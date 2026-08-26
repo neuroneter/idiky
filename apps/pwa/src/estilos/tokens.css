@@ -2,38 +2,55 @@
  * Design tokens de Idiky.
  * Cambiar la identidad visual del producto = cambiar este archivo.
  * Ninguna pantalla debe escribir colores literales.
+ *
+ * La identidad combina dos colores y cada uno tiene un trabajo. No son
+ * intercambiables:
+ *
+ *   AZUL  (--color-marca)   estructura: donde estas.
+ *                           Barra superior, lateral del admin, boton primario,
+ *                           pestana activa, foco de campos, enlaces.
+ *   FUCSIA (--color-acento) accion y atencion: que puedes hacer.
+ *                           Contadores, boton de acento, chips de acento.
+ *
+ * Las dos juntas aparecen en `.tarjeta--marca` (el saldo), que degrada de azul a
+ * fucsia: es la firma de marca y sale una vez por pantalla. Por eso
+ * `--color-marca-claro` ES fucsia y no un azul mas claro — tambien hace que el
+ * boton primario pase de azul a fucsia al pasar el cursor.
+ *
+ * El rojo de error se reserva para la plata (mora, vencida). No usar fucsia para
+ * alarmar: compiten y se pierde la senal.
  */
 
 :root {
   /* Marca */
-  --color-marca: #0f3d3e;
-  --color-marca-claro: #16585a;
-  --color-marca-suave: #e6f0ef;
-  --color-acento: #d98324;
-  --color-acento-suave: #fdf0e0;
+  --color-marca: #1d2e7a;
+  --color-marca-claro: #c41e8c;
+  --color-marca-suave: #e8ebf9;
+  --color-acento: #c41e8c;
+  --color-acento-suave: #fbe6f3;
 
   /* Superficies */
-  --color-fondo: #f4f6f6;
+  --color-fondo: #f5f5fb;
   --color-superficie: #ffffff;
-  --color-superficie-2: #f9fafa;
-  --color-borde: #e2e7e7;
-  --color-borde-fuerte: #cbd4d4;
+  --color-superficie-2: #fafafe;
+  --color-borde: #e4e5f1;
+  --color-borde-fuerte: #c9cbdf;
 
   /* Texto */
-  --color-texto: #14201f;
-  --color-texto-suave: #5c6b6a;
-  --color-texto-tenue: #8b9897;
+  --color-texto: #171935;
+  --color-texto-suave: #5b5f82;
+  --color-texto-tenue: #8b8fab;
   --color-texto-inverso: #ffffff;
 
   /* Estados */
-  --color-exito: #1f7a4d;
-  --color-exito-suave: #e4f4eb;
-  --color-alerta: #b26a00;
-  --color-alerta-suave: #fdf1dc;
-  --color-error: #b3261e;
-  --color-error-suave: #fbe9e8;
-  --color-info: #1f5c9e;
-  --color-info-suave: #e7f0f9;
+  --color-exito: #0f7a52;
+  --color-exito-suave: #e3f4ec;
+  --color-alerta: #a6620a;
+  --color-alerta-suave: #fbf0dc;
+  --color-error: #c0271d;
+  --color-error-suave: #fbe9e7;
+  --color-info: #1e6fb8;
+  --color-info-suave: #e4f0fa;
 
   /* Tipografia */
   --fuente: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
@@ -62,9 +79,9 @@
   --radio-completo: 999px;
 
   /* Sombras */
-  --sombra-1: 0 1px 2px rgba(20, 32, 31, 0.06);
-  --sombra-2: 0 4px 16px rgba(20, 32, 31, 0.08);
-  --sombra-3: 0 12px 32px rgba(20, 32, 31, 0.14);
+  --sombra-1: 0 1px 2px rgba(23, 25, 53, 0.07);
+  --sombra-2: 0 4px 16px rgba(23, 25, 53, 0.09);
+  --sombra-3: 0 12px 32px rgba(23, 25, 53, 0.16);
 
   /* Medidas de layout */
   --ancho-movil: 480px;

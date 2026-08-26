@@ -61,6 +61,47 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-26 · Mary + IA (Claude) · Identidad visual: azul y fucsia
+
+**Qué se hizo**
+
+Mary pidió una paleta con fucsia y azul, **combinados**, no uno subordinado al otro. Se
+propusieron dos direcciones (azul de marca con fucsia de acento, y la inversa) y se eligió
+combinarlas repartiendo el trabajo entre las dos:
+
+- **Azul tinta `#1d2e7a` = estructura.** Dónde estás: barra superior, lateral del admin,
+  botón primario, pestaña activa, foco, enlaces.
+- **Fucsia `#c41e8c` = acción y atención.** Qué puedes hacer: contadores, botón de acento.
+- **Las dos juntas** en una sola superficie por pantalla: la tarjeta de saldo del residente y
+  la barra lateral de la consola, con un degradado de azul a fucsia. Es la firma de la marca.
+
+Los neutros dejaron de ser grises verdosos y ahora tiran a azul (`#f5f5fb`, texto `#171935`):
+un gris neutro al lado de un color saturado se ve sin decidir.
+
+**Una decisión que conviene no deshacer sin pensarlo**
+
+En este producto **el rojo significa plata** — mora, cuota vencida, cartera vencida. En la
+primera propuesta con fucsia dominante ese rojo perdía fuerza, porque el fucsia le quedaba
+cerca en tono y competía justo con la señal que más tiene que alarmar. Por eso el fucsia
+quedó como acento y no como color de marca, y el rojo mandó solo. Está anotado en el
+encabezado de `tokens.css` y en [`08-convenciones.md`](./08-convenciones.md).
+
+**Qué se tocó**
+
+`tokens.css` (paleta y el porqué del reparto), `layout.css` (degradado de la lateral), los dos
+SVG del logo, los PNG del manifest, el `theme-color` y el `background_color`. El empaquetador
+del demo ahora **lee `--color-marca` de los tokens**, para que el `theme-color` no se
+desactualice en el próximo cambio de identidad.
+
+Verificado en Chromium a 390×844 y 1280×800, sin errores de consola.
+
+**Qué sigue**
+
+T-09 sigue en curso: faltan el **logotipo definitivo** y la **tipografía** (hoy usa la fuente
+del sistema). Los colores ya están.
+
+---
+
 ### 2026-08-26 · Mary + IA (Claude) · Revisión del repositorio y alcance declarado
 
 **Qué se hizo**
