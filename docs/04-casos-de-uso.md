@@ -44,7 +44,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-21 | **Ver la transmisión en vivo de la asamblea** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-21) |
 | CU-R-22 | **Otorgar poder a otro copropietario** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-22) |
 | CU-R-23 | **Recibir y ejercer poderes de otros copropietarios** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-23) |
-| CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-24) |
+| CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-24) |
 
 ## 2. Administrador — consola web
 

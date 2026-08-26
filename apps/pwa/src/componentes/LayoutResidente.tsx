@@ -1,6 +1,6 @@
 /**
  * Cascaron de la app movil del residente.
- * CU-R-01 (unidad activa) · CU-R-02 … CU-R-11 se renderizan dentro del <Outlet>.
+ * CU-R-01 (unidad activa) · CU-R-02 … CU-R-11 y CU-R-24 se renderizan dentro del <Outlet>.
  */
 
 import { useState } from 'react'
@@ -31,6 +31,7 @@ const TITULOS: Record<string, string> = {
   '/app/comunicados': 'Cartelera',
   '/app/visitantes': 'Visitantes',
   '/app/correspondencia': 'Correspondencia',
+  '/app/unidad': 'Mi unidad',
 }
 
 export function LayoutResidente() {

@@ -241,7 +241,8 @@ están implementadas.
 - A2. Visitante frecuente (recurrente semanal) → *fase 2*.
 
 **Reglas de negocio**
-- RN-16: el código deja de ser válido al terminar la vigencia (CU-S-04).
+- RN-16: el código solo vale dentro de su vigencia — antes de `vigenciaDesde` aparece
+  como `programado`, después de `vigenciaHasta` como `vencido` (CU-S-04).
 - RN-17: el código es de un solo uso salvo que se marque como recurrente.
 
 **Estado en el demo:** ✅ — `src/features/residente/VisitantesPage.tsx`. El QR se dibuja
@@ -326,7 +327,7 @@ localmente sin librerías externas (ver [ADR-0005](../adr/0005-codigo-qr-sin-dep
 - A4. La unidad está en mora → **(?)** pendiente de definir si pierde el voto.
 
 **Reglas de negocio**
-- RN-27: el voto se pondera por coeficiente **(?)**.
+- RN-27: el voto se pondera por coeficiente (confirmada por el equipo el 2026-08-26).
 - RN-29: un voto por unidad y por pregunta.
 - RN-32: quien otorgó poder no vota esa unidad directamente.
 - RN-34: una votación cerrada no se reabre.
@@ -524,5 +525,8 @@ se descarga. Requiere ADR-0006.
 **Reglas de negocio**
 - RN-05, RN-19, RN-27, RN-37.
 
-**Estado en el demo:** ⬜ — el dato existe en el modelo (`Unidad.coeficiente`) y lo usa la
-consola de administración, pero **el residente no lo ve en ninguna pantalla**.
+**Estado en el demo:** ✅ — `src/features/residente/MiUnidadPage.tsx`, con acceso desde el
+inicio. Muestra el coeficiente, lo que determina (cuota del mes y peso del voto) y la suma
+de la copropiedad. El peso del voto sale de `pesoDelVoto()` en `dominio/reglas.ts`: es la
+única definición de RN-27, para que el módulo de asambleas la reutilice y no vuelva a leer
+`unidad.coeficiente` por su cuenta.

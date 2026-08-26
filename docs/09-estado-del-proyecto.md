@@ -13,7 +13,7 @@ nueva o una sesión de IA distinta.
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | Simulada (selección de perfil, [ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso implementados** | 20 de **45** documentados (11 de residente, 9 de administrador) |
+| **Casos de uso implementados** | 21 de **45** documentados (12 de residente, 9 de administrador) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 
 ### Lo que funciona hoy
@@ -21,7 +21,7 @@ nueva o una sesión de IA distinta.
 **App del residente:** ingreso y unidad activa · inicio con resumen · estado de cuenta ·
 pago simulado con comprobante · reserva y cancelación de zonas comunes con validación de
 reglas · radicar y seguir PQRS · cartelera de comunicados · autorización de visitantes con
-código · consulta de correspondencia.
+código · consulta de correspondencia · consulta del coeficiente de copropiedad.
 
 **Consola del administrador:** tablero de indicadores · unidades y residentes con búsqueda,
 ficha y vinculación · cartera con morosidad · registro de pagos manuales · generación de
@@ -34,9 +34,9 @@ Backend, autenticación real, pagos reales, notificaciones push, apps nativas, p
 presupuesto, informes exportables, modo oscuro.
 
 Y —**esto es lo importante desde el 2026-08-26**— no existe nada del núcleo que el equipo
-declaró como alcance: **asambleas** (citación, transmisión, votación, poderes, acta),
-**documentos descargables** (paz y salvo, estado de cuenta, comprobante) ni **coeficientes
-visibles al copropietario**.
+declaró como alcance: **asambleas** (citación, transmisión, votación, poderes, acta) ni
+**documentos descargables** (paz y salvo, estado de cuenta, comprobante). Los **coeficientes
+visibles al copropietario** sí — se implementaron el 2026-08-26 (CU-R-24).
 
 ### ⚠️ El demo v0.1 no es el producto
 
@@ -70,15 +70,15 @@ que las reglas del [`CLAUDE.md`](../CLAUDE.md) se están cumpliendo: ninguna pan
 `semilla.ts` ni `almacen.ts`, y las 16 pantallas declaran su caso de uso. Se encontraron
 **cuatro bugs y tres deudas de arquitectura** (T-15 del tablero):
 
-| Hallazgo | Dónde |
-|---|---|
-| **Fechas y horas en UTC**: `ahoraISO()` guarda en UTC y `formatearFechaHora()` corta la cadena sin convertir. Un pago a las 8:30 p.m. del 26 se muestra como «27 ago, 01:30» | `dominio/reglas.ts:37`, `utilidades/formato.ts:37` |
-| **La PWA no tiene íconos instalables**: `index.html` apunta a `icono-192.png`, que no existe; el manifest solo declara SVG | `index.html:10`, `manifest.webmanifest` |
-| **Visitante autorizado a futuro aparece activo hoy**: no se valida `vigenciaDesde` | `dominio/reglas.ts:286` |
-| **Doble toque pierde escrituras**: `ejecutar()` clona la `bd` del closure | `estado/DatosContext.tsx:74` |
-| *Deuda:* las reglas se validan **solo en la UI** — `crearReserva()` no llama a `validarReserva()`. Al pasar a backend, la validación queda del lado equivocado | `datos/repositorio.ts:205` |
-| *Deuda:* `imputarPago()` (RN-06) es código muerto; `PagoPage` reimplementa la imputación | `dominio/reglas.ts:113` |
-| *Deuda:* RN-22 no filtra por copropiedad, viola RN-01 | `datos/repositorio.ts:175` |
+| Hallazgo | Dónde | Estado |
+|---|---|---|
+| **Fechas y horas en UTC**: `formatearFechaHora()` cortaba la cadena sin convertir. Un pago a las 8:30 p.m. del 26 se mostraba como «27 ago, 01:30» | `utilidades/formato.ts` | ✅ Corregido |
+| **La PWA no tenía íconos instalables**: `index.html` apuntaba a un PNG inexistente y el manifest solo declaraba SVG | `public/`, `manifest.webmanifest` | ✅ Corregido |
+| **Visitante autorizado a futuro aparecía activo hoy**: no se validaba `vigenciaDesde` | `dominio/reglas.ts` | ✅ Corregido (nuevo estado `programado`) |
+| **Doble toque perdía escrituras**: `ejecutar()` clonaba la `bd` del closure | `estado/DatosContext.tsx` | ✅ Corregido (referencia + candado) |
+| *Deuda:* las reglas se validan **solo en la UI** — `crearReserva()` no llama a `validarReserva()`. Al pasar a backend, la validación queda del lado equivocado | `datos/repositorio.ts:205` | ⬜ Abierta |
+| *Deuda:* `imputarPago()` (RN-06) es código muerto; `PagoPage` reimplementa la imputación | `dominio/reglas.ts:113` | ⬜ Abierta |
+| *Deuda:* RN-22 no filtra por copropiedad, viola RN-01 | `datos/repositorio.ts:175` | ⬜ Abierta |
 
 No hay pruebas, ni linter, ni CI.
 
@@ -101,10 +101,26 @@ poderes entre copropietarios, acta y coeficientes.
    (transmisión en vivo). Sin ellos no se puede empezar ni el paz y salvo ni la asamblea
    transmitida.
 
+**Lo que se construyó**
+
+- **CU-R-24 — Consultar mi coeficiente** (`MiUnidadPage.tsx`, ruta `/app/unidad`, con acceso
+  desde el inicio). Muestra el coeficiente y, sobre todo, **qué determina**: la cuota del mes
+  y el peso del voto en asamblea. El peso del voto sale de `pesoDelVoto()`, que es la única
+  definición de RN-27 — cuando se construya la votación debe llamar ahí, no volver a leer
+  `unidad.coeficiente`.
+- **Los cuatro bugs corregidos** (tabla de arriba). Los íconos PNG de la PWA se generan con
+  `apps/pwa/herramientas/generar-iconos.py`, un rasterizador de librería estándar: no había
+  ImageMagick en el entorno y agregar una dependencia de imagen rompía la regla del
+  `CLAUDE.md`. Si cambia el logo, hay que volver a correrlo.
+
+Verificado en Chromium a 390×844 con zona horaria de Bogotá: el comprobante de un pago hecho
+a las 18:35 ahora dice «26 ago, 18:35» y no la hora UTC. Sin errores de consola.
+
 **Lo que quedó marcado como supuesto, no como decisión**
 
-El voto ponderado por coeficiente, el quórum en coeficientes y el tope de poderes se
-escribieron como supuestos con **(?)**, no como reglas cerradas. En particular, **el tope
+El quórum en coeficientes y el tope de poderes se escribieron como supuestos con **(?)**, no
+como reglas cerradas. (El **voto ponderado por coeficiente** sí quedó confirmado por Mary ese
+mismo día: RN-27 pasó de supuesto a regla implementada.) En particular, **el tope
 legal de poderes de la Ley 675 de 2001 no se escribió con una cifra concreta porque no se
 verificó el artículo** — implementar RN-30 con un número inventado sería un error con
 consecuencias jurídicas. Es la tarea T-11.

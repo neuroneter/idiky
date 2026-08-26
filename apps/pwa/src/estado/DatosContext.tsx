@@ -11,7 +11,7 @@
  * por `ejecutar`, porque perderian la actualizacion del estado (ADR-0003).
  */
 
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { BaseDatos } from '../dominio/tipos'
 import { cargar, ErrorDeNegocio, reiniciar, type Resultado } from '../datos/repositorio'
@@ -43,15 +43,32 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
   const [cargando, setCargando] = useState(false)
   const [aviso, setAviso] = useState<Aviso | null>(null)
 
+  /**
+   * Espejo de `bd` para leerla sin depender del cierre de `ejecutar`.
+   *
+   * Sin esto, dos operaciones seguidas parten las dos de la misma foto de la base y
+   * la segunda pisa a la primera: en movil, un doble toque en "Pagar" perdia el
+   * primer pago. Con la referencia, cada operacion parte del resultado de la anterior.
+   */
+  const bdRef = useRef<BaseDatos | null>(null)
+
+  /** Candado: mientras una operacion este en vuelo no se admite otra. */
+  const operacionEnCurso = useRef(false)
+
+  const fijarBd = useCallback((datos: BaseDatos) => {
+    bdRef.current = datos
+    setBd(datos)
+  }, [])
+
   useEffect(() => {
     let vigente = true
     cargar().then((datos) => {
-      if (vigente) setBd(datos)
+      if (vigente) fijarBd(datos)
     })
     return () => {
       vigente = false
     }
-  }, [])
+  }, [fijarBd])
 
   const mostrarAviso = useCallback((texto: string, tipo: TipoAviso = 'info') => {
     setAviso({ texto, tipo })
@@ -71,11 +88,17 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
       operacion: (bd: BaseDatos) => Promise<Resultado<T>>,
       mensajeExito?: string,
     ): Promise<T | null> => {
-      if (!bd) return null
+      const actual = bdRef.current
+      if (!actual) return null
+      // El segundo toque de un doble toque se descarta en silencio: no es una accion
+      // nueva del usuario, es la misma repetida.
+      if (operacionEnCurso.current) return null
+
+      operacionEnCurso.current = true
       setCargando(true)
       try {
-        const { bd: nueva, datos } = await operacion(bd)
-        setBd(nueva)
+        const { bd: nueva, datos } = await operacion(actual)
+        fijarBd(nueva)
         if (mensajeExito) mostrarAviso(mensajeExito, 'exito')
         return datos
       } catch (error) {
@@ -86,19 +109,25 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
         mostrarAviso(texto, 'error')
         return null
       } finally {
+        operacionEnCurso.current = false
         setCargando(false)
       }
     },
-    [bd, mostrarAviso],
+    [fijarBd, mostrarAviso],
   )
 
   const reiniciarDemo = useCallback(async () => {
+    if (operacionEnCurso.current) return
+    operacionEnCurso.current = true
     setCargando(true)
-    const datos = await reiniciar()
-    setBd(datos)
-    setCargando(false)
-    mostrarAviso('Datos del demo reiniciados.', 'exito')
-  }, [mostrarAviso])
+    try {
+      fijarBd(await reiniciar())
+      mostrarAviso('Datos del demo reiniciados.', 'exito')
+    } finally {
+      operacionEnCurso.current = false
+      setCargando(false)
+    }
+  }, [fijarBd, mostrarAviso])
 
   const valor = useMemo(
     () =>

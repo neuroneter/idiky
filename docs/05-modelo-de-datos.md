@@ -214,7 +214,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-13 | SLA de PQRS: 15 días calendario. | `dominio/reglas.ts` |
 | RN-14 | Una PQRS resuelta se cierra sola a los 5 días. | *pendiente* |
 | RN-15 | Los comunicados `urgente` se destacan y no se ocultan. | `features/residente/InicioPage.tsx` |
-| RN-16 | El código de visitante expira al terminar su vigencia. | `dominio/reglas.ts` |
+| RN-16 | El código de visitante solo vale **dentro** de su vigencia: antes de `vigenciaDesde` está `programado`, después de `vigenciaHasta` está `vencido`. | `dominio/reglas.ts` |
 | RN-17 | El código es de un solo uso salvo que sea recurrente. | *parcial* |
 | RN-18 | El % de recaudo se calcula sobre las cuotas del periodo actual. | `dominio/reglas.ts` |
 | RN-19 | La suma de coeficientes de una copropiedad es 100 %. | validado en la semilla |
@@ -225,7 +225,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-24 | La primera respuesta de la administración pasa la PQRS a `en_gestion`. | `datos/repositorio.ts` |
 | RN-25 | La correspondencia entregada no se edita. | `features/admin/CorrespondenciaAdminPage.tsx` |
 | RN-26 | El paz y salvo solo se emite si el saldo de la unidad es cero. | *pendiente* |
-| RN-27 | El voto en asamblea se pondera por el coeficiente de la unidad. **(?)** | *pendiente* |
+| RN-27 | El voto en asamblea se pondera por el coeficiente de la unidad. **Confirmada por el equipo el 2026-08-26.** | `dominio/reglas.ts` (`pesoDelVoto`) |
 | RN-28 | El quórum se mide en coeficientes (presentes + representados), no en personas. | *pendiente* |
 | RN-29 | Un voto por unidad y por votación; quien representa N unidades emite N votos. | *pendiente* |
 | RN-30 | Un apoderado no puede superar el tope de coeficientes que puede representar. **(? — cifra por confirmar en la Ley 675 de 2001)** | *pendiente* |

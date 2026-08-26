@@ -1,7 +1,7 @@
 {
-  "name": "Idiky — Gestion de copropiedad",
+  "name": "Idiky — Gestión de copropiedad",
   "short_name": "Idiky",
-  "description": "Administra tu copropiedad horizontal desde el telefono: cuenta, reservas, PQRS, visitantes y comunicados.",
+  "description": "Administra tu copropiedad horizontal desde el teléfono: cuenta, reservas, PQRS, visitantes y comunicados.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
@@ -10,7 +10,9 @@
   "theme_color": "#0f3d3e",
   "lang": "es",
   "icons": [
-    { "src": "./icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
-    { "src": "./icono-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+    { "src": "./icono-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "./icono-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "./icono-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "./icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
   ]
 }

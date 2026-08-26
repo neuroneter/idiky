@@ -282,13 +282,21 @@ export function diasRestantesSla(pqrs: Pqrs, hoy: FechaISO = hoyISO()): number {
 // Visitantes
 // ---------------------------------------------------------------------------
 
-/** RN-16 — El codigo deja de ser valido al terminar la vigencia. */
+/**
+ * RN-16 — El codigo solo es valido **dentro** de su vigencia.
+ *
+ * La vigencia tiene dos puntas y las dos cuentan: un visitante autorizado para el
+ * sabado no puede entrar hoy. Antes de `vigenciaDesde` el codigo esta `programado`;
+ * despues de `vigenciaHasta`, `vencido`. Ambas fechas son inclusive.
+ */
 export function estadoRealVisitante(
   visitante: Visitante,
   hoy: FechaISO = hoyISO(),
 ): Visitante['estado'] {
   if (visitante.estado === 'revocado') return 'revocado'
-  return visitante.vigenciaHasta < hoy ? 'vencido' : 'activo'
+  if (visitante.vigenciaHasta < hoy) return 'vencido'
+  if (visitante.vigenciaDesde > hoy) return 'programado'
+  return 'activo'
 }
 
 // ---------------------------------------------------------------------------
@@ -302,4 +310,18 @@ export function etiquetaUnidad(unidad: Unidad): string {
 /** RN-19 — La suma de coeficientes de una copropiedad debe ser 100 %. */
 export function sumaCoeficientes(unidades: Unidad[]): number {
   return Number(unidades.reduce((total, unidad) => total + unidad.coeficiente, 0).toFixed(4))
+}
+
+/**
+ * RN-27 — El peso del voto de una unidad en asamblea es su coeficiente.
+ *
+ * Confirmado por el equipo el 2026-08-26: el coeficiente no es solo un dato de
+ * consulta, es lo que determina cuanto vale el voto de la unidad.
+ *
+ * Hoy solo lo usa la pantalla de consulta (CU-R-24). Cuando exista el modulo de
+ * asambleas, esta es **la unica definicion** del peso del voto: la votacion debe
+ * llamar aqui y no volver a leer `unidad.coeficiente` por su cuenta.
+ */
+export function pesoDelVoto(unidad: Unidad): number {
+  return unidad.coeficiente
 }

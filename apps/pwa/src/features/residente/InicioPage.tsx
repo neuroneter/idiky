@@ -12,6 +12,7 @@ import {
   calcularSaldoVencido,
   diasDeMora,
   estadoRealVisitante,
+  etiquetaUnidad,
   hoyISO,
   pqrsAbierta,
 } from '../../dominio/reglas'
@@ -25,6 +26,7 @@ export function InicioPage() {
   if (!sesion) return null
 
   const unidadId = sesion.unidadActivaId
+  const unidad = sel.unidad(bd, unidadId)
   const cuotas = sel.cuotasDeUnidad(bd, unidadId)
   const saldo = calcularSaldo(cuotas)
   const vencido = calcularSaldoVencido(cuotas)
@@ -113,6 +115,24 @@ export function InicioPage() {
               {destacado.cuerpo.slice(0, 120)}
               {destacado.cuerpo.length > 120 ? '…' : ''}
             </p>
+          </Link>
+        </div>
+      )}
+
+      {/* Mi unidad y su coeficiente — CU-R-24 */}
+      {unidad && (
+        <div className="pila">
+          <span className="titulo-seccion">Tu unidad</span>
+          <Link to="/app/unidad" className="tarjeta tarjeta--accion">
+            <div className="fila">
+              <div className="columna">
+                <strong>{etiquetaUnidad(unidad)}</strong>
+                <span className="subtitulo">
+                  Coeficiente {unidad.coeficiente} % · {unidad.area} m²
+                </span>
+              </div>
+              <Icono nombre="chevron" tamano={16} className="tenue" />
+            </div>
           </Link>
         </div>
       )}

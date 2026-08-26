@@ -9,6 +9,7 @@ import { LayoutResidente } from './componentes/LayoutResidente'
 import { LayoutAdmin } from './componentes/LayoutAdmin'
 import { AccesoPage } from './features/auth/AccesoPage'
 import { InicioPage } from './features/residente/InicioPage'
+import { MiUnidadPage } from './features/residente/MiUnidadPage'
 import { CuentaPage } from './features/residente/CuentaPage'
 import { PagoPage } from './features/residente/PagoPage'
 import { ReservasPage } from './features/residente/ReservasPage'
@@ -62,6 +63,7 @@ export function App() {
         <Route path="comunicados" element={<ComunicadosPage />} />
         <Route path="visitantes" element={<VisitantesPage />} />
         <Route path="correspondencia" element={<CorrespondenciaPage />} />
+        <Route path="unidad" element={<MiUnidadPage />} />
       </Route>
 
       {/* Consola de administracion — CU-A-xx */}

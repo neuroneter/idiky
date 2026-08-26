@@ -214,7 +214,7 @@ export interface Correspondencia {
 // ---------------------------------------------------------------------------
 // Visitantes
 // ---------------------------------------------------------------------------
-export type EstadoVisitante = 'activo' | 'vencido' | 'revocado'
+export type EstadoVisitante = 'programado' | 'activo' | 'vencido' | 'revocado'
 
 export interface Visitante {
   id: string

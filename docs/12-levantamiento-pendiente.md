@@ -129,8 +129,12 @@ Este módulo es el núcleo del producto (§0) y es el que tiene **consecuencias 
 Ninguna de estas preguntas se puede resolver con un supuesto razonable: hay que leer el
 reglamento de la copropiedad y la Ley 675 de 2001.
 
-- **Peso del voto:** ¿cada unidad vale un voto, o el voto se pondera por coeficiente?
-  *(Supuesto actual: ponderado por coeficiente — RN-27.)* → *(respuesta)*
+- ~~**Peso del voto:** ¿cada unidad vale un voto, o el voto se pondera por coeficiente?~~
+  → ✅ **Respondido (Mary, 2026-08-26):** el coeficiente es un dato de consulta para los
+  usuarios **y es el que se usa para las votaciones en asamblea**. RN-27 queda confirmada e
+  implementada en `pesoDelVoto()`.
+  *Nota:* esto confirma el **peso del voto**, no cómo se mide el **quórum** — sigue abierto
+  justo debajo.
 - **Quórum:** ¿qué porcentaje de coeficientes se necesita para instalar la asamblea? ¿Hay
   segunda convocatoria con quórum menor? → *(respuesta)*
 - **Mayorías:** ¿qué decisiones exigen mayoría simple, cuáles calificada (70 %), cuáles
@@ -142,6 +146,8 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   escrito y firmado? Si exige firma, ¿sirve una firma electrónica? → *(respuesta)*
 - **Poderes — a quién:** ¿se puede dar poder a cualquier copropietario, o hay
   inhabilidades (administrador, empleados, consejo)? → *(respuesta)*
+- **Arrendatario y voto:** ¿vota el arrendatario, o solo el propietario? La app muestra el
+  rol en la unidad, pero no restringe nada todavía. → *(respuesta)*
 - **Mora y voto:** ¿el copropietario en mora puede votar? ¿Puede recibir poderes?
   *(Hoy la mora solo bloquea reservas — RN-08.)* → *(respuesta)*
 - **Asistencia:** ¿la asamblea es presencial, virtual o mixta? Si es mixta, ¿el quórum
@@ -216,7 +222,7 @@ el modelo de datos y varios casos de uso.**
 7. El demo no tiene backend ni autenticación real.
 8. El país es Colombia: moneda COP, PQRS, paz y salvo y Ley 675 de 2001 como marco legal.
    *(Se deduce del demo; nadie lo ha confirmado.)*
-9. El voto en asamblea se pondera por coeficiente y el quórum se mide en coeficientes,
-   no en número de unidades. **Supuesto — ver §3 bis.**
+9. ~~El voto en asamblea se pondera por coeficiente~~ → **confirmado el 2026-08-26**, ya no
+   es supuesto. Que el **quórum** se mida en coeficientes sigue siendo supuesto (§3 bis).
 10. Los documentos formales (paz y salvo, acta, comprobante, estado de cuenta) se entregan
     en PDF descargable. **Supuesto — ver §3 ter y ADR-0006.**

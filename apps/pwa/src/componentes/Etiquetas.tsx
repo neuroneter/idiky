@@ -88,6 +88,7 @@ export function ChipCorrespondencia({ estado }: { estado: EstadoCorrespondencia 
 }
 
 const VISITANTE: Record<EstadoVisitante, [string, Variante]> = {
+  programado: ['Programado', 'marca'],
   activo: ['Vigente', 'exito'],
   vencido: ['Vencido', ''],
   revocado: ['Revocado', 'error'],

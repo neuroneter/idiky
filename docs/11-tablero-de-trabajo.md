@@ -20,7 +20,8 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-12 | **Decidir si visitantes, correspondencia y cartelera siguen** | Los tres | 📋 Por hacer | Están implementados pero nadie los mencionó en el alcance |
 | T-13 | **ADR-0006 — cómo se generan los PDF** | Daniel | 📋 Por hacer | Bloquea paz y salvo, estado de cuenta, comprobante y acta |
 | T-14 | **ADR-0007 — proveedor de transmisión en vivo** | Daniel | 📋 Por hacer | Costo por minuto, grabación, ancho de banda |
-| T-15 | Corregir los bugs del demo detectados en la revisión | Zona A / D | 📋 Por hacer | Zona horaria en fechas, íconos PWA faltantes, vigencia del visitante, doble toque. Ver bitácora del 2026-08-26 |
+| T-15 | Corregir los bugs del demo detectados en la revisión | Zona A / D | ✅ Hecho | Zona horaria, íconos PWA, vigencia del visitante y doble toque. Ver bitácora del 2026-08-26 |
+| T-16 | Saldar las tres deudas de arquitectura | Daniel (zona C) | 📋 Por hacer | Validar las reglas en el repositorio y no solo en la UI · usar `imputarPago()` en vez de reimplementarlo · RN-22 debe filtrar por copropiedad |
 
 ## Siguiente — cuando T-01 esté cerrado
 
