@@ -61,6 +61,25 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · Cobrar es una facultad del administrador
+
+Mary cerró quién origina un cobro: **solo el administrador, desde su perfil** (RN-49). Aplica a
+todo lo que entra en la cartera —ordinaria, extraordinaria, multa, cobro adicional, interés—.
+En la app del residente no hay ninguna acción que cree un cobro, y esa asimetría es
+deliberada: quien debe el dinero no puede tocar lo que debe.
+
+Con una precisión que ya había aparecido con la tasa de interés: es **el administrador de esa
+copropiedad**, no cualquiera con perfil de administrador (RN-01).
+
+**Y esto destapó una deuda concreta.** Hoy la regla vive solo en la interfaz: `App.tsx` protege
+`/admin`, pero `generarCuotas()` en el repositorio **no recibe quién la llama ni lo comprueba**.
+En el demo da igual —cada quien corre su copia—, pero es justo la clase de comprobación que no
+puede quedarse en el cliente: con backend, el servidor tiene que verificar rol y copropiedad sin
+confiar en que la petición venga de la consola. Anotado en T-16, que ya recogía «validar las
+reglas en el repositorio y no solo en la UI»; ahora tiene un primer caso con nombre.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · El respaldo se justifica, y la extraordinaria tiene destino
 
 Cuatro precisiones de Mary que endurecieron el principio del respaldo, en orden:

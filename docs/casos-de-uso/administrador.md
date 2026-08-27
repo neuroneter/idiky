@@ -94,8 +94,10 @@ y vincular residente).
 ### CU-A-05
 ## CU-A-05 — Generar cuotas del periodo
 
-- **Actor principal:** Administrador
-- **Precondiciones:** No existen ya cuotas ordinarias del periodo.
+- **Actor principal:** Administrador — **es el único que puede crear cuotas**, y solo las de
+  su copropiedad (RN-49).
+- **Precondiciones:** La sesión es de un administrador de esa copropiedad. No existen ya cuotas
+  ordinarias del periodo.
 - **Disparador:** Inicio de mes.
 - **Resultado esperado:** Todas las unidades quedan con su cuota del periodo.
 
@@ -135,6 +137,7 @@ y vincular residente).
 - RN-46: una cuota extraordinaria exige el acta de asamblea que la aprobó.
 - RN-47: el cobro exige una justificación escrita que cite el acta y su fecha.
 - RN-48: el concepto es texto libre, pero describe la destinación que aprobó el acta.
+- RN-49: solo el administrador de esa copropiedad crea cuotas.
 
 **Estado en el demo:** 🟡 — `src/features/admin/CarteraPage.tsx` (acción "Generar cuotas")
 genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.

@@ -353,6 +353,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-46 | Una cuota **extraordinaria** exige el acta de asamblea que la aprobó. No admite la opción «reglamento»: siempre es acta. | *pendiente* |
 | RN-47 | El respaldo se **justifica por escrito**: el cobro exige una justificación que cite el acta y su fecha y diga para qué se aprobó. Sin ella el cobro no se crea. El copropietario la lee desde su estado de cuenta. | *pendiente* |
 | RN-48 | La cuota extraordinaria tiene **destinación específica**: el concepto la describe en texto libre —cada obra es distinta— pero es la destinación que aprobó el acta, y el recaudo se destina a eso. | *pendiente* |
+| RN-49 | **Los cobros los crea únicamente el administrador de esa copropiedad, desde su perfil.** Ordinarias, extraordinarias, multas, cobros adicionales e intereses: ningún otro rol los origina, y la comprobación no puede vivir solo en la interfaz. | *parcial* (`App.tsx` protege la ruta; `repositorio.ts` no comprueba quién llama) |
 
 ## 3 bis. El principio del respaldo
 
@@ -404,6 +405,24 @@ la asamblea del 15 de marzo para impermeabilizar la cubierta».
 
 La consecuencia práctica: cuando un copropietario pregunte «¿por qué me cobran esto?», el
 sistema siempre puede responder con un acta o un artículo, en vez de con un número suelto.
+
+## 3 ter. Quién puede cobrar
+
+**Los cobros los crea únicamente el administrador desde su perfil** (Mary, 2026-08-27). Vale
+para todos: cuota ordinaria, extraordinaria, multa, cobro adicional e interés de mora. En la
+app del residente no existe ninguna acción que origine un cobro —consulta, descarga y paga— y
+esa asimetría es deliberada: quien debe el dinero no puede tocar lo que debe.
+
+Y es **el administrador de esa copropiedad**, no cualquier administrador (RN-01, y la misma
+precisión que Mary hizo para la tasa de interés). Un cobro creado desde el perfil equivocado es
+un cobro de otra copropiedad.
+
+> ⚠️ **Hoy esto vive solo en la interfaz.** `App.tsx` protege `/admin` con `Protegida
+> rol="admin"`, pero `generarCuotas()` no recibe quién la llama ni lo comprueba: la regla es una
+> puerta en la pantalla, no en los datos. En el demo no tiene consecuencia —cada quien corre su
+> propia copia—, pero **es exactamente la clase de comprobación que no puede quedarse en el
+> cliente** cuando haya backend: allí el servidor vuelve a verificar rol y copropiedad, sin
+> confiar en que la petición venga de la consola. Queda en T-16.
 
 ## 4. Convenciones de datos
 
