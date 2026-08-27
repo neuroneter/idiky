@@ -8,8 +8,9 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useDatos } from '../estado/DatosContext'
 import { useSesion } from '../estado/SesionContext'
 import * as sel from '../datos/selectores'
+import { nombreCompleto } from '../datos/selectores'
 import { etiquetaUnidad } from '../dominio/reglas'
-import { iniciales } from '../utilidades/formato'
+import { capitalizar, iniciales } from '../utilidades/formato'
 import { Icono, type NombreIcono } from './Icono'
 import { Logotipo } from './Logotipo'
 import { Modal } from './Modal'
@@ -45,12 +46,14 @@ export function LayoutResidente() {
   const { sesion, cerrar, cambiarUnidadActiva } = useSesion()
   const { pathname } = useLocation()
   const [eligiendoUnidad, setEligiendoUnidad] = useState(false)
+  const [viendoPerfil, setViendoPerfil] = useState(false)
 
   if (!sesion) return null
 
   const persona = sel.persona(bd, sesion.personaId)
   const unidadActiva = sel.unidad(bd, sesion.unidadActivaId)
   const misResidencias = sel.residenciasDePersona(bd, sesion.personaId)
+  const miRol = misResidencias.find((r) => r.unidadId === sesion.unidadActivaId)?.rol
 
   return (
     <div className="app-movil">
@@ -79,7 +82,15 @@ export function LayoutResidente() {
               {unidadActiva ? etiquetaUnidad(unidadActiva) : 'Sin unidad'}
               {misResidencias.length > 1 && <Icono nombre="chevron" tamano={12} />}
             </button>
-            <button className="avatar" onClick={cerrar} title="Cerrar sesion">
+            {/* El circulo abre el perfil, no cierra la sesion. Antes cerraba de
+                un toque y sin preguntar, y al leerse como un avatar la gente
+                esperaba justo lo contrario: ver quien es. La salida esta dentro,
+                que es un paso deliberado para algo irreversible. */}
+            <button
+              className="avatar"
+              onClick={() => setViendoPerfil(true)}
+              aria-label="Tu perfil"
+            >
               {persona ? iniciales(persona.nombres, persona.apellidos) : '··'}
             </button>
           </div>
@@ -107,6 +118,35 @@ export function LayoutResidente() {
       </nav>
 
       <AvisoGlobal />
+
+      {viendoPerfil && (
+        <Modal titulo="Tu perfil" onCerrar={() => setViendoPerfil(false)}>
+          <div className="fila fila-inicio" style={{ gap: 'var(--e3)' }}>
+            <span className="avatar avatar--perfil">
+              {persona ? iniciales(persona.nombres, persona.apellidos) : '··'}
+            </span>
+            <div className="columna" style={{ flex: 1 }}>
+              <strong>{nombreCompleto(persona)}</strong>
+              <span className="subtitulo">
+                {miRol ? `${capitalizar(miRol)} · ` : ''}
+                {unidadActiva ? etiquetaUnidad(unidadActiva) : 'Sin unidad'}
+              </span>
+              {persona?.email && <span className="subtitulo">{persona.email}</span>}
+            </div>
+          </div>
+
+          <div className="separador" />
+
+          <button
+            className="boton boton--peligro boton--bloque"
+            onClick={cerrar}
+            style={{ minHeight: 44 }}
+          >
+            <Icono nombre="salir" tamano={16} />
+            Cerrar sesion
+          </button>
+        </Modal>
+      )}
 
       {eligiendoUnidad && (
         <Modal

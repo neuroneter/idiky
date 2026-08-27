@@ -45,9 +45,10 @@
   font-weight: 600;
 }
 .avatar {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
+  /* 44 px es el area minima recomendada para tocar con el dedo. */
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -55,6 +56,16 @@
   border: 1px solid rgba(255, 255, 255, 0.24);
   font-size: var(--texto-sm);
   font-weight: 700;
+}
+/* Dentro de la hoja de perfil el avatar va sobre superficie clara. */
+.avatar--perfil {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  background: var(--color-marca-suave);
+  border-color: transparent;
+  color: var(--color-marca);
+  font-size: var(--texto-base);
 }
 
 .contenido-movil {

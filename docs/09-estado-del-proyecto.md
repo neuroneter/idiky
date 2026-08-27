@@ -61,6 +61,42 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · El círculo «MR» dejó de cerrar la sesión
+
+**El hallazgo**
+
+Mary, recorriendo el demo, preguntó qué era el círculo «MR» de la barra: **creyó que era el
+botón de volver**. En realidad son sus iniciales y **cerraba la sesión de un toque, sin
+preguntar**. Si la persona que construye el producto lo leyó mal, cualquier residente lo hará.
+
+Tres defectos en un solo control:
+
+| | |
+|---|---|
+| Parecía identidad, hacía una acción | Un avatar invita a «ver quién soy», no a salir |
+| Sin etiqueta visible | Solo tenía `title`, que en un teléfono no se muestra nunca |
+| Destructivo e inmediato | Un toque accidental terminaba la sesión, sin confirmar |
+
+Y medía 38 px, cuando el mínimo recomendado para el dedo son 44.
+
+**Qué se hizo**
+
+Se evaluaron tres salidas —abrir el perfil, un botón «Salir» explícito, o mover el perfil a
+los accesos del inicio— y Mary eligió la primera: **el círculo abre una hoja de perfil** con
+el nombre completo, el rol, la unidad y el correo, y dentro está «Cerrar sesión».
+
+Arregla los tres defectos de una vez: el círculo significa lo que la gente espera, la app gana
+el único sitio donde el residente ve quién es para el sistema, y la salida queda detrás de un
+paso deliberado, que es lo que corresponde a algo irreversible.
+
+**Pendiente de decidir por el equipo**
+
+La hoja muestra el rol tal como está en el modelo: «Propietario». Es el término legal, pero se
+muestra igual para todas las personas. Si el equipo quiere una forma neutra, hay que cambiar
+el vocabulario del dominio, no solo esta pantalla.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · La marca en las vistas interiores y el botón de volver
 
 **Qué se hizo**
