@@ -68,8 +68,29 @@ del dominio (`'peticion'`, `'administracion'`), clases de CSS y rutas van sin ti
 que los separa en la práctica: **una etiqueta visible nunca es una sola palabra en
 minúscula.**
 
+**La pregunta se abre y se cierra.** `¿Aprueba el presupuesto?`, nunca `Aprueba el
+presupuesto?`. Es la falta que más se cuela porque se copia del inglés sin darse cuenta.
+
 No se revisa a ojo. `herramientas/revisar-ortografia.py` recorre el texto visible y falla si
-encuentra algo; está en la definición de "terminado".
+encuentra algo; está en la definición de "terminado". Revisa las pantallas (`src/**/*.tsx`)
+**y los datos de ejemplo** (`src/datos/semilla.ts`): la semilla es lo que se lee en la
+demostración, así que sus tildes valen igual.
+
+**Lo que la herramienta no puede decidir, lo decide quien escribe.** `esta`/`está`,
+`mas`/`más`, `cual`/`cuál` son palabras válidas de las dos formas: ahí no hay diccionario que
+valga, hay que leer la frase.
+
+### Segmentos dentro de una pestaña
+
+Cuando una pestaña de la barra inferior agrupa varias vistas —Solicitudes: reservas, PQRS y
+paz y salvo—, se navega con **segmentos** (`.segmento`), no con filtros:
+
+- Cada segmento tiene **su propia ruta**. Así el botón «atrás» del teléfono funciona y se
+  puede enlazar directo a uno desde el inicio.
+- El activo se marca con `aria-current`, que `NavLink` ya pone. Los filtros, que cambian el
+  subconjunto de una misma vista, usan `aria-pressed`. No es lo mismo y no se pintan igual.
+- Miden **44 px de alto**: son navegación, y navegar con el pulgar en un control de 28 px
+  falla a los 60 años.
 
 ## 6. Identidad visual
 

@@ -134,7 +134,7 @@ export function CarteraPage() {
             [
               ['todas', 'Todas'],
               ['mora', 'En mora'],
-              ['al-dia', 'Al dia'],
+              ['al-dia', 'Al día'],
             ] as Array<[Filtro, string]>
           ).map(([id, texto]) => (
             <button

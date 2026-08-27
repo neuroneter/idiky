@@ -53,7 +53,7 @@ export function InicioPage() {
           lo primero que la persona busca y no necesita una caja que lo encierre. */}
       <Link to="/app/cuenta" className="cartera-inicio">
         <span className="cartera-inicio__etiqueta">
-          {saldo === 0 ? 'Tu unidad esta al dia' : 'Valor adeudado'}
+          {saldo === 0 ? 'Tu unidad está al día' : 'Valor adeudado'}
         </span>
         <div className="cartera-inicio__monto">{formatearDinero(saldo)}</div>
         {vencido > 0 ? (
@@ -96,7 +96,7 @@ export function InicioPage() {
             <span className="acceso-directo__contador">{correspondenciaPendiente.length}</span>
           )}
         </Link>
-        <Link to="/app/pqrs" className="acceso-directo">
+        <Link to="/app/solicitudes/pqrs" className="acceso-directo">
           <span className="acceso-directo__icono">
             <Icono nombre="pqrs" />
           </span>
@@ -159,10 +159,10 @@ export function InicioPage() {
       <div className="pila">
         <div className="encabezado-seccion">
           <h2>Tu próxima reserva</h2>
-          <Link to="/app/reservas">Ver reservas</Link>
+          <Link to="/app/solicitudes/reservas">Ver reservas</Link>
         </div>
         {reserva && zonaReserva ? (
-          <Link to="/app/reservas" className="tarjeta tarjeta--accion">
+          <Link to="/app/solicitudes/reservas" className="tarjeta tarjeta--accion">
             <div className="fila">
               <div className="tarjeta__cuerpo">
                 {/* Bloque de calendario: una reserva es una fecha, y asi se
@@ -184,7 +184,7 @@ export function InicioPage() {
             </div>
           </Link>
         ) : (
-          <Link to="/app/reservas" className="tarjeta tarjeta--accion">
+          <Link to="/app/solicitudes/reservas" className="tarjeta tarjeta--accion">
             <div className="fila">
               <span className="subtitulo">No tienes reservas proximas.</span>
               <span className="chip chip--marca">Reservar</span>

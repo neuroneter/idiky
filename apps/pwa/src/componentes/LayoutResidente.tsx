@@ -16,11 +16,20 @@ import { Logotipo } from './Logotipo'
 import { Modal } from './Modal'
 import { AvisoGlobal } from './Aviso'
 
+/**
+ * Cinco pestanas, que es el maximo que caben sin que el texto se parta.
+ *
+ * Reservas y PQRS se unificaron en "Solicitudes" el 2026-08-27 para hacerle sitio
+ * a Asambleas (Mary). Es mejor reparto que el anterior: reservar el salon y
+ * radicar una queja son la misma accion —pedirle algo a la administracion— y no
+ * merecian dos pestanas, mientras que la asamblea, que es donde el copropietario
+ * decide, no tenia ninguna.
+ */
 const PESTANAS: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta?: boolean }> = [
   { ruta: '/app', texto: 'Inicio', icono: 'inicio', exacta: true },
   { ruta: '/app/cuenta', texto: 'Cuenta', icono: 'cuenta' },
-  { ruta: '/app/reservas', texto: 'Reservas', icono: 'reservas' },
-  { ruta: '/app/pqrs', texto: 'PQRS', icono: 'pqrs' },
+  { ruta: '/app/solicitudes', texto: 'Solicitudes', icono: 'solicitudes' },
+  { ruta: '/app/asambleas', texto: 'Asambleas', icono: 'asambleas' },
   { ruta: '/app/comunicados', texto: 'Cartelera', icono: 'comunicados' },
 ]
 
@@ -33,12 +42,28 @@ const PESTANAS: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta?
 const TITULOS: Record<string, string> = {
   '/app/cuenta': 'Estado de cuenta',
   '/app/cuenta/pagar': 'Pagar',
-  '/app/reservas': 'Zonas comunes',
-  '/app/pqrs': 'Peticiones y quejas',
+  '/app/solicitudes/reservas': 'Zonas comunes',
+  '/app/solicitudes/pqrs': 'Peticiones y quejas',
+  '/app/solicitudes/paz-y-salvo': 'Paz y salvo',
+  '/app/asambleas': 'Asambleas',
   '/app/comunicados': 'Cartelera',
   '/app/visitantes': 'Visitantes',
   '/app/correspondencia': 'Correspondencia',
   '/app/unidad': 'Mi unidad',
+}
+
+/**
+ * El titulo de la barra para una ruta.
+ *
+ * El detalle de una asamblea lleva id en la ruta, asi que no puede salir de una
+ * tabla fija. Antes de esto la barra decia "Idiky" en cualquier pantalla que no
+ * estuviera en la lista, que es como no decir nada.
+ */
+function tituloDe(pathname: string): string {
+  if (TITULOS[pathname]) return TITULOS[pathname]
+  if (pathname.startsWith('/app/asambleas/')) return 'Asamblea'
+  if (pathname.startsWith('/app/solicitudes')) return 'Solicitudes'
+  return 'Idiky'
 }
 
 export function LayoutResidente() {
@@ -83,7 +108,7 @@ export function LayoutResidente() {
             <span className="barra-superior__titulo">
               {pathname === '/app'
                 ? `Hola, ${persona?.nombres.split(' ')[0] ?? 'residente'}`
-                : (TITULOS[pathname] ?? 'Idiky')}
+                : tituloDe(pathname)}
             </span>
           </div>
           <div className="fila" style={{ gap: 'var(--e2)' }}>

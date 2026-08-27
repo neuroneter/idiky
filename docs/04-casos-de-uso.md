@@ -32,15 +32,15 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-09 | Leer comunicados de la cartelera | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-09) |
 | CU-R-10 | Autorizar un visitante y generar su código | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-10) |
 | CU-R-11 | Ver correspondencia pendiente | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-11) |
-| CU-R-12 | **Descargar el paz y salvo** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-12) |
-| CU-R-13 | **Votar en una asamblea** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-13) |
+| CU-R-12 | **Descargar el paz y salvo** | 1 | 🟡 Parcial (se emite y se registra; falta el PDF, ADR-0006) | [ver](./casos-de-uso/residente.md#cu-r-12) |
+| CU-R-13 | **Votar en una asamblea** | 1 | 🟡 Parcial (se vota y se cuenta por coeficiente; falta mayoría y quórum) | [ver](./casos-de-uso/residente.md#cu-r-13) |
 | CU-R-14 | Reportar una novedad con foto (daño, ruido) | 3 | ⬜ Pendiente | — |
 | CU-R-15 | Registrar mis vehículos y mascotas | 3 | ⬜ Pendiente | — |
 | CU-R-16 | Recibir notificaciones push | 3 | ⬜ Pendiente | — |
 | CU-R-17 | Directorio de contactos útiles y emergencias | 3 | ⬜ Pendiente | — |
 | CU-R-18 | **Descargar el informe de estado de cuenta** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-18) |
 | CU-R-19 | **Consultar y descargar mis comprobantes de pago** | 1 | 🟡 Parcial | [ver](./casos-de-uso/residente.md#cu-r-19) |
-| CU-R-20 | **Recibir la citación a asamblea y confirmar asistencia** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-20) |
+| CU-R-20 | **Recibir la citación a asamblea y confirmar asistencia** | 1 | 🟡 Parcial (muestra la citación y el orden del día; no confirma asistencia) | [ver](./casos-de-uso/residente.md#cu-r-20) |
 | CU-R-21 | **Ver la transmisión en vivo de la asamblea** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-21) |
 | CU-R-22 | **Otorgar poder a otro copropietario** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-22) |
 | CU-R-23 | **Recibir y ejercer poderes de otros copropietarios** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-23) |

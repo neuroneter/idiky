@@ -15,7 +15,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-02 | Validar/ajustar los casos de uso ya documentados | Los tres | 🔨 En curso | Catálogo actualizado con 12 CU nuevos. Falta que el equipo los revise |
 | T-03 | Confirmar la asignación de zonas del equipo | Los tres | 📋 Por hacer | Tabla §1 de [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md). **Mary indicó que trabajará en la app móvil**, hoy asignada a Jeimy |
 | T-04 | Recorrer el demo v0.1 y anotar observaciones | Los tres | 📋 Por hacer | Cada quien anota en la bitácora qué sobra, qué falta y qué está mal planteado |
-| T-10 | **Responder las preguntas de asamblea** (§3 bis) | Los tres | 📋 Por hacer | Peso del voto, quórum, mayorías, tope de poderes. **Bloquea RN-27 a RN-34 y todo el módulo** |
+| T-10 | **Responder las preguntas de asamblea** (§3 bis) | Los tres | 📋 Por hacer | Quórum, mayorías, tope de poderes. La pantalla de asambleas ya vota y cuenta por coeficiente, pero **no puede decir si un punto se aprobó** hasta que esto se responda |
 | T-11 | **Confirmar el tope legal de poderes** (Ley 675 de 2001) | Los tres | 📋 Por hacer | Hay que leer el artículo y citarlo. **No se implementa RN-30 con una cifra supuesta** |
 | T-12 | **Decidir si visitantes, correspondencia y cartelera siguen** | Los tres | 📋 Por hacer | Están implementados pero nadie los mencionó en el alcance |
 | T-13 | **ADR-0006 — cómo se generan los PDF** | Daniel | 📋 Por hacer | Bloquea paz y salvo, estado de cuenta, comprobante y acta |

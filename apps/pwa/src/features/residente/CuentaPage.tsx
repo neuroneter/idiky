@@ -49,7 +49,7 @@ export function CuentaPage() {
         </div>
         {vencido > 0 ? (
           <p className="subtitulo">
-            De ese total, <strong>{formatearDinero(vencido)}</strong> esta vencido
+            De ese total, <strong>{formatearDinero(vencido)}</strong> está vencido
             {mora > 0 && ` (${mora} dias de mora)`}.
           </p>
         ) : (

@@ -330,18 +330,18 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-23 | Vencimiento por defecto: día 10 del periodo. | `datos/repositorio.ts` |
 | RN-24 | La primera respuesta de la administración pasa la PQRS a `en_gestion`. | `datos/repositorio.ts` |
 | RN-25 | La correspondencia entregada no se edita. | `features/admin/CorrespondenciaAdminPage.tsx` |
-| RN-26 | El paz y salvo solo se emite si el saldo de la unidad es cero. | *pendiente* |
+| RN-26 | El paz y salvo solo se emite si el saldo de la unidad es cero. | `datos/repositorio.ts` (`emitirPazYSalvo`) |
 | RN-27 | El voto en asamblea se pondera por el coeficiente de la unidad. **Confirmada por el equipo el 2026-08-26.** | `dominio/reglas.ts` (`pesoDelVoto`) |
 | RN-28 | El quórum se mide en coeficientes (presentes + representados), no en personas. | *pendiente* |
-| RN-29 | Un voto por unidad y por votación; quien representa N unidades emite N votos. | *pendiente* |
+| RN-29 | Un voto por unidad y por votación; quien representa N unidades emite N votos. | `dominio/reglas.ts` (`yaVoto`); los poderes siguen pendientes |
 | RN-30 | Un apoderado no puede superar el tope de coeficientes que puede representar. **(? — cifra por confirmar en la Ley 675 de 2001)** | *pendiente* |
 | RN-31 | El poder vale para una sola asamblea y vence al cerrarse (CU-S-09). | *pendiente* |
 | RN-32 | Quien otorgó poder no puede votar esa unidad directamente. | *pendiente* |
 | RN-33 | La citación se emite con la antelación mínima del reglamento. **(?)** | *pendiente* |
-| RN-34 | Una votación cerrada no se reabre ni se modifica; se anula y se repite. | *pendiente* |
+| RN-34 | Una votación cerrada no se reabre ni se modifica; se anula y se repite. | `dominio/reglas.ts` (`votacionRecibeVotos`) |
 | RN-35 | El acta se construye desde los datos registrados; aprobada, no se edita — se aclara con un acta nueva. | *pendiente* |
-| RN-36 | Todo documento formal lleva consecutivo único por tipo y es verificable. | *pendiente* |
-| RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | *pendiente* |
+| RN-36 | Todo documento formal lleva consecutivo único por tipo y es verificable. | `datos/repositorio.ts` (paz y salvo); falta el código de verificación |
+| RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | `datos/repositorio.ts` (`emitirVoto` copia el coeficiente) |
 | RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si el reglamento lo contempla o una asamblea lo aprobó. | *pendiente* |
 | RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al proponerla. **(? — depende del debido proceso, Ley 675)** | *pendiente* |
 | RN-40 | Un concepto del catálogo no se borra: se desactiva, porque las multas impuestas lo referencian. | *pendiente* |
@@ -355,6 +355,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-48 | La cuota extraordinaria tiene **destinación específica**: el concepto la describe en texto libre —cada obra es distinta— pero es la destinación que aprobó el acta, y el recaudo se destina a eso. | *pendiente* |
 | RN-49 | **Parametrizar la cartera es facultad exclusiva del administrador de esa copropiedad**: qué cuotas, multas e intereses existen y cuánto valen. Ningún otro rol lo hace, y la comprobación no puede vivir solo en la interfaz. | *parcial* (`App.tsx` protege la ruta; `repositorio.ts` no comprueba quién llama) |
 | RN-50 | **Lo que cae en la cuenta de una unidad se sigue de la parametrización y de su regla, no de una decisión caso por caso.** El interés lo liquida el sistema (RN-42, RN-44), la multa exige un concepto del catálogo y quedar firme (RN-38, RN-39), la extraordinaria sale del acta (RN-46, RN-48). | *pendiente* |
+| RN-51 | **Vota el propietario de la unidad**, no quien la habita: el voto va con la propiedad, igual que la cuota. **(? — falta definir el rol `autorizado` y el apoderado, CU-R-23)** | `dominio/reglas.ts` (`puedeVotar`) + `repositorio.ts` |
 
 ## 3 bis. El principio del respaldo
 

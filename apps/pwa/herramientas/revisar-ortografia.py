@@ -11,6 +11,11 @@ Uso:
 
 Sale con codigo 1 si encuentra algo, para poder encadenarlo antes de subir.
 
+Que revisa: el texto de las pantallas (`src/**/*.tsx`) **y el de los datos de
+ejemplo** (`src/datos/semilla.ts`). Lo segundo se agrego el 2026-08-27: la semilla
+es lo que se lee en la demostracion, asi que sus tildes valen igual que las del
+codigo. Nada gana un revisor que solo mira la mitad de lo que se ve.
+
 Que NO revisa, a proposito:
   - Identificadores, clases de CSS, rutas e imports. Ahi las tildes no van
     (docs/08-convenciones.md).
@@ -55,6 +60,13 @@ PALABRAS = {
     'danar': 'dañar', 'facil': 'fácil', 'dificil': 'difícil', 'util': 'útil',
     'rapido': 'rápido', 'credito': 'crédito', 'debito': 'débito',
     'automatico': 'automático', 'electronico': 'electrónico', 'cedula': 'cédula',
+    # asambleas
+    'quorum': 'quórum', 'dia': 'día', 'eleccion': 'elección', 'instalacion': 'instalación',
+    'verificacion': 'verificación', 'consideracion': 'consideración', 'discusion': 'discusión',
+    'votacion': 'votación', 'destinacion': 'destinación',
+    'revision': 'revisión', 'ano': 'año', 'proposito': 'propósito', 'tecnico': 'técnico',
+    'reglamentacion': 'reglamentación', 'citacion': 'citación', 'tuberia': 'tubería',
+    'comun': 'común', 'supervision': 'supervisión',
 }
 
 # Lineas que nunca son texto visible.
@@ -100,9 +112,29 @@ def frases_visibles(linea: str):
     return trozos
 
 
+def signos_de_apertura(frase: str):
+    """Devuelve el signo que falta al principio de una pregunta o exclamacion.
+
+    En espanol la pregunta se abre y se cierra. Es la falta de ortografia que mas
+    se ve en una interfaz porque se copia del ingles sin darse cuenta, y es
+    decidible sin ambiguedad: si la frase termina en `?` y empieza en mayuscula,
+    o lleva `¿` o esta mal.
+    """
+    limpia = frase.strip()
+    if not limpia or not limpia[0].isupper():
+        return None
+    if limpia.endswith('?') and '¿' not in limpia:
+        return '¿'
+    if limpia.endswith('!') and '¡' not in limpia:
+        return '¡'
+    return None
+
+
 def main() -> None:
     hallazgos = []
-    for archivo in sorted((RAIZ / 'src').rglob('*.tsx')):
+    aperturas = []
+    archivos = sorted((RAIZ / 'src').rglob('*.tsx')) + [RAIZ / 'src/datos/semilla.ts']
+    for archivo in archivos:
         en_comentario = False
         for n, linea in enumerate(archivo.read_text(encoding='utf-8').split('\n'), 1):
             # Los comentarios JSX de varias lineas ({/* ... */}) no empiezan por // ni
@@ -118,6 +150,9 @@ def main() -> None:
             if NO_ES_TEXTO.search(linea) or ES_COMENTARIO.match(linea):
                 continue
             for frase in frases_visibles(linea):
+                signo = signos_de_apertura(frase)
+                if signo:
+                    aperturas.append((archivo.relative_to(RAIZ), n, signo, frase.strip()[:56]))
                 # Una etiqueta visible nunca es una sola palabra en minuscula: eso
                 # es un valor del dominio (`autor: 'administracion'`, que distingue
                 # quien escribio el mensaje). Ahi la tilde romperia la comparacion.
@@ -133,13 +168,18 @@ def main() -> None:
                         (archivo.relative_to(RAIZ), n, palabra, esperada, frase.strip()[:56])
                     )
 
-    if not hallazgos:
+    if not hallazgos and not aperturas:
         print('Ortografia: sin hallazgos.')
         return
 
-    print(f'Ortografia: {len(hallazgos)} palabras sin tilde en texto visible.\n')
-    for ruta, n, mal, bien, frase in hallazgos:
-        print(f'  {ruta}:{n}\n    {mal} -> {bien}   en: "{frase}"')
+    if hallazgos:
+        print(f'Ortografia: {len(hallazgos)} palabras sin tilde en texto visible.\n')
+        for ruta, n, mal, bien, frase in hallazgos:
+            print(f'  {ruta}:{n}\n    {mal} -> {bien}   en: "{frase}"')
+    if aperturas:
+        print(f'\nOrtografia: {len(aperturas)} frases sin signo de apertura.\n')
+        for ruta, n, signo, frase in aperturas:
+            print(f'  {ruta}:{n}\n    falta "{signo}" al principio   en: "{frase}"')
     sys.exit(1)
 
 

@@ -61,6 +61,54 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · Asambleas en el menú y Solicitudes unificado
+
+Tres pedidos de Mary sobre la barra inferior del residente, en orden:
+
+1. **Asambleas entra al menú.** Es donde el copropietario decide, y no tenía pestaña.
+2. **Reservas y PQRS se unifican en Solicitudes.** Son la misma acción vistas desde quien la
+   hace: pedirle algo a la administración.
+3. **Solicitudes son tres, no dos:** reservar zona común, radicar una PQRS y **generar el paz
+   y salvo**.
+4. **En asambleas se vota**, y vale para la ordinaria y para la extraordinaria.
+
+La barra queda en cinco: Inicio · Cuenta · Solicitudes · Asambleas · Cartelera. Las rutas
+viejas (`/app/reservas`, `/app/pqrs`) redirigen, por si alguien las dejó guardadas en la
+pantalla de inicio del teléfono.
+
+**Lo que se construyó de asambleas, y lo que no.** Entraron `Asamblea`, `PuntoOrdenDelDia`,
+`Votacion` y `Voto`; el residente ve la citación y el orden del día (CU-R-20), vota los puntos
+(CU-R-13) y ve el conteo por coeficiente. Quedaron fuera **a propósito** `Asistencia`, `Poder`
+y el quórum: dependen de RN-28 y RN-30, que el equipo no ha confirmado (T-10, T-11).
+
+De ahí la línea que se respetó en la pantalla: **la app cuenta los votos, pero no dice si el
+punto se aprobó.** Contar por coeficiente es aritmética y ya está resuelto (RN-27); declarar
+aprobado exige la mayoría exigida y el quórum de instalación, que es derecho y no se escribe de
+memoria. La pantalla lo dice en voz alta en vez de inventarlo.
+
+**Regla nueva: vota el propietario (RN-51).** Sale de la palabra que usó Mary. El arrendatario
+usa la copropiedad pero no decide sobre ella: el voto va con la propiedad, igual que la cuota.
+Falta definir el rol `autorizado` y el apoderado (CU-R-23). La comprobación quedó en el
+repositorio y no solo en la pantalla, que es lo que pedía T-16: esconder un botón no es una
+regla.
+
+**Paz y salvo (CU-R-12), a medias y con la mitad que faltaba dicha.** Se implementó lo decidido
+—RN-26 (saldo cero) y RN-36 (consecutivo)—: el certificado se emite, queda registrado y se ve
+en pantalla. **Falta el PDF**, que es ADR-0006. Y aparece una pregunta que nadie había hecho:
+¿«saldo cero» incluye la cuota del mes en curso que aún no vence? Hoy el demo la cuenta, así
+que hay que pagarla antes de emitir. Si en la práctica «al día» significa «nada vencido»,
+RN-26 cambia.
+
+**De paso, la ortografía.** El revisor solo miraba las pantallas, no los datos de ejemplo —que
+es justo lo que se lee en una demostración—. Se extendió a `semilla.ts` y aparecieron 78
+palabras sin tilde («salon social», «orden del dia», «informe de gestion»). Se corrigieron
+todas. Se le agregó además una comprobación nueva: **la pregunta se abre y se cierra**; cuatro
+frases nuevas se habían escrito «Aprueba el presupuesto?». Lo que la herramienta no puede
+decidir —`esta`/`está`, `cual`/`cuál`— se corrigió a mano, y queda dicho en las convenciones
+que ahí no hay diccionario que valga.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · Parametrizar la cartera, no cobrar caso por caso
 
 Mary precisó la palabra: el administrador de la copropiedad es quien tiene el rol para

@@ -102,6 +102,14 @@ textarea {
 .tarjeta--plana {
   box-shadow: none;
 }
+/* Estado en una tarjeta: un filo de color a la izquierda. Pintar la caja entera
+   de verde o ambar compite con el degradado del fondo y grita mas que el dato. */
+.tarjeta--exito {
+  border-left: 3px solid var(--color-exito);
+}
+.tarjeta--alerta {
+  border-left: 3px solid var(--color-alerta);
+}
 .tarjeta--marca {
   background: var(--degradado-marca);
   color: var(--color-texto-inverso);
@@ -371,6 +379,54 @@ textarea {
   background: var(--color-acento);
   border-color: rgba(255, 255, 255, 0.45);
   color: var(--color-texto-inverso);
+}
+
+/* --------------------------------------------------------------- Segmentos */
+/* Dos o tres vistas que viven bajo un mismo icono de la barra (Solicitudes).
+   No son filtros —cambian de pantalla, no de subconjunto—, por eso se pintan con
+   `aria-current` y no con `aria-pressed`. Miden 44 px porque son navegacion, y
+   navegar con el pulgar en un boton de 28 px falla a los 60 anos. */
+.segmentos {
+  display: flex;
+  gap: var(--e2);
+  margin-bottom: var(--e4);
+}
+.segmento {
+  flex: 1;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e2);
+  padding: 0 var(--e2);
+  border-radius: var(--radio-completo);
+  border: 1px solid var(--color-borde-fuerte);
+  background: var(--color-superficie);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto-suave);
+  text-align: center;
+}
+.segmento[aria-current='page'] {
+  background: var(--color-acento);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: var(--color-texto-inverso);
+}
+
+/* ----------------------------------------------------------------- Medidor */
+/* Barra de proporcion para el conteo de una votacion. Lleva el valor al lado en
+   numero: una barra sola se lee "como mas o menos la mitad", y aqui la cifra
+   exacta es el punto. */
+.medidor {
+  height: 8px;
+  border-radius: var(--radio-completo);
+  background: var(--color-borde);
+  overflow: hidden;
+}
+.medidor__relleno {
+  height: 100%;
+  background: var(--color-acento);
+  border-radius: var(--radio-completo);
 }
 
 /* ------------------------------------------------------------ Pantalla carga */

@@ -7,13 +7,17 @@
  */
 
 import type {
+  Asamblea,
   Cuota,
   FechaISO,
   Periodo,
   Pqrs,
   Reserva,
+  RolResidencia,
   Unidad,
   Visitante,
+  Votacion,
+  Voto,
   ZonaComun,
 } from './tipos'
 
@@ -324,4 +328,87 @@ export function sumaCoeficientes(unidades: Unidad[]): number {
  */
 export function pesoDelVoto(unidad: Unidad): number {
   return unidad.coeficiente
+}
+
+// ---------------------------------------------------------------------------
+// Asambleas y votaciones — CU-R-13, CU-R-20
+// ---------------------------------------------------------------------------
+
+/**
+ * RN-51 — Vota el propietario de la unidad, no quien la habita.
+ *
+ * Mary lo dijo asi el 2026-08-27: «el propietario va a tener la opcion para
+ * votar los puntos de una asamblea». El arrendatario usa la copropiedad pero no
+ * decide sobre ella; el voto va con la propiedad, igual que la cuota.
+ *
+ * Ojo: falta confirmar que pasa con el rol `autorizado` y con el apoderado
+ * (CU-R-23), que vota unidades que no son suyas. Mientras no este definido, la
+ * unica puerta abierta es la del propietario.
+ */
+export function puedeVotar(rol?: RolResidencia): boolean {
+  return rol === 'propietario'
+}
+
+/** RN-29 — Un voto por unidad y por votacion. */
+export function yaVoto(votos: Voto[], votacionId: string, unidadId?: string): Voto | undefined {
+  if (!unidadId) return undefined
+  return votos.find((voto) => voto.votacionId === votacionId && voto.unidadId === unidadId)
+}
+
+/** La votacion solo recibe votos mientras este abierta (RN-34). */
+export function votacionRecibeVotos(votacion: Votacion): boolean {
+  return votacion.estado === 'abierta'
+}
+
+export interface ConteoOpcion {
+  opcionId: string
+  texto: string
+  /** Suma de coeficientes que eligieron la opcion (RN-27). */
+  coeficiente: number
+  unidades: number
+}
+
+export interface ConteoVotacion {
+  porOpcion: ConteoOpcion[]
+  /** Coeficiente total que voto. NO es el quorum: eso es otra cosa (RN-28). */
+  coeficienteVotante: number
+  unidadesVotantes: number
+}
+
+/**
+ * Cuenta una votacion por coeficiente, no por cabezas (RN-27, RN-29).
+ *
+ * **No dice si el punto se aprobo**, y eso es a proposito: para eso hace falta la
+ * mayoria exigida —simple, calificada, unanimidad— y el quorum con que se instalo
+ * la asamblea, que son justo las reglas que el equipo tiene pendientes (RN-28,
+ * T-10). Contar es aritmetica; declarar aprobado es derecho.
+ */
+export function contarVotacion(
+  votacion: Votacion,
+  votos: Voto[],
+): ConteoVotacion {
+  const emitidos = votos.filter((voto) => voto.votacionId === votacion.id)
+  const porOpcion = votacion.opciones.map((opcion) => {
+    const suyos = emitidos.filter((voto) => voto.opcionId === opcion.id)
+    return {
+      opcionId: opcion.id,
+      texto: opcion.texto,
+      coeficiente: Number(
+        suyos.reduce((total, voto) => total + voto.coeficiente, 0).toFixed(4),
+      ),
+      unidades: suyos.length,
+    }
+  })
+  return {
+    porOpcion,
+    coeficienteVotante: Number(
+      emitidos.reduce((total, voto) => total + voto.coeficiente, 0).toFixed(4),
+    ),
+    unidadesVotantes: emitidos.length,
+  }
+}
+
+/** Orden de la lista: primero lo que esta pasando, despues lo que viene, al final lo cerrado. */
+export function ordenAsamblea(asamblea: Asamblea): number {
+  return { instalada: 0, convocada: 1, cerrada: 2, cancelada: 3 }[asamblea.estado]
 }

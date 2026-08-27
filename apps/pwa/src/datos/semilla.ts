@@ -9,6 +9,7 @@
  */
 
 import type {
+  Asamblea,
   BaseDatos,
   Comunicado,
   Correspondencia,
@@ -21,11 +22,16 @@ import type {
   Residencia,
   Unidad,
   Visitante,
+  Votacion,
+  Voto,
   ZonaComun,
 } from '../dominio/tipos'
 import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 
-export const VERSION_ESQUEMA = 1
+// Sube con cada cambio de forma de los datos: `almacen.ts` regenera la semilla
+// cuando no coincide, para que nadie quede con una base a medias.
+// 2 — asambleas, votaciones, votos y documentos.
+export const VERSION_ESQUEMA = 2
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -139,8 +145,8 @@ const zonasComunes: ZonaComun[] = [
   {
     id: 'zon-salon',
     copropiedadId: COPROPIEDAD_ID,
-    nombre: 'Salon social',
-    descripcion: 'Salon para reuniones y celebraciones, con cocineta y bano.',
+    nombre: 'Salón social',
+    descripcion: 'Salón para reuniones y celebraciones, con cocineta y baño.',
     icono: 'salon',
     aforo: 40,
     requiereAprobacion: true,
@@ -237,7 +243,7 @@ function construirCartera(): { cuotas: Cuota[]; pagos: Pago[]; consecutivoCompro
         unidadId: unidad.id,
         periodo,
         tipo: 'ordinaria',
-        concepto: 'Cuota de administracion',
+        concepto: 'Cuota de administración',
         valor: Math.round(unidad.coeficiente * VALOR_POR_COEFICIENTE),
         fechaVencimiento: vencimientoDelPeriodo(periodo),
         estado: pagada ? 'pagada' : 'pendiente',
@@ -269,7 +275,7 @@ function construirCartera(): { cuotas: Cuota[]; pagos: Pago[]; consecutivoCompro
       unidadId: unidad.id,
       periodo: periodoExtraordinaria,
       tipo: 'extraordinaria',
-      concepto: 'Extraordinaria: impermeabilizacion de cubiertas',
+      concepto: 'Extraordinaria: impermeabilización de cubiertas',
       valor: Math.round((EXTRAORDINARIA_TOTAL * unidad.coeficiente) / 100),
       fechaVencimiento: vencimientoDelPeriodo(periodoExtraordinaria),
       estado: periodosEnMora > 0 ? 'pendiente' : 'pagada',
@@ -361,9 +367,9 @@ function construirPqrs(): { pqrs: Pqrs[]; consecutivo: number } {
       personaId: 'per-1',
       tipo: 'reclamo',
       categoria: 'mantenimiento',
-      asunto: 'Filtracion de agua en el bano social',
+      asunto: 'Filtración de agua en el baño social',
       descripcion:
-        'Desde la semana pasada baja agua por el techo del bano social. Parece venir del apartamento de arriba o de una tuberia comun.',
+        'Desde la semana pasada baja agua por el techo del baño social. Parece venir del apartamento de arriba o de una tubería común.',
       estado: 'en_gestion',
       fechaRadicacion: `${sumarDias(hoy, -9)}T14:30:00.000Z`,
       fechaLimite: sumarDias(hoy, 6),
@@ -373,7 +379,7 @@ function construirPqrs(): { pqrs: Pqrs[]; consecutivo: number } {
           autor: 'administracion',
           autorNombre: 'Olga Lucia Henao',
           texto:
-            'Recibido. Programamos visita del plomero para el proximo martes entre 8 y 10 de la manana.',
+            'Recibido. Programamos visita del plomero para el próximo martes entre 8 y 10 de la mañana.',
           fecha: `${sumarDias(hoy, -7)}T09:10:00.000Z`,
         },
       ],
@@ -386,7 +392,7 @@ function construirPqrs(): { pqrs: Pqrs[]; consecutivo: number } {
       personaId: 'per-10',
       tipo: 'queja',
       categoria: 'convivencia',
-      asunto: 'Ruido despues de las 11 de la noche',
+      asunto: 'Ruido después de las 11 de la noche',
       descripcion:
         'El apartamento vecino hace reuniones con musica alta entre semana. Ya se hablo directamente sin resultado.',
       estado: 'abierta',
@@ -442,14 +448,14 @@ function construirComunicados(): Comunicado[] {
     {
       id: 'com-1',
       copropiedadId: COPROPIEDAD_ID,
-      titulo: 'Corte programado de agua el sabado',
+      titulo: 'Corte programado de agua el sábado',
       cuerpo:
-        'El proximo sabado, entre las 8:00 a. m. y la 1:00 p. m., se suspendera el suministro de agua en las dos torres por mantenimiento de los tanques. Recomendamos almacenar el agua necesaria la noche anterior.',
+        'El próximo sábado, entre las 8:00 a. m. y la 1:00 p. m., se suspendera el suministro de agua en las dos torres por mantenimiento de los tanques. Recomendamos almacenar el agua necesaria la noche anterior.',
       categoria: 'urgente',
       fijado: true,
       fechaPublicacion: `${sumarDias(hoy, -1)}T17:00:00.000Z`,
       vigenteHasta: sumarDias(hoy, 7),
-      autor: 'Administracion',
+      autor: 'Administración',
       leidoPor: [],
     },
     {
@@ -457,12 +463,12 @@ function construirComunicados(): Comunicado[] {
       copropiedadId: COPROPIEDAD_ID,
       titulo: 'Convocatoria a asamblea ordinaria',
       cuerpo:
-        'Se convoca a todos los copropietarios a la asamblea ordinaria que se realizara en el salon social. Orden del dia: informe de gestion, estados financieros, presupuesto y eleccion del consejo de administracion. Se recuerda que las unidades en mora no tienen voto.',
+        'Se convoca a todos los copropietarios a la asamblea ordinaria que se realizará en el salón social. Orden del día: informe de gestión, estados financieros, presupuesto y elección del consejo de administración. Se recuerda que las unidades en mora no tienen voto.',
       categoria: 'asamblea',
       fijado: true,
       fechaPublicacion: `${sumarDias(hoy, -6)}T12:00:00.000Z`,
       vigenteHasta: sumarDias(hoy, 20),
-      autor: 'Administracion',
+      autor: 'Administración',
       leidoPor: [],
     },
     {
@@ -470,11 +476,11 @@ function construirComunicados(): Comunicado[] {
       copropiedadId: COPROPIEDAD_ID,
       titulo: 'Mantenimiento de ascensores Torre 2',
       cuerpo:
-        'El ascensor 2 de la Torre 2 estara fuera de servicio el jueves durante toda la manana por mantenimiento preventivo. Agradecemos su comprension.',
+        'El ascensor 2 de la Torre 2 estara fuera de servicio el jueves durante toda la mañana por mantenimiento preventivo. Agradecemos su comprension.',
       categoria: 'mantenimiento',
       fijado: false,
       fechaPublicacion: `${sumarDias(hoy, -3)}T09:30:00.000Z`,
-      autor: 'Administracion',
+      autor: 'Administración',
       leidoPor: [],
     },
     {
@@ -482,11 +488,11 @@ function construirComunicados(): Comunicado[] {
       copropiedadId: COPROPIEDAD_ID,
       titulo: 'Nuevo horario del gimnasio',
       cuerpo:
-        'A partir de este mes el gimnasio abre a las 5:00 a. m. y cierra a las 9:00 p. m. Recuerden reservar su franja desde la aplicacion y respetar el aforo de 8 personas.',
+        'A partir de este mes el gimnasio abre a las 5:00 a. m. y cierra a las 9:00 p. m. Recuerden reservar su franja desde la aplicación y respetar el aforo de 8 personas.',
       categoria: 'general',
       fijado: false,
       fechaPublicacion: `${sumarDias(hoy, -12)}T15:00:00.000Z`,
-      autor: 'Administracion',
+      autor: 'Administración',
       leidoPor: [],
     },
   ]
@@ -500,7 +506,7 @@ function construirCorrespondencia(): Correspondencia[] {
       unidadId: 'uni-torre1-402',
       tipo: 'paquete',
       remitente: 'Mercado en linea',
-      observaciones: 'Caja mediana, se recibe en porteria principal.',
+      observaciones: 'Caja mediana, se recibe en portería principal.',
       fechaRecepcion: `${sumarDias(hoy, -1)}T11:20:00.000Z`,
       estado: 'en_porteria',
     },
@@ -520,7 +526,7 @@ function construirCorrespondencia(): Correspondencia[] {
       unidadId: 'uni-torre2-901',
       tipo: 'domicilio',
       remitente: 'Farmacia del barrio',
-      observaciones: 'Requiere refrigeracion.',
+      observaciones: 'Requiere refrigeración.',
       fechaRecepcion: `${sumarDias(hoy, 0)}T08:45:00.000Z`,
       estado: 'en_porteria',
     },
@@ -570,6 +576,208 @@ function construirVisitantes(): Visitante[] {
 }
 
 // ---------------------------------------------------------------------------
+// Asambleas — CU-R-13, CU-R-20
+//
+// Tres, a proposito, para que se vean los tres momentos: una en curso donde se
+// puede votar, una convocada que todavia no abre votaciones, y una cerrada con
+// su resultado. Hay ordinaria y extraordinaria porque en las dos se vota.
+// ---------------------------------------------------------------------------
+
+/**
+ * Fecha y hora completas a partir de un desplazamiento en dias.
+ *
+ * Con el desfase de Colombia escrito, no en UTC: una asamblea sembrada a las
+ * 19:00Z se mostraba «14:00», que es la hora equivocada y ademas la del error de
+ * zona horaria que ya se corrigio una vez en este demo.
+ */
+function fechaHoraRelativa(dias: number, hora: string): string {
+  return `${sumarDias(hoyISO(), dias)}T${hora}:00-05:00`
+}
+
+const ASAMBLEA_EN_CURSO = 'asa-extra-cubierta'
+const ASAMBLEA_CONVOCADA = 'asa-ordinaria-anual'
+const ASAMBLEA_CERRADA = 'asa-ordinaria-anterior'
+
+const asambleas: Asamblea[] = [
+  {
+    id: ASAMBLEA_EN_CURSO,
+    copropiedadId: COPROPIEDAD_ID,
+    tipo: 'extraordinaria',
+    titulo: 'Asamblea extraordinaria — obras de la cubierta',
+    fechaHora: fechaHoraRelativa(0, '19:00'),
+    modalidad: 'mixta',
+    lugar: 'Salón social, Torre 1',
+    enlaceTransmision: 'https://transmision.idiky.demo/asamblea-cubierta',
+    estado: 'instalada',
+    citacion: 'Citación 003 del consejo de administración',
+    ordenDelDia: [
+      {
+        id: 'pun-ex-1',
+        orden: 1,
+        titulo: 'Verificación del quórum e instalación',
+        descripcion: 'Registro de asistentes y representados, y lectura del orden del día.',
+        seVota: false,
+      },
+      {
+        id: 'pun-ex-2',
+        orden: 2,
+        titulo: 'Cuota extraordinaria para impermeabilizar la cubierta',
+        descripcion:
+          'Se somete a consideración una cuota extraordinaria de $40.000.000, prorrateada por coeficiente, con destinación exclusiva a la impermeabilización de la cubierta de las dos torres.',
+        seVota: true,
+      },
+      {
+        id: 'pun-ex-3',
+        orden: 3,
+        titulo: 'Contratista de la obra',
+        descripcion:
+          'Tres propuestas recibidas. La ganadora ejecuta la obra bajo supervisión del consejo.',
+        seVota: true,
+      },
+    ],
+  },
+  {
+    id: ASAMBLEA_CONVOCADA,
+    copropiedadId: COPROPIEDAD_ID,
+    tipo: 'ordinaria',
+    titulo: 'Asamblea ordinaria anual',
+    fechaHora: fechaHoraRelativa(22, '18:30'),
+    modalidad: 'presencial',
+    lugar: 'Salón social, Torre 1',
+    estado: 'convocada',
+    citacion: 'Convocatoria 001 de la administración',
+    ordenDelDia: [
+      {
+        id: 'pun-or-1',
+        orden: 1,
+        titulo: 'Informe de gestión de la administración',
+        descripcion: 'Presentacion del informe del periodo. Punto informativo.',
+        seVota: false,
+      },
+      {
+        id: 'pun-or-2',
+        orden: 2,
+        titulo: 'Aprobacion de los estados financieros',
+        descripcion: 'Estados financieros del último periodo, con el informe del revisor fiscal.',
+        seVota: true,
+      },
+      {
+        id: 'pun-or-3',
+        orden: 3,
+        titulo: 'Presupuesto del próximo año',
+        descripcion: 'Presupuesto de ingresos y gastos, y el valor de la cuota de administración.',
+        seVota: true,
+      },
+      {
+        id: 'pun-or-4',
+        orden: 4,
+        titulo: 'Elección del consejo de administración',
+        descripcion: 'Postulaciones recibidas hasta ocho días antes de la asamblea.',
+        seVota: true,
+      },
+    ],
+  },
+  {
+    id: ASAMBLEA_CERRADA,
+    copropiedadId: COPROPIEDAD_ID,
+    tipo: 'ordinaria',
+    titulo: 'Asamblea ordinaria del periodo anterior',
+    fechaHora: fechaHoraRelativa(-150, '18:30'),
+    modalidad: 'presencial',
+    lugar: 'Salón social, Torre 1',
+    estado: 'cerrada',
+    citacion: 'Convocatoria 004 de la administración',
+    ordenDelDia: [
+      {
+        id: 'pun-an-1',
+        orden: 1,
+        titulo: 'Aprobacion del presupuesto',
+        descripcion: 'Presupuesto que rige el periodo en curso.',
+        seVota: true,
+      },
+    ],
+  },
+]
+
+const votaciones: Votacion[] = [
+  {
+    id: 'vta-ex-2',
+    asambleaId: ASAMBLEA_EN_CURSO,
+    puntoId: 'pun-ex-2',
+    pregunta: '¿Aprueba la cuota extraordinaria para impermeabilizar la cubierta?',
+    opciones: [
+      { id: 'op-si', texto: 'A favor' },
+      { id: 'op-no', texto: 'En contra' },
+      { id: 'op-abs', texto: 'Me abstengo' },
+    ],
+    estado: 'abierta',
+    abiertaEn: fechaHoraRelativa(0, '19:20'),
+  },
+  {
+    id: 'vta-ex-3',
+    asambleaId: ASAMBLEA_EN_CURSO,
+    puntoId: 'pun-ex-3',
+    pregunta: '¿Cuál propuesta debe ejecutar la obra?',
+    opciones: [
+      { id: 'op-a', texto: 'Impermeabilizados del Norte' },
+      { id: 'op-b', texto: 'Construcciones Andinas' },
+      { id: 'op-c', texto: 'Tecnicubiertas' },
+    ],
+    estado: 'abierta',
+    abiertaEn: fechaHoraRelativa(0, '19:40'),
+  },
+  {
+    id: 'vta-or-2',
+    asambleaId: ASAMBLEA_CONVOCADA,
+    puntoId: 'pun-or-2',
+    pregunta: '¿Aprueba los estados financieros del periodo?',
+    opciones: [
+      { id: 'op-si', texto: 'A favor' },
+      { id: 'op-no', texto: 'En contra' },
+      { id: 'op-abs', texto: 'Me abstengo' },
+    ],
+    estado: 'preparada',
+  },
+  {
+    id: 'vta-an-1',
+    asambleaId: ASAMBLEA_CERRADA,
+    puntoId: 'pun-an-1',
+    pregunta: '¿Aprueba el presupuesto presentado?',
+    opciones: [
+      { id: 'op-si', texto: 'A favor' },
+      { id: 'op-no', texto: 'En contra' },
+      { id: 'op-abs', texto: 'Me abstengo' },
+    ],
+    estado: 'cerrada',
+    abiertaEn: fechaHoraRelativa(-150, '19:10'),
+    cerradaEn: fechaHoraRelativa(-150, '19:35'),
+  },
+]
+
+/** Votos de la asamblea ya cerrada: `[unidad, opcion]`. El coeficiente se copia (RN-37). */
+const VOTOS_ASAMBLEA_CERRADA: Array<[string, string]> = [
+  ['uni-torre1-402', 'op-si'],
+  ['uni-torre1-201', 'op-si'],
+  ['uni-torre1-202', 'op-si'],
+  ['uni-torre1-301', 'op-si'],
+  ['uni-torre1-302', 'op-no'],
+  ['uni-torre2-501', 'op-si'],
+  ['uni-torre2-502', 'op-abs'],
+  ['uni-torre2-601', 'op-no'],
+  ['uni-torre2-602', 'op-si'],
+]
+
+const votos: Voto[] = VOTOS_ASAMBLEA_CERRADA.map(([unidadId, opcionId], i) => ({
+  id: `vot-${i + 1}`,
+  votacionId: 'vta-an-1',
+  unidadId,
+  opcionId,
+  emitidoPor: residencias.find((r) => r.unidadId === unidadId)?.personaId ?? 'per-1',
+  coeficiente: unidades.find((u) => u.id === unidadId)?.coeficiente ?? 0,
+  fecha: fechaHoraRelativa(-150, '19:2' + String(i % 10)),
+}))
+
+// ---------------------------------------------------------------------------
 // Semilla completa
 // ---------------------------------------------------------------------------
 export function crearSemilla(): BaseDatos {
@@ -599,11 +807,16 @@ export function crearSemilla(): BaseDatos {
     comunicados: construirComunicados(),
     correspondencia: construirCorrespondencia(),
     visitantes: construirVisitantes(),
+    asambleas,
+    votaciones,
+    votos,
+    // Sin paz y salvo emitido: que la primera emision del demo sea la de quien lo prueba.
+    documentos: [],
     perfilesDemo: [
       {
         id: 'perfil-residente-al-dia',
         etiqueta: 'Maria Camila Restrepo',
-        descripcion: 'Residente al dia · Torre 1 apto 402',
+        descripcion: 'Residente al día · Torre 1 apto 402',
         rol: 'residente',
         personaId: 'per-1',
         copropiedadId: COPROPIEDAD_ID,
@@ -630,6 +843,7 @@ export function crearSemilla(): BaseDatos {
     consecutivos: {
       pqrs: consecutivoPqrs,
       comprobante: consecutivoComprobante,
+      pazYSalvo: 1,
     },
   }
 }

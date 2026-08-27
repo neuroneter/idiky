@@ -46,7 +46,7 @@ export function ReservasPage() {
     // RN-08: el bloqueo por mora se avisa antes de que el residente pierda tiempo.
     if (enMora) {
       mostrarAviso(
-        'Tu unidad tiene cuotas vencidas. Ponte al dia para reservar zonas comunes.',
+        'Tu unidad tiene cuotas vencidas. Ponte al día para reservar zonas comunes.',
         'error',
       )
       return
@@ -98,7 +98,7 @@ export function ReservasPage() {
         <div className="tarjeta" style={{ background: 'var(--color-error-suave)', borderColor: 'transparent' }}>
           <strong style={{ color: 'var(--color-error)' }}>Reservas bloqueadas</strong>
           <p className="subtitulo" style={{ marginTop: 'var(--e1)' }}>
-            El reglamento no permite reservar zonas comunes con cuotas vencidas. Ponte al dia
+            El reglamento no permite reservar zonas comunes con cuotas vencidas. Ponte al día
             desde tu estado de cuenta.
           </p>
         </div>
@@ -135,7 +135,7 @@ export function ReservasPage() {
         {misReservas.length === 0 ? (
           <EstadoVacio
             titulo="Todavia no has reservado"
-            detalle="Elige una zona comun arriba para hacer tu primera reserva."
+            detalle="Elige una zona común arriba para hacer tu primera reserva."
           />
         ) : (
           <div className="lista lista--compacta">

@@ -80,9 +80,14 @@ apps/pwa/
 | `/app` | Inicio residente | CU-R-02 |
 | `/app/cuenta` | Estado de cuenta | CU-R-03 |
 | `/app/cuenta/pagar` | Pago | CU-R-04 |
-| `/app/reservas` | Zonas comunes y reservas | CU-R-05, CU-R-06 |
-| `/app/pqrs` | PQRS | CU-R-07, CU-R-08 |
+| `/app/solicitudes` | Redirige a reservas | — |
+| `/app/solicitudes/reservas` | Zonas comunes y reservas | CU-R-05, CU-R-06 |
+| `/app/solicitudes/pqrs` | PQRS | CU-R-07, CU-R-08 |
+| `/app/solicitudes/paz-y-salvo` | Paz y salvo | CU-R-12 |
+| `/app/asambleas` | Asambleas de la copropiedad | CU-R-20 |
+| `/app/asambleas/:id` | Orden del día y votaciones | CU-R-13, CU-R-20 |
 | `/app/comunicados` | Cartelera | CU-R-09 |
+| `/app/reservas`, `/app/pqrs` | Redirigen a `/app/solicitudes/…` | — |
 | `/app/visitantes` | Visitantes y códigos | CU-R-10 |
 | `/app/correspondencia` | Correspondencia | CU-R-11 |
 | `/admin` | Tablero | CU-A-01 |

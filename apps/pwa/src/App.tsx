@@ -15,6 +15,10 @@ import { PagoPage } from './features/residente/PagoPage'
 import { ReservasPage } from './features/residente/ReservasPage'
 import { PqrsPage } from './features/residente/PqrsPage'
 import { ComunicadosPage } from './features/residente/ComunicadosPage'
+import { SolicitudesPage } from './features/residente/SolicitudesPage'
+import { PazYSalvoPage } from './features/residente/PazYSalvoPage'
+import { AsambleasPage } from './features/residente/AsambleasPage'
+import { AsambleaDetallePage } from './features/residente/AsambleaDetallePage'
 import { VisitantesPage } from './features/residente/VisitantesPage'
 import { CorrespondenciaPage } from './features/residente/CorrespondenciaPage'
 import { TableroPage } from './features/admin/TableroPage'
@@ -58,8 +62,22 @@ export function App() {
         <Route index element={<InicioPage />} />
         <Route path="cuenta" element={<CuentaPage />} />
         <Route path="cuenta/pagar" element={<PagoPage />} />
-        <Route path="reservas" element={<ReservasPage />} />
-        <Route path="pqrs" element={<PqrsPage />} />
+        {/* Solicitudes: reservar, radicar una PQRS y pedir el paz y salvo viven
+            bajo un mismo icono (Mary, 2026-08-27). Cada una conserva su ruta
+            propia para poder enlazarla desde el inicio y para que "atras"
+            funcione. */}
+        <Route path="solicitudes" element={<SolicitudesPage />}>
+          <Route index element={<Navigate to="reservas" replace />} />
+          <Route path="reservas" element={<ReservasPage />} />
+          <Route path="pqrs" element={<PqrsPage />} />
+          <Route path="paz-y-salvo" element={<PazYSalvoPage />} />
+        </Route>
+        {/* Las rutas viejas siguen respondiendo: alguien pudo dejarlas guardadas
+            en la pantalla de inicio del telefono. */}
+        <Route path="reservas" element={<Navigate to="/app/solicitudes/reservas" replace />} />
+        <Route path="pqrs" element={<Navigate to="/app/solicitudes/pqrs" replace />} />
+        <Route path="asambleas" element={<AsambleasPage />} />
+        <Route path="asambleas/:asambleaId" element={<AsambleaDetallePage />} />
         <Route path="comunicados" element={<ComunicadosPage />} />
         <Route path="visitantes" element={<VisitantesPage />} />
         <Route path="correspondencia" element={<CorrespondenciaPage />} />

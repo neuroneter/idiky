@@ -151,7 +151,7 @@ export function ReservasAdminPage() {
               id="motivo-rechazo"
               value={motivo}
               onChange={(evento) => setMotivo(evento.target.value)}
-              placeholder="Ej: la zona esta en mantenimiento ese dia."
+              placeholder="Ej: la zona está en mantenimiento ese día."
             />
           </div>
           <button className="boton boton--peligro boton--bloque" disabled={cargando} onClick={rechazar}>

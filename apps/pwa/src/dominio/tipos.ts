@@ -233,6 +233,92 @@ export interface Visitante {
 }
 
 // ---------------------------------------------------------------------------
+// Asambleas — CU-R-13, CU-R-20 · docs/05-modelo-de-datos.md
+//
+// Es un subconjunto deliberado del modelo documentado: estan las entidades que
+// necesita el copropietario para enterarse de la asamblea y votar sus puntos.
+// **Faltan a proposito** `Asistencia`, `Poder` y el quorum: dependen de reglas
+// que el equipo todavia no ha confirmado (RN-28, RN-30, T-10 y T-11), y
+// escribirlas de memoria seria inventar la ley.
+// ---------------------------------------------------------------------------
+export type TipoAsamblea = 'ordinaria' | 'extraordinaria'
+
+export type EstadoAsamblea = 'convocada' | 'instalada' | 'cerrada' | 'cancelada'
+
+export type ModalidadAsamblea = 'presencial' | 'virtual' | 'mixta'
+
+export interface PuntoOrdenDelDia {
+  id: string
+  orden: number
+  titulo: string
+  descripcion: string
+  /** Los puntos informativos no se votan (un informe de gestion, por ejemplo). */
+  seVota: boolean
+}
+
+export interface Asamblea {
+  id: string
+  copropiedadId: string
+  tipo: TipoAsamblea
+  titulo: string
+  fechaHora: FechaHoraISO
+  modalidad: ModalidadAsamblea
+  lugar?: string
+  enlaceTransmision?: string
+  ordenDelDia: PuntoOrdenDelDia[]
+  estado: EstadoAsamblea
+  /** Lo que convoca: numero y fecha del acta o de la citacion. */
+  citacion: string
+}
+
+export type EstadoVotacion = 'preparada' | 'abierta' | 'cerrada' | 'anulada'
+
+export interface OpcionVotacion {
+  id: string
+  texto: string
+}
+
+export interface Votacion {
+  id: string
+  asambleaId: string
+  puntoId: string
+  pregunta: string
+  opciones: OpcionVotacion[]
+  estado: EstadoVotacion
+  abiertaEn?: FechaHoraISO
+  cerradaEn?: FechaHoraISO
+}
+
+export interface Voto {
+  id: string
+  votacionId: string
+  unidadId: string
+  opcionId: string
+  /** Quien lo emitio; con poderes (CU-R-23) puede no ser el propietario. */
+  emitidoPor: string
+  /** Copiado al votar: si el coeficiente cambia, la votacion cerrada no (RN-37). */
+  coeficiente: number
+  fecha: FechaHoraISO
+}
+
+// ---------------------------------------------------------------------------
+// Documentos formales — CU-R-12
+// ---------------------------------------------------------------------------
+export type TipoDocumento = 'paz_y_salvo'
+
+export interface Documento {
+  id: string
+  tipo: TipoDocumento
+  /** Consecutivo por tipo (RN-36). */
+  numero: string
+  copropiedadId: string
+  unidadId: string
+  emitidoEn: FechaISO
+  vigenteHasta: FechaISO
+  estado: 'vigente' | 'anulado'
+}
+
+// ---------------------------------------------------------------------------
 // Sesion y perfiles demo
 // ---------------------------------------------------------------------------
 export type RolUsuario = 'residente' | 'admin'
@@ -275,9 +361,14 @@ export interface BaseDatos {
   comunicados: Comunicado[]
   correspondencia: Correspondencia[]
   visitantes: Visitante[]
+  asambleas: Asamblea[]
+  votaciones: Votacion[]
+  votos: Voto[]
+  documentos: Documento[]
   perfilesDemo: PerfilDemo[]
   consecutivos: {
     pqrs: number
     comprobante: number
+    pazYSalvo: number
   }
 }

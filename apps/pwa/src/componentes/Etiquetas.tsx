@@ -5,6 +5,7 @@
 
 import type {
   CategoriaComunicado,
+  EstadoAsamblea,
   EstadoCorrespondencia,
   EstadoCuota,
   EstadoPqrs,
@@ -74,6 +75,20 @@ const COMUNICADO: Record<CategoriaComunicado, [string, Variante]> = {
 
 export function ChipComunicado({ categoria }: { categoria: CategoriaComunicado }) {
   const [texto, variante] = COMUNICADO[categoria]
+  return <Chip texto={texto} variante={variante} />
+}
+
+const ASAMBLEA: Record<EstadoAsamblea, [string, Variante]> = {
+  convocada: ['Convocada', 'marca'],
+  // La que esta pasando lleva el unico color de alarma de la lista: es la que
+  // tiene votaciones abiertas y la que caduca en minutos.
+  instalada: ['En curso', 'alerta'],
+  cerrada: ['Cerrada', ''],
+  cancelada: ['Cancelada', 'error'],
+}
+
+export function ChipAsamblea({ estado }: { estado: EstadoAsamblea }) {
+  const [texto, variante] = ASAMBLEA[estado]
   return <Chip texto={texto} variante={variante} />
 }
 

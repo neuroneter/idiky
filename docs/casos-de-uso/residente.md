@@ -298,7 +298,13 @@ localmente sin librerías externas (ver [ADR-0005](../adr/0005-codigo-qr-sin-dep
 - RN-26: solo se emite con saldo cero.
 - RN-36: consecutivo único y verificable.
 
-**Estado en el demo:** ⬜ — requiere generación de PDF (ADR-0006, pendiente).
+> **Pregunta abierta (?):** ¿«saldo cero» incluye la cuota del mes en curso que todavía no ha
+> vencido? Hoy el demo la cuenta, así que hay que pagarla antes de emitir. Si la práctica de la
+> copropiedad es otra —al día = nada vencido—, cambia RN-26 y con ella la pantalla.
+
+**Estado en el demo:** 🟡 — `src/features/residente/PazYSalvoPage.tsx`. Verifica RN-26, emite el
+certificado con su consecutivo (RN-36) y lo muestra en pantalla; **falta la descarga en PDF**,
+que depende de ADR-0006.
 
 ---
 
@@ -332,7 +338,11 @@ localmente sin librerías externas (ver [ADR-0005](../adr/0005-codigo-qr-sin-dep
 - RN-32: quien otorgó poder no vota esa unidad directamente.
 - RN-34: una votación cerrada no se reabre.
 
-**Estado en el demo:** ⬜ — no existe el módulo de asambleas.
+**Estado en el demo:** 🟡 — `src/features/residente/AsambleaDetallePage.tsx`. Se vota en las
+asambleas ordinarias y extraordinarias, un voto por unidad (RN-29), solo el propietario
+(RN-51), con el coeficiente copiado al votar (RN-37), y se muestra el conteo por coeficiente.
+**No dice si el punto quedó aprobado**: eso exige la mayoría y el quórum, que siguen sin
+definir (RN-28, T-10). Faltan también los poderes (CU-R-23) y la mora como causal (A4).
 
 ---
 
@@ -410,7 +420,9 @@ se descarga. Requiere ADR-0006.
 **Reglas de negocio**
 - RN-33: la citación debe emitirse con la antelación mínima que exija el reglamento **(?)**.
 
-**Estado en el demo:** ⬜ — no existe el módulo de asambleas.
+**Estado en el demo:** 🟡 — `src/features/residente/AsambleasPage.tsx` muestra la citación, la
+modalidad, el lugar y el orden del día de cada asamblea, ordinaria o extraordinaria. **No
+confirma asistencia** (paso 2) ni entrega la convocatoria en PDF (ADR-0006).
 
 ---
 

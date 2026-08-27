@@ -16,6 +16,7 @@ import type {
   Comunicado,
   Correspondencia,
   Cuota,
+  Documento,
   MedioPago,
   Pago,
   Periodo,
@@ -26,13 +27,19 @@ import type {
   TipoCorrespondencia,
   TipoPqrs,
   Visitante,
+  Voto,
 } from '../dominio/tipos'
 import {
   ahoraISO,
   calcularFechaLimite,
+  calcularSaldo,
   hoyISO,
   prorratearPorCoeficiente,
+  puedeVotar,
+  sumarDias,
   vencimientoDelPeriodo,
+  votacionRecibeVotos,
+  yaVoto,
 } from '../dominio/reglas'
 import { guardar, leer, sembrar } from './almacen'
 
@@ -557,4 +564,111 @@ export async function desvincularResidente(
   if (!residencia) throw new ErrorDeNegocio('El vinculo no existe.')
   residencia.hasta = hoyISO()
   return persistir(bd, residencia)
+}
+
+// ---------------------------------------------------------------------------
+// CU-R-13 — Votar un punto del orden del dia
+// ---------------------------------------------------------------------------
+
+/** Dias que vale un paz y salvo emitido. Provisional: el plazo esta por confirmar. */
+const VIGENCIA_PAZ_Y_SALVO_DIAS = 30
+
+export async function emitirVoto(
+  bdActual: BaseDatos,
+  parametros: {
+    votacionId: string
+    unidadId: string
+    personaId: string
+    opcionId: string
+  },
+): Promise<Resultado<Voto>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  const votacion = bd.votaciones.find((v) => v.id === parametros.votacionId)
+  if (!votacion) throw new ErrorDeNegocio('La votacion no existe.')
+  // RN-34: una votacion cerrada no recibe votos ni se reabre.
+  if (!votacionRecibeVotos(votacion)) {
+    throw new ErrorDeNegocio('La votacion no esta abierta.')
+  }
+
+  const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
+  if (!unidad) throw new ErrorDeNegocio('La unidad no existe.')
+
+  // RN-51: vota el propietario. La comprobacion va aqui y no solo en la pantalla:
+  // esconder el boton no es una regla (T-16).
+  const residencia = bd.residencias.find(
+    (r) => r.unidadId === unidad.id && r.personaId === parametros.personaId && !r.hasta,
+  )
+  if (!puedeVotar(residencia?.rol)) {
+    throw new ErrorDeNegocio('Solo el propietario de la unidad puede votar.')
+  }
+
+  // RN-29: un voto por unidad y por votacion.
+  if (yaVoto(bd.votos, votacion.id, unidad.id)) {
+    throw new ErrorDeNegocio('Esta unidad ya voto este punto.')
+  }
+
+  if (!votacion.opciones.some((opcion) => opcion.id === parametros.opcionId)) {
+    throw new ErrorDeNegocio('La opcion elegida no pertenece a esta votacion.')
+  }
+
+  const voto: Voto = {
+    id: nuevoId('vot'),
+    votacionId: votacion.id,
+    unidadId: unidad.id,
+    opcionId: parametros.opcionId,
+    emitidoPor: parametros.personaId,
+    // RN-37: el coeficiente se copia. Si manana cambia, esta votacion no.
+    coeficiente: unidad.coeficiente,
+    fecha: ahoraISO(),
+  }
+  bd.votos.push(voto)
+  return persistir(bd, voto)
+}
+
+// ---------------------------------------------------------------------------
+// CU-R-12 — Paz y salvo
+// ---------------------------------------------------------------------------
+
+/**
+ * Emite el certificado de paz y salvo de una unidad.
+ *
+ * Lo que si esta resuelto es **cuando se puede emitir** (RN-26: saldo cero) y su
+ * **consecutivo unico** (RN-36). Lo que falta es el PDF: generarlo es la decision
+ * de ADR-0006, que sigue pendiente. Por eso el certificado se guarda y se muestra
+ * en pantalla, y la descarga es lo unico que queda en deuda.
+ */
+export async function emitirPazYSalvo(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; unidadId: string },
+): Promise<Resultado<Documento>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
+  if (!unidad) throw new ErrorDeNegocio('La unidad no existe.')
+
+  // RN-26: solo se emite con saldo cero. La comprobacion vive aqui, no en el boton.
+  const saldo = calcularSaldo(bd.cuotas.filter((cuota) => cuota.unidadId === unidad.id))
+  if (saldo > 0) {
+    throw new ErrorDeNegocio('La unidad tiene saldo pendiente: no se puede emitir el paz y salvo.')
+  }
+
+  const consecutivo = bd.consecutivos.pazYSalvo
+  const hoy = hoyISO()
+  const documento: Documento = {
+    id: nuevoId('doc'),
+    tipo: 'paz_y_salvo',
+    // RN-36: consecutivo unico por tipo.
+    numero: `PS-${hoy.slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`,
+    copropiedadId: parametros.copropiedadId,
+    unidadId: unidad.id,
+    emitidoEn: hoy,
+    vigenteHasta: sumarDias(hoy, VIGENCIA_PAZ_Y_SALVO_DIAS),
+    estado: 'vigente',
+  }
+  bd.documentos.push(documento)
+  bd.consecutivos.pazYSalvo = consecutivo + 1
+  return persistir(bd, documento)
 }
