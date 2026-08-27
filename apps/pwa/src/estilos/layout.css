@@ -145,17 +145,15 @@
   height: 100vh;
 }
 .lateral__marca {
-  font-size: var(--texto-xl);
-  font-weight: 700;
-  letter-spacing: -0.03em;
   padding: 0 var(--e3);
 }
-.lateral__marca span {
+/* Clase propia y no `span` a secas: el Logotipo renderiza spans por dentro. */
+.lateral__marca-sub {
   display: block;
+  margin-top: var(--e1);
   font-size: var(--texto-xs);
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.65);
-  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.7);
 }
 .lateral__nav {
   display: flex;
@@ -277,12 +275,6 @@
 }
 .acceso__marca {
   text-align: center;
-}
-.acceso__logo {
-  font-size: var(--texto-3xl);
-  font-weight: 720;
-  letter-spacing: -0.045em;
-  color: var(--color-marca);
 }
 .acceso__lema {
   color: var(--color-texto-suave);

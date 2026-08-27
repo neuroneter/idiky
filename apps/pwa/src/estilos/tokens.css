@@ -60,10 +60,13 @@
   --color-borde: #e4e5f1;
   --color-borde-fuerte: #c9cbdf;
 
-  /* Texto */
+  /* Texto — los tres grises pasan contraste AA sobre `--color-fondo`.
+     `--color-texto-tenue` estaba en 2.92:1 y se usa en fechas y notas al pie, o
+     sea en texto chico: a los 30 se adivinaba, a los 60 no. Si se retocan estos
+     valores hay que volver a medirlos, no ajustarlos a ojo. */
   --color-texto: #171935;
-  --color-texto-suave: #5b5f82;
-  --color-texto-tenue: #8b8fab;
+  --color-texto-suave: #515170;
+  --color-texto-tenue: #6c6c84;
   --color-texto-inverso: #ffffff;
 
   /* Estados */
@@ -76,16 +79,24 @@
   --color-info: #1e6fb8;
   --color-info-suave: #e4f0fa;
 
-  /* Tipografia */
+  /* Tipografia
+     La fuente es la del sistema a proposito, no por omision: cada persona ve la
+     letra que su telefono ya usa en todo lo demas, y se respeta el tamano que
+     tenga configurado en Ajustes. Alguien de 60 que agrando la letra de su
+     telefono espera que Idiky la agrande tambien. Una tipografia propia sumaria
+     peso, dejaria de funcionar sin conexion (choca con ADR-0002, Capacitor) y
+     seria una dependencia nueva: exige ADR.
+
+     La base es de 16 px, no de 15: el publico va de los 18 a los 60 anos. */
   --fuente: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;
-  --texto-xs: 0.72rem;
-  --texto-sm: 0.82rem;
-  --texto-base: 0.94rem;
-  --texto-lg: 1.08rem;
-  --texto-xl: 1.32rem;
-  --texto-2xl: 1.7rem;
-  --texto-3xl: 2.2rem;
+  --texto-xs: 0.8rem;
+  --texto-sm: 0.875rem;
+  --texto-base: 1rem;
+  --texto-lg: 1.125rem;
+  --texto-xl: 1.375rem;
+  --texto-2xl: 1.75rem;
+  --texto-3xl: 2.25rem;
 
   /* Espacio */
   --e1: 0.25rem;

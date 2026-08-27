@@ -67,6 +67,17 @@ Tipos: `feat`, `fix`, `docs`, `refactor`, `chore`, `test`.
 manifest). El **logotipo** va en minúscula: `idiky`. No mezclar las dos formas en el mismo
 contexto.
 
+**Logotipo.** La casa de la marca seguida del nombre, en
+`apps/pwa/src/componentes/Logotipo.tsx`. Es la **única definición**: ninguna pantalla vuelve a
+escribir «idiky» a mano ni redibuja la casa. Dos reglas:
+
+- **Va limpio sobre la superficie**, sin bloque de color detrás. Si la superficie ya es
+  oscura —la lateral de la consola—, se usa la prop `inverso`.
+- **El nombre se lee entero.** Se probó esconder la casa dentro de una de las íes y se
+  descartó con la prueba delante: al tamaño de la barra lateral la casita se vuelve una
+  mancha, y obliga a descifrar qué letra es. Para un nombre que la gente tiene que leer y
+  decir en voz alta, eso se paga caro.
+
 **Colores.** Todos viven en `apps/pwa/src/estilos/tokens.css`. **Ninguna pantalla escribe un
 color literal.** La identidad combina dos colores y cada uno tiene un trabajo — no son
 intercambiables:
@@ -109,6 +120,21 @@ python3 herramientas/generar-iconos.py
 ```
 
 El empaquetador del demo lee `--color-marca` de los tokens, así que ese no hay que tocarlo.
+
+**Tipografía.** El público va de los **18 a los 60 años**, así que la legibilidad manda sobre
+el estilo. Tres decisiones, todas en `tokens.css`:
+
+- **La fuente es la del sistema a propósito, no por omisión.** Cada persona ve la letra que su
+  teléfono ya usa en todo lo demás —San Francisco en iPhone, Roboto en Android— que es la que
+  su ojo tiene más entrenada. Y respeta el tamaño de letra que tenga configurado en Ajustes:
+  alguien de 60 que agrandó la letra de su teléfono espera que Idiky la agrande también. Una
+  tipografía propia sumaría peso, dejaría de funcionar sin conexión —choca con
+  [ADR-0002](./adr/0002-estrategia-multiplataforma.md), la app va a un WebView de Capacitor—
+  y sería una dependencia nueva: **exige ADR**.
+- **La base es de 16 px**, no de 15. Y el texto más pequeño, de 12,8 px.
+- **Los tres grises pasan contraste AA** sobre `--color-fondo`. `--color-texto-tenue` estaba
+  en 2,92:1 y se usa en fechas y notas al pie, o sea en texto chico. Si se retocan estos
+  valores hay que **volver a medirlos**, no ajustarlos a ojo.
 
 ## 6. Definición de "terminado"
 

@@ -8,6 +8,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
+import { Logotipo } from '../../componentes/Logotipo'
 import * as sel from '../../datos/selectores'
 import { iniciales } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
@@ -28,7 +29,7 @@ export function AccesoPage() {
   return (
     <div className="acceso">
       <div className="acceso__marca">
-        <div className="acceso__logo">idiky</div>
+        <Logotipo tamano="var(--texto-3xl)" />
         <p className="acceso__lema">
           Gestion de copropiedad horizontal
           <br />

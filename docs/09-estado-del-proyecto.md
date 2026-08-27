@@ -61,6 +61,57 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · Logotipo y tipografía — T-09 cerrada
+
+**Qué se hizo**
+
+Se cerró la identidad visual con el encuadre que dio Mary: **el público va de los 18 a los 60
+años**. Eso convirtió la tipografía en un problema de legibilidad medible y no de gusto.
+
+**Logotipo.** La casa de la marca seguida del nombre, en un componente
+(`componentes/Logotipo.tsx`) que ahora usan las tres pantallas donde aparecía la palabra
+escrita a mano: acceso, pantalla de carga y lateral de la consola. Va limpio sobre la
+superficie, sin bloque de color detrás.
+
+Se probaron y descartaron dos alternativas, las dos con la prueba delante:
+
+| Descartada | Por qué |
+|---|---|
+| La casa dentro de una de las íes (`id⌂ky`) | Al tamaño de la barra lateral la casita se vuelve una mancha, y obliga a descifrar qué letra es. Caro para un nombre que hay que leer y decir en voz alta |
+| La i en fucsia | **Desaparece** contra el extremo fucsia del degradado de marca |
+
+**Tipografía.** Se mantiene la fuente del sistema, como decisión y no por omisión: es la que
+cada persona ya lee en su teléfono, y respeta el tamaño de letra que tenga configurado en
+Ajustes — que para alguien de 60 no es un detalle. Una tipografía propia exige ADR (peso,
+funcionamiento sin conexión, ADR-0002).
+
+Lo que sí cambió son dos cosas medibles:
+
+| | Antes | Ahora |
+|---|---|---|
+| Tamaño base | 15 px | **16 px** |
+| Texto más pequeño | 11,5 px | **12,8 px** |
+| `--color-texto-tenue` sobre el fondo | **2,92:1 — no cumplía AA** | **4,70:1** |
+| `--color-texto-suave` | 5,68:1 | 7,00:1 |
+
+El gris tenue era el problema serio: se usa en las fechas de la cartelera y en las notas al
+pie, o sea justo en texto chico, y no alcanzaba el mínimo de contraste.
+
+**Una trampa de CSS que apareció al hacerlo**
+
+`.lateral__marca span` estilaba cualquier `span` dentro de la marca de la consola. Al meter el
+componente —que renderiza spans por dentro— el nombre del logotipo heredaba el estilo del
+subtítulo. Se cambió por la clase `.lateral__marca-sub`. Vale la regla general: **no estilar
+por etiqueta dentro de un contenedor que va a recibir componentes.**
+
+**Qué sigue**
+
+T-09 queda cerrada. Subir la base de 15 a 16 px movió todas las pantallas; se revisaron
+acceso, inicio del residente y consola sin desbordes, pero conviene que el equipo recorra el
+resto del demo.
+
+---
+
 ### 2026-08-26 · Mary + IA (Claude) · Identidad visual: azul y fucsia
 
 **Qué se hizo**

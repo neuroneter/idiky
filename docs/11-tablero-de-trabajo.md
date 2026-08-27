@@ -31,7 +31,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-06 | Decidir el stack de backend (ADR-0008) | Daniel | 📋 Por hacer |
 | T-07 | Documentar los casos de uso de asambleas — **hecho, ver CU-R-13, CU-R-20…24 y CU-A-12, CU-A-17…21** | Mary | ✅ Hecho |
 | T-08 | Documentar el módulo de portería (minuta, validación de visitantes) | Jeimy | 📋 Por hacer |
-| T-09 | Definir la identidad visual real — **colores hechos** (azul + fucsia); faltan logo y tipografía | Zona D | 🔨 En curso |
+| T-09 | Definir la identidad visual real (colores, logo, tipografía) | Zona D | ✅ Hecho |
 
 ## Hecho
 

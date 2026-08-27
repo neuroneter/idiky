@@ -14,6 +14,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { BaseDatos } from '../dominio/tipos'
+import { Logotipo } from '../componentes/Logotipo'
 import { cargar, ErrorDeNegocio, reiniciar, type Resultado } from '../datos/repositorio'
 
 export type TipoAviso = 'exito' | 'error' | 'info'
@@ -140,7 +141,7 @@ export function ProveedorDatos({ children }: { children: ReactNode }) {
   if (!valor) {
     return (
       <div className="pantalla-carga">
-        <div className="marca-carga">idiky</div>
+        <Logotipo tamano="var(--texto-2xl)" />
         <p>Cargando la copropiedad…</p>
       </div>
     )

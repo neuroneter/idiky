@@ -8,6 +8,7 @@ import { useDatos } from '../estado/DatosContext'
 import { useSesion } from '../estado/SesionContext'
 import * as sel from '../datos/selectores'
 import { nombreCompleto } from '../datos/selectores'
+import { Logotipo } from './Logotipo'
 import { Icono, type NombreIcono } from './Icono'
 import { AvisoGlobal } from './Aviso'
 
@@ -45,8 +46,8 @@ export function LayoutAdmin() {
     <div className="consola">
       <aside className="lateral">
         <div className="lateral__marca">
-          idiky
-          <span>{copropiedad?.nombre}</span>
+          <Logotipo inverso />
+          <span className="lateral__marca-sub">{copropiedad?.nombre}</span>
         </div>
 
         <nav className="lateral__nav">

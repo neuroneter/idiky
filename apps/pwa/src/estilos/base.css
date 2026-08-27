@@ -372,13 +372,6 @@ textarea {
   gap: var(--e3);
   color: var(--color-texto-suave);
 }
-.marca-carga {
-  font-size: var(--texto-2xl);
-  font-weight: 700;
-  color: var(--color-marca);
-  letter-spacing: -0.03em;
-}
-
 /* -------------------------------------------------------------------- Aviso */
 .aviso {
   position: fixed;
