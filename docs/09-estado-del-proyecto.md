@@ -61,6 +61,29 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · El principio del respaldo
+
+Mary precisó que **las multas solo se dan si están en el reglamento de copropiedad o fueron
+aprobadas en asamblea**. Es la tercera vez que aparece la misma forma —ya había pasado con la
+tasa de interés, y aplica igual a las cuotas extraordinarias—, así que se nombró como regla
+transversal (RN-45) en vez de repetirla caso por caso:
+
+> **Ningún cobro que no sea la cuota ordinaria puede existir sin apuntar a qué lo autoriza: el
+> reglamento de la copropiedad o un acta de asamblea.**
+
+En el modelo son siempre los mismos tres campos: `origen`, `actaId` y `referencia`. Los llevan
+`TasaInteres` y `ConceptoSancion`.
+
+**Y eso destapó un hueco que nadie había señalado:** `Cuota` **no los tiene**, así que una
+cuota extraordinaria hoy se puede generar sin acta que la respalde. Una extraordinaria sin
+respaldo es tan impugnable como una multa inventada. Queda en RN-45, pendiente.
+
+La consecuencia práctica del principio: cuando un copropietario pregunte «¿por qué me cobran
+esto?», el sistema siempre puede responder con un acta o un artículo, y no con un número
+suelto.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · Multas y cobros adicionales entran al alcance
 
 Mary pidió que el administrador pueda cobrar **cuotas adicionales** y **multas**, y que dentro

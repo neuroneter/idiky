@@ -171,8 +171,15 @@ antes de poder imponer ninguna.
 | `nombre` | string | «Ruido fuera de horario», «Mascota sin correa» |
 | `descripcion` | string | Qué conducta se sanciona |
 | `valor` | number | Valor sugerido; se puede ajustar al imponerla **(?)** |
-| `articuloReglamento` | string? | El artículo que la sustenta. **Sin esto una multa es difícil de defender** |
+| `origen` | `'reglamento' \| 'asamblea'` | **Qué la autoriza. Obligatorio** |
+| `actaId` | string? | El acta que la aprobó, cuando el origen es una asamblea |
+| `referencia` | string | El artículo del reglamento, o el punto del orden del día |
 | `activo` | boolean | Se desactiva, **no se borra**: las multas ya impuestas lo referencian (O3) |
+
+> **Una multa solo existe si el reglamento la contempla o la asamblea la aprobó**
+> (Mary, 2026-08-27). No es un cobro que el administrador pueda inventar: por eso `origen` y
+> `referencia` no son opcionales. Es la misma estructura que `TasaInteres`, y por la misma
+> razón.
 
 ### Sancion — la multa impuesta
 
@@ -329,13 +336,30 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-35 | El acta se construye desde los datos registrados; aprobada, no se edita — se aclara con un acta nueva. | *pendiente* |
 | RN-36 | Todo documento formal lleva consecutivo único por tipo y es verificable. | *pendiente* |
 | RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | *pendiente* |
-| RN-38 | Solo se puede imponer una multa que exista en el catálogo de la copropiedad. | *pendiente* |
+| RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si el reglamento lo contempla o una asamblea lo aprobó. | *pendiente* |
 | RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al proponerla. **(? — depende del debido proceso, Ley 675)** | *pendiente* |
 | RN-40 | Un concepto del catálogo no se borra: se desactiva, porque las multas impuestas lo referencian. | *pendiente* |
 | RN-41 | Una cuota adicional exige concepto y valor explícitos; no se prorratea por coeficiente. | *pendiente* |
 | RN-42 | El interés de mora solo se calcula si la copropiedad lo tiene activado; apagado, no se genera ninguno. | *pendiente* |
 | RN-43 | La tasa la aprueba la copropiedad —su reglamento o un acta de asamblea— y el sistema exige registrar cuál. La ley solo pone el techo: una tasa por encima del tope legal se rechaza. **(? — tope por confirmar)** | *pendiente* |
 | RN-44 | El interés se liquida sobre lo vencido y genera una cuota de tipo `interes`, que entra en la cartera como cualquier otra. | *pendiente* |
+| RN-45 | **Todo cobro que no sea la cuota ordinaria debe apuntar a qué lo autoriza**: el reglamento o un acta de asamblea. Aplica a extraordinarias, multas, intereses y cobros adicionales. | *pendiente* |
+
+## 3 bis. El principio del respaldo
+
+Tres requisitos distintos —la tasa de interés, las multas y las cuotas extraordinarias—
+llegaron a la misma forma, así que conviene nombrarla una vez:
+
+> **Ningún cobro que no sea la cuota ordinaria puede existir sin apuntar a qué lo autoriza:
+> el reglamento de la copropiedad o un acta de asamblea.**
+
+En el modelo eso son siempre los mismos tres campos: `origen`, `actaId` y `referencia`. Los
+llevan `TasaInteres` y `ConceptoSancion`, y **deberían llevarlos también las cuotas
+extraordinarias** — hoy `Cuota` no los tiene, y una extraordinaria sin acta que la respalde es
+tan impugnable como una multa inventada. Es RN-45 y está pendiente.
+
+La consecuencia práctica: cuando un copropietario pregunte «¿por qué me cobran esto?», el
+sistema siempre puede responder con un acta o un artículo, en vez de con un número suelto.
 
 ## 4. Convenciones de datos
 

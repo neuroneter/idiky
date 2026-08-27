@@ -190,8 +190,9 @@ CU-A-22, CU-A-23 y CU-A-24.
 - **Quién decide los descargos.** ¿La misma persona que impuso la multa, u otra? → *(respuesta)*
 - **El valor.** ¿Es fijo por concepto, o el que impone puede ajustarlo? Si puede, ¿con qué
   tope? → *(respuesta)*
-- **Sin artículo del reglamento.** ¿Se permite crear un concepto de multa que no cite el
-  artículo que lo sustenta, o el sistema debe impedirlo? → *(respuesta)*
+- ~~**Sin artículo del reglamento.**~~ → ✅ **Respondido (Mary, 2026-08-27):** una multa solo
+  se da si **está en el reglamento o fue aprobada en asamblea**. El respaldo es obligatorio:
+  sin él, el concepto no se crea. Es el mismo principio que rige la tasa de interés (RN-45).
 - **Reincidencia.** ¿La multa sube si se repite la conducta? → *(respuesta)*
 - **Multa anulada después de pagada.** ¿Se devuelve el dinero o se abona a la siguiente cuota?
   → *(respuesta)*

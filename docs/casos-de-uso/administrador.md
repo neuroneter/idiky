@@ -417,19 +417,26 @@ y vincular residente).
 
 **Flujo principal**
 1. El administrador ve los conceptos de multa de su copropiedad, activos e inactivos.
-2. Crea uno: nombre, descripción de la conducta, valor sugerido y **el artículo del reglamento
-   que lo sustenta**.
+2. Crea uno: nombre, descripción de la conducta, valor sugerido y **qué lo autoriza** — el
+   artículo del reglamento, o el acta de la asamblea que lo aprobó.
 3. El sistema lo guarda como activo y queda disponible para CU-A-23.
+
+> **Una multa solo existe si el reglamento la contempla o la asamblea la aprobó**
+> (decisión del equipo, 2026-08-27). No es un cobro que el administrador pueda inventar, así
+> que el respaldo **no es opcional**: sin él, el concepto no se crea. Es el mismo principio que
+> rige la tasa de interés y las cuotas extraordinarias — ver
+> [`../05-modelo-de-datos.md`](../05-modelo-de-datos.md) §3 bis, «El principio del respaldo».
 
 **Flujos alternativos**
 - A1. Editar un concepto → **no cambia las multas ya impuestas**, que copiaron su valor (RN-37).
 - A2. Dar de baja un concepto → se marca inactivo. **No se borra**, porque las multas impuestas
   lo referencian (RN-40).
-- A3. Crear un concepto sin artículo del reglamento → el sistema avisa de que la multa será
-  más difícil de defender, pero **(?)** queda por decidir si lo impide.
+- A3. La asamblea aprueba multas nuevas → se crean los conceptos citando esa acta, y quedan
+  disponibles desde entonces.
 
 **Reglas de negocio**
-- RN-38, RN-40.
+- RN-38: solo entra al catálogo lo que el reglamento contempla o la asamblea aprobó.
+- RN-40, RN-45.
 
 **Estado en el demo:** ⬜ — no existe.
 
