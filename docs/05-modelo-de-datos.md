@@ -69,7 +69,7 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 | `origen` | `'reglamento' \| 'asamblea'` \| ausente | **Solo la ordinaria puede ir sin respaldo.** En la extraordinaria es siempre `'asamblea'` (RN-46) |
 | `actaId` | string? | El acta que la aprobó |
 | `referencia` | string? | Número y fecha del acta, o el artículo del reglamento |
-| `soporteId` | string? | El **documento adjunto** que lo prueba. Obligatorio cuando hay respaldo (RN-47) |
+| `justificacion` | string? | **Por qué se cobra y con qué acta**, citando su fecha. Obligatoria cuando hay respaldo (RN-47) |
 
 ### Pago
 `id`, `unidadId`, `cuotaIds[]`, `valor`, `medio` (`'pse' \| 'tarjeta' \| 'transferencia' \| 'efectivo' \| 'otro'`), `referencia`, `fecha`, `comprobante` (consecutivo, RN-07).
@@ -135,10 +135,10 @@ aprobó esa copropiedad, y la ley solo dice hasta dónde puede llegar.
 | `origen` | `'reglamento' \| 'asamblea'` | Qué la autoriza |
 | `actaId` | string? | El acta que la aprobó, cuando el origen es una asamblea. **Enlaza la cartera con el módulo de asambleas** (CU-A-20) |
 | `referencia` | string | El artículo del reglamento, o el punto del orden del día |
-| `soporteId` | string | El documento adjunto que lo prueba (RN-47) |
+| `justificacion` | string | Por qué se cobra esa tasa y en qué acta se aprobó, con su fecha (RN-47) |
 
-> Sin el soporte adjunto, un copropietario que pregunte «¿por qué me cobran este interés?»
-> recibe una afirmación. Con él, recibe el acta.
+> Sin la justificación, un copropietario que pregunte «¿por qué me cobran este interés?» recibe
+> un número. Con ella, recibe la decisión que lo autoriza y dónde quedó escrita.
 
 > **Por qué esto es una tabla y no una constante.** «Normativa vigente» significa una tasa que
 > **cambia periódicamente** y que fija una autoridad externa —la certifica la Superintendencia
@@ -179,7 +179,7 @@ antes de poder imponer ninguna.
 | `origen` | `'reglamento' \| 'asamblea'` | **Qué la autoriza. Obligatorio** |
 | `actaId` | string? | El acta que la aprobó, cuando el origen es una asamblea |
 | `referencia` | string | El artículo del reglamento, o el punto del orden del día |
-| `soporteId` | string | El documento adjunto que lo prueba (RN-47) |
+| `justificacion` | string | Qué autoriza esta multa y en qué acta o artículo, con su fecha (RN-47) |
 | `activo` | boolean | Se desactiva, **no se borra**: las multas ya impuestas lo referencian (O3) |
 
 > **Una multa solo existe si el reglamento la contempla o la asamblea la aprobó**
@@ -351,8 +351,8 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-44 | El interés se liquida sobre lo vencido y genera una cuota de tipo `interes`, que entra en la cartera como cualquier otra. | *pendiente* |
 | RN-45 | **Todo cobro que no sea la cuota ordinaria debe apuntar a qué lo autoriza**: el reglamento o un acta de asamblea. Aplica a extraordinarias, multas, intereses y cobros adicionales. | *pendiente* |
 | RN-46 | Una cuota **extraordinaria** exige el acta de asamblea que la aprobó. No admite la opción «reglamento»: siempre es acta. | *pendiente* |
-| RN-47 | El respaldo **se adjunta, no se cita**: sin el documento soporte cargado, el cobro no se crea. El copropietario puede abrirlo desde su estado de cuenta. | *pendiente* |
-| RN-48 | La cuota extraordinaria tiene **destinación específica**: su concepto es el que aprobó el acta, no texto libre, y el recaudo se destina a eso. | *pendiente* |
+| RN-47 | El respaldo se **justifica por escrito**: el cobro exige una justificación que cite el acta y su fecha y diga para qué se aprobó. Sin ella el cobro no se crea. El copropietario la lee desde su estado de cuenta. | *pendiente* |
+| RN-48 | La cuota extraordinaria tiene **destinación específica**: el concepto la describe en texto libre —cada obra es distinta— pero es la destinación que aprobó el acta, y el recaudo se destina a eso. | *pendiente* |
 
 ## 3 bis. El principio del respaldo
 
@@ -381,24 +381,26 @@ lo hayan votado. Y además **tiene destinación específica**: la asamblea no ap
 extraordinaria», aprueba una extraordinaria **para algo** —impermeabilizar la cubierta, cambiar
 el ascensor—.
 
-De ahí sale una consecuencia de modelado que es fácil pasar por alto: **el `concepto` de una
-extraordinaria no es texto libre que el administrador escriba**, es la destinación que aprobó
-la asamblea, y por eso sale del acta (RN-48). Escribir otra cosa es cobrar por algo que nadie
-votó.
+**El `concepto` sí es texto libre** (Mary, 2026-08-27), y tiene que serlo: el «para qué» puede
+ser un proyecto de mejora de zonas comunes, la reparación de un daño del edificio, automatizar
+la entrada, y no hay lista que las cubra todas. Lo que no es libre es **el hecho**: la
+destinación que se escribe es la que aprobó la asamblea, no una que invente el administrador
+(RN-48). El campo es abierto; el dato no es discrecional.
 
-**El respaldo se adjunta, no se cita** (Mary, 2026-08-27). Un número de acta escrito a mano no
-es un respaldo: es una afirmación. Por eso los tres campos van con un cuarto, `soporteId`, que
-apunta al **documento de verdad** —el acta escaneada, el extracto del reglamento— y **sin él el
-cobro no se crea** (RN-47).
+**El respaldo se justifica por escrito** (Mary, 2026-08-27). Los tres campos van con un cuarto,
+`justificacion`, donde el administrador escribe **para qué se aprobó el cobro y en qué acta,
+citando su fecha**. Sin esa justificación el cobro no se crea (RN-47).
 
-Eso convierte el principio en algo comprobable: el copropietario no solo lee «aprobado en acta
-012 del 15 de marzo», **puede abrirla desde su estado de cuenta**.
+Eso deja el principio a la vista del copropietario: en vez de un número suelto lee «aprobada en
+la asamblea del 15 de marzo para impermeabilizar la cubierta».
 
-> ⚠️ **Esto exige una capacidad que la app no tiene: almacenar archivos.** No hay nada en el
-> demo ni en el modelo que guarde un PDF subido por alguien. Es una decisión de arquitectura de
-> la fase 2 —dónde viven los archivos, qué tamaño se admite, quién puede verlos, cuánto tiempo
-> se conservan— y se suma a [ADR-0006](./adr/README.md), que ya trataba la generación de
-> documentos. Generar un PDF y recibir uno son problemas distintos.
+> **Se consideró exigir el acta adjunta y se dejó para después** (Mary, 2026-08-27). La
+> justificación escrita es más débil que el documento —quien la escribe puede equivocarse en la
+> fecha, o citar un acta que no dice eso—, y el copropietario no puede verificarla por su
+> cuenta. Se acepta a cambio de no meter en la fase 1 una capacidad que la app no tiene:
+> **almacenar archivos que suben los usuarios**. Cuando exista (fase 2, ADR-0006), el adjunto
+> se suma a la justificación; no la reemplaza, porque el texto sigue siendo lo que se lee de un
+> vistazo en el estado de cuenta.
 
 La consecuencia práctica: cuando un copropietario pregunte «¿por qué me cobran esto?», el
 sistema siempre puede responder con un acta o un artículo, en vez de con un número suelto.

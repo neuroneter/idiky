@@ -61,28 +61,42 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
-### 2026-08-27 · Mary + IA (Claude) · El respaldo se adjunta, y la extraordinaria tiene destino
+### 2026-08-27 · Mary + IA (Claude) · El respaldo se justifica, y la extraordinaria tiene destino
 
-Tres precisiones de Mary que endurecieron el principio del respaldo, en orden:
+Cuatro precisiones de Mary que endurecieron el principio del respaldo, en orden:
 
 **1. La extraordinaria siempre se aprueba en asamblea.** No admite la opción «reglamento» que
 sí tienen las multas y la tasa: su respaldo es siempre un acta (RN-46).
 
-**2. El respaldo se adjunta, no se cita.** Un número de acta escrito a mano no es un respaldo,
-es una afirmación. Sin el **documento cargado** el cobro no se crea (RN-47), y el copropietario
-puede abrirlo desde su estado de cuenta. Eso convierte el principio en algo comprobable.
+**2. El respaldo se justifica por escrito.** Primero se planteó exigir el acta **adjunta**, y
+Mary lo corrigió: en su lugar va una **casilla de justificación que alude al acta y a su
+fecha** (RN-47). Sin ella el cobro no se crea, y el copropietario la lee desde su estado de
+cuenta.
+
+Vale dejar dicho el costo, porque la razón para adjuntar era buena: un acta citada a mano es
+más débil que el documento —la fecha puede estar mal, o el acta puede no decir eso— y el
+copropietario no puede verificarla solo. Se acepta a cambio de no meter en la fase 1 una
+capacidad que la app no tiene: **almacenar archivos que suben los usuarios**. Cuando exista
+(fase 2, ADR-0006), el adjunto **se suma** a la justificación; no la reemplaza, porque el texto
+es lo que se lee de un vistazo.
 
 **3. La extraordinaria tiene destinación específica.** La asamblea no aprueba «una
-extraordinaria», aprueba una extraordinaria **para algo**. De ahí sale una consecuencia de
-modelado fácil de pasar por alto: **el `concepto` no es texto libre**, es la destinación que
-aprobó el acta (RN-48). Escribir otra cosa es cobrar por algo que nadie votó.
+extraordinaria», aprueba una extraordinaria **para algo** (RN-48). Escribir otra cosa es cobrar
+por algo que nadie votó.
+
+**4. Y el concepto sí es texto libre.** Segunda corrección de Mary, sobre la conclusión que yo
+había sacado del punto 3: el «para qué» puede ser un proyecto de mejora de zonas comunes,
+reparar un daño del edificio, automatizar la entrada —no hay lista que las cubra—. El campo es
+abierto; lo que no es discrecional es **el hecho** que describe. La distinción que importa: no
+se restringe el formato del dato, se exige que corresponda a lo aprobado, y eso lo sostiene la
+justificación del punto 2, no un menú desplegable.
 
 **Dos consecuencias que exceden la cartera**
 
-- **Adjuntar archivos es una capacidad que la app no tiene.** No hay nada en el demo ni en el
-  modelo que guarde un PDF subido por alguien. Dónde viven, qué tamaño se admite, quién puede
-  verlos: entra en ADR-0006, que hasta ahora solo trataba **generar** documentos. Generar un
-  PDF y recibir uno son problemas distintos.
+- **Recibir archivos sigue pendiente, ahora sin bloquear la fase 1.** No hay nada en el demo ni
+  en el modelo que guarde un PDF subido por alguien: dónde viven, qué tamaño se admite, quién
+  puede verlos. Queda anotado en ADR-0006, que hasta ahora solo trataba **generar** documentos.
+  Generar un PDF y recibir uno son problemas distintos.
 - **La destinación específica es dato contable.** Lo recaudado por una extraordinaria tiene que
   poder cruzarse con lo gastado en esa destinación, y eso vive en la aplicación contable de
   Jeimy. Es el primer caso concreto de lo que las dos apps tienen que intercambiar (T-17).
