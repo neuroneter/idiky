@@ -148,7 +148,8 @@ Idiky.vistaCartera = (function () {
             return el('tr', null, [
               el('td', null, [
                 el('strong', null, cuota.concepto),
-                el('span', 'sub', f.periodo(cuota.periodo)),
+                el('span', 'sub', f.periodo(cuota.periodo)
+                  + (cuota.cuentaIngreso ? ' · PUC ' + cuota.cuentaIngreso : '')),
               ]),
               el('td', 'sub', f.fechaCorta(cuota.fechaVencimiento)),
               el('td', 'derecha cifra', f.dinero(cuota.valor)),

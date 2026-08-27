@@ -31,7 +31,7 @@ var Idiky = window.Idiky || (window.Idiky = {})
 Idiky.contabilidad = (function () {
   'use strict'
 
-  var plan = Idiky.plan
+  var puc = Idiky.puc
 
   /**
    * Fecha en que una cuota se causa: el primer dia de su periodo.
@@ -46,6 +46,15 @@ Idiky.contabilidad = (function () {
 
   function fechaDeAplicacion(pago) {
     return (pago.fechaAplicacion || pago.fecha).slice(0, 10)
+  }
+
+  /**
+   * Una cuenta es de cartera si cuelga del grupo 13 (deudores). Se mira el
+   * codigo y no una lista fija, para que siga funcionando si el usuario abre
+   * cuentas nuevas de cartera en el plan.
+   */
+  function esDeCartera(codigo) {
+    return String(codigo).indexOf('13') === 0
   }
 
   function enRango(fecha, desde, hasta) {
@@ -77,7 +86,14 @@ Idiky.contabilidad = (function () {
     return linea
   }
 
-  /** Asientos que se derivan de los documentos, sin que nadie los escriba. */
+  /**
+   * Asientos que se derivan de los documentos, sin que nadie los escriba.
+   *
+   * Cada documento trae GUARDADA la cuenta que uso el dia en que se creo. No
+   * se consulta el parametro actual: si manana se cambia a que cuenta va una
+   * cuota de administracion, las cuotas viejas siguen donde estaban. Cambiar
+   * un parametro no debe reescribir la contabilidad de ayer.
+   */
   function asientosDerivados(datos) {
     var lineas = []
 
@@ -85,46 +101,53 @@ Idiky.contabilidad = (function () {
     datos.cuotas.forEach(function (cuota) {
       var fecha = fechaCausacion(cuota)
       var extra = { unidadId: cuota.unidadId, documento: 'Causacion ' + cuota.periodo }
-      lineas.push(asiento(fecha, plan.CARTERA, cuota.valor, 0, cuota.concepto, extra))
-      lineas.push(asiento(fecha, plan.cuentaDeIngreso(cuota.tipo), 0, cuota.valor, cuota.concepto, extra))
+      lineas.push(asiento(fecha, cuota.cuentaCartera, cuota.valor, 0, cuota.concepto, extra))
+      lineas.push(asiento(fecha, cuota.cuentaIngreso, 0, cuota.valor, cuota.concepto, extra))
     })
 
     datos.pagos.forEach(function (pago) {
       if (pago.estado === 'reportado') return
-      var imputado = (pago.imputaciones || []).reduce(function (t, l) { return t + l.valor }, 0)
       var aFavor = pago.saldoAFavor || 0
       var extra = { unidadId: pago.unidadId, documento: pago.recibo || '' }
-
-      // Se aplica un pago: entra a caja, baja la cartera, y lo que sobre
-      // queda como anticipo, que es un pasivo — plata del propietario que
-      // todavia no es ingreso de la copropiedad.
       var fecha = fechaDeAplicacion(pago)
-      lineas.push(asiento(fecha, plan.CAJA, pago.valor, 0, 'Recaudo', extra))
-      if (imputado > 0) lineas.push(asiento(fecha, plan.CARTERA, 0, imputado, 'Abono a cartera', extra))
-      if (aFavor > 0) lineas.push(asiento(fecha, plan.ANTICIPOS, 0, aFavor, 'Saldo a favor', extra))
+
+      // Se aplica un pago: entra a caja, baja la cartera de cada cuota que
+      // toco, y lo que sobre queda como anticipo — un pasivo, porque es plata
+      // del propietario que todavia no es ingreso de la copropiedad.
+      lineas.push(asiento(fecha, pago.cuentaCaja, pago.valor, 0, 'Recaudo', extra))
+      ;(pago.imputaciones || []).forEach(function (linea) {
+        lineas.push(asiento(fecha, linea.cuenta, 0, linea.valor, 'Abono a cartera', extra))
+      })
+      if (aFavor > 0) {
+        lineas.push(asiento(fecha, pago.cuentaAnticipos, 0, aFavor, 'Saldo a favor', extra))
+      }
 
       // La anulacion es un hecho aparte, con su propia fecha: revierte el
       // asiento sin borrarlo.
       if (pago.estado === 'anulado' && pago.fechaAnulacion) {
         var anula = pago.fechaAnulacion.slice(0, 10)
-        lineas.push(asiento(anula, plan.CAJA, 0, pago.valor, 'Anulacion de recibo', extra))
-        if (imputado > 0) lineas.push(asiento(anula, plan.CARTERA, imputado, 0, 'Anulacion de recibo', extra))
-        if (aFavor > 0) lineas.push(asiento(anula, plan.ANTICIPOS, aFavor, 0, 'Anulacion de recibo', extra))
+        lineas.push(asiento(anula, pago.cuentaCaja, 0, pago.valor, 'Anulacion de recibo', extra))
+        ;(pago.imputaciones || []).forEach(function (linea) {
+          lineas.push(asiento(anula, linea.cuenta, linea.valor, 0, 'Anulacion de recibo', extra))
+        })
+        if (aFavor > 0) {
+          lineas.push(asiento(anula, pago.cuentaAnticipos, aFavor, 0, 'Anulacion de recibo', extra))
+        }
       }
     })
 
     datos.gastos.forEach(function (gasto) {
-      var cuenta = plan.cuentaDeGasto(gasto.categoria)
       var extra = { documento: gasto.proveedor || '' }
 
       // Se causa el gasto: sube el egreso y sube la cuenta por pagar.
-      lineas.push(asiento(gasto.fecha, cuenta, gasto.valor, 0, gasto.concepto, extra))
-      lineas.push(asiento(gasto.fecha, plan.POR_PAGAR, 0, gasto.valor, gasto.concepto, extra))
+      lineas.push(asiento(gasto.fecha, gasto.cuenta, gasto.valor, 0, gasto.concepto, extra))
+      lineas.push(asiento(gasto.fecha, gasto.cuentaPorPagar, 0, gasto.valor, gasto.concepto, extra))
 
       // Se paga: baja la cuenta por pagar y sale de caja.
       if (gasto.estado === 'pagado' && gasto.fechaPago) {
-        lineas.push(asiento(gasto.fechaPago, plan.POR_PAGAR, gasto.valor, 0, 'Pago a ' + (gasto.proveedor || 'proveedor'), extra))
-        lineas.push(asiento(gasto.fechaPago, plan.CAJA, 0, gasto.valor, 'Pago a ' + (gasto.proveedor || 'proveedor'), extra))
+        var quien = 'Pago a ' + (gasto.proveedor || 'proveedor')
+        lineas.push(asiento(gasto.fechaPago, gasto.cuentaPorPagar, gasto.valor, 0, quien, extra))
+        lineas.push(asiento(gasto.fechaPago, gasto.cuentaCaja, 0, gasto.valor, quien, extra))
       }
     })
 
@@ -164,7 +187,7 @@ Idiky.contabilidad = (function () {
   // ---------------------------------------------------------------------------
 
   /**
-   * Saldo de cada cuenta, en la convencion `debe - haber`.
+   * Saldo de cada cuenta que recibe movimiento, en la convencion `debe - haber`.
    * Activo y gasto quedan positivos; pasivo, patrimonio e ingreso, negativos.
    */
   function saldosPorCuenta(lineas, desde, hasta) {
@@ -176,20 +199,61 @@ Idiky.contabilidad = (function () {
     return saldos
   }
 
-  /** Convierte los saldos de una clase en lineas presentables, ya con su signo. */
-  function lineasDeClase(saldos, clase) {
-    var invertir = clase === 'pasivo' || clase === 'patrimonio' || clase === 'ingreso'
-    return plan.deClase(clase)
-      .map(function (cuenta) {
-        var bruto = saldos[cuenta.codigo] || 0
-        return {
-          codigo: cuenta.codigo,
-          concepto: cuenta.nombre,
-          valor: invertir ? -bruto : bruto,
+  /** La cuenta de cuatro digitos bajo la que se agrupa un saldo. */
+  function cuentaDePresentacion(codigo) {
+    return String(codigo).length === 6 ? String(codigo).slice(0, 4) : String(codigo)
+  }
+
+  /**
+   * Convierte los saldos de una clase en lineas presentables, ya con su signo.
+   *
+   * Se presenta en dos niveles: la cuenta de cuatro digitos con su total, y
+   * debajo sus auxiliares. En una copropiedad ese detalle es justamente lo que
+   * quiere ver la asamblea — "Servicios" no dice nada, "Vigilancia 7.600.000"
+   * si. Cada linea de cuenta trae `hijos`; los totales se suman solo sobre las
+   * cuentas, nunca sobre los auxiliares, para no contar dos veces.
+   */
+  function lineasDeClase(plan, saldos, clase) {
+    var invertir = puc.seInvierte(clase)
+    var cuentas = {}
+
+    Object.keys(saldos).forEach(function (codigo) {
+      if (puc.claseDe(codigo) !== clase) return
+      var valor = invertir ? -saldos[codigo] : saldos[codigo]
+      if (valor === 0) return
+
+      var padre = cuentaDePresentacion(codigo)
+      if (!cuentas[padre]) {
+        cuentas[padre] = {
+          codigo: padre,
+          concepto: nombreDeCuenta(plan, padre),
+          valor: 0,
+          hijos: [],
         }
+      }
+      cuentas[padre].valor += valor
+      if (padre !== String(codigo)) {
+        cuentas[padre].hijos.push({
+          codigo: String(codigo),
+          concepto: nombreDeCuenta(plan, codigo),
+          valor: valor,
+        })
+      }
+    })
+
+    return Object.keys(cuentas)
+      .sort()
+      .map(function (codigo) {
+        var cuenta = cuentas[codigo]
+        cuenta.hijos.sort(function (a, b) { return a.codigo.localeCompare(b.codigo) })
+        return cuenta
       })
-      .filter(function (linea) { return linea.valor !== 0 })
-      .sort(function (a, b) { return b.valor - a.valor })
+      .filter(function (cuenta) { return cuenta.valor !== 0 || cuenta.hijos.length > 0 })
+  }
+
+  function nombreDeCuenta(plan, codigo) {
+    var encontrada = (plan || []).filter(function (c) { return c.codigo === codigo })[0]
+    return encontrada ? encontrada.nombre : codigo
   }
 
   function sumar(lineas) {
@@ -211,7 +275,7 @@ Idiky.contabilidad = (function () {
   function movimientosDeUnidad(datos, unidadId, desde, hasta) {
     var eventos = libro(datos)
       .filter(function (l) {
-        return l.cuenta === plan.CARTERA && l.unidadId === unidadId
+        return esDeCartera(l.cuenta) && l.unidadId === unidadId
       })
       .sort(function (a, b) {
         return a.fecha.localeCompare(b.fecha) || b.debe - a.debe
@@ -259,7 +323,7 @@ Idiky.contabilidad = (function () {
   /** Efecto neto de los ajustes sobre la cartera de una unidad, hasta una fecha. */
   function ajusteDeCarteraDeUnidad(datos, unidadId, hasta) {
     return asientosDeAjustes(datos.comprobantes).reduce(function (total, linea) {
-      if (linea.cuenta !== plan.CARTERA || linea.unidadId !== unidadId) return total
+      if (!esDeCartera(linea.cuenta) || linea.unidadId !== unidadId) return total
       if (!enRango(linea.fecha, null, hasta)) return total
       return total + linea.debe - linea.haber
     }, 0)
@@ -271,8 +335,8 @@ Idiky.contabilidad = (function () {
 
   function estadoDeResultados(datos, desde, hasta) {
     var saldos = saldosPorCuenta(libro(datos), desde, hasta)
-    var ingresos = lineasDeClase(saldos, 'ingreso')
-    var egresos = lineasDeClase(saldos, 'gasto')
+    var ingresos = lineasDeClase(datos.plan, saldos, 'ingreso')
+    var egresos = lineasDeClase(datos.plan, saldos, 'gasto')
     var totalIngresos = sumar(ingresos)
     var totalEgresos = sumar(egresos)
 
@@ -304,18 +368,18 @@ Idiky.contabilidad = (function () {
   function situacionFinanciera(datos, hasta) {
     var saldos = saldosPorCuenta(libro(datos), null, hasta)
 
-    var activo = lineasDeClase(saldos, 'activo')
-    var pasivo = lineasDeClase(saldos, 'pasivo')
-    var patrimonio = lineasDeClase(saldos, 'patrimonio')
+    var activo = lineasDeClase(datos.plan, saldos, 'activo')
+    var pasivo = lineasDeClase(datos.plan, saldos, 'pasivo')
+    var patrimonio = lineasDeClase(datos.plan, saldos, 'patrimonio')
 
-    var totalIngresos = sumar(lineasDeClase(saldos, 'ingreso'))
-    var totalEgresos = sumar(lineasDeClase(saldos, 'gasto'))
+    var totalIngresos = sumar(lineasDeClase(datos.plan, saldos, 'ingreso'))
+    var totalEgresos = sumar(lineasDeClase(datos.plan, saldos, 'gasto'))
     var resultadoAcumulado = totalIngresos - totalEgresos
 
     // El resultado del ejercicio se presenta dentro del patrimonio.
     var lineasPatrimonio = patrimonio.concat(
       resultadoAcumulado !== 0
-        ? [{ codigo: '', concepto: 'Resultado acumulado del ejercicio', valor: resultadoAcumulado }]
+        ? [{ codigo: '3605', concepto: 'Excedente del ejercicio', valor: resultadoAcumulado, hijos: [] }]
         : [],
     )
 
@@ -371,6 +435,37 @@ Idiky.contabilidad = (function () {
     return { saldoInicial: saldoInicial, lineas: lineas, saldoFinal: saldo }
   }
 
+  /**
+   * Balance de prueba: todas las cuentas con movimiento en el rango, con sus
+   * totales de debe y haber. Es la vista que usa un contador para revisar.
+   */
+  function balanceDePrueba(datos, desde, hasta) {
+    var acumulado = {}
+    libro(datos).forEach(function (linea) {
+      if (!enRango(linea.fecha, desde, hasta)) return
+      if (!acumulado[linea.cuenta]) acumulado[linea.cuenta] = { debe: 0, haber: 0 }
+      acumulado[linea.cuenta].debe += linea.debe
+      acumulado[linea.cuenta].haber += linea.haber
+    })
+
+    var lineas = Object.keys(acumulado).sort().map(function (codigo) {
+      return {
+        codigo: codigo,
+        nombre: nombreDeCuenta(datos.plan, codigo),
+        clase: puc.claseDe(codigo),
+        debe: acumulado[codigo].debe,
+        haber: acumulado[codigo].haber,
+        saldo: acumulado[codigo].debe - acumulado[codigo].haber,
+      }
+    })
+
+    return {
+      lineas: lineas,
+      totalDebe: lineas.reduce(function (t, l) { return t + l.debe }, 0),
+      totalHaber: lineas.reduce(function (t, l) { return t + l.haber }, 0),
+    }
+  }
+
   /** Un comprobante es valido si cuadra y mueve algo. */
   function validarComprobante(lineas) {
     var utiles = (lineas || []).filter(function (l) {
@@ -391,7 +486,7 @@ Idiky.contabilidad = (function () {
       if (debe > 0 && haber > 0) {
         return {
           valido: false,
-          motivo: 'Cada linea va al debe o al haber, no a los dos. Revisa "' + plan.nombre(linea.cuenta) + '".',
+          motivo: 'Cada linea va al debe o al haber, no a las dos. Revisa la cuenta ' + linea.cuenta + '.',
         }
       }
       totalDebe += debe
@@ -418,6 +513,8 @@ Idiky.contabilidad = (function () {
     estadoDeResultados: estadoDeResultados,
     situacionFinanciera: situacionFinanciera,
     auxiliarDeCuenta: auxiliarDeCuenta,
+    balanceDePrueba: balanceDePrueba,
+    esDeCartera: esDeCartera,
     validarComprobante: validarComprobante,
   }
 })()

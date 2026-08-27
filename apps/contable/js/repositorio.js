@@ -153,8 +153,22 @@ Idiky.repo = (function () {
     return d.numeroRecibo(consecutivo)
   }
 
+  /**
+   * Deja solo las lineas con valor y le pone a cada una la cuenta de cartera
+   * de su cuota. Asi el recibo guarda contra que cuenta del PUC se abono, y
+   * no hay que volver a deducirlo cuando se arme un reporte.
+   */
   function limpiarImputaciones(imputaciones) {
-    return imputaciones.filter(function (linea) { return linea.valor > 0 })
+    return imputaciones
+      .filter(function (linea) { return linea.valor > 0 })
+      .map(function (linea) {
+        var cuota = bd.cuotas.filter(function (c) { return c.id === linea.cuotaId })[0]
+        return {
+          cuotaId: linea.cuotaId,
+          valor: linea.valor,
+          cuenta: (cuota && cuota.cuentaCartera) || bd.parametros.cartera.ordinaria,
+        }
+      })
   }
 
   /**
@@ -182,6 +196,8 @@ Idiky.repo = (function () {
       origen: 'administracion',
       conceptoInformado: parametros.conceptoInformado || '',
       recibo: emitirRecibo(),
+      cuentaCaja: bd.parametros.caja,
+      cuentaAnticipos: bd.parametros.anticipos,
       imputaciones: limpiarImputaciones(imputaciones),
       saldoAFavor: d.saldoAFavorDelPago(parametros.valor, imputaciones),
       fechaAplicacion: ahora,
@@ -214,6 +230,8 @@ Idiky.repo = (function () {
 
     pago.imputaciones = limpiarImputaciones(imputaciones)
     pago.saldoAFavor = d.saldoAFavorDelPago(pago.valor, imputaciones)
+    pago.cuentaCaja = bd.parametros.caja
+    pago.cuentaAnticipos = bd.parametros.anticipos
     pago.estado = 'aplicado'
     pago.recibo = emitirRecibo()
     pago.fechaAplicacion = d.ahoraISO()
@@ -294,6 +312,9 @@ Idiky.repo = (function () {
       estado: parametros.pagado ? 'pagado' : 'por_pagar',
       fechaPago: parametros.pagado ? (parametros.fechaPago || parametros.fecha) : undefined,
       medio: parametros.pagado ? (parametros.medio || 'transferencia') : undefined,
+      cuenta: parametros.cuenta || bd.parametros.gasto[parametros.categoria] || '5195',
+      cuentaPorPagar: bd.parametros.porPagar,
+      cuentaCaja: bd.parametros.caja,
       registradoPor: bd.usuario,
     }
 
@@ -343,6 +364,7 @@ Idiky.repo = (function () {
       pagos: base.pagos,
       gastos: base.gastos.filter(function (g) { return g.estado !== 'anulado' }),
       comprobantes: base.comprobantes,
+      plan: base.plan,
     }
   }
 
@@ -474,12 +496,145 @@ Idiky.repo = (function () {
         saldo: linea.valor,
         fechaVencimiento: d.vencimientoDelPeriodo(parametros.periodo),
         estado: 'pendiente',
+        // La cuenta queda guardada en la cuota: si manana se cambia el
+        // parametro, estas cuotas siguen donde estan.
+        cuentaCartera: bd.parametros.cartera[parametros.tipo] || bd.parametros.cartera.ordinaria,
+        cuentaIngreso: bd.parametros.ingreso[parametros.tipo] || bd.parametros.ingreso.ordinaria,
       }
     })
 
     bd.cuotas = bd.cuotas.concat(nuevas)
     guardar()
     return nuevas
+  }
+
+  // -------------------------------------------------------------------------
+  // Plan de cuentas y parametros
+  // -------------------------------------------------------------------------
+
+  function plan() {
+    return cargar().plan.slice().sort(function (a, b) {
+      return a.codigo.localeCompare(b.codigo)
+    })
+  }
+
+  /** Solo las cuentas que reciben asientos y estan activas. */
+  function cuentasDeMovimiento() {
+    return plan().filter(function (c) { return c.movimiento && c.activa })
+  }
+
+  function cuentaPorCodigo(codigo) {
+    return cargar().plan.filter(function (c) { return c.codigo === codigo })[0]
+  }
+
+  function nombreDeCuenta(codigo) {
+    var c = cuentaPorCodigo(codigo)
+    return c ? c.nombre : codigo
+  }
+
+  function etiquetaDeCuenta(codigo) {
+    return codigo + ' — ' + nombreDeCuenta(codigo)
+  }
+
+  function parametros() {
+    return cargar().parametros
+  }
+
+  /** Cuentas que algun parametro esta usando: no se pueden desactivar. */
+  function cuentasEnUso() {
+    var p = parametros()
+    var usadas = [p.caja, p.anticipos, p.porPagar, p.excedentes]
+    Object.keys(p.cartera).forEach(function (k) { usadas.push(p.cartera[k]) })
+    Object.keys(p.ingreso).forEach(function (k) { usadas.push(p.ingreso[k]) })
+    Object.keys(p.gasto).forEach(function (k) { usadas.push(p.gasto[k]) })
+    return usadas
+  }
+
+  function guardarCuenta(parametrosCuenta) {
+    cargar()
+    var codigo = String(parametrosCuenta.codigo || '').trim()
+    var nombre = String(parametrosCuenta.nombre || '').trim()
+
+    if (!Idiky.puc.esValido(codigo)) {
+      throw new Error('El codigo debe ser numerico y de 1, 2, 4 o 6 digitos (1, 11, 1105, 110505).')
+    }
+    if (!nombre) throw new Error('Escribe el nombre de la cuenta.')
+
+    // Una cuenta suelta no sirve: si no cuelga de nada, no suma en ningun
+    // total del estado financiero.
+    var padre = Idiky.puc.padreDe(codigo)
+    if (padre && !cuentaPorCodigo(padre)) {
+      throw new Error('Falta la cuenta padre ' + padre + '. Creala primero.')
+    }
+
+    var existente = cuentaPorCodigo(codigo)
+    if (existente) {
+      existente.nombre = nombre
+      existente.movimiento = !!parametrosCuenta.movimiento
+      if (parametrosCuenta.activa != null) existente.activa = !!parametrosCuenta.activa
+      guardar()
+      return existente
+    }
+
+    var cuenta = {
+      codigo: codigo,
+      nombre: nombre,
+      movimiento: !!parametrosCuenta.movimiento,
+      activa: true,
+    }
+    bd.plan.push(cuenta)
+    guardar()
+    return cuenta
+  }
+
+  /**
+   * Las cuentas no se borran: se desactivan. Una cuenta que ya tiene asientos
+   * no puede desaparecer sin romper la contabilidad de meses anteriores.
+   */
+  function desactivarCuenta(codigo) {
+    cargar()
+    var cuenta = cuentaPorCodigo(codigo)
+    if (!cuenta) throw new Error('La cuenta no existe.')
+    if (cuentasEnUso().indexOf(codigo) !== -1) {
+      throw new Error('Esa cuenta la esta usando un parametro del modulo. Cambia el parametro primero.')
+    }
+    cuenta.activa = false
+    guardar()
+    return cuenta
+  }
+
+  function activarCuenta(codigo) {
+    cargar()
+    var cuenta = cuentaPorCodigo(codigo)
+    if (!cuenta) throw new Error('La cuenta no existe.')
+    cuenta.activa = true
+    guardar()
+    return cuenta
+  }
+
+  /**
+   * Cambia a que cuenta va un tipo de documento.
+   * No toca los documentos ya registrados: cada uno guarda la suya.
+   */
+  function fijarParametro(ruta, codigo) {
+    cargar()
+    var cuenta = cuentaPorCodigo(codigo)
+    if (!cuenta) throw new Error('Esa cuenta no existe en el plan.')
+    if (!cuenta.movimiento) throw new Error('Esa cuenta es un titulo: no recibe movimientos.')
+    if (!cuenta.activa) throw new Error('Esa cuenta esta inactiva.')
+
+    var partes = ruta.split('.')
+    if (partes.length === 1) {
+      bd.parametros[partes[0]] = codigo
+    } else {
+      bd.parametros[partes[0]][partes[1]] = codigo
+    }
+    guardar()
+    return bd.parametros
+  }
+
+  function balanceDePrueba(desde, hasta) {
+    return Idiky.contabilidad.balanceDePrueba(datosContables(), desde, hasta)
   }
 
   function copropiedad() {
@@ -522,6 +677,18 @@ Idiky.repo = (function () {
     datosContables: datosContables,
     movimientosDeUnidad: movimientosDeUnidad,
     auxiliarDeCuenta: auxiliarDeCuenta,
+    plan: plan,
+    cuentasDeMovimiento: cuentasDeMovimiento,
+    cuentaPorCodigo: cuentaPorCodigo,
+    nombreDeCuenta: nombreDeCuenta,
+    etiquetaDeCuenta: etiquetaDeCuenta,
+    parametros: parametros,
+    cuentasEnUso: cuentasEnUso,
+    guardarCuenta: guardarCuenta,
+    desactivarCuenta: desactivarCuenta,
+    activarCuenta: activarCuenta,
+    fijarParametro: fijarParametro,
+    balanceDePrueba: balanceDePrueba,
     comprobantes: comprobantes,
     comprobantePorId: comprobantePorId,
     registrarComprobante: registrarComprobante,

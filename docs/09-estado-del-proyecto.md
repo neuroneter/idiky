@@ -12,7 +12,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy) |
-| **Contable** | Cartera · Pagos · Recibos de caja · Gastos · Ajustes · Reportes. Partida doble sobre un plan de cuentas |
+| **Contable** | Cartera · Pagos · Recibos de caja · Gastos · Ajustes · Plan de cuentas · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
 | **Autenticación** | Simulada (selección de perfil, [ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso implementados** | 22 de 35 documentados (12 de residente, 10 de administrador) |
@@ -53,6 +53,45 @@ casos de uso cambien, se eliminen o aparezcan otros.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · PUC editable
+
+**Qué se hizo**
+
+El plan de cuentas dejó de ser una constante del código: ahora es un **PUC colombiano
+editable** que vive en los datos, con 86 cuentas a la medida de una copropiedad. Se agregan,
+se renombran y se desactivan desde la nueva pantalla **Plan de cuentas**, que además trae el
+**balance de prueba**.
+
+- **Códigos de cuatro dígitos según el PUC** (Decreto 2650). Los de seis son auxiliares
+  propios de la copropiedad, nivel que el PUC deja a criterio de cada entidad. Como una
+  copropiedad es una ESAL, el grupo 41 se adaptó a sus conceptos (cuotas de administración,
+  extraordinarias, intereses) en vez de los del PUC de comerciantes, que van por sector.
+- **Parámetros:** qué cuenta usa cada documento, editable en la misma pantalla.
+- **Cada documento guarda su cuenta** (RN-36). Es la decisión de fondo: cambiar un parámetro
+  afecta a los documentos futuros, no a los pasados, así que reconfigurar el plan **no mueve
+  la contabilidad de un mes cerrado**.
+- Los estados pasaron a presentarse en **dos niveles**: la cuenta con su total y los
+  auxiliares debajo. Volver a "Servicios" como una sola línea habría escondido vigilancia,
+  aseo y servicios públicos, que es justo lo que mira la asamblea.
+
+**Verificación** — cuatro suites en Chromium, todas pasan. La nueva cubre lo que importa: que
+se rechace una cuenta huérfana y un código de largo inválido, que no se pueda desactivar una
+cuenta que un parámetro está usando, que los documentos guarden sus cuentas, y —lo más
+importante— que **cambiar un parámetro no reescriba los documentos viejos** mientras los
+nuevos sí usan la cuenta nueva. Las cifras de los estados no cambiaron con la migración.
+
+**⚠️ Lo que hay que hacer antes de usar esto en contabilidad real**
+
+Los códigos son la adaptación convencional del PUC para propiedad horizontal, no una verdad
+revelada. **El contador de la copropiedad tiene que revisarlos.** Se dejó todo editable y con
+la advertencia en la propia pantalla.
+
+**Qué sigue**
+
+1. Que el contador valide el plan y ajuste lo que haga falta.
+2. Falta exportar el balance de prueba y el libro auxiliar a CSV; el motor ya los calcula.
+3. Sigue pendiente el intercambio de información con la PWA (T-12).
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Ajustes y partida doble
 

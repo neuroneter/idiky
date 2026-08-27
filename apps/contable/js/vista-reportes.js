@@ -292,9 +292,9 @@ Idiky.vistaReportes = (function () {
       nombre: 'estado-de-resultados.csv',
       filas: [['Concepto', 'Valor']]
         .concat([['INGRESOS', '']])
-        .concat(r.ingresos.map(function (l) { return [l.concepto, l.valor] }))
+        .concat(aFilasCsv(r.ingresos))
         .concat([['Total ingresos', r.totalIngresos], ['GASTOS', '']])
-        .concat(r.egresos.map(function (l) { return [l.concepto, l.valor] }))
+        .concat(aFilasCsv(r.egresos))
         .concat([
           ['Total gastos', r.totalEgresos],
           [hayDeficit ? 'Deficit del periodo' : 'Excedente del periodo', r.excedente],
@@ -336,16 +336,49 @@ Idiky.vistaReportes = (function () {
     ])
   }
 
+  /**
+   * Pinta las cuentas de un grupo con sus auxiliares debajo. Si una cuenta
+   * tiene un solo auxiliar no vale la pena repetirla: se muestra el auxiliar,
+   * que es el que tiene el nombre util.
+   */
   function bloque(lineas, mensajeVacio) {
     if (lineas.length === 0) {
       return [el('tr', null, [el('td', { colspan: 2, clase: 'sub' }, mensajeVacio)])]
     }
-    return lineas.map(function (linea) {
-      return el('tr', null, [
-        el('td', 'celda-sangrada', linea.concepto),
-        el('td', 'derecha cifra', f.dinero(linea.valor)),
-      ])
+
+    var filas = []
+    lineas.forEach(function (cuenta) {
+      if (cuenta.hijos.length === 1) {
+        var unico = cuenta.hijos[0]
+        filas.push(el('tr', null, [
+          el('td', 'celda-sangrada', [
+            unico.concepto,
+            el('span', 'codigo-puc', unico.codigo),
+          ]),
+          el('td', 'derecha cifra', f.dinero(unico.valor)),
+        ]))
+        return
+      }
+
+      filas.push(el('tr', cuenta.hijos.length ? 'fila--cuenta' : null, [
+        el('td', 'celda-sangrada', [
+          cuenta.concepto,
+          el('span', 'codigo-puc', cuenta.codigo),
+        ]),
+        el('td', 'derecha cifra', f.dinero(cuenta.valor)),
+      ]))
+
+      cuenta.hijos.forEach(function (hijo) {
+        filas.push(el('tr', 'fila--auxiliar', [
+          el('td', 'celda-auxiliar', [
+            hijo.concepto,
+            el('span', 'codigo-puc', hijo.codigo),
+          ]),
+          el('td', 'derecha cifra', f.dinero(hijo.valor)),
+        ]))
+      })
     })
+    return filas
   }
 
   // ---------------------------------------------------------------------------
@@ -358,11 +391,11 @@ Idiky.vistaReportes = (function () {
     ultimoCsv = {
       nombre: 'situacion-financiera.csv',
       filas: [['Concepto', 'Valor'], ['ACTIVO', '']]
-        .concat(s.activo.lineas.map(function (l) { return [l.concepto, l.valor] }))
+        .concat(aFilasCsv(s.activo.lineas))
         .concat([['Total activo', s.activo.total], ['PASIVO', '']])
-        .concat(s.pasivo.lineas.map(function (l) { return [l.concepto, l.valor] }))
+        .concat(aFilasCsv(s.pasivo.lineas))
         .concat([['Total pasivo', s.pasivo.total], ['PATRIMONIO', '']])
-        .concat(s.patrimonio.lineas.map(function (l) { return [l.concepto, l.valor] }))
+        .concat(aFilasCsv(s.patrimonio.lineas))
         .concat([
           ['Total patrimonio', s.patrimonio.total],
           ['Total pasivo y patrimonio', s.totalPasivoYPatrimonio],
@@ -422,6 +455,18 @@ Idiky.vistaReportes = (function () {
         + 'puede ser menor que el saldo total que muestra el modulo de Cartera: alli entran '
         + 'tambien las cuotas ya facturadas de meses siguientes, que todavia no son ingreso.'),
     ])
+  }
+
+  /** Aplana cuentas y auxiliares para el CSV, con el codigo del PUC delante. */
+  function aFilasCsv(lineas) {
+    var filas = []
+    lineas.forEach(function (cuenta) {
+      filas.push([cuenta.codigo + ' ' + cuenta.concepto, cuenta.valor])
+      cuenta.hijos.forEach(function (hijo) {
+        filas.push(['   ' + hijo.codigo + ' ' + hijo.concepto, hijo.valor])
+      })
+    })
+    return filas
   }
 
   // ---------------------------------------------------------------------------

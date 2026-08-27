@@ -17,7 +17,7 @@ Idiky.datos = (function () {
 
   var d = Idiky.dominio
   var CLAVE = 'idiky.contable.bd'
-  var VERSION_ESQUEMA = 3
+  var VERSION_ESQUEMA = 4
 
   /** Valor de la cuota ordinaria por punto de coeficiente. */
   var VALOR_POR_COEFICIENTE = 45000
@@ -44,6 +44,9 @@ Idiky.datos = (function () {
   function idUnidad(torre, numero) {
     return 'uni-' + torre.toLowerCase().replace(/\s+/g, '') + '-' + numero
   }
+
+  /** Parametros vigentes mientras se arma la semilla. */
+  var P = Idiky.puc.parametrosBase()
 
   function crearSemilla() {
     var unidades = []
@@ -89,7 +92,9 @@ Idiky.datos = (function () {
         estado: 'aplicado',
         origen: 'administracion',
         recibo: d.numeroRecibo(consecutivo),
-        imputaciones: [{ cuotaId: cuota.id, valor: cuota.valor }],
+        cuentaCaja: P.caja,
+        cuentaAnticipos: P.anticipos,
+        imputaciones: [{ cuotaId: cuota.id, valor: cuota.valor, cuenta: cuota.cuentaCartera }],
         saldoAFavor: 0,
         fechaAplicacion: fecha,
         registradoPor: 'Sistema',
@@ -125,6 +130,8 @@ Idiky.datos = (function () {
           saldo: valor,
           fechaVencimiento: d.vencimientoDelPeriodo(periodo),
           estado: 'pendiente',
+          cuentaCartera: P.cartera.ordinaria,
+          cuentaIngreso: P.ingreso.ordinaria,
         }
         if (!esFuturo && !enMora) {
           pagos.push(reciboCompleto(cuota, indice % 2 === 0 ? 'pse' : 'transferencia', 3))
@@ -144,6 +151,8 @@ Idiky.datos = (function () {
         saldo: valorExtra,
         fechaVencimiento: d.vencimientoDelPeriodo(periodoExtra),
         estado: 'pendiente',
+        cuentaCartera: P.cartera.extraordinaria,
+        cuentaIngreso: P.ingreso.extraordinaria,
       }
       if (periodosEnMora === 0) pagos.push(reciboCompleto(extra, 'transferencia', 5))
       cuotas.push(extra)
@@ -173,7 +182,9 @@ Idiky.datos = (function () {
         conceptoInformado: 'Primer contado de la cuota extraordinaria de cubiertas.',
         cuotasInformadas: [extraMora.id],
         recibo: d.numeroRecibo(consecutivo),
-        imputaciones: [{ cuotaId: extraMora.id, valor: abono }],
+        cuentaCaja: P.caja,
+        cuentaAnticipos: P.anticipos,
+        imputaciones: [{ cuotaId: extraMora.id, valor: abono, cuenta: extraMora.cuentaCartera }],
         saldoAFavor: 0,
         fechaAplicacion: d.sumarDias(d.hoyISO(), -12) + 'T16:05:00.000Z',
         registradoPor: 'Olga Lucia Henao',
@@ -200,7 +211,9 @@ Idiky.datos = (function () {
         conceptoInformado: 'Adelanto de la mitad de la cuota del mes entrante.',
         cuotasInformadas: [proxima.id],
         recibo: d.numeroRecibo(consecutivo),
-        imputaciones: [{ cuotaId: proxima.id, valor: adelanto }],
+        cuentaCaja: P.caja,
+        cuentaAnticipos: P.anticipos,
+        imputaciones: [{ cuotaId: proxima.id, valor: adelanto, cuenta: proxima.cuentaCartera }],
         saldoAFavor: 0,
         fechaAplicacion: d.sumarDias(d.hoyISO(), -2) + 'T09:12:00.000Z',
         registradoPor: 'Olga Lucia Henao',
@@ -262,6 +275,8 @@ Idiky.datos = (function () {
       pagos: pagos,
       gastos: construirGastos(),
       comprobantes: construirComprobantes(),
+      plan: Idiky.puc.planBase(),
+      parametros: Idiky.puc.parametrosBase(),
       consecutivos: { recibo: consecutivo, gasto: 100, comprobante: 3 },
     }
   }
@@ -299,6 +314,9 @@ Idiky.datos = (function () {
         estado: pagado ? 'pagado' : 'por_pagar',
         fechaPago: pagado ? d.sumarDias(fecha, 5) : undefined,
         medio: pagado ? 'transferencia' : undefined,
+        cuenta: P.gasto[categoria] || '5195',
+        cuentaPorPagar: P.porPagar,
+        cuentaCaja: P.caja,
       })
       n += 1
     }
@@ -345,7 +363,7 @@ Idiky.datos = (function () {
         registradoPor: 'Olga Lucia Henao',
         lineas: [
           {
-            cuenta: '1305',
+            cuenta: '130515',
             unidadId: 'uni-torre2-901',
             debe: 96000,
             haber: 0,
@@ -363,8 +381,8 @@ Idiky.datos = (function () {
         estado: 'registrado',
         registradoPor: 'Olga Lucia Henao',
         lineas: [
-          { cuenta: '5299', unidadId: null, debe: 900000, haber: 0, descripcion: 'Castigo de cartera' },
-          { cuenta: '1399', unidadId: null, debe: 0, haber: 900000, descripcion: 'Provision de cartera' },
+          { cuenta: '519910', unidadId: null, debe: 900000, haber: 0, descripcion: 'Castigo de cartera' },
+          { cuenta: '139905', unidadId: null, debe: 0, haber: 900000, descripcion: 'Provision de cartera' },
         ],
       },
     ]

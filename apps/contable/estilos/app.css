@@ -970,3 +970,56 @@ input[type="number"], .entrada-cifra {
   .asiento-linea { grid-template-columns: 1fr 1fr; }
   .asiento-linea__cuenta { grid-column: 1 / -1; }
 }
+
+/* ===========================================================================
+   Plan de cuentas
+   =========================================================================== */
+
+/* La jerarquia del PUC se lee por la sangria del codigo, como en un balance. */
+.tabla--plan td { padding: var(--e2) var(--e4); }
+.tabla--plan .nivel-clase { font-weight: 700; }
+.tabla--plan .nivel-grupo { padding-left: var(--e4); font-weight: 650; }
+.tabla--plan .nivel-cuenta { padding-left: var(--e5); }
+.tabla--plan .nivel-auxiliar { padding-left: var(--e6); color: var(--tinta-suave); }
+
+.fila--titulo-cuenta { background: var(--superficie-alterna); }
+.fila--titulo-cuenta td { font-weight: 600; }
+
+.celda-titulo { text-transform: uppercase; letter-spacing: 0.04em; font-size: var(--texto-xs); }
+
+.lista-parametros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  margin-top: var(--e2);
+}
+
+.fila-parametro {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: var(--e3);
+  align-items: center;
+}
+
+.fila-parametro__etiqueta {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.fila-parametro select { margin: 0; }
+
+@media (max-width: 780px) {
+  .fila-parametro { grid-template-columns: 1fr; gap: var(--e1); }
+}
+
+/* El codigo del PUC acompana al nombre en los estados, en tono menor. */
+.codigo-puc {
+  font-family: var(--fuente-cifras);
+  font-size: var(--texto-xs);
+  color: var(--tinta-tenue);
+  margin-left: var(--e2);
+}
+
+.fila--cuenta td { font-weight: 600; }
+.fila--auxiliar td { color: var(--tinta-suave); }
+.celda-auxiliar { padding-left: var(--e6) !important; }

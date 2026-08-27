@@ -142,6 +142,10 @@ Idiky.vistaRecibos = (function () {
             : null,
           linea('Estado', ui.chipPago(pago.estado)),
           linea('Registrado por', document.createTextNode(pago.registradoPor)),
+          pago.cuentaCaja
+            ? linea('Cuenta de caja', document.createTextNode(
+                pago.cuentaCaja + ' — ' + Idiky.repo.nombreDeCuenta(pago.cuentaCaja)))
+            : null,
         ]),
 
         pago.conceptoInformado ? ui.citaDelPropietario(pago.conceptoInformado) : null,
@@ -155,9 +159,15 @@ Idiky.vistaRecibos = (function () {
                     return c.id === aplicacion.cuotaId
                   })[0]
                   return el('tr', null, [
-                    el('td', null, cuota
-                      ? cuota.concepto + ' · ' + f.periodo(cuota.periodo)
-                      : aplicacion.cuotaId),
+                    el('td', null, [
+                      el('strong', null, cuota
+                        ? cuota.concepto + ' · ' + f.periodo(cuota.periodo)
+                        : aplicacion.cuotaId),
+                      aplicacion.cuenta
+                        ? el('span', 'sub', aplicacion.cuenta + ' — '
+                            + Idiky.repo.nombreDeCuenta(aplicacion.cuenta))
+                        : null,
+                    ]),
                     el('td', 'derecha cifra', f.dinero(aplicacion.valor)),
                   ])
                 })),

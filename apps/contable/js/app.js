@@ -24,6 +24,8 @@ Idiky.app = (function () {
       subtitulo: 'Lo que la copropiedad debe y lo que ya pago' },
     { id: 'ajustes', texto: 'Ajustes', titulo: 'Comprobantes de ajuste',
       subtitulo: 'Mover la contabilidad sin que entre ni salga plata' },
+    { id: 'plan', texto: 'Plan de cuentas', titulo: 'Plan de cuentas',
+      subtitulo: 'El PUC de la copropiedad y a que cuenta va cada documento' },
     { id: 'reportes', texto: 'Reportes', titulo: 'Reportes',
       subtitulo: 'Movimientos por cliente y estados financieros' },
   ]
@@ -63,6 +65,7 @@ Idiky.app = (function () {
     else if (modulo === 'recibos') Idiky.vistaRecibos.pintar(contenedor, pintar)
     else if (modulo === 'gastos') Idiky.vistaGastos.pintar(contenedor, pintar)
     else if (modulo === 'ajustes') Idiky.vistaAjustes.pintar(contenedor, pintar)
+    else if (modulo === 'plan') Idiky.vistaPlan.pintar(contenedor, pintar)
     else Idiky.vistaReportes.pintar(contenedor, pintar)
 
     if (opciones.mantenerFoco) {

@@ -27,7 +27,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-09 | Definir la identidad visual real (colores, logo, tipografía) | Zona D | 📋 Por hacer |
 | T-12 | Definir qué información intercambian la PWA y la contable, y en qué dirección | Jeimy + Mary | 📋 Por hacer |
 | T-13 | Resto de la contable: proveedores, presupuesto anual, saldos de apertura de caja | Jeimy | 📋 Por hacer |
-| T-15 | Decidir si el plan de cuentas debe ser editable (¿PUC real?) o se queda fijo | Jeimy | 📋 Por hacer |
+| T-17 | **Que el contador de la copropiedad valide los códigos del PUC** | Jeimy | 📋 Por hacer |
 
 ## Hecho
 
@@ -38,6 +38,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-11 | Aplicación contable: cartera, pagos y recibos de caja sin compilación (ADR-0006) | ✅ Hecho |
 | T-14 | Contable: gastos, movimientos por cliente, estado de resultados y situación financiera | ✅ Hecho |
 | T-16 | Contable: partida doble, plan de cuentas y comprobantes de ajuste | ✅ Hecho |
+| T-15 | Contable: PUC colombiano editable, con la cuenta guardada en cada documento | ✅ Hecho |
 
 ---
 

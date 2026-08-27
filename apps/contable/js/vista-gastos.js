@@ -71,7 +71,7 @@ Idiky.vistaGastos = (function () {
             el('thead', null, el('tr', null, [
               el('th', null, 'Fecha'),
               el('th', null, 'Concepto'),
-              el('th', null, 'Categoria'),
+              el('th', null, 'Cuenta PUC'),
               el('th', null, 'Proveedor'),
               el('th', 'derecha', 'Valor'),
               el('th', null, 'Estado'),
@@ -86,7 +86,10 @@ Idiky.vistaGastos = (function () {
                     ? el('span', 'sub', 'Pagado el ' + f.fechaCorta(gasto.fechaPago))
                     : null,
                 ]),
-                el('td', 'sub', gasto.categoria),
+                el('td', null, [
+                  el('strong', 'cifra', gasto.cuenta || '—'),
+                  el('span', 'sub', gasto.cuenta ? Idiky.repo.nombreDeCuenta(gasto.cuenta) : gasto.categoria),
+                ]),
                 el('td', 'sub', gasto.proveedor || '—'),
                 el('td', 'derecha cifra', f.dinero(gasto.valor)),
                 el('td', null, chipGasto(gasto.estado)),
@@ -134,6 +137,7 @@ Idiky.vistaGastos = (function () {
       valor: 0,
       proveedor: '',
       pagado: false,
+      cuenta: Idiky.repo.parametros().gasto['Vigilancia'],
     }
 
     var campoFecha = el('input', {
@@ -144,11 +148,28 @@ Idiky.vistaGastos = (function () {
       type: 'text', placeholder: 'Por ejemplo: vigilancia de agosto',
       onInput: function (e) { estado.concepto = e.target.value },
     })
+    // Al cambiar la categoria se propone la cuenta del PUC configurada para
+    // ella, pero se puede cambiar: la categoria agrupa, la cuenta contabiliza.
     var campoCategoria = el('select', {
-      onChange: function (e) { estado.categoria = e.target.value },
+      onChange: function (e) {
+        estado.categoria = e.target.value
+        estado.cuenta = Idiky.repo.parametros().gasto[estado.categoria] || '5195'
+        campoCuenta.value = estado.cuenta
+      },
     }, Idiky.repo.CATEGORIAS_GASTO.map(function (c) {
       return el('option', { value: c }, c)
     }))
+
+    var campoCuenta = el('select', {
+      onChange: function (e) { estado.cuenta = e.target.value },
+    }, Idiky.repo.cuentasDeMovimiento()
+      .filter(function (c) { return Idiky.puc.claseDe(c.codigo) === 'gasto' })
+      .map(function (c) {
+        return el('option', {
+          value: c.codigo,
+          selected: c.codigo === estado.cuenta,
+        }, Idiky.repo.etiquetaDeCuenta(c.codigo))
+      }))
     var campoValor = el('input', {
       type: 'number', min: 0, step: 1000, value: 0,
       onInput: function (e) { estado.valor = f.aNumero(e.target.value) },
@@ -172,6 +193,8 @@ Idiky.vistaGastos = (function () {
           ui.campo('Categoria', campoCategoria),
         ]),
         ui.campo('Concepto', campoConcepto),
+        ui.campo('Cuenta contable (PUC)', campoCuenta,
+          'Es la cuenta contra la que se registra el gasto. Queda guardada en el documento.'),
         el('div', 'fila-campos', [
           ui.campo('Valor', campoValor),
           ui.campo('Proveedor', campoProveedor),

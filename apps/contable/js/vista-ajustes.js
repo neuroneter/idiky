@@ -20,7 +20,6 @@ Idiky.vistaAjustes = (function () {
   var ui = Idiky.ui
   var d = Idiky.dominio
   var f = Idiky.formato
-  var plan = Idiky.plan
 
   var filtro = 'vigentes'
 
@@ -36,7 +35,7 @@ Idiky.vistaAjustes = (function () {
       concepto: 'Intereses de mora',
       pideUnidad: true,
       lineas: [
-        { cuenta: '1305', lado: 'debe' },
+        { cuenta: '130515', lado: 'debe' },
         { cuenta: '4115', lado: 'haber' },
       ],
     },
@@ -46,8 +45,8 @@ Idiky.vistaAjustes = (function () {
       concepto: 'Provision de cartera de dificil cobro',
       pideUnidad: false,
       lineas: [
-        { cuenta: '5299', lado: 'debe' },
-        { cuenta: '1399', lado: 'haber' },
+        { cuenta: '519910', lado: 'debe' },
+        { cuenta: '139905', lado: 'haber' },
       ],
     },
     {
@@ -56,7 +55,7 @@ Idiky.vistaAjustes = (function () {
       concepto: 'Sancion',
       pideUnidad: true,
       lineas: [
-        { cuenta: '1305', lado: 'debe' },
+        { cuenta: '130520', lado: 'debe' },
         { cuenta: '4120', lado: 'haber' },
       ],
     },
@@ -66,8 +65,8 @@ Idiky.vistaAjustes = (function () {
       concepto: 'Traslado al fondo de imprevistos',
       pideUnidad: false,
       lineas: [
-        { cuenta: '3105', lado: 'debe' },
-        { cuenta: '3110', lado: 'haber' },
+        { cuenta: '3705', lado: 'debe' },
+        { cuenta: '3305', lado: 'haber' },
       ],
     },
     {
@@ -165,7 +164,7 @@ Idiky.vistaAjustes = (function () {
           return el('tr', null, [
             el('td', null, [
               el('strong', 'cifra', linea.cuenta),
-              el('span', 'sub', plan.nombre(linea.cuenta)),
+              el('span', 'sub', Idiky.repo.nombreDeCuenta(linea.cuenta)),
             ]),
             el('td', 'sub', linea.unidadId
               ? Idiky.repo.etiquetaUnidad(linea.unidadId)
@@ -241,11 +240,11 @@ Idiky.vistaAjustes = (function () {
       var selectorCuenta = el('select', {
         onChange: function (e) { linea.cuenta = e.target.value; pintarLineas() },
       }, [el('option', { value: '' }, 'Elige una cuenta…')].concat(
-        plan.CUENTAS.map(function (c) {
+        Idiky.repo.cuentasDeMovimiento().map(function (c) {
           return el('option', {
             value: c.codigo,
             selected: c.codigo === linea.cuenta,
-          }, plan.etiqueta(c.codigo))
+          }, Idiky.repo.etiquetaDeCuenta(c.codigo))
         }),
       ))
 
@@ -265,7 +264,7 @@ Idiky.vistaAjustes = (function () {
 
       // La unidad solo tiene sentido en cartera: es lo que hace que el ajuste
       // aparezca en el extracto de ese propietario.
-      var esCartera = linea.cuenta === plan.CARTERA
+      var esCartera = Idiky.contabilidad.esDeCartera(linea.cuenta)
       var selectorUnidad = esCartera
         ? el('select', {
             onChange: function (e) { linea.unidadId = e.target.value },

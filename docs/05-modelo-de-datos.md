@@ -109,6 +109,37 @@ hay estado de resultados.
 | `fechaPago` | fecha ISO? | Presente cuando `estado = 'pagado'` |
 | `motivoAnulacion` | string? | Obligatorio al anular; el registro no se borra |
 
+### Cuenta del PUC — solo en `apps/contable/`
+
+El plan de cuentas **es un dato editable**, no una constante del código. Vive en la base y se
+edita desde la pantalla "Plan de cuentas".
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `codigo` | string | Numérico. El largo define el nivel: 1 clase, 2 grupo, 4 cuenta, 6 auxiliar |
+| `nombre` | string | |
+| `movimiento` | boolean | Si `false`, es un título: agrupa y suma, pero no recibe asientos |
+| `activa` | boolean | Las cuentas no se borran, se desactivan (RN-37) |
+
+**Los códigos de cuatro dígitos siguen el PUC colombiano (Decreto 2650).** Los de seis son
+auxiliares propios de la copropiedad — el PUC deja ese nivel al criterio de cada entidad.
+Una copropiedad es una ESAL, así que el grupo 41 de ingresos operacionales se adapta a sus
+conceptos propios (cuotas de administración, extraordinarias, intereses) en vez de usar los
+del PUC de comerciantes, que van por sector económico.
+
+> ⚠️ Los códigos son la adaptación convencional del PUC para propiedad horizontal.
+> **Antes de usarlos en contabilidad real, el contador de la copropiedad debe revisarlos.**
+> Todo es editable justamente para eso.
+
+### Parámetros contables — solo en `apps/contable/`
+
+Conectan cada tipo de documento con su cuenta: `caja`, `anticipos`, `porPagar`,
+`excedentes`, `cartera` por tipo de cuota, `ingreso` por tipo de cuota, `gasto` por categoría.
+
+Cambiar un parámetro afecta a los documentos **futuros**. Los ya registrados conservan su
+cuenta, porque cada documento la guarda (RN-36) — así la contabilidad de un mes cerrado no se
+mueve cuando alguien reconfigura el plan.
+
 ### Comprobante de ajuste — solo en `apps/contable/`
 
 Un movimiento contable que **no es un pago ni un recaudo**: causar intereses de mora,
@@ -200,21 +231,24 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-33 | Activo = Pasivo + Patrimonio. Si no cuadra, **se muestra el descuadre**, no se oculta. | `contable/js/contabilidad.js` |
 | RN-34 | Un comprobante de ajuste solo se registra si **el debe es igual al haber**. | `contable/js/contabilidad.js` |
 | RN-35 | Un comprobante no se borra: se anula, deja de contar en los estados y su número queda quemado. | `contable/js/repositorio.js` |
+| RN-36 | **Todo documento guarda la cuenta del PUC con la que se registró.** Cambiar un parámetro no reescribe los documentos anteriores. | `contable/js/repositorio.js` |
+| RN-37 | Una cuenta del plan no se borra: se desactiva, y no puede desactivarse si un parámetro la usa. | `contable/js/repositorio.js` |
 
 ### El motor contable: todo es un asiento
 
 `apps/contable/` lleva **partida doble** sobre un plan de cuentas corto
 (`js/plan-de-cuentas.js`). Hay dos fuentes de asientos y se suman en el mismo sitio:
 
-**Automáticos** — se derivan de los documentos, nadie los escribe:
+**Automáticos** — se derivan de los documentos, nadie los escribe. Las cuentas salen del
+propio documento, no del parámetro vigente (RN-36):
 
 | Hecho | Débito | Crédito |
 |---|---|---|
-| Se causa una cuota | Cartera `1305` | Ingreso `41xx` según el tipo |
-| Se aplica un pago | Caja `1105` | Cartera `1305` + el excedente a Anticipos `2805` |
+| Se causa una cuota | `cuota.cuentaCartera` (`1305xx`) | `cuota.cuentaIngreso` (`41xx`) |
+| Se aplica un pago | `pago.cuentaCaja` (`1110xx`) | la cuenta de cada imputación + el excedente a `pago.cuentaAnticipos` (`2805xx`) |
 | Se anula un recibo | lo contrario, con la fecha de la anulación | |
-| Se causa un gasto | Gasto `51xx` según la categoría | Cuentas por pagar `2335` |
-| Se paga un gasto | Cuentas por pagar `2335` | Caja `1105` |
+| Se causa un gasto | `gasto.cuenta` (`51xx`) | `gasto.cuentaPorPagar` (`2335`) |
+| Se paga un gasto | `gasto.cuentaPorPagar` | `gasto.cuentaCaja` |
 
 **Manuales** — los comprobantes de ajuste, que el administrador escribe cuando hay que mover
 la contabilidad sin que entre ni salga plata.
@@ -224,6 +258,10 @@ construcción, vengan los asientos de donde vengan (RN-33). Convención de signo
 una cuenta es siempre `debe − haber`; activo y gasto quedan positivos, pasivo, patrimonio e
 ingreso negativos y se muestran cambiados de signo. Una cuenta correctora como la provisión
 de cartera `1399` cae sola en negativo dentro del activo, sin necesitar un caso especial.
+
+Los estados se presentan en **dos niveles**: la cuenta de cuatro dígitos con su total y sus
+auxiliares debajo. En una copropiedad ese detalle es lo que quiere ver la asamblea —
+"Servicios" no dice nada, "Vigilancia $7.600.000" sí.
 
 ## 4. Convenciones de datos
 

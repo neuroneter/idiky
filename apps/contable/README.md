@@ -23,6 +23,7 @@ recargar. El botón **"Reiniciar demo"** devuelve todo a su estado inicial.
 | **Recibos de caja** | El libro completo, con los anulados. Ver el detalle de cualquier recibo y anularlo con motivo. |
 | **Gastos** | Lo que la copropiedad debe y lo que ya pagó. Es el otro lado de la contabilidad. |
 | **Ajustes** | Comprobantes contables que mueven cuentas **sin que entre ni salga plata**: intereses de mora, provisiones, reclasificaciones, traslados al fondo de imprevistos. |
+| **Plan de cuentas** | El PUC de la copropiedad, editable. Qué cuenta usa cada documento, y el balance de prueba. |
 | **Reportes** | Movimientos por cliente y fechas, estado de resultados y estado de situación financiera. Se imprimen (o se guardan como PDF) y se bajan en CSV. |
 
 Lo que distingue a este módulo de una caja registradora: **el propietario dice a qué
@@ -31,8 +32,8 @@ antigüedad, pero quien decide es el administrador, leyendo lo que escribió el 
 
 ## Cómo funciona la contabilidad por dentro
 
-La aplicación lleva **partida doble** sobre un plan de cuentas corto (`js/plan-de-cuentas.js`).
-Hay dos fuentes de asientos y se suman en el mismo sitio:
+La aplicación lleva **partida doble** sobre un PUC colombiano editable. Hay dos fuentes de
+asientos y se suman en el mismo sitio:
 
 - **Automáticos:** salen solos de las cuotas, los pagos y los gastos. Nadie los escribe.
 - **Manuales:** los comprobantes de ajuste que registras en el módulo de Ajustes.
@@ -43,6 +44,30 @@ mejor decirlo ahí que dejar que aparezca después en el estado de situación fi
 
 > **Regla para saber dónde va cada cosa:** si entró o salió plata, va en **Pagos** o en
 > **Gastos**. Si solo hay que mover cuentas, va en **Ajustes**.
+
+### El plan de cuentas es un dato, no código
+
+Las cuentas se agregan, se renombran y se desactivan desde la pantalla **Plan de cuentas**.
+No se borran: una cuenta con asientos no puede desaparecer sin romper la contabilidad de los
+meses anteriores.
+
+Los códigos de **cuatro dígitos siguen el PUC colombiano** (Decreto 2650); los de **seis** son
+auxiliares propios de la copropiedad, que el PUC deja a criterio de cada entidad.
+
+> ⚠️ **Antes de usar esto en contabilidad real, que el contador revise los códigos.** Son la
+> adaptación convencional del PUC para propiedad horizontal, no una verdad revelada. Todo es
+> editable justamente para eso.
+
+### Cada documento guarda su cuenta
+
+Una cuota guarda `cuentaCartera` y `cuentaIngreso`. Un gasto guarda `cuenta`,
+`cuentaPorPagar` y `cuentaCaja`. Un recibo guarda `cuentaCaja` y la cuenta de cada
+imputación. Un comprobante las trae en sus líneas.
+
+Eso no es redundancia: es lo que hace que **cambiar un parámetro no reescriba la contabilidad
+de ayer**. Si mañana decides que las cuotas de administración van a otra cuenta, las cuotas
+viejas se quedan donde estaban y solo las nuevas usan la cuenta nueva. Un mes cerrado no se
+mueve solo.
 
 ## Cómo leen los reportes
 
@@ -81,7 +106,7 @@ apps/contable/
 └── js/
     ├── formato.js             Mostrar dinero y fechas.
     ├── dominio.js             ⭐ Las reglas de cartera y pagos (RN-xx). Funciones puras.
-    ├── plan-de-cuentas.js     ⭐ Las cuentas contables y a cuál va cada cosa.
+    ├── puc.js                 ⭐ El PUC por defecto y la lectura de la jerarquía.
     ├── contabilidad.js        ⭐ El motor: convierte todo en asientos y arma los estados.
     ├── datos.js               Semilla del demo + guardado en el navegador.
     ├── repositorio.js         ⭐ La ÚNICA puerta a los datos.
@@ -92,6 +117,7 @@ apps/contable/
     ├── vista-recibos.js       Pantalla de Recibos de caja.
     ├── vista-gastos.js        Pantalla de Gastos.
     ├── vista-ajustes.js       Pantalla de Ajustes (comprobantes contables).
+    ├── vista-plan.js          Pantalla del Plan de cuentas y sus parámetros.
     ├── vista-reportes.js      Los tres reportes, con impresión y CSV.
     └── app.js                 Arranque y navegación.
 ```
