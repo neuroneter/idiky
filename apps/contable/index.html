@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Idiky Contable — Cartera y pagos</title>
+    <meta name="description" content="Modulo de cartera, pagos y recibos de caja para la administracion de una copropiedad." />
+    <link rel="stylesheet" href="estilos/app.css" />
+  </head>
+  <body>
+    <div class="aplicacion">
+      <aside class="lateral">
+        <div class="lateral__marca">
+          <span class="lateral__nombre">idiky</span>
+          <span class="lateral__producto">Contable</span>
+        </div>
+
+        <nav class="nav" id="navegacion" aria-label="Modulos"></nav>
+
+        <div class="lateral__copropiedad">
+          <span id="nombre-copropiedad">—</span>
+          <span id="nit-copropiedad"></span>
+        </div>
+
+        <div class="lateral__pie">
+          <strong id="usuario">—</strong>
+          Administradora
+        </div>
+      </aside>
+
+      <main class="area">
+        <header class="cabecera" id="cabecera"></header>
+        <div class="contenido" id="contenido"></div>
+      </main>
+    </div>
+
+    <div id="avisos" role="status" aria-live="polite"></div>
+
+    <!--
+      El orden importa: cada archivo usa lo que definieron los anteriores.
+      Se cargan como scripts clasicos a proposito — los modulos de JavaScript
+      (import/export) los bloquea el navegador al abrir un archivo desde el
+      disco, y esta aplicacion tiene que funcionar con doble clic.
+    -->
+    <script src="js/formato.js"></script>
+    <script src="js/dominio.js"></script>
+    <script src="js/datos.js"></script>
+    <script src="js/repositorio.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/editor-imputacion.js"></script>
+    <script src="js/vista-cartera.js"></script>
+    <script src="js/vista-pagos.js"></script>
+    <script src="js/vista-recibos.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>

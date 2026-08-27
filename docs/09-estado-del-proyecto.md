@@ -9,9 +9,10 @@ nueva o una sesión de IA distinta.
 
 | | |
 |---|---|
-| **Versión** | v0.1 — demo PWA navegable |
+| **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
-| **Backend** | No existe. Datos simulados en el navegador. |
+| **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy) |
+| **Backend** | No existe. Datos simulados en el navegador, en los dos. |
 | **Autenticación** | Simulada (selección de perfil, [ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso implementados** | 22 de 35 documentados (12 de residente, 10 de administrador) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
@@ -51,6 +52,46 @@ casos de uso cambien, se eliminen o aparezcan otros.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Aplicación contable
+
+**Qué se hizo**
+
+Nace el segundo producto del repositorio: [`apps/contable/`](../apps/contable/README.md),
+la aplicación de cartera, pagos y recibos de caja del administrador.
+
+- **Sin compilación, a propósito** ([ADR-0006](./adr/0006-stack-aplicacion-contable.md)).
+  HTML, CSS y JavaScript planos: se abre con doble clic en `index.html`. No es una
+  preferencia técnica — quien la desarrolla no puede instalar nada en su computador, y un
+  stack que el equipo no puede ejecutar no es un stack.
+- **Tres módulos:** Cartera (quién debe y estado de cuenta por unidad), Pagos (bandeja de
+  abonos informados por conciliar, y registro de lo que llega por fuera) y Recibos de caja
+  (el libro, con los anulados).
+- **Las mismas reglas que la PWA**, traducidas a JavaScript con los mismos números `RN-xx`.
+
+**Restricciones medidas, no supuestas.** Al abrir un archivo desde el disco, Chromium
+bloquea los módulos ES (`import`/`export`) y el `fetch` de archivos locales. Por eso el
+código usa `<script src>` clásicos y los datos viven dentro de un `.js`. Está en el ADR.
+
+**Verificación** — recorrido completo en Chromium abriendo `index.html` desde el disco:
+nueve pasos de punta a punta sin errores de consola, y la anulación revisada aparte —
+devuelve al saldo exactamente el valor del recibo, lo deja en el libro marcado como anulado,
+y el consecutivo no se reutiliza (RC-00051 anulado, el siguiente es RC-00052).
+
+**Corrección de rumbo.** La sesión anterior construyó cartera y pagos dentro de la PWA
+creyendo que era el entregable de Jeimy. No lo era: **Jeimy trabaja en la contable, Mary en
+la PWA.** Lo de la PWA se queda —la consola de Mary necesitaba cartera igual— pero el
+entregable de Jeimy es este.
+
+**Qué sigue**
+
+1. **Definir qué información intercambian las dos aplicaciones y en qué dirección** (T-12).
+   Hoy los abonos informados vienen sembrados en `apps/contable/js/datos.js`; ese es el
+   punto exacto por donde se van a conectar.
+2. **Decidir el alcance del resto de la contable** (T-13): egresos y gastos, proveedores,
+   plan de cuentas, balances. Lo entregado es cuentas por cobrar; el otro lado no existe.
+3. Ojo con las reglas duplicadas: una `RN-xx` que cambie hay que cambiarla en los dos
+   productos el mismo día (§2.1 de `10-equipo-y-orquestacion.md`).
 
 ### 2026-08-26 · Sesión de IA (Claude), a pedido de Jeimy · Cartera y pagos
 

@@ -72,6 +72,16 @@ apps/pwa/
 | Todo acceso a datos pasa por `useDatos()` (que usa el repositorio). | Un solo punto de cambio hacia el backend. |
 | Cada pantalla declara en un comentario el/los `CU-` que implementa. | Trazabilidad documentación ↔ código. |
 
+## 3.1 Los dos productos del repositorio
+
+| Carpeta | Producto | Stack | Responsable |
+|---|---|---|---|
+| `apps/pwa/` | App del residente + consola web | React + TypeScript + Vite ([ADR-0001](./adr/0001-stack-tecnologico.md)) | Mary |
+| `apps/contable/` | Aplicación contable de escritorio | HTML + CSS + JS sin compilar ([ADR-0006](./adr/0006-stack-aplicacion-contable.md)) | Jeimy |
+
+No comparten código. Comparten **las reglas del dominio**, traducidas a los dos lenguajes —
+ver [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md) §2.1.
+
 ## 4. Rutas de la aplicación
 
 | Ruta | Pantalla | CU |

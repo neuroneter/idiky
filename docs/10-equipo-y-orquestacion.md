@@ -25,20 +25,22 @@ tu zona** salvo acuerdo explícito.
 | **B. Consola de administración** | `apps/pwa/src/features/admin/**` | Mary |
 | **C. Núcleo, datos y documentación** | `apps/pwa/src/{dominio,datos,estado}/**`, `docs/**` | Daniel |
 | **D. Diseño y componentes** | `apps/pwa/src/{componentes,estilos}/**` | Rotativo (ver §3) |
-| **E. Aplicación contable (escritorio)** | *por definir — ver §1.1* | Jeimy |
+| **E. Aplicación contable** | `apps/contable/**` | Jeimy |
 
-### 1.1 La aplicación contable todavía no tiene casa
+### 1.1 La aplicación contable
 
-La zona E está **sin ubicar a propósito**: antes de crear carpetas hay que decidir tres cosas.
+Vive en [`apps/contable/`](../apps/contable/README.md) y se construye **sin compilación**:
+HTML, CSS y JavaScript planos, que se abren con doble clic. La razón está en
+[ADR-0006](./adr/0006-stack-aplicacion-contable.md), y no es de gusto técnico: quien la
+desarrolla no puede instalar nada en su computador, así que cualquier stack con paso de
+compilación la dejaría sin poder trabajar.
 
-1. **Con qué se construye.** Es una aplicación de escritorio, no una web. La restricción
-   real es qué puede instalar y ejecutar Jeimy en su computador; eso manda sobre el gusto
-   técnico. Cuando se decida, va en un ADR (`docs/adr/0006-...`).
-2. **Dónde vive.** ¿En este repositorio, como `apps/contable/`, o en uno propio? Si comparte
-   las reglas del dominio con la PWA, estar en el mismo repositorio lo hace más fácil.
-3. **Qué información se comparte y en qué dirección.** Es la pregunta que decide la
-   integración: qué le manda la PWA a la contable (recaudo, recibos de caja) y qué necesita
-   la contable de vuelta.
+**Zona propia, sin protocolo compartido.** Como no comparte archivos con la PWA, Jeimy puede
+trabajar ahí sin coordinar con nadie. La única excepción está en §2.1.
+
+Queda una decisión pendiente: **qué información se intercambia y en qué dirección.** Hoy los
+abonos informados por los residentes vienen sembrados en `apps/contable/js/datos.js`. Ese es
+el punto exacto por donde las dos aplicaciones se van a conectar.
 
 > **Lo que ya está listo para compartirse:** las reglas de cartera y pagos —
 > RN-03 a RN-07 y RN-26 a RN-30 en [`05-modelo-de-datos.md`](./05-modelo-de-datos.md) —
@@ -59,6 +61,17 @@ Estos archivos los toca todo el mundo, así que tienen reglas propias:
 | `src/estilos/tokens.css` | **Solo lo cambia quien tenga la zona D.** Nadie más toca los tokens. |
 | `docs/09-estado-del-proyecto.md` | Cada quien **agrega su entrada al principio**; no edites las entradas de otros. |
 | `docs/04-casos-de-uso.md` | Solo cambias la fila de **tu** caso de uso. |
+
+### 2.1 Las reglas del dominio están en dos idiomas
+
+`apps/pwa/src/dominio/reglas.ts` y `apps/contable/js/dominio.js` implementan **las mismas
+reglas** (`RN-xx`) en TypeScript y en JavaScript. Es duplicación deliberada: son productos
+distintos y no hay compilación que los una.
+
+**Regla:** una `RN-xx` que cambia en una, cambia en la otra **en el mismo día**, y las dos
+personas lo hablan antes. La definición que manda es la de
+[`05-modelo-de-datos.md`](./05-modelo-de-datos.md); los dos archivos son traducciones de ese
+documento, no fuentes de verdad independientes.
 
 **Si dos personas necesitan el mismo archivo el mismo día:** háblenlo antes de empezar y
 decidan quién va primero. Es más barato esperar 20 minutos que resolver un conflicto.

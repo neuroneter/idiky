@@ -1,0 +1,695 @@
+/* ===========================================================================
+   Idiky Contable — hoja de estilos unica.
+   No hay preprocesador ni compilacion: se edita y se recarga el navegador.
+
+   Todo el color y el espaciado salen de las variables de abajo. Si quieres
+   cambiar el aspecto de la aplicacion, cambia las variables, no las reglas.
+   =========================================================================== */
+
+:root {
+  /* Color — verde profundo de marca sobre un neutro con sesgo frio.
+     Los tres colores semanticos (deuda, exito, espera) NO son el acento:
+     se reservan para el estado de la plata, que es lo que hay que leer de un golpe. */
+  --marca: #0f3d3e;
+  --marca-clara: #1d5b5c;
+  --marca-suave: #e3ecea;
+
+  --fondo: #eef1ef;
+  --superficie: #ffffff;
+  --superficie-alterna: #f7f9f8;
+  --borde: #dbe2df;
+  --borde-fuerte: #c3cecb;
+
+  --tinta: #141b1a;
+  --tinta-suave: #5c6b68;
+  --tinta-tenue: #8b9794;
+
+  --deuda: #a4232a;
+  --deuda-suave: #fbeaea;
+  --exito: #1a6b4f;
+  --exito-suave: #e4f2ec;
+  --espera: #8a5a00;
+  --espera-suave: #fcf1dc;
+
+  /* Tipografia — del sistema, a proposito: la aplicacion se abre desde el
+     disco y puede estar sin internet, asi que no depende de ninguna fuente
+     que haya que descargar. */
+  --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fuente-cifras: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --texto-xs: 0.75rem;
+  --texto-sm: 0.8125rem;
+  --texto-base: 0.9375rem;
+  --texto-lg: 1.125rem;
+  --texto-xl: 1.5rem;
+
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 12px;
+  --e4: 16px;
+  --e5: 24px;
+  --e6: 32px;
+
+  --radio-sm: 4px;
+  --radio: 8px;
+  --sombra: 0 1px 2px rgba(20, 27, 26, 0.06), 0 1px 3px rgba(20, 27, 26, 0.04);
+  --sombra-modal: 0 12px 40px rgba(20, 27, 26, 0.24);
+
+  --ancho-lateral: 216px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  font-size: var(--texto-base);
+  line-height: 1.5;
+  color: var(--tinta);
+  background: var(--fondo);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p, figure, blockquote { margin: 0; }
+
+:focus-visible {
+  outline: 2px solid var(--marca-clara);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   Estructura: barra lateral fija + area de trabajo
+   --------------------------------------------------------------------------- */
+
+.aplicacion {
+  display: grid;
+  grid-template-columns: var(--ancho-lateral) 1fr;
+  height: 100%;
+}
+
+.lateral {
+  background: var(--marca);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: var(--e5) var(--e3);
+  gap: var(--e5);
+}
+
+.lateral__marca {
+  padding: 0 var(--e2);
+}
+
+.lateral__nombre {
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.lateral__producto {
+  display: block;
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.62);
+  margin-top: var(--e1);
+}
+
+.lateral__copropiedad {
+  padding: 0 var(--e2);
+  font-size: var(--texto-sm);
+  color: rgba(255, 255, 255, 0.82);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  padding-top: var(--e3);
+}
+
+.lateral__copropiedad span {
+  display: block;
+  font-size: var(--texto-xs);
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: var(--e1);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+}
+
+.nav__enlace {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  font: inherit;
+  font-size: var(--texto-sm);
+  text-align: left;
+  padding: var(--e2) var(--e3);
+  border-radius: var(--radio-sm);
+  cursor: pointer;
+}
+
+.nav__enlace:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+
+.nav__enlace.activo {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.lateral__pie {
+  margin-top: auto;
+  padding: 0 var(--e2);
+  font-size: var(--texto-xs);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.lateral__pie strong {
+  display: block;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.area {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e5) var(--e6) var(--e4);
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+}
+
+.cabecera__titulo {
+  font-size: var(--texto-xl);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.cabecera__subtitulo {
+  color: var(--tinta-suave);
+  font-size: var(--texto-sm);
+  margin-top: var(--e1);
+}
+
+.contenido {
+  padding: var(--e5) var(--e6) var(--e6);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e4);
+}
+
+/* ---------------------------------------------------------------------------
+   Indicadores y tarjetas
+   --------------------------------------------------------------------------- */
+
+.rejilla-indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--e3);
+}
+
+.rejilla-indicadores--dos { grid-template-columns: repeat(2, 1fr); }
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: var(--e4);
+  box-shadow: var(--sombra);
+}
+
+.tarjeta--plana { box-shadow: none; background: var(--superficie-alterna); }
+.tarjeta--tabla { padding: 0; overflow: hidden; }
+
+.indicador { display: flex; flex-direction: column; gap: var(--e1); }
+
+.indicador__etiqueta {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tinta-tenue);
+  font-weight: 600;
+}
+
+.indicador__valor {
+  font-family: var(--fuente-cifras);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--texto-xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.indicador__valor--deuda { color: var(--deuda); }
+
+/* ---------------------------------------------------------------------------
+   Tablas — el corazon de una aplicacion contable
+   --------------------------------------------------------------------------- */
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+}
+
+.tabla th {
+  text-align: left;
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tinta-tenue);
+  font-weight: 600;
+  padding: var(--e3) var(--e4);
+  border-bottom: 1px solid var(--borde);
+  background: var(--superficie-alterna);
+  white-space: nowrap;
+}
+
+.tabla td {
+  padding: var(--e3) var(--e4);
+  border-bottom: 1px solid var(--borde);
+  vertical-align: middle;
+}
+
+.tabla tbody tr:last-child td { border-bottom: 0; }
+.tabla tbody tr:hover { background: var(--superficie-alterna); }
+
+.tabla td span.sub {
+  display: block;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-xs);
+  margin-top: 1px;
+}
+
+.derecha { text-align: right; }
+
+.sub { color: var(--tinta-suave); font-size: var(--texto-sm); }
+
+/* Cifras: ancho fijo por digito para que las columnas de dinero se alineen. */
+.cifra {
+  font-family: var(--fuente-cifras);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cifra--deuda { color: var(--deuda); font-weight: 600; }
+.cifra--cero { color: var(--tinta-tenue); }
+.cifra--grande { font-size: var(--texto-lg); font-weight: 600; }
+
+.fila--anulada td { color: var(--tinta-tenue); }
+.fila--anulada td:first-child { text-decoration: line-through; }
+
+/* ---------------------------------------------------------------------------
+   Botones y filtros
+   --------------------------------------------------------------------------- */
+
+.boton {
+  appearance: none;
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  padding: var(--e2) var(--e4);
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--borde-fuerte);
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.boton:hover { background: var(--superficie-alterna); border-color: var(--tinta-tenue); }
+
+.boton--principal {
+  background: var(--marca);
+  border-color: var(--marca);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.boton--principal:hover { background: var(--marca-clara); border-color: var(--marca-clara); }
+
+.boton--peligro { color: var(--deuda); border-color: #e4b9bb; }
+.boton--peligro:hover { background: var(--deuda-suave); border-color: var(--deuda); }
+
+.boton--pequeno { padding: var(--e1) var(--e3); font-size: var(--texto-xs); }
+
+.boton--icono {
+  border: 0;
+  background: transparent;
+  padding: var(--e1) var(--e2);
+  font-size: var(--texto-base);
+  color: var(--tinta-suave);
+  line-height: 1;
+}
+
+.boton--icono:hover { background: var(--superficie-alterna); color: var(--tinta); }
+
+.barra-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  flex-wrap: wrap;
+}
+
+.filtros { display: flex; gap: var(--e1); }
+
+.filtro {
+  appearance: none;
+  font: inherit;
+  font-size: var(--texto-sm);
+  padding: var(--e2) var(--e3);
+  border: 1px solid transparent;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  color: var(--tinta-suave);
+  cursor: pointer;
+}
+
+.filtro:hover { background: var(--marca-suave); color: var(--marca); }
+
+.filtro[aria-pressed="true"] {
+  background: var(--superficie);
+  border-color: var(--borde-fuerte);
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   Estados y avisos
+   --------------------------------------------------------------------------- */
+
+.chip {
+  display: inline-block;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  padding: 2px var(--e2);
+  border-radius: var(--radio-sm);
+  background: var(--superficie-alterna);
+  color: var(--tinta-suave);
+  white-space: nowrap;
+}
+
+.chip--exito { background: var(--exito-suave); color: var(--exito); }
+.chip--error { background: var(--deuda-suave); color: var(--deuda); }
+.chip--alerta { background: var(--espera-suave); color: var(--espera); }
+.chip--info { background: var(--marca-suave); color: var(--marca); }
+
+.nota {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e3) var(--e4);
+  background: var(--espera-suave);
+  border: 1px solid #eddcb8;
+  border-radius: var(--radio);
+}
+
+.nota span.sub { display: block; color: var(--tinta-suave); }
+.nota--anulado { background: var(--deuda-suave); border-color: #e4b9bb; }
+
+#avisos {
+  position: fixed;
+  bottom: var(--e5);
+  right: var(--e5);
+  z-index: 80;
+}
+
+.aviso {
+  padding: var(--e3) var(--e4);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-modal);
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  max-width: 380px;
+  background: var(--tinta);
+  color: #ffffff;
+}
+
+.aviso--exito { background: var(--exito); }
+.aviso--error { background: var(--deuda); }
+
+.vacio {
+  padding: var(--e6);
+  text-align: center;
+  color: var(--tinta-suave);
+  background: var(--superficie);
+  border: 1px dashed var(--borde-fuerte);
+  border-radius: var(--radio);
+  font-size: var(--texto-sm);
+}
+
+.vacio__titulo { font-weight: 600; color: var(--tinta); margin-bottom: var(--e1); }
+
+/* ---------------------------------------------------------------------------
+   Cita del propietario — lo que escribio, tal cual
+   --------------------------------------------------------------------------- */
+
+.cita {
+  margin: var(--e3) 0 0;
+  padding: var(--e3) var(--e4);
+  border-left: 3px solid var(--marca);
+  background: var(--marca-suave);
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+}
+
+.cita__etiqueta {
+  display: block;
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--marca);
+  font-weight: 700;
+  margin-bottom: var(--e1);
+}
+
+.cita p { font-size: var(--texto-sm); }
+
+/* ---------------------------------------------------------------------------
+   Abonos por conciliar
+   --------------------------------------------------------------------------- */
+
+.lista-abonos { display: flex; flex-direction: column; gap: var(--e3); }
+
+.abono__cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e4);
+}
+
+.abono__titulo { display: flex; align-items: center; gap: var(--e2); }
+.abono__titulo strong { font-size: var(--texto-base); }
+
+.abono__cabecera span.sub { display: block; margin-top: var(--e1); font-size: var(--texto-xs); }
+
+.abono__acciones { display: flex; gap: var(--e2); margin-top: var(--e4); }
+
+/* ---------------------------------------------------------------------------
+   Formularios
+   --------------------------------------------------------------------------- */
+
+.campo { display: block; margin-bottom: var(--e4); }
+
+.campo__etiqueta {
+  display: block;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  margin-bottom: var(--e1);
+}
+
+.campo__ayuda {
+  display: block;
+  font-size: var(--texto-xs);
+  color: var(--tinta-suave);
+  margin-top: var(--e1);
+}
+
+.campo__ayuda--error { color: var(--deuda); font-weight: 600; }
+
+input, select, textarea {
+  width: 100%;
+  font: inherit;
+  font-size: var(--texto-sm);
+  padding: var(--e2) var(--e3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-sm);
+  background: var(--superficie);
+  color: var(--tinta);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--marca-clara);
+  outline: 2px solid var(--marca-suave);
+  outline-offset: 0;
+}
+
+textarea { resize: vertical; }
+
+input[type="number"], .entrada-cifra {
+  font-family: var(--fuente-cifras);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.entrada-cifra { width: 130px; }
+
+.fila-campos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e3);
+}
+
+.busqueda { max-width: 340px; }
+
+/* ---------------------------------------------------------------------------
+   Reparto del pago entre cuotas
+   --------------------------------------------------------------------------- */
+
+.reparto {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: var(--e4);
+  background: var(--superficie-alterna);
+}
+
+.reparto__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  margin-bottom: var(--e3);
+}
+
+.reparto__lista { background: var(--superficie); border-radius: var(--radio-sm); overflow: hidden; }
+
+.tabla--reparto td { padding: var(--e2) var(--e3); }
+.tabla--reparto th { padding: var(--e2) var(--e3); }
+
+.reparto__resumen { margin-top: var(--e3); }
+
+.reparto__linea {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e1) 0;
+  font-size: var(--texto-sm);
+  color: var(--tinta-suave);
+}
+
+.titulo-seccion {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tinta-tenue);
+  font-weight: 700;
+  margin: var(--e4) 0 var(--e2);
+  display: block;
+}
+
+.resumen-pago {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.resumen-pago__linea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e2) var(--e4);
+  font-size: var(--texto-sm);
+  border-bottom: 1px solid var(--borde);
+}
+
+.resumen-pago__linea:last-child { border-bottom: 0; }
+.resumen-pago__linea > span:first-child { color: var(--tinta-suave); }
+
+.previsualizacion__caja {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Dialogo modal
+   --------------------------------------------------------------------------- */
+
+.fondo-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 27, 26, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--e5);
+  z-index: 70;
+}
+
+.modal {
+  background: var(--superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-modal);
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal__cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e4) var(--e5);
+  border-bottom: 1px solid var(--borde);
+}
+
+.modal__titulo { font-size: var(--texto-lg); font-weight: 650; }
+.modal__descripcion { font-size: var(--texto-sm); color: var(--tinta-suave); margin-top: var(--e1); }
+
+.modal__cuerpo { padding: var(--e5); overflow-y: auto; }
+
+.modal__pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--e2);
+  padding: var(--e3) var(--e5);
+  border-top: 1px solid var(--borde);
+  background: var(--superficie-alterna);
+}
+
+/* ---------------------------------------------------------------------------
+   Pantallas angostas — un portatil pequeno sigue siendo un computador
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .aplicacion { grid-template-columns: 1fr; height: auto; }
+  .lateral { flex-direction: row; align-items: center; gap: var(--e4); padding: var(--e3) var(--e4); }
+  .lateral__copropiedad, .lateral__pie { display: none; }
+  .nav { flex-direction: row; }
+  .area { overflow: visible; }
+  .cabecera, .contenido { padding-left: var(--e4); padding-right: var(--e4); }
+  .fila-campos { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
