@@ -144,8 +144,12 @@ La prueba estaba en el CSS: **`.boton--acento` existía con el estilo fucsia y n
 ninguna pantalla.** El color de acción estaba definido y muerto.
 
 Ahora `.boton--primario` es fucsia y `.boton--acento` se eliminó, porque pasaron a ser lo
-mismo. Texto blanco sobre el botón: 5,37:1, y 7,20:1 presionado. Las convenciones quedaron
-corregidas: el azul ya no incluye el botón primario en su lista.
+mismo. Texto blanco sobre el botón: 5,37:1, y 7,20:1 presionado.
+
+El **filtro elegido** siguió el mismo camino, por la misma razón. Eso dejó dibujada la línea
+entre los dos colores, que quedó escrita en las convenciones: **lo que se navega es azul
+—la pestaña activa, la barra, el lateral— y lo que se acciona es fucsia.** Un filtro no es un
+sitio donde estás, es un control que tocaste.
 
 **La parte blanca**
 

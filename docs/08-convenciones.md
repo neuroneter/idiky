@@ -90,7 +90,7 @@ intercambiables:
 | Token | Color | Para qué |
 |---|---|---|
 | `--color-marca` | Azul tinta `#1d2e7a` | **Estructura: dónde estás.** Barra superior, lateral del admin, pestaña activa, foco de campos, enlaces |
-| `--color-acento` | Fucsia `#c41e8c` | **Acción y atención: qué puedes hacer.** El **botón primario**, los contadores, los chips de acento. `--color-acento-fuerte` es el mismo, presionado |
+| `--color-acento` | Fucsia `#c41e8c` | **Acción y atención: qué puedes hacer.** El **botón primario**, el **filtro elegido**, los contadores, los chips de acento. `--color-acento-fuerte` es el mismo, presionado |
 
 Los dos juntos aparecen en **una sola superficie por pantalla**: `.tarjeta--marca` (el saldo
 del residente) y la barra lateral de la consola. Es la firma de la marca; si aparece en más
@@ -110,6 +110,11 @@ No están calibrados igual, y es a propósito:
 Para dar **más azul** a cualquiera de los dos: subir la parada intermedia de `--color-marca`,
 o subir la de `--color-marca-claro` por encima de 100 % — el degradado se corta antes y el
 borde visible no llega a fucsia pleno.
+
+**Dónde va la línea entre los dos.** Lo que la persona **navega** es azul: la pestaña activa
+de la barra inferior, la barra superior, el lateral de la consola. Lo que la persona
+**acciona** es fucsia: el botón primario y el filtro que eligió. Un filtro no es un sitio
+donde estás, es un control que tocaste.
 
 **El rojo está reservado para la plata** — mora, cuota vencida, cartera vencida. No usar
 fucsia para alarmar: compiten en tono y se pierde la señal que más importa.

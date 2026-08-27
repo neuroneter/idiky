@@ -361,9 +361,12 @@ textarea {
   color: var(--color-texto-suave);
   white-space: nowrap;
 }
+/* Fucsia, igual que el boton primario: el filtro elegido es un control que la
+   persona toco, no un sitio donde esta. La linea es esa —navegar es azul, actuar
+   es fucsia—, y el azul marino ademas se enturbiaba sobre el degradado. */
 .filtro[aria-pressed='true'] {
-  background: var(--color-marca);
-  border-color: var(--color-marca);
+  background: var(--color-acento);
+  border-color: var(--color-acento);
   color: var(--color-texto-inverso);
 }
 
