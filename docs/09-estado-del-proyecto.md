@@ -96,6 +96,27 @@ contraste —blanco translúcido— y no el tono.
 Y los encabezados dejaron de ser todos la misma etiqueta gris en mayúsculas: ahora el título
 tiene peso y, donde hay más que ver, la acción vive en el encabezado («Ver cartelera»).
 
+**El degradado pasa a cubrir toda la vista, fijo a la pantalla**
+
+Mary quiso probar el degradado en toda la pantalla y no solo en el tercio superior. Se probó
+la versión directa —el degradado estirado con el alto del contenido— y **se descartó**: el
+color de cada punto acababa dependiendo de cuántos datos tuviera la persona. Con tres
+comunicados y dos reservas, la misma zona de la pantalla sería de otro color, y la marca
+dejaría de ser una constante.
+
+La versión que quedó fija el degradado **a la pantalla, no al contenido** (`position: fixed`
+limitado al ancho de la columna móvil), y el contenido pasa por encima al desplazarse.
+
+Cubrir todo el fondo cuesta dos señales, y las dos se recuperaron en otro soporte:
+
+| Señal perdida | Cómo se recuperó |
+|---|---|
+| «Ver cartelera» era azul y por eso se leía como tocable; en blanco plano se confundía con el título | Pasa a una pastilla translúcida |
+| La portería avisaba con superficie fucsia, que sobre fondo fucsia desaparece | Avisa con un filo fucsia a la izquierda, igual que el comunicado con el suyo |
+
+El texto blanco se midió en todo el recorrido del degradado: 12,2:1 en el extremo azul, 9,2:1
+a la mitad y 5,4:1 en el fucsia. Pasa AA en los tres puntos.
+
 **La parte blanca**
 
 Las tarjetas tenían filete de 1 px más una sombra apenas visible, y esa combinación es la que

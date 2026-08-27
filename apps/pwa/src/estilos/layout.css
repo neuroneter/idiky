@@ -26,22 +26,27 @@
 .app-movil--inicio {
   position: relative;
 }
+/* Fija a la pantalla, no al contenido. Si el degradado se estirara con el alto de
+   la pagina, el color de cada punto dependeria de cuantos datos tenga la persona:
+   con tres comunicados y dos reservas, la misma zona seria de otro color. Fija,
+   la marca es una constante y el contenido pasa por encima. */
 .zona-marca {
-  position: absolute;
+  position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
-  height: calc(300px + env(safe-area-inset-top, 0px));
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--ancho-movil);
   background: var(--degradado-marca);
-  /* El borde curvo hace que la zona lea como un techo sobre el contenido. */
-  border-radius: 0 0 var(--radio-lg) var(--radio-lg);
   overflow: hidden;
   z-index: 0;
+  pointer-events: none;
 }
 .zona-marca__siluetas {
   position: absolute;
   right: -28px;
-  bottom: -6px;
+  bottom: calc(var(--alto-nav-inferior) + var(--e4));
   width: 300px;
   height: auto;
   color: #fff;
@@ -430,6 +435,19 @@
   color: var(--color-marca);
   white-space: nowrap;
 }
+/* Sobre el degradado el titulo va en blanco. El enlace, ademas, dentro de una
+   pastilla: en blanco plano se confundiria con el titulo y dejaria de decir que
+   se puede tocar. */
+.app-movil--inicio .encabezado-seccion h2 {
+  color: var(--color-texto-inverso);
+}
+.app-movil--inicio .encabezado-seccion a {
+  color: var(--color-texto-inverso);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: var(--radio-completo);
+  padding: 0.18rem 0.7rem;
+}
 
 /* ------------------------------------------- Distintivos de cada tarjeta */
 /* Distintivo + contenido, pegados a la izquierda. No sirve `.fila`, que reparte
@@ -487,13 +505,11 @@
 }
 /* Superficie de accion: algo te espera y todavia no lo has resuelto. El fucsia
    aqui no decora, significa lo mismo que en el resto de la app. */
+/* "Algo te espera y no lo has resuelto". Sobre el degradado no puede avisar con
+   superficie fucsia —desapareceria contra el fondo—, asi que lo hace con el filo,
+   igual que el comunicado lo hace con el suyo. */
 .tarjeta--pendiente {
-  background: var(--color-acento-suave);
-  border-color: transparent;
-}
-/* Sobre la tarjeta teñida, un distintivo del mismo tono desaparece: va en blanco. */
-.tarjeta--pendiente .marca-tarjeta {
-  background: var(--color-superficie);
+  border-left: 3px solid var(--color-acento);
 }
 
 /* ======================================================= Accesos directos */
