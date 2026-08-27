@@ -52,7 +52,7 @@ export function InicioPage() {
       {/* Cartera — CU-R-03 */}
       <Link to="/app/cuenta" className="tarjeta tarjeta--marca">
         <span className="subtitulo">
-          {saldo === 0 ? 'Tu unidad esta al dia' : 'Saldo pendiente'}
+          {saldo === 0 ? 'Tu unidad esta al dia' : 'Valor adeudado'}
         </span>
         <div className="dato-grande" style={{ margin: 'var(--e1) 0 var(--e2)' }}>
           {formatearDinero(saldo)}
