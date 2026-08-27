@@ -89,8 +89,8 @@ intercambiables:
 
 | Token | Color | Para qué |
 |---|---|---|
-| `--color-marca` | Azul tinta `#1d2e7a` | **Estructura: dónde estás.** Barra superior, lateral del admin, botón primario, pestaña activa, foco de campos, enlaces |
-| `--color-acento` | Fucsia `#c41e8c` | **Acción y atención: qué puedes hacer.** Contadores, botón de acento, chips de acento |
+| `--color-marca` | Azul tinta `#1d2e7a` | **Estructura: dónde estás.** Barra superior, lateral del admin, pestaña activa, foco de campos, enlaces |
+| `--color-acento` | Fucsia `#c41e8c` | **Acción y atención: qué puedes hacer.** El **botón primario**, los contadores, los chips de acento. `--color-acento-fuerte` es el mismo, presionado |
 
 Los dos juntos aparecen en **una sola superficie por pantalla**: `.tarjeta--marca` (el saldo
 del residente) y la barra lateral de la consola. Es la firma de la marca; si aparece en más

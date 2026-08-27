@@ -10,7 +10,8 @@
  *                           Barra superior, lateral del admin, boton primario,
  *                           pestana activa, foco de campos, enlaces.
  *   FUCSIA (--color-acento) accion y atencion: que puedes hacer.
- *                           Contadores, boton de acento, chips de acento.
+ *                           Boton primario, contadores, chips de acento.
+ *                           `--color-acento-fuerte` es el mismo, presionado.
  *
  * Las dos juntas aparecen en las superficies de firma — `.tarjeta--marca` (el
  * saldo) y `.lateral` (la consola) — mediante `--degradado-marca`. El azul manda
@@ -28,6 +29,7 @@
   --color-marca-claro: #c41e8c;
   --color-marca-suave: #e8ebf9;
   --color-acento: #c41e8c;
+  --color-acento-fuerte: #a3186f;
   --color-acento-suave: #fbe6f3;
 
   /* Degradado de marca — azul que se calienta hacia el fucsia.

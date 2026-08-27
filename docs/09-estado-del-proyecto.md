@@ -133,6 +133,20 @@ a dos correcciones:
 Esto último es la misma lección de ayer con el botón de cerrar sesión, al revés: allá se usó
 el rojo donde no correspondía, aquí se le quitó el soporte donde sí hacía falta.
 
+**El botón primario pasa al color de acción**
+
+El azul marino de los botones se enturbiaba sobre el degradado. Pero el problema de fondo era
+otro: **la regla decía una cosa y el código hacía la contraria.** El fucsia estaba definido
+como «lo que puedes hacer» y todas las acciones de la app —pagar, reservar, radicar,
+autorizar— usaban el azul, que es el color de «dónde estás».
+
+La prueba estaba en el CSS: **`.boton--acento` existía con el estilo fucsia y no lo usaba
+ninguna pantalla.** El color de acción estaba definido y muerto.
+
+Ahora `.boton--primario` es fucsia y `.boton--acento` se eliminó, porque pasaron a ser lo
+mismo. Texto blanco sobre el botón: 5,37:1, y 7,20:1 presionado. Las convenciones quedaron
+corregidas: el azul ya no incluye el botón primario en su lista.
+
 **La parte blanca**
 
 Las tarjetas tenían filete de 1 px más una sombra apenas visible, y esa combinación es la que

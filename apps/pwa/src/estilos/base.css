@@ -142,18 +142,20 @@ textarea {
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* Fucsia, no azul. El azul es estructura —donde estas— y el fucsia es accion
+   —que puedes hacer—; la accion principal de la app estaba pintada del color
+   equivocado (docs/08-convenciones.md). Ademas, sobre el degradado de marca un
+   boton azul marino se enturbiaba.
+   `.boton--acento` existia con este mismo estilo y no lo usaba ninguna pantalla:
+   se elimina, porque ahora el primario ya es el acento. */
 .boton--primario {
-  background: var(--color-marca);
-  border-color: var(--color-marca);
-  color: var(--color-texto-inverso);
-}
-.boton--primario:hover:not(:disabled) {
-  background: var(--color-marca-claro);
-}
-.boton--acento {
   background: var(--color-acento);
   border-color: var(--color-acento);
   color: var(--color-texto-inverso);
+}
+.boton--primario:hover:not(:disabled) {
+  background: var(--color-acento-fuerte);
+  border-color: var(--color-acento-fuerte);
 }
 .boton--peligro {
   color: var(--color-error);
