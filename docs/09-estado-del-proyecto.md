@@ -117,6 +117,22 @@ Cubrir todo el fondo cuesta dos señales, y las dos se recuperaron en otro sopor
 El texto blanco se midió en todo el recorrido del degradado: 12,2:1 en el extremo azul, 9,2:1
 a la mitad y 5,4:1 en el fucsia. Pasa AA en los tres puntos.
 
+**El degradado pasa a todas las vistas del residente**
+
+Ya no es solo el inicio: el degradado fijo es el fondo de toda la app del residente. Eso obligó
+a dos correcciones:
+
+- Los textos que van **sueltos, sin tarjeta** —títulos de sección en mayúsculas, párrafos de
+  ayuda— estaban en gris oscuro y quedaban ilegibles sobre el color. Pasan a blanco.
+- **La alerta de mora parecía un enlace.** Era una pastilla translúcida, idéntica a las de
+  «Ver cartelera» y «Ver reservas», que son navegación. El dato más alarmante de la app
+  —«$ 4.119.500 vencido · 78 días de mora»— estaba vestido de control. Ahora es una pastilla
+  **blanca sólida con el rojo dentro**: el blanco le devuelve al rojo un fondo donde se lee, y
+  la solidez la distingue de los controles translúcidos.
+
+Esto último es la misma lección de ayer con el botón de cerrar sesión, al revés: allá se usó
+el rojo donde no correspondía, aquí se le quitó el soporte donde sí hacía falta.
+
 **La parte blanca**
 
 Las tarjetas tenían filete de 1 px más una sombra apenas visible, y esa combinación es la que

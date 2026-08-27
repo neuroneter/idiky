@@ -55,26 +55,22 @@ export function LayoutResidente() {
   const misResidencias = sel.residenciasDePersona(bd, sesion.personaId)
   const miRol = misResidencias.find((r) => r.unidadId === sesion.unidadActivaId)?.rol
 
-  const enInicio = pathname === '/app'
-
   return (
-    <div className={`app-movil${enInicio ? ' app-movil--inicio' : ''}`}>
-      {/* Zona de marca del inicio: el encabezado y el saldo dejan de ser dos
-          bloques y pasan a ser uno. La silueta de torres es la copropiedad
-          misma, dibujada con el mismo trazo del logotipo. */}
-      {enInicio && (
-        <div className="zona-marca" aria-hidden="true">
-          <svg className="zona-marca__siluetas" viewBox="0 0 320 150" fill="none">
-            <g stroke="currentColor" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round">
-              <path d="M12 150V54l30-20 30 20v96M42 150v-30h18v30" />
-              <path d="M96 150V78l26-17 26 17v72M122 150v-24h14v24" />
-              <path d="M172 150V42l34-22 34 22v108M206 150v-34h20v34" />
-              <path d="M260 150V88l24-16 24 16v62" />
-              <path d="M0 150h320" />
-            </g>
-          </svg>
-        </div>
-      )}
+    <div className="app-movil app-movil--marca">
+      {/* Zona de marca: el degradado es el fondo de toda la app del residente, fijo
+          a la pantalla. La silueta de torres es la copropiedad misma, dibujada
+          con el mismo trazo del logotipo. */}
+      <div className="zona-marca" aria-hidden="true">
+        <svg className="zona-marca__siluetas" viewBox="0 0 320 150" fill="none">
+          <g stroke="currentColor" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round">
+            <path d="M12 150V54l30-20 30 20v96M42 150v-30h18v30" />
+            <path d="M96 150V78l26-17 26 17v72M122 150v-24h14v24" />
+            <path d="M172 150V42l34-22 34 22v108M206 150v-34h20v34" />
+            <path d="M260 150V88l24-16 24 16v62" />
+            <path d="M0 150h320" />
+          </g>
+        </svg>
+      </div>
 
       <header className="barra-superior">
         <div className="barra-superior__fila">
