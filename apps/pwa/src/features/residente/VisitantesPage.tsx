@@ -15,6 +15,7 @@ import { formatearFecha } from '../../utilidades/formato'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { CodigoVisual } from '../../componentes/CodigoVisual'
+import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipVisitante } from '../../componentes/Etiquetas'
 
@@ -68,6 +69,10 @@ export function VisitantesPage() {
 
   return (
     <>
+      <div className="encabezado-pagina">
+        <BotonVolver />
+      </div>
+
       <button className="boton boton--primario boton--bloque" onClick={() => setCreando(true)}>
         <Icono nombre="mas" tamano={16} />
         Autorizar visitante

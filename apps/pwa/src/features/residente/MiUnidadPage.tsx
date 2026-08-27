@@ -12,6 +12,7 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { etiquetaUnidad, pesoDelVoto, periodoActual, sumaCoeficientes } from '../../dominio/reglas'
 import { capitalizar, formatearDinero, formatearPeriodo } from '../../utilidades/formato'
+import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 
 /** El coeficiente se expresa en porcentaje con cuatro decimales (docs/05, RN-19). */
@@ -47,6 +48,10 @@ export function MiUnidadPage() {
 
   return (
     <>
+      <div className="encabezado-pagina">
+        <BotonVolver />
+      </div>
+
       <div className="tarjeta tarjeta--marca">
         <span className="subtitulo">Tu coeficiente de copropiedad</span>
         <div className="dato-grande numerico" style={{ margin: 'var(--e1) 0 var(--e2)' }}>

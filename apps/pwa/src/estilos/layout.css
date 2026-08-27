@@ -36,6 +36,14 @@
   font-weight: 650;
   letter-spacing: -0.01em;
 }
+/* Logotipo sobre la unidad activa, en las pantallas que no son el inicio. */
+.barra-superior__marca-unidad {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--e1);
+}
+
 .selector-unidad {
   display: inline-flex;
   align-items: center;
@@ -113,12 +121,26 @@
   display: inline-flex;
   align-items: center;
   gap: var(--e1);
-  border: none;
-  background: none;
+  /* 44 px es el area minima recomendada para tocar con el dedo. Antes esto tenia
+     `padding: 0` y medida unos 21 px de alto. */
+  min-height: 44px;
+  padding: 0 var(--e3) 0 var(--e2);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-completo);
+  background: var(--color-superficie);
   color: var(--color-marca);
   font-size: var(--texto-sm);
   font-weight: 600;
-  padding: 0;
+  box-shadow: var(--sombra-1);
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.boton-volver:hover {
+  background: var(--color-marca-suave);
+  border-color: var(--color-marca-suave);
+}
+.boton-volver:focus-visible {
+  outline: 2px solid var(--color-marca);
+  outline-offset: 2px;
 }
 
 /* ======================================================== Consola de admin */

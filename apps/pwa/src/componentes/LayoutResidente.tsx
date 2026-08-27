@@ -67,16 +67,22 @@ export function LayoutResidente() {
             )}
           </div>
           <div className="fila" style={{ gap: 'var(--e2)' }}>
-            <button
-              className="selector-unidad"
-              onClick={() => misResidencias.length > 1 && setEligiendoUnidad(true)}
-              title={
-                misResidencias.length > 1 ? 'Cambiar de unidad' : 'Tu unidad en la copropiedad'
-              }
-            >
-              {unidadActiva ? etiquetaUnidad(unidadActiva) : 'Sin unidad'}
-              {misResidencias.length > 1 && <Icono nombre="chevron" tamano={12} />}
-            </button>
+            <div className="barra-superior__marca-unidad">
+              {/* En el inicio el logotipo ya ocupa el lugar del titulo; aqui se
+                  repetiria. En las demas pantallas va sobre la unidad activa, que
+                  es donde queda sitio sin quitarle el titulo a la pantalla. */}
+              {pathname !== '/app' && <Logotipo inverso tamano="var(--texto-sm)" />}
+              <button
+                className="selector-unidad"
+                onClick={() => misResidencias.length > 1 && setEligiendoUnidad(true)}
+                title={
+                  misResidencias.length > 1 ? 'Cambiar de unidad' : 'Tu unidad en la copropiedad'
+                }
+              >
+                {unidadActiva ? etiquetaUnidad(unidadActiva) : 'Sin unidad'}
+                {misResidencias.length > 1 && <Icono nombre="chevron" tamano={12} />}
+              </button>
+            </div>
             <button className="avatar" onClick={cerrar} title="Cerrar sesion">
               {persona ? iniciales(persona.nombres, persona.apellidos) : '··'}
             </button>

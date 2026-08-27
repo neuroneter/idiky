@@ -61,6 +61,34 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · La marca en las vistas interiores y el botón de volver
+
+**Qué se hizo**
+
+*La marca en la barra.* El logotipo solo aparecía en el inicio. Ahora también en las demás
+pantallas del residente, sobre la identificación del apartamento. **Está en evaluación**: se
+le pasaron a Mary dos ubicaciones y esta es la primera.
+
+| Opción | Dónde va | Nota |
+|---|---|---|
+| **1 — implementada** | Arriba a la derecha, sobre «Torre 1 · 402» | Conserva el saludo. En el inicio no se repite, porque allí el logotipo ya ocupa el lugar del título |
+| 2 — propuesta | Arriba a la izquierda, encabezando la barra, con el contexto debajo | La marca queda en el **mismo sitio en todas las pantallas**, inicio incluido. Cuesta el saludo |
+
+La observación que sostiene la opción 2: en la 1 el logotipo cambia de lado según la
+pantalla, y una marca que se mueve no se memoriza. Además la esquina derecha es la zona de
+controles —unidad y avatar— y la marca no es un control.
+
+*El botón de volver.* Tenía `padding: 0` y medía **unos 21 px de alto**, cuando el mínimo
+recomendado para tocar con el dedo son **44 px**. Ahora es un botón de verdad, con borde,
+fondo y foco visible, en `componentes/BotonVolver.tsx`.
+
+Y estrenó tres pantallas que no tenían ninguna: **mi unidad, visitantes y correspondencia**
+se abren desde los accesos directos del inicio y **no tienen pestaña en la barra inferior**,
+así que la única salida era acertarle a la pestaña de inicio. El botón nombra su destino
+(«Inicio», «Mi cuenta») en vez de decir solo «Volver», que obliga a recordar de dónde vienes.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · Logotipo y tipografía — T-09 cerrada
 
 **Qué se hizo**

@@ -16,6 +16,7 @@ import { registrarPago } from '../../datos/repositorio'
 import { cuotaPendiente, estadoRealCuota } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import type { MedioPago, Pago } from '../../dominio/tipos'
+import { BotonVolver } from '../../componentes/BotonVolver'
 import { Icono } from '../../componentes/Icono'
 import { ChipCuota } from '../../componentes/Etiquetas'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
@@ -131,10 +132,7 @@ export function PagoPage() {
   return (
     <div className="pila">
       <div className="encabezado-pagina">
-        <Link to="/app/cuenta" className="boton-volver">
-          <Icono nombre="volver" tamano={16} />
-          Mi cuenta
-        </Link>
+        <BotonVolver a="/app/cuenta" texto="Mi cuenta" />
       </div>
 
       <div className="pila">
