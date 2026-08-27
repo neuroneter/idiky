@@ -524,12 +524,18 @@ y vincular residente).
 **Flujo de la tasa** — la registra **el administrador de cada copropiedad**
 (decisión del equipo, 2026-08-27).
 
-5. El administrador registra la tasa vigente: valor, desde cuándo aplica y **la fuente** que la
-   certifica.
+5. El administrador registra la tasa vigente: valor, desde cuándo aplica y **qué la aprobó** —
+   el reglamento, citando el artículo, o un acta de asamblea, enlazándola (CU-A-20).
 6. El sistema **rechaza** una tasa por encima del tope legal (RN-43) y **avisa** cuando la
    vigente lleva demasiado tiempo sin actualizarse.
 
-> **Por qué esos dos frenos.** Si la tasa la teclea una persona, se puede equivocar o dejarla
+> **La ley pone el techo, la asamblea pone la tasa.** Hay una norma que regula el interés de
+> mora, pero cada copropiedad tiene su reglamento y sus aprobaciones de asamblea: la tasa que
+> se cobra es la que **esa** copropiedad aprobó, y la ley solo dice hasta dónde puede llegar.
+> Por eso no basta con guardar un número: hay que guardar **qué lo autoriza**. Cuando un
+> copropietario pregunte por qué le cobran ese interés, la respuesta es un acta o un artículo.
+
+> **Y por eso los dos frenos.** Si la tasa la teclea una persona, se puede equivocar o dejarla
 > vieja. Cobrar por encima del tope es usura; cobrar con una tasa vencida es cobrar mal. El
 > sistema no puede evitar el error, pero sí hacerlo visible.
 

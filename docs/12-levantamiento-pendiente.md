@@ -208,14 +208,20 @@ CU-A-22, CU-A-23 y CU-A-24.
 Ya está decidido que se calcula según la normativa colombiana y que cada copropiedad elige si
 lo cobra. Falta lo que **no podemos suponer sin equivocarnos**:
 
-- **La tasa exacta y su tope.** ¿Cuál es la tasa aplicable a propiedad horizontal según la Ley
-  675, y cuál el tope por encima del cual el cobro es usura? *No la escribimos de memoria: un
-  número mal puesto expone a la copropiedad.* → *(respuesta)*
+- **El tope legal.** ¿Cuál es el tope por encima del cual el cobro es usura, según la Ley 675?
+  *No lo escribimos de memoria: un número mal puesto expone a la copropiedad.* Es lo único que
+  el sistema necesita de la ley — **la tasa en sí la pone cada copropiedad** (reglamento o
+  asamblea), la ley solo pone el techo. → *(respuesta)*
 - ~~**Quién mantiene la tasa actualizada.**~~ → ✅ **Respondido (Mary, 2026-08-27):** la
   registra **el administrador de cada copropiedad**.
   *Consecuencia:* la tasa la teclea una persona, así que la app tiene que protegerla de
   equivocarse — avisar cuando la tasa vigente está vieja y rechazar una que supere el tope
   legal. Eso hace **más urgente** confirmar cuál es ese tope (pregunta de arriba).
+- **Si la asamblea no ha aprobado ninguna tasa.** ¿Se cobra el máximo legal por defecto, o
+  no se cobra nada hasta que haya aprobación? *(Lo segundo es lo prudente, pero es una decisión
+  del equipo.)* → *(respuesta)*
+- **Una tasa aprobada por asamblea, ¿desde cuándo rige?** ¿Desde el acta, desde su aprobación,
+  desde el periodo siguiente? → *(respuesta)*
 - **Sobre qué se liquida.** ¿Sobre el saldo vencido total, o cuota por cuota desde su
   vencimiento? → *(respuesta)*
 - **Cada cuánto se liquida.** ¿Diario, mensual al cerrar el periodo? → *(respuesta)*

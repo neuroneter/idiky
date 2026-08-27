@@ -104,6 +104,15 @@ número escrito en el código quedaría desactualizado y expondría a la copropi
 tasa se modeló como `TasaInteres`, un dato **con vigencia y fuente** (RN-43), y no como una
 constante.
 
+**La ley pone el techo, la asamblea pone la tasa.** Mary precisó que, aunque hay una norma que
+regula el interés de mora, **cada copropiedad tiene su propio reglamento y sus aprobaciones de
+asamblea**. Eso cambió el modelo para mejor: `TasaInteres` no guarda solo un número, guarda
+**qué lo autoriza** — el artículo del reglamento o el acta de la asamblea que lo aprobó. Y esa
+referencia al acta **enlaza el módulo de cartera con el de asambleas** (CU-A-20).
+
+Sin eso, un copropietario que pregunte «¿por qué me cobran este interés?» no tiene respuesta.
+Con eso, la respuesta es un acta o un artículo.
+
 **Quién mantiene la tasa: el administrador de cada copropiedad** (Mary, 2026-08-27). Eso tiene
 una consecuencia de diseño: si la teclea una persona, se puede equivocar o dejarla vieja, y
 cobrar por encima del tope es usura. Así que el sistema **rechaza una tasa sobre el tope legal

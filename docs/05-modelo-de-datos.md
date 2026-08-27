@@ -117,13 +117,23 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 | `baseCalculo` | `'saldo_vencido' \| 'cuota_vencida'` | Sobre qué se liquida **(?)** |
 | `modificadaPor`, `modificadaEn` | string, fecha ISO | Quién encendió o apagó el cobro y cuándo |
 
-### TasaInteres — la tasa no se codifica, se registra
+### TasaInteres — la ley pone el techo, la asamblea pone la tasa
+
+Hay una norma que regula el interés de mora, **pero cada copropiedad tiene su propio
+reglamento y sus aprobaciones de asamblea**. La tasa que se cobra no es «la legal»: es la que
+aprobó esa copropiedad, y la ley solo dice hasta dónde puede llegar.
 
 | Campo | Tipo | Notas |
 |---|---|---|
-| `vigenciaDesde` / `vigenciaHasta` | fecha ISO | La tasa cambia con el tiempo |
+| `copropiedadId` | string | RN-01. La tasa es de cada copropiedad, no del sistema |
+| `vigenciaDesde` / `vigenciaHasta` | fecha ISO | Cambia con el tiempo |
 | `valor` | number | Tasa efectiva anual, en porcentaje |
-| `fuente` | string | Quién la certificó y el acto que la fija |
+| `origen` | `'reglamento' \| 'asamblea'` | Qué la autoriza |
+| `actaId` | string? | El acta que la aprobó, cuando el origen es una asamblea. **Enlaza la cartera con el módulo de asambleas** (CU-A-20) |
+| `referencia` | string | El artículo del reglamento, o el punto del orden del día |
+
+> Sin `origen` y sin `referencia`, un copropietario que pregunte «¿por qué me cobran este
+> interés?» no tiene respuesta. Con ellos, la respuesta es un acta o un artículo.
 
 > **Por qué esto es una tabla y no una constante.** «Normativa vigente» significa una tasa que
 > **cambia periódicamente** y que fija una autoridad externa —la certifica la Superintendencia
@@ -131,8 +141,8 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 > en el código quedaría desactualizado y expondría a la copropiedad.
 >
 > **Quién la mantiene:** el administrador de cada copropiedad (decisión del equipo,
-> 2026-08-27). Como la teclea una persona, el sistema tiene que rechazar una tasa por encima
-> del tope legal y avisar cuando la vigente está vencida.
+> 2026-08-27), **registrando qué la aprobó**. Como la teclea una persona, el sistema tiene que
+> rechazar una tasa por encima del tope legal y avisar cuando la vigente está vencida.
 >
 > Lo que sigue sin resolverse y **no podemos suponer**: cuál es exactamente la tasa aplicable a
 > propiedad horizontal y su tope según la Ley 675. Ver
@@ -324,7 +334,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-40 | Un concepto del catálogo no se borra: se desactiva, porque las multas impuestas lo referencian. | *pendiente* |
 | RN-41 | Una cuota adicional exige concepto y valor explícitos; no se prorratea por coeficiente. | *pendiente* |
 | RN-42 | El interés de mora solo se calcula si la copropiedad lo tiene activado; apagado, no se genera ninguno. | *pendiente* |
-| RN-43 | La tasa de interés la registra el administrador de cada copropiedad, con vigencia y fuente. El sistema rechaza una que supere el tope legal y avisa cuando la vigente está vencida. **(? — tope por confirmar)** | *pendiente* |
+| RN-43 | La tasa la aprueba la copropiedad —su reglamento o un acta de asamblea— y el sistema exige registrar cuál. La ley solo pone el techo: una tasa por encima del tope legal se rechaza. **(? — tope por confirmar)** | *pendiente* |
 | RN-44 | El interés se liquida sobre lo vencido y genera una cuota de tipo `interes`, que entra en la cartera como cualquier otra. | *pendiente* |
 
 ## 4. Convenciones de datos
