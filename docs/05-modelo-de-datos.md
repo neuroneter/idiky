@@ -103,6 +103,86 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 `unidadId`, `nombre`, `documento`, `placa?`, `vigenciaDesde`, `vigenciaHasta`, `codigo`
 (único, RN-16/17), `recurrente`, `estado` (`'activo' \| 'vencido' \| 'revocado'`).
 
+### Configuración de cartera de la copropiedad
+
+> Del alcance del 2026-08-27: el interés de mora se calcula **según la normativa vigente en
+> Colombia**, pero **cada copropiedad decide si lo cobra**, porque no todas lo hacen.
+
+### ConfiguracionCartera
+| Campo | Tipo | Notas |
+|---|---|---|
+| `copropiedadId` | string | Uno por copropiedad |
+| `cobraInteresMora` | boolean | **El interruptor.** Si está apagado no se genera ningún interés (RN-42) |
+| `diaVencimiento` | number | Hoy es una constante global (RN-23); pasa a ser de cada copropiedad |
+| `baseCalculo` | `'saldo_vencido' \| 'cuota_vencida'` | Sobre qué se liquida **(?)** |
+| `modificadaPor`, `modificadaEn` | string, fecha ISO | Quién encendió o apagó el cobro y cuándo |
+
+### TasaInteres — la tasa no se codifica, se registra
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `vigenciaDesde` / `vigenciaHasta` | fecha ISO | La tasa cambia con el tiempo |
+| `valor` | number | Tasa efectiva anual, en porcentaje |
+| `fuente` | string | Quién la certificó y el acto que la fija |
+
+> **Por qué esto es una tabla y no una constante.** «Normativa vigente» significa una tasa que
+> **cambia periódicamente** y que fija una autoridad externa —la certifica la Superintendencia
+> Financiera—, con un **tope legal** por encima del cual el cobro es usura. Un número escrito
+> en el código quedaría desactualizado y expondría a la copropiedad.
+>
+> Eso obliga a decidir dos cosas que **no podemos suponer**: cuál es exactamente la tasa
+> aplicable a propiedad horizontal y su tope según la Ley 675, y **quién la mantiene
+> actualizada** — ¿el administrador de cada copropiedad, o llega desde un servicio central?
+> Ver [`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md) §3 quinquies.
+
+### Entidades de multas y cobros adicionales
+
+> **Propuestas, no implementadas.** Salen del alcance que pidió Mary el 2026-08-27: el
+> administrador debe poder cobrar **cuotas adicionales** y **multas**, y dentro de multas
+> definir cuáles existen.
+
+`TipoCuota` gana un valor: pasa a ser
+`'ordinaria' | 'extraordinaria' | 'adicional' | 'interes' | 'sancion'`. Una multa impuesta y
+un cobro adicional **no son entidades nuevas en la cartera**: son `Cuota` con su tipo, así que
+entran solos en el saldo (RN-03), en la imputación por antigüedad (RN-06) y en el estado de
+cuenta del residente, sin tocar nada de eso.
+
+### ConceptoSancion — el catálogo de multas
+
+El subnivel que pidió Mary: el administrador define **qué multas existen** en su copropiedad
+antes de poder imponer ninguna.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `copropiedadId` | string | RN-01 |
+| `nombre` | string | «Ruido fuera de horario», «Mascota sin correa» |
+| `descripcion` | string | Qué conducta se sanciona |
+| `valor` | number | Valor sugerido; se puede ajustar al imponerla **(?)** |
+| `articuloReglamento` | string? | El artículo que la sustenta. **Sin esto una multa es difícil de defender** |
+| `activo` | boolean | Se desactiva, **no se borra**: las multas ya impuestas lo referencian (O3) |
+
+### Sancion — la multa impuesta
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `conceptoId` | string | Del catálogo |
+| `unidadId` | string | A quién se le impone |
+| `valor` | number | Copiado al imponerla, como el coeficiente (RN-37) |
+| `hechos` | string | Qué pasó, cuándo y dónde |
+| `estado` | `'propuesta' \| 'notificada' \| 'en_descargos' \| 'firme' \| 'anulada'` | **(?)** — ver la advertencia de abajo |
+| `cuotaId` | string? | La cuota que genera, **solo cuando queda firme** |
+| `impuestaPor`, `fechaImposicion` | string, fecha ISO | |
+
+> ⚠️ **Una multa no es un cobro cualquiera.** En Colombia la Ley 675 de 2001 exige **debido
+> proceso** antes de sancionar: el copropietario tiene que ser oído. Una app que permita
+> imponer una multa de un toque y mandarla directo a la cartera puede producir **multas
+> jurídicamente nulas** y demandas contra la administración.
+>
+> Por eso `Sancion` se modela con **estados** y no como una cuota inmediata: la cuota nace solo
+> cuando la sanción queda `firme`. Cuántos estados hacen falta y quién decide en cada uno **es
+> una pregunta para el reglamento de la copropiedad**, no un supuesto que podamos cerrar aquí.
+> Ver [`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md) §3 quater.
+
 ### Entidades del módulo de asambleas y documentos
 
 > **Propuestas, no implementadas.** Salen del alcance declarado el 2026-08-26
@@ -236,6 +316,13 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-35 | El acta se construye desde los datos registrados; aprobada, no se edita — se aclara con un acta nueva. | *pendiente* |
 | RN-36 | Todo documento formal lleva consecutivo único por tipo y es verificable. | *pendiente* |
 | RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | *pendiente* |
+| RN-38 | Solo se puede imponer una multa que exista en el catálogo de la copropiedad. | *pendiente* |
+| RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al proponerla. **(? — depende del debido proceso, Ley 675)** | *pendiente* |
+| RN-40 | Un concepto del catálogo no se borra: se desactiva, porque las multas impuestas lo referencian. | *pendiente* |
+| RN-41 | Una cuota adicional exige concepto y valor explícitos; no se prorratea por coeficiente. | *pendiente* |
+| RN-42 | El interés de mora solo se calcula si la copropiedad lo tiene activado; apagado, no se genera ninguno. | *pendiente* |
+| RN-43 | La tasa de interés no se escribe en el código: se registra con vigencia y fuente, y no puede superar el tope legal. **(? — tasa y tope por confirmar)** | *pendiente* |
+| RN-44 | El interés se liquida sobre lo vencido y genera una cuota de tipo `interes`, que entra en la cartera como cualquier otra. | *pendiente* |
 
 ## 4. Convenciones de datos
 

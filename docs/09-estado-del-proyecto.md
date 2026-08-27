@@ -61,6 +61,58 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · Multas y cobros adicionales entran al alcance
+
+Mary pidió que el administrador pueda cobrar **cuotas adicionales** y **multas**, y que dentro
+de multas exista un subnivel para definir cuáles existen. Salió de una pregunta suya: dónde se
+elige el concepto de un pago.
+
+**Lo que la pregunta destapó.** El residente no elige concepto a propósito —RN-06 imputa a la
+deuda más antigua—, pero al revisarlo apareció que `TipoCuota` ya contemplaba `interes` y
+`sancion` y **nada en la app los generaba**. Eran valores muertos en el modelo.
+
+**Lo documentado** — CU-A-22 (catálogo de multas), CU-A-23 (imponer una multa), CU-A-24 (cuota
+adicional), más las entidades `ConceptoSancion` y `Sancion` y las reglas RN-38 a RN-41.
+`TipoCuota` gana `'adicional'`.
+
+Una decisión de modelado que evita trabajo: **una multa y un cobro adicional no son entidades
+nuevas en la cartera, son `Cuota` con su tipo**. Así entran solos en el saldo, en la imputación
+por antigüedad y en el estado de cuenta, sin tocar nada de eso.
+
+**⚠️ CU-A-23 queda bloqueado, y no por falta de tiempo.** La Ley 675 de 2001 exige **debido
+proceso** antes de sancionar: hay que oír al copropietario. Una app que imponga una multa de un
+toque y la mande directo a la cartera puede producir **multas nulas** y demandas contra la
+administración. Por eso `Sancion` se modeló con estados —propuesta, notificada, en descargos,
+firme— y la cuota nace **solo cuando queda firme** (RN-39).
+
+Cuántos estados hacen falta, quién impone, quién resuelve los descargos y con qué plazo **sale
+del reglamento de la copropiedad**, no de un supuesto nuestro. Las preguntas quedaron en
+[`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md) §3 quater.
+
+**Qué sí se puede construir ya:** el catálogo (CU-A-22) y la cuota adicional (CU-A-24). Ninguno
+tiene consecuencias jurídicas.
+
+**El interés de mora, configurable por copropiedad**
+
+Mary añadió: se calcula según la normativa vigente en Colombia, pero **cada copropiedad decide
+si lo cobra**, porque no todas lo hacen. Eso cerró en parte una pregunta que estaba abierta
+desde el arranque. Quedó como CU-A-25 y RN-42.
+
+La parte técnica que obliga a decidir: **«normativa vigente» significa una tasa que cambia y
+que fija una autoridad externa**, con un tope legal por encima del cual el cobro es usura. Un
+número escrito en el código quedaría desactualizado y expondría a la copropiedad. Por eso la
+tasa se modeló como `TasaInteres`, un dato **con vigencia y fuente** (RN-43), y no como una
+constante.
+
+Lo que **no se escribió y no se debe escribir de memoria**: cuál es la tasa aplicable y su
+tope. Eso hay que verificarlo en la ley, igual que el tope de poderes de asamblea. Y falta
+decidir quién la mantiene actualizada: ¿el administrador de cada copropiedad, o un servicio
+central de la plataforma? Las preguntas están en §3 quinquies del levantamiento.
+
+Con el interruptor y sin las respuestas se puede construir CU-A-25, pero no el cálculo.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · Las tildes, y una herramienta para no perderlas
 
 Mary: «cuidado con el tema de la ortografía, dice mucho de la calidad de una aplicación».

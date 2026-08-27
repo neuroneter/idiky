@@ -71,13 +71,17 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-19 | **Validar y registrar los poderes** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-19) |
 | CU-A-20 | **Generar el acta de la asamblea** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-20) |
 | CU-A-21 | **Administrar los coeficientes de las unidades** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-21) |
+| CU-A-22 | **Administrar el catálogo de multas** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-22) |
+| CU-A-23 | **Imponer una multa a una unidad** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-23) |
+| CU-A-24 | **Cobrar una cuota adicional a una unidad** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-24) |
+| CU-A-25 | **Configurar si la copropiedad cobra interés de mora** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-25) |
 
 ## 3. Sistema — procesos automáticos
 
 | ID | Caso de uso | Fase | Estado |
 |---|---|---|---|
 | CU-S-01 | Generar cuotas ordinarias mensuales | 2 | ⬜ Pendiente (hoy es manual, CU-A-05) |
-| CU-S-02 | Marcar cuotas vencidas y calcular interés de mora | 2 | 🟡 Parcial (el vencimiento se marca; el interés no se calcula) |
+| CU-S-02 | Marcar cuotas vencidas y calcular interés de mora | 1 | 🟡 Parcial (el vencimiento se marca; el interés no se calcula — **solo si la copropiedad lo activó**, RN-42) |
 | CU-S-03 | Liberar reservas no confirmadas | 2 | ⬜ Pendiente |
 | CU-S-04 | Vencer códigos de visitante | 1 | ✅ Demo (por fecha de vigencia) |
 | CU-S-05 | Alertar PQRS próximas a vencer SLA | 2 | 🟡 Parcial (se muestra el indicador de vencida) |

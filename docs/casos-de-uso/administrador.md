@@ -403,3 +403,142 @@ y vincular residente).
 
 **Estado en el demo:** 🟡 — el coeficiente existe y se muestra en `UnidadesPage.tsx`, pero
 **no se puede editar** y no hay versionado.
+
+---
+
+### CU-A-22
+## CU-A-22 — Administrar el catálogo de multas
+
+- **Actor principal:** Administrador
+- **Precondiciones:** El reglamento de la copropiedad define qué conductas se sancionan.
+- **Disparador:** Se configura la copropiedad, o el reglamento cambia.
+- **Resultado esperado:** Queda definido **qué multas existen** y por cuánto. Sin catálogo no
+  se puede imponer ninguna (RN-38).
+
+**Flujo principal**
+1. El administrador ve los conceptos de multa de su copropiedad, activos e inactivos.
+2. Crea uno: nombre, descripción de la conducta, valor sugerido y **el artículo del reglamento
+   que lo sustenta**.
+3. El sistema lo guarda como activo y queda disponible para CU-A-23.
+
+**Flujos alternativos**
+- A1. Editar un concepto → **no cambia las multas ya impuestas**, que copiaron su valor (RN-37).
+- A2. Dar de baja un concepto → se marca inactivo. **No se borra**, porque las multas impuestas
+  lo referencian (RN-40).
+- A3. Crear un concepto sin artículo del reglamento → el sistema avisa de que la multa será
+  más difícil de defender, pero **(?)** queda por decidir si lo impide.
+
+**Reglas de negocio**
+- RN-38, RN-40.
+
+**Estado en el demo:** ⬜ — no existe.
+
+---
+
+### CU-A-23
+## CU-A-23 — Imponer una multa a una unidad
+
+- **Actor principal:** Administrador (o el consejo, **(?)**)
+- **Precondiciones:** El catálogo tiene al menos un concepto activo (CU-A-22).
+- **Disparador:** Ocurre una conducta sancionable.
+- **Resultado esperado:** Queda registrada la sanción con sus hechos, y **solo cuando queda
+  firme** se convierte en una cuota en la cartera de la unidad.
+
+**Flujo principal**
+1. El administrador elige la unidad y un concepto del catálogo (RN-38).
+2. Describe **los hechos**: qué pasó, cuándo y dónde. Ajusta el valor si el reglamento lo
+   permite **(?)**.
+3. La sanción queda `propuesta` y se **notifica** al copropietario.
+4. El copropietario tiene un plazo para presentar **descargos** **(? — plazo por definir)**.
+5. Con los descargos a la vista, la sanción queda `firme` o `anulada`.
+6. Al quedar firme, el sistema genera una `Cuota` de tipo `sancion` con el valor y su
+   vencimiento (RN-39). Desde ahí se comporta como cualquier otra cuota: suma al saldo,
+   entra en la imputación por antigüedad y aparece en el estado de cuenta.
+
+**Flujos alternativos**
+- A1. El copropietario presenta descargos y se le da la razón → `anulada`, con motivo. **No se
+  borra**, queda el registro (O3).
+- A2. Anular una multa ya firme → la cuota se anula también **(?)**; si ya fue pagada, hay que
+  definir si se devuelve o se abona.
+
+**Reglas de negocio**
+- RN-38, RN-39.
+
+> ⚠️ **Este caso de uso tiene consecuencias jurídicas.** La Ley 675 de 2001 exige debido
+> proceso antes de sancionar. Un flujo que imponga la multa de un toque y la mande directo a
+> la cartera puede producir **multas nulas** y demandas contra la administración. Los estados
+> de este flujo tienen que salir del reglamento de la copropiedad, no de una suposición
+> nuestra — ver [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 quater.
+
+**Estado en el demo:** ⬜ — no existe.
+
+---
+
+### CU-A-24
+## CU-A-24 — Cobrar una cuota adicional a una unidad
+
+- **Actor principal:** Administrador
+- **Precondiciones:** Existe la unidad.
+- **Disparador:** Un cobro que no es la cuota del mes ni una extraordinaria de toda la
+  copropiedad: parqueadero adicional, mascota, uso de una zona con costo, reposición de un
+  daño.
+- **Resultado esperado:** La unidad tiene una cuota nueva de tipo `adicional`, con su concepto
+  y su vencimiento.
+
+**Flujo principal**
+1. El administrador elige la unidad, escribe el concepto y el valor, y fija el vencimiento.
+2. El sistema crea la cuota de tipo `adicional` (RN-41).
+3. Entra sola en el saldo de la unidad y en el estado de cuenta del residente.
+
+**Flujos alternativos**
+- A1. Cobrar lo mismo a varias unidades → **(?)** por definir si hace falta un cobro masivo o
+  basta repetirlo.
+- A2. Anular una cuota adicional no pagada → se anula con motivo, no se borra (O3).
+
+**Reglas de negocio**
+- RN-41: exige concepto y valor explícitos. **No se prorratea por coeficiente**, a diferencia
+  de la extraordinaria (RN-05): un parqueadero adicional no depende del tamaño del apartamento.
+
+**Estado en el demo:** ⬜ — no existe.
+
+---
+
+### CU-A-25
+## CU-A-25 — Configurar si la copropiedad cobra interés de mora
+
+- **Actor principal:** Administrador
+- **Precondiciones:** Existe la copropiedad.
+- **Disparador:** Se configura la copropiedad, o la asamblea decide empezar o dejar de cobrar
+  intereses.
+- **Resultado esperado:** Queda definido si esta copropiedad cobra interés de mora. **No todas
+  lo hacen**, y apagado no se genera ninguno (RN-42).
+
+**Flujo principal**
+1. El administrador ve la configuración de cartera de su copropiedad.
+2. Enciende o apaga el cobro de interés de mora.
+3. El sistema registra **quién lo cambió y cuándo**: encender un cobro que afecta a todos los
+   copropietarios no puede ser un cambio anónimo.
+4. Con el cobro encendido, el proceso automático (CU-S-02) liquida los intereses según la tasa
+   vigente y genera cuotas de tipo `interes` (RN-44).
+
+**Flujos alternativos**
+- A1. Se apaga el cobro → **los intereses ya generados no desaparecen**; son cuotas y se
+  anulan una por una si así se decide (O3).
+- A2. No hay tasa vigente registrada → el sistema **no calcula nada** y avisa. Es preferible no
+  cobrar a cobrar con una tasa desactualizada (RN-43).
+
+**Reglas de negocio**
+- RN-42: sin activar, no se genera ningún interés.
+- RN-43: la tasa no se escribe en el código; se registra con vigencia y fuente, y no puede
+  superar el tope legal.
+- RN-44: el interés genera una cuota de tipo `interes`, que entra en la cartera como cualquier
+  otra y por tanto suma al saldo (RN-03) y se imputa por antigüedad (RN-06).
+
+> **La tasa cambia y viene de afuera.** «Normativa vigente» significa que la fija una autoridad
+> externa y se actualiza periódicamente. Por eso la tasa es un dato con vigencia, no una
+> constante del código, y por eso hace falta decidir **quién la mantiene al día**. Las
+> preguntas están en [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md)
+> §3 quinquies. Sin esas respuestas se puede construir el interruptor de este caso de uso, pero
+> no el cálculo.
+
+**Estado en el demo:** ⬜ — hoy no se calcula ningún interés (CU-S-02 está parcial).

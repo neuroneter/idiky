@@ -105,15 +105,17 @@ hay que responderlo explícitamente, no asumirlo.
 | Chat entre residentes | ❓ Sin confirmar | No mencionado |
 | Reserva de parqueaderos de visitantes | ❓ Sin confirmar | No mencionado |
 | Control de mascotas | ❓ Sin confirmar | No mencionado |
-| Multas y sanciones por convivencia | ❓ Sin confirmar | No mencionado |
+| **Multas y sanciones por convivencia** | ✅ v1 | Pedido el 2026-08-27. **CU-A-23 bloqueado** por el debido proceso (§3 quater) |
+| **Cobros adicionales por unidad** | ✅ v1 | Parqueadero, mascota, uso de zonas, reposición de daños (CU-A-24) |
 | Facturación electrónica | ❓ Sin confirmar | No mencionado |
 
 ## 3. Funcionamiento de la copropiedad real
 
 - ¿Las cuotas se facturan **por anticipado o vencidas**? ¿Qué día vencen?
   *(Supuesto actual: vencen el día 10 del periodo — RN-23.)* → *(respuesta)*
-- ¿Cómo se calcula el **interés de mora**? ¿Tasa, base de cálculo, tope legal?
-  *(Hoy no se calcula; está pendiente en CU-S-02.)* → *(respuesta)*
+- ~~¿Cómo se calcula el **interés de mora**?~~ → ✅ **Respondido en parte (Mary, 2026-08-27):**
+  según la normativa vigente en Colombia, y **configurable por copropiedad**, porque no todas
+  lo cobran (RN-42, CU-A-25). Lo que falta de esa respuesta está en §3 quinquies.
 - ¿Qué pasa con una unidad en mora: pierde voto, pierde reservas, ambas?
   *(Supuesto actual: pierde reservas — RN-08.)* → *(respuesta)*
 - ¿El valor de la cuota se define **por coeficiente**, por tipo de unidad, por área, o es
@@ -171,6 +173,56 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   → *(respuesta)*
 - ¿El comprobante de pago es un recibo de caja informal o debe ser un documento con
   requisitos fiscales? → *(respuesta)*
+
+## 3 quater. Multas y cobros adicionales — el debido proceso
+
+Mary pidió (2026-08-27) que el administrador pueda cobrar **cuotas adicionales** y **multas**,
+y que dentro de multas exista un subnivel para definir cuáles existen. Quedó documentado en
+CU-A-22, CU-A-23 y CU-A-24.
+
+**Antes de construirlo hay que responder esto**, porque una multa mal impuesta es nula:
+
+- **Debido proceso.** La Ley 675 de 2001 exige oír al copropietario antes de sancionar.
+  ¿Cuáles son los pasos en esta copropiedad: notificación, plazo de descargos, decisión?
+  ¿Cuánto dura el plazo? → *(respuesta)*
+- **Quién impone.** ¿El administrador solo, el consejo de administración, o la asamblea?
+  → *(respuesta)*
+- **Quién decide los descargos.** ¿La misma persona que impuso la multa, u otra? → *(respuesta)*
+- **El valor.** ¿Es fijo por concepto, o el que impone puede ajustarlo? Si puede, ¿con qué
+  tope? → *(respuesta)*
+- **Sin artículo del reglamento.** ¿Se permite crear un concepto de multa que no cite el
+  artículo que lo sustenta, o el sistema debe impedirlo? → *(respuesta)*
+- **Reincidencia.** ¿La multa sube si se repite la conducta? → *(respuesta)*
+- **Multa anulada después de pagada.** ¿Se devuelve el dinero o se abona a la siguiente cuota?
+  → *(respuesta)*
+- **Efecto de la multa en otros derechos.** Una multa impaga, ¿cuenta como mora para bloquear
+  reservas (RN-08) o para el paz y salvo (RN-26)? → *(respuesta)*
+- **Cuotas adicionales.** ¿Qué se cobra realmente por esta vía —parqueadero, mascota, uso de
+  zonas, reposición de daños— y quién lo autoriza? → *(respuesta)*
+
+> **Mientras no haya respuestas, no se implementa CU-A-23.** El catálogo (CU-A-22) y la cuota
+> adicional (CU-A-24) sí se pueden construir sin ellas: no tienen consecuencias jurídicas.
+
+## 3 quinquies. Interés de mora — lo que falta de la respuesta
+
+Ya está decidido que se calcula según la normativa colombiana y que cada copropiedad elige si
+lo cobra. Falta lo que **no podemos suponer sin equivocarnos**:
+
+- **La tasa exacta y su tope.** ¿Cuál es la tasa aplicable a propiedad horizontal según la Ley
+  675, y cuál el tope por encima del cual el cobro es usura? *No la escribimos de memoria: un
+  número mal puesto expone a la copropiedad.* → *(respuesta)*
+- **Quién mantiene la tasa actualizada.** La certifica la Superintendencia Financiera y cambia
+  periódicamente. ¿La actualiza el administrador de cada copropiedad, o llega desde un
+  servicio central de la plataforma? → *(respuesta)*
+- **Sobre qué se liquida.** ¿Sobre el saldo vencido total, o cuota por cuota desde su
+  vencimiento? → *(respuesta)*
+- **Cada cuánto se liquida.** ¿Diario, mensual al cerrar el periodo? → *(respuesta)*
+- **El interés, ¿genera interés?** ¿Se capitaliza o no? *(Habitualmente no, pero hay que
+  confirmarlo.)* → *(respuesta)*
+- **Al ponerse al día.** Si alguien paga todo lo vencido, ¿se le cobra el interés corrido hasta
+  ese día? ¿Se puede condonar, y quién lo autoriza? → *(respuesta)*
+- **Interés impago.** ¿Cuenta como mora para bloquear reservas (RN-08) y para el paz y salvo
+  (RN-26)? → *(respuesta)*
 
 ## 4. Usuarios y roles
 
