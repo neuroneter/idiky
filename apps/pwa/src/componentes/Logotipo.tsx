@@ -53,10 +53,13 @@ export function Logotipo({
           strokeLinejoin="round"
           strokeLinecap="round"
         />
-        {/* La puerta es el unico punto de acento, igual que en el resto de la app. */}
+        {/* La puerta usa el fucsia de la marca —el extremo del degradado—, no el
+            color de accion. El logotipo no es un control: su punto de color tiene
+            que brillar contra el azul y no cambiar si manana cambia el color de
+            los botones. */}
         <path
           d="M78 132V98h36v34"
-          stroke="var(--color-acento)"
+          stroke="var(--color-marca-claro)"
           strokeWidth="13"
           strokeLinejoin="round"
           strokeLinecap="round"

@@ -9,7 +9,8 @@
  *   AZUL  (--color-marca)   estructura: donde estas.
  *                           Barra superior, lateral del admin, boton primario,
  *                           pestana activa, foco de campos, enlaces.
- *   FUCSIA (--color-acento) accion y atencion: que puedes hacer.
+ *   VIOLETA (--color-acento) accion y atencion: que puedes hacer.
+ *                           Sale del propio degradado, al 60 % del recorrido.
  *                           Boton primario, contadores, chips de acento.
  *                           `--color-acento-fuerte` es el mismo, presionado.
  *
@@ -28,8 +29,8 @@
   --color-marca: #1d2e7a;
   --color-marca-claro: #c41e8c;
   --color-marca-suave: #e8ebf9;
-  --color-acento: #c41e8c;
-  --color-acento-fuerte: #a3186f;
+  --color-acento: #812485;
+  --color-acento-fuerte: #6b1e6f;
   --color-acento-suave: #fbe6f3;
 
   /* Degradado de marca — azul que se calienta hacia el fucsia.

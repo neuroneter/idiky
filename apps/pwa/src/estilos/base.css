@@ -364,9 +364,12 @@ textarea {
 /* Fucsia, igual que el boton primario: el filtro elegido es un control que la
    persona toco, no un sitio donde esta. La linea es esa —navegar es azul, actuar
    es fucsia—, y el azul marino ademas se enturbiaba sobre el degradado. */
+/* El borde claro no es decoracion: el violeta sale del propio degradado, asi que
+   en algun punto del scroll coincide con el fondo y el chip se disolveria. El filo
+   lo despega siempre. */
 .filtro[aria-pressed='true'] {
   background: var(--color-acento);
-  border-color: var(--color-acento);
+  border-color: rgba(255, 255, 255, 0.45);
   color: var(--color-texto-inverso);
 }
 
