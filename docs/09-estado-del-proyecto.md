@@ -61,6 +61,62 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · El inicio deja de ser cajas blancas
+
+**El diagnóstico**
+
+Mary: «el inicio está muy básico, queremos una app que tenga también una marca». Lo que lo
+hacía verse básico no era la falta de color: era que **todo pesaba igual**. Barra, saldo,
+accesos y secciones eran bloques del mismo tamaño apilados, y las cuatro tarjetas eran
+rectángulos blancos idénticos que se leían como una sola mancha.
+
+**Zona de marca**
+
+El encabezado y el saldo dejan de ser dos bloques y pasan a ser uno: el degradado ocupa el
+tercio superior, con borde inferior curvo para que lea como un techo sobre el contenido. El
+monto va directo sobre el degradado y los accesos flotan montados sobre el borde. Detrás, una
+**silueta de torres** al 9 % de opacidad, con el mismo trazo del logotipo: es la copropiedad,
+no una textura cualquiera.
+
+En el inicio la barra pierde su fondo y **deja de ser pegajosa a propósito**: transparente y
+pegajosa dejaría pasar el contenido por debajo.
+
+El chip rojo de mora no se lee sobre el fucsia, así que en la zona de marca la alarma la da el
+contraste —blanco translúcido— y no el tono.
+
+**Cada sección con su carácter**
+
+| Sección | Tratamiento | Por qué |
+|---|---|---|
+| Comunicado | Borde azul a la izquierda | Es texto editorial; un icono competiría con el chip de categoría |
+| Tu unidad | Distintivo en azul suave | |
+| Próxima reserva | **Bloque de calendario** (2 · SEP) | Una reserva es una fecha, y así se reconoce sin leer |
+| Portería | **Superficie fucsia** | El fucsia significa acción en toda la app: algo te espera y no lo has resuelto |
+
+Y los encabezados dejaron de ser todos la misma etiqueta gris en mayúsculas: ahora el título
+tiene peso y, donde hay más que ver, la acción vive en el encabezado («Ver cartelera»).
+
+**La parte blanca**
+
+Las tarjetas tenían filete de 1 px más una sombra apenas visible, y esa combinación es la que
+las hacía ver de maqueta. Perdieron el filete, se apoyan solo en la sombra y el fondo se
+profundizó de `#f5f5fb` a `#eceef7` para que se despeguen.
+
+> ⚠️ **Al oscurecer el fondo, `--color-texto-tenue` se cayó del contraste AA** (bajó a
+> 4,41:1). Hubo que oscurecerlo con él, a 4,62:1. **Los grises van amarrados al fondo:** si se
+> vuelve a tocar `--color-fondo`, hay que volver a medirlos.
+
+**Tres defectos encontrados al verificar**
+
+1. **Texto centrado en las tarjetas.** `.fila` reparte con `space-between`, así que separaba
+   el distintivo del contenido. Se creó `.tarjeta__cuerpo`. Regla: **`.fila` es para repartir,
+   no para agrupar.**
+2. **El hueco inferior no descontaba la safe-area**, que la barra inferior sí suma a su alto.
+3. Un tercer «defecto» resultó no serlo: en capturas con `fullPage` la barra inferior aparece
+   cortando el contenido, porque es `position: fixed`. En la app no ocurre.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · El círculo «MR» dejó de cerrar la sesión
 
 **El hallazgo**

@@ -408,6 +408,29 @@
   font-weight: 700;
 }
 
+/* --------------------------------------------- Encabezado de cada seccion */
+/* Antes todas las secciones eran la misma etiqueta gris en mayusculas, y eso es
+   lo que hacia que la pantalla se leyera como una lista de rotulos. Ahora el
+   titulo tiene peso y, donde hay mas que ver, la accion vive en el encabezado. */
+.encabezado-seccion {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e3);
+}
+.encabezado-seccion h2 {
+  font-size: var(--texto-lg);
+  font-weight: 680;
+  letter-spacing: -0.015em;
+  color: var(--color-texto);
+}
+.encabezado-seccion a {
+  font-size: var(--texto-sm);
+  font-weight: 650;
+  color: var(--color-marca);
+  white-space: nowrap;
+}
+
 /* ------------------------------------------- Distintivos de cada tarjeta */
 /* Distintivo + contenido, pegados a la izquierda. No sirve `.fila`, que reparte
    con space-between y dejaria el texto flotando en el centro. */
@@ -462,6 +485,16 @@
 .tarjeta--comunicado {
   border-left: 3px solid var(--color-marca);
 }
+/* Superficie de accion: algo te espera y todavia no lo has resuelto. El fucsia
+   aqui no decora, significa lo mismo que en el resto de la app. */
+.tarjeta--pendiente {
+  background: var(--color-acento-suave);
+  border-color: transparent;
+}
+/* Sobre la tarjeta teñida, un distintivo del mismo tono desaparece: va en blanco. */
+.tarjeta--pendiente .marca-tarjeta {
+  background: var(--color-superficie);
+}
 
 /* ======================================================= Accesos directos */
 .accesos {
@@ -475,9 +508,10 @@
   align-items: center;
   gap: var(--e1);
   padding: var(--e3) var(--e1);
-  border: 1px solid var(--color-borde);
+  border: 1px solid transparent;
   border-radius: var(--radio);
   background: var(--color-superficie);
+  box-shadow: var(--sombra-1);
   font-size: 0.68rem;
   font-weight: 600;
   color: var(--color-texto-suave);

@@ -110,7 +110,10 @@ export function InicioPage() {
       {/* Comunicado destacado — CU-R-09, RN-15 */}
       {destacado && (
         <div className="pila">
-          <span className="titulo-seccion">De la administracion</span>
+          <div className="encabezado-seccion">
+            <h2>De la administracion</h2>
+            <Link to="/app/comunicados">Ver cartelera</Link>
+          </div>
           <Link to="/app/comunicados" className="tarjeta tarjeta--accion tarjeta--comunicado">
             <div className="fila" style={{ marginBottom: 'var(--e2)' }}>
               <ChipComunicado categoria={destacado.categoria} />
@@ -130,7 +133,9 @@ export function InicioPage() {
       {/* Mi unidad y su coeficiente — CU-R-24 */}
       {unidad && (
         <div className="pila">
-          <span className="titulo-seccion">Tu unidad</span>
+          <div className="encabezado-seccion">
+            <h2>Tu unidad</h2>
+          </div>
           <Link to="/app/unidad" className="tarjeta tarjeta--accion">
             <div className="fila">
               <div className="tarjeta__cuerpo">
@@ -152,7 +157,10 @@ export function InicioPage() {
 
       {/* Proxima reserva — CU-R-05 */}
       <div className="pila">
-        <span className="titulo-seccion">Tu proxima reserva</span>
+        <div className="encabezado-seccion">
+          <h2>Tu proxima reserva</h2>
+          <Link to="/app/reservas">Ver reservas</Link>
+        </div>
         {reserva && zonaReserva ? (
           <Link to="/app/reservas" className="tarjeta tarjeta--accion">
             <div className="fila">
@@ -188,8 +196,10 @@ export function InicioPage() {
       {/* Correspondencia — CU-R-11 */}
       {correspondenciaPendiente.length > 0 && (
         <div className="pila">
-          <span className="titulo-seccion">Te espera en porteria</span>
-          <Link to="/app/correspondencia" className="tarjeta tarjeta--accion">
+          <div className="encabezado-seccion">
+            <h2>Te espera en porteria</h2>
+          </div>
+          <Link to="/app/correspondencia" className="tarjeta tarjeta--accion tarjeta--pendiente">
             <div className="fila">
               <div className="tarjeta__cuerpo">
                 <span className="marca-tarjeta marca-tarjeta--acento">

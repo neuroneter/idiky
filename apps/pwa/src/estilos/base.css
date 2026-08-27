@@ -91,8 +91,11 @@ textarea {
 /* ----------------------------------------------------------------- Tarjetas */
 .tarjeta {
   background: var(--color-superficie);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio);
+  /* Sin filete: el borde de 1 px mas una sombra apenas visible era lo que hacia
+     que las tarjetas se leyeran como cajas de maqueta. Ahora se apoyan solo en la
+     sombra, y el fondo mas profundo hace el resto del trabajo. */
+  border: 1px solid transparent;
+  border-radius: var(--radio-lg);
   padding: var(--e4);
   box-shadow: var(--sombra-1);
 }

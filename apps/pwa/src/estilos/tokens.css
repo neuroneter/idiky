@@ -54,19 +54,21 @@
   );
 
   /* Superficies */
-  --color-fondo: #f5f5fb;
+  --color-fondo: #eceef7;
   --color-superficie: #ffffff;
   --color-superficie-2: #fafafe;
   --color-borde: #e4e5f1;
   --color-borde-fuerte: #c9cbdf;
 
   /* Texto — los tres grises pasan contraste AA sobre `--color-fondo`.
+     Si se oscurece el fondo hay que oscurecer estos grises con el, o el contraste
+     cae por debajo del minimo. Paso al bajar el fondo a #eceef7.
      `--color-texto-tenue` estaba en 2.92:1 y se usa en fechas y notas al pie, o
      sea en texto chico: a los 30 se adivinaba, a los 60 no. Si se retocan estos
      valores hay que volver a medirlos, no ajustarlos a ojo. */
   --color-texto: #171935;
   --color-texto-suave: #515170;
-  --color-texto-tenue: #6c6c84;
+  --color-texto-tenue: #69697f;
   --color-texto-inverso: #ffffff;
 
   /* Estados */
@@ -114,8 +116,8 @@
   --radio-completo: 999px;
 
   /* Sombras */
-  --sombra-1: 0 1px 2px rgba(23, 25, 53, 0.07);
-  --sombra-2: 0 4px 16px rgba(23, 25, 53, 0.09);
+  --sombra-1: 0 1px 2px rgba(23, 25, 53, .05), 0 4px 12px rgba(23, 25, 53, .05);
+  --sombra-2: 0 2px 6px rgba(23, 25, 53, .06), 0 10px 24px rgba(23, 25, 53, .09);
   --sombra-3: 0 12px 32px rgba(23, 25, 53, 0.16);
 
   /* Medidas de layout */
