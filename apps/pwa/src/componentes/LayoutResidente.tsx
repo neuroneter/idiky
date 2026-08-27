@@ -56,33 +56,29 @@ export function LayoutResidente() {
     <div className="app-movil">
       <header className="barra-superior">
         <div className="barra-superior__fila">
+          {/* La marca encabeza la barra y debajo va donde estas. Queda en el
+              mismo sitio en todas las pantallas: una marca que cambia de lado
+              segun la vista no se memoriza, y la esquina derecha es la zona de
+              controles (unidad y avatar), que no es donde va un logotipo. */}
           <div className="columna">
-            <span className="barra-superior__saludo">
-              Hola, {persona?.nombres.split(' ')[0] ?? 'residente'}
+            <Logotipo inverso tamano="var(--texto-sm)" />
+            <span className="barra-superior__titulo">
+              {pathname === '/app'
+                ? `Hola, ${persona?.nombres.split(' ')[0] ?? 'residente'}`
+                : (TITULOS[pathname] ?? 'Idiky')}
             </span>
-            {pathname === '/app' ? (
-              <Logotipo inverso tamano="var(--texto-lg)" />
-            ) : (
-              <span className="barra-superior__titulo">{TITULOS[pathname] ?? 'Idiky'}</span>
-            )}
           </div>
           <div className="fila" style={{ gap: 'var(--e2)' }}>
-            <div className="barra-superior__marca-unidad">
-              {/* En el inicio el logotipo ya ocupa el lugar del titulo; aqui se
-                  repetiria. En las demas pantallas va sobre la unidad activa, que
-                  es donde queda sitio sin quitarle el titulo a la pantalla. */}
-              {pathname !== '/app' && <Logotipo inverso tamano="var(--texto-sm)" />}
-              <button
-                className="selector-unidad"
-                onClick={() => misResidencias.length > 1 && setEligiendoUnidad(true)}
-                title={
-                  misResidencias.length > 1 ? 'Cambiar de unidad' : 'Tu unidad en la copropiedad'
-                }
-              >
-                {unidadActiva ? etiquetaUnidad(unidadActiva) : 'Sin unidad'}
-                {misResidencias.length > 1 && <Icono nombre="chevron" tamano={12} />}
-              </button>
-            </div>
+            <button
+              className="selector-unidad"
+              onClick={() => misResidencias.length > 1 && setEligiendoUnidad(true)}
+              title={
+                misResidencias.length > 1 ? 'Cambiar de unidad' : 'Tu unidad en la copropiedad'
+              }
+            >
+              {unidadActiva ? etiquetaUnidad(unidadActiva) : 'Sin unidad'}
+              {misResidencias.length > 1 && <Icono nombre="chevron" tamano={12} />}
+            </button>
             <button className="avatar" onClick={cerrar} title="Cerrar sesion">
               {persona ? iniciales(persona.nombres, persona.apellidos) : '··'}
             </button>

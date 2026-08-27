@@ -65,18 +65,16 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 **Qué se hizo**
 
-*La marca en la barra.* El logotipo solo aparecía en el inicio. Ahora también en las demás
-pantallas del residente, sobre la identificación del apartamento. **Está en evaluación**: se
-le pasaron a Mary dos ubicaciones y esta es la primera.
+*La marca en la barra.* El logotipo solo aparecía en el inicio. Se evaluaron dos ubicaciones
+para llevarlo al resto de la app del residente y **Mary eligió la segunda**:
 
-| Opción | Dónde va | Nota |
+| Opción | Dónde va | Veredicto |
 |---|---|---|
-| **1 — implementada** | Arriba a la derecha, sobre «Torre 1 · 402» | Conserva el saludo. En el inicio no se repite, porque allí el logotipo ya ocupa el lugar del título |
-| 2 — propuesta | Arriba a la izquierda, encabezando la barra, con el contexto debajo | La marca queda en el **mismo sitio en todas las pantallas**, inicio incluido. Cuesta el saludo |
+| 1 | Arriba a la derecha, sobre «Torre 1 · 402» | Descartada: el logotipo cambiaba de lado según la pantalla —izquierda en el inicio, derecha en las demás— y una marca que se mueve no se memoriza. Además la esquina derecha es la zona de controles (unidad y avatar), y una marca no es un control |
+| **2 — aplicada** | Arriba a la izquierda, encabezando la barra, con el contexto debajo | La marca queda **en el mismo sitio en todas las pantallas**, inicio incluido. El saludo no se perdió: en el inicio pasa a la línea de abajo |
 
-La observación que sostiene la opción 2: en la 1 el logotipo cambia de lado según la
-pantalla, y una marca que se mueve no se memoriza. Además la esquina derecha es la zona de
-controles —unidad y avatar— y la marca no es un control.
+Cayeron dos reglas de CSS que quedaron sin uso: `.barra-superior__saludo` y
+`.barra-superior__marca-unidad`.
 
 *El botón de volver.* Tenía `padding: 0` y medía **unos 21 px de alto**, cuando el mínimo
 recomendado para tocar con el dedo son **44 px**. Ahora es un botón de verdad, con borde,

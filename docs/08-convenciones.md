@@ -74,8 +74,10 @@ escribir «idiky» a mano ni redibuja la casa. Dos reglas:
 - **Va limpio sobre la superficie**, sin bloque de color detrás. Si la superficie ya es
   oscura —la lateral de la consola, la barra superior del residente—, se usa la prop
   `inverso`.
-- **En la app del residente vive en la barra superior del inicio**, donde reemplaza al
-  título. En las demás pantallas manda el título, que sí dice dónde estás.
+- **En la app del residente encabeza la barra superior**, en todas las pantallas y en el
+  mismo sitio, con el contexto debajo: en el inicio el saludo, en las demás el título de la
+  pantalla. Una marca que cambia de lado según la vista no se memoriza, y la esquina derecha
+  es la zona de controles —unidad y avatar—, que no es donde va un logotipo.
 - **El nombre se lee entero.** Se probó esconder la casa dentro de una de las íes y se
   descartó con la prueba delante: al tamaño de la barra lateral la casita se vuelve una
   mancha, y obliga a descifrar qué letra es. Para un nombre que la gente tiene que leer y

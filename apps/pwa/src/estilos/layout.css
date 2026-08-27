@@ -27,23 +27,11 @@
   justify-content: space-between;
   gap: var(--e3);
 }
-.barra-superior__saludo {
-  font-size: var(--texto-xs);
-  color: rgba(255, 255, 255, 0.72);
-}
 .barra-superior__titulo {
   font-size: var(--texto-lg);
   font-weight: 650;
   letter-spacing: -0.01em;
 }
-/* Logotipo sobre la unidad activa, en las pantallas que no son el inicio. */
-.barra-superior__marca-unidad {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--e1);
-}
-
 .selector-unidad {
   display: inline-flex;
   align-items: center;
