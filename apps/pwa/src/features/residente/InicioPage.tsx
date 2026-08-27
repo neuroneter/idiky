@@ -49,49 +49,57 @@ export function InicioPage() {
 
   return (
     <>
-      {/* Cartera — CU-R-03 */}
-      <Link to="/app/cuenta" className="tarjeta tarjeta--marca">
-        <span className="subtitulo">
+      {/* Cartera — CU-R-03. Va sobre la zona de marca, sin tarjeta: el monto es
+          lo primero que la persona busca y no necesita una caja que lo encierre. */}
+      <Link to="/app/cuenta" className="cartera-inicio">
+        <span className="cartera-inicio__etiqueta">
           {saldo === 0 ? 'Tu unidad esta al dia' : 'Valor adeudado'}
         </span>
-        <div className="dato-grande" style={{ margin: 'var(--e1) 0 var(--e2)' }}>
-          {formatearDinero(saldo)}
-        </div>
+        <div className="cartera-inicio__monto">{formatearDinero(saldo)}</div>
         {vencido > 0 ? (
-          <span className="chip chip--error">
+          /* Blanco sobre el degradado: el rojo no se lee sobre fucsia. */
+          <span className="cartera-inicio__alerta">
             {formatearDinero(vencido)} vencido · {mora} dias de mora
           </span>
         ) : proximaCuota ? (
-          <span className="subtitulo">
+          <span className="cartera-inicio__etiqueta">
             Proximo vencimiento: {formatearFecha(proximaCuota.fechaVencimiento)}
           </span>
         ) : (
-          <span className="subtitulo">No tienes cuotas pendientes</span>
+          <span className="cartera-inicio__etiqueta">No tienes cuotas pendientes</span>
         )}
       </Link>
 
       {/* Accesos directos a los modulos sin pestana propia */}
       <div className="accesos">
         <Link to="/app/cuenta/pagar" className="acceso-directo">
-          <Icono nombre="cuenta" />
+          <span className="acceso-directo__icono">
+            <Icono nombre="cuenta" />
+          </span>
           Pagar
         </Link>
         <Link to="/app/visitantes" className="acceso-directo">
-          <Icono nombre="visitantes" />
+          <span className="acceso-directo__icono">
+            <Icono nombre="visitantes" />
+          </span>
           Visitantes
           {visitantesVigentes.length > 0 && (
             <span className="acceso-directo__contador">{visitantesVigentes.length}</span>
           )}
         </Link>
         <Link to="/app/correspondencia" className="acceso-directo">
-          <Icono nombre="correspondencia" />
+          <span className="acceso-directo__icono">
+            <Icono nombre="correspondencia" />
+          </span>
           Paquetes
           {correspondenciaPendiente.length > 0 && (
             <span className="acceso-directo__contador">{correspondenciaPendiente.length}</span>
           )}
         </Link>
         <Link to="/app/pqrs" className="acceso-directo">
-          <Icono nombre="pqrs" />
+          <span className="acceso-directo__icono">
+            <Icono nombre="pqrs" />
+          </span>
           Solicitudes
           {pqrsAbiertas.length > 0 && (
             <span className="acceso-directo__contador">{pqrsAbiertas.length}</span>
@@ -103,7 +111,7 @@ export function InicioPage() {
       {destacado && (
         <div className="pila">
           <span className="titulo-seccion">De la administracion</span>
-          <Link to="/app/comunicados" className="tarjeta tarjeta--accion">
+          <Link to="/app/comunicados" className="tarjeta tarjeta--accion tarjeta--comunicado">
             <div className="fila" style={{ marginBottom: 'var(--e2)' }}>
               <ChipComunicado categoria={destacado.categoria} />
               <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
@@ -125,11 +133,16 @@ export function InicioPage() {
           <span className="titulo-seccion">Tu unidad</span>
           <Link to="/app/unidad" className="tarjeta tarjeta--accion">
             <div className="fila">
-              <div className="columna">
-                <strong>{etiquetaUnidad(unidad)}</strong>
-                <span className="subtitulo">
-                  Coeficiente {unidad.coeficiente} % · {unidad.area} m²
+              <div className="tarjeta__cuerpo">
+                <span className="marca-tarjeta">
+                  <Icono nombre="unidades" tamano={20} />
                 </span>
+                <div className="columna">
+                  <strong>{etiquetaUnidad(unidad)}</strong>
+                  <span className="subtitulo">
+                    Coeficiente {unidad.coeficiente} % · {unidad.area} m²
+                  </span>
+                </div>
               </div>
               <Icono nombre="chevron" tamano={16} className="tenue" />
             </div>
@@ -143,11 +156,21 @@ export function InicioPage() {
         {reserva && zonaReserva ? (
           <Link to="/app/reservas" className="tarjeta tarjeta--accion">
             <div className="fila">
-              <div className="columna">
-                <strong>{zonaReserva.nombre}</strong>
-                <span className="subtitulo">
-                  {formatearFecha(reserva.fecha)} · {reserva.horaInicio} a {reserva.horaFin}
+              <div className="tarjeta__cuerpo">
+                {/* Bloque de calendario: una reserva es una fecha, y asi se
+                    reconoce sin leer. */}
+                <span className="bloque-fecha">
+                  <span className="bloque-fecha__dia">{Number(reserva.fecha.slice(8, 10))}</span>
+                  <span className="bloque-fecha__mes">
+                    {formatearFechaCorta(reserva.fecha).split(' ')[1]}
+                  </span>
                 </span>
+                <div className="columna">
+                  <strong>{zonaReserva.nombre}</strong>
+                  <span className="subtitulo">
+                    {reserva.horaInicio} a {reserva.horaFin}
+                  </span>
+                </div>
               </div>
               <ChipReserva estado={reserva.estado} />
             </div>
@@ -168,14 +191,19 @@ export function InicioPage() {
           <span className="titulo-seccion">Te espera en porteria</span>
           <Link to="/app/correspondencia" className="tarjeta tarjeta--accion">
             <div className="fila">
-              <div className="columna">
-                <strong>
-                  {correspondenciaPendiente.length}{' '}
-                  {correspondenciaPendiente.length === 1 ? 'envio' : 'envios'} sin recoger
-                </strong>
-                <span className="subtitulo">
-                  El mas reciente: {correspondenciaPendiente[0].remitente}
+              <div className="tarjeta__cuerpo">
+                <span className="marca-tarjeta marca-tarjeta--acento">
+                  <Icono nombre="correspondencia" tamano={20} />
                 </span>
+                <div className="columna">
+                  <strong>
+                    {correspondenciaPendiente.length}{' '}
+                    {correspondenciaPendiente.length === 1 ? 'envio' : 'envios'} sin recoger
+                  </strong>
+                  <span className="subtitulo">
+                    El mas reciente: {correspondenciaPendiente[0].remitente}
+                  </span>
+                </div>
               </div>
               <Icono nombre="chevron" tamano={16} className="tenue" />
             </div>

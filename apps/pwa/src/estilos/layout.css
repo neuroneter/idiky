@@ -21,6 +21,43 @@
   color: var(--color-texto-inverso);
   padding: calc(env(safe-area-inset-top, 0px) + var(--e4)) var(--e4) var(--e4);
 }
+
+/* ------------------------------------------------- Zona de marca del inicio */
+.app-movil--inicio {
+  position: relative;
+}
+.zona-marca {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: calc(300px + env(safe-area-inset-top, 0px));
+  background: var(--degradado-marca);
+  /* El borde curvo hace que la zona lea como un techo sobre el contenido. */
+  border-radius: 0 0 var(--radio-lg) var(--radio-lg);
+  overflow: hidden;
+  z-index: 0;
+}
+.zona-marca__siluetas {
+  position: absolute;
+  right: -28px;
+  bottom: -6px;
+  width: 300px;
+  height: auto;
+  color: #fff;
+  opacity: 0.09;
+}
+/* Sobre la zona, la barra pierde su fondo. Deja de ser pegajosa a proposito: una
+   barra transparente y pegajosa dejaria pasar el contenido por debajo. */
+.app-movil--inicio .barra-superior {
+  position: relative;
+  background: none;
+  z-index: 1;
+}
+.app-movil--inicio .contenido-movil {
+  position: relative;
+  z-index: 1;
+}
 .barra-superior__fila {
   display: flex;
   /* Alineados abajo y no al centro: la unidad y el avatar quedan a la altura del
@@ -74,7 +111,12 @@
 .contenido-movil {
   flex: 1;
   padding: var(--e4);
-  padding-bottom: calc(var(--alto-nav-inferior) + var(--e6));
+  /* La barra inferior mide alto + safe-area; el hueco de abajo tiene que
+     descontar las dos cosas o en un telefono con muesca el ultimo bloque queda
+     pegado a la barra. */
+  padding-bottom: calc(
+    var(--alto-nav-inferior) + env(safe-area-inset-bottom, 0px) + var(--e6)
+  );
   display: flex;
   flex-direction: column;
   gap: var(--e4);
@@ -337,6 +379,90 @@
   color: var(--color-acento);
 }
 
+/* ------------------------------------------------ Cartera sobre la marca */
+.cartera-inicio {
+  display: block;
+  color: var(--color-texto-inverso);
+  padding: var(--e2) 0 var(--e6);
+}
+.cartera-inicio__etiqueta {
+  display: block;
+  font-size: var(--texto-sm);
+  color: rgba(255, 255, 255, 0.78);
+}
+.cartera-inicio__monto {
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: var(--e1) 0 var(--e2);
+}
+/* Blanco sobre blanco translucido: el rojo de mora no se lee sobre el fucsia del
+   degradado, asi que aqui la alarma la da el contraste, no el tono. */
+.cartera-inicio__alerta {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.34);
+  border-radius: var(--radio-completo);
+  padding: 0.2rem 0.7rem;
+  font-size: var(--texto-xs);
+  font-weight: 700;
+}
+
+/* ------------------------------------------- Distintivos de cada tarjeta */
+/* Distintivo + contenido, pegados a la izquierda. No sirve `.fila`, que reparte
+   con space-between y dejaria el texto flotando en el centro. */
+.tarjeta__cuerpo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--e3);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Cuatro tarjetas iguales se leen como una sola mancha. Cada seccion lleva su
+   propio distintivo para reconocerse sin leer el titulo. */
+.marca-tarjeta {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: var(--radio-sm);
+  background: var(--color-marca-suave);
+  color: var(--color-marca);
+}
+.marca-tarjeta--acento {
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+}
+.bloque-fecha {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: var(--radio-sm);
+  background: var(--color-marca);
+  color: var(--color-texto-inverso);
+  line-height: 1;
+}
+.bloque-fecha__dia {
+  font-size: var(--texto-base);
+  font-weight: 700;
+}
+.bloque-fecha__mes {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.82;
+}
+/* El comunicado es texto editorial: se distingue por el borde, no por un icono
+   que competiria con el chip de categoria. */
+.tarjeta--comunicado {
+  border-left: 3px solid var(--color-marca);
+}
+
 /* ======================================================= Accesos directos */
 .accesos {
   display: grid;
@@ -360,6 +486,15 @@
 }
 .acceso-directo svg {
   color: var(--color-marca);
+}
+/* El icono dentro de un circulo: da ritmo y quita la sensacion de caja vacia. */
+.acceso-directo__icono {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--color-marca-suave);
 }
 .acceso-directo__contador {
   position: absolute;
