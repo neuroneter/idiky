@@ -151,6 +151,29 @@ Cambiar un parámetro afecta a los documentos **futuros**. Los ya registrados co
 cuenta, porque cada documento la guarda (RN-36) — así la contabilidad de un mes cerrado no se
 mueve cuando alguien reconfigura el plan.
 
+### Tipo de comprobante — solo en `apps/contable/`
+
+**Es lo que le quita la contabilidad de encima al administrador.** Cada tipo trae su asiento
+ya definido, así que él elige el tipo y pone el valor: no tiene que saber que los intereses
+de mora van contra la `4115`.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `codigo` | string | Prefijo de su consecutivo: `NI-00001`, `NP-00001` |
+| `nombre`, `descripcion` | string | Lo que ve el administrador al elegir |
+| `sistema` | boolean | Si `true`, lo genera el módulo y no se registra a mano (RN-40) |
+| `pideUnidad` | boolean | Si el comprobante va contra un propietario |
+| `consecutivo` | number | **Propio de cada tipo**, como en cualquier libro contable |
+| `lineas` | `{cuenta?, parametro?, lado, porcentaje, concepto, usaUnidad}[]` | El asiento |
+
+Una línea trae `cuenta` fija o apunta a un `parametro`. Lo segundo permite que "Recibo de
+caja" siga siendo correcto aunque se cambie la cuenta de bancos.
+
+Los tipos `sistema` (`CC` causación de cuotas, `RC` recibo de caja, `CG` causación de gasto,
+`CE` comprobante de egreso) **no se registran a mano** — los genera el módulo — pero se
+muestran en pantalla con sus cuentas: saber contra qué mueve un recibo de caja es lo que
+hace auditable el módulo.
+
 ### Comprobante de ajuste — solo en `apps/contable/`
 
 Un movimiento contable que **no es un pago ni un recaudo**: causar intereses de mora,
@@ -245,6 +268,8 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-36 | **Todo documento guarda la cuenta del PUC con la que se registró.** Cambiar un parámetro no reescribe los documentos anteriores. | `contable/js/repositorio.js` |
 | RN-37 | Una cuenta del plan no se borra: se desactiva, y no puede desactivarse si un parámetro la usa. | `contable/js/repositorio.js` |
 | RN-38 | Abrirle una subcuenta a una cuenta transaccional la convierte en título: el movimiento baja al nivel nuevo. | `contable/js/repositorio.js` |
+| RN-39 | Cada tipo de comprobante lleva **su propio consecutivo**; el número nunca se repite entre tipos ni dentro de uno. | `contable/js/repositorio.js` |
+| RN-40 | Un tipo `sistema` no se registra a mano: solo lo genera el módulo que le corresponde. | `contable/js/repositorio.js` |
 
 ### El motor contable: todo es un asiento
 

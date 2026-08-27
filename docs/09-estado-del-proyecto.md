@@ -54,6 +54,50 @@ casos de uso cambien, se eliminen o aparezcan otros.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Tipos de comprobante
+
+**Qué se hizo**
+
+El administrador dejó de tener que saber contabilidad para registrar un ajuste.
+
+Cada **tipo de comprobante** trae ahora su asiento definido, y son datos configurables, no
+código. Para registrar un ajuste se elige el tipo, la fecha y el valor —y el propietario si
+el tipo lo pide—; el sistema arma el asiento y se lo muestra antes de guardar. Antes había
+que elegir cuenta por cuenta y cuadrar el débito contra el crédito a mano.
+
+- **Nueve tipos sembrados.** Cinco que registra el administrador (intereses de mora, sanción,
+  provisión de cartera, traslado al fondo de imprevistos, comisión bancaria) y cuatro que
+  genera el sistema (causación de cuotas, recibo de caja, causación de gasto, comprobante de
+  egreso). Los del sistema no se registran a mano, pero **se muestran con sus cuentas**:
+  saber contra qué mueve un recibo de caja es lo que hace auditable el módulo.
+- **Consecutivo propio por tipo** (RN-39): `NI-00001` los intereses, `NP-00001` las
+  provisiones. Como en cualquier libro contable.
+- **Gastos ya no pide la cuenta:** la categoría la decide, y la pantalla la informa.
+- **El comprobante libre queda como salida de emergencia**, con una nota que dice lo obvio:
+  si el ajuste se repite, hay que hacerle su tipo.
+
+**Dos bugs que aparecieron al probar**
+
+1. Los comprobantes sembrados gastaban `NI-00001` y `NP-00001`, pero los tipos arrancaban su
+   consecutivo en 1: el primer comprobante del usuario habría **repetido el número**. Ahora
+   el consecutivo se deriva de lo sembrado, así que sigue siendo correcto si mañana se agrega
+   otro comprobante a la semilla.
+2. El contador de comprobantes libres arrancaba en 3, herencia de cuando todos compartían
+   consecutivo.
+
+**Verificación** — seis suites en Chromium, todas pasan. La nueva comprueba lo esencial: que
+en el formulario de ajustes **no quede ni una sola opción de cuenta** que el administrador
+tenga que elegir, y lo mismo en el de gastos; que el asiento se muestre armado; que cada tipo
+use su consecutivo; que se exija el propietario cuando corresponde; y que no se pueda
+registrar a mano un tipo del sistema.
+
+**Qué sigue**
+
+1. Los tipos se ven y se usan, pero todavía no se crean ni se editan desde la pantalla: hay
+   que agregar ese formulario para que el equipo defina los suyos sin tocar código (T-19).
+2. Sigue pendiente que el contador valide los códigos (T-17).
+3. Sigue pendiente el intercambio de información con la PWA (T-12).
+
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Los cinco niveles del PUC
 
 **Qué se hizo**

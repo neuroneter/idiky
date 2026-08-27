@@ -23,64 +23,6 @@ Idiky.vistaAjustes = (function () {
 
   var filtro = 'vigentes'
 
-  /**
-   * Plantillas de los ajustes que mas se repiten en una copropiedad. No son
-   * obligatorias — se puede armar el comprobante desde cero — pero evitan
-   * tener que recordar que cuenta va contra cual.
-   */
-  var PLANTILLAS = [
-    {
-      id: 'intereses',
-      texto: 'Causar intereses de mora',
-      concepto: 'Intereses de mora',
-      pideUnidad: true,
-      lineas: [
-        { cuenta: '130515', lado: 'debe' },
-        { cuenta: '4115', lado: 'haber' },
-      ],
-    },
-    {
-      id: 'provision',
-      texto: 'Provisionar cartera de dificil cobro',
-      concepto: 'Provision de cartera de dificil cobro',
-      pideUnidad: false,
-      lineas: [
-        { cuenta: '519910', lado: 'debe' },
-        { cuenta: '139905', lado: 'haber' },
-      ],
-    },
-    {
-      id: 'sancion',
-      texto: 'Cargar una sancion a una unidad',
-      concepto: 'Sancion',
-      pideUnidad: true,
-      lineas: [
-        { cuenta: '130520', lado: 'debe' },
-        { cuenta: '4120', lado: 'haber' },
-      ],
-    },
-    {
-      id: 'fondo',
-      texto: 'Trasladar excedentes al fondo de imprevistos',
-      concepto: 'Traslado al fondo de imprevistos',
-      pideUnidad: false,
-      lineas: [
-        { cuenta: '3705', lado: 'debe' },
-        { cuenta: '3305', lado: 'haber' },
-      ],
-    },
-    {
-      id: 'libre',
-      texto: 'Comprobante en blanco',
-      concepto: '',
-      pideUnidad: false,
-      lineas: [
-        { cuenta: '', lado: 'debe' },
-        { cuenta: '', lado: 'haber' },
-      ],
-    },
-  ]
-
   function pintar(contenedor, repintar) {
     var todos = Idiky.repo.comprobantes()
     var vigentes = todos.filter(function (c) { return c.estado !== 'anulado' })
@@ -112,10 +54,17 @@ Idiky.vistaAjustes = (function () {
           botonFiltro('vigentes', 'Vigentes', repintar),
           botonFiltro('anulados', 'Anulados', repintar),
         ]),
-        el('button', {
-          clase: 'boton boton--principal',
-          onClick: function () { abrirNuevo(repintar) },
-        }, 'Nuevo comprobante'),
+        el('div', 'grupo-acciones', [
+          el('button', {
+            clase: 'boton',
+            onClick: function () { abrirLibre(repintar) },
+            title: 'Para el caso excepcional que ningun tipo cubre',
+          }, 'Comprobante libre'),
+          el('button', {
+            clase: 'boton boton--principal',
+            onClick: function () { abrirNuevo(repintar) },
+          }, 'Nuevo comprobante'),
+        ]),
       ]),
 
       visibles.length === 0
@@ -144,9 +93,11 @@ Idiky.vistaAjustes = (function () {
         el('div', null, [
           el('div', 'abono__titulo', [
             el('strong', 'cifra', comprobante.numero),
+            comprobante.tipoNombre ? ui.chip(comprobante.tipoNombre, 'info') : null,
             anulado ? ui.chip('Anulado', 'error') : ui.chip('Registrado', 'exito'),
           ]),
-          el('span', 'sub', comprobante.concepto + ' · ' + f.fecha(comprobante.fecha)),
+          el('span', 'sub', comprobante.concepto + ' · ' + f.fecha(comprobante.fecha)
+            + (comprobante.unidadId ? ' · ' + Idiky.repo.etiquetaUnidad(comprobante.unidadId) : '')),
         ]),
         el('strong', 'cifra cifra--grande', f.dinero(total)),
       ]),
@@ -188,35 +139,181 @@ Idiky.vistaAjustes = (function () {
   }
 
   // ---------------------------------------------------------------------------
-  // Nuevo comprobante
+  // Nuevo comprobante — el camino normal
   // ---------------------------------------------------------------------------
 
+  /**
+   * El administrador elige QUE paso, no COMO se contabiliza.
+   *
+   * Cada tipo trae su asiento definido, asi que aqui solo se piden fecha,
+   * valor y —cuando el tipo lo necesita— la unidad. El asiento se muestra
+   * armado antes de guardar, para que quede claro que va a pasar, pero no hay
+   * que escribirlo.
+   */
   function abrirNuevo(repintar) {
+    var tipos = Idiky.repo.tiposRegistrables()
+    if (tipos.length === 0) {
+      ui.aviso('No hay tipos de comprobante configurados. Se definen en Plan de cuentas.', 'error')
+      return
+    }
+
+    var estado = {
+      tipoId: tipos[0].id,
+      fecha: d.hoyISO(),
+      valor: 0,
+      unidadId: '',
+      detalle: '',
+    }
+
+    var zonaUnidad = el('div')
+    var vistaAsiento = el('div', 'asiento-previo')
+
+    function tipoActual() {
+      return Idiky.repo.tipoPorId(estado.tipoId)
+    }
+
+    var campoValor = el('input', {
+      type: 'number', min: 0, step: 1000, value: 0,
+      onInput: function (e) { estado.valor = f.aNumero(e.target.value); pintarAsiento() },
+    })
+
+    function pintarUnidad() {
+      ui.vaciar(zonaUnidad)
+      var tipo = tipoActual()
+      if (!tipo.pideUnidad) return
+      var unidades = Idiky.repo.unidades()
+      if (!estado.unidadId) estado.unidadId = unidades[0].id
+      zonaUnidad.appendChild(ui.campo('Propietario', el('select', {
+        onChange: function (e) { estado.unidadId = e.target.value; pintarAsiento() },
+      }, unidades.map(function (u) {
+        return el('option', {
+          value: u.id,
+          selected: u.id === estado.unidadId,
+        }, u.etiqueta + ' — ' + Idiky.repo.nombrePropietario(u.id))
+      })), 'Este comprobante le carga el valor a su cuenta.'))
+    }
+
+    function pintarAsiento() {
+      ui.vaciar(vistaAsiento)
+      var tipo = tipoActual()
+      var lineas = Idiky.repo.cuentasDelTipo(tipo)
+
+      ui.agregar(vistaAsiento, [
+        el('span', 'cascada__etiqueta', 'Asiento que se va a registrar'),
+        el('table', 'tabla tabla--asiento', [
+          el('thead', null, el('tr', null, [
+            el('th', null, 'Cuenta'),
+            el('th', 'derecha', 'Debe'),
+            el('th', 'derecha', 'Haber'),
+          ])),
+          el('tbody', null, lineas.map(function (linea) {
+            var valor = Math.round((estado.valor * (linea.porcentaje || 100)) / 100)
+            return el('tr', null, [
+              el('td', null, [
+                el('strong', 'cifra', linea.cuenta),
+                el('span', 'sub', linea.nombre
+                  + (linea.usaUnidad && estado.unidadId
+                    ? ' · ' + Idiky.repo.etiquetaUnidad(estado.unidadId)
+                    : '')),
+              ]),
+              el('td', 'derecha cifra', linea.lado === 'debe' ? f.dinero(valor) : ''),
+              el('td', 'derecha cifra', linea.lado === 'haber' ? f.dinero(valor) : ''),
+            ])
+          })),
+        ]),
+        el('p', 'campo__ayuda',
+          'Estas cuentas vienen del tipo de comprobante. Se cambian en Plan de cuentas, '
+          + 'no aqui: asi el mismo ajuste siempre queda igual.'),
+      ])
+    }
+
+    var selectorTipo = el('select', {
+      onChange: function (e) {
+        estado.tipoId = e.target.value
+        pintarUnidad()
+        pintarAsiento()
+        descripcion.textContent = tipoActual().descripcion || ''
+      },
+    }, tipos.map(function (t) {
+      return el('option', { value: t.id, selected: t.id === estado.tipoId }, t.nombre)
+    }))
+
+    var descripcion = el('p', 'campo__ayuda', tipoActual().descripcion || '')
+
+    pintarUnidad()
+    pintarAsiento()
+
+    ui.abrirModal({
+      titulo: 'Nuevo comprobante',
+      descripcion: 'Elige que paso y pon el valor. El asiento lo arma el sistema.',
+      contenido: [
+        ui.campo('Tipo de comprobante', selectorTipo),
+        descripcion,
+        el('div', 'fila-campos', [
+          ui.campo('Fecha', el('input', {
+            type: 'date', value: estado.fecha,
+            onChange: function (e) { estado.fecha = e.target.value },
+          })),
+          ui.campo('Valor', campoValor),
+        ]),
+        zonaUnidad,
+        ui.campo('Detalle', el('textarea', {
+          rows: 2,
+          placeholder: 'Por que se hace este ajuste. Queda guardado con el comprobante.',
+          onInput: function (e) { estado.detalle = e.target.value },
+        }), 'Es lo que va a leer quien revise la contabilidad dentro de seis meses.'),
+        vistaAsiento,
+      ],
+      acciones: [
+        el('button', { clase: 'boton', onClick: ui.cerrarModal }, 'Cancelar'),
+        el('button', {
+          clase: 'boton boton--principal',
+          onClick: function () {
+            try {
+              var comprobante = Idiky.repo.registrarComprobanteDeTipo({
+                tipoId: estado.tipoId,
+                fecha: estado.fecha,
+                valor: estado.valor,
+                unidadId: estado.unidadId,
+                detalle: estado.detalle,
+              })
+              ui.cerrarModal()
+              repintar()
+              ui.aviso('Comprobante ' + comprobante.numero + ' registrado.', 'exito')
+            } catch (error) { ui.aviso(error.message, 'error') }
+          },
+        }, 'Registrar comprobante'),
+      ],
+    })
+  }
+
+  // ---------------------------------------------------------------------------
+  // Comprobante libre — la salida de emergencia
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Para el caso que ningun tipo cubre. Exige saber contabilidad, y por eso NO
+   * es el camino principal: si un ajuste se repite, lo correcto es crearle su
+   * tipo en Plan de cuentas y no volver a escribirlo a mano.
+   */
+  function abrirLibre(repintar) {
     var estado = {
       fecha: d.hoyISO(),
       concepto: '',
       detalle: '',
-      lineas: [],
+      lineas: [
+        { cuenta: '', lado: 'debe', valor: 0, unidadId: '' },
+        { cuenta: '', lado: 'haber', valor: 0, unidadId: '' },
+      ],
     }
 
     var contenedorLineas = el('div', 'asiento-editor')
     var resumen = el('div', 'reparto__resumen')
     var campoConcepto = el('input', {
       type: 'text',
-      placeholder: 'Por ejemplo: intereses de mora de agosto',
+      placeholder: 'Que se esta ajustando',
       onInput: function (e) { estado.concepto = e.target.value },
     })
-
-    function aplicarPlantilla(id) {
-      var plantilla = PLANTILLAS.filter(function (p) { return p.id === id })[0]
-      if (!plantilla) return
-      estado.concepto = plantilla.concepto
-      campoConcepto.value = plantilla.concepto
-      estado.lineas = plantilla.lineas.map(function (l) {
-        return { cuenta: l.cuenta, lado: l.lado, valor: 0, unidadId: '' }
-      })
-      pintarLineas()
-    }
 
     function pintarLineas() {
       ui.vaciar(contenedorLineas)
@@ -262,8 +359,6 @@ Idiky.vistaAjustes = (function () {
         onInput: function (e) { linea.valor = f.aNumero(e.target.value); pintarResumen() },
       })
 
-      // La unidad solo tiene sentido en cartera: es lo que hace que el ajuste
-      // aparezca en el extracto de ese propietario.
       var esCartera = Idiky.contabilidad.esDeCartera(linea.cuenta)
       var selectorUnidad = esCartera
         ? el('select', {
@@ -286,10 +381,7 @@ Idiky.vistaAjustes = (function () {
           clase: 'boton boton--icono',
           type: 'button',
           'aria-label': 'Quitar la linea ' + (indice + 1),
-          onClick: function () {
-            estado.lineas.splice(indice, 1)
-            pintarLineas()
-          },
+          onClick: function () { estado.lineas.splice(indice, 1); pintarLineas() },
         }, '✕'),
         selectorUnidad
           ? el('div', 'asiento-linea__unidad', [
@@ -337,18 +429,19 @@ Idiky.vistaAjustes = (function () {
       ])
     }
 
-    aplicarPlantilla('intereses')
+    pintarLineas()
 
     ui.abrirModal({
-      titulo: 'Nuevo comprobante de ajuste',
-      descripcion: 'Mueve cuentas, no plata. Tiene que cuadrar para poder guardarse.',
+      titulo: 'Comprobante libre',
+      descripcion: 'Para lo que ningun tipo cubre. Aqui si hay que escribir el asiento.',
       contenido: [
-        ui.campo('Tipo de ajuste', el('select', {
-          onChange: function (e) { aplicarPlantilla(e.target.value) },
-        }, PLANTILLAS.map(function (p) {
-          return el('option', { value: p.id }, p.texto)
-        })), 'Elige una plantilla o arma el comprobante desde cero.'),
-
+        el('div', 'nota nota--info', [
+          el('div', null, [
+            el('strong', null, 'Si este ajuste se repite, hazle un tipo'),
+            el('span', 'sub',
+              'Los tipos se crean en Plan de cuentas y evitan volver a escribir el asiento cada vez.'),
+          ]),
+        ]),
         el('div', 'fila-campos', [
           ui.campo('Fecha', el('input', {
             type: 'date', value: estado.fecha,
@@ -356,13 +449,11 @@ Idiky.vistaAjustes = (function () {
           })),
           ui.campo('Concepto', campoConcepto),
         ]),
-
         ui.campo('Detalle', el('textarea', {
           rows: 2,
-          placeholder: 'Por que se hace este ajuste. Queda guardado con el comprobante.',
+          placeholder: 'Por que se hace este ajuste.',
           onInput: function (e) { estado.detalle = e.target.value },
-        }), 'Es lo que va a leer quien revise la contabilidad dentro de seis meses.'),
-
+        })),
         el('h3', 'titulo-seccion', 'Asiento'),
         contenedorLineas,
         resumen,
@@ -382,9 +473,7 @@ Idiky.vistaAjustes = (function () {
               ui.cerrarModal()
               repintar()
               ui.aviso('Comprobante ' + comprobante.numero + ' registrado.', 'exito')
-            } catch (error) {
-              ui.aviso(error.message, 'error')
-            }
+            } catch (error) { ui.aviso(error.message, 'error') }
           },
         }, 'Registrar comprobante'),
       ],

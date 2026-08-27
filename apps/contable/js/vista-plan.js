@@ -51,6 +51,7 @@ Idiky.vistaPlan = (function () {
       el('div', 'barra-acciones', [
         el('div', 'filtros', [
           botonPestana('cuentas', 'Cuentas', repintar),
+          botonPestana('tipos', 'Tipos de comprobante', repintar),
           botonPestana('parametros', 'Que cuenta usa cada documento', repintar),
           botonPestana('balance', 'Balance de prueba', repintar),
         ]),
@@ -64,6 +65,7 @@ Idiky.vistaPlan = (function () {
     ])
 
     if (pestana === 'cuentas') pintarCuentas(contenedor, repintar)
+    else if (pestana === 'tipos') pintarTipos(contenedor)
     else if (pestana === 'parametros') pintarParametros(contenedor, repintar)
     else pintarBalance(contenedor)
   }
@@ -436,6 +438,86 @@ Idiky.vistaPlan = (function () {
         }, 'Guardar'),
       ],
     })
+  }
+
+  // ---------------------------------------------------------------------------
+  // Tipos de comprobante
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Cada tipo con su asiento a la vista.
+   *
+   * Es la respuesta a "con que cuenta se asocia cada comprobante": aqui se ve
+   * de un golpe, sin tener que abrir un documento. Los del sistema no se
+   * registran a mano — los genera el propio modulo — pero se muestran porque
+   * saber contra que cuentas mueve un recibo de caja es justo lo que hace
+   * auditable el modulo.
+   */
+  function pintarTipos(contenedor) {
+    var todos = Idiky.repo.tipos()
+    var delSistema = todos.filter(function (t) { return t.sistema })
+    var registrables = todos.filter(function (t) { return !t.sistema })
+
+    ui.agregar(contenedor, [
+      el('p', 'documento__nota',
+        'Cada tipo trae su asiento definido. Por eso el administrador solo elige el tipo y '
+        + 'pone el valor: no tiene que saber que los intereses de mora van contra la 4115.'),
+
+      el('h3', 'titulo-seccion', 'Los que registra el administrador'),
+      el('div', 'lista-abonos', registrables.map(tarjetaTipo)),
+
+      el('h3', 'titulo-seccion', 'Los que genera el sistema'),
+      el('p', 'documento__nota',
+        'Estos no se registran a mano: salen solos al aplicar un pago, causar un gasto o '
+        + 'generar las cuotas. Sus cuentas se cambian en la pestaña de al lado.'),
+      el('div', 'lista-abonos', delSistema.map(tarjetaTipo)),
+    ])
+  }
+
+  function tarjetaTipo(tipo) {
+    var lineas = Idiky.repo.cuentasDelTipo(tipo)
+
+    return el('article', 'tarjeta', [
+      el('div', 'abono__cabecera', [
+        el('div', null, [
+          el('div', 'abono__titulo', [
+            el('strong', 'cifra', tipo.codigo),
+            el('strong', null, tipo.nombre),
+            tipo.sistema ? ui.chip('Automatico', 'info') : ui.chip('Manual', 'exito'),
+            tipo.pideUnidad ? ui.chip('Va a un propietario', 'alerta') : null,
+          ]),
+          el('span', 'sub', tipo.descripcion),
+        ]),
+        tipo.sistema && tipo.origen
+          ? el('span', 'sub', tipo.origen)
+          : el('span', 'sub cifra', 'Siguiente: ' + tipo.codigo + '-'
+              + String(tipo.consecutivo).padStart(5, '0')),
+      ]),
+
+      el('table', 'tabla tabla--asiento', [
+        el('thead', null, el('tr', null, [
+          el('th', null, 'Cuenta'),
+          el('th', null, 'Concepto'),
+          el('th', null, 'Va al'),
+        ])),
+        el('tbody', null, lineas.map(function (linea) {
+          return el('tr', null, [
+            el('td', null, [
+              el('strong', 'cifra', linea.cuenta || '—'),
+              el('span', 'sub', linea.nombre),
+            ]),
+            el('td', 'sub', linea.concepto),
+            el('td', null, [
+              ui.chip(linea.lado === 'debe' ? 'Debe' : 'Haber',
+                linea.lado === 'debe' ? '' : 'info'),
+              linea.desdeParametro
+                ? el('span', 'sub', 'Sale del parametro configurado')
+                : null,
+            ]),
+          ])
+        })),
+      ]),
+    ])
   }
 
   // ---------------------------------------------------------------------------

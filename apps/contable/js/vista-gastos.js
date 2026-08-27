@@ -154,22 +154,25 @@ Idiky.vistaGastos = (function () {
       onChange: function (e) {
         estado.categoria = e.target.value
         estado.cuenta = Idiky.repo.parametros().gasto[estado.categoria] || '5195'
-        campoCuenta.value = estado.cuenta
+        pintarCuenta()
       },
     }, Idiky.repo.CATEGORIAS_GASTO.map(function (c) {
       return el('option', { value: c }, c)
     }))
 
-    var campoCuenta = el('select', {
-      onChange: function (e) { estado.cuenta = e.target.value },
-    }, Idiky.repo.cuentasDeMovimiento()
-      .filter(function (c) { return Idiky.puc.claseDe(c.codigo) === 'gasto' })
-      .map(function (c) {
-        return el('option', {
-          value: c.codigo,
-          selected: c.codigo === estado.cuenta,
-        }, Idiky.repo.etiquetaDeCuenta(c.codigo))
-      }))
+    // La cuenta la decide la categoria. No se le pide al administrador: se le
+    // muestra, para que sepa que va a pasar sin tener que decidirlo.
+    var avisoCuenta = el('p', 'campo__ayuda')
+
+    function pintarCuenta() {
+      Idiky.ui.vaciar(avisoCuenta)
+      Idiky.ui.agregar(avisoCuenta, [
+        'Se va a contabilizar contra ',
+        el('strong', 'cifra', estado.cuenta),
+        ' — ' + Idiky.repo.nombreDeCuenta(estado.cuenta)
+          + '. Esa asociacion se cambia en Plan de cuentas.',
+      ])
+    }
     var campoValor = el('input', {
       type: 'number', min: 0, step: 1000, value: 0,
       onInput: function (e) { estado.valor = f.aNumero(e.target.value) },
@@ -184,6 +187,8 @@ Idiky.vistaGastos = (function () {
       onChange: function (e) { estado.pagado = e.target.checked },
     })
 
+    pintarCuenta()
+
     ui.abrirModal({
       titulo: 'Registrar gasto',
       descripcion: 'El gasto se causa en la fecha que indiques, se pague ese dia o despues.',
@@ -193,8 +198,7 @@ Idiky.vistaGastos = (function () {
           ui.campo('Categoria', campoCategoria),
         ]),
         ui.campo('Concepto', campoConcepto),
-        ui.campo('Cuenta contable (PUC)', campoCuenta,
-          'Es la cuenta contra la que se registra el gasto. Queda guardada en el documento.'),
+        avisoCuenta,
         el('div', 'fila-campos', [
           ui.campo('Valor', campoValor),
           ui.campo('Proveedor', campoProveedor),

@@ -17,7 +17,7 @@ Idiky.datos = (function () {
 
   var d = Idiky.dominio
   var CLAVE = 'idiky.contable.bd'
-  var VERSION_ESQUEMA = 4
+  var VERSION_ESQUEMA = 5
 
   /** Valor de la cuota ordinaria por punto de coeficiente. */
   var VALOR_POR_COEFICIENTE = 45000
@@ -277,7 +277,10 @@ Idiky.datos = (function () {
       comprobantes: construirComprobantes(),
       plan: Idiky.puc.planBase(),
       parametros: Idiky.puc.parametrosBase(),
-      consecutivos: { recibo: consecutivo, gasto: 100, comprobante: 3 },
+      tipos: tiposConConsecutivoAlDia(),
+      // El consecutivo `comprobante` es solo para los libres (CA-xxxxx): los
+      // sembrados llevan el de su tipo, asi que este arranca sin usar.
+      consecutivos: { recibo: consecutivo, gasto: 100, comprobante: 1 },
     }
   }
 
@@ -355,7 +358,11 @@ Idiky.datos = (function () {
     return [
       {
         id: 'cmp-001',
-        numero: 'CA-00001',
+        numero: 'NI-00001',
+        tipoCodigo: 'NI',
+        tipoNombre: 'Intereses de mora',
+        valor: 96000,
+        unidadId: 'uni-torre2-901',
         fecha: d.sumarDias(d.hoyISO(), -6),
         concepto: 'Intereses de mora de agosto',
         detalle: 'Se causan los intereses de la unidad con mayor mora, calculados a mano.',
@@ -374,7 +381,11 @@ Idiky.datos = (function () {
       },
       {
         id: 'cmp-002',
-        numero: 'CA-00002',
+        numero: 'NP-00001',
+        tipoCodigo: 'NP',
+        tipoNombre: 'Provision de cartera',
+        valor: 900000,
+        unidadId: null,
         fecha: d.sumarDias(d.hoyISO(), -4),
         concepto: 'Provision de cartera de dificil cobro',
         detalle: 'Se provisiona la cartera con mas de 90 dias de mora, segun politica del consejo.',
@@ -386,6 +397,31 @@ Idiky.datos = (function () {
         ],
       },
     ]
+  }
+
+  /**
+   * Deja cada tipo apuntando al numero que sigue.
+   *
+   * Los comprobantes sembrados ya gastaron NI-00001 y NP-00001. Si los tipos
+   * arrancaran todos en 1, el primer comprobante que registre el usuario
+   * repetiria un numero — y un consecutivo repetido rompe la trazabilidad de
+   * todo el libro. Se deriva de lo sembrado en vez de escribirlo a mano, para
+   * que siga siendo correcto si manana se agrega otro comprobante a la semilla.
+   */
+  function tiposConConsecutivoAlDia() {
+    var tipos = Idiky.puc.tiposBase()
+    var usados = {}
+
+    construirComprobantes().forEach(function (comprobante) {
+      var numero = parseInt(String(comprobante.numero).split('-')[1], 10)
+      var codigo = comprobante.tipoCodigo
+      if (!isNaN(numero)) usados[codigo] = Math.max(usados[codigo] || 0, numero)
+    })
+
+    tipos.forEach(function (tipo) {
+      if (usados[tipo.codigo]) tipo.consecutivo = usados[tipo.codigo] + 1
+    })
+    return tipos
   }
 
   // -------------------------------------------------------------------------

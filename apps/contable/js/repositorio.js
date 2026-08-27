@@ -382,6 +382,98 @@ Idiky.repo = (function () {
   // Comprobantes de ajuste
   // -------------------------------------------------------------------------
 
+  // -------------------------------------------------------------------------
+  // Tipos de comprobante
+  // -------------------------------------------------------------------------
+
+  function tipos() {
+    return cargar().tipos.slice()
+  }
+
+  /** Los que el administrador puede registrar a mano. */
+  function tiposRegistrables() {
+    return tipos().filter(function (t) { return !t.sistema && t.activo })
+  }
+
+  function tipoPorId(id) {
+    return cargar().tipos.filter(function (t) { return t.id === id })[0]
+  }
+
+  /**
+   * Resuelve las cuentas de un tipo. Una linea puede traer la cuenta fija o
+   * apuntar a un parametro; en el segundo caso se resuelve contra la
+   * configuracion vigente, que es lo que permite que "Recibo de caja" siga
+   * siendo correcto aunque se cambie la cuenta de bancos.
+   */
+  function cuentasDelTipo(tipo, contexto) {
+    contexto = contexto || {}
+    var p = parametros()
+    return tipo.lineas.map(function (linea) {
+      var codigo = linea.cuenta
+      if (!codigo && linea.parametro) {
+        var valor = p[linea.parametro]
+        // Los parametros de cartera, ingreso y gasto dependen del documento;
+        // sin ese dato se muestra el de la cuota ordinaria como representativo.
+        if (valor && typeof valor === 'object') {
+          codigo = valor[contexto.tipoCuota || 'ordinaria']
+            || valor[contexto.categoria]
+            || valor[Object.keys(valor)[0]]
+        } else {
+          codigo = valor
+        }
+      }
+      return {
+        cuenta: codigo,
+        nombre: nombreDeCuenta(codigo),
+        lado: linea.lado,
+        porcentaje: linea.porcentaje,
+        concepto: linea.concepto,
+        usaUnidad: linea.usaUnidad,
+        desdeParametro: !linea.cuenta && !!linea.parametro,
+      }
+    })
+  }
+
+  /**
+   * Registra un comprobante a partir de un tipo: el administrador solo pone la
+   * fecha, el valor y —si el tipo lo pide— la unidad. El asiento lo arma el
+   * sistema con las cuentas del tipo.
+   */
+  function registrarComprobanteDeTipo(datos) {
+    cargar()
+    var tipo = tipoPorId(datos.tipoId)
+    if (!tipo) throw new Error('Ese tipo de comprobante no existe.')
+    if (tipo.sistema) {
+      throw new Error('"' + tipo.nombre + '" lo genera el sistema; no se registra a mano.')
+    }
+    if (!datos.fecha) throw new Error('Indica la fecha del comprobante.')
+    if (!(datos.valor > 0)) throw new Error('El valor debe ser mayor que cero.')
+    if (tipo.pideUnidad && !datos.unidadId) {
+      throw new Error('Este comprobante va contra un propietario: elige la unidad.')
+    }
+
+    var resueltas = cuentasDelTipo(tipo)
+    var lineas = resueltas.map(function (linea) {
+      var valor = Math.round((datos.valor * (linea.porcentaje || 100)) / 100)
+      return {
+        cuenta: linea.cuenta,
+        unidadId: linea.usaUnidad ? datos.unidadId || null : null,
+        debe: linea.lado === 'debe' ? valor : 0,
+        haber: linea.lado === 'haber' ? valor : 0,
+        descripcion: linea.concepto,
+      }
+    })
+
+    var comprobante = registrarComprobante({
+      fecha: datos.fecha,
+      concepto: datos.concepto || tipo.nombre,
+      detalle: datos.detalle,
+      lineas: lineas,
+      tipo: tipo,
+    })
+    return comprobante
+  }
+
   function comprobantes() {
     return cargar().comprobantes.slice().sort(function (a, b) {
       return b.fecha.localeCompare(a.fecha) || b.numero.localeCompare(a.numero)
@@ -408,12 +500,26 @@ Idiky.repo = (function () {
     var validacion = Idiky.contabilidad.validarComprobante(parametros.lineas)
     if (!validacion.valido) throw new Error(validacion.motivo)
 
-    var consecutivo = bd.consecutivos.comprobante
-    bd.consecutivos.comprobante = consecutivo + 1
+    // Cada tipo lleva su propio consecutivo, como en cualquier libro contable:
+    // NI-00001 son los intereses, NP-00001 las provisiones.
+    var tipo = parametros.tipo || null
+    var prefijo = tipo ? tipo.codigo : 'CA'
+    var consecutivo
+    if (tipo) {
+      consecutivo = tipo.consecutivo
+      tipo.consecutivo = consecutivo + 1
+    } else {
+      consecutivo = bd.consecutivos.comprobante
+      bd.consecutivos.comprobante = consecutivo + 1
+    }
 
     var comprobante = {
       id: nuevoId('cmp'),
-      numero: 'CA-' + String(consecutivo).padStart(5, '0'),
+      numero: prefijo + '-' + String(consecutivo).padStart(5, '0'),
+      tipoCodigo: prefijo,
+      tipoNombre: tipo ? tipo.nombre : 'Comprobante libre',
+      valor: parametros.valor || validacion.total,
+      unidadId: parametros.unidadId || null,
       fecha: parametros.fecha,
       concepto: parametros.concepto.trim(),
       detalle: (parametros.detalle || '').trim(),
@@ -721,6 +827,11 @@ Idiky.repo = (function () {
     activarCuenta: activarCuenta,
     fijarParametro: fijarParametro,
     balanceDePrueba: balanceDePrueba,
+    tipos: tipos,
+    tiposRegistrables: tiposRegistrables,
+    tipoPorId: tipoPorId,
+    cuentasDelTipo: cuentasDelTipo,
+    registrarComprobanteDeTipo: registrarComprobanteDeTipo,
     comprobantes: comprobantes,
     comprobantePorId: comprobantePorId,
     registrarComprobante: registrarComprobante,

@@ -1116,3 +1116,15 @@ input[type="number"], .entrada-cifra {
 
 .tabla--plan .nivel-subcuenta { padding-left: var(--e6); color: var(--tinta-suave); }
 .tabla--plan .nivel-auxiliar { padding-left: calc(var(--e6) + var(--e4)); color: var(--tinta-tenue); }
+
+/* El asiento que se va a registrar, en vista previa antes de guardar. */
+.asiento-previo {
+  margin-top: var(--e4);
+  padding: var(--e3);
+  border-left: 3px solid var(--acento);
+  background: var(--acento-suave);
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+}
+
+.asiento-previo .tabla { background: var(--superficie); border-radius: var(--radio-sm); }
+.asiento-previo .campo__ayuda { margin-top: var(--e2); }

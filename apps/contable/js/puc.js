@@ -176,6 +176,161 @@ Idiky.puc = (function () {
     },
   }
 
+  /**
+   * Tipos de comprobante.
+   *
+   * --------------------------------------------------------------------------
+   * ESTO ES LO QUE LE QUITA LA CONTABILIDAD DE ENCIMA AL ADMINISTRADOR
+   * --------------------------------------------------------------------------
+   * Cada tipo trae su asiento ya definido: que cuenta va al debe y cual al
+   * haber. El administrador elige el tipo, pone la fecha y el valor, y el
+   * sistema arma el asiento. No tiene que saber que los intereses de mora van
+   * contra 4115: eso se define una vez, idealmente con el contador.
+   *
+   * Los tipos `sistema` no se registran a mano — los genera el propio modulo
+   * cuando se aplica un pago, se causa un gasto o se generan las cuotas. Estan
+   * aqui para que se pueda VER contra que cuentas mueve cada documento, que es
+   * justamente lo que hace auditable el modulo.
+   *
+   * `porcentaje` reparte el valor entre varias lineas del mismo lado. Por
+   * defecto 100: el valor completo.
+   */
+  var TIPOS_BASE = [
+    // --- Los que genera el sistema. No se registran a mano. ---
+    {
+      codigo: 'CC',
+      nombre: 'Causacion de cuotas',
+      descripcion: 'Lo genera Cartera al generar las cuotas del periodo.',
+      sistema: true,
+      origen: 'Cartera · Generar cuotas',
+      pideUnidad: false,
+      lineas: [
+        { parametro: 'cartera', lado: 'debe', concepto: 'Cuota por cobrar', usaUnidad: true },
+        { parametro: 'ingreso', lado: 'haber', concepto: 'Ingreso por cuotas' },
+      ],
+    },
+    {
+      codigo: 'RC',
+      nombre: 'Recibo de caja',
+      descripcion: 'Lo genera Pagos al aplicar un abono o registrar un pago.',
+      sistema: true,
+      origen: 'Pagos',
+      pideUnidad: false,
+      lineas: [
+        { parametro: 'caja', lado: 'debe', concepto: 'Recaudo' },
+        { parametro: 'cartera', lado: 'haber', concepto: 'Abono a cartera', usaUnidad: true },
+        { parametro: 'anticipos', lado: 'haber', concepto: 'Saldo a favor (el excedente)' },
+      ],
+    },
+    {
+      codigo: 'CG',
+      nombre: 'Causacion de gasto',
+      descripcion: 'Lo genera Gastos al registrar un gasto.',
+      sistema: true,
+      origen: 'Gastos',
+      pideUnidad: false,
+      lineas: [
+        { parametro: 'gasto', lado: 'debe', concepto: 'Gasto, segun su categoria' },
+        { parametro: 'porPagar', lado: 'haber', concepto: 'Cuenta por pagar' },
+      ],
+    },
+    {
+      codigo: 'CE',
+      nombre: 'Comprobante de egreso',
+      descripcion: 'Lo genera Gastos al marcar un gasto como pagado.',
+      sistema: true,
+      origen: 'Gastos · Marcar pagado',
+      pideUnidad: false,
+      lineas: [
+        { parametro: 'porPagar', lado: 'debe', concepto: 'Cuenta por pagar' },
+        { parametro: 'caja', lado: 'haber', concepto: 'Salida de caja' },
+      ],
+    },
+
+    // --- Los que el administrador registra desde Ajustes. ---
+    {
+      codigo: 'NI',
+      nombre: 'Intereses de mora',
+      descripcion: 'Carga los intereses a un propietario. Sube su deuda y el ingreso.',
+      sistema: false,
+      pideUnidad: true,
+      lineas: [
+        { cuenta: '130515', lado: 'debe', concepto: 'Intereses de mora', usaUnidad: true },
+        { cuenta: '4115', lado: 'haber', concepto: 'Intereses de mora' },
+      ],
+    },
+    {
+      codigo: 'NS',
+      nombre: 'Sancion a una unidad',
+      descripcion: 'Carga una sancion aprobada por el consejo.',
+      sistema: false,
+      pideUnidad: true,
+      lineas: [
+        { cuenta: '130520', lado: 'debe', concepto: 'Sancion', usaUnidad: true },
+        { cuenta: '4120', lado: 'haber', concepto: 'Sanciones y multas' },
+      ],
+    },
+    {
+      codigo: 'NP',
+      nombre: 'Provision de cartera',
+      descripcion: 'Provisiona la cartera de dificil cobro, segun la politica del consejo.',
+      sistema: false,
+      pideUnidad: false,
+      lineas: [
+        { cuenta: '519910', lado: 'debe', concepto: 'Castigo de cartera' },
+        { cuenta: '139905', lado: 'haber', concepto: 'Provision de cartera' },
+      ],
+    },
+    {
+      codigo: 'NF',
+      nombre: 'Traslado al fondo de imprevistos',
+      descripcion: 'Mueve excedentes acumulados al fondo obligatorio de la Ley 675.',
+      sistema: false,
+      pideUnidad: false,
+      lineas: [
+        { cuenta: '3705', lado: 'debe', concepto: 'Excedentes acumulados' },
+        { cuenta: '3305', lado: 'haber', concepto: 'Fondo de imprevistos' },
+      ],
+    },
+    {
+      codigo: 'NB',
+      nombre: 'Comision bancaria',
+      descripcion: 'Registra el cobro del banco, que sale de caja sin ser un gasto operacional.',
+      sistema: false,
+      pideUnidad: false,
+      lineas: [
+        { cuenta: '5305', lado: 'debe', concepto: 'Financieros' },
+        { parametro: 'caja', lado: 'haber', concepto: 'Salida de caja' },
+      ],
+    },
+  ]
+
+  function tiposBase() {
+    return TIPOS_BASE.map(function (tipo, i) {
+      return {
+        id: 'tip-' + String(i + 1).padStart(3, '0'),
+        codigo: tipo.codigo,
+        nombre: tipo.nombre,
+        descripcion: tipo.descripcion,
+        sistema: !!tipo.sistema,
+        origen: tipo.origen || '',
+        pideUnidad: !!tipo.pideUnidad,
+        activo: true,
+        consecutivo: 1,
+        lineas: tipo.lineas.map(function (linea) {
+          return {
+            cuenta: linea.cuenta || '',
+            parametro: linea.parametro || '',
+            lado: linea.lado,
+            porcentaje: linea.porcentaje || 100,
+            concepto: linea.concepto,
+            usaUnidad: !!linea.usaUnidad,
+          }
+        }),
+      }
+    })
+  }
+
   function planBase() {
     return PLAN_BASE.map(function (fila) {
       return { codigo: fila[0], nombre: fila[1], movimiento: fila[2], activa: true }
@@ -275,6 +430,7 @@ Idiky.puc = (function () {
   return {
     NIVELES: NIVELES,
     planBase: planBase,
+    tiposBase: tiposBase,
     parametrosBase: parametrosBase,
     claseDe: claseDe,
     nivelDe: nivelDe,

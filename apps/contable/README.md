@@ -23,7 +23,7 @@ recargar. El botón **"Reiniciar demo"** devuelve todo a su estado inicial.
 | **Recibos de caja** | El libro completo, con los anulados. Ver el detalle de cualquier recibo y anularlo con motivo. |
 | **Gastos** | Lo que la copropiedad debe y lo que ya pagó. Es el otro lado de la contabilidad. |
 | **Ajustes** | Comprobantes contables que mueven cuentas **sin que entre ni salga plata**: intereses de mora, provisiones, reclasificaciones, traslados al fondo de imprevistos. |
-| **Plan de cuentas** | El PUC de la copropiedad, editable. Qué cuenta usa cada documento, y el balance de prueba. |
+| **Plan de cuentas** | El PUC de la copropiedad, editable. Los tipos de comprobante con su asiento, qué cuenta usa cada documento, y el balance de prueba. |
 | **Reportes** | Movimientos por cliente y fechas, estado de resultados y estado de situación financiera. Se imprimen (o se guardan como PDF) y se bajan en CSV. |
 
 Lo que distingue a este módulo de una caja registradora: **el propietario dice a qué
@@ -77,6 +77,23 @@ criterio de cada entidad.
 > ⚠️ **Antes de usar esto en contabilidad real, que el contador revise los códigos.** Son la
 > adaptación convencional del PUC para propiedad horizontal, no una verdad revelada. Todo es
 > editable justamente para eso.
+
+### El administrador no elige cuentas
+
+Cada **tipo de comprobante** trae su asiento definido: qué cuenta va al debe y cuál al haber.
+Para registrar un ajuste el administrador elige el tipo, pone la fecha y el valor —y el
+propietario, si el tipo lo pide— y el sistema arma el asiento. Se lo muestra antes de
+guardar, para que sepa qué va a pasar, pero no tiene que escribirlo.
+
+Lo mismo con los gastos: la categoría decide la cuenta, y la pantalla se lo dice en vez de
+preguntárselo.
+
+Los tipos se definen una vez, idealmente con el contador, en **Plan de cuentas → Tipos de
+comprobante**. Ahí también se ven los que genera el sistema —recibo de caja, comprobante de
+egreso, causación de cuotas y de gastos— con las cuentas que mueve cada uno.
+
+Queda el **comprobante libre** para lo que ningún tipo cubra. Es la salida de emergencia, no
+el camino normal: si un ajuste se repite, lo correcto es hacerle su tipo.
 
 ### Cada documento guarda su cuenta
 
