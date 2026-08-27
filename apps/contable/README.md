@@ -51,8 +51,28 @@ Las cuentas se agregan, se renombran y se desactivan desde la pantalla **Plan de
 No se borran: una cuenta con asientos no puede desaparecer sin romper la contabilidad de los
 meses anteriores.
 
-Los códigos de **cuatro dígitos siguen el PUC colombiano** (Decreto 2650); los de **seis** son
-auxiliares propios de la copropiedad, que el PUC deja a criterio de cada entidad.
+**Los cinco niveles del PUC.** El código no se escribe entero: se arma por niveles, y cada
+uno agrega dos dígitos al de arriba.
+
+| Nivel | Dígitos | Ejemplo |
+|---|---|---|
+| Clase | 1 | `1` Activo |
+| Grupo | 2 | `11` Disponible |
+| Cuenta | 4 | `1105` Caja |
+| Subcuenta | 6 | `110505` Caja general |
+| Auxiliar | 8 | `11050501` Caja general sede norte |
+
+Al crear una cuenta eliges la clase, y de ahí el grupo, y de ahí la cuenta: el prefijo del
+padre se muestra fijo y solo escribes los dos dígitos nuevos. Así es imposible teclear un
+código que no cuelgue de nada.
+
+Solo las cuentas **transaccionales** reciben asientos; las demás son títulos que agrupan y
+suman. Por eso **abrirle una subcuenta a una cuenta transaccional la convierte en título**:
+el movimiento baja al nivel nuevo.
+
+Los códigos de **cuatro dígitos siguen el PUC colombiano** (Decreto 2650); de **seis en
+adelante** son subcuentas y auxiliares propios de la copropiedad, nivel que el PUC deja a
+criterio de cada entidad.
 
 > ⚠️ **Antes de usar esto en contabilidad real, que el contador revise los códigos.** Son la
 > adaptación convencional del PUC para propiedad horizontal, no una verdad revelada. Todo es

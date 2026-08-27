@@ -26,6 +26,7 @@ Idiky.vistaPlan = (function () {
   var pestana = 'cuentas'
   var busqueda = ''
   var verInactivas = false
+  var nivelFiltro = 'todos'
 
   var NOMBRE_CLASE = {
     activo: 'Activo',
@@ -85,6 +86,7 @@ Idiky.vistaPlan = (function () {
 
     var visibles = todas.filter(function (c) {
       if (!verInactivas && !c.activa) return false
+      if (nivelFiltro !== 'todos' && puc.nivelDe(c.codigo) !== nivelFiltro) return false
       if (!busqueda) return true
       var texto = (c.codigo + ' ' + c.nombre).toLowerCase()
       return texto.indexOf(busqueda.toLowerCase()) !== -1
@@ -99,6 +101,11 @@ Idiky.vistaPlan = (function () {
     ui.agregar(contenedor, [
       el('div', 'barra-acciones', [
         campoBusqueda,
+        el('div', 'filtros', [
+          botonNivel('todos', 'Todos', repintar),
+        ].concat(puc.NIVELES.map(function (n) {
+          return botonNivel(n.id, n.nombre, repintar)
+        }))),
         el('label', 'campo--casilla', [
           el('input', {
             type: 'checkbox', clase: 'casilla', checked: verInactivas,
@@ -110,10 +117,11 @@ Idiky.vistaPlan = (function () {
 
       el('div', 'tarjeta tarjeta--tabla', el('table', 'tabla tabla--plan', [
         el('thead', null, el('tr', null, [
+          el('th', null, 'Nivel'),
           el('th', null, 'Codigo'),
-          el('th', null, 'Cuenta'),
+          el('th', null, 'Nombre'),
           el('th', null, 'Clase'),
-          el('th', null, 'Recibe movimiento'),
+          el('th', null, 'Tipo'),
           el('th', null, ''),
         ])),
         el('tbody', null, visibles.map(function (cuenta) {
@@ -133,11 +141,12 @@ Idiky.vistaPlan = (function () {
     return el('tr', {
       clase: (esTitulo ? 'fila--titulo-cuenta' : '') + (cuenta.activa ? '' : ' fila--anulada'),
     }, [
+      el('td', 'sub etiqueta-nivel', puc.nombreDeNivel(cuenta.codigo)),
       el('td', 'cifra nivel-' + nivel, cuenta.codigo),
       el('td', esTitulo ? 'celda-titulo' : 'celda-sangrada', cuenta.nombre),
       el('td', 'sub', NOMBRE_CLASE[puc.claseDe(cuenta.codigo)]),
       el('td', null, cuenta.movimiento
-        ? ui.chip('Si', 'exito')
+        ? ui.chip('Transaccional', 'exito')
         : ui.chip('Titulo', '')),
       el('td', 'derecha', el('div', 'grupo-acciones', [
         usada ? ui.chip('En uso', 'info') : null,
@@ -170,46 +179,190 @@ Idiky.vistaPlan = (function () {
     ])
   }
 
+  function botonNivel(id, texto, repintar) {
+    return el('button', {
+      clase: 'filtro',
+      'aria-pressed': String(nivelFiltro === id),
+      onClick: function () { nivelFiltro = id; repintar() },
+    }, texto)
+  }
+
+  /**
+   * Alta y edicion de una cuenta.
+   *
+   * El codigo no se escribe entero: se arma por niveles, como en cualquier
+   * software contable. Se elige la clase, y de ahi el grupo, y de ahi la
+   * cuenta; el prefijo del padre se muestra fijo y solo se escriben los dos
+   * digitos que este nivel agrega. Asi es imposible teclear un codigo que no
+   * cuelgue de nada.
+   */
   function abrirCuenta(cuenta, repintar) {
     var esNueva = !cuenta
+
+    if (!esNueva) return abrirEdicion(cuenta, repintar)
+
     var estado = {
-      codigo: cuenta ? cuenta.codigo : '',
-      nombre: cuenta ? cuenta.nombre : '',
-      movimiento: cuenta ? cuenta.movimiento : true,
+      nivel: 'subcuenta',
+      // Codigo del padre elegido en cada nivel, para armar la cascada.
+      padres: { clase: '', grupo: '', cuenta: '', subcuenta: '' },
+      segmento: '',
+      nombre: '',
+      transaccional: true,
     }
 
-    var campoCodigo = el('input', {
-      type: 'text',
-      value: estado.codigo,
-      disabled: !esNueva,
-      placeholder: '110505',
-      onInput: function (e) { estado.codigo = e.target.value.replace(/\D/g, '') },
-    })
+    var cascada = el('div', 'cascada')
+    var vistaPrevia = el('div', 'cascada__resultado')
+
     var campoNombre = el('input', {
-      type: 'text', value: estado.nombre,
+      type: 'text',
+      placeholder: 'Nombre de la cuenta',
       onInput: function (e) { estado.nombre = e.target.value },
     })
-    var campoMovimiento = el('input', {
-      type: 'checkbox', clase: 'casilla', checked: estado.movimiento,
-      onChange: function (e) { estado.movimiento = e.target.checked },
+
+    var campoSegmento = el('input', {
+      type: 'text',
+      clase: 'entrada-segmento',
+      maxlength: 2,
+      placeholder: '05',
+      onInput: function (e) {
+        estado.segmento = e.target.value.replace(/\D/g, '')
+        e.target.value = estado.segmento
+        pintarResultado()
+      },
     })
 
+    var campoTransaccional = el('input', {
+      type: 'checkbox', clase: 'casilla', checked: true,
+      onChange: function (e) { estado.transaccional = e.target.checked },
+    })
+
+    /** El nivel padre del nivel que se esta creando. */
+    function nivelPadre(idNivel) {
+      var indice = puc.NIVELES.map(function (n) { return n.id }).indexOf(idNivel)
+      return indice > 0 ? puc.NIVELES[indice - 1] : null
+    }
+
+    /** Los niveles que hay que ir eligiendo antes de llegar al que se crea. */
+    function cadenaDePadres(idNivel) {
+      var cadena = []
+      var actual = nivelPadre(idNivel)
+      while (actual) {
+        cadena.unshift(actual)
+        actual = nivelPadre(actual.id)
+      }
+      return cadena
+    }
+
+    function prefijo() {
+      var padres = cadenaDePadres(estado.nivel)
+      if (padres.length === 0) return ''
+      var ultimo = padres[padres.length - 1]
+      return estado.padres[ultimo.id] || ''
+    }
+
+    function codigoCompleto() {
+      return prefijo() + estado.segmento
+    }
+
+    function pintarCascada() {
+      ui.vaciar(cascada)
+      var padres = cadenaDePadres(estado.nivel)
+
+      padres.forEach(function (nivel, indice) {
+        var anterior = indice > 0 ? estado.padres[padres[indice - 1].id] : ''
+        var opciones = Idiky.repo.cuentasDeNivel(nivel.id, anterior)
+
+        // Si el padre de este nivel aun no se ha elegido, no hay que mostrar
+        // un selector vacio: se muestra deshabilitado para que se vea el orden.
+        var habilitado = indice === 0 || !!anterior
+
+        var selector = el('select', {
+          disabled: !habilitado,
+          onChange: function (e) {
+            estado.padres[nivel.id] = e.target.value
+            // Elegir un padre invalida lo que se hubiera elegido mas abajo.
+            padres.slice(indice + 1).forEach(function (n) { estado.padres[n.id] = '' })
+            pintarCascada()
+          },
+        }, [el('option', { value: '' }, habilitado ? 'Elige…' : 'Elige primero el nivel de arriba')]
+          .concat(opciones.map(function (c) {
+            return el('option', {
+              value: c.codigo,
+              selected: c.codigo === estado.padres[nivel.id],
+            }, c.codigo + ' — ' + c.nombre)
+          })))
+
+        cascada.appendChild(el('div', 'cascada__fila', [
+          el('span', 'cascada__nivel', nivel.nombre),
+          selector,
+        ]))
+      })
+
+      // La fila del nivel que se esta creando: prefijo fijo + segmento nuevo.
+      var nivelActual = puc.nivelPorId(estado.nivel)
+      cascada.appendChild(el('div', 'cascada__fila cascada__fila--nueva', [
+        el('span', 'cascada__nivel', nivelActual.nombre),
+        el('div', 'cascada__codigo', [
+          el('span', 'cascada__prefijo', prefijo() || '—'),
+          campoSegmento,
+        ]),
+      ]))
+
+      pintarResultado()
+    }
+
+    function pintarResultado() {
+      ui.vaciar(vistaPrevia)
+      var codigo = codigoCompleto()
+      var nivelActual = puc.nivelPorId(estado.nivel)
+      var completo = codigo.length === nivelActual.largo
+      var yaExiste = completo && !!Idiky.repo.cuentaPorCodigo(codigo)
+
+      ui.agregar(vistaPrevia, [
+        el('span', 'cascada__etiqueta', 'Codigo que se va a crear'),
+        el('strong', 'cascada__valor' + (completo && !yaExiste ? '' : ' cascada__valor--incompleto'),
+          codigo || '—'),
+        !completo
+          ? el('span', 'campo__ayuda',
+              'Faltan digitos: una ' + nivelActual.nombre.toLowerCase() + ' tiene '
+              + nivelActual.largo + '.')
+          : yaExiste
+            ? el('span', 'campo__ayuda campo__ayuda--error', 'Esa cuenta ya existe.')
+            : el('span', 'campo__ayuda', puc.nombreDeNivel(codigo) + ' de '
+                + NOMBRE_CLASE[puc.claseDe(codigo)].toLowerCase() + '.'),
+      ])
+    }
+
+    var selectorNivel = el('select', {
+      onChange: function (e) {
+        estado.nivel = e.target.value
+        estado.segmento = ''
+        campoSegmento.value = ''
+        campoSegmento.maxLength = estado.nivel === 'clase' ? 1 : 2
+        campoSegmento.placeholder = estado.nivel === 'clase' ? '1' : '05'
+        pintarCascada()
+      },
+    }, puc.NIVELES.map(function (n) {
+      return el('option', { value: n.id, selected: n.id === estado.nivel }, n.nombre)
+    }))
+
+    pintarCascada()
+
     ui.abrirModal({
-      titulo: esNueva ? 'Nueva cuenta' : 'Editar ' + cuenta.codigo,
-      descripcion: esNueva
-        ? 'El codigo define el nivel: 1 digito es clase, 2 grupo, 4 cuenta, 6 auxiliar.'
-        : 'El codigo no se cambia. Si esta mal, crea la cuenta correcta y desactiva esta.',
+      titulo: 'Nueva cuenta',
+      descripcion: 'El codigo se arma por niveles: cada uno agrega dos digitos al de arriba.',
       contenido: [
-        ui.campo('Codigo', campoCodigo,
-          esNueva ? 'Tiene que colgar de una cuenta que ya exista: 110505 necesita que exista 1105.' : ''),
+        ui.campo('Nivel', selectorNivel),
+        cascada,
+        vistaPrevia,
         ui.campo('Nombre', campoNombre),
         el('label', 'campo campo--casilla', [
-          campoMovimiento,
-          el('span', null, 'Recibe movimiento'),
+          campoTransaccional,
+          el('span', null, 'Transaccional'),
         ]),
         el('p', 'campo__ayuda',
-          'Las cuentas que reciben movimiento son las que aceptan asientos. Las demas son titulos: '
-          + 'existen para agrupar y para sumar en los estados.'),
+          'Las cuentas transaccionales son las que reciben asientos. Al abrirle una subcuenta '
+          + 'a una cuenta transaccional, esta pasa a ser un titulo y el movimiento baja al nivel nuevo.'),
       ],
       acciones: [
         el('button', { clase: 'boton', onClick: ui.cerrarModal }, 'Cancelar'),
@@ -217,13 +370,70 @@ Idiky.vistaPlan = (function () {
           clase: 'boton boton--principal',
           onClick: function () {
             try {
-              Idiky.repo.guardarCuenta(estado)
+              Idiky.repo.guardarCuenta({
+                codigo: codigoCompleto(),
+                nombre: estado.nombre,
+                movimiento: estado.transaccional,
+              })
               ui.cerrarModal()
               repintar()
-              ui.aviso(esNueva ? 'Cuenta creada.' : 'Cuenta actualizada.', 'exito')
+              ui.aviso('Cuenta ' + codigoCompleto() + ' creada.', 'exito')
             } catch (error) { ui.aviso(error.message, 'error') }
           },
-        }, esNueva ? 'Crear cuenta' : 'Guardar'),
+        }, 'Crear cuenta'),
+      ],
+    })
+  }
+
+  /** Editar solo cambia el nombre y el tipo: el codigo define la jerarquia. */
+  function abrirEdicion(cuenta, repintar) {
+    var tieneHijas = Idiky.repo.hijasDe(cuenta.codigo).length > 0
+    var estado = { nombre: cuenta.nombre, transaccional: cuenta.movimiento }
+
+    var campoNombre = el('input', {
+      type: 'text', value: estado.nombre,
+      onInput: function (e) { estado.nombre = e.target.value },
+    })
+    var campoTransaccional = el('input', {
+      type: 'checkbox', clase: 'casilla',
+      checked: estado.transaccional,
+      disabled: tieneHijas,
+      onChange: function (e) { estado.transaccional = e.target.checked },
+    })
+
+    ui.abrirModal({
+      titulo: 'Editar ' + cuenta.codigo,
+      descripcion: puc.nombreDeNivel(cuenta.codigo) + ' de '
+        + NOMBRE_CLASE[puc.claseDe(cuenta.codigo)].toLowerCase()
+        + '. El codigo no se cambia: es lo que define de quien cuelga.',
+      contenido: [
+        ui.campo('Nombre', campoNombre),
+        el('label', 'campo campo--casilla', [
+          campoTransaccional,
+          el('span', null, 'Transaccional'),
+        ]),
+        el('p', 'campo__ayuda',
+          tieneHijas
+            ? 'Esta cuenta tiene subcuentas, asi que es un titulo: el movimiento va en el nivel de abajo.'
+            : 'Las cuentas transaccionales son las que reciben asientos.'),
+      ],
+      acciones: [
+        el('button', { clase: 'boton', onClick: ui.cerrarModal }, 'Cancelar'),
+        el('button', {
+          clase: 'boton boton--principal',
+          onClick: function () {
+            try {
+              Idiky.repo.guardarCuenta({
+                codigo: cuenta.codigo,
+                nombre: estado.nombre,
+                movimiento: tieneHijas ? false : estado.transaccional,
+              })
+              ui.cerrarModal()
+              repintar()
+              ui.aviso('Cuenta actualizada.', 'exito')
+            } catch (error) { ui.aviso(error.message, 'error') }
+          },
+        }, 'Guardar'),
       ],
     })
   }

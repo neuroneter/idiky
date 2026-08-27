@@ -556,35 +556,65 @@ Idiky.repo = (function () {
     var nombre = String(parametrosCuenta.nombre || '').trim()
 
     if (!Idiky.puc.esValido(codigo)) {
-      throw new Error('El codigo debe ser numerico y de 1, 2, 4 o 6 digitos (1, 11, 1105, 110505).')
+      throw new Error('El codigo debe ser numerico y de 1, 2, 4, 6 u 8 digitos.')
     }
     if (!nombre) throw new Error('Escribe el nombre de la cuenta.')
 
     // Una cuenta suelta no sirve: si no cuelga de nada, no suma en ningun
     // total del estado financiero.
-    var padre = Idiky.puc.padreDe(codigo)
-    if (padre && !cuentaPorCodigo(padre)) {
-      throw new Error('Falta la cuenta padre ' + padre + '. Creala primero.')
+    var codigoPadre = Idiky.puc.padreDe(codigo)
+    var padre = codigoPadre ? cuentaPorCodigo(codigoPadre) : null
+    if (codigoPadre && !padre) {
+      throw new Error('Falta la cuenta padre ' + codigoPadre + '. Creala primero.')
     }
 
     var existente = cuentaPorCodigo(codigo)
     if (existente) {
       existente.nombre = nombre
-      existente.movimiento = !!parametrosCuenta.movimiento
+      if (parametrosCuenta.movimiento != null) existente.movimiento = !!parametrosCuenta.movimiento
       if (parametrosCuenta.activa != null) existente.activa = !!parametrosCuenta.activa
       guardar()
       return existente
     }
 
+    // Abrirle una subcuenta a una cuenta transaccional la convierte en titulo:
+    // el movimiento pasa al nivel de abajo. Si un parametro la esta usando hay
+    // que arreglarlo antes, o los documentos nuevos irian a un titulo.
+    if (padre && padre.movimiento) {
+      if (cuentasEnUso().indexOf(padre.codigo) !== -1) {
+        throw new Error(
+          'La cuenta ' + padre.codigo + ' es transaccional y un parametro la esta usando. '
+          + 'Cambia ese parametro antes de abrirle una subcuenta.',
+        )
+      }
+      padre.movimiento = false
+    }
+
     var cuenta = {
       codigo: codigo,
       nombre: nombre,
-      movimiento: !!parametrosCuenta.movimiento,
+      movimiento: parametrosCuenta.movimiento != null ? !!parametrosCuenta.movimiento : true,
       activa: true,
     }
     bd.plan.push(cuenta)
     guardar()
     return cuenta
+  }
+
+  /** Cuentas hijas directas de un codigo. */
+  function hijasDe(codigo) {
+    return cargar().plan.filter(function (c) {
+      return Idiky.puc.padreDe(c.codigo) === codigo
+    })
+  }
+
+  /** Cuentas de un nivel, para armar los selectores en cascada. */
+  function cuentasDeNivel(idNivel, prefijo) {
+    return plan().filter(function (c) {
+      if (Idiky.puc.nivelDe(c.codigo) !== idNivel) return false
+      if (prefijo && c.codigo.indexOf(prefijo) !== 0) return false
+      return c.activa
+    })
   }
 
   /**
@@ -685,6 +715,8 @@ Idiky.repo = (function () {
     parametros: parametros,
     cuentasEnUso: cuentasEnUso,
     guardarCuenta: guardarCuenta,
+    hijasDe: hijasDe,
+    cuentasDeNivel: cuentasDeNivel,
     desactivarCuenta: desactivarCuenta,
     activarCuenta: activarCuenta,
     fijarParametro: fijarParametro,

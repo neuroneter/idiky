@@ -116,10 +116,21 @@ edita desde la pantalla "Plan de cuentas".
 
 | Campo | Tipo | Notas |
 |---|---|---|
-| `codigo` | string | Numérico. El largo define el nivel: 1 clase, 2 grupo, 4 cuenta, 6 auxiliar |
+| `codigo` | string | Numérico. El largo define el nivel (ver abajo) |
 | `nombre` | string | |
-| `movimiento` | boolean | Si `false`, es un título: agrupa y suma, pero no recibe asientos |
+| `movimiento` | boolean | `true` = **transaccional**, recibe asientos. `false` = título: agrupa y suma |
 | `activa` | boolean | Las cuentas no se borran, se desactivan (RN-37) |
+
+**Los cinco niveles.** Cada uno agrega dos dígitos al del padre, y la jerarquía se lee del
+código, no de un campo aparte:
+
+| Nivel | Dígitos | Ejemplo |
+|---|---|---|
+| Clase | 1 | `1` Activo |
+| Grupo | 2 | `11` Disponible |
+| Cuenta | 4 | `1105` Caja |
+| Subcuenta | 6 | `110505` Caja general |
+| Auxiliar | 8 | `11050501` Caja general sede norte |
 
 **Los códigos de cuatro dígitos siguen el PUC colombiano (Decreto 2650).** Los de seis son
 auxiliares propios de la copropiedad — el PUC deja ese nivel al criterio de cada entidad.
@@ -233,6 +244,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-35 | Un comprobante no se borra: se anula, deja de contar en los estados y su número queda quemado. | `contable/js/repositorio.js` |
 | RN-36 | **Todo documento guarda la cuenta del PUC con la que se registró.** Cambiar un parámetro no reescribe los documentos anteriores. | `contable/js/repositorio.js` |
 | RN-37 | Una cuenta del plan no se borra: se desactiva, y no puede desactivarse si un parámetro la usa. | `contable/js/repositorio.js` |
+| RN-38 | Abrirle una subcuenta a una cuenta transaccional la convierte en título: el movimiento baja al nivel nuevo. | `contable/js/repositorio.js` |
 
 ### El motor contable: todo es un asiento
 

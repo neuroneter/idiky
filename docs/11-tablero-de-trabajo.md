@@ -39,6 +39,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-14 | Contable: gastos, movimientos por cliente, estado de resultados y situación financiera | ✅ Hecho |
 | T-16 | Contable: partida doble, plan de cuentas y comprobantes de ajuste | ✅ Hecho |
 | T-15 | Contable: PUC colombiano editable, con la cuenta guardada en cada documento | ✅ Hecho |
+| T-18 | Contable: los cinco niveles del PUC y alta de cuentas en cascada | ✅ Hecho |
 
 ---
 

@@ -1023,3 +1023,96 @@ input[type="number"], .entrada-cifra {
 .fila--cuenta td { font-weight: 600; }
 .fila--auxiliar td { color: var(--tinta-suave); }
 .celda-auxiliar { padding-left: var(--e6) !important; }
+
+/* ---------------------------------------------------------------------------
+   Alta de cuenta por niveles
+   --------------------------------------------------------------------------- */
+
+.etiqueta-nivel {
+  text-transform: uppercase;
+  font-size: var(--texto-xs);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.cascada {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  padding: var(--e3);
+  background: var(--superficie-alterna);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+}
+
+.cascada__fila {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--e3);
+  align-items: center;
+}
+
+.cascada__nivel {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  text-align: right;
+  color: var(--tinta-suave);
+}
+
+.cascada__fila--nueva .cascada__nivel { color: var(--acento); }
+
+.cascada__fila select { margin: 0; }
+
+/* El prefijo del padre se ve pero no se escribe: solo se teclea el segmento. */
+.cascada__codigo {
+  display: flex;
+  align-items: center;
+  gap: var(--e1);
+}
+
+.cascada__prefijo {
+  font-family: var(--fuente-cifras);
+  font-size: var(--texto-sm);
+  padding: var(--e2) var(--e3);
+  background: var(--borde);
+  border-radius: var(--radio-sm) 0 0 var(--radio-sm);
+  color: var(--tinta-suave);
+}
+
+.entrada-segmento {
+  width: 72px;
+  text-align: center;
+  font-family: var(--fuente-cifras);
+  letter-spacing: 0.08em;
+}
+
+.cascada__resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: var(--e3) 0;
+  padding: var(--e3);
+  border-left: 3px solid var(--acento);
+  background: var(--acento-suave);
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+}
+
+.cascada__etiqueta {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--acento-clara);
+}
+
+.cascada__valor {
+  font-family: var(--fuente-cifras);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.cascada__valor--incompleto { color: var(--tinta-tenue); }
+
+.tabla--plan .nivel-subcuenta { padding-left: var(--e6); color: var(--tinta-suave); }
+.tabla--plan .nivel-auxiliar { padding-left: calc(var(--e6) + var(--e4)); color: var(--tinta-tenue); }

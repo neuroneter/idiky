@@ -202,21 +202,54 @@ Idiky.puc = (function () {
     return CLASES[String(codigo).charAt(0)] || 'activo'
   }
 
+  /** Los cinco niveles, del mas alto al mas bajo. */
+  var NIVELES = [
+    { id: 'clase', nombre: 'Clase', largo: 1, ejemplo: '1' },
+    { id: 'grupo', nombre: 'Grupo', largo: 2, ejemplo: '11' },
+    { id: 'cuenta', nombre: 'Cuenta', largo: 4, ejemplo: '1105' },
+    { id: 'subcuenta', nombre: 'Subcuenta', largo: 6, ejemplo: '110505' },
+    { id: 'auxiliar', nombre: 'Auxiliar', largo: 8, ejemplo: '11050501' },
+  ]
+
+  var POR_LARGO = {}
+  NIVELES.forEach(function (n) { POR_LARGO[n.largo] = n })
+
   function nivelDe(codigo) {
-    var largo = String(codigo).length
-    if (largo === 1) return 'clase'
-    if (largo === 2) return 'grupo'
-    if (largo === 4) return 'cuenta'
-    return 'auxiliar'
+    var nivel = POR_LARGO[String(codigo).length]
+    return nivel ? nivel.id : 'auxiliar'
   }
 
-  /** Codigo del padre: 110505 -> 1105 -> 11 -> 1 -> null. */
+  function nombreDeNivel(codigo) {
+    var nivel = POR_LARGO[String(codigo).length]
+    return nivel ? nivel.nombre : 'Auxiliar'
+  }
+
+  /** El nivel que sigue debajo de este. `null` si ya es el mas bajo. */
+  function nivelHijoDe(idNivel) {
+    for (var i = 0; i < NIVELES.length - 1; i += 1) {
+      if (NIVELES[i].id === idNivel) return NIVELES[i + 1]
+    }
+    return null
+  }
+
+  function nivelPorId(idNivel) {
+    return NIVELES.filter(function (n) { return n.id === idNivel })[0]
+  }
+
+  /** Codigo del padre: 11050501 -> 110505 -> 1105 -> 11 -> 1 -> null. */
   function padreDe(codigo) {
     var largo = String(codigo).length
+    if (largo === 8) return String(codigo).slice(0, 6)
     if (largo === 6) return String(codigo).slice(0, 4)
     if (largo === 4) return String(codigo).slice(0, 2)
     if (largo === 2) return String(codigo).slice(0, 1)
     return null
+  }
+
+  /** Los digitos que este nivel agrega al codigo del padre. */
+  function segmentoDe(codigo) {
+    var padre = padreDe(codigo)
+    return padre ? String(codigo).slice(padre.length) : String(codigo)
   }
 
   /** Todos los ancestros, del mas cercano al mas lejano. */
@@ -231,7 +264,7 @@ Idiky.puc = (function () {
   }
 
   function esValido(codigo) {
-    return /^\d+$/.test(codigo) && [1, 2, 4, 6].indexOf(String(codigo).length) !== -1
+    return /^\d+$/.test(codigo) && [1, 2, 4, 6, 8].indexOf(String(codigo).length) !== -1
   }
 
   /** El signo con el que la clase se presenta en los estados. */
@@ -240,11 +273,16 @@ Idiky.puc = (function () {
   }
 
   return {
+    NIVELES: NIVELES,
     planBase: planBase,
     parametrosBase: parametrosBase,
     claseDe: claseDe,
     nivelDe: nivelDe,
+    nombreDeNivel: nombreDeNivel,
+    nivelHijoDe: nivelHijoDe,
+    nivelPorId: nivelPorId,
     padreDe: padreDe,
+    segmentoDe: segmentoDe,
     ancestrosDe: ancestrosDe,
     esValido: esValido,
     seInvierte: seInvierte,

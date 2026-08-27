@@ -201,7 +201,7 @@ Idiky.contabilidad = (function () {
 
   /** La cuenta de cuatro digitos bajo la que se agrupa un saldo. */
   function cuentaDePresentacion(codigo) {
-    return String(codigo).length === 6 ? String(codigo).slice(0, 4) : String(codigo)
+    return String(codigo).length > 4 ? String(codigo).slice(0, 4) : String(codigo)
   }
 
   /**

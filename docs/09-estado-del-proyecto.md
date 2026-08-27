@@ -54,6 +54,37 @@ casos de uso cambien, se eliminen o aparezcan otros.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Los cinco niveles del PUC
+
+**Qué se hizo**
+
+El plan de cuentas pasa a tener la jerarquía completa del PUC, explícita:
+**Clase · Grupo · Cuenta · Subcuenta · Auxiliar**.
+
+- **Faltaba un nivel.** El auxiliar de ocho dígitos no existía, y el de seis estaba mal
+  llamado "auxiliar" cuando en el PUC es **subcuenta** (el auxiliar es de siete u ocho).
+  Corregido en el modelo y en toda la interfaz.
+- **El código ya no se escribe entero: se arma por niveles.** Se elige la clase, de ahí el
+  grupo, de ahí la cuenta, y solo se escriben los dos dígitos que el nivel nuevo agrega. El
+  prefijo del padre se muestra fijo. Así es imposible teclear un código huérfano, que antes
+  el sistema tenía que rechazar después.
+- **La tabla muestra el nivel de cada cuenta** y se puede filtrar por nivel.
+- **Regla nueva (RN-38):** abrirle una subcuenta a una cuenta transaccional la convierte en
+  título, porque el movimiento baja al nivel nuevo. Si un parámetro estaba usando esa cuenta,
+  la operación se bloquea con el motivo: si no, los documentos nuevos irían a un título.
+
+**Verificación** — cinco suites en Chromium, todas pasan. La nueva cubre la cascada: que solo
+el primer selector arranque habilitado, que elegir un padre habilite el siguiente, que avise
+mientras el código está incompleto y si ya existe, que abrir un auxiliar convierta a la
+subcuenta en título, y que el bloqueo por parámetro en uso funcione. Los estados y el balance
+de prueba siguen cuadrando.
+
+**Qué sigue**
+
+1. Sigue pendiente que el contador valide los códigos (T-17).
+2. Falta exportar el balance de prueba y el libro auxiliar a CSV.
+3. Sigue pendiente el intercambio de información con la PWA (T-12).
+
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · PUC editable
 
 **Qué se hizo**
