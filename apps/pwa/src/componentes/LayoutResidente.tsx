@@ -9,7 +9,7 @@ import { useDatos } from '../estado/DatosContext'
 import { useSesion } from '../estado/SesionContext'
 import * as sel from '../datos/selectores'
 import { nombreCompleto } from '../datos/selectores'
-import { etiquetaUnidad, solicitudesEsperandoRespuesta } from '../dominio/reglas'
+import { etiquetaUnidad } from '../dominio/reglas'
 import { capitalizar, iniciales } from '../utilidades/formato'
 import { Icono, type NombreIcono } from './Icono'
 import { Logotipo } from './Logotipo'
@@ -80,13 +80,6 @@ export function LayoutResidente() {
   const misResidencias = sel.residenciasDePersona(bd, sesion.personaId)
   const miRol = misResidencias.find((r) => r.unidadId === sesion.unidadActivaId)?.rol
 
-  // El inicio tenia un acceso directo a Solicitudes con este mismo numero, al lado
-  // de una pestana que llevaba al mismo sitio. Se quito el acceso directo y el dato
-  // se quedo aqui, que es donde hay una sola puerta (Mary, 2026-08-27).
-  const pendientes = solicitudesEsperandoRespuesta(
-    sel.pqrsDeUnidad(bd, sesion.unidadActivaId),
-    sel.reservasDeUnidad(bd, sesion.unidadActivaId),
-  )
 
   return (
     <div className="app-movil app-movil--marca">
@@ -159,23 +152,8 @@ export function LayoutResidente() {
               `nav-inferior__enlace${isActive ? ' activo' : ''}`
             }
           >
-            <span className="nav-inferior__icono">
-              <Icono nombre={pestana.icono} />
-              {pestana.ruta === '/app/solicitudes' && pendientes > 0 && (
-                <span className="nav-inferior__contador" aria-hidden="true">
-                  {pendientes}
-                </span>
-              )}
-            </span>
-            <span>
-              {pestana.texto}
-              {pestana.ruta === '/app/solicitudes' && pendientes > 0 && (
-                /* Para el lector de pantalla, que no ve el globo del contador. */
-                <span className="solo-lectura-pantalla">
-                  , {pendientes} esperando respuesta
-                </span>
-              )}
-            </span>
+            <Icono nombre={pestana.icono} />
+            <span>{pestana.texto}</span>
           </NavLink>
         ))}
       </nav>

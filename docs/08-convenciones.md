@@ -80,18 +80,24 @@ demostración, así que sus tildes valen igual.
 `mas`/`más`, `cual`/`cuál` son palabras válidas de las dos formas: ahí no hay diccionario que
 valga, hay que leer la frase.
 
-### Una puerta por destino
+### Un destino, una identidad
 
-**Si algo tiene pestaña en la barra, no lleva además un acceso directo en el inicio.** Dos
-puertas con el mismo nombre al mismo sitio no dan más comodidad: hacen dudar de si llevan a lo
-mismo. Los accesos directos del inicio son, literalmente, **los módulos sin pestaña propia**.
+Un mismo destino **puede** aparecer en dos sitios —el acceso directo del inicio y la pestaña de
+la barra—: son dos alcances distintos, la mano en el inicio y la navegación permanente. Lo que
+no puede es **verse como dos destinos**. Cuando se repite, se repite entero:
 
-Lo que sí puede repetir destino es una **tarjeta de contexto**: «tu próxima reserva», «te
-espera en portería». No son una entrada de menú duplicada, son un dato concreto de esta persona
-hoy, y el enlace es la consecuencia de leerlo.
+- **El mismo ícono.** El acceso a Solicitudes usaba el bocadillo de PQRS y la pestaña usaba la
+  bandeja: dos dibujos para el mismo sitio, que es exactamente lo que hace dudar.
+- **El mismo nombre.**
+- **El mismo aterrizaje.** El acceso caía en el segmento de PQRS y la pestaña en la vista. Los
+  dos llevan ahora a `/app/solicitudes`.
+- **El contador, una sola vez.** Si el número aparece en las dos, se lee como dos cosas
+  distintas que hay que atender. Va en el acceso directo del inicio, junto a los de Visitantes
+  y Paquetes, que es donde se compara con ellos.
 
-Cuando un acceso directo desaparece, **su contador se muda a la pestaña**; unificar no es
-perder el dato.
+Y una **tarjeta de contexto** —«tu próxima reserva», «te espera en portería»— no cuenta como
+una segunda puerta: no es una entrada de menú, es un dato concreto de esta persona hoy, y el
+enlace es la consecuencia de leerlo.
 
 ### Segmentos dentro de una pestaña
 

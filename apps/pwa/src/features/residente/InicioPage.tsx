@@ -14,6 +14,7 @@ import {
   estadoRealVisitante,
   etiquetaUnidad,
   hoyISO,
+  solicitudesEsperandoRespuesta,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearFechaCorta } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
@@ -41,6 +42,12 @@ export function InicioPage() {
   const correspondenciaPendiente = sel
     .correspondenciaDeUnidad(bd, unidadId)
     .filter((registro) => registro.estado === 'en_porteria')
+  // Cuenta la PQRS sin cerrar y la reserva sin aprobar: quien las hizo las vive
+  // igual, «pedi algo y no me han contestado».
+  const pendientes = solicitudesEsperandoRespuesta(
+    sel.pqrsDeUnidad(bd, unidadId),
+    sel.reservasDeUnidad(bd, unidadId),
+  )
   const visitantesVigentes = sel
     .visitantesDeUnidad(bd, unidadId)
     .filter((visitante) => estadoRealVisitante(visitante, hoyISO()) === 'activo')
@@ -68,10 +75,12 @@ export function InicioPage() {
         )}
       </Link>
 
-      {/* Accesos directos a los modulos sin pestana propia. Es literal: Solicitudes
-          estuvo aqui hasta que gano su pestana, y entonces eran dos puertas con el
-          mismo nombre al mismo sitio. Lo que traia —cuantas solicitudes esperan
-          respuesta— se mudo al contador de la pestana (Mary, 2026-08-27). */}
+      {/* Accesos directos. Solicitudes se queda aqui (Mary, 2026-08-27): lo que
+          habia que unificar no era el sitio, era la identidad. Antes este acceso
+          llevaba el icono de PQRS y aterrizaba en el segmento de PQRS, mientras la
+          pestana llevaba otro icono y aterrizaba en la vista: se veian como dos
+          destinos distintos. Ahora es **el mismo icono, el mismo nombre y el mismo
+          destino** que la pestana. */}
       <div className="accesos">
         <Link to="/app/cuenta/pagar" className="acceso-directo">
           <span className="acceso-directo__icono">
@@ -96,6 +105,13 @@ export function InicioPage() {
           {correspondenciaPendiente.length > 0 && (
             <span className="acceso-directo__contador">{correspondenciaPendiente.length}</span>
           )}
+        </Link>
+        <Link to="/app/solicitudes" className="acceso-directo">
+          <span className="acceso-directo__icono">
+            <Icono nombre="solicitudes" />
+          </span>
+          Solicitudes
+          {pendientes > 0 && <span className="acceso-directo__contador">{pendientes}</span>}
         </Link>
       </div>
 

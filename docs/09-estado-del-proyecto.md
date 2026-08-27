@@ -61,24 +61,27 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
-### 2026-08-27 · Mary + IA (Claude) · Una sola puerta a Solicitudes
+### 2026-08-27 · Mary + IA (Claude) · Un destino, una identidad
 
-Mary vio dos caminos al mismo sitio: el acceso directo del inicio y la pestaña de la barra,
-con el mismo nombre y el mismo destino. Tenía razón, y la fila de accesos directos ya lo decía
-en su propio comentario: **son los módulos sin pestaña propia**. Solicitudes estuvo ahí hasta
-que ganó la suya, y nadie lo quitó.
+Mary vio dos caminos al mismo sitio: el acceso directo del inicio y la pestaña de la barra.
+Mi primera lectura fue quitar el acceso directo, y me corrigió: **no se elimina del inicio**.
+Tenía razón, y la corrección afina la regla.
 
-**Queda una sola puerta: la pestaña.** El acceso directo se fue, y la fila vuelve a ser lo que
-dice: Pagar, Visitantes y Paquetes.
+El problema no era que el destino apareciera dos veces —el acceso del inicio y la pestaña son
+dos alcances distintos, la mano a lo de hoy y la navegación permanente—. El problema era que se
+**veía** como dos destinos: el acceso llevaba el ícono de PQRS y caía en el segmento de PQRS,
+mientras la pestaña llevaba la bandeja y caía en la vista. Dos dibujos y dos aterrizajes para
+el mismo sitio.
 
-**Lo que traía el acceso directo no se perdió.** Llevaba un contador —cuántas solicitudes
-esperan respuesta— y ese dato se mudó a la pestaña, que ahora lleva el globo. Unificar no es
-borrar: es dejar el dato en la única puerta que queda.
+**Ahora se repite entero:** mismo ícono, mismo nombre y mismo aterrizaje (`/app/solicitudes`).
+Y el contador aparece **una sola vez**, en el acceso del inicio, junto a los de Visitantes y
+Paquetes, que es donde se compara con ellos. Quedó escrito en las convenciones como «un
+destino, una identidad».
 
 De paso quedó nombrada una regla que no existía: `solicitudesEsperandoRespuesta()` en
 `reglas.ts` suma la PQRS sin cerrar y la reserva sin aprobar, porque la persona las vive igual
-—«pedí algo y no me han contestado»— aunque en el modelo sean dos entidades. El paz y salvo no
-cuenta: se emite solo, no lo aprueba nadie.
+—«pedí algo y no me han contestado»— aunque en el modelo sean dos entidades. El acceso directo
+antes contaba solo las PQRS. El paz y salvo no cuenta: se emite solo, no lo aprueba nadie.
 
 ---
 

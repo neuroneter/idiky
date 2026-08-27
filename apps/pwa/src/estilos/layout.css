@@ -163,41 +163,6 @@
   width: 21px;
   height: 21px;
 }
-/* Contador de la pestana: el globo se cuelga del icono, no del texto, para que
-   no empuje la etiqueta y descuadre las cinco pestanas. */
-.nav-inferior__icono {
-  position: relative;
-  display: inline-flex;
-}
-.nav-inferior__contador {
-  position: absolute;
-  top: -4px;
-  left: 13px;
-  min-width: 16px;
-  height: 16px;
-  padding: 0 4px;
-  border-radius: var(--radio-completo);
-  background: var(--color-acento);
-  color: #fff;
-  font-size: 0.6rem;
-  font-weight: 700;
-  line-height: 16px;
-  text-align: center;
-}
-
-/* Texto solo para lectores de pantalla: el contador es un numero suelto, y sin
-   esto quien navega con voz oye "Solicitudes 2" sin saber que son dos. */
-.solo-lectura-pantalla {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  margin: -1px;
-  padding: 0;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
-  white-space: nowrap;
-  border: 0;
-}
 
 .encabezado-pagina {
   display: flex;
