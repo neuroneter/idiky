@@ -7,29 +7,53 @@
    =========================================================================== */
 
 :root {
-  /* Color — verde profundo de marca sobre un neutro con sesgo frio.
-     Los tres colores semanticos (deuda, exito, espera) NO son el acento:
-     se reservan para el estado de la plata, que es lo que hay que leer de un golpe. */
-  --marca: #0f3d3e;
-  --marca-clara: #1d5b5c;
-  --marca-suave: #e3ecea;
+  /* --------------------------------------------------------------------
+     Color
 
-  --fondo: #eef1ef;
+     Azul oscuro y fucsia, con un reparto deliberado de papeles:
+
+       AZUL   es la estructura — la barra lateral, los encabezados de los
+              estados financieros, los titulos de grupo. Es el color que
+              sostiene la pantalla y el que se imprime.
+       FUCSIA es la accion — el boton principal, el modulo activo, el foco
+              del teclado, y la cita de lo que escribio el propietario.
+              Aparece poco, y por eso se ve.
+
+     El fucsia NO se usa como color de estado. Vencido es rojo, y rojo y
+     fucsia son vecinos: puestos uno al lado del otro en la misma columna
+     de una tabla se confundirian. Separandolos por funcion, nunca coinciden.
+
+     Los contrastes de esta paleta estan medidos contra WCAG AA.
+     -------------------------------------------------------------------- */
+  --marca: #152046;
+  --marca-suave: #e7eaf4;
+
+  --acento: #b51f88;
+  --acento-clara: #94186f;
+  --acento-suave: #fbe9f4;
+
+  /* Neutros con sesgo azul, para que acompanen al azul de marca en vez de
+     pelearse con el. Un gris puro se veria sucio al lado. */
+  --fondo: #eef0f6;
   --superficie: #ffffff;
-  --superficie-alterna: #f7f9f8;
-  --borde: #dbe2df;
-  --borde-fuerte: #c3cecb;
+  --superficie-alterna: #f6f7fb;
+  --borde: #dfe3ee;
+  --borde-fuerte: #c5cbdd;
 
-  --tinta: #141b1a;
-  --tinta-suave: #5c6b68;
-  --tinta-tenue: #8b9794;
+  --tinta: #141830;
+  --tinta-suave: #5b6180;
+  --tinta-tenue: #6c7392;
 
-  --deuda: #a4232a;
-  --deuda-suave: #fbeaea;
+  /* Colores de estado. Son semanticos, no decorativos: no cuentan como
+     acento y no se usan para nada que no sea el estado de la plata. */
+  --deuda: #c0271d;
+  --deuda-suave: #fceae8;
+  --deuda-borde: #f0c2bd;
   --exito: #1a6b4f;
   --exito-suave: #e4f2ec;
-  --espera: #8a5a00;
-  --espera-suave: #fcf1dc;
+  --espera: #87640a;
+  --espera-suave: #fbf2dd;
+  --espera-borde: #ecd9a8;
 
   /* Tipografia — del sistema, a proposito: la aplicacion se abre desde el
      disco y puede estar sin internet, asi que no depende de ninguna fuente
@@ -52,8 +76,8 @@
 
   --radio-sm: 4px;
   --radio: 8px;
-  --sombra: 0 1px 2px rgba(20, 27, 26, 0.06), 0 1px 3px rgba(20, 27, 26, 0.04);
-  --sombra-modal: 0 12px 40px rgba(20, 27, 26, 0.24);
+  --sombra: 0 1px 2px rgba(20, 24, 48, 0.06), 0 1px 3px rgba(20, 24, 48, 0.04);
+  --sombra-modal: 0 12px 40px rgba(20, 24, 48, 0.26);
 
   --ancho-lateral: 216px;
 }
@@ -75,7 +99,7 @@ body {
 h1, h2, h3, p, figure, blockquote { margin: 0; }
 
 :focus-visible {
-  outline: 2px solid var(--marca-clara);
+  outline: 2px solid var(--acento);
   outline-offset: 2px;
 }
 
@@ -153,8 +177,13 @@ h1, h2, h3, p, figure, blockquote { margin: 0; }
 
 .nav__enlace:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
 
+.nav__enlace {
+  border-left: 3px solid transparent;
+}
+
 .nav__enlace.activo {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.12);
+  border-left-color: var(--acento);
   color: #ffffff;
   font-weight: 600;
 }
@@ -332,15 +361,15 @@ h1, h2, h3, p, figure, blockquote { margin: 0; }
 .boton:hover { background: var(--superficie-alterna); border-color: var(--tinta-tenue); }
 
 .boton--principal {
-  background: var(--marca);
-  border-color: var(--marca);
+  background: var(--acento);
+  border-color: var(--acento);
   color: #ffffff;
   font-weight: 600;
 }
 
-.boton--principal:hover { background: var(--marca-clara); border-color: var(--marca-clara); }
+.boton--principal:hover { background: var(--acento-clara); border-color: var(--acento-clara); }
 
-.boton--peligro { color: var(--deuda); border-color: #e4b9bb; }
+.boton--peligro { color: var(--deuda); border-color: var(--deuda-borde); }
 .boton--peligro:hover { background: var(--deuda-suave); border-color: var(--deuda); }
 
 .boton--pequeno { padding: var(--e1) var(--e3); font-size: var(--texto-xs); }
@@ -414,12 +443,12 @@ h1, h2, h3, p, figure, blockquote { margin: 0; }
   gap: var(--e4);
   padding: var(--e3) var(--e4);
   background: var(--espera-suave);
-  border: 1px solid #eddcb8;
+  border: 1px solid var(--espera-borde);
   border-radius: var(--radio);
 }
 
 .nota span.sub { display: block; color: var(--tinta-suave); }
-.nota--anulado { background: var(--deuda-suave); border-color: #e4b9bb; }
+.nota--anulado { background: var(--deuda-suave); border-color: var(--deuda-borde); }
 
 #avisos {
   position: fixed;
@@ -461,8 +490,8 @@ h1, h2, h3, p, figure, blockquote { margin: 0; }
 .cita {
   margin: var(--e3) 0 0;
   padding: var(--e3) var(--e4);
-  border-left: 3px solid var(--marca);
-  background: var(--marca-suave);
+  border-left: 3px solid var(--acento);
+  background: var(--acento-suave);
   border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
 }
 
@@ -471,7 +500,7 @@ h1, h2, h3, p, figure, blockquote { margin: 0; }
   font-size: var(--texto-xs);
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: var(--marca);
+  color: var(--acento-clara);
   font-weight: 700;
   margin-bottom: var(--e1);
 }
@@ -532,8 +561,8 @@ input, select, textarea {
 }
 
 input:focus, select:focus, textarea:focus {
-  border-color: var(--marca-clara);
-  outline: 2px solid var(--marca-suave);
+  border-color: var(--acento);
+  outline: 2px solid var(--acento-suave);
   outline-offset: 0;
 }
 
@@ -880,8 +909,8 @@ input[type="number"], .entrada-cifra {
   }
 
   .tabla { font-size: 10pt; }
-  .tabla th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-  .fila--grupo td { background: #eaefee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .tabla th { background: #f2f3f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .fila--grupo td { background: #e7eaf4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 
   /* Que una fila no quede partida entre dos hojas. */
   tr, .documento__encabezado, .documento__cliente { break-inside: avoid; }
