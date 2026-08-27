@@ -89,6 +89,19 @@ Arregla los tres defectos de una vez: el círculo significa lo que la gente espe
 el único sitio donde el residente ve quién es para el sistema, y la salida queda detrás de un
 paso deliberado, que es lo que corresponde a algo irreversible.
 
+**El botón de la hoja salió del rojo**
+
+La primera versión pintaba «Cerrar sesión» con el rojo de error, y Mary notó que los colores
+de la hoja no eran los de la app. Tenía razón, y el fallo era contra **nuestra propia regla**:
+el rojo está reservado para la plata —mora, cuota vencida, cartera vencida—
+([`08-convenciones.md`](./08-convenciones.md)). Cerrar sesión no es un error ni pierde nada, y
+pintarlo de rojo le quitaba fuerza a la señal que sí tiene que alarmar. Ahora es un botón
+neutro.
+
+Vale como recordatorio: la regla estaba escrita y aun así se rompió al primer intento. Si
+aparece un color fuera de los tokens de la superficie donde está, es un error, no una
+variación.
+
 **La barra, alineada**
 
 La unidad y el avatar estaban centrados contra las dos líneas de la izquierda, así que

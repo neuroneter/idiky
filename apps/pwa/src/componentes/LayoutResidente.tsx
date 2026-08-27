@@ -137,11 +137,11 @@ export function LayoutResidente() {
 
           <div className="separador" />
 
-          <button
-            className="boton boton--peligro boton--bloque"
-            onClick={cerrar}
-            style={{ minHeight: 44 }}
-          >
+          {/* Neutro, no rojo: el rojo esta reservado para la plata (mora, cuota
+              vencida). Cerrar sesion no es un error ni pierde nada, y pintarlo de
+              rojo le quita fuerza a la senal que si tiene que alarmar
+              (docs/08-convenciones.md). */}
+          <button className="boton boton--bloque" onClick={cerrar} style={{ minHeight: 44 }}>
             <Icono nombre="salir" tamano={16} />
             Cerrar sesion
           </button>
