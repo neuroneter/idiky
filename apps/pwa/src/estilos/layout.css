@@ -59,9 +59,13 @@
   background: none;
   z-index: 1;
 }
+/* Sin `z-index`: con el, este contenedor creaba un contexto de apilamiento y los
+   modales de las pantallas quedaban encerrados dentro. Su `z-index: 60` dejaba de
+   competir con la barra inferior (30) y la barra les tapaba el boton de confirmar
+   —y se quedaba con el toque—. `position: relative` sin `z-index` basta para
+   quedar sobre la zona de marca, porque el orden del DOM decide. */
 .app-movil--marca .contenido-movil {
   position: relative;
-  z-index: 1;
 }
 .barra-superior__fila {
   display: flex;

@@ -61,6 +61,32 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · El botón de confirmar quedaba bajo la barra
+
+**El síntoma.** Al abrir el modal para radicar una PQRS o autorizar un visitante, el botón de
+confirmar aparecía **partido por la barra inferior**. Y no era solo visual:
+`document.elementFromPoint` en el centro del botón devolvía la barra, así que **el botón no
+recibía el toque**.
+
+**La causa fue un efecto colateral del degradado.** Para poner el contenido sobre la zona de
+marca se le había dado `z-index: 1` a `.contenido-movil`. Eso **crea un contexto de
+apilamiento**, y los modales de las pantallas viven dentro de ese contenedor: su `z-index: 60`
+dejó de competir con la barra inferior (30) y pasó a competir solo dentro de la caja. La barra
+ganaba.
+
+Se quitó el `z-index`. `position: relative` sin `z-index` basta para quedar sobre la zona de
+marca, porque entre elementos posicionados sin `z-index` decide el orden del DOM — y no crea
+contexto de apilamiento.
+
+De paso, el fondo del modal descuenta `env(safe-area-inset-bottom)`: sin eso, en un teléfono
+con muesca el botón queda pegado al borde y encima del indicador del sistema.
+
+**La lección, que vale para lo que viene:** `z-index` no es un número global. Cada
+`position` + `z-index` encierra a sus hijos. Antes de poner uno, hay que preguntarse qué queda
+atrapado dentro — aquí quedaron atrapados todos los modales de las pantallas.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · Dos ajustes de texto
 
 **Un solo nombre para el mismo número.** El inicio decía «Valor adeudado» y el estado de

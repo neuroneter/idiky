@@ -426,6 +426,9 @@ textarea {
   justify-content: center;
   z-index: 60;
   padding: var(--e4);
+  /* El modal sube desde abajo: sin esto, en un telefono con muesca el boton de
+     confirmar queda pegado al borde y encima del indicador del sistema. */
+  padding-bottom: calc(var(--e4) + env(safe-area-inset-bottom, 0px));
 }
 .modal {
   background: var(--color-superficie);
