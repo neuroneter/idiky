@@ -104,10 +104,14 @@ número escrito en el código quedaría desactualizado y expondría a la copropi
 tasa se modeló como `TasaInteres`, un dato **con vigencia y fuente** (RN-43), y no como una
 constante.
 
+**Quién mantiene la tasa: el administrador de cada copropiedad** (Mary, 2026-08-27). Eso tiene
+una consecuencia de diseño: si la teclea una persona, se puede equivocar o dejarla vieja, y
+cobrar por encima del tope es usura. Así que el sistema **rechaza una tasa sobre el tope legal
+y avisa cuando la vigente está vencida** (RN-43). No evita el error, pero lo hace visible.
+
 Lo que **no se escribió y no se debe escribir de memoria**: cuál es la tasa aplicable y su
-tope. Eso hay que verificarlo en la ley, igual que el tope de poderes de asamblea. Y falta
-decidir quién la mantiene actualizada: ¿el administrador de cada copropiedad, o un servicio
-central de la plataforma? Las preguntas están en §3 quinquies del levantamiento.
+tope. Eso hay que verificarlo en la ley, igual que el tope de poderes de asamblea — y ahora es
+más urgente, porque el freno del sistema depende de conocer ese tope.
 
 Con el interruptor y sin las respuestas se puede construir CU-A-25, pero no el cálculo.
 

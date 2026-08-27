@@ -521,11 +521,25 @@ y vincular residente).
 4. Con el cobro encendido, el proceso automático (CU-S-02) liquida los intereses según la tasa
    vigente y genera cuotas de tipo `interes` (RN-44).
 
+**Flujo de la tasa** — la registra **el administrador de cada copropiedad**
+(decisión del equipo, 2026-08-27).
+
+5. El administrador registra la tasa vigente: valor, desde cuándo aplica y **la fuente** que la
+   certifica.
+6. El sistema **rechaza** una tasa por encima del tope legal (RN-43) y **avisa** cuando la
+   vigente lleva demasiado tiempo sin actualizarse.
+
+> **Por qué esos dos frenos.** Si la tasa la teclea una persona, se puede equivocar o dejarla
+> vieja. Cobrar por encima del tope es usura; cobrar con una tasa vencida es cobrar mal. El
+> sistema no puede evitar el error, pero sí hacerlo visible.
+
 **Flujos alternativos**
 - A1. Se apaga el cobro → **los intereses ya generados no desaparecen**; son cuotas y se
   anulan una por una si así se decide (O3).
 - A2. No hay tasa vigente registrada → el sistema **no calcula nada** y avisa. Es preferible no
   cobrar a cobrar con una tasa desactualizada (RN-43).
+- A3. La tasa vigente está vencida → el sistema avisa y **(?)** queda por decidir si sigue
+  liquidando con la última conocida o se detiene.
 
 **Reglas de negocio**
 - RN-42: sin activar, no se genera ningún interés.

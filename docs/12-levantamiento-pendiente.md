@@ -211,9 +211,11 @@ lo cobra. Falta lo que **no podemos suponer sin equivocarnos**:
 - **La tasa exacta y su tope.** ¿Cuál es la tasa aplicable a propiedad horizontal según la Ley
   675, y cuál el tope por encima del cual el cobro es usura? *No la escribimos de memoria: un
   número mal puesto expone a la copropiedad.* → *(respuesta)*
-- **Quién mantiene la tasa actualizada.** La certifica la Superintendencia Financiera y cambia
-  periódicamente. ¿La actualiza el administrador de cada copropiedad, o llega desde un
-  servicio central de la plataforma? → *(respuesta)*
+- ~~**Quién mantiene la tasa actualizada.**~~ → ✅ **Respondido (Mary, 2026-08-27):** la
+  registra **el administrador de cada copropiedad**.
+  *Consecuencia:* la tasa la teclea una persona, así que la app tiene que protegerla de
+  equivocarse — avisar cuando la tasa vigente está vieja y rechazar una que supere el tope
+  legal. Eso hace **más urgente** confirmar cuál es ese tope (pregunta de arriba).
 - **Sobre qué se liquida.** ¿Sobre el saldo vencido total, o cuota por cuota desde su
   vencimiento? → *(respuesta)*
 - **Cada cuánto se liquida.** ¿Diario, mensual al cerrar el periodo? → *(respuesta)*
