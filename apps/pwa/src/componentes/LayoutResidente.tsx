@@ -11,6 +11,7 @@ import * as sel from '../datos/selectores'
 import { etiquetaUnidad } from '../dominio/reglas'
 import { iniciales } from '../utilidades/formato'
 import { Icono, type NombreIcono } from './Icono'
+import { Logotipo } from './Logotipo'
 import { Modal } from './Modal'
 import { AvisoGlobal } from './Aviso'
 
@@ -22,8 +23,13 @@ const PESTANAS: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta?
   { ruta: '/app/comunicados', texto: 'Cartelera', icono: 'comunicados' },
 ]
 
+/**
+ * Titulo de cada pantalla. `/app` no esta aqui a proposito: en el inicio la barra
+ * muestra el logotipo en vez del titulo, porque decir "Inicio" cuando ya estas en
+ * el inicio no informa nada, y esa es la unica cara de la app del residente donde
+ * la marca alcanza a verse.
+ */
 const TITULOS: Record<string, string> = {
-  '/app': 'Inicio',
   '/app/cuenta': 'Estado de cuenta',
   '/app/cuenta/pagar': 'Pagar',
   '/app/reservas': 'Zonas comunes',
@@ -54,7 +60,11 @@ export function LayoutResidente() {
             <span className="barra-superior__saludo">
               Hola, {persona?.nombres.split(' ')[0] ?? 'residente'}
             </span>
-            <span className="barra-superior__titulo">{TITULOS[pathname] ?? 'Idiky'}</span>
+            {pathname === '/app' ? (
+              <Logotipo inverso tamano="var(--texto-lg)" />
+            ) : (
+              <span className="barra-superior__titulo">{TITULOS[pathname] ?? 'Idiky'}</span>
+            )}
           </div>
           <div className="fila" style={{ gap: 'var(--e2)' }}>
             <button

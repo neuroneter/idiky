@@ -104,11 +104,21 @@ componente —que renderiza spans por dentro— el nombre del logotipo heredaba 
 subtítulo. Se cambió por la clase `.lateral__marca-sub`. Vale la regla general: **no estilar
 por etiqueta dentro de un contenedor que va a recibir componentes.**
 
+**El logotipo entra a la app del residente**
+
+Al revisar el resultado apareció un hueco: el logotipo solo se veía en el acceso, en el
+destello de carga y en la lateral de la consola. **Dentro de la app del residente no había
+marca en ninguna pantalla** — justo la cara que más se usa.
+
+Se resolvió en la barra superior del inicio: donde decía «Inicio» ahora va el logotipo. Decir
+«Inicio» cuando ya estás en el inicio no informa nada, así que el sitio estaba libre. En las
+demás pantallas el título se queda, porque ahí sí dice dónde estás.
+
 **Qué sigue**
 
 T-09 queda cerrada. Subir la base de 15 a 16 px movió todas las pantallas; se revisaron
-acceso, inicio del residente y consola sin desbordes, pero conviene que el equipo recorra el
-resto del demo.
+acceso, inicio del residente, estado de cuenta y consola sin desbordes, pero conviene que el
+equipo recorra el resto del demo.
 
 ---
 

@@ -72,7 +72,10 @@ contexto.
 escribir «idiky» a mano ni redibuja la casa. Dos reglas:
 
 - **Va limpio sobre la superficie**, sin bloque de color detrás. Si la superficie ya es
-  oscura —la lateral de la consola—, se usa la prop `inverso`.
+  oscura —la lateral de la consola, la barra superior del residente—, se usa la prop
+  `inverso`.
+- **En la app del residente vive en la barra superior del inicio**, donde reemplaza al
+  título. En las demás pantallas manda el título, que sí dice dónde estás.
 - **El nombre se lee entero.** Se probó esconder la casa dentro de una de las íes y se
   descartó con la prueba delante: al tamaño de la barra lateral la casita se vuelve una
   mancha, y obliga a descifrar qué letra es. Para un nombre que la gente tiene que leer y
