@@ -330,7 +330,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-23 | Vencimiento por defecto: día 10 del periodo. | `datos/repositorio.ts` |
 | RN-24 | La primera respuesta de la administración pasa la PQRS a `en_gestion`. | `datos/repositorio.ts` |
 | RN-25 | La correspondencia entregada no se edita. | `features/admin/CorrespondenciaAdminPage.tsx` |
-| RN-26 | El paz y salvo solo se emite si el saldo de la unidad es cero. | `datos/repositorio.ts` (`emitirPazYSalvo`) |
+| RN-26 | El paz y salvo solo se emite si el saldo de la unidad es cero, **incluida la cuota ya facturada del periodo aunque todavía no haya vencido**. Estar sin mora no basta. | `datos/repositorio.ts` (`emitirPazYSalvo`) |
 | RN-27 | El voto en asamblea se pondera por el coeficiente de la unidad. **Confirmada por el equipo el 2026-08-26.** | `dominio/reglas.ts` (`pesoDelVoto`) |
 | RN-28 | El quórum se mide en coeficientes (presentes + representados), no en personas. | *pendiente* |
 | RN-29 | Un voto por unidad y por votación; quien representa N unidades emite N votos. | `dominio/reglas.ts` (`yaVoto`); los poderes siguen pendientes |

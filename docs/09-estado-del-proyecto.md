@@ -94,10 +94,13 @@ regla.
 
 **Paz y salvo (CU-R-12), a medias y con la mitad que faltaba dicha.** Se implementó lo decidido
 —RN-26 (saldo cero) y RN-36 (consecutivo)—: el certificado se emite, queda registrado y se ve
-en pantalla. **Falta el PDF**, que es ADR-0006. Y aparece una pregunta que nadie había hecho:
-¿«saldo cero» incluye la cuota del mes en curso que aún no vence? Hoy el demo la cuenta, así
-que hay que pagarla antes de emitir. Si en la práctica «al día» significa «nada vencido»,
-RN-26 cambia.
+en pantalla. **Falta el PDF**, que es ADR-0006.
+
+Y una pregunta que apareció construyéndolo, ya respondida: ¿«saldo cero» incluye la cuota del
+periodo que aún no vence? **Sí, incluye lo ya facturado** (Mary, 2026-08-27). Estar sin mora no
+basta: el certificado afirma que la unidad no debe nada, y lo facturado se debe. Como el caso
+desconcierta —no estoy atrasado y aun así no puedo emitir—, la pantalla lo explica cuando el
+saldo existe pero no hay nada vencido.
 
 **De paso, la ortografía.** El revisor solo miraba las pantallas, no los datos de ejemplo —que
 es justo lo que se lee en una demostración—. Se extendió a `semilla.ts` y aparecieron 78

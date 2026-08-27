@@ -298,9 +298,10 @@ localmente sin librerías externas (ver [ADR-0005](../adr/0005-codigo-qr-sin-dep
 - RN-26: solo se emite con saldo cero.
 - RN-36: consecutivo único y verificable.
 
-> **Pregunta abierta (?):** ¿«saldo cero» incluye la cuota del mes en curso que todavía no ha
-> vencido? Hoy el demo la cuenta, así que hay que pagarla antes de emitir. Si la práctica de la
-> copropiedad es otra —al día = nada vencido—, cambia RN-26 y con ella la pantalla.
+> **Respondido (Mary, 2026-08-27):** «saldo cero» **incluye la cuota ya facturada** del periodo,
+> aunque falten días para su vencimiento. Estar sin mora no basta: el certificado dice que la
+> unidad no debe nada, y lo facturado se debe. Quien tenga la cuota del mes pendiente la paga
+> primero (CU-R-04) y luego emite.
 
 **Estado en el demo:** 🟡 — `src/features/residente/PazYSalvoPage.tsx`. Verifica RN-26, emite el
 certificado con su consecutivo (RN-36) y lo muestra en pantalla; **falta la descarga en PDF**,

@@ -14,7 +14,7 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
 import { emitirPazYSalvo } from '../../datos/repositorio'
-import { calcularSaldo, etiquetaUnidad, hoyISO } from '../../dominio/reglas'
+import { calcularSaldo, calcularSaldoVencido, etiquetaUnidad, hoyISO } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
 import { Link } from 'react-router-dom'
@@ -27,7 +27,11 @@ export function PazYSalvoPage() {
   const unidad = sel.unidad(bd, sesion.unidadActivaId)
   const copropiedad = sel.copropiedad(bd, sesion.copropiedadId)
   const persona = sel.persona(bd, sesion.personaId)
-  const saldo = calcularSaldo(sel.cuotasDeUnidad(bd, sesion.unidadActivaId))
+  const cuotas = sel.cuotasDeUnidad(bd, sesion.unidadActivaId)
+  // RN-26 cuenta el saldo completo, no solo lo vencido: la cuota del mes ya
+  // facturada entra aunque falten dias para su vencimiento (Mary, 2026-08-27).
+  const saldo = calcularSaldo(cuotas)
+  const vencido = calcularSaldoVencido(cuotas)
   const vigente = sel.pazYSalvoVigente(bd, sesion.unidadActivaId)
   const alDia = saldo === 0
 
@@ -47,7 +51,9 @@ export function PazYSalvoPage() {
       {/* El estado de la unidad va primero: es la condicion de todo lo demas
           (RN-26) y evita que alguien pulse un boton que no le va a funcionar. */}
       <div className={`tarjeta ${alDia ? 'tarjeta--exito' : 'tarjeta--alerta'}`}>
-        <div className="tarjeta__cuerpo">
+        {/* El icono arriba y no centrado: con tres lineas de texto, un icono a
+            media altura se lee como si senalara la linea del medio. */}
+        <div className="tarjeta__cuerpo" style={{ alignItems: 'flex-start' }}>
           <Icono nombre={alDia ? 'check' : 'alerta'} tamano={22} />
           <div className="columna">
             <strong>{alDia ? 'Tu unidad está al día' : 'Tu unidad tiene saldo pendiente'}</strong>
@@ -56,6 +62,15 @@ export function PazYSalvoPage() {
                 ? 'Puedes emitir el certificado de paz y salvo cuando lo necesites.'
                 : `El paz y salvo certifica que no debes nada, así que solo se emite con saldo en cero. Hoy debes ${formatearDinero(saldo)}.`}
             </span>
+            {/* Sin mora pero con saldo es el caso que desconcierta: la persona no
+                se ha atrasado y aun asi no puede emitir. Se explica en vez de
+                dejarla adivinando (RN-26). */}
+            {!alDia && vencido === 0 && (
+              <span className="subtitulo">
+                No estás en mora: es la cuota del periodo, que ya está facturada aunque todavía
+                no venza. El certificado dice que no debes nada, y esa también cuenta.
+              </span>
+            )}
           </div>
         </div>
         <div className="separador" />
