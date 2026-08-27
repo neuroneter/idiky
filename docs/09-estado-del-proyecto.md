@@ -61,6 +61,30 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · Parametrizar la cartera, no cobrar caso por caso
+
+Mary precisó la palabra: el administrador de la copropiedad es quien tiene el rol para
+**parametrizar** las cuotas, las multas y los intereses. Vale la pena tomarla al pie de la
+letra, porque separa dos actos que hasta ahora iban juntos en RN-49:
+
+- **Parametrizar** es definir qué existe y cuánto vale —el valor de la ordinaria, el catálogo
+  de multas, la tasa y si se cobra, los conceptos adicionales—. Es facultad exclusiva del
+  administrador de esa copropiedad (RN-49).
+- **Que el cobro caiga en una unidad** se sigue de esa parametrización y de su regla, no de una
+  decisión caso por caso (RN-50, nueva). El interés lo liquida el sistema sobre lo vencido; la
+  multa se escoge del catálogo y solo genera cuota cuando queda firme; la extraordinaria se
+  traslada del acta.
+
+El administrador **configura la regla; no toca el caso**. Eso es lo mismo que protege al
+administrador cuando el copropietario reclama: el cobro no es una decisión suya sobre esa
+unidad, es la regla vigente aplicada a todas.
+
+**Y deja una frontera con nombre:** ¿puede ajustar el valor de una multa al imponerla? Si puede,
+sí está decidiendo sobre el caso. Estaba marcado con **(?)** en el modelo; ahora se sabe por qué
+importa. Sigue en §3 quater del levantamiento.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · Cobrar es una facultad del administrador
 
 Mary cerró quién origina un cobro: **solo el administrador, desde su perfil** (RN-49). Aplica a

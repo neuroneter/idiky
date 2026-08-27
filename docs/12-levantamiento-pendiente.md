@@ -189,7 +189,9 @@ CU-A-22, CU-A-23 y CU-A-24.
   → *(respuesta)*
 - **Quién decide los descargos.** ¿La misma persona que impuso la multa, u otra? → *(respuesta)*
 - **El valor.** ¿Es fijo por concepto, o el que impone puede ajustarlo? Si puede, ¿con qué
-  tope? → *(respuesta)*
+  tope? → *(respuesta)* — **es el límite entre parametrizar e imponer** (RN-49 / RN-50): si el
+  valor se puede mover al imponer la multa, el administrador sí está decidiendo sobre el caso
+  concreto y no solo configurando la regla.
 - ~~**Sin artículo del reglamento.**~~ → ✅ **Respondido (Mary, 2026-08-27):** una multa solo
   se da si **está en el reglamento o fue aprobada en asamblea**. El respaldo es obligatorio:
   sin él, el concepto no se crea. Es el mismo principio que rige la tasa de interés (RN-45).

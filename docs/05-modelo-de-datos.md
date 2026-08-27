@@ -353,7 +353,8 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-46 | Una cuota **extraordinaria** exige el acta de asamblea que la aprobó. No admite la opción «reglamento»: siempre es acta. | *pendiente* |
 | RN-47 | El respaldo se **justifica por escrito**: el cobro exige una justificación que cite el acta y su fecha y diga para qué se aprobó. Sin ella el cobro no se crea. El copropietario la lee desde su estado de cuenta. | *pendiente* |
 | RN-48 | La cuota extraordinaria tiene **destinación específica**: el concepto la describe en texto libre —cada obra es distinta— pero es la destinación que aprobó el acta, y el recaudo se destina a eso. | *pendiente* |
-| RN-49 | **Los cobros los crea únicamente el administrador de esa copropiedad, desde su perfil.** Ordinarias, extraordinarias, multas, cobros adicionales e intereses: ningún otro rol los origina, y la comprobación no puede vivir solo en la interfaz. | *parcial* (`App.tsx` protege la ruta; `repositorio.ts` no comprueba quién llama) |
+| RN-49 | **Parametrizar la cartera es facultad exclusiva del administrador de esa copropiedad**: qué cuotas, multas e intereses existen y cuánto valen. Ningún otro rol lo hace, y la comprobación no puede vivir solo en la interfaz. | *parcial* (`App.tsx` protege la ruta; `repositorio.ts` no comprueba quién llama) |
+| RN-50 | **Lo que cae en la cuenta de una unidad se sigue de la parametrización y de su regla, no de una decisión caso por caso.** El interés lo liquida el sistema (RN-42, RN-44), la multa exige un concepto del catálogo y quedar firme (RN-38, RN-39), la extraordinaria sale del acta (RN-46, RN-48). | *pendiente* |
 
 ## 3 bis. El principio del respaldo
 
@@ -408,14 +409,39 @@ sistema siempre puede responder con un acta o un artículo, en vez de con un nú
 
 ## 3 ter. Quién puede cobrar
 
-**Los cobros los crea únicamente el administrador desde su perfil** (Mary, 2026-08-27). Vale
-para todos: cuota ordinaria, extraordinaria, multa, cobro adicional e interés de mora. En la
-app del residente no existe ninguna acción que origine un cobro —consulta, descarga y paga— y
-esa asimetría es deliberada: quien debe el dinero no puede tocar lo que debe.
+**Parametrizar la cartera es facultad del administrador de esa copropiedad, desde su perfil**
+(Mary, 2026-08-27). Vale para todo lo que se cobra: cuota ordinaria, extraordinaria, multa,
+cobro adicional e interés de mora. En la app del residente no existe ninguna acción que origine
+un cobro —consulta, descarga y paga— y esa asimetría es deliberada: quien debe el dinero no
+puede tocar lo que debe.
 
 Y es **el administrador de esa copropiedad**, no cualquier administrador (RN-01, y la misma
 precisión que Mary hizo para la tasa de interés). Un cobro creado desde el perfil equivocado es
 un cobro de otra copropiedad.
+
+**Parametrizar no es lo mismo que cobrar**, y la palabra que usó Mary vale la pena tomarla al
+pie de la letra, porque separa dos actos que hasta ahora iban juntos:
+
+| | Qué es | Quién |
+|---|---|---|
+| **Parametrizar** | Definir **qué existe y cuánto vale**: el valor de la ordinaria, el catálogo de multas, la tasa de interés y si se cobra, los conceptos de cobro adicional | El administrador de la copropiedad, y **solo él** (RN-49) |
+| **Que el cobro caiga en una unidad** | Que aparezca en el estado de cuenta de un apartamento concreto | **Se sigue de la parametrización y de su regla** (RN-50) |
+
+La distinción importa porque acota la facultad del administrador. No puede decidir «a esta
+unidad le cobro tanto de interés»: lo que hace es fijar la tasa, y el sistema la liquida sobre
+lo vencido (RN-42, RN-44). No puede inventar una multa: la impone escogiéndola de un catálogo
+que el reglamento o la asamblea autorizaron (RN-38), y solo genera cuota cuando queda firme
+(RN-39). No escribe una extraordinaria: la traslada del acta (RN-46, RN-48).
+
+Dicho de otro modo, el administrador **configura la regla; no toca el caso**. Eso es también lo
+que protege al administrador —el punto que Mary planteó con el interés—: cuando el copropietario
+reclama, el cobro no es una decisión suya sobre esa unidad, es la regla vigente aplicada a
+todas.
+
+> **Queda una frontera por definir:** ¿puede ajustar el valor de una multa al imponerla, o el
+> valor del catálogo es fijo? Es exactamente el límite entre parametrizar e imponer, y sigue
+> abierto en [`./12-levantamiento-pendiente.md` §3 quater](./12-levantamiento-pendiente.md).
+> El modelo lo tiene marcado con **(?)** en `ConceptoSancion.valor`.
 
 > ⚠️ **Hoy esto vive solo en la interfaz.** `App.tsx` protege `/admin` con `Protegida
 > rol="admin"`, pero `generarCuotas()` no recibe quién la llama ni lo comprueba: la regla es una
