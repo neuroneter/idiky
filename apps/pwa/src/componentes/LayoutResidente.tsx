@@ -54,13 +54,15 @@ export function LayoutResidente() {
   const unidadActiva = sel.unidad(bd, sesion.unidadActivaId)
   const misResidencias = sel.residenciasDePersona(bd, sesion.personaId)
   const miRol = misResidencias.find((r) => r.unidadId === sesion.unidadActivaId)?.rol
+  const enInicio = pathname === '/app'
 
   return (
-    <div className="app-movil app-movil--marca">
-      {/* Zona de marca: el degradado es el fondo de toda la app del residente, fijo
-          a la pantalla. La silueta de torres es la copropiedad misma, dibujada
-          con el mismo trazo del logotipo. */}
-      <div className="zona-marca" aria-hidden="true">
+    <div className={`app-movil${enInicio ? ' app-movil--inicio' : ''}`}>
+      {/* Zona de marca del inicio. Se probo cubrir con el degradado el fondo de
+          toda la app y se descarto: sin nada contra que contrastar, el degradado
+          no dejaba trabajar a los demas colores. Ver la bitacora del 2026-08-27. */}
+      {enInicio && (
+        <div className="zona-marca" aria-hidden="true">
         <svg className="zona-marca__siluetas" viewBox="0 0 320 150" fill="none">
           <g stroke="currentColor" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round">
             <path d="M12 150V54l30-20 30 20v96M42 150v-30h18v30" />
@@ -70,7 +72,8 @@ export function LayoutResidente() {
             <path d="M0 150h320" />
           </g>
         </svg>
-      </div>
+        </div>
+      )}
 
       <header className="barra-superior">
         <div className="barra-superior__fila">

@@ -116,6 +116,11 @@ de la barra inferior, la barra superior, el lateral de la consola. Lo que la per
 **acciona** es fucsia: el botón primario y el filtro que eligió. Un filtro no es un sitio
 donde estás, es un control que tocaste.
 
+**Un color de control no puede vivir dentro del degradado.** El degradado ocupa todo el rango
+entre el azul y el fucsia, así que cualquier tono intermedio —un violeta, por ejemplo— coincide
+con el fondo en algún punto del recorrido y el control se disuelve. El fucsia funciona porque
+está en el extremo.
+
 **El rojo está reservado para la plata** — mora, cuota vencida, cartera vencida. No usar
 fucsia para alarmar: compiten en tono y se pierde la señal que más importa.
 

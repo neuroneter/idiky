@@ -61,6 +61,46 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · El degradado vuelve a ser una banda
+
+**Lo que se probó y por qué se descartó**
+
+Se llevó el degradado a cubrir el fondo de toda la app del residente, buscando más presencia
+de marca. Se descartó. La causa no fue estética: **un color solo es reconocible cuando tiene
+contra qué contrastar**, y al ocupar todo el fondo el degradado dejó de tener contrapunto.
+
+Cinco señales se cayeron, todas por lo mismo:
+
+| Señal | Qué le pasó |
+|---|---|
+| El rojo de la mora | No se lee sobre fucsia; hubo que meterlo en una pastilla blanca |
+| El tinte fucsia de portería | Desapareció contra el fondo; degradó a un filo |
+| Los títulos de sección | Hubo que pasarlos a blanco |
+| Un botón violeta que se probó | Se disolvía en su propio fondo, porque el degradado ya ocupa todos los tonos entre el azul y el fucsia |
+| La silueta de torres | Quedó detrás del contenido y dejó de verse |
+
+Cada una se pudo arreglar, pero el patrón era el diagnóstico.
+
+**Lo que quedó**
+
+El degradado vuelve a ser una **banda en el inicio**, ahora más alta que la primera versión
+(370 px en vez de 300), con el saldo encima y la silueta donde de verdad se lee. El golpe de
+marca al abrir la app es el mismo; de ahí para abajo el contenido respira, el fucsia vuelve a
+poder señalar y el rojo vuelve a poder alarmar.
+
+**Una regla que sale de aquí**
+
+Al elegir el color de un control, **no puede ser un tono que viva dentro del degradado**. El
+degradado ocupa todo el rango entre el azul y el fucsia, así que cualquier tono intermedio
+coincide con el fondo en algún punto. El fucsia funciona precisamente porque está en el
+extremo.
+
+*(También se probó el amarillo y se descartó por una razón dura: **ningún amarillo vivo admite
+texto blanco** —el mejor llega a 3,25:1 contra un mínimo de 4,5—, así que habría obligado a
+texto oscuro en todos los botones y habría chocado con el ámbar de «Pendiente».)*
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · El inicio deja de ser cajas blancas
 
 **El diagnóstico**
