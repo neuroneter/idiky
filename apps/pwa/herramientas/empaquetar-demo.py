@@ -12,8 +12,15 @@ navegacion usa `HashRouter`, asi que no hace falta configurar rutas en un servid
 Uso:
     npm run build
     python3 herramientas/empaquetar-demo.py [destino.html]
+    python3 herramientas/empaquetar-demo.py --artifact [destino.html]
 
 Por defecto escribe `dist/demo-idiky.html`.
+
+`--artifact` escribe la misma cosa **sin `<html>`, `<head>` ni `<body>`**, que es lo
+que pide el publicador de artefactos de claude.ai: ahi la pagina se envuelve sola, y
+un documento completo dentro de otro no arranca. Es el formato del demo publicado;
+**si se actualiza el demo hay que volver a publicarlo con esta opcion**, porque el
+archivo compartido y el artefacto son dos copias distintas.
 
 Ojo: cada persona que lo abra tiene su **propia copia** de los datos, en su navegador.
 Nadie ve lo que hace el otro. Para una demostracion eso es una ventaja.
@@ -52,6 +59,9 @@ def unico(patron: str) -> Path:
 
 
 def main() -> None:
+    argumentos = [a for a in sys.argv[1:] if a != '--artifact']
+    para_artefacto = '--artifact' in sys.argv[1:]
+
     css = unico('assets/*.css').read_text(encoding='utf-8')
     js = unico('assets/*.js').read_text(encoding='utf-8')
 
@@ -62,7 +72,21 @@ def main() -> None:
             'El bundle contiene un cierre de <script>. Hay que escaparlo antes de incrustarlo.'
         )
 
-    destino = Path(sys.argv[1]) if len(sys.argv) > 1 else DIST / 'demo-idiky.html'
+    destino = Path(argumentos[0]) if argumentos else DIST / (
+        'demo-idiky-artefacto.html' if para_artefacto else 'demo-idiky.html'
+    )
+
+    if para_artefacto:
+        destino.write_text(
+            f'<title>{TITULO}</title>\n'
+            '<style>\n' + css + '\n</style>\n'
+            '<div id="root"></div>\n'
+            '<script type="module">\n' + js + '\n</script>\n',
+            encoding='utf-8',
+        )
+        print(f'{destino}: {destino.stat().st_size / 1024:.0f} kB (para artefacto)')
+        return
+
     destino.write_text(
         '<!doctype html>\n'
         '<html lang="es">\n'
