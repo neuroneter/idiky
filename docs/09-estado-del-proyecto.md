@@ -61,6 +61,19 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · Dos ajustes de texto
+
+**Un solo nombre para el mismo número.** El inicio decía «Valor adeudado» y el estado de
+cuenta «Saldo total», del mismo dato y para la misma persona. Ahora los dos dicen **«Valor
+adeudado»**. «Saldo» se queda en la consola del administrador, donde quien lee es contable, y
+en el código (`calcularSaldo`, RN-03): el nombre del dominio no cambia, cambia lo que lee la
+persona.
+
+**Fuera el título repetido.** En Zonas comunes la barra superior decía «Zonas comunes» y justo
+debajo el título de sección lo repetía. Se eliminó el segundo.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · Decisión final: degradado completo y acción en violeta
 
 Mary eligió, viendo las versiones renderizadas: **el degradado cubre el fondo de toda la app

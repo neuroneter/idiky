@@ -105,7 +105,8 @@ export function ReservasPage() {
       )}
 
       <div className="pila">
-        <span className="titulo-seccion">Zonas comunes</span>
+        {/* Sin titulo de seccion: la barra superior ya dice "Zonas comunes" y
+            repetirlo dos veces seguidas no informa nada. */}
         <div className="lista lista--compacta">
           {zonas.map((zona) => (
             <button

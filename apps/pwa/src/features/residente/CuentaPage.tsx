@@ -41,7 +41,9 @@ export function CuentaPage() {
   return (
     <>
       <div className="tarjeta">
-        <span className="indicador__etiqueta">Saldo total</span>
+        {/* El mismo nombre que en el inicio. "Saldo" es lenguaje contable y se
+            queda en la consola, donde quien lee es el administrador. */}
+        <span className="indicador__etiqueta">Valor adeudado</span>
         <div className="dato-grande" style={{ margin: 'var(--e1) 0' }}>
           {formatearDinero(saldo)}
         </div>
