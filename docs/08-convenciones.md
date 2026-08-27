@@ -90,7 +90,7 @@ intercambiables:
 | Token | Color | Para qué |
 |---|---|---|
 | `--color-marca` | Azul tinta `#1d2e7a` | **Estructura: dónde estás.** Barra superior, lateral del admin, pestaña activa, foco de campos, enlaces |
-| `--color-acento` | Fucsia `#c41e8c` | **Acción y atención: qué puedes hacer.** El **botón primario**, el **filtro elegido**, los contadores, los chips de acento. `--color-acento-fuerte` es el mismo, presionado |
+| `--color-acento` | Violeta `#812485` | **Acción y atención: qué puedes hacer.** El **botón primario**, el **filtro elegido**, los contadores, los chips de acento. `--color-acento-fuerte` es el mismo, presionado |
 
 Los dos juntos aparecen en **una sola superficie por pantalla**: `.tarjeta--marca` (el saldo
 del residente) y la barra lateral de la consola. Es la firma de la marca; si aparece en más
@@ -115,6 +115,16 @@ borde visible no llega a fucsia pleno.
 de la barra inferior, la barra superior, el lateral de la consola. Lo que la persona
 **acciona** es fucsia: el botón primario y el filtro que eligió. Un filtro no es un sitio
 donde estás, es un control que tocaste.
+
+**El color de acción sale del propio degradado**, al 60 % del recorrido entre el azul y el
+fucsia. Eso tiene una consecuencia que hay que respetar: en algún punto del scroll **ese
+violeta coincide con el fondo**, así que todo control apoyado directamente sobre el degradado
+—sin tarjeta debajo— necesita un **filo claro** que lo despegue. Sobre tarjeta blanca no hace
+falta.
+
+**El logotipo no sigue al color de acción.** La puerta de la casa usa `--color-marca-claro`,
+el fucsia del extremo del degradado, porque tiene que brillar contra el azul y no debe cambiar
+si mañana cambia el color de los botones. Un logotipo no es un control.
 
 **El rojo está reservado para la plata** — mora, cuota vencida, cartera vencida. No usar
 fucsia para alarmar: compiten en tono y se pierde la señal que más importa.

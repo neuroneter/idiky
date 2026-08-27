@@ -61,6 +61,30 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · Decisión final: degradado completo y acción en violeta
+
+Mary eligió, viendo las versiones renderizadas: **el degradado cubre el fondo de toda la app
+del residente**, fijo a la pantalla, y **el color de acción es un violeta tomado del propio
+degradado** (`#812485`, al 60 % del recorrido).
+
+Se había propuesto lo contrario —volver a una banda— con el argumento de que el degradado a
+pantalla completa no dejaba trabajar a los demás colores. El argumento era correcto en los
+hechos y equivocado en la conclusión: **los cinco problemas ya estaban resueltos** uno por uno,
+así que el costo estaba pagado. La decisión era de producto, no técnica. La banda se revirtió.
+
+**Dos cosas que el violeta obligó a resolver**
+
+1. **El chip del filtro puede disolverse en el fondo.** El violeta sale del degradado, así que
+   en algún punto del scroll coincide con él. El filtro elegido lleva ahora un **filo claro**
+   que lo despega siempre. Regla general: todo control apoyado directamente sobre el
+   degradado, sin tarjeta debajo, necesita ese filo.
+2. **La puerta del logotipo perdió su brillo.** Usaba `--color-acento`, así que se volvió
+   violeta y se apagó contra el azul. Pasa a `--color-marca-claro` —el fucsia del extremo del
+   degradado—: **el logotipo no es un control** y no debe cambiar si mañana cambia el color de
+   los botones.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · El inicio deja de ser cajas blancas
 
 **El diagnóstico**
