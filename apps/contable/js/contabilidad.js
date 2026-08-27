@@ -1,34 +1,37 @@
 /**
- * Motor contable: convierte cartera y pagos en movimientos y en estados.
+ * Motor contable: convierte todo lo que pasa en la copropiedad en asientos de
+ * partida doble, y de ahi arma los estados.
  *
  * Funciones puras. No leen ni escriben datos: reciben las listas y calculan.
  *
  * --------------------------------------------------------------------------
  * CRITERIO: se trabaja por CAUSACION, no por caja.
  * --------------------------------------------------------------------------
- * Una cuota es ingreso el dia en que se causa (el primero de su periodo),
- * aunque el propietario pague tres meses despues. Un gasto es egreso el dia en
- * que se causa, aunque se pague al mes siguiente. Es como debe llevarse la
- * contabilidad de una copropiedad, y es lo que hace que la cartera exista como
- * cifra: la cartera es justamente lo causado que todavia no se ha recaudado.
+ * Una cuota es ingreso el dia en que se causa, aunque el propietario pague
+ * tres meses despues. Un gasto es egreso el dia en que se causa, aunque se
+ * pague al mes siguiente. Es lo que hace que la cartera exista como cifra: la
+ * cartera es justamente lo causado que todavia no se ha recaudado.
  *
- * Las cuatro cuentas que se mueven:
+ * --------------------------------------------------------------------------
+ * TODO ES UN ASIENTO
+ * --------------------------------------------------------------------------
+ * Hay dos fuentes de asientos y se suman en el mismo lugar:
  *
- *   Se causa una cuota      -> sube CARTERA           y sube INGRESOS
- *   Se aplica un pago       -> sube CAJA, baja CARTERA
- *                              (lo que sobre sube ANTICIPOS, que es un pasivo:
- *                               plata del propietario que aun no es ingreso)
- *   Se anula un recibo      -> lo contrario, con fecha de la anulacion
- *   Se causa un gasto       -> sube EGRESOS           y sube CUENTAS POR PAGAR
- *   Se paga un gasto        -> baja CAJA              y baja CUENTAS POR PAGAR
+ *   AUTOMATICOS  los que salen de cuotas, pagos y gastos. Nadie los escribe:
+ *                se derivan de los documentos.
+ *   MANUALES     los comprobantes de ajuste, que el administrador escribe a
+ *                mano cuando hay que mover la contabilidad sin que entre ni
+ *                salga plata.
  *
- * De ahi salen los dos estados, y cuadran por construccion:
- *   ACTIVO (caja + cartera) = PASIVO (anticipos + por pagar) + PATRIMONIO
+ * Como todo asiento tiene `debe = haber`, el estado de situacion financiera
+ * cuadra por construccion, vengan los asientos de donde vengan.
  */
 var Idiky = window.Idiky || (window.Idiky = {})
 
 Idiky.contabilidad = (function () {
   'use strict'
+
+  var plan = Idiky.plan
 
   /**
    * Fecha en que una cuota se causa: el primer dia de su periodo.
@@ -41,44 +44,156 @@ Idiky.contabilidad = (function () {
     return cuota.periodo + '-01'
   }
 
+  function fechaDeAplicacion(pago) {
+    return (pago.fechaAplicacion || pago.fecha).slice(0, 10)
+  }
+
   function enRango(fecha, desde, hasta) {
     if (!fecha) return false
     var dia = fecha.slice(0, 10)
     return (!desde || dia >= desde) && (!hasta || dia <= hasta)
   }
 
-  function hastaLaFecha(fecha, hasta) {
-    return !!fecha && (!hasta || fecha.slice(0, 10) <= hasta)
+  // ---------------------------------------------------------------------------
+  // Generacion de asientos
+  // ---------------------------------------------------------------------------
+
+  function asiento(fecha, cuenta, debe, haber, descripcion, extra) {
+    var linea = {
+      fecha: fecha.slice(0, 10),
+      cuenta: cuenta,
+      debe: debe,
+      haber: haber,
+      descripcion: descripcion,
+      origen: 'automatico',
+      unidadId: null,
+      documento: '',
+    }
+    if (extra) {
+      if (extra.unidadId) linea.unidadId = extra.unidadId
+      if (extra.documento) linea.documento = extra.documento
+      if (extra.origen) linea.origen = extra.origen
+    }
+    return linea
   }
 
-  /** Fecha en la que un pago entro a los libros. */
-  function fechaDeAplicacion(pago) {
-    return pago.fechaAplicacion || pago.fecha
-  }
+  /** Asientos que se derivan de los documentos, sin que nadie los escriba. */
+  function asientosDerivados(datos) {
+    var lineas = []
 
-  /**
-   * Efecto acumulado de los pagos hasta una fecha, descontando los anulados.
-   *
-   * Un recibo anulado DESPUES de la fecha de corte si contaba a esa fecha: por
-   * eso la anulacion se resta como un hecho con su propia fecha, en vez de
-   * simplemente ignorar los recibos que hoy figuran como anulados.
-   */
-  function efectoPagos(pagos, hasta) {
-    var total = { recaudo: 0, imputado: 0, anticipos: 0 }
-
-    pagos.forEach(function (pago) {
-      if (pago.estado === 'reportado') return
-      if (!hastaLaFecha(fechaDeAplicacion(pago), hasta)) return
-
-      var imputado = (pago.imputaciones || []).reduce(function (t, l) { return t + l.valor }, 0)
-      var signo = pago.estado === 'anulado' && hastaLaFecha(pago.fechaAnulacion, hasta) ? 0 : 1
-
-      total.recaudo += pago.valor * signo
-      total.imputado += imputado * signo
-      total.anticipos += (pago.saldoAFavor || 0) * signo
+    // Se causa una cuota: sube cartera y sube el ingreso que corresponda.
+    datos.cuotas.forEach(function (cuota) {
+      var fecha = fechaCausacion(cuota)
+      var extra = { unidadId: cuota.unidadId, documento: 'Causacion ' + cuota.periodo }
+      lineas.push(asiento(fecha, plan.CARTERA, cuota.valor, 0, cuota.concepto, extra))
+      lineas.push(asiento(fecha, plan.cuentaDeIngreso(cuota.tipo), 0, cuota.valor, cuota.concepto, extra))
     })
 
-    return total
+    datos.pagos.forEach(function (pago) {
+      if (pago.estado === 'reportado') return
+      var imputado = (pago.imputaciones || []).reduce(function (t, l) { return t + l.valor }, 0)
+      var aFavor = pago.saldoAFavor || 0
+      var extra = { unidadId: pago.unidadId, documento: pago.recibo || '' }
+
+      // Se aplica un pago: entra a caja, baja la cartera, y lo que sobre
+      // queda como anticipo, que es un pasivo — plata del propietario que
+      // todavia no es ingreso de la copropiedad.
+      var fecha = fechaDeAplicacion(pago)
+      lineas.push(asiento(fecha, plan.CAJA, pago.valor, 0, 'Recaudo', extra))
+      if (imputado > 0) lineas.push(asiento(fecha, plan.CARTERA, 0, imputado, 'Abono a cartera', extra))
+      if (aFavor > 0) lineas.push(asiento(fecha, plan.ANTICIPOS, 0, aFavor, 'Saldo a favor', extra))
+
+      // La anulacion es un hecho aparte, con su propia fecha: revierte el
+      // asiento sin borrarlo.
+      if (pago.estado === 'anulado' && pago.fechaAnulacion) {
+        var anula = pago.fechaAnulacion.slice(0, 10)
+        lineas.push(asiento(anula, plan.CAJA, 0, pago.valor, 'Anulacion de recibo', extra))
+        if (imputado > 0) lineas.push(asiento(anula, plan.CARTERA, imputado, 0, 'Anulacion de recibo', extra))
+        if (aFavor > 0) lineas.push(asiento(anula, plan.ANTICIPOS, aFavor, 0, 'Anulacion de recibo', extra))
+      }
+    })
+
+    datos.gastos.forEach(function (gasto) {
+      var cuenta = plan.cuentaDeGasto(gasto.categoria)
+      var extra = { documento: gasto.proveedor || '' }
+
+      // Se causa el gasto: sube el egreso y sube la cuenta por pagar.
+      lineas.push(asiento(gasto.fecha, cuenta, gasto.valor, 0, gasto.concepto, extra))
+      lineas.push(asiento(gasto.fecha, plan.POR_PAGAR, 0, gasto.valor, gasto.concepto, extra))
+
+      // Se paga: baja la cuenta por pagar y sale de caja.
+      if (gasto.estado === 'pagado' && gasto.fechaPago) {
+        lineas.push(asiento(gasto.fechaPago, plan.POR_PAGAR, gasto.valor, 0, 'Pago a ' + (gasto.proveedor || 'proveedor'), extra))
+        lineas.push(asiento(gasto.fechaPago, plan.CAJA, 0, gasto.valor, 'Pago a ' + (gasto.proveedor || 'proveedor'), extra))
+      }
+    })
+
+    return lineas
+  }
+
+  /** Asientos que el administrador escribio a mano en un comprobante. */
+  function asientosDeAjustes(comprobantes) {
+    var lineas = []
+    ;(comprobantes || []).forEach(function (comprobante) {
+      if (comprobante.estado === 'anulado') return
+      comprobante.lineas.forEach(function (linea) {
+        lineas.push(asiento(
+          comprobante.fecha,
+          linea.cuenta,
+          linea.debe || 0,
+          linea.haber || 0,
+          linea.descripcion || comprobante.concepto,
+          {
+            unidadId: linea.unidadId || null,
+            documento: comprobante.numero,
+            origen: 'ajuste',
+          },
+        ))
+      })
+    })
+    return lineas
+  }
+
+  /** Todos los asientos del periodo, automaticos y manuales. */
+  function libro(datos) {
+    return asientosDerivados(datos).concat(asientosDeAjustes(datos.comprobantes))
+  }
+
+  // ---------------------------------------------------------------------------
+  // Saldos
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Saldo de cada cuenta, en la convencion `debe - haber`.
+   * Activo y gasto quedan positivos; pasivo, patrimonio e ingreso, negativos.
+   */
+  function saldosPorCuenta(lineas, desde, hasta) {
+    var saldos = {}
+    lineas.forEach(function (linea) {
+      if (!enRango(linea.fecha, desde, hasta)) return
+      saldos[linea.cuenta] = (saldos[linea.cuenta] || 0) + linea.debe - linea.haber
+    })
+    return saldos
+  }
+
+  /** Convierte los saldos de una clase en lineas presentables, ya con su signo. */
+  function lineasDeClase(saldos, clase) {
+    var invertir = clase === 'pasivo' || clase === 'patrimonio' || clase === 'ingreso'
+    return plan.deClase(clase)
+      .map(function (cuenta) {
+        var bruto = saldos[cuenta.codigo] || 0
+        return {
+          codigo: cuenta.codigo,
+          concepto: cuenta.nombre,
+          valor: invertir ? -bruto : bruto,
+        }
+      })
+      .filter(function (linea) { return linea.valor !== 0 })
+      .sort(function (a, b) { return b.valor - a.valor })
+  }
+
+  function sumar(lineas) {
+    return lineas.reduce(function (t, l) { return t + l.valor }, 0)
   }
 
   // ---------------------------------------------------------------------------
@@ -86,56 +201,21 @@ Idiky.contabilidad = (function () {
   // ---------------------------------------------------------------------------
 
   /**
-   * Extracto de una unidad: cargos y abonos ordenados por fecha, con el saldo
-   * corriendo. Es donde cartera y pagos se juntan en una sola lista.
+   * Extracto de una unidad: lo que le cargaron y lo que abono, en una sola
+   * linea de tiempo, con el saldo corriendo. Solo mira la cuenta de cartera,
+   * que es la que le debe el propietario a la copropiedad.
    *
-   * `contexto` = { cuotas, pagos } de esa unidad. Devuelve
-   * `{ saldoInicial, lineas, cargos, abonos, saldoFinal }`.
+   * Los ajustes que toquen cartera de esa unidad entran aqui igual que una
+   * cuota: si no, el extracto no cuadraria con lo que dice la contabilidad.
    */
-  function movimientosDeUnidad(contexto, desde, hasta) {
-    var eventos = []
-
-    contexto.cuotas.forEach(function (cuota) {
-      eventos.push({
-        fecha: fechaCausacion(cuota),
-        tipo: 'cargo',
-        concepto: cuota.concepto,
-        detalle: 'Causacion de ' + cuota.periodo,
-        documento: '',
-        valor: cuota.valor,
+  function movimientosDeUnidad(datos, unidadId, desde, hasta) {
+    var eventos = libro(datos)
+      .filter(function (l) {
+        return l.cuenta === plan.CARTERA && l.unidadId === unidadId
       })
-    })
-
-    contexto.pagos.forEach(function (pago) {
-      if (pago.estado === 'reportado') return
-      var imputado = (pago.imputaciones || []).reduce(function (t, l) { return t + l.valor }, 0)
-      if (imputado > 0) {
-        eventos.push({
-          fecha: fechaDeAplicacion(pago).slice(0, 10),
-          tipo: 'abono',
-          concepto: 'Pago aplicado',
-          detalle: pago.medio + ' ' + pago.referencia,
-          documento: pago.recibo || '',
-          valor: imputado,
-        })
-      }
-      // La anulacion es un hecho aparte, con su propia fecha: revierte el abono
-      // sin borrarlo del extracto.
-      if (pago.estado === 'anulado' && pago.fechaAnulacion && imputado > 0) {
-        eventos.push({
-          fecha: pago.fechaAnulacion.slice(0, 10),
-          tipo: 'cargo',
-          concepto: 'Anulacion de recibo',
-          detalle: pago.motivoAnulacion || '',
-          documento: pago.recibo || '',
-          valor: imputado,
-        })
-      }
-    })
-
-    eventos.sort(function (a, b) {
-      return a.fecha.localeCompare(b.fecha) || (a.tipo === 'cargo' ? -1 : 1)
-    })
+      .sort(function (a, b) {
+        return a.fecha.localeCompare(b.fecha) || b.debe - a.debe
+      })
 
     var saldoInicial = 0
     var lineas = []
@@ -144,7 +224,7 @@ Idiky.contabilidad = (function () {
     var saldo = 0
 
     eventos.forEach(function (evento) {
-      var efecto = evento.tipo === 'cargo' ? evento.valor : -evento.valor
+      var efecto = evento.debe - evento.haber
       if (desde && evento.fecha < desde) {
         saldoInicial += efecto
         saldo = saldoInicial
@@ -153,15 +233,16 @@ Idiky.contabilidad = (function () {
       if (hasta && evento.fecha > hasta) return
 
       saldo += efecto
-      if (evento.tipo === 'cargo') cargos += evento.valor
-      else abonos += evento.valor
+      cargos += evento.debe
+      abonos += evento.haber
       lineas.push({
         fecha: evento.fecha,
-        concepto: evento.concepto,
-        detalle: evento.detalle,
+        concepto: evento.descripcion,
+        detalle: evento.origen === 'ajuste' ? 'Comprobante de ajuste' : evento.documento,
         documento: evento.documento,
-        cargo: evento.tipo === 'cargo' ? evento.valor : 0,
-        abono: evento.tipo === 'abono' ? evento.valor : 0,
+        esAjuste: evento.origen === 'ajuste',
+        cargo: evento.debe,
+        abono: evento.haber,
         saldo: saldo,
       })
     })
@@ -175,61 +256,35 @@ Idiky.contabilidad = (function () {
     }
   }
 
+  /** Efecto neto de los ajustes sobre la cartera de una unidad, hasta una fecha. */
+  function ajusteDeCarteraDeUnidad(datos, unidadId, hasta) {
+    return asientosDeAjustes(datos.comprobantes).reduce(function (total, linea) {
+      if (linea.cuenta !== plan.CARTERA || linea.unidadId !== unidadId) return total
+      if (!enRango(linea.fecha, null, hasta)) return total
+      return total + linea.debe - linea.haber
+    }, 0)
+  }
+
   // ---------------------------------------------------------------------------
   // Estado de resultados
   // ---------------------------------------------------------------------------
 
-  var ETIQUETA_INGRESO = {
-    ordinaria: 'Cuotas de administracion',
-    extraordinaria: 'Cuotas extraordinarias',
-    interes: 'Intereses de mora',
-    sancion: 'Sanciones',
-  }
-
-  /**
-   * Ingresos y egresos causados dentro del rango. Devuelve las dos listas
-   * agrupadas y el excedente (o deficit) del periodo.
-   */
   function estadoDeResultados(datos, desde, hasta) {
-    var ingresos = {}
-    var egresos = {}
-
-    datos.cuotas.forEach(function (cuota) {
-      if (!enRango(fechaCausacion(cuota), desde, hasta)) return
-      var clave = ETIQUETA_INGRESO[cuota.tipo] || 'Otros ingresos'
-      ingresos[clave] = (ingresos[clave] || 0) + cuota.valor
-    })
-
-    datos.gastos.forEach(function (gasto) {
-      if (!enRango(gasto.fecha, desde, hasta)) return
-      var clave = gasto.categoria || 'Otros gastos'
-      egresos[clave] = (egresos[clave] || 0) + gasto.valor
-    })
-
-    var lineasIngresos = aLineas(ingresos)
-    var lineasEgresos = aLineas(egresos)
-    var totalIngresos = sumar(lineasIngresos)
-    var totalEgresos = sumar(lineasEgresos)
+    var saldos = saldosPorCuenta(libro(datos), desde, hasta)
+    var ingresos = lineasDeClase(saldos, 'ingreso')
+    var egresos = lineasDeClase(saldos, 'gasto')
+    var totalIngresos = sumar(ingresos)
+    var totalEgresos = sumar(egresos)
 
     return {
       desde: desde,
       hasta: hasta,
-      ingresos: lineasIngresos,
-      egresos: lineasEgresos,
+      ingresos: ingresos,
+      egresos: egresos,
       totalIngresos: totalIngresos,
       totalEgresos: totalEgresos,
       excedente: totalIngresos - totalEgresos,
     }
-  }
-
-  function aLineas(mapa) {
-    return Object.keys(mapa)
-      .map(function (clave) { return { concepto: clave, valor: mapa[clave] } })
-      .sort(function (a, b) { return b.valor - a.valor })
-  }
-
-  function sumar(lineas) {
-    return lineas.reduce(function (t, l) { return t + l.valor }, 0)
   }
 
   // ---------------------------------------------------------------------------
@@ -237,74 +292,132 @@ Idiky.contabilidad = (function () {
   // ---------------------------------------------------------------------------
 
   /**
-   * Foto a una fecha de corte. Cuadra por construccion:
+   * Foto a una fecha de corte.
    *
-   *   ACTIVO   = caja + cartera
-   *            = (recaudo - gastos pagados) + (ingresos causados - imputado)
-   *   PASIVO   = anticipos + cuentas por pagar
-   *            = (recaudo - imputado) + (gastos causados - gastos pagados)
-   *   PATRIMONIO = ingresos causados - gastos causados
+   * El patrimonio son las cuentas de patrimonio mas el resultado acumulado de
+   * toda la vida hasta el corte: las cuentas de ingreso y gasto no aparecen en
+   * este estado, pero su efecto si, cerrado contra excedentes.
    *
-   * Sumar pasivo y patrimonio da exactamente el activo. Si algun dia deja de
-   * cuadrar, es que se agrego un hecho economico que no pasa por aqui.
+   * Cuadra por construccion, porque todo asiento tiene debe = haber. Si algun
+   * dia el descuadre no es cero, es que alguien creo un asiento desbalanceado.
    */
   function situacionFinanciera(datos, hasta) {
-    var ingresosCausados = datos.cuotas.reduce(function (total, cuota) {
-      return hastaLaFecha(fechaCausacion(cuota), hasta) ? total + cuota.valor : total
-    }, 0)
+    var saldos = saldosPorCuenta(libro(datos), null, hasta)
 
-    var efecto = efectoPagos(datos.pagos, hasta)
+    var activo = lineasDeClase(saldos, 'activo')
+    var pasivo = lineasDeClase(saldos, 'pasivo')
+    var patrimonio = lineasDeClase(saldos, 'patrimonio')
 
-    var gastosCausados = 0
-    var gastosPagados = 0
-    datos.gastos.forEach(function (gasto) {
-      if (!hastaLaFecha(gasto.fecha, hasta)) return
-      gastosCausados += gasto.valor
-      if (gasto.estado === 'pagado' && hastaLaFecha(gasto.fechaPago, hasta)) {
-        gastosPagados += gasto.valor
-      }
-    })
+    var totalIngresos = sumar(lineasDeClase(saldos, 'ingreso'))
+    var totalEgresos = sumar(lineasDeClase(saldos, 'gasto'))
+    var resultadoAcumulado = totalIngresos - totalEgresos
 
-    var caja = efecto.recaudo - gastosPagados
-    var cartera = ingresosCausados - efecto.imputado
-    var anticipos = efecto.anticipos
-    var porPagar = gastosCausados - gastosPagados
-    var excedentes = ingresosCausados - gastosCausados
+    // El resultado del ejercicio se presenta dentro del patrimonio.
+    var lineasPatrimonio = patrimonio.concat(
+      resultadoAcumulado !== 0
+        ? [{ codigo: '', concepto: 'Resultado acumulado del ejercicio', valor: resultadoAcumulado }]
+        : [],
+    )
 
-    var activo = caja + cartera
-    var pasivo = anticipos + porPagar
+    var totalActivo = sumar(activo)
+    var totalPasivo = sumar(pasivo)
+    var totalPatrimonio = sumar(lineasPatrimonio)
 
     return {
       hasta: hasta,
-      activo: {
-        lineas: [
-          { concepto: 'Caja y bancos', valor: caja },
-          { concepto: 'Cartera por cobrar a copropietarios', valor: cartera },
-        ],
-        total: activo,
-      },
-      pasivo: {
-        lineas: [
-          { concepto: 'Anticipos de copropietarios (saldos a favor)', valor: anticipos },
-          { concepto: 'Cuentas por pagar', valor: porPagar },
-        ],
-        total: pasivo,
-      },
-      patrimonio: {
-        lineas: [{ concepto: 'Excedentes acumulados', valor: excedentes }],
-        total: excedentes,
-      },
-      totalPasivoYPatrimonio: pasivo + excedentes,
+      activo: { lineas: activo, total: totalActivo },
+      pasivo: { lineas: pasivo, total: totalPasivo },
+      patrimonio: { lineas: lineasPatrimonio, total: totalPatrimonio },
+      totalPasivoYPatrimonio: totalPasivo + totalPatrimonio,
       /** Debe ser 0. Se muestra en pantalla: un estado que no cuadra hay que verlo. */
-      descuadre: activo - (pasivo + excedentes),
+      descuadre: totalActivo - (totalPasivo + totalPatrimonio),
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Libro auxiliar por cuenta
+  // ---------------------------------------------------------------------------
+
+  /** Movimientos de una cuenta en el rango, con su saldo corriendo. */
+  function auxiliarDeCuenta(datos, codigo, desde, hasta) {
+    var todas = libro(datos)
+      .filter(function (l) { return l.cuenta === codigo })
+      .sort(function (a, b) { return a.fecha.localeCompare(b.fecha) })
+
+    var saldoInicial = 0
+    var lineas = []
+    var saldo = 0
+
+    todas.forEach(function (linea) {
+      var efecto = linea.debe - linea.haber
+      if (desde && linea.fecha < desde) {
+        saldoInicial += efecto
+        saldo = saldoInicial
+        return
+      }
+      if (hasta && linea.fecha > hasta) return
+      saldo += efecto
+      lineas.push({
+        fecha: linea.fecha,
+        descripcion: linea.descripcion,
+        documento: linea.documento,
+        origen: linea.origen,
+        debe: linea.debe,
+        haber: linea.haber,
+        saldo: saldo,
+      })
+    })
+
+    return { saldoInicial: saldoInicial, lineas: lineas, saldoFinal: saldo }
+  }
+
+  /** Un comprobante es valido si cuadra y mueve algo. */
+  function validarComprobante(lineas) {
+    var utiles = (lineas || []).filter(function (l) {
+      return l.cuenta && ((l.debe || 0) > 0 || (l.haber || 0) > 0)
+    })
+    if (utiles.length < 2) {
+      return { valido: false, motivo: 'Un comprobante necesita al menos dos lineas con valor.' }
+    }
+    var totalDebe = 0
+    var totalHaber = 0
+    for (var i = 0; i < utiles.length; i += 1) {
+      var linea = utiles[i]
+      var debe = linea.debe || 0
+      var haber = linea.haber || 0
+      if (debe < 0 || haber < 0) {
+        return { valido: false, motivo: 'No se puede registrar un valor negativo.' }
+      }
+      if (debe > 0 && haber > 0) {
+        return {
+          valido: false,
+          motivo: 'Cada linea va al debe o al haber, no a los dos. Revisa "' + plan.nombre(linea.cuenta) + '".',
+        }
+      }
+      totalDebe += debe
+      totalHaber += haber
+    }
+    if (totalDebe !== totalHaber) {
+      return {
+        valido: false,
+        motivo: 'El comprobante no cuadra: el debe suma ' + totalDebe
+          + ' y el haber ' + totalHaber + '. La diferencia es ' + Math.abs(totalDebe - totalHaber) + '.',
+      }
+    }
+    return { valido: true, lineas: utiles, total: totalDebe }
   }
 
   return {
     fechaCausacion: fechaCausacion,
-    efectoPagos: efectoPagos,
+    libro: libro,
+    asientosDerivados: asientosDerivados,
+    asientosDeAjustes: asientosDeAjustes,
+    saldosPorCuenta: saldosPorCuenta,
     movimientosDeUnidad: movimientosDeUnidad,
+    ajusteDeCarteraDeUnidad: ajusteDeCarteraDeUnidad,
     estadoDeResultados: estadoDeResultados,
     situacionFinanciera: situacionFinanciera,
+    auxiliarDeCuenta: auxiliarDeCuenta,
+    validarComprobante: validarComprobante,
   }
 })()

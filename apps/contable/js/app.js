@@ -22,6 +22,8 @@ Idiky.app = (function () {
       subtitulo: 'El libro completo, con los anulados' },
     { id: 'gastos', texto: 'Gastos', titulo: 'Gastos',
       subtitulo: 'Lo que la copropiedad debe y lo que ya pago' },
+    { id: 'ajustes', texto: 'Ajustes', titulo: 'Comprobantes de ajuste',
+      subtitulo: 'Mover la contabilidad sin que entre ni salga plata' },
     { id: 'reportes', texto: 'Reportes', titulo: 'Reportes',
       subtitulo: 'Movimientos por cliente y estados financieros' },
   ]
@@ -60,6 +62,7 @@ Idiky.app = (function () {
     else if (modulo === 'pagos') Idiky.vistaPagos.pintar(contenedor, pintar)
     else if (modulo === 'recibos') Idiky.vistaRecibos.pintar(contenedor, pintar)
     else if (modulo === 'gastos') Idiky.vistaGastos.pintar(contenedor, pintar)
+    else if (modulo === 'ajustes') Idiky.vistaAjustes.pintar(contenedor, pintar)
     else Idiky.vistaReportes.pintar(contenedor, pintar)
 
     if (opciones.mantenerFoco) {

@@ -109,6 +109,23 @@ hay estado de resultados.
 | `fechaPago` | fecha ISO? | Presente cuando `estado = 'pagado'` |
 | `motivoAnulacion` | string? | Obligatorio al anular; el registro no se borra |
 
+### Comprobante de ajuste — solo en `apps/contable/`
+
+Un movimiento contable que **no es un pago ni un recaudo**: causar intereses de mora,
+provisionar cartera, reclasificar una cuenta, trasladar excedentes al fondo de imprevistos.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `numero` | string | `CA-<NNNNN>`, consecutivo, sin reúso |
+| `fecha` | fecha ISO | Fecha del asiento |
+| `concepto` | string | Título visible |
+| `detalle` | string | **Por qué** se hace el ajuste; es lo que lee quien audite |
+| `estado` | `'registrado' \| 'anulado'` | RN-35 |
+| `lineas` | `{cuenta, unidadId?, debe, haber, descripcion}[]` | El asiento. Debe cuadrar (RN-34) |
+
+`unidadId` solo tiene sentido en la cuenta de cartera: es lo que hace que el ajuste aparezca
+en el extracto de ese propietario y en su saldo.
+
 ### ZonaComun
 | Campo | Tipo | Notas |
 |---|---|---|
@@ -181,21 +198,32 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-31 | Los estados financieros se preparan **por causación, no por caja**: una cuota es ingreso en su mes aunque se pague después. | `contable/js/contabilidad.js` |
 | RN-32 | Un gasto se causa en su fecha y se paga después; entre los dos momentos es cuenta por pagar. | `contable/js/contabilidad.js` |
 | RN-33 | Activo = Pasivo + Patrimonio. Si no cuadra, **se muestra el descuadre**, no se oculta. | `contable/js/contabilidad.js` |
+| RN-34 | Un comprobante de ajuste solo se registra si **el debe es igual al haber**. | `contable/js/contabilidad.js` |
+| RN-35 | Un comprobante no se borra: se anula, deja de contar en los estados y su número queda quemado. | `contable/js/repositorio.js` |
 
-### Las cuatro cuentas del motor contable
+### El motor contable: todo es un asiento
 
-Todo hecho económico mueve estas cuatro cuentas, y de ahí salen los dos estados
-(`apps/contable/js/contabilidad.js`):
+`apps/contable/` lleva **partida doble** sobre un plan de cuentas corto
+(`js/plan-de-cuentas.js`). Hay dos fuentes de asientos y se suman en el mismo sitio:
 
-| Hecho | Efecto |
-|---|---|
-| Se causa una cuota | ↑ Cartera · ↑ Ingresos |
-| Se aplica un pago | ↑ Caja · ↓ Cartera · el excedente ↑ Anticipos (pasivo) |
-| Se anula un recibo | lo contrario, con la fecha de la anulación |
-| Se causa un gasto | ↑ Egresos · ↑ Cuentas por pagar |
-| Se paga un gasto | ↓ Caja · ↓ Cuentas por pagar |
+**Automáticos** — se derivan de los documentos, nadie los escribe:
 
-Por construcción: `Caja + Cartera = Anticipos + Por pagar + Excedentes acumulados` (RN-33).
+| Hecho | Débito | Crédito |
+|---|---|---|
+| Se causa una cuota | Cartera `1305` | Ingreso `41xx` según el tipo |
+| Se aplica un pago | Caja `1105` | Cartera `1305` + el excedente a Anticipos `2805` |
+| Se anula un recibo | lo contrario, con la fecha de la anulación | |
+| Se causa un gasto | Gasto `51xx` según la categoría | Cuentas por pagar `2335` |
+| Se paga un gasto | Cuentas por pagar `2335` | Caja `1105` |
+
+**Manuales** — los comprobantes de ajuste, que el administrador escribe cuando hay que mover
+la contabilidad sin que entre ni salga plata.
+
+Como **todo asiento tiene debe = haber**, el estado de situación financiera cuadra por
+construcción, vengan los asientos de donde vengan (RN-33). Convención de signo: el saldo de
+una cuenta es siempre `debe − haber`; activo y gasto quedan positivos, pasivo, patrimonio e
+ingreso negativos y se muestran cambiados de signo. Una cuenta correctora como la provisión
+de cartera `1399` cae sola en negativo dentro del activo, sin necesitar un caso especial.
 
 ## 4. Convenciones de datos
 

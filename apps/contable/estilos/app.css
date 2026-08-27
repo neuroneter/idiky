@@ -918,3 +918,55 @@ input[type="number"], .entrada-cifra {
 
   .columnas-estado { grid-template-columns: 1fr 1fr; gap: 10mm; }
 }
+
+/* ===========================================================================
+   Comprobantes de ajuste
+   =========================================================================== */
+
+.nota--info {
+  background: var(--marca-suave);
+  border-color: var(--borde-fuerte);
+}
+
+.tarjeta--anulada { opacity: 0.72; }
+
+.tabla--asiento { margin-top: var(--e3); }
+.tabla--asiento td { padding: var(--e2) var(--e3); }
+.tabla--asiento th { padding: var(--e2) var(--e3); }
+.tabla--asiento tbody tr:hover { background: transparent; }
+
+/* Editor del asiento: cuenta, lado, valor y la unidad cuando aplica. */
+.asiento-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+.asiento-linea {
+  display: grid;
+  grid-template-columns: 1fr 110px 140px 32px;
+  gap: var(--e2);
+  align-items: center;
+  padding: var(--e2);
+  background: var(--superficie-alterna);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+}
+
+.asiento-linea select,
+.asiento-linea input { margin: 0; }
+
+/* La unidad ocupa su propia fila debajo, porque solo aparece a veces. */
+.asiento-linea__unidad {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+}
+
+.asiento-linea__unidad .campo__ayuda { margin: 0; white-space: nowrap; }
+
+@media (max-width: 720px) {
+  .asiento-linea { grid-template-columns: 1fr 1fr; }
+  .asiento-linea__cuenta { grid-column: 1 / -1; }
+}

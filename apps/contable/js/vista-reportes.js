@@ -198,6 +198,7 @@ Idiky.vistaReportes = (function () {
                 el('td', null, [
                   el('strong', null, linea.concepto),
                   linea.detalle ? el('span', 'sub', linea.detalle) : null,
+                  linea.esAjuste ? ui.chip('Ajuste', 'info') : null,
                 ]),
                 el('td', 'derecha cifra', linea.cargo ? f.dinero(linea.cargo) : ''),
                 el('td', 'derecha cifra', linea.abono ? f.dinero(linea.abono) : ''),

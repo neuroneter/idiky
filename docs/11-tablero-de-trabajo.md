@@ -27,6 +27,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-09 | Definir la identidad visual real (colores, logo, tipografía) | Zona D | 📋 Por hacer |
 | T-12 | Definir qué información intercambian la PWA y la contable, y en qué dirección | Jeimy + Mary | 📋 Por hacer |
 | T-13 | Resto de la contable: proveedores, presupuesto anual, saldos de apertura de caja | Jeimy | 📋 Por hacer |
+| T-15 | Decidir si el plan de cuentas debe ser editable (¿PUC real?) o se queda fijo | Jeimy | 📋 Por hacer |
 
 ## Hecho
 
@@ -36,6 +37,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-10 | Módulos de cartera y pagos con abonos parciales y recibos de caja (CU-R-18, CU-A-18) | ✅ Hecho |
 | T-11 | Aplicación contable: cartera, pagos y recibos de caja sin compilación (ADR-0006) | ✅ Hecho |
 | T-14 | Contable: gastos, movimientos por cliente, estado de resultados y situación financiera | ✅ Hecho |
+| T-16 | Contable: partida doble, plan de cuentas y comprobantes de ajuste | ✅ Hecho |
 
 ---
 

@@ -12,7 +12,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy) |
-| **Contable** | Cartera · Pagos · Recibos de caja · Gastos · Reportes (estados financieros) |
+| **Contable** | Cartera · Pagos · Recibos de caja · Gastos · Ajustes · Reportes. Partida doble sobre un plan de cuentas |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
 | **Autenticación** | Simulada (selección de perfil, [ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso implementados** | 22 de 35 documentados (12 de residente, 10 de administrador) |
@@ -53,6 +53,40 @@ casos de uso cambien, se eliminen o aparezcan otros.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Ajustes y partida doble
+
+**Qué se hizo**
+
+Módulo de **Ajustes**: comprobantes contables que mueven cuentas sin que entre ni salga
+plata. Causar intereses de mora, provisionar cartera, cargar una sanción, trasladar
+excedentes al fondo de imprevistos. Con plantillas para los casos que más se repiten, y con
+la opción de armar el asiento desde cero.
+
+**El cambio de fondo está debajo.** Hasta ahora el motor trabajaba con cuentas implícitas:
+sabía sumar caja, cartera, anticipos y cuentas por pagar, pero esas cuentas no existían en
+ninguna parte. Para poder decir "debito esta cuenta y credito esta otra" hubo que escribirlas:
+ahora hay un **plan de cuentas** (`js/plan-de-cuentas.js`) y el motor lleva **partida doble**.
+Todo lo que pasa —cuotas, pagos, gastos, ajustes— se convierte en asientos, y los estados se
+arman sumando saldos de cuentas.
+
+Eso no cambió ninguna cifra de lo que ya existía; sí cambió de dónde salen.
+
+**Verificación** — las tres suites pasan. La nueva prueba de ajustes verifica lo que importa:
+que un comprobante descuadrado **se rechace** (con el motivo en pantalla), que uno cuadrado
+entre, que un ajuste a cartera llegue al saldo del cliente y a su extracto marcado como
+ajuste, y que al anularlo el efecto se deshaga y el balance siga cuadrando.
+
+**Dónde va cada cosa** — si entró o salió plata, es Pagos o Gastos. Si solo hay que mover
+cuentas, es Ajustes. Quedó escrito en la pantalla del módulo, porque es la confusión natural.
+
+**Qué sigue**
+
+1. El plan de cuentas es corto y está fijo en el código. Si el equipo necesita el PUC real o
+   cuentas propias, hay que hacerlo editable (T-15).
+2. Falta el libro auxiliar por cuenta en pantalla: el motor ya lo calcula
+   (`auxiliarDeCuenta`), pero no hay reporte que lo muestre.
+3. Sigue pendiente el intercambio de información con la PWA (T-12).
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Reportes y estados financieros
 

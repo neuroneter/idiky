@@ -17,7 +17,7 @@ Idiky.datos = (function () {
 
   var d = Idiky.dominio
   var CLAVE = 'idiky.contable.bd'
-  var VERSION_ESQUEMA = 2
+  var VERSION_ESQUEMA = 3
 
   /** Valor de la cuota ordinaria por punto de coeficiente. */
   var VALOR_POR_COEFICIENTE = 45000
@@ -261,7 +261,8 @@ Idiky.datos = (function () {
       cuotas: cuotas,
       pagos: pagos,
       gastos: construirGastos(),
-      consecutivos: { recibo: consecutivo, gasto: 100 },
+      comprobantes: construirComprobantes(),
+      consecutivos: { recibo: consecutivo, gasto: 100, comprobante: 3 },
     }
   }
 
@@ -321,6 +322,52 @@ Idiky.datos = (function () {
     agregar(d.periodoRelativo(-1), 22, 'Impermeabilizacion de cubiertas', 'Mantenimiento', 38000000, 'Construcciones Vertice', false)
 
     return gastos
+  }
+
+  // -------------------------------------------------------------------------
+  // Comprobantes de ajuste
+  // -------------------------------------------------------------------------
+
+  /**
+   * Dos ajustes tipicos de una copropiedad, para que el modulo no arranque
+   * vacio. Ninguno de los dos es un pago ni un recaudo: no entra ni sale plata,
+   * y por eso no pueden hacerse desde Pagos.
+   */
+  function construirComprobantes() {
+    return [
+      {
+        id: 'cmp-001',
+        numero: 'CA-00001',
+        fecha: d.sumarDias(d.hoyISO(), -6),
+        concepto: 'Intereses de mora de agosto',
+        detalle: 'Se causan los intereses de la unidad con mayor mora, calculados a mano.',
+        estado: 'registrado',
+        registradoPor: 'Olga Lucia Henao',
+        lineas: [
+          {
+            cuenta: '1305',
+            unidadId: 'uni-torre2-901',
+            debe: 96000,
+            haber: 0,
+            descripcion: 'Intereses de mora Torre 2 · 901',
+          },
+          { cuenta: '4115', unidadId: null, debe: 0, haber: 96000, descripcion: 'Intereses de mora' },
+        ],
+      },
+      {
+        id: 'cmp-002',
+        numero: 'CA-00002',
+        fecha: d.sumarDias(d.hoyISO(), -4),
+        concepto: 'Provision de cartera de dificil cobro',
+        detalle: 'Se provisiona la cartera con mas de 90 dias de mora, segun politica del consejo.',
+        estado: 'registrado',
+        registradoPor: 'Olga Lucia Henao',
+        lineas: [
+          { cuenta: '5299', unidadId: null, debe: 900000, haber: 0, descripcion: 'Castigo de cartera' },
+          { cuenta: '1399', unidadId: null, debe: 0, haber: 900000, descripcion: 'Provision de cartera' },
+        ],
+      },
+    ]
   }
 
   // -------------------------------------------------------------------------

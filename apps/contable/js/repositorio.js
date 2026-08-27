@@ -113,13 +113,18 @@ Idiky.repo = (function () {
 
   /** Resumen de cartera de todas las unidades: la tabla principal. */
   function estadoDeCartera() {
+    var contables = datosContables()
     return unidades().map(function (u) {
       var cuotas = cuotasDeUnidad(u.id)
+      // Los ajustes que tocan la cartera de esta unidad (intereses de mora,
+      // por ejemplo) no son cuotas, pero el propietario los debe igual.
+      var ajuste = Idiky.contabilidad.ajusteDeCarteraDeUnidad(contables, u.id, null)
       return {
         unidad: u,
         propietario: nombrePropietario(u.id),
         cuotas: cuotas,
-        saldo: d.calcularSaldo(cuotas),
+        ajuste: ajuste,
+        saldo: d.calcularSaldo(cuotas) + ajuste,
         vencido: d.calcularSaldoVencido(cuotas),
         mora: d.diasDeMora(cuotas),
         enMora: d.estaEnMora(cuotas),
@@ -337,19 +342,94 @@ Idiky.repo = (function () {
       cuotas: base.cuotas,
       pagos: base.pagos,
       gastos: base.gastos.filter(function (g) { return g.estado !== 'anulado' }),
+      comprobantes: base.comprobantes,
     }
   }
 
   /** Extracto de movimientos de una unidad entre dos fechas. */
   function movimientosDeUnidad(unidadId, desde, hasta) {
-    return Idiky.contabilidad.movimientosDeUnidad(
-      {
-        cuotas: cargar().cuotas.filter(function (c) { return c.unidadId === unidadId }),
-        pagos: cargar().pagos.filter(function (p) { return p.unidadId === unidadId }),
-      },
-      desde,
-      hasta,
-    )
+    return Idiky.contabilidad.movimientosDeUnidad(datosContables(), unidadId, desde, hasta)
+  }
+
+  /** Libro auxiliar de una cuenta del plan. */
+  function auxiliarDeCuenta(codigo, desde, hasta) {
+    return Idiky.contabilidad.auxiliarDeCuenta(datosContables(), codigo, desde, hasta)
+  }
+
+  // -------------------------------------------------------------------------
+  // Comprobantes de ajuste
+  // -------------------------------------------------------------------------
+
+  function comprobantes() {
+    return cargar().comprobantes.slice().sort(function (a, b) {
+      return b.fecha.localeCompare(a.fecha) || b.numero.localeCompare(a.numero)
+    })
+  }
+
+  function comprobantePorId(id) {
+    return cargar().comprobantes.filter(function (c) { return c.id === id })[0]
+  }
+
+  /**
+   * Registra un comprobante de ajuste.
+   *
+   * No mueve plata: mueve cuentas. Por eso lo unico que se valida es que
+   * cuadre — si el debe no es igual al haber, la contabilidad se rompe, y es
+   * mejor rechazarlo que dejar un descuadre para que alguien lo descubra
+   * despues en el balance.
+   */
+  function registrarComprobante(parametros) {
+    cargar()
+    if (!parametros.fecha) throw new Error('Indica la fecha del comprobante.')
+    if (!(parametros.concepto || '').trim()) throw new Error('Escribe el concepto del comprobante.')
+
+    var validacion = Idiky.contabilidad.validarComprobante(parametros.lineas)
+    if (!validacion.valido) throw new Error(validacion.motivo)
+
+    var consecutivo = bd.consecutivos.comprobante
+    bd.consecutivos.comprobante = consecutivo + 1
+
+    var comprobante = {
+      id: nuevoId('cmp'),
+      numero: 'CA-' + String(consecutivo).padStart(5, '0'),
+      fecha: parametros.fecha,
+      concepto: parametros.concepto.trim(),
+      detalle: (parametros.detalle || '').trim(),
+      estado: 'registrado',
+      registradoPor: bd.usuario,
+      lineas: validacion.lineas.map(function (linea) {
+        return {
+          cuenta: linea.cuenta,
+          unidadId: linea.unidadId || null,
+          debe: linea.debe || 0,
+          haber: linea.haber || 0,
+          descripcion: (linea.descripcion || '').trim() || parametros.concepto.trim(),
+        }
+      }),
+    }
+
+    bd.comprobantes.unshift(comprobante)
+    guardar()
+    return comprobante
+  }
+
+  /**
+   * Anula un comprobante. Como con los recibos, no se borra: se marca anulado
+   * y deja de contar en los estados. El numero queda quemado.
+   */
+  function anularComprobante(parametros) {
+    cargar()
+    var comprobante = comprobantePorId(parametros.comprobanteId)
+    if (!comprobante) throw new Error('El comprobante no existe.')
+    var motivo = (parametros.motivo || '').trim()
+    if (!motivo) throw new Error('Escribe el motivo de la anulacion.')
+    if (comprobante.estado === 'anulado') throw new Error('Ese comprobante ya esta anulado.')
+
+    comprobante.estado = 'anulado'
+    comprobante.motivoAnulacion = motivo
+    comprobante.fechaAnulacion = d.ahoraISO()
+    guardar()
+    return comprobante
   }
 
   // -------------------------------------------------------------------------
@@ -441,5 +521,10 @@ Idiky.repo = (function () {
     anularGasto: anularGasto,
     datosContables: datosContables,
     movimientosDeUnidad: movimientosDeUnidad,
+    auxiliarDeCuenta: auxiliarDeCuenta,
+    comprobantes: comprobantes,
+    comprobantePorId: comprobantePorId,
+    registrarComprobante: registrarComprobante,
+    anularComprobante: anularComprobante,
   }
 })()
