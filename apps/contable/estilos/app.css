@@ -693,3 +693,199 @@ input[type="number"], .entrada-cifra {
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+/* ===========================================================================
+   Reportes y documentos contables
+   =========================================================================== */
+
+.controles-reporte {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--e3);
+  flex-wrap: wrap;
+  padding: var(--e4);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+
+.controles-reporte .campo { margin-bottom: 0; }
+.controles-reporte .campo:nth-child(3) { min-width: 320px; flex: 1; }
+.controles-reporte .campo__ayuda { max-width: 280px; margin-bottom: var(--e2); }
+
+.grupo-acciones { display: flex; gap: var(--e2); }
+
+/* El documento imita una hoja: es lo que se imprime y lo que se archiva. */
+.documento {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: var(--e6);
+  box-shadow: var(--sombra);
+}
+
+.documento__encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e5);
+  padding-bottom: var(--e4);
+  border-bottom: 2px solid var(--marca);
+  margin-bottom: var(--e4);
+}
+
+.documento__titulo {
+  font-size: var(--texto-xl);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.documento__subtitulo { color: var(--tinta-suave); font-size: var(--texto-sm); margin-top: var(--e1); }
+
+.documento__emisor {
+  text-align: right;
+  font-size: var(--texto-xs);
+  color: var(--tinta-suave);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.documento__emisor strong { color: var(--tinta); font-size: var(--texto-sm); }
+
+.documento__cliente {
+  display: flex;
+  gap: var(--e6);
+  flex-wrap: wrap;
+  padding: var(--e3) var(--e4);
+  background: var(--superficie-alterna);
+  border-radius: var(--radio-sm);
+  margin-bottom: var(--e4);
+}
+
+.etiqueta-dato {
+  display: block;
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tinta-tenue);
+  font-weight: 600;
+}
+
+.documento__nota {
+  font-size: var(--texto-xs);
+  color: var(--tinta-suave);
+  margin: var(--e3) 0;
+  max-width: 78ch;
+}
+
+.documento__cuadre {
+  margin-top: var(--e4);
+  padding: var(--e2) var(--e3);
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  background: var(--exito-suave);
+  color: var(--exito);
+  display: inline-block;
+}
+
+.documento__cuadre--error { background: var(--deuda-suave); color: var(--deuda); }
+
+.tabla--documento { margin-top: var(--e2); }
+.tabla--documento tbody tr:hover { background: transparent; }
+
+.tabla--documento tfoot td {
+  border-top: 2px solid var(--tinta);
+  border-bottom: 0;
+  font-weight: 700;
+  padding-top: var(--e3);
+}
+
+.fila--apertura td { background: var(--superficie-alterna); color: var(--tinta-suave); font-style: italic; }
+
+/* Estados financieros: dos columnas, concepto y valor. */
+.tabla--estado { table-layout: fixed; }
+.tabla--estado td:first-child { width: auto; }
+.tabla--estado td:last-child { width: 30%; }
+
+.fila--grupo td {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--marca);
+  background: var(--marca-suave);
+  padding-top: var(--e2);
+  padding-bottom: var(--e2);
+}
+
+.celda-sangrada { padding-left: var(--e5) !important; }
+
+.fila--subtotal td {
+  font-weight: 650;
+  border-top: 1px solid var(--borde-fuerte);
+}
+
+.fila--resultado td {
+  font-size: var(--texto-base);
+  font-weight: 700;
+}
+
+.columnas-estado {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e5);
+  align-items: start;
+}
+
+.campo--casilla {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  margin-bottom: var(--e2);
+}
+
+.campo--casilla .casilla { width: auto; margin: 0; }
+
+@media (max-width: 1100px) {
+  .columnas-estado { grid-template-columns: 1fr; }
+}
+
+/* ---------------------------------------------------------------------------
+   Impresion — se imprime el documento, nada mas.
+   Desde el dialogo del navegador tambien se guarda como PDF.
+   --------------------------------------------------------------------------- */
+
+@media print {
+  @page { margin: 14mm; }
+
+  body { background: #ffffff; }
+
+  .lateral,
+  .cabecera,
+  .no-imprimir,
+  #avisos,
+  .fondo-modal { display: none !important; }
+
+  .aplicacion { display: block; height: auto; }
+  .area { overflow: visible; }
+  .contenido { padding: 0; overflow: visible; gap: 0; }
+
+  .documento {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .tabla { font-size: 10pt; }
+  .tabla th { background: #f0f0f0 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .fila--grupo td { background: #eaefee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Que una fila no quede partida entre dos hojas. */
+  tr, .documento__encabezado, .documento__cliente { break-inside: avoid; }
+  thead { display: table-header-group; }
+
+  .columnas-estado { grid-template-columns: 1fr 1fr; gap: 10mm; }
+}

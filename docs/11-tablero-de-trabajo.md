@@ -26,7 +26,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-08 | Documentar el módulo de portería (minuta, validación de visitantes) | Jeimy | 📋 Por hacer |
 | T-09 | Definir la identidad visual real (colores, logo, tipografía) | Zona D | 📋 Por hacer |
 | T-12 | Definir qué información intercambian la PWA y la contable, y en qué dirección | Jeimy + Mary | 📋 Por hacer |
-| T-13 | Decidir el alcance del resto de la contable: egresos, proveedores, plan de cuentas | Jeimy | 📋 Por hacer |
+| T-13 | Resto de la contable: proveedores, presupuesto anual, saldos de apertura de caja | Jeimy | 📋 Por hacer |
 
 ## Hecho
 
@@ -35,6 +35,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-00 | Estructura del repositorio, documentación base y demo PWA v0.1 | ✅ Hecho |
 | T-10 | Módulos de cartera y pagos con abonos parciales y recibos de caja (CU-R-18, CU-A-18) | ✅ Hecho |
 | T-11 | Aplicación contable: cartera, pagos y recibos de caja sin compilación (ADR-0006) | ✅ Hecho |
+| T-14 | Contable: gastos, movimientos por cliente, estado de resultados y situación financiera | ✅ Hecho |
 
 ---
 

@@ -245,6 +245,114 @@ Idiky.repo = (function () {
   }
 
   // -------------------------------------------------------------------------
+  // Gastos
+  // -------------------------------------------------------------------------
+
+  var CATEGORIAS_GASTO = [
+    'Vigilancia',
+    'Aseo',
+    'Servicios publicos',
+    'Mantenimiento',
+    'Administracion',
+    'Seguros',
+    'Reparaciones',
+    'Otros',
+  ]
+
+  function gastos() {
+    return cargar().gastos.slice().sort(function (a, b) {
+      return b.fecha.localeCompare(a.fecha)
+    })
+  }
+
+  function gastoPorId(gastoId) {
+    return cargar().gastos.filter(function (g) { return g.id === gastoId })[0]
+  }
+
+  function registrarGasto(parametros) {
+    cargar()
+    if (!(parametros.valor > 0)) throw new Error('El valor del gasto debe ser mayor que cero.')
+    if (!(parametros.concepto || '').trim()) throw new Error('Escribe el concepto del gasto.')
+    if (!parametros.fecha) throw new Error('Indica la fecha de causacion del gasto.')
+
+    var consecutivo = bd.consecutivos.gasto
+    bd.consecutivos.gasto = consecutivo + 1
+
+    var gasto = {
+      id: 'gas-' + consecutivo,
+      fecha: parametros.fecha,
+      concepto: parametros.concepto.trim(),
+      categoria: parametros.categoria || 'Otros',
+      valor: parametros.valor,
+      proveedor: (parametros.proveedor || '').trim(),
+      // Se causa siempre: si ya se pago, se marca pagado en el mismo acto.
+      estado: parametros.pagado ? 'pagado' : 'por_pagar',
+      fechaPago: parametros.pagado ? (parametros.fechaPago || parametros.fecha) : undefined,
+      medio: parametros.pagado ? (parametros.medio || 'transferencia') : undefined,
+      registradoPor: bd.usuario,
+    }
+
+    bd.gastos.unshift(gasto)
+    guardar()
+    return gasto
+  }
+
+  function pagarGasto(parametros) {
+    cargar()
+    var gasto = gastoPorId(parametros.gastoId)
+    if (!gasto) throw new Error('El gasto no existe.')
+    if (gasto.estado === 'anulado') throw new Error('Ese gasto esta anulado.')
+    if (gasto.estado === 'pagado') throw new Error('Ese gasto ya esta pagado.')
+
+    gasto.estado = 'pagado'
+    gasto.fechaPago = parametros.fechaPago || d.hoyISO()
+    gasto.medio = parametros.medio || 'transferencia'
+    guardar()
+    return gasto
+  }
+
+  /** Como con los recibos: un gasto no se borra, se anula con su motivo. */
+  function anularGasto(parametros) {
+    cargar()
+    var gasto = gastoPorId(parametros.gastoId)
+    if (!gasto) throw new Error('El gasto no existe.')
+    var motivo = (parametros.motivo || '').trim()
+    if (!motivo) throw new Error('Escribe el motivo de la anulacion.')
+    if (gasto.estado === 'anulado') throw new Error('Ese gasto ya esta anulado.')
+
+    gasto.estado = 'anulado'
+    gasto.motivoAnulacion = motivo
+    gasto.fechaAnulacion = d.ahoraISO()
+    guardar()
+    return gasto
+  }
+
+  /**
+   * Datos que consumen los reportes. Los gastos anulados no entran: dejaron de
+   * ser un hecho economico, aunque el registro se conserve.
+   */
+  function datosContables() {
+    var base = cargar()
+    return {
+      cuotas: base.cuotas,
+      pagos: base.pagos,
+      gastos: base.gastos.filter(function (g) { return g.estado !== 'anulado' }),
+    }
+  }
+
+  /** Extracto de movimientos de una unidad entre dos fechas. */
+  function movimientosDeUnidad(unidadId, desde, hasta) {
+    return Idiky.contabilidad.movimientosDeUnidad(
+      {
+        cuotas: cargar().cuotas.filter(function (c) { return c.unidadId === unidadId }),
+        pagos: cargar().pagos.filter(function (p) { return p.unidadId === unidadId }),
+      },
+      desde,
+      hasta,
+    )
+  }
+
+  // -------------------------------------------------------------------------
   // Facturacion
   // -------------------------------------------------------------------------
 
@@ -325,5 +433,13 @@ Idiky.repo = (function () {
     anularPago: anularPago,
     previsualizarCuotas: previsualizarCuotas,
     generarCuotas: generarCuotas,
+    CATEGORIAS_GASTO: CATEGORIAS_GASTO,
+    gastos: gastos,
+    gastoPorId: gastoPorId,
+    registrarGasto: registrarGasto,
+    pagarGasto: pagarGasto,
+    anularGasto: anularGasto,
+    datosContables: datosContables,
+    movimientosDeUnidad: movimientosDeUnidad,
   }
 })()

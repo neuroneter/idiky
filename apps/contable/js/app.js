@@ -20,6 +20,10 @@ Idiky.app = (function () {
       subtitulo: 'Abonos por conciliar y registro de lo que entra' },
     { id: 'recibos', texto: 'Recibos de caja', titulo: 'Recibos de caja',
       subtitulo: 'El libro completo, con los anulados' },
+    { id: 'gastos', texto: 'Gastos', titulo: 'Gastos',
+      subtitulo: 'Lo que la copropiedad debe y lo que ya pago' },
+    { id: 'reportes', texto: 'Reportes', titulo: 'Reportes',
+      subtitulo: 'Movimientos por cliente y estados financieros' },
   ]
 
   var moduloActivo = 'cartera'
@@ -54,7 +58,9 @@ Idiky.app = (function () {
 
     if (modulo === 'cartera') Idiky.vistaCartera.pintar(contenedor, pintar)
     else if (modulo === 'pagos') Idiky.vistaPagos.pintar(contenedor, pintar)
-    else Idiky.vistaRecibos.pintar(contenedor, pintar)
+    else if (modulo === 'recibos') Idiky.vistaRecibos.pintar(contenedor, pintar)
+    else if (modulo === 'gastos') Idiky.vistaGastos.pintar(contenedor, pintar)
+    else Idiky.vistaReportes.pintar(contenedor, pintar)
 
     if (opciones.mantenerFoco) {
       var campo = document.querySelector('.' + opciones.mantenerFoco)

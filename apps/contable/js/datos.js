@@ -17,7 +17,7 @@ Idiky.datos = (function () {
 
   var d = Idiky.dominio
   var CLAVE = 'idiky.contable.bd'
-  var VERSION_ESQUEMA = 1
+  var VERSION_ESQUEMA = 2
 
   /** Valor de la cuota ordinaria por punto de coeficiente. */
   var VALOR_POR_COEFICIENTE = 45000
@@ -260,8 +260,67 @@ Idiky.datos = (function () {
       propietarios: propietarios,
       cuotas: cuotas,
       pagos: pagos,
-      consecutivos: { recibo: consecutivo },
+      gastos: construirGastos(),
+      consecutivos: { recibo: consecutivo, gasto: 100 },
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // Gastos de la copropiedad
+  // -------------------------------------------------------------------------
+
+  /**
+   * Gastos mensuales tipicos de un conjunto. Sin esto el estado de resultados
+   * solo tendria la mitad de arriba: los ingresos. Un estado de resultados sin
+   * egresos no es un estado de resultados.
+   */
+  var GASTOS_MENSUALES = [
+    ['Vigilancia', 'Vigilancia', 1900000, 'Seguridad Andina S.A.S.'],
+    ['Aseo y cafeteria', 'Aseo', 850000, 'Servilimpieza Ltda.'],
+    ['Servicios publicos zonas comunes', 'Servicios publicos', 620000, 'Empresa de servicios'],
+    ['Mantenimiento de ascensores', 'Mantenimiento', 380000, 'Ascensores del Norte'],
+    ['Honorarios de administracion', 'Administracion', 450000, 'Olga Lucia Henao'],
+  ]
+
+  function construirGastos() {
+    var gastos = []
+    var n = 1
+
+    function agregar(periodo, dia, concepto, categoria, valor, proveedor, pagado) {
+      var fecha = periodo + '-' + String(dia).padStart(2, '0')
+      gastos.push({
+        id: 'gas-' + String(n).padStart(3, '0'),
+        fecha: fecha,
+        concepto: concepto,
+        categoria: categoria,
+        valor: valor,
+        proveedor: proveedor,
+        estado: pagado ? 'pagado' : 'por_pagar',
+        fechaPago: pagado ? d.sumarDias(fecha, 5) : undefined,
+        medio: pagado ? 'transferencia' : undefined,
+      })
+      n += 1
+    }
+
+    // Los tres meses anteriores y el actual. Lo del mes corriente todavia no se
+    // ha pagado: por eso aparece en cuentas por pagar.
+    ;[-3, -2, -1, 0].forEach(function (desplazamiento) {
+      var periodo = d.periodoRelativo(desplazamiento)
+      var pagado = desplazamiento < 0
+      GASTOS_MENSUALES.forEach(function (fila, i) {
+        agregar(periodo, 5 + i, fila[0], fila[1], fila[2], fila[3], pagado)
+      })
+    })
+
+    // La poliza de la copropiedad, que se paga una vez al ano.
+    agregar(d.periodoRelativo(-2), 20, 'Poliza de areas comunes', 'Seguros', 1800000, 'Aseguradora Colmena', true)
+
+    // La obra que financia la cuota extraordinaria: se causa en el mismo
+    // periodo en que se cobro, y por eso ese mes da deficit en el estado de
+    // resultados aunque la plata haya entrado.
+    agregar(d.periodoRelativo(-1), 22, 'Impermeabilizacion de cubiertas', 'Mantenimiento', 38000000, 'Construcciones Vertice', false)
+
+    return gastos
   }
 
   // -------------------------------------------------------------------------

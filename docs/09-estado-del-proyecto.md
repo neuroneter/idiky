@@ -12,6 +12,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy) |
+| **Contable** | Cartera · Pagos · Recibos de caja · Gastos · Reportes (estados financieros) |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
 | **Autenticación** | Simulada (selección de perfil, [ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso implementados** | 22 de 35 documentados (12 de residente, 10 de administrador) |
@@ -52,6 +53,43 @@ casos de uso cambien, se eliminen o aparezcan otros.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Reportes y estados financieros
+
+**Qué se hizo**
+
+`apps/contable/` gana dos módulos: **Gastos** y **Reportes**.
+
+- **Reportes** (3): movimientos por cliente y fechas —el extracto donde cartera y pagos se
+  juntan en una sola línea de tiempo, con saldo corrido—, **estado de resultados** y
+  **estado de situación financiera**. Se imprimen o se guardan como PDF, y se bajan en CSV.
+- **Gastos.** No estaba en lo pedido, pero un estado de resultados sin egresos no es un
+  estado de resultados: solo tendría la mitad de arriba. Se agregó lo mínimo — causar un
+  gasto, marcarlo pagado, anularlo con motivo — para que los dos estados sean reales.
+- **Motor contable** (`js/contabilidad.js`): por causación, no por caja (RN-31 a RN-33).
+  Todo hecho económico mueve cuatro cuentas, y de ahí el balance **cuadra por construcción**.
+
+**Verificación** — el estado de situación financiera cuadra, y **sigue cuadrando** después
+de conciliar un abono, registrar un gasto por pagar y anular un recibo; cada operación se
+probó midiendo el descuadre, que se mantuvo en cero. Nueve pasos en Chromium abriendo el
+archivo desde el disco, sin errores de consola. La impresión se verificó aparte: oculta la
+barra lateral y los controles, y deja el documento solo.
+
+**Dos cosas que hay que saber al leer los reportes**
+
+1. **Hay dos cifras de cartera y las dos son correctas.** El módulo de Cartera muestra todo
+   lo que deben, incluidas las cuotas ya facturadas del mes siguiente; el balance muestra
+   solo lo causado a la fecha de corte. La pantalla lo explica al pie.
+2. **"Caja y bancos" no es un saldo bancario conciliado**, es lo recaudado menos lo pagado.
+   Para que lo fuera haría falta registrar saldos de apertura y una conciliación bancaria.
+
+**Qué sigue**
+
+1. Falta el resto de la contabilidad: proveedores como entidad, presupuesto anual contra
+   ejecución, y saldos de apertura para que caja sea un saldo real (T-13).
+2. Sigue pendiente definir el intercambio de información con la PWA (T-12).
+3. RN-31 a RN-33 son **solo de la contable**: la PWA no tiene gastos ni estados. No hay que
+   duplicarlas allá.
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Aplicación contable
 

@@ -21,10 +21,39 @@ recargar. El botón **"Reiniciar demo"** devuelve todo a su estado inicial.
 | **Cartera** | Quién debe, cuánto y desde cuándo. Estado de cuenta por unidad y generación de las cuotas del periodo. |
 | **Pagos** | Los abonos que los propietarios informaron y hay que conciliar, y el registro de la plata que llega por fuera. |
 | **Recibos de caja** | El libro completo, con los anulados. Ver el detalle de cualquier recibo y anularlo con motivo. |
+| **Gastos** | Lo que la copropiedad debe y lo que ya pagó. Es el otro lado de la contabilidad. |
+| **Reportes** | Movimientos por cliente y fechas, estado de resultados y estado de situación financiera. Se imprimen (o se guardan como PDF) y se bajan en CSV. |
 
 Lo que distingue a este módulo de una caja registradora: **el propietario dice a qué
 corresponde su abono, y eso se ve antes de aplicarlo.** El sistema sugiere el reparto por
 antigüedad, pero quien decide es el administrador, leyendo lo que escribió el propietario.
+
+## Cómo leen los reportes
+
+Los tres reportes trabajan **por causación, no por caja**. Una cuota es ingreso el día en
+que se causa (el primero de su mes) aunque el propietario pague tres meses después; un gasto
+es egreso el día en que se causa aunque se pague al mes siguiente. Es lo que hace que la
+cartera exista como cifra: **la cartera es justamente lo causado que todavía no se ha
+recaudado.**
+
+Todo hecho económico mueve cuatro cuentas:
+
+| Hecho | Efecto |
+|---|---|
+| Se causa una cuota | ↑ Cartera · ↑ Ingresos |
+| Se aplica un pago | ↑ Caja · ↓ Cartera · el excedente ↑ Anticipos (pasivo) |
+| Se anula un recibo | lo contrario, con la fecha de la anulación |
+| Se causa un gasto | ↑ Egresos · ↑ Cuentas por pagar |
+| Se paga un gasto | ↓ Caja · ↓ Cuentas por pagar |
+
+De ahí el estado de situación financiera cuadra **por construcción**: activo = pasivo +
+patrimonio. Si algún día no cuadra, la pantalla lo dice en rojo en vez de esconderlo —
+significa que se agregó un hecho económico que no pasa por `contabilidad.js`.
+
+> **Dos cifras de cartera distintas, y las dos correctas.** El módulo de Cartera muestra
+> todo lo que deben, incluidas las cuotas ya facturadas del mes siguiente. El estado de
+> situación financiera muestra solo lo causado hasta la fecha de corte. Responden preguntas
+> distintas; la pantalla lo explica al pie.
 
 ## Cómo está organizado
 
@@ -35,7 +64,8 @@ apps/contable/
 │                              las variables del principio del archivo.
 └── js/
     ├── formato.js             Mostrar dinero y fechas.
-    ├── dominio.js             ⭐ Las reglas de negocio (RN-xx). Funciones puras.
+    ├── dominio.js             ⭐ Las reglas de cartera y pagos (RN-xx). Funciones puras.
+    ├── contabilidad.js        ⭐ El motor de los reportes: causación y estados.
     ├── datos.js               Semilla del demo + guardado en el navegador.
     ├── repositorio.js         ⭐ La ÚNICA puerta a los datos.
     ├── ui.js                  Ayudas para construir la pantalla.
@@ -43,6 +73,8 @@ apps/contable/
     ├── vista-cartera.js       Pantalla de Cartera.
     ├── vista-pagos.js         Pantalla de Pagos.
     ├── vista-recibos.js       Pantalla de Recibos de caja.
+    ├── vista-gastos.js        Pantalla de Gastos.
+    ├── vista-reportes.js      Los tres reportes, con impresión y CSV.
     └── app.js                 Arranque y navegación.
 ```
 
@@ -58,6 +90,14 @@ apps/contable/
    pantallas no se tocan.
 
 El porqué de las tres está en [ADR-0006](../../docs/adr/0006-stack-aplicacion-contable.md).
+
+**Una más, para los reportes:** el cálculo va en `contabilidad.js`, nunca en la pantalla.
+`vista-reportes.js` solo pinta lo que ese archivo devuelve. Así las cifras se pueden revisar
+y probar sin abrir el navegador.
+
+> El botón **Descargar CSV** solo funciona al abrir el archivo desde tu computador. En la
+> versión compartida por enlace el navegador bloquea las descargas, y el botón aparece
+> desactivado; ahí se usa **Imprimir o guardar PDF**, que sí funciona en los dos lados.
 
 ## La relación con la app de Mary
 

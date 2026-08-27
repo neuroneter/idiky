@@ -93,6 +93,22 @@ borra, se anula (RN-29).
 > `conceptoInformado` es el campo que sostiene todo el módulo: es la diferencia entre
 > aplicar el abono donde el sistema supone y aplicarlo donde el propietario quiso.
 
+### Gasto — solo en `apps/contable/`
+
+La PWA no tiene gastos: es el lado que solo existe en la aplicación contable, y sin él no
+hay estado de resultados.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `fecha` | fecha ISO | **Fecha de causación**, no de pago (RN-32) |
+| `concepto` | string | Texto visible |
+| `categoria` | `'Vigilancia' \| 'Aseo' \| 'Servicios publicos' \| 'Mantenimiento' \| 'Administracion' \| 'Seguros' \| 'Reparaciones' \| 'Otros'` | Agrupa el estado de resultados |
+| `valor` | number | Pesos enteros |
+| `proveedor` | string | A quién se le paga |
+| `estado` | `'por_pagar' \| 'pagado' \| 'anulado'` | RN-32 |
+| `fechaPago` | fecha ISO? | Presente cuando `estado = 'pagado'` |
+| `motivoAnulacion` | string? | Obligatorio al anular; el registro no se borra |
+
 ### ZonaComun
 | Campo | Tipo | Notas |
 |---|---|---|
@@ -162,6 +178,24 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-28 | Recibo de caja: `RC-<NNNNN>`, consecutivo, asignado al aplicar y sin reúso. | `dominio/reglas.ts` |
 | RN-29 | Un recibo no se borra: se anula con motivo y el saldo vuelve a las cuotas. | `datos/repositorio.ts` |
 | RN-30 | Un abono informado por el propietario no afecta la cartera hasta que se aplica. | `datos/repositorio.ts` |
+| RN-31 | Los estados financieros se preparan **por causación, no por caja**: una cuota es ingreso en su mes aunque se pague después. | `contable/js/contabilidad.js` |
+| RN-32 | Un gasto se causa en su fecha y se paga después; entre los dos momentos es cuenta por pagar. | `contable/js/contabilidad.js` |
+| RN-33 | Activo = Pasivo + Patrimonio. Si no cuadra, **se muestra el descuadre**, no se oculta. | `contable/js/contabilidad.js` |
+
+### Las cuatro cuentas del motor contable
+
+Todo hecho económico mueve estas cuatro cuentas, y de ahí salen los dos estados
+(`apps/contable/js/contabilidad.js`):
+
+| Hecho | Efecto |
+|---|---|
+| Se causa una cuota | ↑ Cartera · ↑ Ingresos |
+| Se aplica un pago | ↑ Caja · ↓ Cartera · el excedente ↑ Anticipos (pasivo) |
+| Se anula un recibo | lo contrario, con la fecha de la anulación |
+| Se causa un gasto | ↑ Egresos · ↑ Cuentas por pagar |
+| Se paga un gasto | ↓ Caja · ↓ Cuentas por pagar |
+
+Por construcción: `Caja + Cartera = Anticipos + Por pagar + Excedentes acumulados` (RN-33).
 
 ## 4. Convenciones de datos
 
