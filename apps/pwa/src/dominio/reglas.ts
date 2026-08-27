@@ -412,3 +412,26 @@ export function contarVotacion(
 export function ordenAsamblea(asamblea: Asamblea): number {
   return { instalada: 0, convocada: 1, cerrada: 2, cancelada: 3 }[asamblea.estado]
 }
+
+// ---------------------------------------------------------------------------
+// Solicitudes — lo que el residente le pidio a la administracion
+// ---------------------------------------------------------------------------
+
+/**
+ * Cuantas solicitudes de la unidad estan esperando respuesta.
+ *
+ * Es la suma de dos cosas que la persona vive igual —«pedi algo y no me han
+ * contestado»— aunque en el modelo sean distintas: una PQRS sin cerrar y una
+ * reserva sin aprobar. El paz y salvo no cuenta: se emite solo, no lo aprueba
+ * nadie.
+ *
+ * Vive aqui y no en el cascaron porque es la definicion de «solicitud
+ * pendiente», y esa la usa el contador de la pestana hoy y manana quien la
+ * necesite.
+ */
+export function solicitudesEsperandoRespuesta(pqrs: Pqrs[], reservas: Reserva[]): number {
+  return (
+    pqrs.filter(pqrsAbierta).length +
+    reservas.filter((reserva) => reserva.estado === 'solicitada').length
+  )
+}

@@ -61,6 +61,27 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · Una sola puerta a Solicitudes
+
+Mary vio dos caminos al mismo sitio: el acceso directo del inicio y la pestaña de la barra,
+con el mismo nombre y el mismo destino. Tenía razón, y la fila de accesos directos ya lo decía
+en su propio comentario: **son los módulos sin pestaña propia**. Solicitudes estuvo ahí hasta
+que ganó la suya, y nadie lo quitó.
+
+**Queda una sola puerta: la pestaña.** El acceso directo se fue, y la fila vuelve a ser lo que
+dice: Pagar, Visitantes y Paquetes.
+
+**Lo que traía el acceso directo no se perdió.** Llevaba un contador —cuántas solicitudes
+esperan respuesta— y ese dato se mudó a la pestaña, que ahora lleva el globo. Unificar no es
+borrar: es dejar el dato en la única puerta que queda.
+
+De paso quedó nombrada una regla que no existía: `solicitudesEsperandoRespuesta()` en
+`reglas.ts` suma la PQRS sin cerrar y la reserva sin aprobar, porque la persona las vive igual
+—«pedí algo y no me han contestado»— aunque en el modelo sean dos entidades. El paz y salvo no
+cuenta: se emite solo, no lo aprueba nadie.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · Asambleas en el menú y Solicitudes unificado
 
 Tres pedidos de Mary sobre la barra inferior del residente, en orden:

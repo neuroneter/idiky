@@ -14,7 +14,6 @@ import {
   estadoRealVisitante,
   etiquetaUnidad,
   hoyISO,
-  pqrsAbierta,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearFechaCorta } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
@@ -42,7 +41,6 @@ export function InicioPage() {
   const correspondenciaPendiente = sel
     .correspondenciaDeUnidad(bd, unidadId)
     .filter((registro) => registro.estado === 'en_porteria')
-  const pqrsAbiertas = sel.pqrsDeUnidad(bd, unidadId).filter(pqrsAbierta)
   const visitantesVigentes = sel
     .visitantesDeUnidad(bd, unidadId)
     .filter((visitante) => estadoRealVisitante(visitante, hoyISO()) === 'activo')
@@ -70,7 +68,10 @@ export function InicioPage() {
         )}
       </Link>
 
-      {/* Accesos directos a los modulos sin pestana propia */}
+      {/* Accesos directos a los modulos sin pestana propia. Es literal: Solicitudes
+          estuvo aqui hasta que gano su pestana, y entonces eran dos puertas con el
+          mismo nombre al mismo sitio. Lo que traia —cuantas solicitudes esperan
+          respuesta— se mudo al contador de la pestana (Mary, 2026-08-27). */}
       <div className="accesos">
         <Link to="/app/cuenta/pagar" className="acceso-directo">
           <span className="acceso-directo__icono">
@@ -94,15 +95,6 @@ export function InicioPage() {
           Paquetes
           {correspondenciaPendiente.length > 0 && (
             <span className="acceso-directo__contador">{correspondenciaPendiente.length}</span>
-          )}
-        </Link>
-        <Link to="/app/solicitudes/pqrs" className="acceso-directo">
-          <span className="acceso-directo__icono">
-            <Icono nombre="pqrs" />
-          </span>
-          Solicitudes
-          {pqrsAbiertas.length > 0 && (
-            <span className="acceso-directo__contador">{pqrsAbiertas.length}</span>
           )}
         </Link>
       </div>

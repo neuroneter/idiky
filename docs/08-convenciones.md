@@ -80,6 +80,19 @@ demostración, así que sus tildes valen igual.
 `mas`/`más`, `cual`/`cuál` son palabras válidas de las dos formas: ahí no hay diccionario que
 valga, hay que leer la frase.
 
+### Una puerta por destino
+
+**Si algo tiene pestaña en la barra, no lleva además un acceso directo en el inicio.** Dos
+puertas con el mismo nombre al mismo sitio no dan más comodidad: hacen dudar de si llevan a lo
+mismo. Los accesos directos del inicio son, literalmente, **los módulos sin pestaña propia**.
+
+Lo que sí puede repetir destino es una **tarjeta de contexto**: «tu próxima reserva», «te
+espera en portería». No son una entrada de menú duplicada, son un dato concreto de esta persona
+hoy, y el enlace es la consecuencia de leerlo.
+
+Cuando un acceso directo desaparece, **su contador se muda a la pestaña**; unificar no es
+perder el dato.
+
 ### Segmentos dentro de una pestaña
 
 Cuando una pestaña de la barra inferior agrupa varias vistas —Solicitudes: reservas, PQRS y
