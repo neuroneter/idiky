@@ -89,6 +89,12 @@ Arregla los tres defectos de una vez: el círculo significa lo que la gente espe
 el único sitio donde el residente ve quién es para el sistema, y la salida queda detrás de un
 paso deliberado, que es lo que corresponde a algo irreversible.
 
+**La barra, alineada**
+
+La unidad y el avatar estaban centrados contra las dos líneas de la izquierda, así que
+flotaban entre el logotipo y el título sin pertenecer a ninguno. Ahora la fila se alinea
+abajo: quedan a la altura del título de la pantalla, que es la línea que la persona lee.
+
 **Pendiente de decidir por el equipo**
 
 La hoja muestra el rol tal como está en el modelo: «Propietario». Es el término legal, pero se

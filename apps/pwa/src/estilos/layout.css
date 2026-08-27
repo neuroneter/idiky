@@ -23,7 +23,10 @@
 }
 .barra-superior__fila {
   display: flex;
-  align-items: center;
+  /* Alineados abajo y no al centro: la unidad y el avatar quedan a la altura del
+     titulo de la pantalla, que es la linea que la persona lee. Centrados
+     flotaban entre el logotipo y el titulo, sin pertenecer a ninguno. */
+  align-items: flex-end;
   justify-content: space-between;
   gap: var(--e3);
 }
