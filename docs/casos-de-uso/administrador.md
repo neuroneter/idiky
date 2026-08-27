@@ -101,19 +101,42 @@ y vincular residente).
 
 **Flujo principal**
 1. El administrador elige periodo (`AAAA-MM`) y tipo (`ordinaria` | `extraordinaria`).
-2. Indica el valor base o el valor total a prorratear.
-3. El sistema calcula el valor por unidad y muestra una **previsualización**.
-4. El administrador confirma; el sistema crea las cuotas en estado `pendiente`.
+2. **Si es extraordinaria**, indica el **acta de asamblea que la aprobó** —número y fecha— y
+   **adjunta el documento**. Sin las dos cosas el sistema no deja continuar (RN-46, RN-47).
+3. Indica el valor base o el valor total a prorratear.
+4. El sistema calcula el valor por unidad y muestra una **previsualización**.
+5. El administrador confirma; el sistema crea las cuotas en estado `pendiente`, y las
+   extraordinarias quedan con su acta guardada.
+
+> **Una cuota extraordinaria siempre se aprueba en asamblea** (decisión del equipo,
+> 2026-08-27), y el soporte es **el acta**. A diferencia de las multas o de la tasa de interés,
+> aquí **no existe la opción «reglamento»**.
+>
+> Y hay algo más: la asamblea no aprueba «una extraordinaria», aprueba una extraordinaria
+> **para algo** —impermeabilizar la cubierta, cambiar el ascensor—. Tiene **destinación
+> específica**. Por eso el **concepto sale del acta y no lo escribe libremente el
+> administrador** (RN-48): poner otra cosa es cobrar por algo que nadie votó.
+>
+> Ver [`../05-modelo-de-datos.md`](../05-modelo-de-datos.md) §3 bis.
 
 **Flujos alternativos**
 - A1. El periodo ya fue generado → el sistema lo impide (RN-22).
+- A2. El módulo de asambleas todavía no existe (CU-A-20) → el acta se registra a mano, con su
+  número, su fecha y **el archivo adjunto**. Cuando exista el módulo, esas referencias se
+  enlazan. **Lo que no se admite nunca es una extraordinaria sin acta adjunta.**
+- A3. El residente abre su estado de cuenta y toca la cuota extraordinaria → **puede ver el
+  acta**. Ese es el punto de adjuntarla: que el respaldo sea comprobable, no una afirmación.
 
 **Reglas de negocio**
 - RN-22: no se puede generar dos veces la cuota ordinaria del mismo periodo.
 - RN-05: las extraordinarias se prorratean por coeficiente.
 - RN-23: la fecha de vencimiento por defecto es el día 10 del periodo.
+- RN-46: una cuota extraordinaria exige el acta de asamblea que la aprobó.
+- RN-47: el acta se adjunta, no se cita.
+- RN-48: el concepto es la destinación que aprobó el acta, no texto libre.
 
-**Estado en el demo:** ✅ — `src/features/admin/CarteraPage.tsx` (acción "Generar cuotas").
+**Estado en el demo:** 🟡 — `src/features/admin/CarteraPage.tsx` (acción "Generar cuotas")
+genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 
 ---
 

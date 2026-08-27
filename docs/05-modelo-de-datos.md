@@ -66,6 +66,10 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 | `fechaVencimiento` | fecha ISO | RN-23 |
 | `estado` | `'pendiente' \| 'pagada' \| 'vencida'` | RN-04 |
 | `pagoId` | string? | Presente cuando `estado = 'pagada'` |
+| `origen` | `'reglamento' \| 'asamblea'` \| ausente | **Solo la ordinaria puede ir sin respaldo.** En la extraordinaria es siempre `'asamblea'` (RN-46) |
+| `actaId` | string? | El acta que la aprobó |
+| `referencia` | string? | Número y fecha del acta, o el artículo del reglamento |
+| `soporteId` | string? | El **documento adjunto** que lo prueba. Obligatorio cuando hay respaldo (RN-47) |
 
 ### Pago
 `id`, `unidadId`, `cuotaIds[]`, `valor`, `medio` (`'pse' \| 'tarjeta' \| 'transferencia' \| 'efectivo' \| 'otro'`), `referencia`, `fecha`, `comprobante` (consecutivo, RN-07).
@@ -131,9 +135,10 @@ aprobó esa copropiedad, y la ley solo dice hasta dónde puede llegar.
 | `origen` | `'reglamento' \| 'asamblea'` | Qué la autoriza |
 | `actaId` | string? | El acta que la aprobó, cuando el origen es una asamblea. **Enlaza la cartera con el módulo de asambleas** (CU-A-20) |
 | `referencia` | string | El artículo del reglamento, o el punto del orden del día |
+| `soporteId` | string | El documento adjunto que lo prueba (RN-47) |
 
-> Sin `origen` y sin `referencia`, un copropietario que pregunte «¿por qué me cobran este
-> interés?» no tiene respuesta. Con ellos, la respuesta es un acta o un artículo.
+> Sin el soporte adjunto, un copropietario que pregunte «¿por qué me cobran este interés?»
+> recibe una afirmación. Con él, recibe el acta.
 
 > **Por qué esto es una tabla y no una constante.** «Normativa vigente» significa una tasa que
 > **cambia periódicamente** y que fija una autoridad externa —la certifica la Superintendencia
@@ -174,6 +179,7 @@ antes de poder imponer ninguna.
 | `origen` | `'reglamento' \| 'asamblea'` | **Qué la autoriza. Obligatorio** |
 | `actaId` | string? | El acta que la aprobó, cuando el origen es una asamblea |
 | `referencia` | string | El artículo del reglamento, o el punto del orden del día |
+| `soporteId` | string | El documento adjunto que lo prueba (RN-47) |
 | `activo` | boolean | Se desactiva, **no se borra**: las multas ya impuestas lo referencian (O3) |
 
 > **Una multa solo existe si el reglamento la contempla o la asamblea la aprobó**
@@ -344,6 +350,9 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-43 | La tasa la aprueba la copropiedad —su reglamento o un acta de asamblea— y el sistema exige registrar cuál. La ley solo pone el techo: una tasa por encima del tope legal se rechaza. **(? — tope por confirmar)** | *pendiente* |
 | RN-44 | El interés se liquida sobre lo vencido y genera una cuota de tipo `interes`, que entra en la cartera como cualquier otra. | *pendiente* |
 | RN-45 | **Todo cobro que no sea la cuota ordinaria debe apuntar a qué lo autoriza**: el reglamento o un acta de asamblea. Aplica a extraordinarias, multas, intereses y cobros adicionales. | *pendiente* |
+| RN-46 | Una cuota **extraordinaria** exige el acta de asamblea que la aprobó. No admite la opción «reglamento»: siempre es acta. | *pendiente* |
+| RN-47 | El respaldo **se adjunta, no se cita**: sin el documento soporte cargado, el cobro no se crea. El copropietario puede abrirlo desde su estado de cuenta. | *pendiente* |
+| RN-48 | La cuota extraordinaria tiene **destinación específica**: su concepto es el que aprobó el acta, no texto libre, y el recaudo se destina a eso. | *pendiente* |
 
 ## 3 bis. El principio del respaldo
 
@@ -354,9 +363,42 @@ llegaron a la misma forma, así que conviene nombrarla una vez:
 > el reglamento de la copropiedad o un acta de asamblea.**
 
 En el modelo eso son siempre los mismos tres campos: `origen`, `actaId` y `referencia`. Los
-llevan `TasaInteres` y `ConceptoSancion`, y **deberían llevarlos también las cuotas
-extraordinarias** — hoy `Cuota` no los tiene, y una extraordinaria sin acta que la respalde es
-tan impugnable como una multa inventada. Es RN-45 y está pendiente.
+llevan `TasaInteres`, `ConceptoSancion` y `Cuota`.
+
+**No todos admiten las mismas opciones**, y esa es la parte que importa:
+
+| Cobro | Respaldo válido |
+|---|---|
+| Cuota ordinaria | Ninguno: es el cobro base de la copropiedad |
+| **Cuota extraordinaria** | **Siempre un acta de asamblea.** No admite reglamento (RN-46) |
+| Multa | Reglamento **o** acta (RN-38) |
+| Interés de mora | Reglamento **o** acta (RN-43) |
+| Cobro adicional | **(?)** por definir |
+
+La extraordinaria es el caso más estricto, y por dos razones. Es un cobro que no estaba
+previsto y que puede ser grande, así que la única forma de imponerlo es que los copropietarios
+lo hayan votado. Y además **tiene destinación específica**: la asamblea no aprueba «una
+extraordinaria», aprueba una extraordinaria **para algo** —impermeabilizar la cubierta, cambiar
+el ascensor—.
+
+De ahí sale una consecuencia de modelado que es fácil pasar por alto: **el `concepto` de una
+extraordinaria no es texto libre que el administrador escriba**, es la destinación que aprobó
+la asamblea, y por eso sale del acta (RN-48). Escribir otra cosa es cobrar por algo que nadie
+votó.
+
+**El respaldo se adjunta, no se cita** (Mary, 2026-08-27). Un número de acta escrito a mano no
+es un respaldo: es una afirmación. Por eso los tres campos van con un cuarto, `soporteId`, que
+apunta al **documento de verdad** —el acta escaneada, el extracto del reglamento— y **sin él el
+cobro no se crea** (RN-47).
+
+Eso convierte el principio en algo comprobable: el copropietario no solo lee «aprobado en acta
+012 del 15 de marzo», **puede abrirla desde su estado de cuenta**.
+
+> ⚠️ **Esto exige una capacidad que la app no tiene: almacenar archivos.** No hay nada en el
+> demo ni en el modelo que guarde un PDF subido por alguien. Es una decisión de arquitectura de
+> la fase 2 —dónde viven los archivos, qué tamaño se admite, quién puede verlos, cuánto tiempo
+> se conservan— y se suma a [ADR-0006](./adr/README.md), que ya trataba la generación de
+> documentos. Generar un PDF y recibir uno son problemas distintos.
 
 La consecuencia práctica: cuando un copropietario pregunte «¿por qué me cobran esto?», el
 sistema siempre puede responder con un acta o un artículo, en vez de con un número suelto.

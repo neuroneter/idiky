@@ -61,6 +61,37 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · El respaldo se adjunta, y la extraordinaria tiene destino
+
+Tres precisiones de Mary que endurecieron el principio del respaldo, en orden:
+
+**1. La extraordinaria siempre se aprueba en asamblea.** No admite la opción «reglamento» que
+sí tienen las multas y la tasa: su respaldo es siempre un acta (RN-46).
+
+**2. El respaldo se adjunta, no se cita.** Un número de acta escrito a mano no es un respaldo,
+es una afirmación. Sin el **documento cargado** el cobro no se crea (RN-47), y el copropietario
+puede abrirlo desde su estado de cuenta. Eso convierte el principio en algo comprobable.
+
+**3. La extraordinaria tiene destinación específica.** La asamblea no aprueba «una
+extraordinaria», aprueba una extraordinaria **para algo**. De ahí sale una consecuencia de
+modelado fácil de pasar por alto: **el `concepto` no es texto libre**, es la destinación que
+aprobó el acta (RN-48). Escribir otra cosa es cobrar por algo que nadie votó.
+
+**Dos consecuencias que exceden la cartera**
+
+- **Adjuntar archivos es una capacidad que la app no tiene.** No hay nada en el demo ni en el
+  modelo que guarde un PDF subido por alguien. Dónde viven, qué tamaño se admite, quién puede
+  verlos: entra en ADR-0006, que hasta ahora solo trataba **generar** documentos. Generar un
+  PDF y recibir uno son problemas distintos.
+- **La destinación específica es dato contable.** Lo recaudado por una extraordinaria tiene que
+  poder cruzarse con lo gastado en esa destinación, y eso vive en la aplicación contable de
+  Jeimy. Es el primer caso concreto de lo que las dos apps tienen que intercambiar (T-17).
+
+**El demo hoy incumple RN-46.** `CarteraPage` genera extraordinarias sin pedir acta, así que
+CU-A-05 pasó de ✅ a 🟡.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · El principio del respaldo
 
 Mary precisó que **las multas solo se dan si están en el reglamento de copropiedad o fueron
