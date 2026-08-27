@@ -31,7 +31,7 @@ export function AccesoPage() {
       <div className="acceso__marca">
         <Logotipo tamano="var(--texto-3xl)" />
         <p className="acceso__lema">
-          Gestion de copropiedad horizontal
+          Gestión de copropiedad horizontal
           <br />
           <strong>{copropiedad?.nombre}</strong>
         </p>

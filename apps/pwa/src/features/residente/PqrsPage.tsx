@@ -19,9 +19,9 @@ import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipPqrs, ChipTipoPqrs } from '../../componentes/Etiquetas'
 
 const TIPOS: Array<{ id: TipoPqrs; texto: string; ayuda: string }> = [
-  { id: 'peticion', texto: 'Peticion', ayuda: 'Solicitas algo a la administracion' },
+  { id: 'peticion', texto: 'Petición', ayuda: 'Solicitas algo a la administración' },
   { id: 'queja', texto: 'Queja', ayuda: 'Reportas una conducta o situacion' },
-  { id: 'reclamo', texto: 'Reclamo', ayuda: 'Exiges la solucion de un problema' },
+  { id: 'reclamo', texto: 'Reclamo', ayuda: 'Exiges la solución de un problema' },
   { id: 'sugerencia', texto: 'Sugerencia', ayuda: 'Propones una mejora' },
 ]
 
@@ -29,7 +29,7 @@ const CATEGORIAS: Array<{ id: CategoriaPqrs; texto: string }> = [
   { id: 'convivencia', texto: 'Convivencia' },
   { id: 'mantenimiento', texto: 'Mantenimiento' },
   { id: 'seguridad', texto: 'Seguridad' },
-  { id: 'administracion', texto: 'Administracion' },
+  { id: 'administracion', texto: 'Administración' },
   { id: 'otro', texto: 'Otro' },
 ]
 
@@ -55,7 +55,7 @@ export function PqrsPage() {
       return
     }
     if (descripcion.trim().length < 15) {
-      mostrarAviso('Describe la situacion con un poco mas de detalle.', 'error')
+      mostrarAviso('Describe la situación con un poco más de detalle.', 'error')
       return
     }
     const creada = await ejecutar(
@@ -104,7 +104,7 @@ export function PqrsPage() {
       {misPqrs.length === 0 ? (
         <EstadoVacio
           titulo="No has radicado solicitudes"
-          detalle="Usa el boton de arriba para reportar algo a la administracion."
+          detalle="Usa el boton de arriba para reportar algo a la administración."
         />
       ) : (
         <div className="lista lista--compacta">
@@ -171,7 +171,7 @@ export function PqrsPage() {
                             id={`respuesta-${pqrs.id}`}
                             value={respuesta}
                             onChange={(evento) => setRespuesta(evento.target.value)}
-                            placeholder="Escribe aqui…"
+                            placeholder="Escribe aquí…"
                           />
                         </div>
                         <button
@@ -194,7 +194,7 @@ export function PqrsPage() {
       {creando && (
         <Modal
           titulo="Nueva solicitud"
-          descripcion="La administracion tiene 15 dias calendario para responder."
+          descripcion="La administración tiene 15 días calendario para responder."
           onCerrar={() => setCreando(false)}
         >
           <div className="campo">
@@ -236,12 +236,12 @@ export function PqrsPage() {
               id="asunto-pqrs"
               value={asunto}
               onChange={(evento) => setAsunto(evento.target.value)}
-              placeholder="Ej: filtracion en el bano social"
+              placeholder="Ej: filtración en el baño social"
             />
           </div>
 
           <div className="campo">
-            <label htmlFor="descripcion-pqrs">Descripcion</label>
+            <label htmlFor="descripcion-pqrs">Descripción</label>
             <textarea
               id="descripcion-pqrs"
               value={descripcion}

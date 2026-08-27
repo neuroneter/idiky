@@ -86,7 +86,7 @@ export function ReservasPage() {
           horaFin: seleccionada.fin,
         }),
       zonaElegida.requiereAprobacion
-        ? 'Solicitud enviada. La administracion la revisara.'
+        ? 'Solicitud enviada. La administración la revisará.'
         : 'Reserva confirmada.',
     )
     if (reserva) setZonaElegida(null)
@@ -120,7 +120,7 @@ export function ReservasPage() {
                   <span className="subtitulo">{zona.descripcion}</span>
                   <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
                     {zona.horaInicio} a {zona.horaFin} · aforo {zona.aforo} ·{' '}
-                    {zona.requiereAprobacion ? 'requiere aprobacion' : 'confirmacion inmediata'}
+                    {zona.requiereAprobacion ? 'requiere aprobacion' : 'confirmación inmediata'}
                   </span>
                 </div>
                 <span className="chip chip--marca">Reservar</span>
@@ -217,7 +217,7 @@ export function ReservasPage() {
               })}
             </div>
             <span className="ayuda-campo">
-              Las franjas tachadas ya estan reservadas por otra unidad.
+              Las franjas tachadas ya están reservadas por otra unidad.
             </span>
           </div>
 

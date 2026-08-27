@@ -183,7 +183,7 @@ export function PqrsAdminPage() {
                     id="respuesta-admin"
                     value={texto}
                     onChange={(evento) => setTexto(evento.target.value)}
-                    placeholder="Escribe la respuesta que vera el residente…"
+                    placeholder="Escribe la respuesta que verá el residente…"
                   />
                 </div>
                 <div className="grupo-botones">

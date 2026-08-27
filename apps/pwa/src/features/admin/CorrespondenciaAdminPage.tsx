@@ -56,7 +56,7 @@ export function CorrespondenciaAdminPage() {
 
   async function entregar() {
     if (!entregando || recibidoPor.trim().length < 3) {
-      mostrarAviso('Indica quien recibio el envio.', 'error')
+      mostrarAviso('Indica quien recibió el envío.', 'error')
       return
     }
     const entregado = await ejecutar(
@@ -77,12 +77,12 @@ export function CorrespondenciaAdminPage() {
         </span>
         <button className="boton boton--primario" onClick={() => setCreando(true)}>
           <Icono nombre="mas" tamano={15} />
-          Registrar envio
+          Registrar envío
         </button>
       </div>
 
       {registros.length === 0 ? (
-        <EstadoVacio titulo="Sin registros" detalle="Registra la correspondencia que llega a porteria." />
+        <EstadoVacio titulo="Sin registros" detalle="Registra la correspondencia que llega a portería." />
       ) : (
         <div className="tarjeta" style={{ padding: 0 }}>
           <div className="contenedor-tabla">
@@ -144,7 +144,7 @@ export function CorrespondenciaAdminPage() {
       {creando && (
         <Modal
           titulo="Registrar correspondencia"
-          descripcion="El residente vera el aviso en su aplicacion."
+          descripcion="El residente verá el aviso en su aplicación."
           onCerrar={() => setCreando(false)}
         >
           <div className="fila-campos">
@@ -201,7 +201,7 @@ export function CorrespondenciaAdminPage() {
               onChange={(evento) =>
                 setFormulario({ ...formulario, observaciones: evento.target.value })
               }
-              placeholder="Ej: caja grande, requiere refrigeracion…"
+              placeholder="Ej: caja grande, requiere refrigeración…"
             />
           </div>
           <button className="boton boton--primario boton--bloque" disabled={cargando} onClick={registrar}>

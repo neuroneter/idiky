@@ -61,6 +61,29 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-27 · Mary + IA (Claude) · Las tildes, y una herramienta para no perderlas
+
+Mary: «cuidado con el tema de la ortografía, dice mucho de la calidad de una aplicación».
+Tenía razón y el alcance era mayor de lo que parecía: **toda la interfaz estaba escrita sin
+tildes**, no solo la palabra que señaló.
+
+**Por qué no bastaba arreglarlo a mano.** La primera pasada dejó fuera frases que estaban
+solas en su línea, sin etiquetas alrededor —«Generar codigo de acceso» entre ellas—. Por eso
+se hizo `herramientas/revisar-ortografia.py`, que recorre el texto visible y falla si encuentra
+algo. Entra en la definición de "terminado".
+
+**Lo difícil no era encontrar, era no dañar.** El detector marcaba de entrada
+`sesion!.personaId`, `telefono: ''` y `descripcion?: string`, que son código. Y marcaba
+`autor: 'administracion'`, que es el **valor del dominio** que distingue quién escribió un
+mensaje: con tilde se rompería la comparación. La regla que los separa quedó escrita en las
+convenciones y dentro de la herramienta:
+
+> Una etiqueta visible nunca es una sola palabra en minúscula.
+
+Con eso, `texto: 'Peticion'` se corrige y `id: 'peticion'` se respeta.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · El botón de confirmar quedaba bajo la barra
 
 **El síntoma.** Al abrir el modal para radicar una PQRS o autorizar un visitante, el botón de

@@ -82,7 +82,7 @@ export function CuentaPage() {
       {visibles.length === 0 ? (
         <EstadoVacio
           titulo="No hay movimientos"
-          detalle="Cuando la administracion genere cuotas apareceran aqui."
+          detalle="Cuando la administración genere cuotas aparecerán aquí."
         />
       ) : (
         <div className="lista lista--compacta">

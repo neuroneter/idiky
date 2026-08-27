@@ -61,7 +61,17 @@ Tipos: `feat`, `fix`, `docs`, `refactor`, `chore`, `test`.
   [`09-estado-del-proyecto.md`](./09-estado-del-proyecto.md). **Esto no es opcional:** es lo
   que permite cambiar de persona o de IA sin perder contexto.
 
-## 5. Identidad visual
+## 5. Ortografía
+
+**El texto visible lleva sus tildes.** Los identificadores no: nombres de variables, valores
+del dominio (`'peticion'`, `'administracion'`), clases de CSS y rutas van sin tilde. La regla
+que los separa en la práctica: **una etiqueta visible nunca es una sola palabra en
+minúscula.**
+
+No se revisa a ojo. `herramientas/revisar-ortografia.py` recorre el texto visible y falla si
+encuentra algo; está en la definición de "terminado".
+
+## 6. Identidad visual
 
 **Nombre del producto.** Se escribe **Idiky** en texto corriente (títulos, documentación,
 manifest). El **logotipo** va en minúscula: `idiky`. No mezclar las dos formas en el mismo
@@ -156,11 +166,14 @@ el estilo. Tres decisiones, todas en `tokens.css`:
   en 2,92:1 y se usa en fechas y notas al pie, o sea en texto chico. Si se retocan estos
   valores hay que **volver a medirlos**, no ajustarlos a ojo.
 
-## 6. Definición de "terminado"
+## 7. Definición de "terminado"
 
 Una funcionalidad está terminada cuando:
 
 1. El caso de uso está documentado y su estado actualizado en el catálogo.
 2. El código compila (`npm run build`) y la pantalla es navegable.
-3. Las reglas de negocio involucradas están en `dominio/reglas.ts`, no dispersas.
-4. La bitácora en `09-estado-del-proyecto.md` refleja el cambio.
+3. **La ortografía del texto visible está revisada**: `python3 herramientas/revisar-ortografia.py`
+   sin hallazgos. La ortografía dice mucho de la calidad de una aplicación, y revisarla a ojo
+   no funciona — en la primera pasada a mano se escaparon frases que estaban solas en su línea.
+4. Las reglas de negocio involucradas están en `dominio/reglas.ts`, no dispersas.
+5. La bitácora en `09-estado-del-proyecto.md` refleja el cambio.

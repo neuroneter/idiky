@@ -87,7 +87,7 @@ export function UnidadesPage() {
           <input
             value={busqueda}
             onChange={(evento) => setBusqueda(evento.target.value)}
-            placeholder="Buscar por torre, numero o residente…"
+            placeholder="Buscar por torre, número o residente…"
             aria-label="Buscar unidad"
           />
         </div>
@@ -285,7 +285,7 @@ export function UnidadesPage() {
                     />
                   </div>
                   <div className="campo">
-                    <label htmlFor="telefono">Telefono</label>
+                    <label htmlFor="telefono">Teléfono</label>
                     <input
                       id="telefono"
                       value={formulario.telefono}

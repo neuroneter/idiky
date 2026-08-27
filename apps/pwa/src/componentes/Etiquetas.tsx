@@ -44,7 +44,7 @@ export function ChipReserva({ estado }: { estado: EstadoReserva }) {
 
 const PQRS: Record<EstadoPqrs, [string, Variante]> = {
   abierta: ['Abierta', 'info'],
-  en_gestion: ['En gestion', 'alerta'],
+  en_gestion: ['En gestión', 'alerta'],
   resuelta: ['Resuelta', 'exito'],
   cerrada: ['Cerrada', ''],
 }
@@ -78,7 +78,7 @@ export function ChipComunicado({ categoria }: { categoria: CategoriaComunicado }
 }
 
 const CORRESPONDENCIA: Record<EstadoCorrespondencia, [string, Variante]> = {
-  en_porteria: ['En porteria', 'alerta'],
+  en_porteria: ['En portería', 'alerta'],
   entregada: ['Entregada', 'exito'],
 }
 

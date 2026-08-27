@@ -26,6 +26,7 @@ proyecto no agrega dependencias sin ADR ([`CLAUDE.md`](../../CLAUDE.md)).
 |---|---|
 | `python3 herramientas/generar-iconos.py` | Regenera los PNG del manifest (192, 512 y maskable) desde la geometría del logo. **Correr si cambia el logo.** |
 | `python3 herramientas/empaquetar-demo.py` | Empaqueta `dist/` en un solo HTML autocontenido para compartir el demo |
+| `python3 herramientas/revisar-ortografia.py` | Revisa que el texto visible lleve sus tildes. **Correr antes de subir**; sale con código 1 si encuentra algo |
 
 ### Compartir el demo con alguien que no tiene el repositorio
 

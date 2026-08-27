@@ -30,7 +30,7 @@ export function MiUnidadPage() {
     return (
       <EstadoVacio
         titulo="Sin unidad activa"
-        detalle="Tu administrador aun no ha vinculado tu unidad a la copropiedad."
+        detalle="Tu administrador aún no ha vinculado tu unidad a la copropiedad."
       />
     )
   }
@@ -69,10 +69,10 @@ export function MiUnidadPage() {
         <div className="tarjeta tarjeta--plana">
           <div className="fila fila-inicio">
             <div className="columna" style={{ flex: 1 }}>
-              <strong>Cuanto pagas de administracion</strong>
+              <strong>Cuanto pagas de administración</strong>
               <span className="subtitulo">
                 Las cuotas ordinarias y las extraordinarias se reparten entre las unidades
-                segun su coeficiente, no en partes iguales.
+                según su coeficiente, no en partes iguales.
               </span>
             </div>
           </div>
@@ -137,7 +137,7 @@ export function MiUnidadPage() {
 
       <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
         El coeficiente lo fija el reglamento de propiedad horizontal. Si crees que el tuyo no
-        corresponde, radica una solicitud a la administracion.
+        corresponde, radica una solicitud a la administración.
       </p>
     </>
   )

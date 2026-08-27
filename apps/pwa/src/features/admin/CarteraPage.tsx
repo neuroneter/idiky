@@ -48,7 +48,7 @@ export function CarteraPage() {
     copropiedadId: '',
     periodo: periodoActual(),
     tipo: 'ordinaria',
-    concepto: 'Cuota de administracion',
+    concepto: 'Cuota de administración',
     valor: 45000,
   })
 
@@ -232,7 +232,7 @@ export function CarteraPage() {
       {unidadPago && (
         <Modal
           titulo="Registrar pago"
-          descripcion="Los pagos se imputan a la deuda mas antigua primero."
+          descripcion="Los pagos se imputan a la deuda más antigua primero."
           onCerrar={() => setUnidadPago(null)}
         >
           <div className="lista lista--compacta">
@@ -296,7 +296,7 @@ export function CarteraPage() {
                 id="referencia-pago"
                 value={referencia}
                 onChange={(evento) => setReferencia(evento.target.value)}
-                placeholder="Numero de consignacion"
+                placeholder="Número de consignación"
               />
             </div>
           </div>
@@ -326,7 +326,7 @@ export function CarteraPage() {
       {generando && (
         <Modal
           titulo="Generar cuotas del periodo"
-          descripcion="Revisa la previsualizacion antes de confirmar."
+          descripcion="Revisa la previsualización antes de confirmar."
           onCerrar={() => setGenerando(false)}
         >
           <div className="fila-campos">
@@ -352,7 +352,7 @@ export function CarteraPage() {
                     tipo: evento.target.value as 'ordinaria' | 'extraordinaria',
                     concepto:
                       evento.target.value === 'ordinaria'
-                        ? 'Cuota de administracion'
+                        ? 'Cuota de administración'
                         : 'Cuota extraordinaria',
                   })
                 }
@@ -389,8 +389,8 @@ export function CarteraPage() {
             />
             <span className="ayuda-campo">
               {generacion.tipo === 'ordinaria'
-                ? 'El valor de cada unidad es su coeficiente multiplicado por este numero.'
-                : 'Se reparte entre las unidades segun su coeficiente (RN-05).'}
+                ? 'El valor de cada unidad es su coeficiente multiplicado por este número.'
+                : 'Se reparte entre las unidades según su coeficiente (RN-05).'}
             </span>
           </div>
 

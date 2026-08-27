@@ -26,7 +26,7 @@ export function CorrespondenciaPage() {
     return (
       <EstadoVacio
         titulo="Sin correspondencia"
-        detalle="Cuando llegue un paquete o carta a tu nombre, aparecera aqui."
+        detalle="Cuando llegue un paquete o carta a tu nombre, aparecera aquí."
       />
     )
   }

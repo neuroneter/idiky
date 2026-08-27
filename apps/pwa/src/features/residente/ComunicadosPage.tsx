@@ -34,7 +34,7 @@ export function ComunicadosPage() {
     return (
       <EstadoVacio
         titulo="No hay comunicados vigentes"
-        detalle="Aqui apareceran los avisos oficiales de la administracion."
+        detalle="Aquí aparecerán los avisos oficiales de la administración."
       />
     )
   }

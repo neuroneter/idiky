@@ -121,7 +121,7 @@ export function PagoPage() {
   if (pendientes.length === 0) {
     return (
       <div className="pila">
-        <EstadoVacio titulo="No tienes cuotas por pagar" detalle="Tu unidad esta al dia." />
+        <EstadoVacio titulo="No tienes cuotas por pagar" detalle="Tu unidad está al día." />
         <Link to="/app/cuenta" className="boton boton--bloque">
           Volver
         </Link>

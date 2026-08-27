@@ -81,7 +81,7 @@ export function VisitantesPage() {
       {visitantes.length === 0 ? (
         <EstadoVacio
           titulo="Sin visitantes autorizados"
-          detalle="Autoriza a tus visitas para que porteria las deje entrar sin llamarte."
+          detalle="Autoriza a tus visitas para que portería las deje entrar sin llamarte."
         />
       ) : (
         <div className="lista lista--compacta">
@@ -109,7 +109,7 @@ export function VisitantesPage() {
                         className="boton boton--pequeno"
                         onClick={() => setVerCodigo(visitante.id)}
                       >
-                        Ver codigo
+                        Ver código
                       </button>
                     )}
                   </div>
@@ -123,7 +123,7 @@ export function VisitantesPage() {
       {creando && (
         <Modal
           titulo="Autorizar visitante"
-          descripcion="Porteria validara el codigo que generes."
+          descripcion="Portería validara el código que generes."
           onCerrar={() => setCreando(false)}
         >
           <div className="campo">
@@ -178,14 +178,14 @@ export function VisitantesPage() {
             </div>
           </div>
           <button className="boton boton--primario boton--bloque" disabled={cargando} onClick={autorizar}>
-            Generar codigo de acceso
+            Generar código de acceso
           </button>
         </Modal>
       )}
 
       {visitanteEnDetalle && (
         <Modal
-          titulo="Codigo de acceso"
+          titulo="Código de acceso"
           descripcion={`Comparte este codigo con ${visitanteEnDetalle.nombre}.`}
           onCerrar={() => setVerCodigo(null)}
         >
@@ -208,12 +208,12 @@ export function VisitantesPage() {
                 onClick={async () => {
                   await ejecutar(
                     (base) => revocarVisitante(base, visitanteEnDetalle.id),
-                    'Autorizacion revocada.',
+                    'Autorización revocada.',
                   )
                   setVerCodigo(null)
                 }}
               >
-                Revocar autorizacion
+                Revocar autorización
               </button>
             )}
           </div>

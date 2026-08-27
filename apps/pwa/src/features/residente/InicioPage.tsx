@@ -111,7 +111,7 @@ export function InicioPage() {
       {destacado && (
         <div className="pila">
           <div className="encabezado-seccion">
-            <h2>De la administracion</h2>
+            <h2>De la administración</h2>
             <Link to="/app/comunicados">Ver cartelera</Link>
           </div>
           <Link to="/app/comunicados" className="tarjeta tarjeta--accion tarjeta--comunicado">
@@ -158,7 +158,7 @@ export function InicioPage() {
       {/* Proxima reserva — CU-R-05 */}
       <div className="pila">
         <div className="encabezado-seccion">
-          <h2>Tu proxima reserva</h2>
+          <h2>Tu próxima reserva</h2>
           <Link to="/app/reservas">Ver reservas</Link>
         </div>
         {reserva && zonaReserva ? (
@@ -197,7 +197,7 @@ export function InicioPage() {
       {correspondenciaPendiente.length > 0 && (
         <div className="pila">
           <div className="encabezado-seccion">
-            <h2>Te espera en porteria</h2>
+            <h2>Te espera en portería</h2>
           </div>
           <Link to="/app/correspondencia" className="tarjeta tarjeta--accion tarjeta--pendiente">
             <div className="fila">
