@@ -6,30 +6,75 @@
 ---
 
 ### CU-R-01
-## CU-R-01 — Ingresar y seleccionar unidad activa
+## CU-R-01 — Ingresar a la app
 
 - **Actor principal:** Residente
-- **Precondiciones:** La persona está registrada y vinculada al menos a una unidad.
+- **Precondiciones:** La administración lo vinculó a una unidad (CU-A-02) y él activó su
+  cuenta (CU-R-25).
 - **Disparador:** Abre la aplicación.
-- **Resultado esperado:** Queda dentro de la app con una **unidad activa** seleccionada; todo
-  lo que vea a partir de ese momento pertenece a esa unidad.
+- **Resultado esperado:** Queda dentro con una **unidad activa**; todo lo que vea a partir de
+  ese momento pertenece a esa unidad.
+
+**Cómo se entra** (decisión del equipo, 2026-08-28)
+
+| | |
+|---|---|
+| **Se identifica con** | Su **documento de identidad**. Es lo que la administración ya tiene de cada propietario, y no cambia cuando cambia el correo o el celular |
+| **Se confirma con** | **Contraseña** y, en un dispositivo nuevo, además un **código de un solo uso** (RN-54). Desde la app se paga plata |
+| **La cuenta nace** | Cuando la administración vincula la unidad. La persona **la activa**, no la crea (RN-53) |
 
 **Flujo principal**
-1. El sistema muestra la pantalla de acceso.
+1. El sistema muestra la pantalla de acceso: documento y contraseña.
 2. El residente se identifica.
-3. El sistema resuelve sus residencias.
-4. Si tiene una sola unidad, la selecciona automáticamente. Si tiene varias, le pide elegir.
-5. El sistema abre el inicio (CU-R-02) con la unidad activa.
+3. Si el dispositivo no es conocido, el sistema envía un **código de un solo uso** y lo pide.
+4. El sistema resuelve sus residencias.
+5. Si tiene una sola unidad, la selecciona; si tiene varias, le pide elegir.
+6. El sistema abre el inicio (CU-R-02) con la unidad activa.
 
 **Flujos alternativos**
-- A1. Sin unidades vinculadas → mensaje "tu administrador aún no ha vinculado tu unidad".
-- A2. El residente cambia de unidad activa desde el selector del encabezado.
+- A1. El documento no está en la copropiedad → el sistema **no dice «documento incorrecto»**:
+  dice que la administración es quien vincula la unidad y que le escriba (RN-53).
+- A2. La cuenta no está activada → lo lleva a activarla (CU-R-25).
+- A3. Sin unidades vinculadas → «tu administrador aún no ha vinculado tu unidad».
+- A4. El residente cambia de unidad activa desde el selector del encabezado.
+- A5. Olvidó la contraseña → CU-R-25, mismo trámite.
 
 **Reglas de negocio**
 - RN-01 (contexto de copropiedad), RN-02 (rol efectivo por unidad).
+- RN-53: la cuenta existe porque la administración vinculó a la persona.
+- RN-54: dispositivo nuevo, código de un solo uso además de la contraseña.
 
-**Estado en el demo:** ✅ — `src/features/auth/AccesoPage.tsx`. Sin contraseña: se elige un
-perfil de una lista (ver [ADR-0004](../adr/0004-autenticacion-demo.md)).
+**Estado en el demo:** 🟡 — `src/features/auth/AccesoPage.tsx` muestra el flujo completo, pero
+**no autentica**: no se guarda ninguna contraseña, cualquiera con la longitud mínima sirve, y
+el código se muestra en pantalla (ver [ADR-0004](../adr/0004-autenticacion-demo.md)). El atajo
+de perfiles sigue disponible, plegado debajo.
+
+---
+
+### CU-R-25
+## CU-R-25 — Activar mi cuenta o recuperar mi contraseña
+
+- **Actor principal:** Residente
+- **Precondiciones:** La administración lo vinculó a una unidad (CU-A-02).
+- **Disparador:** Entra por primera vez, o no recuerda su contraseña.
+- **Resultado esperado:** Queda con contraseña propia y dentro de la app.
+
+**Flujo principal** — tres pasos, los mismos para activar y para recuperar
+1. Escribe su **documento**. El sistema comprueba que esté vinculado (RN-53).
+2. El sistema le envía un **código de un solo uso** y él lo confirma.
+3. Crea su contraseña (dos veces) y entra. El dispositivo queda como conocido (RN-54).
+
+**Flujos alternativos**
+- A1. Documento no vinculado → «la administración es quien te registra».
+- A2. Activar una cuenta ya activada → lo manda a entrar o a recuperar.
+- A3. Recuperar una cuenta sin activar → lo manda a activarla.
+
+**Reglas de negocio**
+- RN-53: no se crea la cuenta aquí, se activa.
+- RN-54: el código prueba la identidad en este dispositivo.
+
+**Estado en el demo:** 🟡 — `src/features/auth/ActivarPage.tsx`. El trámite completo, sin
+guardar contraseñas y con el código a la vista.
 
 ---
 

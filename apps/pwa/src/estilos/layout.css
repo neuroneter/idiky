@@ -338,13 +338,23 @@
 }
 
 /* ==================================================== Pantalla de acceso */
+/* La puerta lleva el degradado de la marca, igual que la app por dentro: es la
+   primera pantalla que ve alguien y la unica oportunidad de que la marca se vea
+   antes de que empiece a leer datos. La tarjeta blanca encima sostiene el
+   formulario. */
+.acceso-fondo {
+  min-height: 100%;
+  background: var(--degradado-marca-vertical);
+  background-attachment: fixed;
+}
 .acceso {
   min-height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: var(--e5);
-  padding: var(--e6) var(--e4);
+  padding: calc(var(--e6) + env(safe-area-inset-top)) var(--e4)
+    calc(var(--e6) + env(safe-area-inset-bottom));
   max-width: 460px;
   margin: 0 auto;
 }
@@ -352,9 +362,16 @@
   text-align: center;
 }
 .acceso__lema {
-  color: var(--color-texto-suave);
+  color: rgba(255, 255, 255, 0.82);
   font-size: var(--texto-sm);
   margin-top: var(--e1);
+}
+.acceso__lema strong {
+  color: var(--color-texto-inverso);
+}
+/* Sobre el degradado, los botones sueltos van en blanco. */
+.acceso .boton--fantasma {
+  color: var(--color-texto-inverso);
 }
 .acceso__nota {
   background: var(--color-alerta-suave);
@@ -364,6 +381,77 @@
   font-size: var(--texto-xs);
   line-height: 1.45;
 }
+.acceso__error {
+  background: var(--color-error-suave);
+  color: var(--color-error);
+  border-radius: var(--radio-sm);
+  padding: var(--e3);
+  font-size: var(--texto-sm);
+  line-height: 1.45;
+  margin-bottom: var(--e3);
+}
+.acceso__enlaces {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e3);
+  margin-top: var(--e4);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-marca);
+}
+/* El atajo de demostracion va plegado: hace falta para mostrar la consola sin
+   teclear cedulas, pero no es la pantalla de acceso y no debe parecerlo. */
+.acceso__demo > summary {
+  cursor: pointer;
+  font-size: var(--texto-sm);
+  font-weight: 650;
+  /* Blanco: va sobre el degradado, y en gris se perdia. */
+  color: rgba(255, 255, 255, 0.88);
+  padding: var(--e3) 0;
+}
+/* Los tres pasos del tramite. Saber cuanto falta es lo que evita que se
+   abandone a la mitad. */
+.pasos {
+  display: flex;
+  gap: var(--e2);
+  counter-reset: paso;
+}
+/* Van sobre el degradado, asi que el paso activo se marca en blanco y el fucsia
+   de la marca hace de subrayado: el violeta de los botones se pierde contra el
+   azul, y el azul marino no se ve en absoluto. */
+.pasos li {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  padding-top: var(--e2);
+  border-top: 3px solid rgba(255, 255, 255, 0.28);
+}
+.pasos li.activo {
+  color: var(--color-texto-inverso);
+  border-top-color: var(--color-marca-claro);
+}
+.pasos li::before {
+  counter-increment: paso;
+  content: counter(paso);
+  display: grid;
+  place-items: center;
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radio-completo);
+  background: rgba(255, 255, 255, 0.24);
+  color: var(--color-texto-inverso);
+  font-size: 0.62rem;
+}
+.pasos li.activo::before {
+  background: var(--color-marca-claro);
+  color: var(--color-texto-inverso);
+}
+
 .perfil {
   display: flex;
   align-items: center;

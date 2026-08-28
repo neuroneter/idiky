@@ -76,7 +76,9 @@ apps/pwa/
 
 | Ruta | Pantalla | CU |
 |---|---|---|
-| `/acceso` | Selección de perfil demo | CU-R-01 |
+| `/acceso` | Ingreso con documento y contraseña | CU-R-01 |
+| `/acceso/activar` | Activar la cuenta | CU-R-25 |
+| `/acceso/recuperar` | Recuperar la contraseña | CU-R-25 |
 | `/app` | Inicio residente | CU-R-02 |
 | `/app/cuenta` | Estado de cuenta | CU-R-03 |
 | `/app/cuenta/pagar` | Pago | CU-R-04 |

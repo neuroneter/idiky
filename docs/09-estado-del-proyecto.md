@@ -61,6 +61,42 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-28 · Mary + IA (Claude) · La puerta de la app
+
+Mary señaló el hueco de fondo: **«lo que hemos trabajado son las pantallas adentro de la app»**.
+Cierto —cartera, asambleas, solicitudes— y la puerta no existía: en su lugar había una lista de
+perfiles, que es un atajo de demostración y no una pantalla de producto.
+
+Tres decisiones suyas la definieron:
+
+1. **Se identifica con el documento.** Es lo que la administración ya tiene de cada propietario
+   y no cambia cuando cambia el correo o el celular.
+2. **Contraseña y, en un teléfono nuevo, además un código de un solo uso** (RN-54). Desde la
+   app se paga plata; el segundo factor solo en dispositivo nuevo evita que el trámite estorbe
+   todos los días.
+3. **La cuenta nace vinculada** (RN-53): la administración registra la unidad y sus residentes
+   (CU-A-02), y la persona **activa** su cuenta —no la crea—. Nadie entra a una copropiedad
+   sin que la administración lo haya puesto ahí.
+
+De ahí salieron tres pantallas: ingreso, activación en tres pasos (documento → código →
+contraseña) y recuperación, que es el mismo trámite con otro texto. Todas con el degradado de
+la marca: es la primera pantalla que ve alguien, y la única donde la marca se ve antes de que
+empiece a leer datos.
+
+**Lo que el demo no hace, y lo dice.** No guarda ninguna contraseña —ni cifrada ni en claro—,
+acepta cualquiera con la longitud mínima, y el código se muestra en pantalla. Guardar
+credenciales de mentira enseñaría la forma equivocada, y un código que nunca llega haría el
+demo inmostrable. Cada pantalla lo advierte. ADR-0004 quedó actualizado con esa tabla.
+
+El atajo de perfiles sigue, plegado debajo: hace falta para mostrar la consola del
+administrador sin teclear cédulas. Ya no es la puerta.
+
+Un efecto secundario que vale la pena: como el acceso arma la sesión desde la persona y su
+residencia, **los doce residentes de la semilla pueden entrar con su documento**, no solo los
+tres perfiles. El demo se siente menos maqueta.
+
+---
+
 ### 2026-08-28 · Mary + IA (Claude) · El rol de portería, y Bre-B como medio de pago
 
 **Se crea el rol de portería** (Mary). Salió de una pregunta suya: ¿quién debería registrar los

@@ -8,6 +8,7 @@ import { useSesion } from './estado/SesionContext'
 import { LayoutResidente } from './componentes/LayoutResidente'
 import { LayoutAdmin } from './componentes/LayoutAdmin'
 import { AccesoPage } from './features/auth/AccesoPage'
+import { ActivarPage } from './features/auth/ActivarPage'
 import { InicioPage } from './features/residente/InicioPage'
 import { MiUnidadPage } from './features/residente/MiUnidadPage'
 import { CuentaPage } from './features/residente/CuentaPage'
@@ -49,6 +50,10 @@ export function App() {
   return (
     <Routes>
       <Route path="/acceso" element={<AccesoPage />} />
+      {/* Activar y recuperar son el mismo tramite en tres pasos; cambia el texto,
+          no el flujo (CU-R-25). */}
+      <Route path="/acceso/activar" element={<ActivarPage modo="activar" />} />
+      <Route path="/acceso/recuperar" element={<ActivarPage modo="recuperar" />} />
 
       {/* App movil del residente — CU-R-xx */}
       <Route
