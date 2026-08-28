@@ -67,6 +67,7 @@ PALABRAS = {
     'revision': 'revisión', 'ano': 'año', 'proposito': 'propósito', 'tecnico': 'técnico',
     'reglamentacion': 'reglamentación', 'citacion': 'citación', 'tuberia': 'tubería',
     'comun': 'común', 'supervision': 'supervisión', 'mas': 'más',
+    'bogota': 'Bogotá',
 }
 
 # Lineas que nunca son texto visible.

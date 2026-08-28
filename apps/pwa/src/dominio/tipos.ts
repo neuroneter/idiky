@@ -337,7 +337,16 @@ export interface Documento {
   copropiedadId: string
   unidadId: string
   emitidoEn: FechaISO
-  vigenteHasta: FechaISO
+  /**
+   * Hasta que dia certifica que la unidad esta al dia.
+   *
+   * Sale del modelo de paz y salvo que uso Mary (2026-08-28): el documento no
+   * dice «vale 30 dias», dice «se encuentra a paz y salvo ... **hasta el dia 31
+   * de agosto**». Es el fin del ultimo periodo cubierto, no una caducidad del
+   * papel; si la copropiedad ademas quiere darle vigencia al documento, esa es
+   * otra decision y sigue abierta (§3 ter del levantamiento).
+   */
+  cubiertoHasta: FechaISO
   estado: 'vigente' | 'anulado'
 }
 

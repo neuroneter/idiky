@@ -526,3 +526,92 @@ textarea {
     align-items: center;
   }
 }
+
+/* ------------------------------------------------------- Hoja imprimible */
+/* Como el residente obtiene su PDF sin servidor y sin conexion: el navegador
+   imprime, y el sistema operativo ofrece «Guardar como PDF» (ADR-0006, revision
+   del 2026-08-28). En pantalla la hoja no existe. */
+.hoja-documento {
+  display: none;
+}
+
+@media print {
+  /* Se oculta todo y se vuelve a mostrar solo la hoja. Con `display: none` en el
+     resto se perderia el arbol donde vive la hoja; con `visibility` el documento
+     queda solo en la pagina y el resto ocupa cero tinta. */
+  body * {
+    visibility: hidden;
+  }
+  .hoja-documento,
+  .hoja-documento * {
+    visibility: visible;
+  }
+  /* La app vive dentro de una columna de 480 px; la hoja no. Sin esto el
+     certificado sale impreso con el ancho de un telefono en medio de la pagina. */
+  html,
+  body,
+  #root,
+  .app-movil,
+  .contenido-movil {
+    max-width: none;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    position: static;
+    background: #fff;
+  }
+  .hoja-documento {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* Negro sobre blanco: una impresora domestica gasta el color y lo devuelve
+       lavado, y un certificado con el azul desteñido parece una fotocopia. */
+    color: #000;
+    background: #fff;
+    font-size: 12pt;
+    line-height: 1.6;
+    text-align: justify;
+  }
+  .hoja-documento p {
+    margin: 0 0 1.2em;
+  }
+  .hoja-documento__encabezado {
+    text-align: center;
+    margin-bottom: 2.4em;
+  }
+  .hoja-documento__encabezado h1 {
+    font-size: 16pt;
+    letter-spacing: 0.14em;
+    margin-bottom: 0.4em;
+  }
+  .hoja-documento__encabezado p {
+    font-size: 10pt;
+    margin: 0;
+  }
+  .hoja-documento__firma {
+    margin-top: 3.5em;
+    text-align: left;
+  }
+  .hoja-documento__linea {
+    width: 62mm;
+    border-top: 1px solid #000;
+    margin: 2.5em 0 0.6em;
+  }
+  .hoja-documento__pie {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-size: 8pt;
+    text-align: center;
+    border-top: 1px solid #999;
+    padding-top: 0.6em;
+  }
+  /* Carta, que es el tamano de tramite en Colombia. */
+  @page {
+    size: letter;
+    margin: 25mm 22mm;
+  }
+}

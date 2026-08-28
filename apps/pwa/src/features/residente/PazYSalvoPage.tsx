@@ -14,9 +14,10 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
 import { emitirPazYSalvo } from '../../datos/repositorio'
-import { calcularSaldo, calcularSaldoVencido, etiquetaUnidad, hoyISO } from '../../dominio/reglas'
+import { calcularSaldo, calcularSaldoVencido, etiquetaUnidad } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
+import { HojaPazYSalvo } from '../../componentes/HojaPazYSalvo'
 import { Link } from 'react-router-dom'
 
 export function PazYSalvoPage() {
@@ -32,7 +33,14 @@ export function PazYSalvoPage() {
   // facturada entra aunque falten dias para su vencimiento (Mary, 2026-08-27).
   const saldo = calcularSaldo(cuotas)
   const vencido = calcularSaldoVencido(cuotas)
-  const vigente = sel.pazYSalvoVigente(bd, sesion.unidadActivaId)
+  const vigente = sel.ultimoPazYSalvo(bd, sesion.unidadActivaId)
+  // Un paz y salvo se expide a nombre de los propietarios, que pueden ser varios.
+  const propietarios = sel
+    .residenciasDeUnidad(bd, sesion.unidadActivaId ?? '')
+    .filter((residencia) => residencia.rol === 'propietario')
+    .map((residencia) => sel.persona(bd, residencia.personaId))
+    .filter((p): p is NonNullable<typeof p> => !!p)
+  const administrador = bd.perfilesDemo.find((perfil) => perfil.rol === 'admin')
   const alDia = saldo === 0
 
   async function emitir() {
@@ -116,28 +124,45 @@ export function PazYSalvoPage() {
               </div>
               <div className="fila">
                 <span className="subtitulo">A nombre de</span>
-                <strong>{nombreCompleto(persona)}</strong>
+                <strong>
+                  {propietarios.length > 0
+                    ? propietarios.map(nombreCompleto).join(' y ')
+                    : nombreCompleto(persona)}
+                </strong>
               </div>
               <div className="fila">
                 <span className="subtitulo">Expedido</span>
                 <strong>{formatearFecha(vigente.emitidoEn)}</strong>
               </div>
+              {/* Lo que el documento afirma no es cuanto vale el papel, sino hasta
+                  que dia la unidad esta al dia (modelo de Mary, 2026-08-28). */}
               <div className="fila">
-                <span className="subtitulo">Vigente hasta</span>
-                <strong>{formatearFecha(vigente.vigenteHasta)}</strong>
+                <span className="subtitulo">A paz y salvo hasta</span>
+                <strong>{formatearFecha(vigente.cubiertoHasta)}</strong>
               </div>
             </div>
             <div className="separador" />
             <p className="subtitulo">
-              {copropiedad?.nombre} certifica que la unidad no registra obligaciones pendientes a
-              la fecha de expedición.
+              {copropiedad?.nombre} certifica que la unidad está a paz y salvo por concepto de
+              cuotas de administración.
             </p>
             {/* El numero es consecutivo y adivinable; el codigo no. Hacen falta los
-                dos para verificar el documento desde fuera de la app (ADR-0006). */}
+                dos para confirmar el documento con la administracion (ADR-0006). */}
             <div className="fila" style={{ marginTop: 'var(--e3)' }}>
               <span className="subtitulo">Código de verificación</span>
               <strong className="numerico">{vigente.codigoVerificacion}</strong>
             </div>
+            <div className="separador" />
+            {/* Imprimir es como se obtiene el PDF: el sistema operativo ofrece
+                «Guardar como PDF», sin servidor, sin conexion y sin librerias
+                (ADR-0006, revision del 2026-08-28). */}
+            <button
+              className="boton boton--primario boton--bloque"
+              onClick={() => window.print()}
+            >
+              <Icono nombre="certificado" tamano={18} />
+              Imprimir o guardar en PDF
+            </button>
           </div>
         </div>
       )}
@@ -157,10 +182,11 @@ export function PazYSalvoPage() {
                       Expedido el {formatearFecha(documento.emitidoEn)}
                     </span>
                   </div>
-                  {/* `hoyISO()` y no `new Date()`: comparar contra una fecha UTC
-                      adelantaba un dia el vencimiento en Colombia. */}
-                  <span className={documento.vigenteHasta >= hoyISO() ? 'chip chip--exito' : 'chip'}>
-                    {documento.vigenteHasta >= hoyISO() ? 'Vigente' : 'Vencido'}
+                  {/* Sin chip de «vencido»: el certificado no caduca solo. Dice
+                      hasta cuando la unidad estaba al dia, y eso sigue siendo
+                      cierto manana. */}
+                  <span className="subtitulo">
+                    Hasta {formatearFecha(documento.cubiertoHasta)}
                   </span>
                 </div>
               </div>
@@ -169,12 +195,21 @@ export function PazYSalvoPage() {
         )}
       </div>
 
-      {/* Se dice que falta, no se simula un botón que no descarga nada. */}
       <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
-        La descarga en PDF llega con el servidor: el certificado lo genera y lo firma la
-        copropiedad, no el teléfono de quien lo pide (ADR-0006). Con el número y el código,
-        quien lo reciba —una notaría, un banco— podrá comprobarlo sin instalar la app.
+        Al imprimir, tu teléfono ofrece «Guardar como PDF»: el certificado queda como archivo
+        para adjuntarlo a tu trámite. Con el número y el código, quien lo reciba puede
+        confirmarlo con la administración.
       </p>
+      {/* No se ve en pantalla: es la hoja que sale al imprimir. */}
+      {vigente && (
+        <HojaPazYSalvo
+          documento={vigente}
+          copropiedad={copropiedad}
+          unidad={unidad}
+          propietarios={propietarios}
+          administrador={sel.persona(bd, administrador?.personaId)}
+        />
+      )}
     </>
   )
 }

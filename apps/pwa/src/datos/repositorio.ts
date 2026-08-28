@@ -36,11 +36,11 @@ import {
   hoyISO,
   prorratearPorCoeficiente,
   puedeVotar,
-  sumarDias,
   vencimientoDelPeriodo,
   votacionRecibeVotos,
   yaVoto,
 } from '../dominio/reglas'
+import { finDePeriodo } from '../utilidades/formato'
 import { guardar, leer, sembrar } from './almacen'
 
 /** Resultado de una operacion: base de datos actualizada + lo que se creo. */
@@ -573,9 +573,6 @@ export async function desvincularResidente(
 // CU-R-13 — Votar un punto del orden del dia
 // ---------------------------------------------------------------------------
 
-/** Dias que vale un paz y salvo emitido. Provisional: el plazo esta por confirmar. */
-const VIGENCIA_PAZ_Y_SALVO_DIAS = 30
-
 /**
  * Codigo de verificacion de un documento formal (RN-36, ADR-0006).
  *
@@ -677,6 +674,16 @@ export async function emitirPazYSalvo(
 
   const consecutivo = bd.consecutivos.pazYSalvo
   const hoy = hoyISO()
+
+  // Hasta cuando certifica. El documento no dice «vale 30 dias»: dice hasta que
+  // dia la unidad esta al dia, y ese dia es el fin del ultimo periodo facturado
+  // (modelo de paz y salvo aportado por Mary, 2026-08-28).
+  const periodos = bd.cuotas
+    .filter((cuota) => cuota.unidadId === unidad.id)
+    .map((cuota) => cuota.periodo)
+    .sort()
+  const ultimoPeriodo = periodos[periodos.length - 1] ?? hoy.slice(0, 7)
+
   const documento: Documento = {
     id: nuevoId('doc'),
     tipo: 'paz_y_salvo',
@@ -686,7 +693,7 @@ export async function emitirPazYSalvo(
     copropiedadId: parametros.copropiedadId,
     unidadId: unidad.id,
     emitidoEn: hoy,
-    vigenteHasta: sumarDias(hoy, VIGENCIA_PAZ_Y_SALVO_DIAS),
+    cubiertoHasta: finDePeriodo(ultimoPeriodo),
     estado: 'vigente',
   }
   bd.documentos.push(documento)

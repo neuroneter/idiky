@@ -206,11 +206,16 @@ export function documentosDeUnidad(bd: BaseDatos, unidadId?: string): Documento[
     .sort((a, b) => b.emitidoEn.localeCompare(a.emitidoEn))
 }
 
-/** El paz y salvo sirve mientras no venza y no se haya anulado (RN-26). */
-export function pazYSalvoVigente(bd: BaseDatos, unidadId?: string): Documento | undefined {
-  const hoy = hoyISO()
+/**
+ * El ultimo paz y salvo emitido que no se haya anulado.
+ *
+ * No se filtra por vigencia porque **el documento no caduca solo**: certifica que
+ * la unidad estaba al dia hasta cierto dia, y eso sigue siendo cierto manana. Si
+ * la copropiedad decide darle un plazo de validez, sera otra regla (§3 ter).
+ */
+export function ultimoPazYSalvo(bd: BaseDatos, unidadId?: string): Documento | undefined {
   return documentosDeUnidad(bd, unidadId).find(
-    (d) => d.tipo === 'paz_y_salvo' && d.estado === 'vigente' && d.vigenteHasta >= hoy,
+    (d) => d.tipo === 'paz_y_salvo' && d.estado === 'vigente',
   )
 }
 

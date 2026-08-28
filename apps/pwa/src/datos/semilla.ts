@@ -797,7 +797,7 @@ export function crearSemilla(): BaseDatos {
         nombre: 'Conjunto Residencial Altos del Bosque',
         nit: '901.234.567-8',
         direccion: 'Calle 134 # 45-20',
-        ciudad: 'Bogota',
+        ciudad: 'Bogotá',
         tipo: 'residencial',
       },
     ],

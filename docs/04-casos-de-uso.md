@@ -32,7 +32,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-09 | Leer comunicados de la cartelera | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-09) |
 | CU-R-10 | Autorizar un visitante y generar su código | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-10) |
 | CU-R-11 | Ver correspondencia pendiente | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-11) |
-| CU-R-12 | **Descargar el paz y salvo** | 1 | 🟡 Parcial (se emite y se registra; falta el PDF, ADR-0006) | [ver](./casos-de-uso/residente.md#cu-r-12) |
+| CU-R-12 | **Descargar el paz y salvo** | 1 | ✅ Demo (se emite e imprime a PDF desde el teléfono) | [ver](./casos-de-uso/residente.md#cu-r-12) |
 | CU-R-13 | **Votar en una asamblea** | 1 | 🟡 Parcial (se vota y se cuenta por coeficiente; falta mayoría y quórum) | [ver](./casos-de-uso/residente.md#cu-r-13) |
 | CU-R-14 | Reportar una novedad con foto (daño, ruido) | 3 | ⬜ Pendiente | — |
 | CU-R-15 | Registrar mis vehículos y mascotas | 3 | ⬜ Pendiente | — |

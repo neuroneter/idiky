@@ -69,6 +69,41 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-28 · Mary + IA (Claude) · El paz y salvo se imprime, y un modelo real corrigió el modelo de datos
+
+Dos correcciones de Mary sobre el ADR que acababa de escribir, y las dos mejoraron el producto.
+
+**1. «No es necesario estar conectado con nadie».** Yo había razonado sobre un instrumento que
+un tercero verifica en línea; lo que la copropiedad emite es **un soporte que el propietario
+adjunta a un trámite**. Con esa premisa, exigir servidor y conexión para producir una hoja que
+hoy firma el administrador es desproporcionado.
+
+Así que los documentos que el residente se lleva —paz y salvo, estado de cuenta, comprobante—
+**se imprimen desde el teléfono**: un bloque `.hoja-documento` y una hoja `@media print` que
+oculta el resto de la app. El sistema operativo ofrece «Guardar como PDF». Sin servidor, sin
+conexión y **sin agregar una sola dependencia**. El acta y la convocatoria siguen esperando el
+backend, porque son instrumentos de la copropiedad y algún día pueden exigir firma.
+
+**CU-R-12 queda terminado.** Era el más viejo de los pendientes de fase 1.
+
+**2. El modelo real.** Mary aportó un paz y salvo de verdad —el del Edificio Cocora— y leerlo
+corrigió dos supuestos míos que ya estaban en el código:
+
+- **El documento no dice «vale 30 días»; dice hasta qué día la unidad está al día.** No es la
+  caducidad del papel, es el alcance de lo que certifica. El campo pasó de `vigenteHasta` a
+  **`cubiertoHasta`**, y con él se fue el chip de «Vencido» del historial: un certificado no
+  caduca solo, y decir que sí era decir algo falso.
+- **Nombra el parqueadero** y admite **varios propietarios**. Las dos cosas estaban en el
+  modelo de datos sin usarse; ahora salen impresas.
+
+De paso responde **quién firma** —el administrador, con cédula, cargo y contacto—, que era una
+de las preguntas abiertas de §3 ter.
+
+La lección para lo que viene: **pedir el documento real antes de diseñar la pantalla**. Media
+hora de leer un paz y salvo de verdad corrigió lo que dos días de suponer habían dejado torcido.
+
+---
+
 ### 2026-08-28 · Mary + IA (Claude) · ADR-0006, los documentos formales
 
 Escrito y aceptado. Era el que bloqueaba más trabajo: cinco casos de uso esperaban un PDF

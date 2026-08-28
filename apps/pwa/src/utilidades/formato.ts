@@ -85,3 +85,56 @@ export function capitalizar(texto: string): string {
   const limpio = texto.replace(/_/g, ' ')
   return limpio.charAt(0).toUpperCase() + limpio.slice(1)
 }
+
+const UNIDADES = [
+  '',
+  'uno',
+  'dos',
+  'tres',
+  'cuatro',
+  'cinco',
+  'seis',
+  'siete',
+  'ocho',
+  'nueve',
+  'diez',
+  'once',
+  'doce',
+  'trece',
+  'catorce',
+  'quince',
+  'dieciseis',
+  'diecisiete',
+  'dieciocho',
+  'diecinueve',
+  'veinte',
+  'veintiuno',
+  'veintidos',
+  'veintitres',
+  'veinticuatro',
+  'veinticinco',
+  'veintiseis',
+  'veintisiete',
+  'veintiocho',
+  'veintinueve',
+  'treinta',
+  'treinta y uno',
+]
+
+/**
+ * `7` -> `siete`. Solo dias del mes (1 a 31), que es donde se usa.
+ *
+ * Los documentos formales escriben el dia con numero y letra —«a los 7 (siete)
+ * dias»— porque un numero suelto se altera con un trazo y una palabra no.
+ */
+export function diaEnLetras(dia: number): string {
+  return UNIDADES[dia] ?? String(dia)
+}
+
+/** Ultimo dia del mes de un periodo `AAAA-MM`, en ISO. */
+export function finDePeriodo(periodo: string): string {
+  const [anio, mes] = periodo.split('-').map(Number)
+  if (!anio || !mes) return periodo
+  const ultimo = new Date(anio, mes, 0).getDate()
+  return `${anio}-${String(mes).padStart(2, '0')}-${String(ultimo).padStart(2, '0')}`
+}

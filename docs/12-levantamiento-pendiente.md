@@ -165,12 +165,17 @@ reglamento de la copropiedad y la Ley 675 de 2001.
 
 - **Paz y salvo:** ¿qué condición exacta debe cumplir una unidad para obtenerlo — saldo en
   cero, o saldo en cero más ninguna sanción pendiente? → *(respuesta)*
-- ¿El paz y salvo tiene **vigencia** (p. ej. 30 días) y consecutivo? ¿Quién lo firma?
-  → *(respuesta)*
+- ~~¿El paz y salvo tiene **vigencia** y consecutivo? ¿Quién lo firma?~~ → ✅ **Respondido
+  (Mary, 2026-08-28, con un modelo real):** el documento **no declara vigencia**; declara
+  **hasta qué día** la unidad está al día. Lleva consecutivo, y **lo firma el administrador**
+  con su nombre, cédula, cargo y contacto. Si además se le quiere dar un plazo de validez al
+  papel, eso está sin decidir.
 - ¿El copropietario lo descarga solo, o el administrador debe autorizarlo primero?
   *(Cambia si es CU-R-12 automático o CU-A-13 manual.)* → *(respuesta)*
 - ¿Los documentos deben poder **verificarse** después (código QR, número de verificación)?
-  → *(respuesta)*
+  → **Parcial (2026-08-28):** el documento ya sale con número y código de verificación, para
+  confirmarlo llamando a la administración. Una **página pública** que lo confirme sin llamar
+  queda diferida ([ADR-0006](./adr/0006-documentos-formales.md)); falta decidir si hace falta.
 - ¿El comprobante de pago es un recibo de caja informal o debe ser un documento con
   requisitos fiscales? → *(respuesta)*
 
