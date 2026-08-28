@@ -88,7 +88,15 @@ export interface Cuota {
   pagoId?: string
 }
 
-export type MedioPago = 'pse' | 'tarjeta' | 'transferencia' | 'efectivo' | 'otro'
+/**
+ * `bre_b` es Bre-B, el sistema de pagos inmediatos interoperable del Banco de la
+ * Republica: se paga desde el banco propio con una **llave** (celular, correo,
+ * documento) y el dinero llega al instante, cualquier dia y a cualquier hora.
+ *
+ * Sin tilde ni guion en el valor, como el resto del dominio: el guion de la marca
+ * vive en el texto que se muestra, no en el dato (docs/08-convenciones.md).
+ */
+export type MedioPago = 'pse' | 'tarjeta' | 'bre_b' | 'transferencia' | 'efectivo' | 'otro'
 
 export interface Pago {
   id: string
@@ -206,7 +214,14 @@ export interface Correspondencia {
   remitente: string
   observaciones: string
   fechaRecepcion: FechaHoraISO
+  /**
+   * Quien la recibio del mensajero y respondio por ella hasta entregarla.
+   * No confundir con `recibidoPor`, que es el residente que se la lleva: sin
+   * este campo la cadena de custodia empieza en el aire (RN-52).
+   */
+  registradoPor: string
   estado: EstadoCorrespondencia
+  /** El residente que la recogio. */
   recibidoPor?: string
   fechaEntrega?: FechaHoraISO
 }
@@ -321,7 +336,13 @@ export interface Documento {
 // ---------------------------------------------------------------------------
 // Sesion y perfiles demo
 // ---------------------------------------------------------------------------
-export type RolUsuario = 'residente' | 'admin'
+/**
+ * `porteria` se agrego el 2026-08-28: quien recibe los paquetes y valida a los
+ * visitantes esta en la entrada a cualquier hora, y suele ser empleado de una
+ * empresa de vigilancia externa. Por eso tiene rol propio y no la cuenta del
+ * administrador (RN-52).
+ */
+export type RolUsuario = 'residente' | 'admin' | 'porteria'
 
 /** Perfil seleccionable en la pantalla de acceso del demo (ADR-0004). */
 export interface PerfilDemo {

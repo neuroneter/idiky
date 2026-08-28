@@ -2,7 +2,15 @@
  * CU-A-09 — Registrar correspondencia recibida.
  * Doc: docs/casos-de-uso/administrador.md#cu-a-09
  *
+ * **Su actor principal sera la porteria**, no el administrador (decision del
+ * equipo, 2026-08-28): quien recibe el paquete del mensajero es quien esta en la
+ * entrada a las siete de la noche. La consola de la porteria esta en el roadmap
+ * (CU-P-01, T-08); mientras tanto el administrador la gestiona desde aqui.
+ *
  * RN-25: un registro entregado ya no se edita.
+ * RN-52: `registradoPor` guarda quien lo recibio del mensajero. Es el comienzo de
+ * la cadena de custodia, y no es lo mismo que `recibidoPor`, que es el residente
+ * que se lo lleva.
  */
 
 import { useState } from 'react'
@@ -45,7 +53,13 @@ export function CorrespondenciaAdminPage() {
       return
     }
     const creado = await ejecutar(
-      (base) => registrarCorrespondencia(base, { ...formulario, unidadId }),
+      (base) =>
+        registrarCorrespondencia(base, {
+          ...formulario,
+          unidadId,
+          // Quien esta en el turno responde por el paquete hasta entregarlo.
+          registradoPor: nombreCompleto(sel.persona(base, sesion!.personaId)),
+        }),
       'Correspondencia registrada. El residente ya la ve en su app.',
     )
     if (creado) {
@@ -113,7 +127,12 @@ export function CorrespondenciaAdminPage() {
                       </td>
                       <td className="suave">{capitalizar(registro.tipo)}</td>
                       <td className="suave">{registro.remitente}</td>
-                      <td className="suave">{formatearFechaHora(registro.fechaRecepcion)}</td>
+                      <td className="suave">
+                        {formatearFechaHora(registro.fechaRecepcion)}
+                        {/* Quien lo recibio del mensajero: sin esto, si el paquete
+                            se pierde el registro no dice quien lo tenia. */}
+                        <div className="subtitulo">{registro.registradoPor}</div>
+                      </td>
                       <td>
                         <ChipCorrespondencia estado={registro.estado} />
                         {registro.estado === 'entregada' && registro.fechaEntrega && (

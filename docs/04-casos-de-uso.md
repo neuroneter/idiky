@@ -3,8 +3,8 @@
 Este es el **índice maestro funcional**. Cada caso de uso tiene un identificador estable
 que se usa en commits, ramas, issues y comentarios de código.
 
-**Nomenclatura:** `CU-<ÁMBITO>-<NN>` donde el ámbito es `R` (residente), `A` (administrador)
-o `S` (sistema).
+**Nomenclatura:** `CU-<ÁMBITO>-<NN>` donde el ámbito es `R` (residente), `A` (administrador),
+`P` (portería) o `S` (sistema).
 
 **Estados:** `✅ Demo` implementado en el demo v0.1 · `🟡 Parcial` implementado a medias ·
 `⬜ Pendiente` documentado pero no implementado.
@@ -75,6 +75,17 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-23 | **Imponer una multa a una unidad** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-23) |
 | CU-A-24 | **Cobrar una cuota adicional a una unidad** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-24) |
 | CU-A-25 | **Configurar si la copropiedad cobra interés de mora** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-25) |
+
+
+## 3. Portería — consola de la entrada
+
+Ámbito nuevo (2026-08-28). **Nada construido**: la app del propietario va primero.
+Detalle en [`casos-de-uso/porteria.md`](./casos-de-uso/porteria.md).
+
+| ID | Caso de uso | Fase | Estado | Detalle |
+|---|---|---|---|---|
+| CU-P-01 | **Registrar y entregar correspondencia** | 2 | ⬜ Pendiente | [ver](./casos-de-uso/porteria.md#cu-p-01) |
+| CU-P-02 | **Validar el código de un visitante** | 2 | ⬜ Pendiente | [ver](./casos-de-uso/porteria.md#cu-p-02) |
 
 ## 3. Sistema — procesos automáticos
 

@@ -210,16 +210,20 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 ### CU-A-09
 ## CU-A-09 — Registrar correspondencia recibida
 
-- **Actor principal:** Administrador (o portería en fase 2)
+- **Actor principal:** **Portería** (CU-P-01). El administrador la gestiona de respaldo, y es
+  quien lo hace hoy porque la consola de portería todavía no existe (T-08).
 - **Resultado esperado:** El residente sabe que tiene un paquete y queda constancia de la entrega.
 
 **Flujo principal**
-1. Se registra unidad destino, tipo (`paquete` | `carta` | `domicilio`), remitente y observaciones.
+1. Se registra unidad destino, tipo (`paquete` | `carta` | `domicilio`), remitente y
+   observaciones. El sistema guarda **quién lo recibió del mensajero** (`registradoPor`,
+   RN-52): es el comienzo de la cadena de custodia.
 2. El sistema crea el registro en estado `en_porteria` y notifica al residente.
 3. Al entregarlo, se registra quién lo recibió y la fecha → estado `entregada`.
 
 **Reglas de negocio**
 - RN-25: la correspondencia entregada no se puede editar, solo consultar.
+- RN-52: la portería registra y entrega; queda constancia de quién recibió.
 
 **Estado en el demo:** ✅ — `src/features/admin/CorrespondenciaAdminPage.tsx`.
 

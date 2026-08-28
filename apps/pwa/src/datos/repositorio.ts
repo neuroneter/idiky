@@ -418,6 +418,8 @@ export async function registrarCorrespondencia(
     tipo: TipoCorrespondencia
     remitente: string
     observaciones: string
+    /** Quien la recibe del mensajero: la porteria de turno (RN-52). */
+    registradoPor: string
   },
 ): Promise<Resultado<Correspondencia>> {
   await esperar()
@@ -429,6 +431,7 @@ export async function registrarCorrespondencia(
     remitente: parametros.remitente,
     observaciones: parametros.observaciones,
     fechaRecepcion: ahoraISO(),
+    registradoPor: parametros.registradoPor,
     estado: 'en_porteria',
   }
   bd.correspondencia.unshift(registro)

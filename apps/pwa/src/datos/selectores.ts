@@ -213,3 +213,4 @@ export function pazYSalvoVigente(bd: BaseDatos, unidadId?: string): Documento | 
     (d) => d.tipo === 'paz_y_salvo' && d.estado === 'vigente' && d.vigenteHasta >= hoy,
   )
 }
+

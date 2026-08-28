@@ -61,6 +61,43 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-28 · Mary + IA (Claude) · El rol de portería, y Bre-B como medio de pago
+
+**Se crea el rol de portería** (Mary). Salió de una pregunta suya: ¿quién debería registrar los
+paquetes que llegan? El administrador no: el domiciliario llega a las siete de la noche o un
+sábado, y un registro hecho al día siguiente pierde la hora real. Además **registrar es asumir
+la custodia**, y el portero suele ser empleado de una empresa de vigilancia externa — con la
+cuenta del administrador vería la cartera de todos.
+
+De ahí salen tres cosas, y el orden importa porque **la app del propietario va primero** (Mary):
+
+1. **El rol existe en el modelo:** `RolUsuario` ya admite `porteria`, y RN-52 dice qué puede
+   hacer —correspondencia y validar visitantes— y qué no: cartera y PQRS, no.
+2. **El hueco que la pregunta destapó, tapado:** `Correspondencia.registradoPor`. La entidad
+   guardaba quién *retira* el paquete pero no quién lo *recibió* del mensajero. Si se pierde, el
+   registro no decía quién lo tenía.
+3. **La consola de la portería queda documentada, no construida** (CU-P-01, CU-P-02, ámbito
+   nuevo `CU-P`). Se alcanzó a escribir y se dejó fuera al confirmar Mary el orden. Ahí queda
+   dicho lo que falta decidir: la minuta, los turnos, si se registra el ingreso además de
+   validarlo.
+
+Vale anotar lo que CU-P-02 deja a la vista: **hoy nadie puede validar el código de un
+visitante**. El residente lo genera (CU-R-10) y en la entrada no hay a quién presentárselo. Es
+la mitad que le falta a un caso de uso que figura como ✅.
+
+**Bre-B entra como medio de pago** (Mary). El sistema de pagos inmediatos del Banco de la
+República: se paga con una llave desde el banco propio y llega al instante. Está en la pantalla
+de pago del residente y en el registro manual del administrador. La opción lleva una línea que
+explica qué es: es nuevo y un medio de pago que hay que adivinar no se usa. **Integrarlo de
+verdad es decisión de fase 2**, como PSE: el demo lo simula.
+
+**Y un defecto del revisor de ortografía.** Descartaba las líneas que contuvieran `id: '`, y
+`{ id: 'pse', texto: 'PSE / debito a cuenta' }` lleva las dos cosas: el descarte se llevaba por
+delante el texto visible. Así llevaban semanas «debito» y «credito» en la pantalla de pago.
+Corregido el filtro y las palabras.
+
+---
+
 ### 2026-08-27 · Mary + IA (Claude) · Un destino, una identidad
 
 Mary vio dos caminos al mismo sitio: el acceso directo del inicio y la pestaña de la barra.

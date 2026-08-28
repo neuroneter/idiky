@@ -435,3 +435,4 @@ export function solicitudesEsperandoRespuesta(pqrs: Pqrs[], reservas: Reserva[])
     reservas.filter((reserva) => reserva.estado === 'solicitada').length
   )
 }
+

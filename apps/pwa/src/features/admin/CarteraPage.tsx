@@ -287,6 +287,7 @@ export function CarteraPage() {
                 <option value="transferencia">Transferencia</option>
                 <option value="efectivo">Efectivo</option>
                 <option value="pse">PSE</option>
+                <option value="bre_b">Bre-B</option>
                 <option value="otro">Otro</option>
               </select>
             </div>

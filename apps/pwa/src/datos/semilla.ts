@@ -31,7 +31,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // Sube con cada cambio de forma de los datos: `almacen.ts` regenera la semilla
 // cuando no coincide, para que nadie quede con una base a medias.
 // 2 — asambleas, votaciones, votos y documentos.
-export const VERSION_ESQUEMA = 2
+// 3 — rol de porteria: la correspondencia guarda quien la recibio del mensajero.
+export const VERSION_ESQUEMA = 3
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -508,6 +509,7 @@ function construirCorrespondencia(): Correspondencia[] {
       remitente: 'Mercado en linea',
       observaciones: 'Caja mediana, se recibe en portería principal.',
       fechaRecepcion: `${sumarDias(hoy, -1)}T11:20:00.000Z`,
+      registradoPor: 'Jairo Alberto Pineda',
       estado: 'en_porteria',
     },
     {
@@ -517,6 +519,7 @@ function construirCorrespondencia(): Correspondencia[] {
       remitente: 'Notaria 12',
       observaciones: 'Sobre certificado.',
       fechaRecepcion: `${sumarDias(hoy, -8)}T16:00:00.000Z`,
+      registradoPor: 'Jairo Alberto Pineda',
       estado: 'entregada',
       recibidoPor: 'Maria Camila Restrepo',
       fechaEntrega: `${sumarDias(hoy, -7)}T19:10:00.000Z`,
@@ -528,6 +531,7 @@ function construirCorrespondencia(): Correspondencia[] {
       remitente: 'Farmacia del barrio',
       observaciones: 'Requiere refrigeración.',
       fechaRecepcion: `${sumarDias(hoy, 0)}T08:45:00.000Z`,
+      registradoPor: 'Jairo Alberto Pineda',
       estado: 'en_porteria',
     },
     {
@@ -537,6 +541,7 @@ function construirCorrespondencia(): Correspondencia[] {
       remitente: 'Tienda de tecnologia',
       observaciones: '',
       fechaRecepcion: `${sumarDias(hoy, -2)}T13:05:00.000Z`,
+      registradoPor: 'Jairo Alberto Pineda',
       estado: 'en_porteria',
     },
   ]

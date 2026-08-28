@@ -21,9 +21,18 @@ import { Icono } from '../../componentes/Icono'
 import { ChipCuota } from '../../componentes/Etiquetas'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 
-const MEDIOS: Array<{ id: MedioPago; texto: string }> = [
-  { id: 'pse', texto: 'PSE / debito a cuenta' },
-  { id: 'tarjeta', texto: 'Tarjeta de credito' },
+/**
+ * `ayuda` no es decoracion: Bre-B es nuevo y mucha gente no sabe todavia que es
+ * ni que necesita una llave. Un medio de pago que hay que adivinar no se usa.
+ */
+const MEDIOS: Array<{ id: MedioPago; texto: string; ayuda: string }> = [
+  { id: 'pse', texto: 'PSE / débito a cuenta', ayuda: 'Te lleva al portal de tu banco' },
+  {
+    id: 'bre_b',
+    texto: 'Bre-B',
+    ayuda: 'Pago inmediato con tu llave, desde la app de tu banco',
+  },
+  { id: 'tarjeta', texto: 'Tarjeta de crédito', ayuda: 'Visa, Mastercard o American Express' },
 ]
 
 export function PagoPage() {
@@ -184,7 +193,10 @@ export function PagoPage() {
               onClick={() => setMedio(opcion.id)}
             >
               <div className="fila">
-                <span>{opcion.texto}</span>
+                <div className="columna">
+                  <span>{opcion.texto}</span>
+                  <span className="subtitulo">{opcion.ayuda}</span>
+                </div>
                 {medio === opcion.id && <Icono nombre="check" tamano={16} />}
               </div>
             </button>

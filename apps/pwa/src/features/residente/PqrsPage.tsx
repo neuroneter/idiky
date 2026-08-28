@@ -20,7 +20,7 @@ import { ChipPqrs, ChipTipoPqrs } from '../../componentes/Etiquetas'
 
 const TIPOS: Array<{ id: TipoPqrs; texto: string; ayuda: string }> = [
   { id: 'peticion', texto: 'Petición', ayuda: 'Solicitas algo a la administración' },
-  { id: 'queja', texto: 'Queja', ayuda: 'Reportas una conducta o situacion' },
+  { id: 'queja', texto: 'Queja', ayuda: 'Reportas una conducta o situación' },
   { id: 'reclamo', texto: 'Reclamo', ayuda: 'Exiges la solución de un problema' },
   { id: 'sugerencia', texto: 'Sugerencia', ayuda: 'Propones una mejora' },
 ]

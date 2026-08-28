@@ -101,7 +101,13 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 
 ### Correspondencia
 `unidadId`, `tipo` (`'paquete' \| 'carta' \| 'domicilio'`), `remitente`, `observaciones`,
-`fechaRecepcion`, `estado` (`'en_porteria' \| 'entregada'`), `recibidoPor?`, `fechaEntrega?`.
+`fechaRecepcion`, `registradoPor`, `estado` (`'en_porteria' \| 'entregada'`), `recibidoPor?`,
+`fechaEntrega?`.
+
+> **`registradoPor` no es `recibidoPor`.** El primero es quien recibió el paquete del mensajero
+> y responde por él mientras está en portería; el segundo es el residente que se lo lleva. Sin
+> el primero, la cadena de custodia empieza en el aire: si el paquete se pierde, el registro no
+> dice quién lo tenía (RN-52).
 
 ### Visitante
 `unidadId`, `nombre`, `documento`, `placa?`, `vigenciaDesde`, `vigenciaHasta`, `codigo`
@@ -356,6 +362,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-49 | **Parametrizar la cartera es facultad exclusiva del administrador de esa copropiedad**: qué cuotas, multas e intereses existen y cuánto valen. Ningún otro rol lo hace, y la comprobación no puede vivir solo en la interfaz. | *parcial* (`App.tsx` protege la ruta; `repositorio.ts` no comprueba quién llama) |
 | RN-50 | **Lo que cae en la cuenta de una unidad se sigue de la parametrización y de su regla, no de una decisión caso por caso.** El interés lo liquida el sistema (RN-42, RN-44), la multa exige un concepto del catálogo y quedar firme (RN-38, RN-39), la extraordinaria sale del acta (RN-46, RN-48). | *pendiente* |
 | RN-51 | **Vota el propietario de la unidad**, no quien la habita: el voto va con la propiedad, igual que la cuota. **(? — falta definir el rol `autorizado` y el apoderado, CU-R-23)** | `dominio/reglas.ts` (`puedeVotar`) + `repositorio.ts` |
+| RN-52 | **La portería hace lo de la entrada, y nada más**: registra y entrega correspondencia y valida visitantes. **No accede a la cartera ni a las PQRS.** Quien recibe el paquete queda registrado en él. | *pendiente* (falta su consola, T-08) |
 
 ## 3 bis. El principio del respaldo
 

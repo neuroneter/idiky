@@ -72,8 +72,12 @@ PALABRAS = {
 # Lineas que nunca son texto visible.
 NO_ES_TEXTO = re.compile(
     r"className|to=|href=|import |from '|nombre=\"|/app|var\(|aria-|role=|"
-    r"id: '|key=|\.tsx|https?://"
+    r"key=|\.tsx|https?://"
 )
+# `id: '...'` NO entra aqui: la linea `{ id: 'pse', texto: 'PSE / debito a cuenta' }`
+# lleva las dos cosas, y descartarla entera dejo pasar dos palabras sin tilde
+# durante semanas. El valor del dominio ya lo protege la regla de la palabra
+# suelta en minuscula.
 # Comentarios: son para quien lee el codigo, no para el usuario. No se revisan.
 ES_COMENTARIO = re.compile(r'^\s*(//|/\*|\*)')
 
