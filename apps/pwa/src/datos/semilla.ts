@@ -32,7 +32,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // cuando no coincide, para que nadie quede con una base a medias.
 // 2 — asambleas, votaciones, votos y documentos.
 // 3 — rol de porteria: la correspondencia guarda quien la recibio del mensajero.
-export const VERSION_ESQUEMA = 3
+// 4 — paz y salvo: cubiertoHasta, codigo de verificacion y una unidad sin saldo.
+export const VERSION_ESQUEMA = 4
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -86,6 +87,17 @@ const unidades: Unidad[] = DEFINICION_UNIDADES.map(([torre, numero, area, coefic
  * Perfil de cartera por unidad: cuantos periodos recientes tiene sin pagar.
  * 0 = al dia. Se cuenta hacia atras desde el periodo actual.
  */
+/**
+ * Unidades que **no deben absolutamente nada**: pagaron incluso la cuota del
+ * periodo siguiente, que se factura por anticipado.
+ *
+ * Existen porque sin ellas nadie podia emitir un paz y salvo sin pagar primero:
+ * el saldo incluye lo ya facturado (RN-26), y a todo el mundo se le factura el
+ * mes que viene. Es un caso normal —quien paga por adelantado— y es el que hay
+ * que poder mostrar (Mary, 2026-08-28).
+ */
+const UNIDADES_SIN_SALDO = ['uni-torre1-202']
+
 const MORA_POR_UNIDAD: Record<string, number> = {
   'uni-torre2-901': 3,
   'uni-torre1-302': 2,
@@ -235,7 +247,8 @@ function construirCartera(): { cuotas: Cuota[]; pagos: Pago[]; consecutivoCompro
     const desdeMora = indiceActual - periodosEnMora + 1
 
     periodos.forEach((periodo, indice) => {
-      const esFuturo = indice > indiceActual
+      const alDiaTotal = UNIDADES_SIN_SALDO.includes(unidad.id)
+      const esFuturo = indice > indiceActual && !alDiaTotal
       const enMora = periodosEnMora > 0 && indice >= desdeMora && indice <= indiceActual
       const pagada = !esFuturo && !enMora
 
@@ -826,6 +839,15 @@ export function crearSemilla(): BaseDatos {
         personaId: 'per-1',
         copropiedadId: COPROPIEDAD_ID,
         unidadId: 'uni-torre1-402',
+      },
+      {
+        id: 'perfil-propietario-sin-saldo',
+        etiqueta: 'Jorge Enrique Valencia',
+        descripcion: 'Propietario sin saldo · Torre 1 apto 202',
+        rol: 'residente',
+        personaId: 'per-4',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre1-202',
       },
       {
         id: 'perfil-residente-mora',

@@ -86,6 +86,13 @@ backend, porque son instrumentos de la copropiedad y algún día pueden exigir f
 
 **CU-R-12 queda terminado.** Era el más viejo de los pendientes de fase 1.
 
+**Un perfil nuevo en la semilla: un propietario que no debe nada** (Mary). Sin él nadie podía
+emitir un paz y salvo sin pagar primero, porque el saldo incluye lo ya facturado (RN-26) y a
+todo el mundo se le factura el mes siguiente por anticipado. Jorge Enrique Valencia, Torre 1
+apto 202, pagó por adelantado — un caso normal, y el que hay que poder mostrar. De paso, el
+botón de la tarjeta con saldo pendiente ahora lleva a **pagar**, no a mirar el estado de
+cuenta: quien entró ahí quería su certificado.
+
 **2. El modelo real.** Mary aportó un paz y salvo de verdad —el del Edificio Cocora— y leerlo
 corrigió dos supuestos míos que ya estaban en el código:
 

@@ -100,8 +100,11 @@ export function PazYSalvoPage() {
             {vigente ? 'Emitir uno nuevo' : 'Emitir mi paz y salvo'}
           </button>
         ) : (
-          <Link to="/app/cuenta" className="boton boton--primario boton--bloque">
-            Ver mi estado de cuenta
+          /* Lleva a pagar, no al estado de cuenta: quien entro aqui queria su
+             certificado, y lo unico que lo separa de el es el saldo. Mandarlo a
+             mirar la deuda le deja el ultimo paso por adivinar. */
+          <Link to="/app/cuenta/pagar" className="boton boton--primario boton--bloque">
+            Pagar para poder emitirlo
           </Link>
         )}
       </div>
