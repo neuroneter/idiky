@@ -167,7 +167,7 @@ export function PazYSalvoPage() {
               onClick={() => setViendoHoja((visible) => !visible)}
             >
               <Icono nombre={viendoHoja ? 'cerrar' : 'buscar'} tamano={18} />
-              {viendoHoja ? 'Ocultar el documento' : 'Ver cómo queda'}
+              {viendoHoja ? 'Ocultar el paz y salvo' : 'Ver paz y salvo'}
             </button>
             {/* Imprimir es como se obtiene el PDF: el sistema operativo ofrece
                 «Guardar como PDF», sin servidor, sin conexion y sin librerias
