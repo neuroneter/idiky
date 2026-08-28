@@ -13,20 +13,21 @@ nueva o una sesión de IA distinta.
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
-| **Autenticación** | El **flujo** está dibujado —documento, contraseña, código en dispositivo nuevo, activación— pero **no autentica**: no se guarda ninguna contraseña ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
+| **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 61 documentados: 20 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
-| **Reglas de negocio** | 54 (RN-01…RN-54) |
+| **Reglas de negocio** | 56 (RN-01…RN-56) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
 ### Lo que funciona hoy
 
-**Puerta:** ingreso con documento y contraseña · código de un solo uso en un dispositivo
-nuevo · activación de la cuenta y recuperación de la contraseña, en tres pasos. Todo
-simulado, y cada pantalla lo dice.
+**Puerta:** ingreso con **clave de 4 números** —y solo la clave si el teléfono ya te conoce— ·
+**huella** donde el aparato tiene lector · código de un solo uso en un dispositivo nuevo ·
+activación y recuperación en tres pasos. Todo simulado salvo la huella, y cada pantalla lo dice.
 
 **App del residente:** inicio con resumen · estado de cuenta · pago simulado con comprobante
-(PSE, Bre-B y tarjeta) · **solicitudes** —zonas comunes, PQRS y paz y salvo— · **asambleas
+(PSE, Bre-B y tarjeta) · **solicitudes** —zonas comunes, PQRS y el **paz y salvo, que se emite,
+se ve y se guarda como PDF**— · **asambleas
 con votación ponderada por coeficiente** · cartelera de comunicados · autorización de
 visitantes con código · consulta de correspondencia · consulta del coeficiente.
 

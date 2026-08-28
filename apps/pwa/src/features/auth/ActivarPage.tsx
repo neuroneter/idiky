@@ -160,7 +160,7 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
               <label htmlFor="documento">Tu documento de identidad</label>
               <input
                 id="documento"
-                className="numerico"
+                className="campo-numeros"
                 inputMode="numeric"
                 value={documento}
                 onChange={(evento) => setDocumento(evento.target.value)}
@@ -187,10 +187,10 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
               </span>
             </div>
             <div className="campo">
-              <label htmlFor="codigo">Código de {esperado.length} dígitos</label>
+              <label htmlFor="codigo">Código de {esperado.length} números</label>
               <input
                 id="codigo"
-                className="numerico"
+                className="campo-numeros"
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 value={codigo}
