@@ -33,7 +33,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 2 — asambleas, votaciones, votos y documentos.
 // 3 — rol de porteria: la correspondencia guarda quien la recibio del mensajero.
 // 4 — paz y salvo: cubiertoHasta, codigo de verificacion y una unidad sin saldo.
-export const VERSION_ESQUEMA = 4
+// 5 — el portero entra al demo como persona y perfil.
+export const VERSION_ESQUEMA = 5
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -140,6 +141,21 @@ const residencias: Residencia[] = DEFINICION_PERSONAS.map(([, , unidadId, rol], 
   desde: `${new Date().getFullYear() - 2}-03-01`,
   principal: true,
 }))
+
+/**
+ * El portero del turno de la manana.
+ *
+ * No es residente: no tiene unidad ni residencia, y por eso no esta en
+ * `DEFINICION_PERSONAS`. Trabaja para la empresa de vigilancia (RN-52).
+ */
+const portero: Persona = {
+  id: 'per-porteria',
+  nombres: 'Jairo Alberto',
+  apellidos: 'Pineda Cortes',
+  documento: '79456123',
+  email: 'porteria@altosdelbosque.co',
+  telefono: '+57 320 555 2020',
+}
 
 /** El administrador de la copropiedad. */
 const administrador: Persona = {
@@ -815,7 +831,7 @@ export function crearSemilla(): BaseDatos {
       },
     ],
     unidades,
-    personas: [...personas, administrador],
+    personas: [...personas, administrador, portero],
     residencias,
     cuotas,
     pagos,
@@ -857,6 +873,14 @@ export function crearSemilla(): BaseDatos {
         personaId: 'per-2',
         copropiedadId: COPROPIEDAD_ID,
         unidadId: 'uni-torre2-901',
+      },
+      {
+        id: 'perfil-porteria',
+        etiqueta: 'Jairo Alberto Pineda',
+        descripcion: 'Portería · turno de la mañana',
+        rol: 'porteria',
+        personaId: 'per-porteria',
+        copropiedadId: COPROPIEDAD_ID,
       },
       {
         id: 'perfil-admin',

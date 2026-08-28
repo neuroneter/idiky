@@ -55,6 +55,7 @@ import {
   registrarFallo,
   ultimaPersona,
 } from '../../estado/acceso'
+import { rutaInicial } from '../../dominio/reglas'
 import { biometria } from '../../servicios/plataforma'
 import { Logotipo } from '../../componentes/Logotipo'
 import { SiluetaTorres } from '../../componentes/SiluetaTorres'
@@ -112,7 +113,7 @@ export function AccesoPage() {
     recordarDispositivo(id)
     recordarUltimaPersona(id)
     iniciar(perfil)
-    navegar(perfil.rol === 'admin' ? '/admin' : '/app', { replace: true })
+    navegar(rutaInicial(perfil.rol), { replace: true })
   }
 
   /** RN-55 — la huella entra en el dispositivo donde se registró. */

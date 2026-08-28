@@ -571,6 +571,21 @@ textarea {
   }
 }
 
+/* --------------------------------------------------- Acciones del turno */
+/* Las dos cosas que la porteria hace cincuenta veces al dia. Grandes porque se
+   tocan con una mano mientras la otra sostiene el paquete. */
+.acciones-turno {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--e3);
+}
+.accion-turno {
+  min-height: 76px;
+  font-size: var(--texto-lg);
+  flex-direction: column;
+  gap: var(--e2);
+}
+
 /* ------------------------------------------------------- Hoja imprimible */
 /* Como el residente obtiene su PDF sin servidor y sin conexion: el navegador
    imprime, y el sistema operativo ofrece «Guardar como PDF» (ADR-0006, revision

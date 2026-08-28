@@ -368,7 +368,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-54 | En un **dispositivo nuevo** se exige un **código de un solo uso** además de la clave. Desde la app se paga. | `estado/acceso.ts` (simulado) |
 | RN-55 | La clave es de **4 números**, no una contraseña: la app la usan adultos mayores. Lo que sostiene esa decisión es que la clave **solo sirve en un dispositivo ya probado** (RN-54) y que **los intentos se acaban**; agotados, se vuelve a exigir el código. | `estado/acceso.ts` |
 | RN-56 | La **huella** reemplaza teclear la clave en el dispositivo donde se registró. Nunca crea la cuenta ni sustituye la identidad, y **solo se ofrece donde hay lector**. | `servicios/plataforma.ts` (WebAuthn) |
-| RN-52 | **La portería hace lo de la entrada, y nada más**: registra y entrega correspondencia y valida visitantes. **No accede a la cartera ni a las PQRS.** Quien recibe el paquete queda registrado en él. | *pendiente* (falta su consola, T-08) |
+| RN-52 | **La portería hace lo de la entrada, y nada más**: registra y entrega correspondencia y valida visitantes. **No accede a la cartera ni a las PQRS.** Quien recibe el paquete queda registrado en él. | `dominio/reglas.ts` (`puede`) + `LayoutPorteria` |
 
 ## 3 bis. El principio del respaldo
 

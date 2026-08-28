@@ -8,6 +8,7 @@
 
 import type {
   Asamblea,
+  RolUsuario,
   Cuota,
   FechaISO,
   Periodo,
@@ -436,3 +437,32 @@ export function solicitudesEsperandoRespuesta(pqrs: Pqrs[], reservas: Reserva[])
   )
 }
 
+
+// ---------------------------------------------------------------------------
+// Porteria — CU-P-01, CU-P-02
+// ---------------------------------------------------------------------------
+
+/**
+ * RN-52 — La porteria hace lo de la entrada, y nada mas.
+ *
+ * Registra y entrega correspondencia, y valida visitantes. **No ve la cartera**
+ * ni las PQRS: quien debe cuanto no es asunto de la porteria, y el portero suele
+ * ser empleado de una empresa de vigilancia externa, no de la copropiedad.
+ *
+ * La lista vive aqui, en el dominio, y no en el menu: un permiso que solo existe
+ * como pestana escondida no es un permiso (T-16).
+ */
+const PERMISOS: Record<RolUsuario, readonly string[]> = {
+  residente: ['cartera:propia', 'reservas:propias', 'pqrs:propias', 'visitantes:propios'],
+  admin: ['cartera', 'unidades', 'reservas', 'pqrs', 'comunicados', 'correspondencia'],
+  porteria: ['correspondencia', 'visitantes:validar'],
+}
+
+export function puede(rol: RolUsuario | undefined, permiso: string): boolean {
+  return !!rol && PERMISOS[rol].includes(permiso)
+}
+
+/** A donde entra cada rol al iniciar sesion. */
+export function rutaInicial(rol: RolUsuario): string {
+  return { residente: '/app', admin: '/admin', porteria: '/porteria' }[rol]
+}

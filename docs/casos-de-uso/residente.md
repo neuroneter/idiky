@@ -303,6 +303,8 @@ están implementadas.
 
 **Estado en el demo:** ✅ — `src/features/residente/VisitantesPage.tsx`. El QR se dibuja
 localmente sin librerías externas (ver [ADR-0005](../adr/0005-codigo-qr-sin-dependencias.md)).
+Desde el 2026-08-28 el código **ya se puede validar** en la entrada (CU-P-02): hasta ese día
+este caso de uso figuraba terminado con la mitad en el aire.
 
 ---
 

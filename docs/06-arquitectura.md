@@ -99,6 +99,9 @@ apps/pwa/
 | `/admin/pqrs` | Bandeja de PQRS | CU-A-07 |
 | `/admin/comunicados` | Publicación de comunicados | CU-A-08 |
 | `/admin/correspondencia` | Registro de correspondencia | CU-A-09 |
+| `/porteria` | El turno: lo pendiente y las dos acciones | CU-P-01, CU-P-02 |
+| `/porteria/visitantes` | Validar el código de un visitante | CU-P-02 |
+| `/porteria/correspondencia` | Registrar y entregar | CU-P-01 |
 
 ## 5. Estrategia multiplataforma
 

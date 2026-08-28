@@ -5,8 +5,10 @@
 
 import { Navigate, Route, Routes } from 'react-router-dom'
 import { useSesion } from './estado/SesionContext'
+import { rutaInicial } from './dominio/reglas'
 import { LayoutResidente } from './componentes/LayoutResidente'
 import { LayoutAdmin } from './componentes/LayoutAdmin'
+import { LayoutPorteria } from './componentes/LayoutPorteria'
 import { AccesoPage } from './features/auth/AccesoPage'
 import { ActivarPage } from './features/auth/ActivarPage'
 import { InicioPage } from './features/residente/InicioPage'
@@ -28,19 +30,21 @@ import { CarteraPage } from './features/admin/CarteraPage'
 import { ReservasAdminPage } from './features/admin/ReservasAdminPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
-import { CorrespondenciaAdminPage } from './features/admin/CorrespondenciaAdminPage'
+import { CorrespondenciaPage as CorrespondenciaGestionPage } from './features/porteria/CorrespondenciaPage'
+import { TurnoPage } from './features/porteria/TurnoPage'
+import { ValidarVisitantePage } from './features/porteria/ValidarVisitantePage'
 
 /** Deja pasar solo si hay sesion con el rol esperado (ADR-0004). */
 function Protegida({
   rol,
   children,
 }: {
-  rol: 'residente' | 'admin'
+  rol: 'residente' | 'admin' | 'porteria'
   children: React.ReactNode
 }) {
   const { sesion } = useSesion()
   if (!sesion) return <Navigate to="/acceso" replace />
-  if (sesion.rol !== rol) return <Navigate to={sesion.rol === 'admin' ? '/admin' : '/app'} replace />
+  if (sesion.rol !== rol) return <Navigate to={rutaInicial(sesion.rol)} replace />
   return <>{children}</>
 }
 
@@ -104,14 +108,26 @@ export function App() {
         <Route path="reservas" element={<ReservasAdminPage />} />
         <Route path="pqrs" element={<PqrsAdminPage />} />
         <Route path="comunicados" element={<ComunicadosAdminPage />} />
-        <Route path="correspondencia" element={<CorrespondenciaAdminPage />} />
+        <Route path="correspondencia" element={<CorrespondenciaGestionPage />} />
+      </Route>
+
+      {/* Puesto de porteria — CU-P-xx */}
+      <Route
+        path="/porteria"
+        element={
+          <Protegida rol="porteria">
+            <LayoutPorteria />
+          </Protegida>
+        }
+      >
+        <Route index element={<TurnoPage />} />
+        <Route path="visitantes" element={<ValidarVisitantePage />} />
+        <Route path="correspondencia" element={<CorrespondenciaGestionPage />} />
       </Route>
 
       <Route
         path="*"
-        element={
-          <Navigate to={sesion ? (sesion.rol === 'admin' ? '/admin' : '/app') : '/acceso'} replace />
-        }
+        element={<Navigate to={sesion ? rutaInicial(sesion.rol) : '/acceso'} replace />}
       />
     </Routes>
   )

@@ -80,13 +80,13 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 
 ## 3. Portería — consola de la entrada
 
-Ámbito nuevo (2026-08-28). **Nada construido**: la app del propietario va primero.
-Detalle en [`casos-de-uso/porteria.md`](./casos-de-uso/porteria.md).
+Ámbito nuevo (2026-08-28), **construido el mismo día** tras aprobar la propuesta. Falta la
+minuta del turno. Detalle en [`casos-de-uso/porteria.md`](./casos-de-uso/porteria.md).
 
 | ID | Caso de uso | Fase | Estado | Detalle |
 |---|---|---|---|---|
-| CU-P-01 | **Registrar y entregar correspondencia** | 2 | ⬜ Pendiente | [ver](./casos-de-uso/porteria.md#cu-p-01) |
-| CU-P-02 | **Validar el código de un visitante** | 2 | ⬜ Pendiente | [ver](./casos-de-uso/porteria.md#cu-p-02) |
+| CU-P-01 | **Registrar y entregar correspondencia** | 2 | 🟡 Parcial (falta la minuta) | [ver](./casos-de-uso/porteria.md#cu-p-01) |
+| CU-P-02 | **Validar el código de un visitante** | 2 | 🟡 Parcial (valida; no registra el ingreso) | [ver](./casos-de-uso/porteria.md#cu-p-02) |
 
 ## 3. Sistema — procesos automáticos
 

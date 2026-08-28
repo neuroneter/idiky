@@ -4,10 +4,9 @@
 recibe los paquetes y valida a los visitantes está en la entrada a cualquier hora, y no es el
 administrador.
 
-> **Nada de esto está construido.** La app del propietario va primero (decisión de Mary,
-> 2026-08-28); la consola de la portería entra después, con el resto del módulo (T-08). Lo que
-> ya existe es la decisión, el rol en el modelo (`RolUsuario`) y el campo que faltaba
-> (`Correspondencia.registradoPor`).
+> **Construido el 2026-08-28**, después de aprobar la propuesta: el puesto tiene tres
+> pantallas —el turno, validar visitantes y correspondencia— y su propio perfil en el demo.
+> Lo que sigue pendiente es la **minuta**: registrar el ingreso, no solo validarlo.
 
 **Por qué tiene rol propio y no la cuenta del administrador**
 
@@ -36,7 +35,9 @@ administrador.
 2. El registro queda `en_porteria` y el residente lo ve en su app (CU-R-11).
 3. Al entregarlo, se registra quién lo retiró y la fecha → `entregada` (RN-25).
 
-**Estado:** ⬜ Pendiente — hoy lo hace el administrador desde su consola.
+**Estado:** 🟡 — `src/features/porteria/CorrespondenciaPage.tsx`. Registra, entrega y guarda
+quién recibió del mensajero (RN-52). El administrador entra a la misma pantalla desde su
+consola, de respaldo (CU-A-09).
 
 ---
 
@@ -58,8 +59,10 @@ administrador.
   mismo «todavía no» que «ya no».
 - A2. El código no existe → se llama al residente. La app no conoce esa autorización.
 
-**Estado:** ⬜ Pendiente — **hoy nadie puede validar el código**: el residente lo genera y en la
-entrada no hay a quién presentárselo. Es la mitad que le falta a CU-R-10.
+**Estado:** 🟡 — `src/features/porteria/ValidarVisitantePage.tsx`. Da el veredicto y los datos
+del visitante, y distingue las tres formas de no servir: todavía no, ya venció, o revocado.
+**No registra el ingreso**: hora de entrada, salida y vehículo son la minuta, que sigue sin
+definir. Con esto CU-R-10 deja de tener una mitad en el aire.
 
 ---
 

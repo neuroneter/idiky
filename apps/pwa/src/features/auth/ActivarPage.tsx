@@ -26,6 +26,7 @@ import {
   recordarDispositivo,
   recordarUltimaPersona,
 } from '../../estado/acceso'
+import { rutaInicial } from '../../dominio/reglas'
 import { biometria } from '../../servicios/plataforma'
 import { Logotipo } from '../../componentes/Logotipo'
 import { SiluetaTorres } from '../../componentes/SiluetaTorres'
@@ -130,7 +131,7 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
       await biometria.registrar(personaId, nombreCompleto(persona))
     }
     iniciar(perfil)
-    navegar(perfil.rol === 'admin' ? '/admin' : '/app', { replace: true })
+    navegar(rutaInicial(perfil.rol), { replace: true })
   }
 
   return (

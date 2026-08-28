@@ -70,6 +70,42 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-28 · Mary + IA (Claude) · El puesto de portería
+
+Mary pidió la propuesta, la aprobó y pidió construirla. Quedó en tres pantallas y con su
+perfil en el demo: **Jairo Alberto Pineda · Portería · turno de la mañana**.
+
+**La tesis que ordena el diseño:** la portería no es una app más pequeña, es **un puesto de
+trabajo**. Alguien de pie, con un paquete en una mano, al que interrumpen cada tres minutos y
+que entrega el turno a las seis. De ahí salen cuatro decisiones, y dos contradicen a propósito
+lo que acabábamos de construir para el propietario:
+
+1. **La sesión es del turno, no de la persona.** Nada de «recordar este dispositivo» ni huella:
+   eso es correcto en el teléfono de un propietario y un agujero en un equipo donde se turnan
+   tres personas. El botón de salir dice «Cerrar turno».
+2. **Dos acciones, no un menú.** Validar visitante y registrar paquete son el 90 % del día, en
+   botones de 76 px: la otra mano sostiene el paquete.
+3. **Lo pendiente primero.** Los paquetes sin entregar y los visitantes de hoy son lo que un
+   turno hereda del anterior; si hay que buscarlos, se pierden.
+4. **No ve cartera ni PQRS** (RN-52). Ahora la lista de permisos vive en `reglas.ts` y el menú
+   se arma con `puede()`: un permiso que solo existe como pestaña escondida no es un permiso.
+
+**Lo que esto destapó y ya está cerrado:** hasta hoy **nadie podía validar el código de un
+visitante**. El residente lo generaba (CU-R-10, que figuraba como ✅) y en la entrada no había a
+quién presentárselo. Un caso de uso puede estar terminado en una app y tener la otra mitad en el
+aire; esta es la clase de hueco que solo aparece cuando se dibuja el rol que falta.
+
+La pantalla de validación distingue **las tres formas de no servir** —todavía no, ya venció,
+revocado—, porque cada una se resuelve distinto: la primera llamando al residente, la segunda
+pidiendo un código nuevo. «Código inválido» para las tres deja al portero sin saber qué sigue.
+
+**Lo que falta, dicho en la pantalla:** la **minuta** —registrar el ingreso, no solo validarlo—
+espera las respuestas de T-08. Y la pregunta que puede cambiar el diseño: **¿la cuenta es de la
+persona o del puesto?** Si es del puesto, «quién recibió el paquete» deja de ser confiable, que
+era la razón de crear el rol.
+
+---
+
 ### 2026-08-28 · Mary + IA (Claude) · Huella, clave de 4 números y una puerta que te reconoce
 
 Tres pedidos de Mary sobre el acceso, y el tercero es el que ordena a los otros dos.

@@ -219,3 +219,20 @@ export function ultimoPazYSalvo(bd: BaseDatos, unidadId?: string): Documento | u
   )
 }
 
+
+/**
+ * Busca un visitante por el codigo que presenta en la entrada (CU-P-02).
+ *
+ * Sin distinguir mayusculas ni espacios: el portero lo teclea de la pantalla
+ * ajena de un visitante, muchas veces de noche y con alguien esperando.
+ */
+export function visitantePorCodigo(bd: BaseDatos, codigo: string): Visitante | undefined {
+  const limpio = codigo.trim().toUpperCase().replace(/\s+/g, '')
+  if (!limpio) return undefined
+  return bd.visitantes.find((v) => v.codigo.toUpperCase().replace(/\s+/g, '') === limpio)
+}
+
+/** Lo que un turno le hereda al siguiente: lo que llego y nadie ha recogido. */
+export function correspondenciaPendiente(bd: BaseDatos, copropiedadId: string): Correspondencia[] {
+  return correspondenciaDeCopropiedad(bd, copropiedadId).filter((c) => c.estado === 'en_porteria')
+}

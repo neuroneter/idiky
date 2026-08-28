@@ -1,11 +1,13 @@
 /**
- * CU-A-09 — Registrar correspondencia recibida.
- * Doc: docs/casos-de-uso/administrador.md#cu-a-09
+ * CU-P-01 — Registrar y entregar la correspondencia de la porteria.
+ * CU-A-09 — El administrador la gestiona tambien, de respaldo.
+ * Doc: docs/casos-de-uso/porteria.md#cu-p-01
  *
- * **Su actor principal sera la porteria**, no el administrador (decision del
- * equipo, 2026-08-28): quien recibe el paquete del mensajero es quien esta en la
- * entrada a las siete de la noche. La consola de la porteria esta en el roadmap
- * (CU-P-01, T-08); mientras tanto el administrador la gestiona desde aqui.
+ * Vive en `features/porteria/` porque **su actor principal es la porteria**:
+ * quien recibe el paquete del mensajero es quien esta en la entrada a las siete
+ * de la noche, no quien tiene horario de oficina. El administrador entra a la
+ * misma pantalla desde su consola, para cuando la porteria no alcanza o hay que
+ * corregir.
  *
  * RN-25: un registro entregado ya no se edita.
  * RN-52: `registradoPor` guarda quien lo recibio del mensajero. Es el comienzo de
@@ -27,7 +29,7 @@ import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipCorrespondencia } from '../../componentes/Etiquetas'
 
-export function CorrespondenciaAdminPage() {
+export function CorrespondenciaPage() {
   const { bd, ejecutar, cargando, mostrarAviso } = useDatos()
   const { sesion } = useSesion()
   const [creando, setCreando] = useState(false)

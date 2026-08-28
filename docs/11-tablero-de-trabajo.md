@@ -23,7 +23,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-15 | Corregir los bugs del demo detectados en la revisión | Zona A / D | ✅ Hecho | Zona horaria, íconos PWA, vigencia del visitante y doble toque. Ver bitácora del 2026-08-26 |
 | T-17 | **Definir qué se intercambia con la app contable de Jeimy** | Mary + Jeimy | 📋 Por hacer | La destinación específica de una extraordinaria (RN-48) es dato contable: lo recaudado tiene que poder cruzarse con lo gastado en esa destinación |
 | T-18 | **Cómo se envía el código de un solo uso** (SMS, WhatsApp o correo) y con qué proveedor | Daniel | 📋 Por hacer | Sale del flujo de acceso decidido el 2026-08-28 (RN-54). Tiene costo por mensaje y afecta el ADR de backend |
-| T-19 | **Consola de portería** (CU-P-01, CU-P-02) | Jeimy | 📋 Por hacer | El rol y las reglas ya están (RN-52); falta la app. Va después de la del propietario |
+| T-19 | **Consola de portería** (CU-P-01, CU-P-02) | Jeimy | 🟡 A medias | Construida el 2026-08-28: turno, visitantes y correspondencia. **Falta la minuta**, que espera las respuestas de T-08 |
 | T-16 | Saldar las tres deudas de arquitectura | Daniel (zona C) | 📋 Por hacer | Validar las reglas en el repositorio y no solo en la UI —**empezando por RN-49: `generarCuotas()` no comprueba quién la llama**— · usar `imputarPago()` en vez de reimplementarlo · RN-22 debe filtrar por copropiedad |
 
 ## Siguiente — cuando T-01 esté cerrado
