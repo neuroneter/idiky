@@ -20,12 +20,15 @@
 | | |
 |---|---|
 | **Se identifica con** | Su **documento de identidad**. Es lo que la administración ya tiene de cada propietario, y no cambia cuando cambia el correo o el celular |
-| **Se confirma con** | **Contraseña** y, en un dispositivo nuevo, además un **código de un solo uso** (RN-54). Desde la app se paga plata |
+| **Se confirma con** | **Una clave de 4 números** (RN-55) y, en un dispositivo nuevo, además un **código de un solo uso** (RN-54). Desde la app se paga plata |
+| **O con huella** | Donde el teléfono tenga lector, la huella reemplaza teclear la clave (RN-56) |
 | **La cuenta nace** | Cuando la administración vincula la unidad. La persona **la activa**, no la crea (RN-53) |
 
 **Flujo principal**
-1. El sistema muestra la pantalla de acceso: documento y contraseña.
-2. El residente se identifica.
+1. El sistema muestra la pantalla de acceso. Si **alguien ya entró en este teléfono**, muestra
+   su nombre y pide **solo la clave** (Mary, 2026-08-28): volver a pedirle diez dígitos de
+   cédula a quien ya entró aquí es trabajo por nada. Si no, pide documento y clave.
+2. El residente se identifica —o toca **Entrar con huella**, si la registró (RN-56)—.
 3. Si el dispositivo no es conocido, el sistema envía un **código de un solo uso** y lo pide.
 4. El sistema resuelve sus residencias.
 5. Si tiene una sola unidad, la selecciona; si tiene varias, le pide elegir.
@@ -37,17 +40,23 @@
 - A2. La cuenta no está activada → lo lleva a activarla (CU-R-25).
 - A3. Sin unidades vinculadas → «tu administrador aún no ha vinculado tu unidad».
 - A4. El residente cambia de unidad activa desde el selector del encabezado.
-- A5. Olvidó la contraseña → CU-R-25, mismo trámite.
+- A5. Olvidó la clave → CU-R-25, mismo trámite.
+- A6. **Se le acabaron los intentos** → el sistema bloquea la clave y lo manda al código
+  (RN-55). Es lo que permite que la clave sea corta.
+- A7. **No es él** quien el teléfono recuerda → toca «No soy yo» y vuelve a documento y clave.
 
 **Reglas de negocio**
 - RN-01 (contexto de copropiedad), RN-02 (rol efectivo por unidad).
 - RN-53: la cuenta existe porque la administración vinculó a la persona.
-- RN-54: dispositivo nuevo, código de un solo uso además de la contraseña.
+- RN-54: dispositivo nuevo, código de un solo uso además de la clave.
+- RN-55: la clave es de 4 números y los intentos se acaban.
+- RN-56: la huella reemplaza teclear la clave en el dispositivo donde se registró.
 
 **Estado en el demo:** 🟡 — `src/features/auth/AccesoPage.tsx` muestra el flujo completo, pero
-**no autentica**: no se guarda ninguna contraseña, cualquiera con la longitud mínima sirve, y
-el código se muestra en pantalla (ver [ADR-0004](../adr/0004-autenticacion-demo.md)). El atajo
-de perfiles sigue disponible, plegado debajo.
+**no autentica**: no se guarda ninguna clave, cualquiera de 4 números sirve, y el código se
+muestra en pantalla (ver [ADR-0004](../adr/0004-autenticacion-demo.md)). **La huella sí es
+real** —la lee el aparato con WebAuthn—; lo que falta es el servidor que la comprobaría. El
+atajo de perfiles sigue disponible, plegado debajo.
 
 ---
 
@@ -62,7 +71,9 @@ de perfiles sigue disponible, plegado debajo.
 **Flujo principal** — tres pasos, los mismos para activar y para recuperar
 1. Escribe su **documento**. El sistema comprueba que esté vinculado (RN-53).
 2. El sistema le envía un **código de un solo uso** y él lo confirma.
-3. Crea su contraseña (dos veces) y entra. El dispositivo queda como conocido (RN-54).
+3. Crea su **clave de 4 números** (dos veces) y entra. El dispositivo queda como conocido
+   (RN-54). Si el teléfono tiene lector, ahí mismo se le ofrece **dejar la huella** (RN-56):
+   es el único momento en que registrarla no exige volver a pedirle nada.
 
 **Flujos alternativos**
 - A1. Documento no vinculado → «la administración es quien te registra».

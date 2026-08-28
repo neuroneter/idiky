@@ -3,7 +3,7 @@
  * CU-R-01 (unidad activa) · CU-R-02 … CU-R-11 y CU-R-24 se renderizan dentro del <Outlet>.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useDatos } from '../estado/DatosContext'
 import { useSesion } from '../estado/SesionContext'
@@ -16,6 +16,7 @@ import { Logotipo } from './Logotipo'
 import { SiluetaTorres } from './SiluetaTorres'
 import { Modal } from './Modal'
 import { AvisoGlobal } from './Aviso'
+import { biometria } from '../servicios/plataforma'
 
 /**
  * Cinco pestanas, que es el maximo que caben sin que el texto se parta.
@@ -73,6 +74,19 @@ export function LayoutResidente() {
   const { pathname } = useLocation()
   const [eligiendoUnidad, setEligiendoUnidad] = useState(false)
   const [viendoPerfil, setViendoPerfil] = useState(false)
+  /** `null` mientras se averigua si el aparato tiene lector (ADR-0002). */
+  const [huella, setHuella] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    let vigente = true
+    biometria.disponible().then((hay) => {
+      if (!vigente || !hay || !sesion) return
+      setHuella(biometria.registrada(sesion.personaId))
+    })
+    return () => {
+      vigente = false
+    }
+  }, [sesion])
 
   if (!sesion) return null
 
@@ -170,6 +184,35 @@ export function LayoutResidente() {
           </div>
 
           <div className="separador" />
+
+          {/* Solo aparece si el aparato tiene lector: ofrecer una huella donde no
+              hay lector es prometer algo que no va a pasar (RN-55). */}
+          {huella !== null && (
+            <label className="opcion-huella">
+              <input
+                type="checkbox"
+                checked={huella}
+                onChange={async (evento) => {
+                  if (!evento.target.checked) {
+                    biometria.olvidar(sesion.personaId)
+                    setHuella(false)
+                    return
+                  }
+                  const listo = await biometria.registrar(
+                    sesion.personaId,
+                    nombreCompleto(persona),
+                  )
+                  setHuella(listo)
+                }}
+              />
+              <span>
+                <strong>Entrar con huella en este teléfono</strong>
+                <span className="subtitulo">
+                  Así no tienes que escribir tu clave cada vez.
+                </span>
+              </span>
+            </label>
+          )}
 
           {/* Azul suave, no rojo: el rojo esta reservado para la plata (mora, cuota
               vencida) y pintar aqui de rojo le quita fuerza a la senal que si tiene

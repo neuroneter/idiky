@@ -3,39 +3,63 @@
  * Doc: docs/casos-de-uso/residente.md#cu-r-01
  *
  * La puerta de la app. Hasta el 2026-08-28 aqui habia una lista de perfiles, que
- * es un atajo de demostracion y no una pantalla de producto: un residente real
- * nunca veria eso. Mary lo senalo —«lo que hemos trabajado son las pantallas
- * adentro»— y el equipo decidio como se entra:
+ * es un atajo de demostracion y no una pantalla de producto.
  *
- *   - **con el documento**, que es lo que la administracion ya tiene de cada
- *     propietario y no cambia cuando cambia el correo o el celular;
- *   - **contrasena**, y en un telefono nuevo ademas un **codigo de un solo uso**
- *     (RN-54), porque desde aqui se paga plata;
- *   - **la cuenta nace vinculada**: si la administracion no vinculo a la persona
- *     a una unidad, no hay a quien dejar entrar (RN-53).
+ * **La pantalla tiene dos caras**, y esa es la decision que la ordena:
  *
- * Nada de esto autentica de verdad (ADR-0004): no se guarda ninguna contrasena y
- * el codigo se muestra en pantalla. La pantalla lo dice, para que nadie confunda
- * el demo con un sistema de acceso.
+ *   - **El telefono ya te conoce** → tu nombre y **solo la clave** (Mary,
+ *     2026-08-28), o la huella si la dejaste registrada (RN-55). Volver a pedir
+ *     diez digitos de cedula a quien ya entro aqui es trabajo por nada.
+ *   - **Nadie ha entrado en este telefono** → documento, clave y un **codigo de
+ *     un solo uso** (RN-54), porque desde aqui se paga plata.
+ *
+ * Y la cuenta **nace vinculada**: si la administracion no vinculo a la persona a
+ * una unidad, no hay a quien dejar entrar (RN-53).
+ *
+ * ## Por que una clave de cuatro digitos y no una contrasena
+ *
+ * «La contrasena debe ser algo muy sencillo porque tenemos adultos mayores»
+ * (Mary). Una contrasena con mayusculas y simbolos, tecleada en un telefono, es
+ * la barrera que hace que la persona deje de entrar y vuelva a llamar a la
+ * administracion — es decir, la que hace que la app no sirva.
+ *
+ * La seguridad no baja, **cambia de sitio**: la clave solo sirve en un
+ * dispositivo ya probado con un codigo (RN-54), los intentos se acaban, y quien
+ * quiera entra con huella sin teclear nada. Es el razonamiento de la clave del
+ * cajero.
+ *
+ * Nada de esto autentica de verdad (ADR-0004): no se guarda ninguna clave y el
+ * codigo se muestra en pantalla. La huella si es real —la lee el aparato—; lo que
+ * no existe todavia es el servidor que la comprobaria.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
+import { nombreCompleto } from '../../datos/selectores'
 import {
   activarCuenta,
   cuentaActivada,
+  DIGITOS_CLAVE,
   dispositivoConocido,
   generarCodigo,
-  MINIMO_CONTRASENA,
+  INTENTOS_MAXIMOS,
+  intentosFallidos,
+  limpiarFallos,
   normalizarDocumento,
+  olvidarUltimaPersona,
   recordarDispositivo,
+  recordarUltimaPersona,
+  registrarFallo,
+  ultimaPersona,
 } from '../../estado/acceso'
+import { biometria } from '../../servicios/plataforma'
 import { Logotipo } from '../../componentes/Logotipo'
 import { SiluetaTorres } from '../../componentes/SiluetaTorres'
 import { Icono } from '../../componentes/Icono'
+import { iniciales } from '../../utilidades/formato'
 import { perfilDe } from './perfil'
 
 export function AccesoPage() {
@@ -44,11 +68,37 @@ export function AccesoPage() {
   const navegar = useNavigate()
 
   const [documento, setDocumento] = useState('')
-  const [contrasena, setContrasena] = useState('')
+  const [clave, setClave] = useState('')
   const [codigo, setCodigo] = useState('')
   const [esperado, setEsperado] = useState<string | null>(null)
   const [personaId, setPersonaId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+
+  /** Quien entro aqui la ultima vez, si sigue vinculado y con la cuenta activa. */
+  const recordada = ultimaPersona()
+  const conocida = recordada && cuentaActivada(recordada) ? sel.persona(bd, recordada) : undefined
+  /** Deja entrar con otro documento sin borrar a quien el telefono recuerda. */
+  const [usarDocumento, setUsarDocumento] = useState(false)
+  const modoConocida = !!conocida && !usarDocumento
+
+  /**
+   * Si se puede entrar con huella.
+   *
+   * Se resuelve al abrir porque preguntar si hay lector es asincrono: hasta que
+   * responde, el boton no existe. Vale mas que aparezca medio segundo tarde que
+   * ofrecer una huella donde no hay lector.
+   */
+  const [hayHuella, setHayHuella] = useState(false)
+
+  useEffect(() => {
+    let vigente = true
+    biometria.disponible().then((hay) => {
+      if (vigente && hay && conocida) setHayHuella(biometria.registrada(conocida.id))
+    })
+    return () => {
+      vigente = false
+    }
+  }, [conocida])
 
   const copropiedad = bd.copropiedades[0]
 
@@ -58,20 +108,37 @@ export function AccesoPage() {
       setError('Tu unidad todavía no está vinculada. Escríbele a la administración.')
       return
     }
+    limpiarFallos(id)
     recordarDispositivo(id)
+    recordarUltimaPersona(id)
     iniciar(perfil)
     navegar(perfil.rol === 'admin' ? '/admin' : '/app', { replace: true })
+  }
+
+  /** RN-55 — la huella entra en el dispositivo donde se registró. */
+  async function entrarConHuella(id: string) {
+    setError(null)
+    const confirmado = await biometria.verificar(id)
+    if (!confirmado) {
+      setError('No pudimos confirmar tu huella. Entra con tu clave.')
+      return
+    }
+    entrar(id)
   }
 
   function verificar(evento: React.FormEvent) {
     evento.preventDefault()
     setError(null)
 
-    const buscado = normalizarDocumento(documento)
-    const persona = bd.personas.find((p) => normalizarDocumento(p.documento) === buscado)
+    // A quien el telefono ya conoce no se le vuelve a pedir el documento.
+    const persona = modoConocida
+      ? conocida
+      : bd.personas.find(
+          (p) => normalizarDocumento(p.documento) === normalizarDocumento(documento),
+        )
 
-    // RN-53: la cuenta existe porque la administracion vinculo a la persona. No se
-    // dice «documento incorrecto»: se dice que hacer, que es lo util aqui.
+    // RN-53: la cuenta existe porque la administración vinculó a la persona. No se
+    // dice «documento incorrecto»: se dice qué hacer, que es lo útil aquí.
     if (!persona) {
       setError(
         'No encontramos ese documento en la copropiedad. La administración es quien vincula tu unidad; escríbele para que te registre.',
@@ -79,15 +146,29 @@ export function AccesoPage() {
       return
     }
     if (!cuentaActivada(persona.id)) {
-      setError('Todavía no has activado tu cuenta. Actívala aquí abajo y creas tu contraseña.')
-      return
-    }
-    if (contrasena.length < MINIMO_CONTRASENA) {
-      setError(`La contraseña tiene al menos ${MINIMO_CONTRASENA} caracteres.`)
+      setError('Todavía no has activado tu cuenta. Actívala aquí abajo y creas tu clave.')
       return
     }
 
-    // RN-54: telefono nuevo, codigo ademas de la contrasena.
+    // El limite de intentos es lo que sostiene que la clave sea de cuatro digitos.
+    if (intentosFallidos(persona.id) >= INTENTOS_MAXIMOS) {
+      setError(
+        'Por seguridad bloqueamos la clave después de varios intentos. Toca «Olvidé mi clave» y te enviamos un código.',
+      )
+      return
+    }
+    if (clave.length !== DIGITOS_CLAVE || !/^\d+$/.test(clave)) {
+      const fallos = registrarFallo(persona.id)
+      const quedan = INTENTOS_MAXIMOS - fallos
+      setError(
+        quedan > 0
+          ? `La clave son ${DIGITOS_CLAVE} números. Te quedan ${quedan} ${quedan === 1 ? 'intento' : 'intentos'}.`
+          : 'Se acabaron los intentos. Toca «Olvidé mi clave» y te enviamos un código.',
+      )
+      return
+    }
+
+    // RN-54: teléfono nuevo, código además de la clave.
     if (dispositivoConocido(persona.id)) {
       entrar(persona.id)
       return
@@ -109,9 +190,7 @@ export function AccesoPage() {
     const persona = sel.persona(bd, personaId)
     return (
       <div className="acceso-fondo">
-      {/* Las mismas torres del fondo de la app: la puerta y el interior son el
-          mismo edificio. */}
-      <SiluetaTorres className="acceso-fondo__siluetas" />
+        <SiluetaTorres className="acceso-fondo__siluetas" />
         <div className="acceso">
           <div className="acceso__marca">
             <Logotipo inverso tamano="var(--texto-3xl)" />
@@ -127,10 +206,10 @@ export function AccesoPage() {
             </div>
 
             <div className="campo">
-              <label htmlFor="codigo">Código de {esperado.length} dígitos</label>
+              <label htmlFor="codigo">Código de {esperado.length} números</label>
               <input
                 id="codigo"
-                className="numerico"
+                className="campo-numeros"
                 inputMode="numeric"
                 autoComplete="one-time-code"
                 value={codigo}
@@ -145,8 +224,8 @@ export function AccesoPage() {
               Confirmar
             </button>
 
-            {/* En la version real esto llega por SMS. Aqui se muestra: un demo que
-              pide un codigo que nunca llega no se le puede mostrar a nadie. */}
+            {/* En la versión real esto llega por SMS. Aquí se muestra: un demo que
+                pide un código que nunca llega no se le puede mostrar a nadie. */}
             <p className="acceso__nota" style={{ marginTop: 'var(--e4)' }}>
               <strong>Demo:</strong> tu código es <strong className="numerico">{esperado}</strong>.
               En la versión real llega por mensaje y no se ve aquí.
@@ -186,28 +265,44 @@ export function AccesoPage() {
         </div>
 
         <form className="tarjeta" onSubmit={verificar}>
-          <div className="campo">
-            <label htmlFor="documento">Documento de identidad</label>
-            <input
-              id="documento"
-              className="numerico"
-              inputMode="numeric"
-              autoComplete="username"
-              value={documento}
-              onChange={(evento) => setDocumento(evento.target.value)}
-              placeholder="Sin puntos ni espacios"
-            />
-          </div>
+          {modoConocida && conocida ? (
+            /* El teléfono ya sabe quién eres: solo falta la clave. */
+            <div className="tarjeta__cuerpo" style={{ marginBottom: 'var(--e4)' }}>
+              <span className="avatar avatar--perfil">
+                {iniciales(conocida.nombres, conocida.apellidos)}
+              </span>
+              <div className="columna">
+                <strong>{nombreCompleto(conocida)}</strong>
+                <span className="subtitulo">Escribe tu clave para entrar</span>
+              </div>
+            </div>
+          ) : (
+            <div className="campo">
+              <label htmlFor="documento">Documento de identidad</label>
+              <input
+                id="documento"
+                className="campo-numeros"
+                inputMode="numeric"
+                autoComplete="username"
+                value={documento}
+                onChange={(evento) => setDocumento(evento.target.value)}
+                placeholder="Sin puntos ni espacios"
+              />
+            </div>
+          )}
 
           <div className="campo">
-            <label htmlFor="contrasena">Contraseña</label>
+            <label htmlFor="clave">Tu clave de {DIGITOS_CLAVE} números</label>
             <input
-              id="contrasena"
+              id="clave"
+              className="campo-numeros"
               type="password"
+              inputMode="numeric"
               autoComplete="current-password"
-              value={contrasena}
-              onChange={(evento) => setContrasena(evento.target.value)}
-              placeholder="Tu contraseña"
+              maxLength={DIGITOS_CLAVE}
+              value={clave}
+              onChange={(evento) => setClave(evento.target.value.replace(/\D/g, ''))}
+              placeholder="••••"
             />
           </div>
 
@@ -217,9 +312,38 @@ export function AccesoPage() {
             Ingresar
           </button>
 
+          {/* La huella va debajo de la clave, no encima: es un atajo de este
+              teléfono, y quien lo cambió o lo perdió necesita ver primero el
+              camino que siempre funciona. */}
+          {modoConocida && conocida && hayHuella && (
+            <button
+              type="button"
+              className="boton boton--salida boton--bloque"
+              style={{ marginTop: 'var(--e2)' }}
+              onClick={() => void entrarConHuella(conocida.id)}
+            >
+              <Icono nombre="huella" tamano={20} />
+              Entrar con huella
+            </button>
+          )}
+
           <div className="acceso__enlaces">
-            <Link to="/acceso/activar">Activar mi cuenta</Link>
-            <Link to="/acceso/recuperar">Olvidé mi contraseña</Link>
+            {modoConocida ? (
+              <button
+                type="button"
+                className="enlace"
+                onClick={() => {
+                  olvidarUltimaPersona()
+                  setUsarDocumento(true)
+                  setError(null)
+                }}
+              >
+                No soy yo
+              </button>
+            ) : (
+              <Link to="/acceso/activar">Activar mi cuenta</Link>
+            )}
+            <Link to="/acceso/recuperar">Olvidé mi clave</Link>
           </div>
         </form>
 
@@ -244,7 +368,7 @@ function AtajoDemo({ alSeleccionar }: { alSeleccionar: (personaId: string) => vo
     <details className="acceso__demo">
       <summary>¿Estás viendo el demo?</summary>
       <p className="subtitulo" style={{ margin: 'var(--e3) 0' }}>
-        Entra directo con uno de estos perfiles, sin documento ni contraseña.
+        Entra directo con uno de estos perfiles, sin documento ni clave.
       </p>
       <div className="lista">
         {bd.perfilesDemo.map((perfil) => (

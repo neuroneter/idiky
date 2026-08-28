@@ -11,6 +11,7 @@ export type NombreIcono =
   | 'solicitudes'
   | 'asambleas'
   | 'certificado'
+  | 'huella'
   | 'voto'
   | 'comunicados'
   | 'visitantes'
@@ -40,6 +41,8 @@ const TRAZOS: Record<NombreIcono, string> = {
   asambleas: 'M12 9a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5M7.5 20v-1.2c0-2 2-3.3 4.5-3.3s4.5 1.3 4.5 3.3V20M4.5 12.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4M19.5 12.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4M2 19v-.8c0-1.4 1.2-2.4 3-2.4M22 19v-.8c0-1.4-1.2-2.4-3-2.4',
   // Documento con sello: el paz y salvo.
   certificado: 'M6.5 3.5h8L19 8v5.5M6.5 3.5v17h5M14 3.5V8h5M9 8h2M9 11.5h6M9 15h4M16.5 21a3 3 0 1 0 0-6 3 3 0 0 0 0 6',
+  // Huella: los arcos del dedo, de mas cerrado a mas abierto.
+  huella: 'M12 11.5v3.2a5 5 0 0 1-1 3M8.6 19.6A7.6 7.6 0 0 0 10 15v-3a2 2 0 1 1 4 0v3c0 1.4-.2 2.7-.7 4M5.9 17.3A9.6 9.6 0 0 0 6.8 13v-1a5.2 5.2 0 0 1 10.4 0v1c0 1.3-.1 2.6-.4 3.8M4.2 8.6A8.6 8.6 0 0 1 12 4c1.9 0 3.6.6 5 1.6',
   // Papeleta en la urna.
   voto: 'M4 12.5h16V20H4zM7.5 12.5V4h9v8.5M10 7.5h4M10 10h4',
   comunicados: 'M4 10v4h3l7 4V6l-7 4H4zM17.5 9.5a4 4 0 0 1 0 5',

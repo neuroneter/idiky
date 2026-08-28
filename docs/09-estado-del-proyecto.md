@@ -69,6 +69,48 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-28 · Mary + IA (Claude) · Huella, clave de 4 números y una puerta que te reconoce
+
+Tres pedidos de Mary sobre el acceso, y el tercero es el que ordena a los otros dos.
+
+1. **Ingreso con huella.**
+2. **«Después de creado el usuario solamente debe solicitarle la contraseña.»**
+3. **«La contraseña debe ser algo muy sencillo porque tenemos adultos mayores»**, y —lo que lo
+   deja claro— *«entiendo los temas de seguridad que se deben implementar pero también debemos
+   tener en cuenta todos nuestros usuarios»*.
+
+**La clave pasa a ser 4 números** (RN-55). Una contraseña con mayúsculas y símbolos, tecleada en
+un teléfono por alguien de 70 años, es la barrera que hace que la persona deje de entrar y
+vuelva a llamar a la administración: es decir, la que hace que la app no sirva. Y la seguridad
+no baja, **cambia de sitio** — que es la respuesta honesta a su tensión:
+
+- la clave **solo sirve en un dispositivo ya probado** con un código de un solo uso (RN-54);
+- **los intentos se acaban**: cinco fallos y hay que volver a pedir el código;
+- quien quiera **entra con huella** y no teclea nada.
+
+Es el razonamiento de la clave del cajero: cuatro dígitos bastan cuando hacen falta la tarjeta y
+un número limitado de intentos. Sin el límite de intentos, cuatro dígitos se prueban enteros en
+un rato — por eso el límite no es un adorno, es lo que sostiene la decisión.
+
+**La puerta tiene dos caras.** Si alguien ya entró en ese teléfono, muestra su nombre y pide
+solo la clave; si no, pide documento y clave. «No soy yo» vuelve al camino largo.
+
+**La huella (RN-56) es real, y eso importa decirlo bien.** Se usa WebAuthn, el estándar del
+navegador: el lector es de verdad y el dedo también. Lo que no existe todavía es el servidor que
+comprobaría la credencial, así que el demo se queda con que el dispositivo confirmó la identidad
+de su dueño. **Donde no hay lector, la opción no se ofrece**: no se simula una huella, porque
+fingir que se leyó un dedo es la clase de mentira que después nadie descubre.
+
+Con esto nace `servicios/plataforma.ts`, que **ADR-0002 había dejado escrito antes de que
+hiciera falta**: las capacidades del dispositivo entran por una interfaz propia con dos
+implementaciones. El ingreso con huella es la primera que la necesitaba.
+
+**Detalle de accesibilidad que vale por sí solo:** los campos de números —cédula, código y
+clave— van grandes, centrados y espaciados. No es decoración: es lo que decide si la persona
+entra o llama a la administración.
+
+---
+
 ### 2026-08-28 · Mary + IA (Claude) · El paz y salvo se imprime, y un modelo real corrigió el modelo de datos
 
 Dos correcciones de Mary sobre el ADR que acababa de escribir, y las dos mejoraron el producto.

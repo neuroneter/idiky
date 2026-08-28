@@ -1,8 +1,8 @@
 /**
- * CU-R-25 — Activar mi cuenta (y recuperar la contraseña).
+ * CU-R-25 — Activar mi cuenta (y recuperar la clave).
  * Doc: docs/casos-de-uso/residente.md#cu-r-25
  *
- * Los dos caminos son el mismo en tres pasos —documento, código, contraseña— y
+ * Los dos caminos son el mismo en tres pasos —documento, código, clave— y
  * por eso viven en una sola pantalla: cambia el texto, no el flujo. Separarlos en
  * dos componentes iguales sería tener que arreglar cada cosa dos veces.
  *
@@ -12,24 +12,28 @@
  * «pídele a la administración que te vincule».
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import {
   activarCuenta,
   cuentaActivada,
+  DIGITOS_CLAVE,
   generarCodigo,
-  MINIMO_CONTRASENA,
+  limpiarFallos,
   normalizarDocumento,
   recordarDispositivo,
+  recordarUltimaPersona,
 } from '../../estado/acceso'
+import { biometria } from '../../servicios/plataforma'
 import { Logotipo } from '../../componentes/Logotipo'
 import { SiluetaTorres } from '../../componentes/SiluetaTorres'
 import { Icono } from '../../componentes/Icono'
+import { nombreCompleto } from '../../datos/selectores'
 import { perfilDe } from './perfil'
 
-type Paso = 'documento' | 'codigo' | 'contrasena'
+type Paso = 'documento' | 'codigo' | 'clave'
 
 export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
   const { bd } = useDatos()
@@ -41,9 +45,22 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
   const [personaId, setPersonaId] = useState<string | null>(null)
   const [esperado, setEsperado] = useState('')
   const [codigo, setCodigo] = useState('')
-  const [contrasena, setContrasena] = useState('')
+  const [clave, setClave] = useState('')
   const [repetida, setRepetida] = useState('')
+  const [conHuella, setConHuella] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  /** Solo se ofrece la huella si este aparato tiene lector (ADR-0002). */
+  const [hayLector, setHayLector] = useState(false)
+
+  useEffect(() => {
+    let vigente = true
+    biometria.disponible().then((hay) => {
+      if (vigente) setHayLector(hay)
+    })
+    return () => {
+      vigente = false
+    }
+  }, [])
 
   const persona = personaId ? bd.personas.find((p) => p.id === personaId) : undefined
   const activando = modo === 'activar'
@@ -61,7 +78,7 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
       return
     }
     if (activando && cuentaActivada(encontrada.id)) {
-      setError('Esta cuenta ya está activada. Entra con tu contraseña o recupérala.')
+      setError('Esta cuenta ya está activada. Entra con tu clave o recupérala.')
       return
     }
     if (!activando && !cuentaActivada(encontrada.id)) {
@@ -80,18 +97,18 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
       setError('Ese código no coincide. Revísalo y vuelve a intentar.')
       return
     }
-    setPaso('contrasena')
+    setPaso('clave')
   }
 
-  function guardar(evento: React.FormEvent) {
+  async function guardar(evento: React.FormEvent) {
     evento.preventDefault()
     setError(null)
-    if (contrasena.length < MINIMO_CONTRASENA) {
-      setError(`La contraseña tiene al menos ${MINIMO_CONTRASENA} caracteres.`)
+    if (clave.length !== DIGITOS_CLAVE || !/^\d+$/.test(clave)) {
+      setError(`La clave son ${DIGITOS_CLAVE} números.`)
       return
     }
-    if (contrasena !== repetida) {
-      setError('Las dos contraseñas no coinciden.')
+    if (clave !== repetida) {
+      setError('Las dos claves no coinciden.')
       return
     }
     if (!personaId) return
@@ -105,6 +122,13 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
     // Quien acaba de probar su identidad con el codigo en este telefono no tiene
     // por que volver a hacerlo al entrar (RN-54).
     recordarDispositivo(personaId)
+    recordarUltimaPersona(personaId)
+    limpiarFallos(personaId)
+    // Si acepto la huella, se registra ahora: el aparato pide el dedo una vez y
+    // queda listo. Si la cancela, se entra igual — no es obligatoria.
+    if (conHuella && hayLector) {
+      await biometria.registrar(personaId, nombreCompleto(persona))
+    }
     iniciar(perfil)
     navegar(perfil.rol === 'admin' ? '/admin' : '/app', { replace: true })
   }
@@ -118,7 +142,7 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
         <div className="acceso__marca">
           <Logotipo inverso tamano="var(--texto-3xl)" />
           <p className="acceso__lema">
-            {activando ? 'Activa tu cuenta' : 'Recupera tu contraseña'}
+            {activando ? 'Activa tu cuenta' : 'Recupera tu clave'}
           </p>
         </div>
 
@@ -127,7 +151,7 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
         <ol className="pasos" aria-label="Pasos">
           <li className={paso === 'documento' ? 'activo' : ''}>Documento</li>
           <li className={paso === 'codigo' ? 'activo' : ''}>Código</li>
-          <li className={paso === 'contrasena' ? 'activo' : ''}>Contraseña</li>
+          <li className={paso === 'clave' ? 'activo' : ''}>Clave</li>
         </ol>
 
         {paso === 'documento' && (
@@ -185,31 +209,65 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
           </form>
         )}
 
-        {paso === 'contrasena' && (
-          <form className="tarjeta" onSubmit={guardar}>
+        {paso === 'clave' && (
+          <form className="tarjeta" onSubmit={(evento) => void guardar(evento)}>
             <div className="campo">
               <label htmlFor="nueva">
-                {activando ? 'Crea tu contraseña' : 'Tu nueva contraseña'}
+                {activando ? `Crea tu clave de ${DIGITOS_CLAVE} números` : 'Tu nueva clave'}
               </label>
               <input
                 id="nueva"
+                className="campo-numeros"
                 type="password"
+                inputMode="numeric"
                 autoComplete="new-password"
-                value={contrasena}
-                onChange={(evento) => setContrasena(evento.target.value)}
+                maxLength={DIGITOS_CLAVE}
+                value={clave}
+                onChange={(evento) => setClave(evento.target.value.replace(/\D/g, ''))}
+                placeholder="••••"
               />
-              <span className="ayuda-campo">Mínimo {MINIMO_CONTRASENA} caracteres.</span>
+              {/* Se dice que NO sirve un cumpleanos: es el consejo que de verdad
+                  cambia algo, y no «use mayusculas y simbolos», que aqui no
+                  aplica. */}
+              <span className="ayuda-campo">
+                Elige {DIGITOS_CLAVE} números que recuerdes. Evita tu año de nacimiento o
+                1234.
+              </span>
             </div>
             <div className="campo">
               <label htmlFor="repetida">Escríbela otra vez</label>
               <input
                 id="repetida"
+                className="campo-numeros"
                 type="password"
+                inputMode="numeric"
                 autoComplete="new-password"
+                maxLength={DIGITOS_CLAVE}
                 value={repetida}
-                onChange={(evento) => setRepetida(evento.target.value)}
+                onChange={(evento) => setRepetida(evento.target.value.replace(/\D/g, ''))}
+                placeholder="••••"
               />
             </div>
+
+            {/* La huella se ofrece **aqui**, cuando la persona acaba de probar
+                quien es: es el unico momento en que registrarla no exige volver a
+                pedirle nada (RN-55). */}
+            {hayLector && (
+              <label className="opcion-huella">
+                <input
+                  type="checkbox"
+                  checked={conHuella}
+                  onChange={(evento) => setConHuella(evento.target.checked)}
+                />
+                <span>
+                  <strong>Entrar con huella en este teléfono</strong>
+                  <span className="subtitulo">
+                    Así no tienes que escribir la clave cada vez. Puedes quitarla luego desde
+                    tu perfil.
+                  </span>
+                </span>
+              </label>
+            )}
             {error && <p className="acceso__error">{error}</p>}
             <button className="boton boton--primario boton--bloque" type="submit">
               {activando ? 'Activar y entrar' : 'Guardar y entrar'}
@@ -217,7 +275,7 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
             {/* Se dice que el demo no guarda contrasenas: es lo honesto y ademas
               evita que alguien escriba aqui una que use de verdad. */}
             <p className="acceso__nota" style={{ marginTop: 'var(--e4)' }}>
-              <strong>Demo:</strong> no se guarda ninguna contraseña. Con la versión real esto lo
+              <strong>Demo:</strong> no se guarda ninguna clave. Con la versión real esto lo
               hace un servidor.
             </p>
           </form>

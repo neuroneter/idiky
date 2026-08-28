@@ -269,6 +269,50 @@ textarea {
   resize: vertical;
   min-height: 92px;
 }
+/* Campos que son numeros: cedula, codigo y clave. Grandes y espaciados porque
+   los teclea gente de 60 y 70 anos, muchas veces de pie en la porteria y sin las
+   gafas de leer (Mary, 2026-08-28). El tamano no es decoracion: es lo que decide
+   si la persona entra o llama a la administracion. */
+.campo-numeros {
+  font-size: 1.35rem;
+  letter-spacing: 0.16em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  padding: 0.7rem !important;
+}
+
+/* La huella se ofrece como una opcion marcada, no como un boton mas: es algo que
+   se acepta de paso, no una decision que haya que tomar aparte. */
+.opcion-huella {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e3);
+  margin: var(--e4) 0;
+  cursor: pointer;
+}
+.opcion-huella input {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  margin-top: 2px;
+  accent-color: var(--color-acento);
+}
+.opcion-huella > span {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+}
+
+/* Un enlace que en realidad es un boton (no navega, cambia el modo). */
+.enlace {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-marca);
+}
+
 .campo--error input,
 .campo--error textarea {
   border-color: var(--color-error);
