@@ -9,6 +9,7 @@
  * descarga, y la pantalla lo dice en vez de simularla.
  */
 
+import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
@@ -23,6 +24,7 @@ import { Link } from 'react-router-dom'
 export function PazYSalvoPage() {
   const { bd, ejecutar, cargando, mostrarAviso } = useDatos()
   const { sesion } = useSesion()
+  const [viendoHoja, setViendoHoja] = useState(false)
   if (!sesion) return null
 
   const unidad = sel.unidad(bd, sesion.unidadActivaId)
@@ -156,11 +158,23 @@ export function PazYSalvoPage() {
               <strong className="numerico">{vigente.codigoVerificacion}</strong>
             </div>
             <div className="separador" />
+            {/* Ver primero, imprimir despues. Nadie manda a imprimir un documento
+                que no ha visto, y en el demo publicado el marco del navegador
+                bloquea el dialogo de impresion: sin la previa no habria forma de
+                mostrar el certificado. */}
+            <button
+              className="boton boton--bloque"
+              onClick={() => setViendoHoja((visible) => !visible)}
+            >
+              <Icono nombre={viendoHoja ? 'cerrar' : 'buscar'} tamano={18} />
+              {viendoHoja ? 'Ocultar el documento' : 'Ver cómo queda'}
+            </button>
             {/* Imprimir es como se obtiene el PDF: el sistema operativo ofrece
                 «Guardar como PDF», sin servidor, sin conexion y sin librerias
                 (ADR-0006, revision del 2026-08-28). */}
             <button
               className="boton boton--primario boton--bloque"
+              style={{ marginTop: 'var(--e2)' }}
               onClick={() => window.print()}
             >
               <Icono nombre="certificado" tamano={18} />
@@ -203,15 +217,18 @@ export function PazYSalvoPage() {
         para adjuntarlo a tu trámite. Con el número y el código, quien lo reciba puede
         confirmarlo con la administración.
       </p>
-      {/* No se ve en pantalla: es la hoja que sale al imprimir. */}
+      {/* Fuera de la vista previa no se ve en pantalla: es la hoja que sale al
+          imprimir. Va siempre en el arbol, este o no abierta la previa. */}
       {vigente && (
-        <HojaPazYSalvo
-          documento={vigente}
-          copropiedad={copropiedad}
-          unidad={unidad}
-          propietarios={propietarios}
-          administrador={sel.persona(bd, administrador?.personaId)}
-        />
+        <div className={viendoHoja ? 'previsualizacion-hoja' : undefined}>
+            <HojaPazYSalvo
+            documento={vigente}
+            copropiedad={copropiedad}
+            unidad={unidad}
+            propietarios={propietarios}
+            administrador={sel.persona(bd, administrador?.personaId)}
+          />
+        </div>
       )}
     </>
   )

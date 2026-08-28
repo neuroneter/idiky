@@ -530,9 +530,68 @@ textarea {
 /* ------------------------------------------------------- Hoja imprimible */
 /* Como el residente obtiene su PDF sin servidor y sin conexion: el navegador
    imprime, y el sistema operativo ofrece «Guardar como PDF» (ADR-0006, revision
-   del 2026-08-28). En pantalla la hoja no existe. */
+   del 2026-08-28).
+
+   El aspecto del documento se define **una sola vez** y lo usan las dos caras:
+   la vista previa en pantalla y la hoja impresa. Definirlo dentro de `@media
+   print` obligaba a repetirlo para la previa, y dos copias del mismo documento
+   se separan en cuanto alguien toca una. */
 .hoja-documento {
   display: none;
+  /* Negro sobre blanco: una impresora domestica gasta el color y lo devuelve
+     lavado, y un certificado con el azul destenido parece una fotocopia. */
+  color: #000;
+  background: #fff;
+  line-height: 1.65;
+  text-align: justify;
+}
+.hoja-documento p {
+  margin: 0 0 1.2em;
+}
+.hoja-documento__encabezado {
+  text-align: center;
+  margin-bottom: 2.4em;
+}
+.hoja-documento__encabezado h1 {
+  font-size: 1.35em;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.4em;
+}
+.hoja-documento__encabezado p {
+  font-size: 0.85em;
+  margin: 0;
+}
+.hoja-documento__firma {
+  margin-top: 3em;
+  text-align: left;
+}
+.hoja-documento__linea {
+  width: 62mm;
+  max-width: 70%;
+  border-top: 1px solid #000;
+  margin: 2.5em 0 0.6em;
+}
+.hoja-documento__pie {
+  font-size: 0.72em;
+  text-align: center;
+  border-top: 1px solid #999;
+  padding-top: 0.6em;
+  margin-top: 2.5em;
+}
+
+/* Vista previa: la misma hoja, en pantalla y a escala de lectura. Sirve para
+   ver como queda antes de imprimir —y para poder mostrarla en el demo, donde el
+   marco del navegador bloquea el dialogo de impresion—. */
+.previsualizacion-hoja {
+  background: #fff;
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-2);
+  padding: var(--e5) var(--e4);
+  font-size: 0.82rem;
+  overflow-x: auto;
+}
+.previsualizacion-hoja .hoja-documento {
+  display: block;
 }
 
 @media print {
@@ -552,13 +611,16 @@ textarea {
   body,
   #root,
   .app-movil,
-  .contenido-movil {
+  .contenido-movil,
+  .previsualizacion-hoja {
     max-width: none;
     width: auto;
     height: auto;
     overflow: visible;
     position: static;
     background: #fff;
+    box-shadow: none;
+    padding: 0;
   }
   .hoja-documento {
     display: block;
@@ -566,48 +628,16 @@ textarea {
     top: 0;
     left: 0;
     width: 100%;
-    /* Negro sobre blanco: una impresora domestica gasta el color y lo devuelve
-       lavado, y un certificado con el azul desteñido parece una fotocopia. */
-    color: #000;
-    background: #fff;
     font-size: 12pt;
-    line-height: 1.6;
-    text-align: justify;
   }
-  .hoja-documento p {
-    margin: 0 0 1.2em;
-  }
-  .hoja-documento__encabezado {
-    text-align: center;
-    margin-bottom: 2.4em;
-  }
-  .hoja-documento__encabezado h1 {
-    font-size: 16pt;
-    letter-spacing: 0.14em;
-    margin-bottom: 0.4em;
-  }
-  .hoja-documento__encabezado p {
-    font-size: 10pt;
-    margin: 0;
-  }
-  .hoja-documento__firma {
-    margin-top: 3.5em;
-    text-align: left;
-  }
-  .hoja-documento__linea {
-    width: 62mm;
-    border-top: 1px solid #000;
-    margin: 2.5em 0 0.6em;
-  }
+  /* En papel el pie va al final de la hoja, no debajo del texto. */
   .hoja-documento__pie {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     font-size: 8pt;
-    text-align: center;
-    border-top: 1px solid #999;
-    padding-top: 0.6em;
+    margin: 0;
   }
   /* Carta, que es el tamano de tramite en Colombia. */
   @page {

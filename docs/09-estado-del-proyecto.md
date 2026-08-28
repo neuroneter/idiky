@@ -86,6 +86,13 @@ backend, porque son instrumentos de la copropiedad y algún día pueden exigir f
 
 **CU-R-12 queda terminado.** Era el más viejo de los pendientes de fase 1.
 
+**Y una vista previa dentro de la app** (Mary: «es necesario verlo en la app, por si hay
+errores ajustarlos»). El botón «Ver cómo queda» muestra el documento en pantalla, tal como
+saldrá impreso. El aspecto del certificado quedó definido **una sola vez** y lo usan las dos
+caras —la previa y el papel—: tenerlo dentro de `@media print` obligaba a repetirlo, y dos
+copias del mismo documento se separan en cuanto alguien toca una. De paso resuelve que el marco
+del demo publicado bloquee el diálogo de impresión: la previa se ve igual.
+
 **Un perfil nuevo en la semilla: un propietario que no debe nada** (Mary). Sin él nadie podía
 emitir un paz y salvo sin pagar primero, porque el saldo incluye lo ya facturado (RN-26) y a
 todo el mundo se le factura el mes siguiente por anticipado. Jorge Enrique Valencia, Torre 1
