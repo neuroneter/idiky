@@ -66,13 +66,13 @@ PALABRAS = {
     'votacion': 'votación', 'destinacion': 'destinación',
     'revision': 'revisión', 'ano': 'año', 'proposito': 'propósito', 'tecnico': 'técnico',
     'reglamentacion': 'reglamentación', 'citacion': 'citación', 'tuberia': 'tubería',
-    'comun': 'común', 'supervision': 'supervisión',
+    'comun': 'común', 'supervision': 'supervisión', 'mas': 'más',
 }
 
 # Lineas que nunca son texto visible.
 NO_ES_TEXTO = re.compile(
     r"className|to=|href=|import |from '|nombre=\"|/app|var\(|aria-|role=|"
-    r"key=|\.tsx|https?://"
+    r"key=|\.tsx|https?://|^\s*\|"
 )
 # `id: '...'` NO entra aqui: la linea `{ id: 'pse', texto: 'PSE / debito a cuenta' }`
 # lleva las dos cosas, y descartarla entera dejo pasar dos palabras sin tilde
@@ -141,9 +141,10 @@ def main() -> None:
     for archivo in archivos:
         en_comentario = False
         for n, linea in enumerate(archivo.read_text(encoding='utf-8').split('\n'), 1):
-            # Los comentarios JSX de varias lineas ({/* ... */}) no empiezan por // ni
-            # por *, asi que hay que seguirlos de una linea a otra.
-            abre, cierra = '{/*' in linea, '*/' in linea
+            # Los comentarios de varias lineas no empiezan por // ni por *, asi que
+            # hay que seguirlos de una linea a otra. Cuentan los dos: `{/* ... */}`
+            # dentro del JSX y `/* ... */` entre los atributos.
+            abre, cierra = '/*' in linea, '*/' in linea
             estaba = en_comentario
             if abre and not cierra:
                 en_comentario = True

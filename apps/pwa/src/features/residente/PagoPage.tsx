@@ -145,9 +145,9 @@ export function PagoPage() {
       </div>
 
       <div className="pila">
-        <span className="titulo-seccion">Que vas a pagar</span>
+        <span className="titulo-seccion">Qué vas a pagar</span>
         <p className="subtitulo">
-          Los pagos se aplican primero a la deuda mas antigua. Toca una cuota para pagar hasta
+          Los pagos se aplican primero a la deuda más antigua. Toca una cuota para pagar hasta
           esa fecha.
         </p>
         <div className="lista lista--compacta">

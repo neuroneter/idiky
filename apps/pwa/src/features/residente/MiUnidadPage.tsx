@@ -64,12 +64,12 @@ export function MiUnidadPage() {
       </div>
 
       <div className="pila">
-        <span className="titulo-seccion">Que determina tu coeficiente</span>
+        <span className="titulo-seccion">Qué determina tu coeficiente</span>
 
         <div className="tarjeta tarjeta--plana">
           <div className="fila fila-inicio">
             <div className="columna" style={{ flex: 1 }}>
-              <strong>Cuanto pagas de administración</strong>
+              <strong>Cuánto pagas de administración</strong>
               <span className="subtitulo">
                 Las cuotas ordinarias y las extraordinarias se reparten entre las unidades
                 según su coeficiente, no en partes iguales.
@@ -90,7 +90,7 @@ export function MiUnidadPage() {
         <div className="tarjeta tarjeta--plana">
           <div className="fila fila-inicio">
             <div className="columna" style={{ flex: 1 }}>
-              <strong>Cuanto pesa tu voto en la asamblea</strong>
+              <strong>Cuánto pesa tu voto en la asamblea</strong>
               <span className="subtitulo">
                 En la asamblea no se cuenta una unidad, un voto: cada unidad vota con el peso
                 de su coeficiente.

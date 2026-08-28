@@ -80,6 +80,13 @@ demostración, así que sus tildes valen igual.
 `mas`/`más`, `cual`/`cuál` son palabras válidas de las dos formas: ahí no hay diccionario que
 valga, hay que leer la frase.
 
+### El color de salir
+
+**Cerrar sesión va en azul suave de marca** (`--color-marca-suave` con texto `--color-marca`),
+que es el mismo azul del avatar en esa hoja: el bloque se lee como parte del perfil. No lleva
+violeta —ese es el color de la acción principal, y salir no lo es— ni rojo, reservado para la
+plata: pintar de rojo lo que no alarma le quita fuerza a lo que sí.
+
 ### Un destino, una identidad
 
 Un mismo destino **puede** aparecer en dos sitios —el acceso directo del inicio y la pestaña de

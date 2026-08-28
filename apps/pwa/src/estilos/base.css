@@ -156,6 +156,20 @@ textarea {
    boton azul marino se enturbiaba.
    `.boton--acento` existia con este mismo estilo y no lo usaba ninguna pantalla:
    se elimina, porque ahora el primario ya es el acento. */
+/* Cerrar sesion: relleno azul suave, el mismo del avatar que esta arriba en la
+   misma hoja, para que el bloque se lea como parte del perfil (Mary, 2026-08-28).
+   No lleva el violeta —ese es el color de la accion principal, y salir no lo es—
+   ni el rojo, que esta reservado para la plata (mora, cuota vencida). */
+.boton--salida {
+  background: var(--color-marca-suave);
+  border-color: transparent;
+  color: var(--color-marca);
+  font-weight: 650;
+}
+.boton--salida:hover:not(:disabled) {
+  background: #dde2f4;
+}
+
 .boton--primario {
   background: var(--color-acento);
   border-color: var(--color-acento);

@@ -91,10 +91,18 @@ de pago del residente y en el registro manual del administrador. La opción llev
 explica qué es: es nuevo y un medio de pago que hay que adivinar no se usa. **Integrarlo de
 verdad es decisión de fase 2**, como PSE: el demo lo simula.
 
-**Y un defecto del revisor de ortografía.** Descartaba las líneas que contuvieran `id: '`, y
+**Cerrar sesión toma color** (Mary eligió entre dos propuestas): relleno azul suave de marca,
+el mismo del avatar que está arriba en esa hoja, para que el bloque se lea como parte del
+perfil. Ni violeta —el color de la acción principal, y salir no lo es— ni rojo, reservado para
+la plata.
+
+**Y tres defectos del revisor de ortografía.** Descartaba las líneas que contuvieran `id: '`, y
 `{ id: 'pse', texto: 'PSE / debito a cuenta' }` lleva las dos cosas: el descarte se llevaba por
 delante el texto visible. Así llevaban semanas «debito» y «credito» en la pantalla de pago.
-Corregido el filtro y las palabras.
+Tampoco seguía los comentarios `/* … */` que no empiezan con `{`, ni descartaba las líneas de
+una unión de tipos (`| 'mas'`). Corregidos los tres, y de paso entró `mas` → `más` al
+diccionario: la forma sin tilde existe, pero equivale a «pero» y no aparece en una interfaz.
+Salieron «la deuda mas antigua», «Que vas a pagar» y «Cuanto pesa tu voto».
 
 ---
 

@@ -178,11 +178,16 @@ export function LayoutResidente() {
 
           <div className="separador" />
 
-          {/* Neutro, no rojo: el rojo esta reservado para la plata (mora, cuota
-              vencida). Cerrar sesión no es un error ni pierde nada, y pintarlo de
-              rojo le quita fuerza a la senal que si tiene que alarmar
+          {/* Azul suave, no rojo: el rojo esta reservado para la plata (mora, cuota
+              vencida) y pintar aqui de rojo le quita fuerza a la senal que si tiene
+              que alarmar. Tampoco el violeta, que es el color de la accion
+              principal. El azul suave es el del avatar de esta misma hoja
               (docs/08-convenciones.md). */}
-          <button className="boton boton--bloque" onClick={cerrar} style={{ minHeight: 44 }}>
+          <button
+            className="boton boton--salida boton--bloque"
+            onClick={cerrar}
+            style={{ minHeight: 44 }}
+          >
             <Icono nombre="salir" tamano={16} />
             Cerrar sesión
           </button>
