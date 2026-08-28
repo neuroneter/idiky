@@ -576,6 +576,23 @@ export async function desvincularResidente(
 /** Dias que vale un paz y salvo emitido. Provisional: el plazo esta por confirmar. */
 const VIGENCIA_PAZ_Y_SALVO_DIAS = 30
 
+/**
+ * Codigo de verificacion de un documento formal (RN-36, ADR-0006).
+ *
+ * Sin las letras que se confunden al dictarlo por telefono o al copiarlo de un
+ * papel: la I con el 1, la O con el 0. Un codigo que se transcribe mal es un
+ * documento que no se puede verificar.
+ */
+function nuevoCodigoVerificacion(): string {
+  const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let codigo = ''
+  for (let i = 0; i < 8; i += 1) {
+    codigo += alfabeto[Math.floor(Math.random() * alfabeto.length)]
+    if (i === 3) codigo += '-'
+  }
+  return codigo
+}
+
 export async function emitirVoto(
   bdActual: BaseDatos,
   parametros: {
@@ -663,8 +680,9 @@ export async function emitirPazYSalvo(
   const documento: Documento = {
     id: nuevoId('doc'),
     tipo: 'paz_y_salvo',
-    // RN-36: consecutivo unico por tipo.
+    // RN-36: consecutivo unico por tipo, mas el codigo que lo hace verificable.
     numero: `PS-${hoy.slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`,
+    codigoVerificacion: nuevoCodigoVerificacion(),
     copropiedadId: parametros.copropiedadId,
     unidadId: unidad.id,
     emitidoEn: hoy,

@@ -10,7 +10,7 @@ persona o IA — tenga que reconstruir el razonamiento más adelante.
 | [0003](./0003-capa-de-datos.md) | Capa de datos con adaptadores intercambiables | Aceptada |
 | [0004](./0004-autenticacion-demo.md) | Sin autenticación real en el demo: selección de perfil | Aceptada |
 | [0005](./0005-codigo-qr-sin-dependencias.md) | Generación del QR de visitantes sin dependencias externas | Aceptada |
-| 0006 | **Documentos: cómo se generan** (paz y salvo, estado de cuenta, comprobante, acta). Cuando la fase 2 admita **archivos que suben los usuarios** (el acta que respalda un cobro, RN-47), se decide aquí | ⬜ Pendiente de escribir |
+| [0006](./0006-documentos-formales.md) | **Documentos formales:** se generan en el servidor, con HTML y CSS; se guardan con su huella y se verifican sin la app | Aceptada |
 | 0007 | **Proveedor de transmisión en vivo** para las asambleas | ⬜ Pendiente de escribir |
 | 0008 | **Stack de backend** | ⬜ Pendiente de escribir |
 

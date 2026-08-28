@@ -18,7 +18,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-10 | **Responder las preguntas de asamblea** (§3 bis) | Los tres | 📋 Por hacer | Quórum, mayorías, tope de poderes. La pantalla de asambleas ya vota y cuenta por coeficiente, pero **no puede decir si un punto se aprobó** hasta que esto se responda |
 | T-11 | **Confirmar el tope legal de poderes** (Ley 675 de 2001) | Los tres | 📋 Por hacer | Hay que leer el artículo y citarlo. **No se implementa RN-30 con una cifra supuesta** |
 | T-12 | **Decidir si visitantes, correspondencia y cartelera siguen** | Los tres | 📋 Por hacer | Están implementados pero nadie los mencionó en el alcance |
-| T-13 | **ADR-0006 — cómo se generan los PDF** | Daniel | 📋 Por hacer | Bloquea paz y salvo, estado de cuenta, comprobante y acta |
+| T-13 | **ADR-0006 — cómo se generan los PDF** | Daniel | ✅ Hecho | Escrito el 2026-08-28. Los cinco documentos quedan bloqueados por el backend (ADR-0008), no por la decisión |
 | T-14 | **ADR-0007 — proveedor de transmisión en vivo** | Daniel | 📋 Por hacer | Costo por minuto, grabación, ancho de banda |
 | T-15 | Corregir los bugs del demo detectados en la revisión | Zona A / D | ✅ Hecho | Zona horaria, íconos PWA, vigencia del visitante y doble toque. Ver bitácora del 2026-08-26 |
 | T-17 | **Definir qué se intercambia con la app contable de Jeimy** | Mary + Jeimy | 📋 Por hacer | La destinación específica de una extraordinaria (RN-48) es dato contable: lo recaudado tiene que poder cruzarse con lo gastado en esa destinación |

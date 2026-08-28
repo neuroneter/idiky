@@ -132,6 +132,12 @@ export function PazYSalvoPage() {
               {copropiedad?.nombre} certifica que la unidad no registra obligaciones pendientes a
               la fecha de expedición.
             </p>
+            {/* El numero es consecutivo y adivinable; el codigo no. Hacen falta los
+                dos para verificar el documento desde fuera de la app (ADR-0006). */}
+            <div className="fila" style={{ marginTop: 'var(--e3)' }}>
+              <span className="subtitulo">Código de verificación</span>
+              <strong className="numerico">{vigente.codigoVerificacion}</strong>
+            </div>
           </div>
         </div>
       )}
@@ -165,8 +171,9 @@ export function PazYSalvoPage() {
 
       {/* Se dice que falta, no se simula un botón que no descarga nada. */}
       <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
-        La descarga en PDF llega con la versión real: falta decidir cómo se generan los
-        documentos formales (ADR-0006). El certificado ya queda registrado con su número.
+        La descarga en PDF llega con el servidor: el certificado lo genera y lo firma la
+        copropiedad, no el teléfono de quien lo pide (ADR-0006). Con el número y el código,
+        quien lo reciba —una notaría, un banco— podrá comprobarlo sin instalar la app.
       </p>
     </>
   )

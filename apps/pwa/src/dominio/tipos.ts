@@ -326,6 +326,14 @@ export interface Documento {
   tipo: TipoDocumento
   /** Consecutivo por tipo (RN-36). */
   numero: string
+  /**
+   * Codigo aleatorio que va impreso junto al numero (ADR-0006).
+   *
+   * El numero es consecutivo y adivinable; el codigo no. Hacen falta los dos para
+   * verificar un documento desde fuera de la app, que es lo que necesita una
+   * notaria o un banco al que le presentan el papel.
+   */
+  codigoVerificacion: string
   copropiedadId: string
   unidadId: string
   emitidoEn: FechaISO

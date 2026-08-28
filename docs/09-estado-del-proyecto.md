@@ -69,6 +69,48 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-08-28 · Mary + IA (Claude) · ADR-0006, los documentos formales
+
+Escrito y aceptado. Era el que bloqueaba más trabajo: cinco casos de uso esperaban un PDF
+—paz y salvo, estado de cuenta, comprobante, convocatoria y acta—.
+
+El criterio que ordenó toda la decisión: **un documento formal no es un dibujo bonito de unos
+datos; es una afirmación que un tercero va a usar para tomar una decisión, y tiene que poder
+comprobarse sin la app.** Quien recibe el paz y salvo —una notaría, un banco, quien va a
+comprar el apartamento— no tiene Idiky instalado.
+
+De ahí salen cinco decisiones:
+
+1. **Se generan en el servidor, nunca en el cliente.** La razón no es el rendimiento: la app
+   corre en el teléfono de quien tiene interés en el resultado, y un cliente modificado puede
+   pintar «está a paz y salvo» sobre una unidad en mora. Además, el día que lleven firma
+   electrónica, la llave privada no puede vivir en miles de teléfonos.
+2. **Se dibujan con HTML y CSS**, no con un lenguaje de coordenadas: la identidad ya está
+   escrita en `tokens.css`, y volver a escribirla en otro idioma la desincroniza. Un paz y
+   salvo con un azul distinto al de la app parece falso.
+3. **El archivo se guarda, no se regenera.** Un paz y salvo dice que la unidad no debía nada
+   *el 15 de marzo*; regenerarlo en junio produciría otro documento con el mismo número.
+4. **Se verifica desde fuera**: número consecutivo más un código aleatorio, y una página
+   pública que responde solo tipo, unidad, fecha y si está vigente o anulado. Nada de nombres,
+   cédulas ni montos: quien verifica necesita saber que el papel es auténtico, no la vida
+   financiera del propietario.
+5. **Un documento no se borra, se anula**, y la verificación lo dice — que es justo lo que hay
+   que saber si presentan una copia vieja.
+
+**La consecuencia incómoda, dicha de frente:** los PDF no existen hasta que exista el backend.
+Los cinco casos de uso quedan bloqueados por ADR-0008, no por esta decisión. Lo que sí se puede
+hacer antes es lo que ya hace el paz y salvo: emitir y registrar el documento.
+
+En el demo entró la parte que sí se puede: el certificado ya trae su **código de verificación**
+—sin las letras que se confunden al dictarlo, la I con el 1 y la O con el 0— y la pantalla
+explica para qué sirve. `codigoVerificacion` deja de ser una pregunta abierta en el modelo.
+
+**Lo que el ADR no responde, a propósito**, porque es de producto y sigue en §3 ter: quién
+firma el paz y salvo, cuánto vale (los 30 días de hoy son un supuesto), si el comprobante tiene
+requisitos fiscales, y si el paz y salvo necesita autorización previa del administrador.
+
+---
+
 ### 2026-08-28 · Mary + IA (Claude) · La puerta de la app
 
 Mary señaló el hueco de fondo: **«lo que hemos trabajado son las pantallas adentro de la app»**.

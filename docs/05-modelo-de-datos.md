@@ -302,8 +302,10 @@ convocatoria, poder y acta.
 | `unidadId` | string? | Cuando aplica a una unidad |
 | `emitidoEn` | fecha ISO | |
 | `vigenteHasta` | fecha ISO? | Paz y salvo **(?)** |
-| `estado` | `'vigente' \| 'anulado'` | **Nunca se borra** (O3) |
-| `codigoVerificacion` | string? | Para validar el documento después **(?)** |
+| `estado` | `'vigente' \| 'anulado'` | **Nunca se borra** (O3): un anulado sigue existiendo y la verificación lo dice |
+| `codigoVerificacion` | string | Aleatorio, va impreso junto al número. Con los dos, un tercero verifica el documento **sin la app** ([ADR-0006](./adr/0006-documentos-formales.md)) |
+| `huella` | string | SHA-256 del archivo generado. El archivo **se guarda, no se regenera**: afirma un estado a una fecha |
+| `archivo` | string | Referencia al PDF en el almacenamiento de objetos. Vacío mientras no exista backend |
 
 ## 3. Reglas de negocio
 
@@ -346,7 +348,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-33 | La citación se emite con la antelación mínima del reglamento. **(?)** | *pendiente* |
 | RN-34 | Una votación cerrada no se reabre ni se modifica; se anula y se repite. | `dominio/reglas.ts` (`votacionRecibeVotos`) |
 | RN-35 | El acta se construye desde los datos registrados; aprobada, no se edita — se aclara con un acta nueva. | *pendiente* |
-| RN-36 | Todo documento formal lleva consecutivo único por tipo y es verificable. | `datos/repositorio.ts` (paz y salvo); falta el código de verificación |
+| RN-36 | Todo documento formal lleva **consecutivo único por tipo** y un **código de verificación** aleatorio, y se comprueba desde fuera de la app sin exponer datos personales (ADR-0006). | `datos/repositorio.ts` (paz y salvo); falta la página pública de verificación |
 | RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | `datos/repositorio.ts` (`emitirVoto` copia el coeficiente) |
 | RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si el reglamento lo contempla o una asamblea lo aprobó. | *pendiente* |
 | RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al proponerla. **(? — depende del debido proceso, Ley 675)** | *pendiente* |

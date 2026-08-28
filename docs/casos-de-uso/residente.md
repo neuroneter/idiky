@@ -349,8 +349,10 @@ localmente sin librerías externas (ver [ADR-0005](../adr/0005-codigo-qr-sin-dep
 > primero (CU-R-04) y luego emite.
 
 **Estado en el demo:** 🟡 — `src/features/residente/PazYSalvoPage.tsx`. Verifica RN-26, emite el
-certificado con su consecutivo (RN-36) y lo muestra en pantalla; **falta la descarga en PDF**,
-que depende de ADR-0006.
+certificado con su consecutivo y su código de verificación (RN-36) y lo muestra en pantalla.
+**Falta la descarga en PDF**, que según [ADR-0006](../adr/0006-documentos-formales.md) genera
+el servidor: el certificado no lo puede producir el teléfono de quien lo pide. Bloqueado por
+ADR-0008 (backend), no por la decisión.
 
 ---
 
