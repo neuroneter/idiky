@@ -11,17 +11,24 @@ nueva o una sesión de IA distinta.
 |---|---|
 | **Versión** | v0.1 — demo PWA navegable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
+| **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
-| **Autenticación** | Simulada (selección de perfil, [ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso implementados** | 21 de **45** documentados (12 de residente, 9 de administrador) |
+| **Autenticación** | El **flujo** está dibujado —documento, contraseña, código en dispositivo nuevo, activación— pero **no autentica**: no se guarda ninguna contraseña ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
+| **Casos de uso** | 61 documentados: 20 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
+| **Reglas de negocio** | 54 (RN-01…RN-54) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
+| **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
 ### Lo que funciona hoy
 
-**App del residente:** ingreso y unidad activa · inicio con resumen · estado de cuenta ·
-pago simulado con comprobante · reserva y cancelación de zonas comunes con validación de
-reglas · radicar y seguir PQRS · cartelera de comunicados · autorización de visitantes con
-código · consulta de correspondencia · consulta del coeficiente de copropiedad.
+**Puerta:** ingreso con documento y contraseña · código de un solo uso en un dispositivo
+nuevo · activación de la cuenta y recuperación de la contraseña, en tres pasos. Todo
+simulado, y cada pantalla lo dice.
+
+**App del residente:** inicio con resumen · estado de cuenta · pago simulado con comprobante
+(PSE, Bre-B y tarjeta) · **solicitudes** —zonas comunes, PQRS y paz y salvo— · **asambleas
+con votación ponderada por coeficiente** · cartelera de comunicados · autorización de
+visitantes con código · consulta de correspondencia · consulta del coeficiente.
 
 **Consola del administrador:** tablero de indicadores · unidades y residentes con búsqueda,
 ficha y vinculación · cartera con morosidad · registro de pagos manuales · generación de
@@ -30,13 +37,14 @@ publicación de comunicados · registro y entrega de correspondencia.
 
 ### Lo que NO existe
 
-Backend, autenticación real, pagos reales, notificaciones push, apps nativas, portería,
-presupuesto, informes exportables, modo oscuro.
+Backend, autenticación real, pagos reales, notificaciones push, apps nativas, **la consola de
+portería** (el rol ya está decidido, CU-P-01 y CU-P-02), presupuesto, modo oscuro.
 
-Y —**esto es lo importante desde el 2026-08-26**— no existe nada del núcleo que el equipo
-declaró como alcance: **asambleas** (citación, transmisión, votación, poderes, acta) ni
-**documentos descargables** (paz y salvo, estado de cuenta, comprobante). Los **coeficientes
-visibles al copropietario** sí — se implementaron el 2026-08-26 (CU-R-24).
+Y del núcleo declarado como alcance, lo que falta es **la mitad jurídica de la asamblea** —
+quórum, mayorías, poderes, acta— y **los documentos en PDF**: el paz y salvo ya se emite y se
+registra, pero no se descarga (ADR-0006 sin escribir). Lo que sí quedó: la citación, el orden
+del día, la votación por coeficiente (CU-R-13, CU-R-20) y los coeficientes visibles al
+copropietario (CU-R-24).
 
 ### ⚠️ El demo v0.1 no es el producto
 
