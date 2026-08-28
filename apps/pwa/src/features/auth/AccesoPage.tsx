@@ -34,6 +34,7 @@ import {
   recordarDispositivo,
 } from '../../estado/acceso'
 import { Logotipo } from '../../componentes/Logotipo'
+import { SiluetaTorres } from '../../componentes/SiluetaTorres'
 import { Icono } from '../../componentes/Icono'
 import { perfilDe } from './perfil'
 
@@ -108,6 +109,9 @@ export function AccesoPage() {
     const persona = sel.persona(bd, personaId)
     return (
       <div className="acceso-fondo">
+      {/* Las mismas torres del fondo de la app: la puerta y el interior son el
+          mismo edificio. */}
+      <SiluetaTorres className="acceso-fondo__siluetas" />
         <div className="acceso">
           <div className="acceso__marca">
             <Logotipo inverso tamano="var(--texto-3xl)" />
@@ -168,6 +172,9 @@ export function AccesoPage() {
 
   return (
     <div className="acceso-fondo">
+      {/* Las mismas torres del fondo de la app: la puerta y el interior son el
+          mismo edificio. */}
+      <SiluetaTorres className="acceso-fondo__siluetas" />
       <div className="acceso">
         <div className="acceso__marca">
           <Logotipo inverso tamano="var(--texto-3xl)" />

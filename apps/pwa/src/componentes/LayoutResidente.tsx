@@ -13,6 +13,7 @@ import { etiquetaUnidad } from '../dominio/reglas'
 import { capitalizar, iniciales } from '../utilidades/formato'
 import { Icono, type NombreIcono } from './Icono'
 import { Logotipo } from './Logotipo'
+import { SiluetaTorres } from './SiluetaTorres'
 import { Modal } from './Modal'
 import { AvisoGlobal } from './Aviso'
 
@@ -87,15 +88,7 @@ export function LayoutResidente() {
           a la pantalla. La silueta de torres es la copropiedad misma, dibujada
           con el mismo trazo del logotipo. */}
       <div className="zona-marca" aria-hidden="true">
-        <svg className="zona-marca__siluetas" viewBox="0 0 320 150" fill="none">
-          <g stroke="currentColor" strokeWidth="3" strokeLinejoin="round" strokeLinecap="round">
-            <path d="M12 150V54l30-20 30 20v96M42 150v-30h18v30" />
-            <path d="M96 150V78l26-17 26 17v72M122 150v-24h14v24" />
-            <path d="M172 150V42l34-22 34 22v108M206 150v-34h20v34" />
-            <path d="M260 150V88l24-16 24 16v62" />
-            <path d="M0 150h320" />
-          </g>
-        </svg>
+        <SiluetaTorres className="zona-marca__siluetas" />
       </div>
 
       <header className="barra-superior">

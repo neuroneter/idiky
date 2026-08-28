@@ -91,6 +91,11 @@ demo inmostrable. Cada pantalla lo advierte. ADR-0004 quedó actualizado con esa
 El atajo de perfiles sigue, plegado debajo: hace falta para mostrar la consola del
 administrador sin teclear cédulas. Ya no es la puerta.
 
+**Y las torres del fondo también** (Mary): la puerta y el interior son el mismo edificio. Al
+llevarlas allá se sacaron a `componentes/SiluetaTorres.tsx`: estaban dibujadas a mano dentro
+del cascarón del residente, y un dibujo repetido en dos sitios se desincroniza el día que
+alguien cambia uno.
+
 Un efecto secundario que vale la pena: como el acceso arma la sesión desde la persona y su
 residencia, **los doce residentes de la semilla pueden entrar con su documento**, no solo los
 tres perfiles. El demo se siente menos maqueta.

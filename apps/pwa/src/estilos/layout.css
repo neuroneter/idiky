@@ -343,9 +343,23 @@
    antes de que empiece a leer datos. La tarjeta blanca encima sostiene el
    formulario. */
 .acceso-fondo {
+  position: relative;
   min-height: 100%;
   background: var(--degradado-marca-vertical);
   background-attachment: fixed;
+  overflow: hidden;
+}
+/* Las torres se apoyan en el borde de abajo, como dentro de la app. Van fijas
+   para que no se despeguen si el teclado empuja la pantalla al escribir. */
+.acceso-fondo__siluetas {
+  position: fixed;
+  right: -28px;
+  bottom: 0;
+  width: 300px;
+  height: auto;
+  color: #fff;
+  opacity: 0.09;
+  pointer-events: none;
 }
 .acceso {
   min-height: 100%;
