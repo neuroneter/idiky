@@ -224,7 +224,9 @@ export function PersonasPage() {
                   unidadId: unidadId!,
                   creadoPor: sesion.personaId,
                 }),
-              'Registro creado. Ahora la persona adjunta sus fotos.',
+              datos.categoria === 'visitante'
+                ? 'Registro creado.'
+                : 'Registro creado. Ahora la persona adjunta sus fotos.',
             )
             if (creado) {
               setRegistrando(false)

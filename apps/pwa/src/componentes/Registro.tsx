@@ -22,6 +22,7 @@ import {
   exigeSoportes,
   exigeVigencia,
   hoyISO,
+  soloUnDia,
   sumarDias,
 } from '../dominio/reglas'
 import { Modal } from './Modal'
@@ -106,6 +107,7 @@ export function FormularioRegistro({
      tramite cambia con ella (RN-57): anunciarle fotos a quien registra una
      visita de una tarde seria prometerle un paso que no va a existir. */
   const conSoportes = exigeSoportes(categoria)
+  const unDia = soloUnDia(categoria)
 
   function enviar(evento: React.FormEvent) {
     evento.preventDefault()
@@ -120,8 +122,12 @@ export function FormularioRegistro({
       )
       return
     }
-    if (conVigencia && hasta < desde) {
+    if (conVigencia && !unDia && hasta < desde) {
       setError('La fecha de salida no puede ser anterior a la de entrada.')
+      return
+    }
+    if (unDia && desde < hoyISO()) {
+      setError('Esa fecha ya pasó. Escoge el día en que viene la visita.')
       return
     }
     if (unidades && !unidadId) {
@@ -137,7 +143,8 @@ export function FormularioRegistro({
       email: email.trim(),
       telefono: telefono.trim(),
       vigenciaDesde: desde,
-      vigenciaHasta: conVigencia ? hasta : undefined,
+      // La visita entra y sale el mismo dia (RN-62).
+      vigenciaHasta: unDia ? desde : conVigencia ? hasta : undefined,
       placa: categoria === 'visitante' ? placa.trim() || undefined : undefined,
       ...(unidades ? { unidadId } : {}),
     })
@@ -256,28 +263,48 @@ export function FormularioRegistro({
           </div>
         </div>
 
-        <div className="fila-campos">
+        {/* La visita es de un solo dia (RN-62), asi que se pregunta un dia y no un
+            rango: dos campos donde solo cabe una fecha invitan a poner un rango
+            y despues rebota la regla. */}
+        {unDia ? (
           <div className="campo">
-            <label htmlFor="desde">Entra el</label>
+            <label htmlFor="desde">¿Qué día viene?</label>
             <input
               id="desde"
               type="date"
+              min={hoyISO()}
               value={desde}
               onChange={(e) => setDesde(e.target.value)}
             />
+            <span className="ayuda-campo">
+              Entra y sale ese día. Si se queda a dormir varios días, regístrala como residente
+              temporal.
+            </span>
           </div>
-          {conVigencia && (
+        ) : (
+          <div className="fila-campos">
             <div className="campo">
-              <label htmlFor="hasta">Sale el</label>
+              <label htmlFor="desde">Entra el</label>
               <input
-                id="hasta"
+                id="desde"
                 type="date"
-                value={hasta}
-                onChange={(e) => setHasta(e.target.value)}
+                value={desde}
+                onChange={(e) => setDesde(e.target.value)}
               />
             </div>
-          )}
-        </div>
+            {conVigencia && (
+              <div className="campo">
+                <label htmlFor="hasta">Sale el</label>
+                <input
+                  id="hasta"
+                  type="date"
+                  value={hasta}
+                  onChange={(e) => setHasta(e.target.value)}
+                />
+              </div>
+            )}
+          </div>
+        )}
 
         {categoria === 'visitante' && (
           <div className="campo">

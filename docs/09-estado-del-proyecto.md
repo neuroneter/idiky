@@ -135,6 +135,13 @@ visitas y las meta sin avisar. Un trámite que se evade protege menos que uno li
 cumple. El huésped de Airbnb sí duerme ahí, usa las zonas comunes y la portería lo ve a diario:
 ahí las dos fotos valen lo que cuestan.
 
+**Y el visitante es de un solo día**, lo que cierra la regla: se escoge el día en que viene, no
+un rango. Sin ese tope, una autorización «del 5 al 20» sería un residente temporal sin sus
+soportes, y por ahí se colaría lo que RN-57 le exige a quien se queda a dormir. Es también lo
+que hace barato no pedirle fotos — *una autorización que caduca esta misma noche no es una
+llave*. En el formulario eso es **un solo campo de fecha**, no dos: dos campos donde solo cabe
+una fecha invitan a poner un rango y después rebota la regla.
+
 **El visitante sigue dejando registro** —queda escrito quién lo dejó entrar y cuándo—; lo que
 se alivió es el requisito, no el rastro. En el código el registro de un visitante nace
 `autorizado` y crea el visitante en el acto, así que hay un solo camino de entrada a la unidad

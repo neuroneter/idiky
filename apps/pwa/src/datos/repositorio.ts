@@ -42,6 +42,7 @@ import {
   puedeAutorizar,
   puedeVotar,
   rolDeCategoria,
+  soloUnDia,
   soportesCompletos,
   vencimientoDelPeriodo,
   votacionRecibeVotos,
@@ -624,6 +625,14 @@ export async function crearRegistroPersona(
   // y no solo en el formulario: el formulario es una comodidad, la regla es esto.
   if (exigeVigencia(parametros.categoria) && !parametros.vigenciaHasta) {
     throw new ErrorDeNegocio('Un registro temporal o de visitante necesita fecha de fin.')
+  }
+
+  // RN-62: la visita es de un solo dia. Se valida aqui y no solo en el
+  // formulario, porque el formulario es una comodidad y esto es la regla.
+  if (soloUnDia(parametros.categoria) && parametros.vigenciaDesde !== parametros.vigenciaHasta) {
+    throw new ErrorDeNegocio(
+      'Una visita se autoriza por un día. Para varios días, registra a la persona como residente temporal.',
+    )
   }
 
   // Dos registros en curso para el mismo documento en la misma unidad son la

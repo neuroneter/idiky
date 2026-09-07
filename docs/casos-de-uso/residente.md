@@ -707,7 +707,7 @@ la subió**. Que la traiga la propia persona es lo que convierte el trámite en 
 
 **El visitante no pasa por esto** (Mary, 2026-09-07: *«el trámite del documento de identidad y
 la foto son para los usuarios con marca de residente y residente temporal»*, *«el visitante no
-requiere de fotos»*). Se registra con nombre, documento y vigencia, y **sale con su código en
+requiere de fotos»*). Se registra con nombre, documento y el día en que viene, y **sale con su código en
 un solo paso**.
 
 No es una concesión a la comodidad, es la decisión más segura de las dos: **pedirle cédula
@@ -725,7 +725,14 @@ lo dejó entrar y cuándo: aliviar el requisito no es renunciar al rastro.
 |---|---|---|---|---|
 | Residente | El dueño, quien le arrienda, su familia | **Sí** | Sin fecha de fin | Una residencia como propietario o arrendatario |
 | **Residente temporal** | **Un huésped de Airbnb, un familiar unos meses** | **Sí** | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
-| Visitante | **Quien viene una tarde o unos días** | **No** | **Exige** fecha de fin | Un visitante con su código, de una vez |
+| Visitante | **Quien viene una tarde** | **No** | **Un solo día** | Un visitante con su código, de una vez |
+
+**El visitante es de un solo día** (Mary, 2026-09-07). No se registra un rango: se escoge el día
+en que viene, y ese día entra y sale. Es lo que mantiene separadas las dos categorías de
+estadía — una autorización de visitante «del 5 al 20» sería un residente temporal sin sus
+soportes, y por ahí se colaría justo lo que RN-57 le exige a quien se queda a dormir. Y es lo
+que hace barato no pedirle fotos: **una autorización que caduca esta misma noche no es una
+llave.**
 
 Los ejemplos son de Mary (2026-09-07) y no son adorno: **son lo que separa las dos categorías
 de estadía**. El huésped de Airbnb duerme ahí, usa las zonas comunes y la portería lo va a ver

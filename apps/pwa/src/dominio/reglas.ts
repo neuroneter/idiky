@@ -566,6 +566,22 @@ export function exigeVigencia(categoria: CategoriaRegistro): boolean {
   return categoria !== 'residente'
 }
 
+/**
+ * RN-62 — **El visitante es de un solo dia** (Mary, 2026-09-07).
+ *
+ * No se registra un rango: se registra el dia en que viene, y ese dia entra y
+ * sale. Es lo que mantiene separadas las dos categorias de estadia — una
+ * autorizacion de visitante «del 5 al 20» es un residente temporal sin sus
+ * soportes, y por ahi se cuela justo lo que RN-57 pide para quien se queda a
+ * dormir.
+ *
+ * Tambien es lo que hace barato no pedirle fotos: una autorizacion que caduca
+ * esta misma noche no es una llave.
+ */
+export function soloUnDia(categoria: CategoriaRegistro): boolean {
+  return categoria === 'visitante'
+}
+
 /** El rol con el que queda vinculada la persona; el visitante no se vincula. */
 export function rolDeCategoria(
   categoria: CategoriaRegistro,
