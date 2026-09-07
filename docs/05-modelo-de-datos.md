@@ -151,6 +151,40 @@ Cambiar un parámetro afecta a los documentos **futuros**. Los ya registrados co
 cuenta, porque cada documento la guarda (RN-36) — así la contabilidad de un mes cerrado no se
 mueve cuando alguien reconfigura el plan.
 
+### Proveedor — solo en `apps/contable/`
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `nit`, `dv` | string, number | El DV se calcula con el **algoritmo de la DIAN** (RN-41) |
+| `razonSocial`, `nombreComercial` | string | |
+| `tipoPersona` | `'juridica' \| 'natural'` | |
+| `responsableIva` | boolean | |
+| `direccion`, `ciudad`, `telefono`, `email` | string | |
+| `cuentaGasto` | string | Cuenta del PUC contra la que se causa lo que factura |
+| `tarifaRetefuente` | number | En porcentaje |
+| `tarifaReteIca` | number | **Por mil**, no por ciento |
+
+> **Sobre consultar la DIAN:** no existe una API pública y gratuita para consultar un NIT y
+> traer la razón social, y esta aplicación además abre desde un archivo local sin servidor
+> (ADR-0006). Por eso el proveedor se crea y vive en el directorio propio de la copropiedad.
+> La consulta está aislada en `Idiky.proveedores.consultarNit`: el día que haya backend, es la
+> única función que cambia.
+
+### Egreso (comprobante de egreso) — solo en `apps/contable/`
+
+**La plata que sale.** No confundir con el recibo de caja, que es la que entra.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `numero` | string | `CE-<NNNNN>`, consecutivo propio |
+| `proveedorId`, `proveedorNit`, `proveedorNombre` | | El beneficiario queda en el documento |
+| `gastoIds` | string[] | Los gastos causados que cancela |
+| `valorBruto` | number | Suma de esos gastos |
+| `retefuente`, `reteica` | number | Retenciones practicadas (RN-42) |
+| `valorNeto` | number | `bruto − retefuente − reteica`: lo que sale de caja |
+| `cuentaCaja`, `cuentaPorPagar`, `cuentaRetefuente`, `cuentaReteica` | string | Guardadas en el documento (RN-36) |
+| `estado` | `'registrado' \| 'anulado'` | Anular devuelve los gastos a `por_pagar` |
+
 ### Tipo de comprobante — solo en `apps/contable/`
 
 **Es lo que le quita la contabilidad de encima al administrador.** Cada tipo trae su asiento
@@ -270,6 +304,8 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-38 | Abrirle una subcuenta a una cuenta transaccional la convierte en título: el movimiento baja al nivel nuevo. | `contable/js/repositorio.js` |
 | RN-39 | Cada tipo de comprobante lleva **su propio consecutivo**; el número nunca se repite entre tipos ni dentro de uno. | `contable/js/repositorio.js` |
 | RN-40 | Un tipo `sistema` no se registra a mano: solo lo genera el módulo que le corresponde. | `contable/js/repositorio.js` |
+| RN-41 | El dígito de verificación del NIT se calcula con el algoritmo de la DIAN; un NIT con DV equivocado se rechaza. | `contable/js/proveedores.js` |
+| RN-42 | Causar un gasto no es pagarlo. Se paga emitiendo un **comprobante de egreso**, que retiene lo que corresponda; lo retenido queda como pasivo, no como menor pago. | `contable/js/repositorio.js` |
 
 ### El motor contable: todo es un asiento
 
@@ -285,7 +321,7 @@ propio documento, no del parámetro vigente (RN-36):
 | Se aplica un pago | `pago.cuentaCaja` (`1110xx`) | la cuenta de cada imputación + el excedente a `pago.cuentaAnticipos` (`2805xx`) |
 | Se anula un recibo | lo contrario, con la fecha de la anulación | |
 | Se causa un gasto | `gasto.cuenta` (`51xx`) | `gasto.cuentaPorPagar` (`2335`) |
-| Se paga un gasto | `gasto.cuentaPorPagar` | `gasto.cuentaCaja` |
+| Se paga a un proveedor | `egreso.cuentaPorPagar` (valor **bruto**) | retenciones `2365` / `2368` + `egreso.cuentaCaja` (valor **neto**) |
 
 **Manuales** — los comprobantes de ajuste, que el administrador escribe cuando hay que mover
 la contabilidad sin que entre ni salga plata.

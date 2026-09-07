@@ -307,32 +307,26 @@ Idiky.repo = (function () {
       concepto: parametros.concepto.trim(),
       categoria: parametros.categoria || 'Otros',
       valor: parametros.valor,
-      proveedor: (parametros.proveedor || '').trim(),
-      // Se causa siempre: si ya se pago, se marca pagado en el mismo acto.
-      estado: parametros.pagado ? 'pagado' : 'por_pagar',
-      fechaPago: parametros.pagado ? (parametros.fechaPago || parametros.fecha) : undefined,
-      medio: parametros.pagado ? (parametros.medio || 'transferencia') : undefined,
-      cuenta: parametros.cuenta || bd.parametros.gasto[parametros.categoria] || '5195',
+      proveedorId: parametros.proveedorId || null,
+      proveedor: proveedorPorId(parametros.proveedorId)
+        ? proveedorPorId(parametros.proveedorId).razonSocial
+        : '',
+      // Un gasto SIEMPRE nace por pagar. Pagarlo es emitir un comprobante de
+      // egreso, que es un documento aparte con su beneficiario y sus
+      // retenciones — no una casilla en este formulario.
+      estado: 'por_pagar',
+      fechaPago: undefined,
+      egresoId: null,
+      cuenta: parametros.cuenta
+        || (proveedorPorId(parametros.proveedorId) || {}).cuentaGasto
+        || bd.parametros.gasto[parametros.categoria]
+        || '5195',
       cuentaPorPagar: bd.parametros.porPagar,
       cuentaCaja: bd.parametros.caja,
       registradoPor: bd.usuario,
     }
 
     bd.gastos.unshift(gasto)
-    guardar()
-    return gasto
-  }
-
-  function pagarGasto(parametros) {
-    cargar()
-    var gasto = gastoPorId(parametros.gastoId)
-    if (!gasto) throw new Error('El gasto no existe.')
-    if (gasto.estado === 'anulado') throw new Error('Ese gasto esta anulado.')
-    if (gasto.estado === 'pagado') throw new Error('Ese gasto ya esta pagado.')
-
-    gasto.estado = 'pagado'
-    gasto.fechaPago = parametros.fechaPago || d.hoyISO()
-    gasto.medio = parametros.medio || 'transferencia'
     guardar()
     return gasto
   }
@@ -363,6 +357,7 @@ Idiky.repo = (function () {
       cuotas: base.cuotas,
       pagos: base.pagos,
       gastos: base.gastos.filter(function (g) { return g.estado !== 'anulado' }),
+      egresos: base.egresos,
       comprobantes: base.comprobantes,
       plan: base.plan,
     }
@@ -381,6 +376,207 @@ Idiky.repo = (function () {
   // -------------------------------------------------------------------------
   // Comprobantes de ajuste
   // -------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------
+  // Proveedores
+  // -------------------------------------------------------------------------
+
+  function proveedores() {
+    return cargar().proveedores.slice().sort(function (a, b) {
+      return a.razonSocial.localeCompare(b.razonSocial)
+    })
+  }
+
+  function proveedorPorId(id) {
+    return cargar().proveedores.filter(function (p) { return p.id === id })[0]
+  }
+
+  function proveedorPorNit(nit) {
+    var limpio = Idiky.proveedores.limpiarNit(nit)
+    return cargar().proveedores.filter(function (p) { return p.nit === limpio })[0]
+  }
+
+  function buscarProveedores(texto) {
+    return Idiky.proveedores.buscar(proveedores().filter(function (p) { return p.activo }), texto)
+  }
+
+  /**
+   * Consulta un NIT. Hoy busca en el directorio propio; el dia que haya
+   * backend, esta es la unica funcion que cambia.
+   */
+  function consultarNit(texto) {
+    return Idiky.proveedores.consultarNit(texto, cargar().proveedores)
+  }
+
+  function guardarProveedor(datos) {
+    cargar()
+    var validacion = Idiky.proveedores.validarNit(datos.nit)
+    if (!validacion.valido) throw new Error(validacion.motivo)
+    if (!(datos.razonSocial || '').trim()) throw new Error('Escribe la razon social del proveedor.')
+
+    var existente = datos.id ? proveedorPorId(datos.id) : proveedorPorNit(validacion.nit)
+    if (!datos.id && existente) {
+      throw new Error('Ya existe un proveedor con el NIT ' + validacion.nit + ': ' + existente.razonSocial + '.')
+    }
+
+    var proveedor = existente || {
+      id: nuevoId('prv'),
+      activo: true,
+    }
+
+    proveedor.nit = validacion.nit
+    proveedor.dv = validacion.dv
+    proveedor.razonSocial = datos.razonSocial.trim()
+    proveedor.nombreComercial = (datos.nombreComercial || '').trim() || proveedor.razonSocial
+    proveedor.tipoPersona = datos.tipoPersona || 'juridica'
+    proveedor.responsableIva = !!datos.responsableIva
+    proveedor.direccion = (datos.direccion || '').trim()
+    proveedor.ciudad = (datos.ciudad || '').trim()
+    proveedor.telefono = (datos.telefono || '').trim()
+    proveedor.email = (datos.email || '').trim()
+    proveedor.cuentaGasto = datos.cuentaGasto || '5195'
+    proveedor.tarifaRetefuente = Number(datos.tarifaRetefuente) || 0
+    proveedor.tarifaReteIca = Number(datos.tarifaReteIca) || 0
+    if (datos.activo != null) proveedor.activo = !!datos.activo
+
+    if (!existente) bd.proveedores.push(proveedor)
+    guardar()
+    return proveedor
+  }
+
+  function desactivarProveedor(id) {
+    cargar()
+    var proveedor = proveedorPorId(id)
+    if (!proveedor) throw new Error('El proveedor no existe.')
+    proveedor.activo = false
+    guardar()
+    return proveedor
+  }
+
+  // -------------------------------------------------------------------------
+  // Egresos — la plata que sale
+  // -------------------------------------------------------------------------
+
+  function egresos() {
+    return cargar().egresos.slice().sort(function (a, b) {
+      return b.fecha.localeCompare(a.fecha) || b.numero.localeCompare(a.numero)
+    })
+  }
+
+  function egresoPorId(id) {
+    return cargar().egresos.filter(function (e) { return e.id === id })[0]
+  }
+
+  /** Gastos causados de un proveedor que todavia nadie ha pagado. */
+  function gastosPorPagarDe(proveedorId) {
+    return cargar().gastos.filter(function (g) {
+      return g.estado === 'por_pagar' && g.proveedorId === proveedorId
+    }).sort(function (a, b) { return a.fecha.localeCompare(b.fecha) })
+  }
+
+  /** Lo que se le debe a cada proveedor, para la pantalla de pagos. */
+  function saldosPorProveedor() {
+    return proveedores().map(function (proveedor) {
+      var pendientes = gastosPorPagarDe(proveedor.id)
+      return {
+        proveedor: proveedor,
+        pendientes: pendientes,
+        saldo: pendientes.reduce(function (t, g) { return t + g.valor }, 0),
+      }
+    })
+  }
+
+  function calcularRetenciones(proveedor, bruto) {
+    var retefuente = Math.round((bruto * (proveedor.tarifaRetefuente || 0)) / 100)
+    // El ICA se expresa por mil, no por ciento.
+    var reteica = Math.round((bruto * (proveedor.tarifaReteIca || 0)) / 1000)
+    return { retefuente: retefuente, reteica: reteica, neto: bruto - retefuente - reteica }
+  }
+
+  /**
+   * Emite un comprobante de egreso: le paga a un proveedor uno o varios
+   * gastos causados, descontando las retenciones que le apliquen.
+   */
+  function registrarEgreso(datos) {
+    cargar()
+    var proveedor = proveedorPorId(datos.proveedorId)
+    if (!proveedor) throw new Error('Elige el proveedor al que se le va a pagar.')
+    if (!datos.fecha) throw new Error('Indica la fecha del pago.')
+
+    var gastos = (datos.gastoIds || []).map(function (id) {
+      return bd.gastos.filter(function (g) { return g.id === id })[0]
+    }).filter(Boolean)
+
+    if (gastos.length === 0) {
+      throw new Error('Selecciona al menos un gasto por pagar de este proveedor.')
+    }
+    var yaPagado = gastos.filter(function (g) { return g.estado !== 'por_pagar' })[0]
+    if (yaPagado) throw new Error('El gasto "' + yaPagado.concepto + '" ya fue pagado.')
+
+    var bruto = gastos.reduce(function (t, g) { return t + g.valor }, 0)
+    var retenciones = calcularRetenciones(proveedor, bruto)
+
+    var consecutivo = bd.consecutivos.egreso
+    bd.consecutivos.egreso = consecutivo + 1
+
+    var egreso = {
+      id: nuevoId('egr'),
+      numero: 'CE-' + String(consecutivo).padStart(5, '0'),
+      fecha: datos.fecha,
+      proveedorId: proveedor.id,
+      proveedorNit: proveedor.nit,
+      proveedorNombre: proveedor.razonSocial,
+      concepto: (datos.concepto || '').trim() || 'Pago a ' + proveedor.razonSocial,
+      gastoIds: gastos.map(function (g) { return g.id }),
+      valorBruto: bruto,
+      retefuente: retenciones.retefuente,
+      reteica: retenciones.reteica,
+      valorNeto: retenciones.neto,
+      medio: datos.medio || 'transferencia',
+      referencia: (datos.referencia || '').trim(),
+      cuentaCaja: bd.parametros.caja,
+      cuentaPorPagar: bd.parametros.porPagar,
+      cuentaRetefuente: bd.parametros.retefuente,
+      cuentaReteica: bd.parametros.reteica,
+      estado: 'registrado',
+      registradoPor: bd.usuario,
+    }
+
+    gastos.forEach(function (g) {
+      g.estado = 'pagado'
+      g.fechaPago = datos.fecha
+      g.egresoId = egreso.id
+      g.medio = egreso.medio
+    })
+
+    bd.egresos.unshift(egreso)
+    guardar()
+    return egreso
+  }
+
+  /** Anular un egreso devuelve los gastos a "por pagar". */
+  function anularEgreso(datos) {
+    cargar()
+    var egreso = egresoPorId(datos.egresoId)
+    if (!egreso) throw new Error('El egreso no existe.')
+    var motivo = (datos.motivo || '').trim()
+    if (!motivo) throw new Error('Escribe el motivo de la anulacion.')
+    if (egreso.estado === 'anulado') throw new Error('Ese egreso ya esta anulado.')
+
+    egreso.gastoIds.forEach(function (id) {
+      var gasto = bd.gastos.filter(function (g) { return g.id === id })[0]
+      if (!gasto) return
+      gasto.estado = 'por_pagar'
+      gasto.fechaPago = undefined
+      gasto.egresoId = null
+    })
+
+    egreso.estado = 'anulado'
+    egreso.motivoAnulacion = motivo
+    egreso.fechaAnulacion = d.ahoraISO()
+    guardar()
+    return egreso
+  }
 
   // -------------------------------------------------------------------------
   // Tipos de comprobante
@@ -808,7 +1004,6 @@ Idiky.repo = (function () {
     gastos: gastos,
     gastoPorId: gastoPorId,
     registrarGasto: registrarGasto,
-    pagarGasto: pagarGasto,
     anularGasto: anularGasto,
     datosContables: datosContables,
     movimientosDeUnidad: movimientosDeUnidad,
@@ -827,6 +1022,20 @@ Idiky.repo = (function () {
     activarCuenta: activarCuenta,
     fijarParametro: fijarParametro,
     balanceDePrueba: balanceDePrueba,
+    proveedores: proveedores,
+    proveedorPorId: proveedorPorId,
+    proveedorPorNit: proveedorPorNit,
+    buscarProveedores: buscarProveedores,
+    consultarNit: consultarNit,
+    guardarProveedor: guardarProveedor,
+    desactivarProveedor: desactivarProveedor,
+    egresos: egresos,
+    egresoPorId: egresoPorId,
+    gastosPorPagarDe: gastosPorPagarDe,
+    saldosPorProveedor: saldosPorProveedor,
+    calcularRetenciones: calcularRetenciones,
+    registrarEgreso: registrarEgreso,
+    anularEgreso: anularEgreso,
     tipos: tipos,
     tiposRegistrables: tiposRegistrables,
     tipoPorId: tipoPorId,

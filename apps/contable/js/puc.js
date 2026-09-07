@@ -72,6 +72,7 @@ Idiky.puc = (function () {
     ['23', 'CUENTAS POR PAGAR', false],
     ['2335', 'Costos y gastos por pagar', true],
     ['2365', 'Retencion en la fuente', true],
+    ['2368', 'Impuesto de industria y comercio retenido', true],
     ['2370', 'Retenciones y aportes de nomina', true],
     ['25', 'OBLIGACIONES LABORALES', false],
     ['2505', 'Salarios por pagar', true],
@@ -152,6 +153,8 @@ Idiky.puc = (function () {
     anticipos: '280510',
     porPagar: '2335',
     excedentes: '3705',
+    retefuente: '2365',
+    reteica: '2368',
     cartera: {
       ordinaria: '130505',
       extraordinaria: '130510',
@@ -237,13 +240,15 @@ Idiky.puc = (function () {
     {
       codigo: 'CE',
       nombre: 'Comprobante de egreso',
-      descripcion: 'Lo genera Gastos al marcar un gasto como pagado.',
+      descripcion: 'Lo genera Pagos al pagarle a un proveedor. Descuenta las retenciones.',
       sistema: true,
-      origen: 'Gastos · Marcar pagado',
+      origen: 'Pagos a proveedores',
       pideUnidad: false,
       lineas: [
-        { parametro: 'porPagar', lado: 'debe', concepto: 'Cuenta por pagar' },
-        { parametro: 'caja', lado: 'haber', concepto: 'Salida de caja' },
+        { parametro: 'porPagar', lado: 'debe', concepto: 'Cuenta por pagar (valor bruto)' },
+        { parametro: 'retefuente', lado: 'haber', concepto: 'Retencion en la fuente practicada' },
+        { parametro: 'reteica', lado: 'haber', concepto: 'ReteICA practicado' },
+        { parametro: 'caja', lado: 'haber', concepto: 'Salida de caja (valor neto)' },
       ],
     },
 

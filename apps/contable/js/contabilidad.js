@@ -136,19 +136,33 @@ Idiky.contabilidad = (function () {
       }
     })
 
+    // Se causa el gasto: sube el egreso y sube la cuenta por pagar. El gasto
+    // NO saca plata de caja: eso lo hace el comprobante de egreso.
     datos.gastos.forEach(function (gasto) {
       var extra = { documento: gasto.proveedor || '' }
-
-      // Se causa el gasto: sube el egreso y sube la cuenta por pagar.
       lineas.push(asiento(gasto.fecha, gasto.cuenta, gasto.valor, 0, gasto.concepto, extra))
       lineas.push(asiento(gasto.fecha, gasto.cuentaPorPagar, 0, gasto.valor, gasto.concepto, extra))
+    })
 
-      // Se paga: baja la cuenta por pagar y sale de caja.
-      if (gasto.estado === 'pagado' && gasto.fechaPago) {
-        var quien = 'Pago a ' + (gasto.proveedor || 'proveedor')
-        lineas.push(asiento(gasto.fechaPago, gasto.cuentaPorPagar, gasto.valor, 0, quien, extra))
-        lineas.push(asiento(gasto.fechaPago, gasto.cuentaCaja, 0, gasto.valor, quien, extra))
+    // Se paga a un proveedor: baja la cuenta por pagar por el valor bruto, y
+    // ese bruto se reparte entre lo retenido y lo que efectivamente sale de
+    // caja. Retener no es pagar menos: es pagarle a la DIAN por cuenta del
+    // proveedor, y por eso la retencion queda como pasivo.
+    ;(datos.egresos || []).forEach(function (egreso) {
+      if (egreso.estado === 'anulado') return
+      var extra = { documento: egreso.numero }
+      var concepto = 'Pago a ' + egreso.proveedorNombre
+
+      lineas.push(asiento(egreso.fecha, egreso.cuentaPorPagar, egreso.valorBruto, 0, concepto, extra))
+      if (egreso.retefuente > 0) {
+        lineas.push(asiento(egreso.fecha, egreso.cuentaRetefuente, 0, egreso.retefuente,
+          'Retencion en la fuente', extra))
       }
+      if (egreso.reteica > 0) {
+        lineas.push(asiento(egreso.fecha, egreso.cuentaReteica, 0, egreso.reteica,
+          'ReteICA', extra))
+      }
+      lineas.push(asiento(egreso.fecha, egreso.cuentaCaja, 0, egreso.valorNeto, concepto, extra))
     })
 
     return lineas

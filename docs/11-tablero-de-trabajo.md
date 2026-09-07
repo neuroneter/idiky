@@ -29,6 +29,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-13 | Resto de la contable: proveedores, presupuesto anual, saldos de apertura de caja | Jeimy | 📋 Por hacer |
 | T-17 | **Que el contador de la copropiedad valide los códigos del PUC** | Jeimy | 📋 Por hacer |
 | T-19 | Crear y editar tipos de comprobante desde la pantalla (hoy solo se ven y se usan) | Jeimy | 📋 Por hacer |
+| T-21 | Declarar y pagar a la DIAN las retenciones acumuladas en 2365 y 2368 | Jeimy | 📋 Por hacer |
 
 ## Hecho
 
@@ -42,6 +43,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-15 | Contable: PUC colombiano editable, con la cuenta guardada en cada documento | ✅ Hecho |
 | T-18 | Contable: los cinco niveles del PUC y alta de cuentas en cascada | ✅ Hecho |
 | T-20 | Contable: tipos de comprobante con su asiento, para que el administrador no elija cuentas | ✅ Hecho |
+| T-22 | Contable: módulo de pagos a proveedores con egresos, retenciones y directorio | ✅ Hecho |
 
 ---
 

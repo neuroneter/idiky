@@ -16,12 +16,14 @@ Idiky.app = (function () {
   var MODULOS = [
     { id: 'cartera', texto: 'Cartera', titulo: 'Cartera',
       subtitulo: 'Quien debe, cuanto y desde cuando' },
-    { id: 'pagos', texto: 'Pagos', titulo: 'Pagos',
-      subtitulo: 'Abonos por conciliar y registro de lo que entra' },
+    { id: 'pagos', texto: 'Recaudos', titulo: 'Recaudos',
+      subtitulo: 'La plata que ENTRA: abonos por conciliar y pagos de copropietarios' },
     { id: 'recibos', texto: 'Recibos de caja', titulo: 'Recibos de caja',
-      subtitulo: 'El libro completo, con los anulados' },
+      subtitulo: 'El libro de lo recaudado, con los anulados' },
     { id: 'gastos', texto: 'Gastos', titulo: 'Gastos',
-      subtitulo: 'Lo que la copropiedad debe y lo que ya pago' },
+      subtitulo: 'Lo que se le debe a los proveedores, causado' },
+    { id: 'egresos', texto: 'Pagos', titulo: 'Pagos a proveedores',
+      subtitulo: 'La plata que SALE: comprobantes de egreso y directorio de proveedores' },
     { id: 'ajustes', texto: 'Ajustes', titulo: 'Comprobantes de ajuste',
       subtitulo: 'Mover la contabilidad sin que entre ni salga plata' },
     { id: 'plan', texto: 'Plan de cuentas', titulo: 'Plan de cuentas',
@@ -64,6 +66,7 @@ Idiky.app = (function () {
     else if (modulo === 'pagos') Idiky.vistaPagos.pintar(contenedor, pintar)
     else if (modulo === 'recibos') Idiky.vistaRecibos.pintar(contenedor, pintar)
     else if (modulo === 'gastos') Idiky.vistaGastos.pintar(contenedor, pintar)
+    else if (modulo === 'egresos') Idiky.vistaEgresos.pintar(contenedor, pintar)
     else if (modulo === 'ajustes') Idiky.vistaAjustes.pintar(contenedor, pintar)
     else if (modulo === 'plan') Idiky.vistaPlan.pintar(contenedor, pintar)
     else Idiky.vistaReportes.pintar(contenedor, pintar)

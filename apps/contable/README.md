@@ -19,9 +19,10 @@ recargar. El botón **"Reiniciar demo"** devuelve todo a su estado inicial.
 | Módulo | Para qué |
 |---|---|
 | **Cartera** | Quién debe, cuánto y desde cuándo. Estado de cuenta por unidad y generación de las cuotas del periodo. |
-| **Pagos** | Los abonos que los propietarios informaron y hay que conciliar, y el registro de la plata que llega por fuera. |
-| **Recibos de caja** | El libro completo, con los anulados. Ver el detalle de cualquier recibo y anularlo con motivo. |
-| **Gastos** | Lo que la copropiedad debe y lo que ya pagó. Es el otro lado de la contabilidad. |
+| **Recaudos** | La plata que **entra**: abonos que los propietarios informaron y hay que conciliar, y pagos que llegan por fuera. |
+| **Recibos de caja** | El libro de lo recaudado, con los anulados. |
+| **Gastos** | Lo que se le debe a los proveedores, causado. Un gasto nace **por pagar**. |
+| **Pagos** | La plata que **sale**: comprobantes de egreso a proveedores, con sus retenciones, y el directorio de proveedores. |
 | **Ajustes** | Comprobantes contables que mueven cuentas **sin que entre ni salga plata**: intereses de mora, provisiones, reclasificaciones, traslados al fondo de imprevistos. |
 | **Plan de cuentas** | El PUC de la copropiedad, editable. Los tipos de comprobante con su asiento, qué cuenta usa cada documento, y el balance de prueba. |
 | **Reportes** | Movimientos por cliente y fechas, estado de resultados y estado de situación financiera. Se imprimen (o se guardan como PDF) y se bajan en CSV. |
@@ -77,6 +78,45 @@ criterio de cada entidad.
 > ⚠️ **Antes de usar esto en contabilidad real, que el contador revise los códigos.** Son la
 > adaptación convencional del PUC para propiedad horizontal, no una verdad revelada. Todo es
 > editable justamente para eso.
+
+### Entra y sale no son lo mismo
+
+Es el error que este módulo corrige. **Recaudos** es la plata que entra de los
+copropietarios y su documento es el **recibo de caja**. **Pagos** es la plata que sale hacia
+los proveedores y su documento es el **comprobante de egreso**. Son opuestos, y un egreso
+tiene cosas que un recibo no: un beneficiario identificado con NIT, los gastos concretos que
+cancela, y las retenciones.
+
+Y una distinción que confunde a todo el mundo: **causar un gasto no es pagarlo.** Al causarlo
+queda debiéndose (pasivo). Al pagarlo sale la plata. Por eso el gasto se registra en Gastos y
+se paga en Pagos, con dos documentos distintos.
+
+### Sobre las retenciones
+
+Retener no es pagarle menos al proveedor: es pagarle a la DIAN por cuenta de él. Por eso el
+egreso baja la cuenta por pagar **por el valor bruto**, y ese bruto se reparte entre lo
+retenido —que queda como pasivo hasta que se le declare a la DIAN— y lo que efectivamente
+sale de caja.
+
+Cada proveedor lleva sus tarifas: retefuente en porcentaje, ReteICA por mil.
+
+### Sobre consultar la DIAN
+
+**No existe una API pública y gratuita de la DIAN** para consultar un NIT y traer la razón
+social; el RUT se consulta en su portal con autenticación, y automatizarlo es un servicio de
+terceros de pago. Además esta aplicación abre desde un archivo local, sin servidor y sin
+conexión garantizada (ADR-0006).
+
+Por eso el proveedor **se crea y vive en el directorio propio de la copropiedad**, que es lo
+que se necesita en el día a día: al de vigilancia se le paga todos los meses, no hay que
+consultarlo cada vez.
+
+Lo que sí es real: **el dígito de verificación se calcula con el algoritmo de la DIAN**,
+verificado contra NITs de dominio público. Sirve para atrapar un NIT mal digitado antes de
+que entre a la contabilidad.
+
+La consulta está aislada en una sola función (`Idiky.proveedores.consultarNit`): el día que
+haya backend, conectar un servicio real es cambiar solo su cuerpo.
 
 ### El administrador no elige cuentas
 
@@ -144,6 +184,7 @@ apps/contable/
     ├── formato.js             Mostrar dinero y fechas.
     ├── dominio.js             ⭐ Las reglas de cartera y pagos (RN-xx). Funciones puras.
     ├── puc.js                 ⭐ El PUC por defecto y la lectura de la jerarquía.
+    ├── proveedores.js         ⭐ Directorio, DV del NIT y la puerta única de consulta.
     ├── contabilidad.js        ⭐ El motor: convierte todo en asientos y arma los estados.
     ├── datos.js               Semilla del demo + guardado en el navegador.
     ├── repositorio.js         ⭐ La ÚNICA puerta a los datos.
@@ -153,6 +194,7 @@ apps/contable/
     ├── vista-pagos.js         Pantalla de Pagos.
     ├── vista-recibos.js       Pantalla de Recibos de caja.
     ├── vista-gastos.js        Pantalla de Gastos.
+    ├── vista-egresos.js       Pantalla de Pagos a proveedores.
     ├── vista-ajustes.js       Pantalla de Ajustes (comprobantes contables).
     ├── vista-plan.js          Pantalla del Plan de cuentas y sus parámetros.
     ├── vista-reportes.js      Los tres reportes, con impresión y CSV.

@@ -17,7 +17,7 @@ Idiky.datos = (function () {
 
   var d = Idiky.dominio
   var CLAVE = 'idiky.contable.bd'
-  var VERSION_ESQUEMA = 5
+  var VERSION_ESQUEMA = 6
 
   /** Valor de la cuota ordinaria por punto de coeficiente. */
   var VALOR_POR_COEFICIENTE = 45000
@@ -49,6 +49,10 @@ Idiky.datos = (function () {
   var P = Idiky.puc.parametrosBase()
 
   function crearSemilla() {
+    // Los gastos se construyen primero porque los egresos los cancelan y les
+    // ponen su fecha de pago.
+    var gastos = construirGastos()
+    var egresos = construirEgresos(gastos)
     var unidades = []
     var propietarios = []
     var cuotas = []
@@ -264,7 +268,7 @@ Idiky.datos = (function () {
       copropiedad: {
         id: 'cop-1',
         nombre: 'Conjunto Residencial Altos del Bosque',
-        nit: '901.234.567-8',
+        nit: '901.234.567-7',
         direccion: 'Calle 134 # 45-20',
         ciudad: 'Bogota',
       },
@@ -273,15 +277,98 @@ Idiky.datos = (function () {
       propietarios: propietarios,
       cuotas: cuotas,
       pagos: pagos,
-      gastos: construirGastos(),
+      gastos: gastos,
+      egresos: egresos.egresos,
+      proveedores: proveedoresBase,
       comprobantes: construirComprobantes(),
       plan: Idiky.puc.planBase(),
       parametros: Idiky.puc.parametrosBase(),
       tipos: tiposConConsecutivoAlDia(),
       // El consecutivo `comprobante` es solo para los libres (CA-xxxxx): los
       // sembrados llevan el de su tipo, asi que este arranca sin usar.
-      consecutivos: { recibo: consecutivo, gasto: 100, comprobante: 1 },
+      consecutivos: {
+        recibo: consecutivo,
+        gasto: 100,
+        comprobante: 1,
+        egreso: egresos.consecutivo,
+      },
     }
+  }
+
+  // -------------------------------------------------------------------------
+  // Proveedores y egresos
+  // -------------------------------------------------------------------------
+
+  var proveedoresBase = Idiky.proveedores.directorioBase()
+
+  function buscarProveedor(id) {
+    return proveedoresBase.filter(function (p) { return p.id === id })[0]
+  }
+
+  /**
+   * Emite los comprobantes de egreso que pagan los gastos historicos.
+   *
+   * Antes el gasto "se pagaba solo" con una fecha. Eso no es un pago: un pago
+   * es un documento con su numero, su beneficiario y sus retenciones. Aqui se
+   * agrupan los gastos marcados como pendientes de pagar, por proveedor y por
+   * fecha, y se emite el egreso que los cancela.
+   */
+  function construirEgresos(gastos) {
+    var egresos = []
+    var consecutivo = 1
+    var grupos = {}
+
+    gastos.forEach(function (gasto) {
+      if (!gasto.pendienteDePagar) return
+      var fechaPago = d.sumarDias(gasto.fecha, 5)
+      var clave = gasto.proveedorId + '|' + fechaPago
+      if (!grupos[clave]) grupos[clave] = { proveedorId: gasto.proveedorId, fecha: fechaPago, gastos: [] }
+      grupos[clave].gastos.push(gasto)
+    })
+
+    Object.keys(grupos).sort(function (a, b) {
+      return grupos[a].fecha.localeCompare(grupos[b].fecha)
+    }).forEach(function (clave) {
+      var grupo = grupos[clave]
+      var proveedor = buscarProveedor(grupo.proveedorId)
+      var bruto = grupo.gastos.reduce(function (t, g) { return t + g.valor }, 0)
+      var retefuente = Math.round((bruto * (proveedor.tarifaRetefuente || 0)) / 100)
+      var reteica = Math.round((bruto * (proveedor.tarifaReteIca || 0)) / 1000)
+      var numero = 'CE-' + String(consecutivo).padStart(5, '0')
+
+      grupo.gastos.forEach(function (g) {
+        g.estado = 'pagado'
+        g.fechaPago = grupo.fecha
+        g.egresoId = 'egr-' + String(consecutivo).padStart(3, '0')
+        delete g.pendienteDePagar
+      })
+
+      egresos.push({
+        id: 'egr-' + String(consecutivo).padStart(3, '0'),
+        numero: numero,
+        fecha: grupo.fecha,
+        proveedorId: proveedor.id,
+        proveedorNit: proveedor.nit,
+        proveedorNombre: proveedor.razonSocial,
+        concepto: 'Pago a ' + proveedor.razonSocial,
+        gastoIds: grupo.gastos.map(function (g) { return g.id }),
+        valorBruto: bruto,
+        retefuente: retefuente,
+        reteica: reteica,
+        valorNeto: bruto - retefuente - reteica,
+        medio: 'transferencia',
+        referencia: 'TRF' + (900000 + consecutivo),
+        cuentaCaja: P.caja,
+        cuentaPorPagar: P.porPagar,
+        cuentaRetefuente: P.retefuente,
+        cuentaReteica: P.reteica,
+        estado: 'registrado',
+        registradoPor: 'Sistema',
+      })
+      consecutivo += 1
+    })
+
+    return { egresos: egresos, consecutivo: consecutivo }
   }
 
   // -------------------------------------------------------------------------
@@ -294,30 +381,35 @@ Idiky.datos = (function () {
    * egresos no es un estado de resultados.
    */
   var GASTOS_MENSUALES = [
-    ['Vigilancia', 'Vigilancia', 1900000, 'Seguridad Andina S.A.S.'],
-    ['Aseo y cafeteria', 'Aseo', 850000, 'Servilimpieza Ltda.'],
-    ['Servicios publicos zonas comunes', 'Servicios publicos', 620000, 'Empresa de servicios'],
-    ['Mantenimiento de ascensores', 'Mantenimiento', 380000, 'Ascensores del Norte'],
-    ['Honorarios de administracion', 'Administracion', 450000, 'Olga Lucia Henao'],
+    ['Vigilancia', 'Vigilancia', 1900000, 'prv-001'],
+    ['Aseo y cafeteria', 'Aseo', 850000, 'prv-002'],
+    ['Servicios publicos zonas comunes', 'Servicios publicos', 620000, 'prv-005'],
+    ['Mantenimiento de ascensores', 'Mantenimiento', 380000, 'prv-003'],
+    ['Honorarios de administracion', 'Administracion', 450000, 'prv-007'],
   ]
 
   function construirGastos() {
     var gastos = []
     var n = 1
 
-    function agregar(periodo, dia, concepto, categoria, valor, proveedor, pagado) {
+    function agregar(periodo, dia, concepto, categoria, valor, proveedorId, pagado) {
       var fecha = periodo + '-' + String(dia).padStart(2, '0')
+      var proveedor = buscarProveedor(proveedorId)
       gastos.push({
         id: 'gas-' + String(n).padStart(3, '0'),
         fecha: fecha,
         concepto: concepto,
         categoria: categoria,
         valor: valor,
-        proveedor: proveedor,
+        proveedorId: proveedorId,
+        proveedor: proveedor ? proveedor.razonSocial : '',
         estado: pagado ? 'pagado' : 'por_pagar',
-        fechaPago: pagado ? d.sumarDias(fecha, 5) : undefined,
-        medio: pagado ? 'transferencia' : undefined,
-        cuenta: P.gasto[categoria] || '5195',
+        // Quien paga es el egreso, no el gasto: `fechaPago` y `egresoId` los
+        // pone el comprobante cuando se emite.
+        fechaPago: undefined,
+        egresoId: null,
+        pendienteDePagar: pagado,
+        cuenta: (proveedor && proveedor.cuentaGasto) || P.gasto[categoria] || '5195',
         cuentaPorPagar: P.porPagar,
         cuentaCaja: P.caja,
       })
@@ -335,12 +427,12 @@ Idiky.datos = (function () {
     })
 
     // La poliza de la copropiedad, que se paga una vez al ano.
-    agregar(d.periodoRelativo(-2), 20, 'Poliza de areas comunes', 'Seguros', 1800000, 'Aseguradora Colmena', true)
+    agregar(d.periodoRelativo(-2), 20, 'Poliza de areas comunes', 'Seguros', 1800000, 'prv-004', true)
 
     // La obra que financia la cuota extraordinaria: se causa en el mismo
     // periodo en que se cobro, y por eso ese mes da deficit en el estado de
     // resultados aunque la plata haya entrado.
-    agregar(d.periodoRelativo(-1), 22, 'Impermeabilizacion de cubiertas', 'Mantenimiento', 38000000, 'Construcciones Vertice', false)
+    agregar(d.periodoRelativo(-1), 22, 'Impermeabilizacion de cubiertas', 'Mantenimiento', 38000000, 'prv-006', false)
 
     return gastos
   }

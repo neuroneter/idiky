@@ -12,7 +12,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy) |
-| **Contable** | Cartera · Pagos · Recibos de caja · Gastos · Ajustes · Plan de cuentas · Reportes. Partida doble sobre un PUC colombiano editable |
+| **Contable** | Cartera · Recaudos · Recibos de caja · Gastos · Pagos a proveedores · Ajustes · Plan de cuentas · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
 | **Autenticación** | Simulada (selección de perfil, [ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso implementados** | 22 de 35 documentados (12 de residente, 10 de administrador) |
@@ -53,6 +53,54 @@ casos de uso cambien, se eliminen o aparezcan otros.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Pagos a proveedores
+
+**Qué se hizo**
+
+Jeimy señaló que el módulo llamado "Pagos" no estaba diseñado para pagos: era una copia del
+de recibos de caja. Tenía razón, y el problema era de raíz — **ese módulo es la plata que
+ENTRA**, y no existía el de la plata que SALE.
+
+- **"Pagos" pasó a llamarse "Recaudos"** y nació **Pagos a proveedores**, con su documento
+  propio: el comprobante de egreso.
+- **Directorio de proveedores**, con NIT, razón social, tipo de persona, dirección, cuenta
+  del PUC contra la que se causa lo que factura, y sus tarifas de retención.
+- **Un egreso retiene.** Baja la cuenta por pagar por el valor bruto y lo reparte entre lo
+  retenido —que queda como pasivo, porque es plata de la DIAN— y lo que sale de caja (RN-42).
+- **Causar un gasto dejó de ser pagarlo.** Se le quitó la casilla "ya está pagado": un gasto
+  nace por pagar, y se paga emitiendo el egreso. Eran dos hechos económicos distintos
+  metidos en un solo formulario.
+
+**Sobre consultar la DIAN**
+
+Jeimy pidió buscar el proveedor en la base de la DIAN. Se le explicó que **no existe una API
+pública y gratuita** para eso —el RUT se consulta con autenticación y automatizarlo es un
+servicio de terceros de pago— y que además la aplicación abre desde un archivo local, sin
+servidor (ADR-0006). Ella respondió que por ahora bastaba con poder crear al proveedor, y así
+quedó.
+
+Lo que sí es real: **el dígito de verificación se calcula con el algoritmo de la DIAN**,
+verificado contra cuatro NITs de dominio público (RN-41). De paso apareció que el NIT del
+demo tenía mal el DV: `901.234.567-8` cuando le corresponde `-7`.
+
+La consulta quedó aislada en una sola función, `Idiky.proveedores.consultarNit`: el día que
+haya backend, conectar un servicio real es cambiar solo su cuerpo.
+
+**Verificación** — siete suites en Chromium, todas pasan. La nueva comprueba el DV contra
+NITs conocidos, el rechazo de un DV equivocado y de un NIT repetido, que Recaudos y Pagos
+sean módulos distintos, que las retenciones se liquiden bien (2 % sobre 38.000.000 = 760.000,
+ICA 0,966 por mil = 36.708), que lo retenido quede como **pasivo y no como menor pago**, que
+anular el egreso devuelva el gasto a por pagar, y que no se pueda pagar dos veces el mismo
+gasto. El balance sigue cuadrando en todos los casos.
+
+**Qué sigue**
+
+1. Falta declarar y pagar las retenciones a la DIAN: hoy se acumulan en `2365` y `2368` y
+   nada las descarga (T-21).
+2. Los gastos de un mismo proveedor se pagan juntos, pero no se puede hacer un abono parcial
+   a un gasto: o se paga completo o no se paga.
+3. Sigue pendiente que el contador valide los códigos del PUC (T-17).
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Tipos de comprobante
 

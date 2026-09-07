@@ -1128,3 +1128,81 @@ input[type="number"], .entrada-cifra {
 
 .asiento-previo .tabla { background: var(--superficie); border-radius: var(--radio-sm); }
 .asiento-previo .campo__ayuda { margin-top: var(--e2); }
+
+/* ===========================================================================
+   Pagos a proveedores
+   =========================================================================== */
+
+.resultados-busqueda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+  margin-bottom: var(--e4);
+}
+
+.resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  padding: var(--e2) var(--e3);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+  background: var(--superficie);
+  font: inherit;
+  cursor: pointer;
+}
+
+.resultado:hover { background: var(--acento-suave); border-color: var(--acento); }
+
+.resultado-vacio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  padding: var(--e3);
+  background: var(--espera-suave);
+  border: 1px solid var(--espera-borde);
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-sm);
+}
+
+/* La ficha del proveedor: lo que el directorio trae al elegirlo. */
+.ficha-proveedor {
+  padding: var(--e3) var(--e4);
+  background: var(--superficie-alterna);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+  margin-bottom: var(--e4);
+}
+
+.ficha-proveedor__cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e3);
+}
+
+.ficha-proveedor__cabecera .sub { display: block; }
+
+.ficha-proveedor__datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e5);
+  margin-top: var(--e3);
+  padding-top: var(--e3);
+  border-top: 1px solid var(--borde);
+  font-size: var(--texto-sm);
+}
+
+.fila-seleccion {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  cursor: pointer;
+}
+
+.fila-seleccion .casilla { width: auto; margin: 0; }
+.fila-seleccion .columna { flex: 1; }
+
+.fila-seleccion .columna .sub { display: block; }

@@ -52,6 +52,19 @@ Idiky.vistaGastos = (function () {
         el('article', 'tarjeta', ui.indicador('Registros', String(vigentes.length))),
       ]),
 
+      porPagar > 0
+        ? el('div', 'nota', [
+            el('div', null, [
+              el('strong', null, 'Causar un gasto no es pagarlo'),
+              el('span', 'sub', 'Queda debiendose hasta que se emita el comprobante de egreso, en Pagos.'),
+            ]),
+            el('button', {
+              clase: 'boton',
+              onClick: function () { Idiky.app.irA('egresos') },
+            }, 'Ir a Pagos'),
+          ])
+        : null,
+
       el('div', 'barra-acciones', [
         el('div', 'filtros', [
           botonFiltro('todos', 'Vigentes', repintar),
@@ -97,14 +110,17 @@ Idiky.vistaGastos = (function () {
                   ? el('div', 'grupo-acciones', [
                       el('button', {
                         clase: 'boton boton--pequeno',
-                        onClick: function () { marcarPagado(gasto.id, repintar) },
-                      }, 'Marcar pagado'),
+                        onClick: function () { Idiky.app.irA('egresos') },
+                        title: 'Un gasto se paga emitiendo un comprobante de egreso',
+                      }, 'Pagar'),
                       el('button', {
                         clase: 'boton boton--pequeno boton--peligro',
                         onClick: function () { abrirAnulacion(gasto.id, repintar) },
                       }, 'Anular'),
                     ])
-                  : null),
+                  : gasto.egresoId
+                    ? el('span', 'sub cifra', reciboDelGasto(gasto))
+                    : null),
               ])
             })),
           ])),
@@ -119,14 +135,10 @@ Idiky.vistaGastos = (function () {
     }, texto)
   }
 
-  function marcarPagado(gastoId, repintar) {
-    try {
-      Idiky.repo.pagarGasto({ gastoId: gastoId })
-      repintar()
-      ui.aviso('Gasto marcado como pagado. Sale de cuentas por pagar.', 'exito')
-    } catch (error) {
-      ui.aviso(error.message, 'error')
-    }
+  /** El numero del egreso que pago este gasto, si ya se pago. */
+  function reciboDelGasto(gasto) {
+    var egreso = Idiky.repo.egresoPorId(gasto.egresoId)
+    return egreso ? egreso.numero : ''
   }
 
   function abrirRegistro(repintar) {
@@ -135,8 +147,7 @@ Idiky.vistaGastos = (function () {
       concepto: '',
       categoria: 'Vigilancia',
       valor: 0,
-      proveedor: '',
-      pagado: false,
+      proveedorId: '',
       cuenta: Idiky.repo.parametros().gasto['Vigilancia'],
     }
 
@@ -177,16 +188,25 @@ Idiky.vistaGastos = (function () {
       type: 'number', min: 0, step: 1000, value: 0,
       onInput: function (e) { estado.valor = f.aNumero(e.target.value) },
     })
-    var campoProveedor = el('input', {
-      type: 'text', placeholder: 'A quien se le paga',
-      onInput: function (e) { estado.proveedor = e.target.value },
-    })
-    var campoPagado = el('input', {
-      type: 'checkbox',
-      clase: 'casilla',
-      onChange: function (e) { estado.pagado = e.target.checked },
-    })
+    var proveedoresActivos = Idiky.repo.proveedores().filter(function (p) { return p.activo })
+    if (!estado.proveedorId && proveedoresActivos.length) {
+      estado.proveedorId = proveedoresActivos[0].id
+    }
 
+    // El proveedor sale del directorio: asi el gasto queda ligado a alguien
+    // identificado y despues se le puede emitir el egreso.
+    var campoProveedor = el('select', {
+      onChange: function (e) {
+        estado.proveedorId = e.target.value
+        var p = Idiky.repo.proveedorPorId(estado.proveedorId)
+        if (p && p.cuentaGasto) { estado.cuenta = p.cuentaGasto; pintarCuenta() }
+      },
+    }, proveedoresActivos.map(function (p) {
+      return el('option', {
+        value: p.id,
+        selected: p.id === estado.proveedorId,
+      }, p.razonSocial)
+    }))
     pintarCuenta()
 
     ui.abrirModal({
@@ -203,12 +223,9 @@ Idiky.vistaGastos = (function () {
           ui.campo('Valor', campoValor),
           ui.campo('Proveedor', campoProveedor),
         ]),
-        el('label', 'campo campo--casilla', [
-          campoPagado,
-          el('span', null, 'Ya esta pagado'),
-        ]),
         el('p', 'campo__ayuda',
-          'Si no lo marcas, queda en cuentas por pagar y aparece como pasivo en el estado de situacion financiera.'),
+          'El gasto queda en cuentas por pagar, como pasivo. Para pagarlo se emite un '
+          + 'comprobante de egreso desde el modulo de Pagos, que es donde se liquidan las retenciones.'),
       ],
       acciones: [
         el('button', { clase: 'boton', onClick: ui.cerrarModal }, 'Cancelar'),
