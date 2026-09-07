@@ -326,6 +326,12 @@ export interface RegistroPersona {
   fotoDocumento?: Soporte
   /** Foto de la persona (RN-57). */
   fotoPersona?: Soporte
+  /**
+   * La autorizacion de tratamiento de datos que dio la persona al adjuntar
+   * (RN-66). Va aqui y no en una tabla aparte porque el registro no se borra
+   * nunca: es donde la constancia sobrevive a las fotos, que si tienen plazo.
+   */
+  consentimiento?: { version: string; aceptadoEn: FechaHoraISO }
   /** Lo que la persona escribe para abrir su registro y adjuntar (RN-58). */
   codigo: string
   estado: EstadoRegistro

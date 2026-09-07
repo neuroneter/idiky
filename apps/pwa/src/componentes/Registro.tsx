@@ -407,6 +407,16 @@ export function DetalleRegistro({
         <>
           <div className="separador" />
           <span className="titulo-seccion">Soportes que adjuntó</span>
+          {/* La constancia de la autorizacion, junto a lo que autoriza. Es lo que
+              la ley le exige probar a quien trata los datos, y quien autoriza el
+              registro tiene que poder verla sin buscarla (RN-66). */}
+          {registro.consentimiento && (
+            <span className="subtitulo">
+              Autorizó el tratamiento de sus datos el{' '}
+              {formatearFechaHora(registro.consentimiento.aceptadoEn)} · política{' '}
+              {registro.consentimiento.version}
+            </span>
+          )}
           <div className="soportes">
             <figure className="soporte">
               <img src={registro.fotoDocumento.imagen} alt="Documento de identidad" />

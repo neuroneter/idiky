@@ -674,8 +674,13 @@ export async function crearRegistroPersona(
     )
   }
 
-  // Dos registros en curso para el mismo documento en la misma unidad son la
-  // forma de que despues nadie sepa cual autorizo.
+  // Solo se bloquean los registros EN CURSO, no los cerrados, y eso es
+  // deliberado: **rehabilitar a alguien es volver a registrarlo**, no deshacer la
+  // inhabilitacion (RN-61). Si sus fotos ya se eliminaron por plazo, el tramite
+  // se las vuelve a pedir — que es justo lo que debe pasar (Mary, 2026-09-07).
+  //
+  // Dos registros en curso para el mismo documento en la misma unidad, en cambio,
+  // son la forma de que despues nadie sepa cual autorizo.
   const enCurso = bd.registros.find(
     (registro) =>
       registro.unidadId === parametros.unidadId &&
@@ -746,7 +751,13 @@ function crearVisitanteDeRegistro(bd: BaseDatos, registro: RegistroPersona): Vis
  */
 export async function adjuntarSoportes(
   bdActual: BaseDatos,
-  parametros: { registroId: string; fotoDocumento: string; fotoPersona: string },
+  parametros: {
+    registroId: string
+    fotoDocumento: string
+    fotoPersona: string
+    /** Version de la politica que la persona acepto (RN-66). */
+    consentimiento: string
+  },
 ): Promise<Resultado<RegistroPersona>> {
   await esperar()
   const bd = clonar(bdActual)
@@ -756,7 +767,15 @@ export async function adjuntarSoportes(
     throw new ErrorDeNegocio('Ese registro ya no está esperando soportes.')
   }
 
+  // RN-66: sin autorizacion no se guarda la foto de una cedula. Se valida aqui y
+  // no solo en la casilla del formulario, porque la casilla es de la pantalla y
+  // esto es la condicion para poder tratar el dato.
+  if (!parametros.consentimiento) {
+    throw new ErrorDeNegocio('Falta la autorización de tratamiento de datos.')
+  }
+
   const ahora = ahoraISO()
+  registro.consentimiento = { version: parametros.consentimiento, aceptadoEn: ahora }
   registro.fotoDocumento = { imagen: parametros.fotoDocumento, adjuntadoEn: ahora }
   registro.fotoPersona = { imagen: parametros.fotoPersona, adjuntadoEn: ahora }
   registro.soportesEn = ahora

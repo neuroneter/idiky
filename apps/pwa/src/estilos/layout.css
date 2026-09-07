@@ -797,6 +797,32 @@
   line-height: calc(17px * var(--escala-texto));
 }
 
+/* --- Autorizacion de tratamiento de datos (RN-66) --- */
+.politica {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+.politica__detalle > summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-size: var(--texto-sm);
+  font-weight: 650;
+  color: var(--color-marca);
+}
+.politica__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+  padding: var(--e3);
+  margin-top: var(--e2);
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie-2);
+  border: 1px solid var(--color-borde);
+}
+
 /* ============================== Registro de personas (CU-R-27, CU-R-28) */
 /* La zona de captura es grande a proposito: se toca de pie, con una mano, y a
    veces con el telefono en la otra apuntando a una cedula. */

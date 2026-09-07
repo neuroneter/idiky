@@ -763,6 +763,9 @@ ahora lo reconoce de una.
 - A4. Un arrendatario abre la pantalla → solo puede registrar visitantes, **y la pantalla se lo
   dice** en vez de esconderle el botón sin explicación (RN-60).
 - A5. La persona se va → **Inhabilitar**. Cierra el vínculo con fecha; no borra nada (RN-61).
+- A5b. La persona **vuelve** → se la registra de nuevo. Rehabilitar no es deshacer: si sus
+  fotos ya se eliminaron por plazo, el trámite se las pide otra vez (Mary, 2026-09-07). La
+  persona sí se reconoce por su documento, así que no nace de cero.
   **Y no borra a la persona**: *«el residente puede pasarse a vivir a otro edificio que opere
   Idiky, por eso lo de inhabilitar nada más»* (Mary, 2026-09-07). Al registrarlo allá se le
   reconoce por su documento y llega con su historia, en vez de nacer de cero.
@@ -815,7 +818,10 @@ un dato que la persona sabe y un código que solo pudo darle quien hizo el trám
 **Flujo principal**
 1. En la pantalla de ingreso toca **Adjuntar mis documentos**.
 2. Escribe su documento y el código.
-3. El sistema le muestra su nombre —para que sepa que es su registro— y le pide dos fotos.
+3. El sistema le muestra su nombre —para que sepa que es su registro—, **la política de
+   tratamiento de datos y la casilla para autorizarla** (RN-66), y le pide dos fotos. La
+   autorización va **antes** de las cámaras: quien ya tomó las dos fotos no vuelve a leer nada,
+   y una casilla al final de un formulario largo se marca sin mirar.
 4. Toma la foto del documento y la suya. **Ve cada una antes de enviarla**: si salió ilegible,
    el rechazo llegaría dos días después.
 5. Envía. El registro queda esperando autorización.
@@ -829,7 +835,7 @@ un dato que la persona sabe y un código que solo pudo darle quien hizo el trám
   si acaso» es lo que rompe el almacenamiento del demo (ADR-0009).
 
 **Reglas de negocio**
-- RN-57, RN-58.
+- RN-57, RN-58, RN-66 (sin autorización no se guarda la foto).
 
 **Estado en el demo:** ✅ — `src/features/auth/AdjuntarPage.tsx` y
 `src/componentes/CapturaFoto.tsx`. Las fotos se reducen a 720 px y se guardan en el navegador;

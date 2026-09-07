@@ -15,7 +15,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 65 documentados: 24 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
-| **Reglas de negocio** | 65 (RN-01…RN-65) |
+| **Reglas de negocio** | 66 (RN-01…RN-66) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -75,6 +75,53 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-07 · Mary + IA (Claude) · El consentimiento de tratamiento de datos
+
+Mary pidió implementar la autorización de tratamiento de datos y su aceptación. Es la primera
+de las cinco preguntas de habeas data del ADR-0009, y la única que se podía responder desde la
+app.
+
+**Los tres requisitos de la Ley 1581, y cómo quedó cada uno:**
+
+| | |
+|---|---|
+| **Informada** | Cinco puntos: quién responde, qué datos, para qué, cuánto se guardan, qué derechos tiene. El responsable es **la copropiedad, con su NIT** — no Idiky, que es la herramienta |
+| **Expresa** | Una casilla que nace **sin marcar**. Nada de «al continuar aceptas»: eso no es autorización, es una trampa con letra pequeña |
+| **Registrada** | Queda la versión aceptada y la fecha. Guardar solo «aceptó» deja sin saber **qué** aceptó; con la versión, el día que cambie el texto se sabe a quién volver a preguntarle |
+
+**Va antes de las cámaras, no debajo del botón.** Quien ya tomó las dos fotos no vuelve a leer
+nada, y una casilla al final de un formulario largo se marca sin mirar. Aquí se lee primero y
+se decide antes de sacar la cédula.
+
+**La política va plegada pero completa**, no resumida: el resumen de una política de datos es
+la política que nadie puede leer entera.
+
+**Y una corrección de Mary que resolvió el choque que estaba anotado.** El texto que escribí
+prometía que las fotos se eliminan al inhabilitar a la persona, cosa que el sistema no hace.
+Al señalarlo, ella precisó: *«me refería a conservar el registro; la documentación se debe
+guardar el tiempo que la normatividad lo permita»*.
+
+Eso desarma la contradicción que llevaba anotada desde la mañana entre RN-61 («nada se borra»)
+y el habeas data: **el registro y la documentación no son lo mismo**. El registro se conserva
+como constancia; los soportes tienen plazo legal. Ninguna de las dos reglas cede, y RN-61 quedó
+precisada así.
+
+Y lo completó con la pieza que faltaba del ciclo: *«si el registro se habilita nuevamente y ya
+no tenemos los documentos, se solicitan nuevamente»*. O sea **rehabilitar es volver a
+registrar, no deshacer la inhabilitación** — el trámite pide las fotos otra vez si ya no están.
+El modelo ya lo permitía sin saberlo: el bloqueo de registros duplicados solo mira los que
+están *en curso*, no los cerrados. Ahora está escrito, y la política se lo advierte a la
+persona, que merece saber por qué se los podrían pedir dos veces.
+
+**Lo que falta, y es importante decirlo:** el texto **es un borrador de trabajo, no un
+documento revisado por un abogado**. Sirve para que el equipo discuta sobre algo concreto en
+vez de sobre una idea. El punto más delicado: **la foto del rostro puede considerarse dato
+biométrico**, y los datos sensibles tienen requisitos adicionales —el titular no está obligado
+a autorizarlos y hay que decírselo—. También falta el plazo concreto de conservación y el
+proceso que borra las fotos cuando se cumple.
+
+---
 
 ### 2026-09-07 · Mary + IA (Claude) · El aviso por mensaje, y quién puede inhabilitar
 

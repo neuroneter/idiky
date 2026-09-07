@@ -28,9 +28,16 @@ import { ControlTamanoTexto } from '../../componentes/ControlTamanoTexto'
 import { CapturaFoto } from '../../componentes/CapturaFoto'
 import { Icono } from '../../componentes/Icono'
 import type { RegistroPersona } from '../../dominio/tipos'
+import {
+  FRASE_ACEPTACION,
+  politicaDatos,
+  VERSION_POLITICA,
+} from '../../dominio/consentimiento'
+import * as sel from '../../datos/selectores'
 
 export function AdjuntarPage() {
   const { bd, ejecutar, cargando } = useDatos()
+
 
   const [documento, setDocumento] = useState('')
   const [codigo, setCodigo] = useState('')
@@ -38,6 +45,8 @@ export function AdjuntarPage() {
   const [fotoDocumento, setFotoDocumento] = useState<string | null>(null)
   const [fotoPersona, setFotoPersona] = useState<string | null>(null)
   const [listo, setListo] = useState(false)
+  /** RN-66: la casilla nace sin marcar. Premarcarla no es autorizar. */
+  const [autoriza, setAutoriza] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   function buscar(evento: React.FormEvent) {
@@ -62,18 +71,22 @@ export function AdjuntarPage() {
   }
 
   async function enviar() {
-    if (!registro || !fotoDocumento || !fotoPersona) return
+    if (!registro || !fotoDocumento || !fotoPersona || !autoriza) return
     const hecho = await ejecutar(
       (base) =>
         adjuntarSoportes(base, {
           registroId: registro.id,
           fotoDocumento,
           fotoPersona,
+          consentimiento: VERSION_POLITICA,
         }),
       'Listo. Quien te registró ya puede autorizar.',
     )
     if (hecho) setListo(true)
   }
+
+  // El responsable del tratamiento es la copropiedad, no Idiky: hay que nombrarla.
+  const copropiedad = sel.copropiedad(bd, registro?.copropiedadId ?? '') ?? bd.copropiedades[0]
 
   return (
     <div className="acceso-fondo">
@@ -141,6 +154,19 @@ export function AdjuntarPage() {
               </span>
             </div>
 
+            {/* La autorización va **antes** de las cámaras, no debajo del botón:
+                quien ya tomó las dos fotos no vuelve a leer nada, y una casilla
+                al final de un formulario largo se marca sin mirar. Aquí se lee
+                primero y se decide antes de sacar la cédula. */}
+            <PoliticaDeDatos
+              copropiedad={copropiedad?.nombre ?? 'La copropiedad'}
+              nit={copropiedad?.nit}
+              autoriza={autoriza}
+              alCambiar={setAutoriza}
+            />
+
+            <div className="separador" />
+
             <CapturaFoto
               etiqueta="Foto de tu documento"
               ayuda="La cara donde se ve tu número y tu nombre. Que se lea."
@@ -163,14 +189,16 @@ export function AdjuntarPage() {
 
             <button
               className="boton boton--primario boton--bloque"
-              disabled={!fotoDocumento || !fotoPersona || cargando}
+              disabled={!fotoDocumento || !fotoPersona || !autoriza || cargando}
               onClick={() => void enviar()}
             >
               Enviar mis documentos
             </button>
-            {(!fotoDocumento || !fotoPersona) && (
+            {(!fotoDocumento || !fotoPersona || !autoriza) && (
               <span className="ayuda-campo" style={{ display: 'block', marginTop: 'var(--e2)' }}>
-                Faltan las dos fotos para poder enviar.
+                {!autoriza
+                  ? 'Para enviar tienes que autorizar el tratamiento de tus datos.'
+                  : 'Faltan las dos fotos para poder enviar.'}
               </span>
             )}
 
@@ -188,6 +216,64 @@ export function AdjuntarPage() {
           Volver al ingreso
         </Link>
       </div>
+    </div>
+  )
+}
+
+
+/**
+ * La política, plegada pero completa.
+ *
+ * **Plegada y no resumida**: el resumen de una política de datos es la política
+ * que nadie puede leer entera. Va cerrada para no tapar la pantalla, pero lo que
+ * hay adentro es el texto, no un extracto.
+ *
+ * La casilla vive fuera del plegado, porque marcarla es la acción y tiene que
+ * verse sin abrir nada.
+ */
+function PoliticaDeDatos({
+  copropiedad,
+  nit,
+  autoriza,
+  alCambiar,
+}: {
+  copropiedad: string
+  nit?: string
+  autoriza: boolean
+  alCambiar: (valor: boolean) => void
+}) {
+  const puntos = politicaDatos(copropiedad, nit)
+
+  return (
+    <div className="politica">
+      <details className="politica__detalle">
+        <summary>Cómo se tratan tus datos personales</summary>
+        <div className="politica__cuerpo">
+          {puntos.map((punto) => (
+            <div key={punto.titulo} className="columna" style={{ gap: 'var(--e1)' }}>
+              <strong>{punto.titulo}</strong>
+              <span className="subtitulo">{punto.texto}</span>
+            </div>
+          ))}
+          <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+            Ley 1581 de 2012 · Versión {VERSION_POLITICA}
+          </span>
+        </div>
+      </details>
+
+      <label className="opcion-huella">
+        <input
+          type="checkbox"
+          checked={autoriza}
+          onChange={(evento) => alCambiar(evento.target.checked)}
+        />
+        <span>
+          <strong>{FRASE_ACEPTACION}</strong>
+          <span className="subtitulo">
+            Puedes revocarla después pidiéndoselo a la administración.
+          </span>
+        </span>
+      </label>
     </div>
   )
 }

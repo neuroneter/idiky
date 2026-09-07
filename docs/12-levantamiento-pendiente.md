@@ -255,10 +255,10 @@ Lo que hay que decidir antes de que esto salga a un servidor:
 
 | Pregunta | Por qué no se puede dejar para después | Respuesta |
 |---|---|---|
-| ¿Con qué **autorización** se recoge, y para qué? | El titular tiene que autorizar el tratamiento y saber el fin | *(pendiente)* |
+| ¿Con qué **autorización** se recoge, y para qué? | El titular tiene que autorizar el tratamiento y saber el fin | **Respondida (2026-09-07)**: autorización informada, expresa y registrada con versión, antes de subir las fotos (RN-66). **Falta que la revise un abogado** — el texto es un borrador de trabajo |
 | ¿**Cuánto se conserva**? | La cédula de un arrendatario que se fue hace tres años no puede seguir ahí. Y un residente temporal que estuvo dos meses, menos | *(pendiente)* |
 | ¿**Quién la ve**? ¿La portería para comparar en la entrada, la administración, el propietario que autorizó? | Cada respuesta es un permiso distinto en el modelo. Hoy la ve quien autorizó, y nadie más | *(pendiente)* |
-| Al **inhabilitar** a la persona, ¿la foto se borra? | RN-61 dice que nada se borra; un dato personal sí puede tener que borrarse. **Las dos reglas chocan** | *(pendiente)* |
+| Al **inhabilitar** a la persona, ¿la foto se borra? | RN-61 dice que nada se borra; un dato personal sí puede tener que borrarse | **Resuelto en principio (Mary, 2026-09-07)**: *«me refería a conservar el registro; la documentación se debe guardar el tiempo que la normatividad lo permita»*, y *«si el registro se habilita nuevamente y ya no tenemos los documentos se solicitan nuevamente»*. El registro queda, las fotos tienen plazo, y rehabilitar es volver a registrar. **Falta el plazo concreto que fija la norma y el proceso que borra las fotos al cumplirse** |
 | ¿**Dónde** se almacena? | Un servidor con las cédulas de un conjunto entero es un objetivo, no un archivo | *(pendiente)* |
 
 Detalle técnico y lo ya decidido: [ADR-0009](./adr/0009-soportes-fotograficos.md).
