@@ -34,7 +34,7 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 3 — rol de porteria: la correspondencia guarda quien la recibio del mensajero.
 // 4 — paz y salvo: cubiertoHasta, codigo de verificacion y una unidad sin saldo.
 // 5 — el portero entra al demo como persona y perfil.
-export const VERSION_ESQUEMA = 8
+export const VERSION_ESQUEMA = 9
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -140,6 +140,9 @@ const residencias: Residencia[] = DEFINICION_PERSONAS.map(([, , unidadId, rol], 
   rol,
   desde: `${new Date().getFullYear() - 2}-03-01`,
   principal: true,
+  // Todos los de la semilla viven en su unidad: es el caso comun, y el
+  // propietario no residente se crea desde el registro cuando alguien lo marca.
+  reside: true,
 }))
 
 /**

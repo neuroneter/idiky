@@ -34,6 +34,26 @@ import {
 import { Modal } from './Modal'
 import { Icono } from './Icono'
 
+/**
+ * La marca de residente segun la categoria (RN-68, Mary 2026-09-07).
+ *
+ *   propietario  -> la escoge quien registra: puede tener la unidad arrendada
+ *   arrendatario -> si, arrienda para vivir ahi
+ *   temporal     -> si, vive ahi un tiempo
+ *   visitante    -> no, viene de visita
+ *
+ * En un solo sitio para que no se conteste distinto en cada pantalla.
+ */
+export function marcaResidente(
+  categoria: CategoriaRegistro,
+  rol: RolResidencia | undefined,
+  escogida: boolean,
+): boolean {
+  if (categoria === 'visitante') return false
+  if (categoria === 'residente' && rol === 'propietario') return escogida
+  return true
+}
+
 /** Cómo se llama cada categoría delante de quien la escoge, y qué significa. */
 export const CATEGORIAS: Record<CategoriaRegistro, { texto: string; ayuda: string }> = {
   residente: {
@@ -69,6 +89,8 @@ export interface DatosRegistro {
   vigenciaDesde?: string
   vigenciaHasta?: string
   placa?: string
+  /** La marca de residente (RN-68). */
+  reside?: boolean
   /** Solo cuando quien registra puede escoger unidad (el administrador). */
   unidadId?: string
 }
@@ -98,6 +120,8 @@ export function FormularioRegistro({
   )
   const [unidadId, setUnidadId] = useState(unidades?.[0]?.id ?? '')
   const [rol, setRol] = useState<RolResidencia>('arrendatario')
+  /** La marca de residente. Solo el propietario puede no llevarla. */
+  const [reside, setReside] = useState(true)
   const [nombres, setNombres] = useState('')
   const [apellidos, setApellidos] = useState('')
   const [documento, setDocumento] = useState('')
@@ -114,6 +138,10 @@ export function FormularioRegistro({
      visita de una tarde seria prometerle un paso que no va a existir. */
   const conSoportes = exigeSoportes(categoria)
   const unDia = soloUnDia(categoria)
+  /** Solo el propietario tiene algo que decidir aquí (RN-68). */
+  const marcaEditable = categoria === 'residente' && rol === 'propietario'
+  /** Lo que va a quedar: lo escogido si se puede escoger, o lo que manda la regla. */
+  const marca = marcaResidente(categoria, rol, reside)
 
   function enviar(evento: React.FormEvent) {
     evento.preventDefault()
@@ -143,6 +171,7 @@ export function FormularioRegistro({
     void alCrear({
       categoria,
       rol: categoria === 'residente' ? rol : undefined,
+      reside: marca,
       nombres: nombres.trim(),
       apellidos: apellidos.trim(),
       documento: documento.trim(),
@@ -217,6 +246,48 @@ export function FormularioRegistro({
             </select>
           </div>
         )}
+
+        {/* La marca **se ve siempre y solo se cambia en el propietario** (Mary,
+            2026-09-07). Se ve siempre porque quien registra tiene que saber qué
+            marca va a quedar antes de crear a la persona; se cambia solo en el
+            propietario porque en los demás no hay nada que decidir: el
+            arrendatario arrienda para vivir ahí, al temporal se le llama
+            temporal porque vive ahí un tiempo, y el visitante viene de visita.
+            Un propietario, en cambio, puede tener su apartamento arrendado o
+            vacío y sigue siendo propietario —vota, recibe la cuota y registra
+            gente—; lo que cambia es que la portería no tiene que reconocerlo. */}
+        <div className="campo">
+          <label>¿Vive en la unidad?</label>
+          <div className="segmentos">
+            <button
+              type="button"
+              className="segmento"
+              aria-current={marca ? 'page' : undefined}
+              disabled={!marcaEditable}
+              onClick={() => setReside(true)}
+            >
+              Sí, vive aquí
+            </button>
+            <button
+              type="button"
+              className="segmento"
+              aria-current={!marca ? 'page' : undefined}
+              disabled={!marcaEditable}
+              onClick={() => setReside(false)}
+            >
+              No vive aquí
+            </button>
+          </div>
+          <span className="ayuda-campo">
+            {!marcaEditable
+              ? categoria === 'visitante'
+                ? 'Un visitante no vive aquí. No se puede cambiar.'
+                : 'Quien entra con este título vive en la unidad. No se puede cambiar.'
+              : marca
+                ? 'Lleva la marca de residente: la portería lo va a reconocer en la entrada.'
+                : 'Tiene la unidad arrendada o vacía. Sigue siendo propietario —vota, recibe la cuota y registra gente—, pero no aparece en la lista de la portería.'}
+          </span>
+        </div>
 
         <div className="fila-campos">
           <div className="campo">

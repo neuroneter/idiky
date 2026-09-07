@@ -15,7 +15,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 66 documentados: 25 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
-| **Reglas de negocio** | 67 (RN-01…RN-67) |
+| **Reglas de negocio** | 68 (RN-01…RN-68) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -75,6 +75,37 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-07 · Mary + IA (Claude) · La marca de residente
+
+Justo después de precisar que «residente» es una marca y no un título, Mary la convirtió en una
+decisión del producto: **al crear un propietario se ofrecen las dos opciones, vive aquí o no**.
+Y completó la tabla en tres mensajes seguidos: el **arrendatario** la trae por defecto, el
+**residente temporal** también, y el **visitante** nace sin ella.
+
+Tiene sentido en cuanto se dice en voz alta: un propietario puede tener su apartamento
+arrendado o vacío y **sigue siendo propietario** —vota, recibe la cuota, registra gente—; lo
+único que cambia es que no vive ahí. El arrendatario arrienda para vivir ahí, y al temporal se
+le llama temporal precisamente porque vive ahí un tiempo.
+
+**Para qué sirve, en concreto:** decide **quién aparece en la lista de rostros de la portería**
+(CU-P-03). El portero tiene que reconocer a quien entra a diario, no a quien viene dos veces al
+año, y llenarle la lista de caras que no va a ver hace más difícil encontrar las que sí.
+
+**Y una corrección de alcance que mejoró el resultado:** yo había puesto «· no vive aquí» en la
+lista de personas de la unidad. Mary: *«la marca solamente se debe ver cuando se crea el
+usuario, en las demás vistas es innecesaria»*. Tiene razón — la marca hace su trabajo por
+detrás, y repetirla en cada lista es ruido que no cambia ninguna decisión de quien la lee.
+
+**Y una precisión sobre dónde se ve:** el selector aparece en **las cuatro categorías**, para
+que quien registra sepa qué marca va a quedar antes de crear a la persona; pero **solo se puede
+cambiar en el propietario**, porque en las demás no hay nada que decidir. En las otras se ve el
+valor, deshabilitado, con la razón escrita al lado.
+
+La regla de qué marca lleva cada categoría vive en una sola función (`marcaResidente`), para
+que no se conteste distinto en cada pantalla.
+
+---
 
 ### 2026-09-07 · Mary + IA (Claude) · «Residente» es una marca, no un título
 

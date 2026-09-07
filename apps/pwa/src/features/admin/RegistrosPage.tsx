@@ -178,6 +178,7 @@ export function RegistrosPage() {
                   creadoPor: sesion.personaId,
                   categoria: datos.categoria,
                   rol: datos.rol,
+                  reside: datos.reside,
                   nombres: datos.nombres,
                   apellidos: datos.apellidos,
                   documento: datos.documento,

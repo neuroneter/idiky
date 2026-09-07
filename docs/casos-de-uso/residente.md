@@ -721,11 +721,11 @@ lo dejó entrar y cuándo: aliviar el requisito no es renunciar al rastro.
 
 **Las categorías** (RN-62)
 
-| Categoría | Quién es, en concreto | ¿Fotos? | Vigencia | Qué se crea al autorizar |
-|---|---|---|---|---|
-| Residente | El dueño, quien le arrienda, su familia | **Sí** | Sin fecha de fin | Una residencia como propietario o arrendatario |
-| **Residente temporal** | **Un huésped de Airbnb, un familiar unos meses** | **Sí** | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
-| Visitante | **Quien viene una tarde** | **No** | **Un solo día** | Un visitante con su código, de una vez |
+| Categoría | Quién es, en concreto | ¿Fotos? | ¿Marca de residente? | Vigencia | Qué se crea al autorizar |
+|---|---|---|---|---|---|
+| Residente | El dueño, quien le arrienda, su familia | **Sí** | Al **propietario se le pregunta** (puede tenerla arrendada); el arrendatario la trae | Sin fecha de fin | Una residencia como propietario o arrendatario |
+| **Residente temporal** | **Un huésped de Airbnb, un familiar unos meses** | **Sí** | Por defecto **sí** | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
+| Visitante | **Quien viene una tarde** | **No** | **No** | **Un solo día** | Un visitante con su código, de una vez |
 
 **El visitante es de un solo día** (Mary, 2026-09-07). No se registra un rango: se escoge el día
 en que viene, y ese día entra y sale. **Ese día puede ser futuro** —una visita del sábado se
@@ -745,7 +745,10 @@ ahora lo reconoce de una.
 **Flujo principal**
 1. El residente abre **Mi unidad → Personas de la unidad**.
 2. Toca **Registrar** y escoge la categoría. Lo que se pregunta después depende de ella:
-   pedirle fecha de salida a quien compró un apartamento no tiene sentido.
+   pedirle fecha de salida a quien compró un apartamento no tiene sentido. **La marca de
+   residente se ve en las cuatro categorías —para saber qué va a quedar— pero solo se cambia
+   en el propietario** (RN-68), que es el único que puede tener la unidad arrendada o vacía.
+   La marca se escoge **aquí y solo aquí**: en las demás vistas no aporta nada.
 3. El sistema crea el registro en `esperando_soportes` y muestra **el código**.
 4. El residente le pasa el código a la persona (en el producto real se lo manda un mensaje).
 5. La persona adjunta (CU-R-28) y el registro pasa a `esperando_autorizacion`.

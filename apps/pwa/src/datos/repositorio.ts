@@ -562,6 +562,9 @@ export async function vincularResidente(
     rol: parametros.rol,
     desde: hoyISO(),
     principal: false,
+    // Por la via directa del administrador se asume que vive ahi; el caso del
+    // propietario no residente se marca en el registro (CU-R-27).
+    reside: true,
   }
   bd.residencias.push(residencia)
   return persistir(bd, residencia)
@@ -648,6 +651,8 @@ export async function crearRegistroPersona(
     creadoPor: string
     categoria: CategoriaRegistro
     rol?: RolResidencia
+    /** La marca de residente (RN-68). */
+    reside?: boolean
     nombres: string
     apellidos: string
     documento: string
@@ -837,6 +842,10 @@ export async function autorizarRegistro(
       desde: registro.vigenciaDesde ?? hoyISO(),
       hasta: registro.vigenciaHasta,
       principal: false,
+      // Solo el propietario puede no residir; el arrendatario arrienda para
+      // vivir ahi y al temporal se le llama temporal porque vive ahi un tiempo
+      // (Mary, 2026-09-07). De ahi que la ausencia del dato signifique «si».
+      reside: registro.reside ?? true,
       registroId: registro.id,
     }
     bd.residencias.push(residencia)

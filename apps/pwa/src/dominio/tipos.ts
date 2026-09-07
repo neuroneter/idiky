@@ -76,6 +76,18 @@ export interface Residencia {
   hasta?: FechaISO
   /** Contacto principal de la unidad. */
   principal: boolean
+  /**
+   * La **marca de residente** (Mary, 2026-09-07): si esta persona vive aqui.
+   *
+   * Es lo que distingue al propietario que habita su apartamento del que lo
+   * tiene arrendado o vacio. Los dos son propietarios —votan, reciben la cuota,
+   * registran gente— pero **solo uno vive aqui**, y eso cambia cosas concretas:
+   * la porteria tiene que reconocer al que entra a diario, no al que viene dos
+   * veces al ano.
+   *
+   * El arrendatario siempre la lleva: arrienda para vivir ahi.
+   */
+  reside: boolean
   /** Registro que la origino, si nacio por CU-R-27. Las de la semilla no tienen. */
   registroId?: string
 }
@@ -319,6 +331,12 @@ export interface RegistroPersona {
   categoria: CategoriaRegistro
   /** Solo para las categorias de residente: con que rol queda vinculado. */
   rol?: RolResidencia
+  /**
+   * Si va a vivir en la unidad. Se pregunta **solo cuando el titulo es
+   * propietario**: el arrendatario arrienda para vivir ahi, y al temporal se le
+   * llama temporal justamente porque vive ahi un tiempo.
+   */
+  reside?: boolean
   nombres: string
   apellidos: string
   documento: string

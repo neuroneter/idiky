@@ -473,6 +473,12 @@ textarea {
   color: var(--color-texto-suave);
   text-align: center;
 }
+/* Un segmento que no se puede tocar tiene que parecerlo, y el que esta escogido
+   se sigue distinguiendo: se muestra el valor, no se esconde. */
+.segmento:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
 .segmento[aria-current='page'] {
   background: var(--color-acento);
   border-color: rgba(255, 255, 255, 0.45);

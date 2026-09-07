@@ -38,7 +38,12 @@ export function ResidentesPage() {
   const porUnidad = new Map(unidades.map((unidad) => [unidad.id, unidad]))
 
   const gente = bd.residencias
-    .filter((residencia) => porUnidad.has(residencia.unidadId) && residenciaVigente(residencia))
+    .filter(
+      (residencia) =>
+        porUnidad.has(residencia.unidadId) &&
+        residenciaVigente(residencia) &&
+        residencia.reside !== false,
+    )
     .map((residencia) => {
       const persona = sel.persona(bd, residencia.personaId)
       const registro = sel.registro(bd, residencia.registroId)
