@@ -118,8 +118,12 @@ residentes y arrendatarios, el arrendatario registra visitantes: cambia quién e
 categoría, no el trámite. Vive en `componentes/Registro.tsx` — dos formularios distintos para
 lo mismo acaban pidiendo cosas distintas, y el modelo de datos diría que los dos traen soportes.
 
-**Autorizar un visitante también pasa por aquí ahora.** Tener dos formas de meter gente a la
-unidad era tener una con soportes y otra sin ellos.
+**Autorizar un visitante también pasa por aquí ahora.** Se le planteó a Mary que para una
+visita de una tarde el trámite completo es pesado, y que cabía una vía rápida solo para
+visitantes; respondió *«no, déjala así, igual tanto para residentes como para visitantes»*.
+Queda escrito en el CU porque es la clase de decisión que alguien querrá «optimizar» más
+adelante: tener dos formas de meter gente a la unidad es tener una con soportes y otra sin
+ellos, y la que no los pide se vuelve la que todo el mundo usa.
 
 **Las fotos:** [ADR-0009](./adr/0009-soportes-fotograficos.md). Se capturan con
 `<input type="file" capture>` —el HTML de siempre, cero dependencias, funciona igual dentro de

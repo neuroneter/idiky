@@ -738,11 +738,21 @@ la subió**. Que la traiga la propia persona es lo que convierte el trámite en 
   RN-60 (quién registra a quién), RN-61 (nada se borra), RN-62 (la categoría decide la
   vigencia), RN-63 (la cadena de registro).
 
+**El visitante pasa por el mismo trámite, y es a propósito** (Mary, 2026-09-07)
+
+Se le planteó que exigirle dos fotos y una autorización a una visita de una tarde es
+notablemente más pesado que el toque único de antes, y que se podía dejar una vía rápida solo
+para visitantes. La respuesta fue **dejarlo igual para residentes y visitantes**.
+
+Queda escrito porque es la clase de decisión que alguien va a querer «optimizar» más adelante
+sin saber que se tomó a conciencia: **tener dos formas de meter gente a la unidad es tener una
+con soportes y otra sin ellos**, y la que no los pide se vuelve la que todo el mundo usa. Si
+algún día se hace más liviano, que sea porque el equipo decidió bajar el requisito —no porque
+alguien encontró el camino corto.
+
 **Estado en el demo:** ✅ — `src/features/residente/PersonasPage.tsx`, con el trámite en
 `src/componentes/Registro.tsx` (compartido con la consola del administrador: dos formularios
-distintos para lo mismo acaban pidiendo cosas distintas). Desde el 2026-09-07 **autorizar un
-visitante también pasa por aquí**: tener dos formas de meter gente a la unidad era tener una
-con soportes y otra sin ellos.
+distintos para lo mismo acaban pidiendo cosas distintas).
 
 **Pendiente:** en el producto real el código viaja por mensaje; aquí se muestra en pantalla
 (misma honestidad que ADR-0004). Y falta avisarle a la persona cuando la autorizan.
