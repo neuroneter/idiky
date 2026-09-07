@@ -200,17 +200,20 @@ export function UnidadesPage() {
                           {capitalizar(residencia.rol)} · {persona?.telefono}
                         </span>
                       </div>
+                      {/* La administracion puede inhabilitar cualquier vinculo de
+                          la copropiedad, incluido el que registro un propietario:
+                          esta por encima suyo en la cadena (RN-65). */}
                       <button
                         className="boton boton--pequeno"
                         disabled={cargando}
                         onClick={() =>
                           ejecutar(
                             (base) => desvincularResidente(base, residencia.id),
-                            'Vinculo cerrado. Queda en el historico.',
+                            'Vínculo cerrado. Queda en el histórico.',
                           )
                         }
                       >
-                        Desvincular
+                        Inhabilitar
                       </button>
                     </div>
                   )

@@ -341,6 +341,32 @@ export interface RegistroPersona {
 }
 
 // ---------------------------------------------------------------------------
+// Mensajes salientes — RN-64
+//
+// Lo que la copropiedad le manda a una persona por fuera de la app: hoy solo el
+// aviso de que su registro quedo autorizado, manana el codigo de un solo uso y
+// los comunicados urgentes.
+//
+// **Se guardan aunque el demo no los envie.** Un mensaje que se manda y no queda
+// escrito es un mensaje que despues nadie puede probar que se mando, y «yo nunca
+// recibi nada» es la discusion mas comun de una copropiedad.
+// ---------------------------------------------------------------------------
+
+export type MotivoMensaje = 'registro_autorizado' | 'registro_rechazado'
+
+export interface Mensaje {
+  id: string
+  copropiedadId: string
+  /** El celular al que se manda, tal como lo escribio quien registro. */
+  destino: string
+  texto: string
+  motivo: MotivoMensaje
+  /** El registro que lo origino, para poder volver de uno al otro. */
+  registroId?: string
+  enviadoEn: FechaHoraISO
+}
+
+// ---------------------------------------------------------------------------
 // Asambleas — CU-R-13, CU-R-20 · docs/05-modelo-de-datos.md
 //
 // Es un subconjunto deliberado del modelo documentado: estan las entidades que
@@ -493,6 +519,7 @@ export interface BaseDatos {
   correspondencia: Correspondencia[]
   visitantes: Visitante[]
   registros: RegistroPersona[]
+  mensajes: Mensaje[]
   asambleas: Asamblea[]
   votaciones: Votacion[]
   votos: Voto[]

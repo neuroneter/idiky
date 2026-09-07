@@ -186,6 +186,7 @@ export function RegistrosPage() {
       {enDetalle && (
         <DetalleRegistro
           registro={enDetalle}
+          mensaje={bd.mensajes.find((m) => m.registroId === enDetalle.id)}
           puedoAutorizar={puedeAutorizar(enDetalle, sesion.personaId)}
           esMio={enDetalle.creadoPor === sesion.personaId}
           alCerrar={() => setViendo(null)}

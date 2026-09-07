@@ -15,7 +15,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 65 documentados: 24 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
-| **Reglas de negocio** | 63 (RN-01…RN-63) |
+| **Reglas de negocio** | 65 (RN-01…RN-65) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -75,6 +75,56 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-07 · Mary + IA (Claude) · El aviso por mensaje, y quién puede inhabilitar
+
+Dos reglas nuevas que cierran huecos del registro de personas.
+
+**RN-64 — cuando el registro queda autorizado, la persona recibe un mensaje de texto.** Era el
+hueco que quedaba: la persona adjuntaba sus documentos y nunca se enteraba del desenlace.
+
+Está hecho con el mismo patrón de la huella: **una interfaz propia**
+(`servicios/mensajeria.ts`) que redacta el mensaje de verdad y lo deja escrito, pero no lo
+envía — en la fase 2 solo se cambia el cuerpo por el proveedor que se elija (T-18, sin
+decidir). No se simula un «enviado ✓» que no ocurrió; la app muestra el texto exacto que
+saldría, que es lo que permite revisarlo antes de que exista quien lo mande.
+
+Tres decisiones que vale la pena que queden:
+
+- **El texto se redacta en el servicio, no en la pantalla.** Un SMS no tiene dónde volver a
+  preguntar: quien lo recibe está en la calle, sin contexto, y el mensaje tiene que traer las
+  tres cosas que le permiten actuar —de qué copropiedad le hablan, qué pasó y qué hace ahora—.
+  Suelto en cada pantalla, en dos meses hay cuatro versiones y una olvida el código.
+- **El texto cambia con la categoría**, porque lo que la persona tiene que hacer después es
+  distinto: el visitante recibe su código de portería; el residente, que ya puede activar su
+  cuenta. Mandarle a los dos «tu registro fue aprobado» los deja igual de perdidos.
+- **El aviso vive en el repositorio, no en la interfaz**: es parte de autorizar. Si dependiera
+  de que cada pantalla lo llame, la primera que se olvide deja a alguien esperando un mensaje
+  que nunca sale. Y **los mensajes se guardan**: uno que se manda y no queda escrito es uno que
+  nadie puede probar que se mandó, y «yo nunca recibí nada» es la discusión más común de una
+  copropiedad. Sin celular no sale mensaje, y la pantalla lo dice para que quien registró avise
+  por su cuenta.
+
+**RN-65 — quién inhabilita depende de quién creó.** *«Lo que crea el propietario lo puede
+inhabilitar el propietario o el administrador de la propiedad, y lo que crea el administrador
+lo puede inhabilitar el administrador o quien este designe con el perfil»* (Mary).
+
+Es **la cadena de RN-63 leída al revés**: se crea hacia abajo y se inhabilita hacia arriba,
+nunca hacia abajo. Lo que impide es concreto: **un propietario no puede sacar de la unidad a un
+copropietario que registró la administración** — si pudiera, dos dueños del mismo apartamento
+tendrían cada uno el botón para borrar al otro y ganaría el que llegara primero.
+
+**Y por qué inhabilitar y no borrar, dicho por Mary:** *«el residente puede pasarse a vivir a
+otro edificio que opere Idiky, por eso lo de inhabilitar nada más»*. Eso fija el modelo: la
+persona y su vínculo con la unidad son entidades distintas, e inhabilitar cierra el vínculo con
+**esta** unidad mientras la persona sigue existiendo. Por eso al autorizar un registro la
+persona se reutiliza **por documento y sin limitarse a la copropiedad**: quien se muda de un
+conjunto a otro es la misma persona, no una nueva.
+
+**Pendiente:** «o quien este designe con el perfil». Delegar la facultad exige un modelo de
+perfiles que todavía no existe (T-08); hoy la administración la ejerce directamente.
+
+---
 
 ### 2026-09-07 · Mary + IA (Claude) · Quién mete gente a una unidad, y con qué soportes
 

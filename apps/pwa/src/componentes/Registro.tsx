@@ -15,8 +15,14 @@
  */
 
 import { useState } from 'react'
-import { formatearFecha } from '../utilidades/formato'
-import type { CategoriaRegistro, RegistroPersona, RolResidencia, Unidad } from '../dominio/tipos'
+import { formatearFecha, formatearFechaHora } from '../utilidades/formato'
+import type {
+  CategoriaRegistro,
+  Mensaje,
+  RegistroPersona,
+  RolResidencia,
+  Unidad,
+} from '../dominio/tipos'
 import {
   etiquetaUnidad,
   exigeSoportes,
@@ -334,6 +340,7 @@ export function FormularioRegistro({
  */
 export function DetalleRegistro({
   registro,
+  mensaje,
   puedoAutorizar,
   esMio,
   alAutorizar,
@@ -341,6 +348,8 @@ export function DetalleRegistro({
   alCerrar,
 }: {
   registro: RegistroPersona
+  /** El mensaje que se le mandó a la persona, si hubo (RN-64). */
+  mensaje?: Mensaje
   puedoAutorizar: boolean
   esMio: boolean
   alAutorizar: () => Promise<void>
@@ -408,6 +417,36 @@ export function DetalleRegistro({
               <figcaption>La persona</figcaption>
             </figure>
           </div>
+        </>
+      )}
+
+      {/* El mensaje que salio, con su texto exacto. Quien autoriza tiene que poder
+          ver que se le dijo a la persona: es lo que despues zanja el «a mi nadie
+          me aviso» (RN-64). Y si no habia celular, se dice, porque entonces le
+          toca avisarle por su cuenta. */}
+      {registro.estado === 'autorizado' && (
+        <>
+          <div className="separador" />
+          {mensaje ? (
+            <div className="columna" style={{ gap: 'var(--e2)' }}>
+              <span className="titulo-seccion">Mensaje enviado</span>
+              <span className="subtitulo">
+                A {mensaje.destino} · {formatearFechaHora(mensaje.enviadoEn)}
+              </span>
+              <p className="mensaje mensaje--administracion">{mensaje.texto}</p>
+              <span className="ayuda-campo">
+                <strong>Demo:</strong> el texto es el que saldría; todavía no hay quién lo envíe.
+              </span>
+            </div>
+          ) : (
+            <div className="columna" style={{ gap: 'var(--e1)' }}>
+              <strong>No pudimos avisarle</strong>
+              <span className="subtitulo">
+                Este registro no tiene celular, así que no salió ningún mensaje. Cuéntale tú que
+                ya quedó.
+              </span>
+            </div>
+          )}
         </>
       )}
 

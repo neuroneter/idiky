@@ -38,7 +38,12 @@ import {
   crearRegistroPersona,
   desvincularResidente,
 } from '../../datos/repositorio'
-import { categoriasQuePuedeRegistrar, puedeAutorizar, registroEnCurso } from '../../dominio/reglas'
+import {
+  categoriasQuePuedeRegistrar,
+  puedeAutorizar,
+  puedeInhabilitar,
+  registroEnCurso,
+} from '../../dominio/reglas'
 import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import {
   CATEGORIAS,
@@ -152,18 +157,26 @@ export function PersonasPage() {
                         {residencia.hasta ? ` hasta ${formatearFecha(residencia.hasta)}` : ''}
                       </span>
                     </div>
-                    {/* Nadie se inhabilita a sí mismo: quedaría una unidad sin
-                        quien responda por ella, y sin nadie que pueda arreglarlo
-                        desde adentro. */}
-                    {miRol === 'propietario' && !soyYo && (
-                      <button
-                        className="boton boton--pequeno boton--peligro"
-                        disabled={cargando}
-                        onClick={() => void darDeBaja(residencia.id, nombreCompleto(persona))}
-                      >
-                        Inhabilitar
-                      </button>
-                    )}
+                    {/* Quién puede inhabilitar depende de quién creó el vínculo
+                        (RN-65): lo que registró el propietario lo quita él o la
+                        administración; lo que registró la administración, solo
+                        ella. Y nadie se inhabilita a sí mismo: quedaría una
+                        unidad sin quien responda por ella, y sin nadie que
+                        pudiera arreglarlo desde adentro. */}
+                    {!soyYo &&
+                      puedeInhabilitar({
+                        creadoPor: sel.registro(bd, residencia.registroId)?.creadoPor,
+                        personaId: sesion.personaId,
+                        rol: sesion.rol,
+                      }) && (
+                        <button
+                          className="boton boton--pequeno boton--peligro"
+                          disabled={cargando}
+                          onClick={() => void darDeBaja(residencia.id, nombreCompleto(persona))}
+                        >
+                          Inhabilitar
+                        </button>
+                      )}
                   </div>
                 </div>
               )
@@ -244,6 +257,7 @@ export function PersonasPage() {
       {enDetalle && (
         <DetalleRegistro
           registro={enDetalle}
+          mensaje={bd.mensajes.find((m) => m.registroId === enDetalle.id)}
           puedoAutorizar={puedeAutorizar(enDetalle, sesion.personaId)}
           esMio={enDetalle.creadoPor === sesion.personaId}
           alCerrar={() => setViendo(null)}

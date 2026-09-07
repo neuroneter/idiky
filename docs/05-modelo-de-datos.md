@@ -373,9 +373,11 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-58 | **Los soportes los adjunta la persona registrada, desde su propio dispositivo**, con su documento y el código que le pasó quien la registró. Una foto de cédula que sube un tercero no prueba nada sobre quién la subió. | `features/auth/AdjuntarPage.tsx` |
 | RN-59 | **El vínculo lo crea la autorización, no el formulario.** Quien registró mira los soportes y responde; hasta ese momento no existe ni residencia ni visitante. Autorizar es decir «los vi y es quien dice ser», y por eso deja constancia de quién y cuándo. | `dominio/reglas.ts` (`puedeAutorizar`) + `repositorio.ts` |
 | RN-60 | **Quién registra a quién**: el propietario registra residentes, arrendatarios y temporales de su unidad; el arrendatario, solo visitantes; el `autorizado`, a nadie. Darle a una autorización la facultad de traer más gente la convierte en una cadena sin dueño. | `dominio/reglas.ts` (`categoriasQuePuedeRegistrar`) |
-| RN-61 | **Nada se borra: se inhabilita** (Mary, 2026-09-07). Un residente se desvincula cerrando el vínculo con fecha; un visitante se revoca; un registro se rechaza o se retira. El histórico es lo único que después permite responder quién vivía aquí en tal fecha, o quién autorizó a quien recibió aquel paquete. | `repositorio.ts` + `dominio/reglas.ts` (`residenciaVigente`) |
+| RN-61 | **Nada se borra: se inhabilita** (Mary, 2026-09-07). Un residente se desvincula cerrando el vínculo con fecha; un visitante se revoca; un registro se rechaza o se retira. Dos razones, y la segunda es la que fija el modelo: (1) el histórico es lo único que después permite responder quién vivía aquí en tal fecha, o quién autorizó a quien recibió aquel paquete; (2) **«el residente puede pasarse a vivir a otro edificio que opere Idiky»** — inhabilitar cierra el vínculo con *esta* unidad, pero la persona sigue existiendo y llega a la siguiente con su historia. Por eso `Persona` y `Residencia` son entidades distintas, y al autorizar un registro la persona **se reutiliza por documento sin limitarse a la copropiedad**. | `repositorio.ts` + `dominio/reglas.ts` (`residenciaVigente`) |
 | RN-62 | **La categoría decide la vigencia.** El residente se queda hasta que lo inhabiliten; el residente temporal **exige** fecha de fin; **el visitante es de un solo día** (Mary, 2026-09-07): se registra el día en que viene, y ese día entra y sale. **Ese día puede ser futuro** —hoy, mañana o el sábado—; lo que no se admite es un rango ni un día ya pasado. «Del mismo día» significa que entrada y salida coinciden, no «solo hoy». Sin ese tope, una autorización de visitante «del 5 al 20» sería un residente temporal sin sus soportes, y por ahí se colaría justo lo que RN-57 exige a quien se queda a dormir. Es también lo que hace barato no pedirle fotos: una autorización que caduca esta misma noche no es una llave. | `dominio/reglas.ts` (`exigeVigencia`, `soloUnDia`) |
 | RN-63 | **La cadena de registro: cada eslabón crea el siguiente, y solo ese.** El operador de Idiky crea al administrador de la copropiedad; el administrador, a los propietarios; el propietario, a los demás de su unidad. Corrige RN-53: la cuenta sigue naciendo vinculada, lo que cambia es **quién** la vincula. Nadie se salta un eslabón — que el administrador creara arrendatarios directamente rompería que el propietario sepa quién vive en su unidad. | `dominio/reglas.ts` (`CADENA_DE_REGISTRO`) |
+| RN-64 | **Cuando un registro queda autorizado —o rechazado después de que la persona adjuntó— se le avisa por mensaje de texto** (Mary, 2026-09-07). El aviso es parte de autorizar, no algo que la interfaz recuerde hacer: vive en el repositorio. El texto cambia con la categoría, porque lo que la persona tiene que hacer después es distinto — el visitante recibe **su código para la portería**, el residente que **ya puede activar su cuenta** (CU-R-25). Sin celular no sale mensaje, y la pantalla lo dice para que quien registró avise por su cuenta. | `servicios/mensajeria.ts` + `repositorio.ts` |
+| RN-65 | **Quién inhabilita depende de quién creó** (Mary, 2026-09-07): lo que registró el propietario lo inhabilita él **o la administración**; lo que registró la administración, solo ella **o quien designe con el perfil**. Es la cadena de RN-63 leída al revés — se crea hacia abajo y se inhabilita hacia arriba, nunca hacia abajo. Lo que impide, y es el punto: **un propietario no puede sacar de la unidad a un copropietario que registró la administración** — si pudiera, dos dueños del mismo apartamento tendrían cada uno el botón para borrar al otro. Los vínculos que no salieron de un registro se tratan como creados por la administración. **Falta** el modelo de perfiles para «quien designe» (T-08). | `dominio/reglas.ts` (`puedeInhabilitar`) |
 
 ### RegistroPersona — el trámite de entrada de una persona (CU-R-27, CU-R-28)
 
@@ -399,6 +401,19 @@ la tiene la persona registrada; en `esperando_autorizacion`, quien la registró.
 
 **Un registro no se borra nunca** (RN-61). Un registro rechazado es justamente el que hay que
 poder consultar después.
+
+### Mensaje — lo que sale de la copropiedad hacia afuera (RN-64)
+
+Cuando el registro queda autorizado, la persona recibe un **mensaje de texto**. Se guarda
+aunque el demo todavía no lo envíe: *un mensaje que se manda y no queda escrito es un mensaje
+que después nadie puede probar que se mandó*, y «yo nunca recibí nada» es la discusión más
+común de una copropiedad.
+
+El texto lo redacta `servicios/mensajeria.ts` y no la pantalla, porque **un SMS no tiene dónde
+volver a preguntar**: quien lo recibe está en la calle, sin contexto, y el mensaje tiene que
+traer las tres cosas que le permiten actuar —de qué copropiedad le hablan, qué pasó y qué hace
+ahora—. Escrito suelto en cada pantalla, en dos meses hay cuatro versiones y una olvida el
+código.
 
 ## 3 bis. El principio del respaldo
 

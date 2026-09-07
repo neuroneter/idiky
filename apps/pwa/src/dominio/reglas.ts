@@ -452,6 +452,44 @@ export function solicitudesEsperandoRespuesta(pqrs: Pqrs[], reservas: Reserva[])
 // ---------------------------------------------------------------------------
 
 /**
+ * RN-65 — Quien inhabilita depende de quien creo.
+ *
+ * «Lo que crea el propietario lo puede inhabilitar el propietario o el
+ * administrador de la propiedad, y lo que crea el administrador de la propiedad
+ * lo puede inhabilitar el administrador de la propiedad o quien este designe con
+ * el perfil» (Mary, 2026-09-07).
+ *
+ * Es **la cadena de RN-63 leida al reves**: se crea hacia abajo y se inhabilita
+ * hacia arriba. Puede inhabilitar quien creo, y cualquiera que este por encima
+ * suyo en la cadena — nunca por debajo.
+ *
+ * Lo que esto impide, y es el punto: **un propietario no puede sacar de la unidad
+ * a un copropietario que registro la administracion**. Si pudiera, dos duenos de
+ * un mismo apartamento tendrian cada uno el boton para borrar al otro, y ganaria
+ * el que llegara primero.
+ *
+ * Los vinculos que **no salieron de un registro** —los de la semilla, y en el
+ * producto real los que existian antes de Idiky— se tratan como creados por la
+ * administracion: es lo conservador, porque deja la decision en el eslabon de
+ * arriba en vez de repartirla.
+ *
+ * **Pendiente:** «o quien este designe con el perfil». Delegar la facultad exige
+ * un modelo de perfiles que todavia no existe (T-08); hoy la administracion la
+ * ejerce directamente.
+ */
+export function puedeInhabilitar(parametros: {
+  /** Quien creo el vinculo. `undefined` = lo creo la administracion. */
+  creadoPor?: string
+  /** Quien quiere inhabilitarlo. */
+  personaId: string
+  /** Su rol de sesion: el administrador esta por encima de cualquier propietario. */
+  rol: RolUsuario
+}): boolean {
+  if (parametros.rol === 'admin') return true
+  return !!parametros.creadoPor && parametros.creadoPor === parametros.personaId
+}
+
+/**
  * RN-63 — La cadena de registro: cada eslabon crea el siguiente, y solo ese.
  *
  * «El administrador de Idiky crea al administrador del edificio, y el

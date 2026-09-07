@@ -750,6 +750,9 @@ ahora lo reconoce de una.
 4. El residente le pasa el código a la persona (en el producto real se lo manda un mensaje).
 5. La persona adjunta (CU-R-28) y el registro pasa a `esperando_autorizacion`.
 6. El residente ve las dos fotos y **autoriza**. El sistema crea la residencia o el visitante.
+7. El sistema **le avisa a la persona por mensaje de texto** (RN-64), con lo que tiene que hacer
+   después: su código de portería si es visitante, o que ya puede activar su cuenta si es
+   residente. Quien autorizó ve el texto exacto que salió.
 
 **Flujos alternativos**
 - A1. Las fotos no se leen → **Rechazar** con motivo. Sin motivo el rechazo no le dice nada a
@@ -760,6 +763,9 @@ ahora lo reconoce de una.
 - A4. Un arrendatario abre la pantalla → solo puede registrar visitantes, **y la pantalla se lo
   dice** en vez de esconderle el botón sin explicación (RN-60).
 - A5. La persona se va → **Inhabilitar**. Cierra el vínculo con fecha; no borra nada (RN-61).
+  **Y no borra a la persona**: *«el residente puede pasarse a vivir a otro edificio que opere
+  Idiky, por eso lo de inhabilitar nada más»* (Mary, 2026-09-07). Al registrarlo allá se le
+  reconoce por su documento y llega con su historia, en vez de nacer de cero.
 - A6. Nadie se inhabilita a sí mismo: quedaría una unidad sin quien responda por ella.
 
 **Reglas de negocio**

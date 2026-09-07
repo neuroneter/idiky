@@ -19,6 +19,7 @@ import type {
   Cuota,
   Documento,
   MedioPago,
+  MotivoMensaje,
   Pago,
   Periodo,
   Pqrs,
@@ -48,6 +49,7 @@ import {
   votacionRecibeVotos,
   yaVoto,
 } from '../dominio/reglas'
+import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajeria'
 import { finDePeriodo } from '../utilidades/formato'
 import { guardar, leer, sembrar } from './almacen'
 
@@ -585,6 +587,43 @@ export async function desvincularResidente(
 // ---------------------------------------------------------------------------
 
 /**
+ * Le avisa a la persona por mensaje de texto (RN-64).
+ *
+ * Vive aqui, en el repositorio, y no en la pantalla: **el aviso es parte de
+ * autorizar**, no algo que la interfaz recuerde hacer despues. Si dependiera de
+ * que cada pantalla lo llame, la primera que se olvide deja a alguien esperando
+ * un mensaje que nunca sale.
+ *
+ * Sin celular no hay mensaje, y eso no es un error: la persona se entera por
+ * quien la registro. La pantalla lo dice para que nadie se quede esperando.
+ */
+function avisar(
+  bd: BaseDatos,
+  registro: RegistroPersona,
+  motivo: MotivoMensaje,
+  visitante?: Visitante,
+): void {
+  const copropiedad = bd.copropiedades.find((c) => c.id === registro.copropiedadId)
+  const unidad = bd.unidades.find((u) => u.id === registro.unidadId)
+  const datos = {
+    registro,
+    copropiedad: copropiedad?.nombre ?? 'la copropiedad',
+    unidad: unidad ? `${unidad.torre}, ${unidad.tipo} ${unidad.numero}` : 'tu unidad',
+    visitante,
+  }
+  const mensaje = redactar({
+    id: nuevoId('msj'),
+    copropiedadId: registro.copropiedadId,
+    destino: registro.telefono,
+    texto: motivo === 'registro_autorizado' ? textoAutorizacion(datos) : textoRechazo(datos),
+    motivo,
+    registroId: registro.id,
+    ahora: ahoraISO(),
+  })
+  if (mensaje) bd.mensajes.unshift(mensaje)
+}
+
+/**
  * Codigo con el que la persona registrada abre su registro para adjuntar.
  *
  * Mismo alfabeto sin ambiguedades que los documentos formales: se dicta por
@@ -669,6 +708,7 @@ export async function crearRegistroPersona(
     registro.estado = 'autorizado'
     registro.decididoEn = ahora
     registro.decididoPor = registro.creadoPor
+    avisar(bd, registro, 'registro_autorizado', visitante)
   }
 
   return persistir(bd, registro)
@@ -746,8 +786,15 @@ export async function autorizarRegistro(
     throw new ErrorDeNegocio('Faltan los soportes: no se puede autorizar sin las dos fotos.')
   }
 
-  // La persona puede existir ya (un arrendatario que se muda a otra unidad del
-  // mismo conjunto). Se reutiliza por documento, que es lo que no cambia.
+  // La persona puede existir ya, y se reutiliza **por documento** — que es lo
+  // unico que no cambia.
+  //
+  // Es lo que sostiene RN-61: «el residente puede pasarse a vivir a otro edificio
+  // que opere Idiky, por eso lo de inhabilitar nada mas» (Mary, 2026-09-07).
+  // Inhabilitar cierra el vinculo con **esta** unidad; la persona sigue
+  // existiendo y llega a la siguiente con su historia. Por eso la busqueda no se
+  // limita a la copropiedad: quien se muda de un conjunto a otro es la misma
+  // persona, no una nueva.
   let persona = bd.personas.find((p) => p.documento === registro.documento)
   if (!persona) {
     persona = {
@@ -781,6 +828,7 @@ export async function autorizarRegistro(
   registro.estado = 'autorizado'
   registro.decididoEn = ahoraISO()
   registro.decididoPor = parametros.personaId
+  avisar(bd, registro, 'registro_autorizado', bd.visitantes.find((v) => v.id === registro.visitanteId))
   return persistir(bd, registro)
 }
 
@@ -807,6 +855,9 @@ export async function cerrarRegistro(
   registro.motivo = parametros.motivo
   registro.decididoEn = ahoraISO()
   registro.decididoPor = parametros.personaId
+  // Un registro que se anula antes de que la persona haga nada no le interesa a
+  // nadie mas; uno que se rechaza despues de que adjunto, si: estuvo esperando.
+  if (!parametros.anular) avisar(bd, registro, 'registro_rechazado')
   return persistir(bd, registro)
 }
 
