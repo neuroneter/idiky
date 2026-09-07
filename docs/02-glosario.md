@@ -11,7 +11,8 @@ el código usan estos términos en español** (ver [convenciones](./08-convencio
 | **Torre / Bloque / Etapa** | Agrupación física de unidades dentro de la copropiedad. | `Unidad.torre` |
 | **Coeficiente de copropiedad** | Porcentaje de participación de una unidad sobre el total. Define cuánto paga y cuánto pesa su voto. | `Unidad.coeficiente` |
 | **Propietario** | Titular del derecho de dominio sobre la unidad. | `Persona` + `Residencia.rol = 'propietario'` |
-| **Residente / Tenedor** | Quien habita la unidad; puede ser el propietario o un arrendatario. | `Residencia.rol = 'arrendatario'` |
+| **Arrendatario / Tenedor** | Quien habita la unidad sin ser su dueño. | `Persona` + `Residencia.rol = 'arrendatario'` |
+| **Residente** | **Una marca, no un título** (Mary, 2026-09-07): se le pone a quien tiene título de **propietario o de arrendatario** y dice «esta persona vive aquí y usa la app del residente». **No es un usuario distinto de esos dos.** El título —quién es dueño y quién arrienda— está en `Residencia.rol` y es el que decide qué puede hacer (RN-02, RN-60). Confundirlos lleva a errores concretos: creer que «residente» es lo contrario de «propietario» y escribir un permiso al revés. | `RolUsuario = 'residente'` (marca) ≠ `Residencia.rol` (título) |
 | **Cuota de administración** | Aporte periódico (normalmente mensual) para gastos comunes. | `Cuota.tipo = 'ordinaria'` |
 | **Cuota extraordinaria** | Aporte aprobado en asamblea para un gasto puntual. | `Cuota.tipo = 'extraordinaria'` |
 | **Cartera** | Conjunto de obligaciones pendientes de las unidades. | `Cartera` (vista) |

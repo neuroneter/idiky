@@ -56,6 +56,14 @@ export interface Persona {
   telefono: string
 }
 
+/**
+ * El **titulo** con el que una persona esta vinculada a una unidad.
+ *
+ * Esto si es un rol, y es lo que decide que puede hacer: el propietario registra
+ * a los demas (RN-60), el propietario vota (RN-51). «Residente» no aparece aqui
+ * porque no es un titulo: es la marca de sesion que llevan el propietario y el
+ * arrendatario por igual (ver `RolUsuario`).
+ */
 export type RolResidencia = 'propietario' | 'arrendatario' | 'autorizado'
 
 /** Vinculo entre una persona y una unidad. Define el rol efectivo (RN-02). */
@@ -493,9 +501,20 @@ export interface Documento {
 // Sesion y perfiles demo
 // ---------------------------------------------------------------------------
 /**
+ * Con que cara de la aplicacion entra la persona. **No es su titulo.**
+ *
+ * `residente` **no es un usuario distinto de propietario o arrendatario**: es
+ * una **marca** que se le pone a quien tiene uno de esos dos titulos (Mary,
+ * 2026-09-07). Dice «esta persona vive aqui y usa la app del residente»; el
+ * titulo —quien es dueno y quien arrienda— vive en `Residencia.rol`, y es el que
+ * decide lo que puede hacer (RN-02, RN-60).
+ *
+ * Confundirlos lleva a errores concretos: creer que «residente» es lo contrario
+ * de «propietario» y escribir un permiso al reves.
+ *
  * `porteria` se agrego el 2026-08-28: quien recibe los paquetes y valida a los
  * visitantes esta en la entrada a cualquier hora, y suele ser empleado de una
- * empresa de vigilancia externa. Por eso tiene rol propio y no la cuenta del
+ * empresa de vigilancia externa. Por eso tiene marca propia y no la cuenta del
  * administrador (RN-52).
  */
 export type RolUsuario = 'residente' | 'admin' | 'porteria'

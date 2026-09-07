@@ -858,7 +858,7 @@ export function crearSemilla(): BaseDatos {
       {
         id: 'perfil-residente-al-dia',
         etiqueta: 'Maria Camila Restrepo',
-        descripcion: 'Residente al día · Torre 1 apto 402',
+        descripcion: 'Propietaria al día · Torre 1 apto 402',
         rol: 'residente',
         personaId: 'per-1',
         copropiedadId: COPROPIEDAD_ID,
@@ -867,7 +867,7 @@ export function crearSemilla(): BaseDatos {
       {
         id: 'perfil-propietario-sin-saldo',
         etiqueta: 'Jorge Enrique Valencia',
-        descripcion: 'Propietario sin saldo · Torre 1 apto 202',
+        descripcion: 'Propietario sin deuda · Torre 1 apto 202',
         rol: 'residente',
         personaId: 'per-4',
         copropiedadId: COPROPIEDAD_ID,
@@ -876,7 +876,7 @@ export function crearSemilla(): BaseDatos {
       {
         id: 'perfil-residente-mora',
         etiqueta: 'Andres Felipe Gomez',
-        descripcion: 'Residente en mora · Torre 2 apto 901',
+        descripcion: 'Propietario en mora · Torre 2 apto 901',
         rol: 'residente',
         personaId: 'per-2',
         copropiedadId: COPROPIEDAD_ID,

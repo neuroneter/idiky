@@ -38,7 +38,7 @@ import { Icono } from './Icono'
 export const CATEGORIAS: Record<CategoriaRegistro, { texto: string; ayuda: string }> = {
   residente: {
     texto: 'Residente',
-    ayuda: 'Vive aquí. El dueño, quien le arrienda, su familia.',
+    ayuda: 'Vive aquí de forma permanente. Enseguida escoges si es propietario o arrendatario.',
   },
   residente_temporal: {
     texto: 'Residente temporal',

@@ -76,6 +76,33 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-07 · Mary + IA (Claude) · «Residente» es una marca, no un título
+
+Mary precisó algo del modelo que el glosario tenía mal escrito: *«la denominación de residente
+es una marca que se le coloca a los usuarios con rol de propietario o arrendatario»*, y
+*«residente no es otro usuario»*.
+
+El código ya lo hacía bien —`RolUsuario = 'residente'` es con qué cara de la app entra la
+persona, y `Residencia.rol` es su título— pero **el glosario decía que «Residente / Tenedor»
+equivalía a `Residencia.rol = 'arrendatario'`**, que es justo confundir la marca con el título.
+Un documento que dice eso lleva a un error concreto: creer que «residente» es lo contrario de
+«propietario» y escribir un permiso al revés.
+
+Quedó separado en tres sitios:
+
+- **El glosario** distingue las dos entradas: «Arrendatario / Tenedor» es un título; «Residente»
+  es la marca que llevan por igual el propietario y el arrendatario.
+- **Los tipos** lo dicen donde se van a leer: `RolUsuario` explica que la marca no es el título,
+  y `RolResidencia` explica por qué «residente» no aparece entre los títulos.
+- **Los perfiles del demo** se nombran por su título: «Propietaria al día», «Propietario en
+  mora», «Propietario sin deuda». Antes decían «Residente al día», que es la ambigüedad de la
+  que salió esta conversación — y de la pregunta de Mary sobre qué significaban.
+
+En el formulario de registro la categoría «Residente» se queda, porque ahí sí es la marca: al
+escogerla, lo siguiente que se pregunta es el título.
+
+---
+
 ### 2026-09-07 · Mary + IA (Claude) · Quién ve la foto, y qué queda cuando la ve
 
 Mary aprobó las dos propuestas que le hice sobre el acceso a los soportes, y **corrigió una**.
