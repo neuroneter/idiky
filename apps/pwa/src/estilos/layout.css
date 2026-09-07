@@ -152,7 +152,12 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  font-size: 0.66rem;
+  /* Crece con la preferencia, pero **hasta el 125 %**: son cinco celdas fijas
+     en una barra que no puede reflujar, y al 150 % «Solicitudes» y
+     «Asambleas» quedaban pegadas una a otra. Es el unico texto de la app
+     con tope, y se lo puede permitir porque nunca va solo: cada etiqueta
+     tiene su icono encima y su destino se reconoce por los dos. */
+  font-size: calc(0.66rem * min(var(--escala-texto), 1.25));
   font-weight: 600;
   color: var(--color-texto-tenue);
 }
@@ -413,6 +418,87 @@
   font-weight: 600;
   color: var(--color-marca);
 }
+/* --- Tamano de la letra (CU-R-26) ---
+   Va arriba de todo y alineado a la derecha, en el sitio donde la gente ya busca
+   los ajustes. Discreto pero **no escondido**: si hay que descubrirlo, no cumple
+   su funcion. */
+.tamano-letra {
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--e2);
+}
+.tamano-letra__boton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e2);
+  /* 44 px de alto: es el minimo que se acierta con el dedo, y quien necesita
+     agrandar la letra suele necesitar tambien el blanco donde tocar. */
+  min-height: 44px;
+  padding: 0 var(--e4);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: var(--radio-completo);
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--color-texto-inverso);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+.tamano-letra__boton:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+.tamano-letra__boton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.tamano-letra__opciones {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  width: 100%;
+  padding: var(--e3);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-2);
+}
+.tamano-letra__opcion {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  min-height: 52px;
+  padding: var(--e2) var(--e3);
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie);
+  text-align: left;
+}
+.tamano-letra__opcion[aria-pressed='true'] {
+  border-color: var(--color-acento);
+  background: var(--color-acento-suave);
+}
+/* La muestra ocupa siempre el mismo ancho para que las tres A queden alineadas
+   y la diferencia de tamano se vea de un vistazo. */
+.tamano-letra__muestra {
+  flex: 0 0 2.6rem;
+  text-align: center;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-marca);
+}
+.tamano-letra__nombre {
+  flex: 1;
+  font-size: var(--texto-sm);
+  font-weight: 650;
+}
+.tamano-letra__porcentaje {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.tamano-letra__opcion[aria-pressed='true'] .tamano-letra__nombre,
+.tamano-letra__opcion[aria-pressed='true'] .tamano-letra__muestra {
+  color: var(--color-acento);
+}
+
 /* El atajo de demostracion va plegado: hace falta para mostrar la consola sin
    teclear cedulas, pero no es la pantalla de acceso y no debe parecerlo. */
 .acceso__demo > summary {
@@ -453,13 +539,13 @@
   content: counter(paso);
   display: grid;
   place-items: center;
-  flex: 0 0 18px;
-  width: 18px;
-  height: 18px;
+  flex: 0 0 calc(18px * var(--escala-texto));
+  width: calc(18px * var(--escala-texto));
+  height: calc(18px * var(--escala-texto));
   border-radius: var(--radio-completo);
   background: rgba(255, 255, 255, 0.24);
   color: var(--color-texto-inverso);
-  font-size: 0.62rem;
+  font-size: calc(0.62rem * var(--escala-texto));
 }
 .pasos li.activo::before {
   background: var(--color-marca-claro);
@@ -502,7 +588,7 @@
   color: rgba(255, 255, 255, 0.78);
 }
 .cartera-inicio__monto {
-  font-size: 2.4rem;
+  font-size: calc(2.4rem * var(--escala-texto));
   font-weight: 700;
   letter-spacing: -0.03em;
   margin: var(--e1) 0 var(--e2);
@@ -606,9 +692,9 @@
 .bloque-fecha {
   display: grid;
   place-items: center;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+  width: calc(40px * var(--escala-texto));
+  height: calc(40px * var(--escala-texto));
+  flex: 0 0 calc(40px * var(--escala-texto));
   border-radius: var(--radio-sm);
   background: var(--color-marca);
   color: var(--color-texto-inverso);
@@ -619,7 +705,7 @@
   font-weight: 700;
 }
 .bloque-fecha__mes {
-  font-size: 0.6rem;
+  font-size: calc(0.6rem * var(--escala-texto));
   text-transform: uppercase;
   letter-spacing: 0.06em;
   opacity: 0.82;
@@ -644,6 +730,14 @@
   grid-template-columns: repeat(4, 1fr);
   gap: var(--e2);
 }
+
+/* Con la letra al 150 % los cuatro accesos dejan de caber en fila: «Solicitudes»
+   ocupa la celda entera y los rotulos se tocan. En vez de encoger la letra —que
+   es justo lo que la persona pidio que no pasara— se parten en dos filas de dos.
+   Quedan mas grandes, no mas pequenos, que es la respuesta correcta. */
+:root[data-texto='mayor'] .accesos {
+  grid-template-columns: repeat(2, 1fr);
+}
 .acceso-directo {
   display: flex;
   flex-direction: column;
@@ -654,7 +748,7 @@
   border-radius: var(--radio);
   background: var(--color-superficie);
   box-shadow: var(--sombra-1);
-  font-size: 0.68rem;
+  font-size: calc(0.68rem * var(--escala-texto));
   font-weight: 600;
   color: var(--color-texto-suave);
   text-align: center;
@@ -676,14 +770,14 @@
   position: absolute;
   top: 6px;
   right: 10px;
-  min-width: 17px;
-  height: 17px;
+  min-width: calc(17px * var(--escala-texto));
+  height: calc(17px * var(--escala-texto));
   padding: 0 4px;
   border-radius: var(--radio-completo);
   background: var(--color-acento);
   color: #fff;
-  font-size: 0.6rem;
-  line-height: 17px;
+  font-size: calc(0.6rem * var(--escala-texto));
+  line-height: calc(17px * var(--escala-texto));
 }
 
 /* ============================================================ Indicadores */

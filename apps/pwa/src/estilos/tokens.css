@@ -95,13 +95,27 @@
      La base es de 16 px, no de 15: el publico va de los 18 a los 60 anos. */
   --fuente: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     sans-serif;
-  --texto-xs: 0.8rem;
-  --texto-sm: 0.875rem;
-  --texto-base: 1rem;
-  --texto-lg: 1.125rem;
-  --texto-xl: 1.375rem;
-  --texto-2xl: 1.75rem;
-  --texto-3xl: 2.25rem;
+
+  /* El multiplicador que escoge la persona en la puerta (CU-R-26). Lo escribe
+     `estado/preferencias.ts` como `data-texto` en el <html>, mas abajo.
+
+     Multiplica **solo la letra**, no el espacio. Es deliberado: si se agrandara
+     tambien `--e1..--e7`, la pantalla se estiraria entera y en el tamano mayor
+     cabria menos que antes — la persona veria letras grandes y tendria que
+     desplazarse el doble para leer lo mismo. Los rellenos ya son holgados y
+     absorben la letra grande; lo que se estira es el alto de las tarjetas, que
+     es justo lo que debe pasar.
+
+     Los tres valores —100 %, 125 % y 150 %— son los del zoom del navegador y la
+     escala de pantalla del sistema (Mary, 2026-09-07). */
+  --escala-texto: 1;
+  --texto-xs: calc(0.8rem * var(--escala-texto));
+  --texto-sm: calc(0.875rem * var(--escala-texto));
+  --texto-base: calc(1rem * var(--escala-texto));
+  --texto-lg: calc(1.125rem * var(--escala-texto));
+  --texto-xl: calc(1.375rem * var(--escala-texto));
+  --texto-2xl: calc(1.75rem * var(--escala-texto));
+  --texto-3xl: calc(2.25rem * var(--escala-texto));
 
   /* Espacio */
   --e1: 0.25rem;
@@ -125,6 +139,19 @@
 
   /* Medidas de layout */
   --ancho-movil: 480px;
-  --alto-nav-inferior: 64px;
+  /* Crece con la letra: es la unica medida fija que contiene texto, y con la
+     escala mayor las etiquetas se salian de los 64 px. */
+  --alto-nav-inferior: calc(64px * var(--escala-texto));
   --ancho-lateral: 236px;
+}
+
+/* Los tres tamanos. El valor lo pone `aplicarTamanoTexto()` en el <html>, de modo
+   que lo hereda todo: la app del residente, las dos consolas y la hoja del paz y
+   salvo. Si se agregan niveles aqui, hay que agregarlos tambien en `TAMANOS`
+   (`estado/preferencias.ts`): esa lista es la que dibuja los botones. */
+:root[data-texto='grande'] {
+  --escala-texto: 1.25;
+}
+:root[data-texto='mayor'] {
+  --escala-texto: 1.5;
 }

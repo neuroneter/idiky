@@ -14,7 +14,7 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 61 documentados: 20 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
+| **Casos de uso** | 62 documentados: 21 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
 | **Reglas de negocio** | 56 (RN-01…RN-56) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -23,7 +23,8 @@ nueva o una sesión de IA distinta.
 
 **Puerta:** ingreso con **clave de 4 números** —y solo la clave si el teléfono ya te conoce— ·
 **huella** donde el aparato tiene lector · código de un solo uso en un dispositivo nuevo ·
-activación y recuperación en tres pasos. Todo simulado salvo la huella, y cada pantalla lo dice.
+activación y recuperación en tres pasos · **tamaño de la letra al 100 %, 125 % o 150 %**, que
+aplica a toda la app (CU-R-26). Todo simulado salvo la huella, y cada pantalla lo dice.
 
 **App del residente:** inicio con resumen · estado de cuenta · pago simulado con comprobante
 (PSE, Bre-B y tarjeta) · **solicitudes** —zonas comunes, PQRS y el **paz y salvo, que se emite,
@@ -38,14 +39,16 @@ publicación de comunicados · registro y entrega de correspondencia.
 
 ### Lo que NO existe
 
-Backend, autenticación real, pagos reales, notificaciones push, apps nativas, **la consola de
-portería** (el rol ya está decidido, CU-P-01 y CU-P-02), presupuesto, modo oscuro.
+Backend, autenticación real, pagos reales, notificaciones push, apps nativas, presupuesto,
+modo oscuro. De la portería existe el puesto (CU-P-01, CU-P-02) pero **no la minuta**:
+se valida el código del visitante, no se registra el ingreso.
 
 Y del núcleo declarado como alcance, lo que falta es **la mitad jurídica de la asamblea** —
-quórum, mayorías, poderes, acta— y **los documentos en PDF**: el paz y salvo ya se emite y se
-registra, pero no se descarga (ADR-0006 sin escribir). Lo que sí quedó: la citación, el orden
-del día, la votación por coeficiente (CU-R-13, CU-R-20) y los coeficientes visibles al
-copropietario (CU-R-24).
+quórum, mayorías, poderes, acta—. Los documentos formales ya tienen criterio y camino
+([ADR-0006](./adr/0006-documentos-formales.md)): el paz y salvo se emite, se ve y se guarda
+como PDF desde el navegador. Lo que sí quedó de la asamblea: la citación, el orden del día, la
+votación por coeficiente (CU-R-13, CU-R-20) y los coeficientes visibles al copropietario
+(CU-R-24).
 
 ### ⚠️ El demo v0.1 no es el producto
 
@@ -69,6 +72,52 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-07 · Mary + IA (Claude) · El tamaño de la letra, en la puerta
+
+Mary retomó el tema de las fuentes y pidió **un botón de accesibilidad en la pantalla inicial
+con tres tamaños**. Al ver la primera propuesta la corrigió: *«implementa los tres niveles más
+usados»* — **100 %, 125 % y 150 %**, los del zoom del navegador y la escala de pantalla del
+sistema. Es mejor que lo que yo había puesto (1 / 1.2 / 1.4): quien alguna vez agrandó la letra
+de su computador reconoce esos números, así que ahora el porcentaje se muestra en el botón en
+vez de esconderse detrás de «Grande».
+
+**Por qué va en la puerta y no en el perfil.** Quien no alcanza a leer la pantalla de ingreso
+no puede entrar a buscar el ajuste adentro. Un control de accesibilidad detrás del acceso le
+sirve a todo el mundo menos a quien lo necesita.
+
+**Cómo está hecho, en una línea:** un multiplicador `--escala-texto` sobre los tokens
+`--texto-*` (`estilos/tokens.css`), escrito como `data-texto` en el `<html>`. **Ninguna
+pantalla tuvo que enterarse**: crecen la app del residente, las dos consolas y la
+previsualización del paz y salvo. La preferencia es del aparato, no de la copropiedad, así que
+vive en `estado/preferencias.ts` y **no pasa por el repositorio** — misma razón que
+`estado/acceso.ts`.
+
+Se agranda **la letra, no el espacio**. Si crecieran también `--e1..--e7`, la pantalla se
+estiraría entera y en el tamaño mayor cabría menos que antes: letras grandes y el doble de
+desplazamiento para leer lo mismo.
+
+**Dos cosas que solo aparecieron al probarlo al 150 % en el navegador**, y que valen como nota
+de diseño:
+
+- La **barra inferior** quedó como el único texto con tope (crece hasta el 125 %). Son cinco
+  celdas fijas que no pueden reflujar, y al 150 % «Solicitudes» y «Asambleas» quedaban pegadas.
+  Se lo puede permitir porque ninguna etiqueta va sola: cada una tiene su icono encima.
+- Los **cuatro accesos del inicio** pasan a dos filas de dos en el tamaño mayor. La alternativa
+  era encoger la letra, que es justo lo que Mary pidió que no pasara.
+
+También se arregló el marcador de posición del campo de documento: con la letra al 150 % «Sin
+puntos ni espacios» se cortaba a la mitad. Ahora la pista va en tamaño normal y sin el
+espaciado de los dígitos; lo que se teclea sigue grande.
+
+**Verificado en el navegador** (Playwright, iPhone 390×844 y escritorio 1280): los tres niveles
+aplican, la preferencia sobrevive a recargar, no hay desbordamiento horizontal en el inicio ni
+en la consola del administrador, y no hay errores de consola.
+
+**Lo que falta:** el control existe solo en la puerta. Falta repetirlo dentro de la app (perfil
+del residente) para quien quiera cambiarlo sin cerrar sesión.
+
+---
 
 ### 2026-08-28 · Mary + IA (Claude) · El puesto de portería
 

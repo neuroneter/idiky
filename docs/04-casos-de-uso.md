@@ -46,6 +46,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-23 | **Recibir y ejercer poderes de otros copropietarios** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-23) |
 | CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-24) |
 | CU-R-25 | **Activar mi cuenta o recuperar mi contraseña** | 1 | 🟡 Parcial (el flujo, sin autenticar) | [ver](./casos-de-uso/residente.md#cu-r-25) |
+| CU-R-26 | **Ajustar el tamaño de la letra** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-26) |
 
 ## 2. Administrador — consola web
 

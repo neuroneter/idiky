@@ -59,6 +59,7 @@ import { rutaInicial } from '../../dominio/reglas'
 import { biometria } from '../../servicios/plataforma'
 import { Logotipo } from '../../componentes/Logotipo'
 import { SiluetaTorres } from '../../componentes/SiluetaTorres'
+import { ControlTamanoTexto } from '../../componentes/ControlTamanoTexto'
 import { Icono } from '../../componentes/Icono'
 import { iniciales } from '../../utilidades/formato'
 import { perfilDe } from './perfil'
@@ -134,9 +135,7 @@ export function AccesoPage() {
     // A quien el telefono ya conoce no se le vuelve a pedir el documento.
     const persona = modoConocida
       ? conocida
-      : bd.personas.find(
-          (p) => normalizarDocumento(p.documento) === normalizarDocumento(documento),
-        )
+      : bd.personas.find((p) => normalizarDocumento(p.documento) === normalizarDocumento(documento))
 
     // RN-53: la cuenta existe porque la administración vinculó a la persona. No se
     // dice «documento incorrecto»: se dice qué hacer, que es lo útil aquí.
@@ -256,6 +255,10 @@ export function AccesoPage() {
           mismo edificio. */}
       <SiluetaTorres className="acceso-fondo__siluetas" />
       <div className="acceso">
+        {/* Antes que el logo y que el formulario: quien no puede leer la pantalla
+            necesita esto primero, no después de fallar al escribir la clave. */}
+        <ControlTamanoTexto />
+
         <div className="acceso__marca">
           <Logotipo inverso tamano="var(--texto-3xl)" />
           <p className="acceso__lema">

@@ -607,3 +607,67 @@ inicio. Muestra el coeficiente, lo que determina (cuota del mes y peso del voto)
 de la copropiedad. El peso del voto sale de `pesoDelVoto()` en `dominio/reglas.ts`: es la
 única definición de RN-27, para que el módulo de asambleas la reutilice y no vuelva a leer
 `unidad.coeficiente` por su cuenta.
+
+---
+
+## CU-R-26 — Ajustar el tamaño de la letra
+
+- **Actor principal:** Cualquiera que use la app (residente, administrador, portería).
+- **Precondiciones:** Ninguna. **Se llega antes de entrar**, y esa es la clave del caso.
+- **Disparador:** No alcanza a leer la pantalla.
+- **Resultado esperado:** Toda la app —las tres caras— se ve con la letra que escogió, en este
+  aparato, hoy y las próximas veces.
+
+**Por qué está en la pantalla de ingreso y no en el perfil**
+
+Quien no alcanza a leer la pantalla de ingreso **no puede entrar a buscar el ajuste adentro**.
+Un control de accesibilidad detrás del acceso le sirve a todo el mundo menos a quien lo
+necesita. Es el mismo razonamiento de la clave de 4 números (RN-55): la app la usan adultos
+mayores, y las barreras que ponemos en la puerta son las que hacen que la persona deje de
+entrar y vuelva a llamar a la administración.
+
+**Los tres niveles** (Mary, 2026-09-07)
+
+| | | |
+|---|---|---|
+| **Normal** | 100 % | Como viene |
+| **Grande** | 125 % | |
+| **Más grande** | 150 % | |
+
+Son los del zoom del navegador y la escala de pantalla del sistema: quien alguna vez agrandó
+la letra de su computador reconoce estos números, y por eso el porcentaje se muestra en el
+botón. El tope de 150 % está dentro de lo que la WCAG (1.4.4) exige que una interfaz aguante
+—hasta el 200 % sin perder contenido—, no en el límite.
+
+**Flujo principal**
+1. En la pantalla de ingreso, arriba a la derecha, la persona toca **Tamaño de la letra**.
+2. El sistema despliega tres opciones, cada una con una muestra en su tamaño real.
+3. La persona escoge una y **la pantalla cambia debajo del dedo**: es la única forma de saber
+   si escogió bien.
+4. El sistema guarda la preferencia en el aparato y la aplica a toda la app.
+
+**Flujos alternativos**
+- A1. El navegador tiene el almacenamiento bloqueado → el tamaño vale para esta sesión y no se
+  recuerda. No se muestra ningún error: no hay nada que la persona pueda hacer al respecto.
+- A2. La persona ya agrandó la letra en los Ajustes de su teléfono → los dos se **suman**. El
+  ajuste de la app multiplica el del sistema, no lo reemplaza.
+
+**Reglas de negocio**
+- Ninguna. Es una preferencia del aparato, no un dato de la copropiedad: por eso vive en
+  `estado/preferencias.ts` y no pasa por el repositorio.
+
+**Estado en el demo:** ✅ — `src/componentes/ControlTamanoTexto.tsx`, montado en
+`src/features/auth/AccesoPage.tsx`. La escala se aplica en `estilos/tokens.css` sobre los
+tokens `--texto-*`, así que **ninguna pantalla tuvo que enterarse**: crecen la app del
+residente, las dos consolas y la previsualización del paz y salvo.
+
+Dos ajustes que salieron de probarlo al 150 %, y que valen como nota de diseño:
+
+- **La barra inferior es el único texto con tope** (crece hasta el 125 %). Son cinco celdas
+  fijas que no pueden reflujar, y al 150 % «Solicitudes» y «Asambleas» quedaban pegadas. Se
+  lo puede permitir porque ninguna etiqueta va sola: cada una tiene su icono encima.
+- **Los cuatro accesos del inicio pasan a dos filas de dos** en el tamaño mayor. La
+  alternativa era encoger la letra, que es justo lo que la persona pidió que no pasara.
+
+**Pendiente:** el control existe solo en la puerta. Falta repetirlo dentro de la app (perfil
+del residente) para quien quiera cambiarlo sin cerrar sesión.

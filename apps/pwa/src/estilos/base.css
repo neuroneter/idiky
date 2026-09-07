@@ -274,11 +274,19 @@ textarea {
    gafas de leer (Mary, 2026-08-28). El tamano no es decoracion: es lo que decide
    si la persona entra o llama a la administracion. */
 .campo-numeros {
-  font-size: 1.35rem;
+  font-size: calc(1.35rem * var(--escala-texto));
   letter-spacing: 0.16em;
   text-align: center;
   font-variant-numeric: tabular-nums;
   padding: 0.7rem !important;
+}
+
+/* El marcador («Sin puntos ni espacios») es una pista, no un dato: se queda en
+   tamano de texto normal y sin el espaciado de los digitos. Con la letra al
+   150 % la frase entera no cabia en el campo y se cortaba a la mitad. */
+.campo-numeros::placeholder {
+  font-size: var(--texto-sm);
+  letter-spacing: normal;
 }
 
 /* La huella se ofrece como una opcion marcada, no como un boton mas: es algo que
@@ -646,7 +654,7 @@ textarea {
   border-radius: var(--radio);
   box-shadow: var(--sombra-2);
   padding: var(--e5) var(--e4);
-  font-size: 0.82rem;
+  font-size: calc(0.82rem * var(--escala-texto));
   overflow-x: auto;
 }
 .previsualizacion-hoja .hoja-documento {

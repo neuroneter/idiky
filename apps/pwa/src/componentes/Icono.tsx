@@ -29,6 +29,7 @@ export type NombreIcono =
   | 'reloj'
   | 'chevron'
   | 'reiniciar'
+  | 'letra'
 
 const TRAZOS: Record<NombreIcono, string> = {
   inicio: 'M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5',
@@ -61,6 +62,9 @@ const TRAZOS: Record<NombreIcono, string> = {
   reloj: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18zM12 7v5.5l3.5 2',
   chevron: 'M9 5l7 7-7 7',
   reiniciar: 'M20 12a8 8 0 1 1-2.6-5.9M20 4v4h-4',
+  // Una A grande y una chica: es el simbolo de «tamano de la letra» en
+  // todas partes, y se entiende sin leer la etiqueta.
+  letra: 'M2.5 19 7.5 6l5 13M4.3 15h6.4M15 19l3.2-8.5L21.5 19M16.2 16.5h4.6',
 }
 
 export function Icono({
