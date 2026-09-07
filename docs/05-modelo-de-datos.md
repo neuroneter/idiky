@@ -364,11 +364,41 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-49 | **Parametrizar la cartera es facultad exclusiva del administrador de esa copropiedad**: qué cuotas, multas e intereses existen y cuánto valen. Ningún otro rol lo hace, y la comprobación no puede vivir solo en la interfaz. | *parcial* (`App.tsx` protege la ruta; `repositorio.ts` no comprueba quién llama) |
 | RN-50 | **Lo que cae en la cuenta de una unidad se sigue de la parametrización y de su regla, no de una decisión caso por caso.** El interés lo liquida el sistema (RN-42, RN-44), la multa exige un concepto del catálogo y quedar firme (RN-38, RN-39), la extraordinaria sale del acta (RN-46, RN-48). | *pendiente* |
 | RN-51 | **Vota el propietario de la unidad**, no quien la habita: el voto va con la propiedad, igual que la cuota. **(? — falta definir el rol `autorizado` y el apoderado, CU-R-23)** | `dominio/reglas.ts` (`puedeVotar`) + `repositorio.ts` |
-| RN-53 | **La cuenta de un residente nace vinculada**: existe porque la administración lo registró en una unidad (CU-A-02). La persona la **activa**, no la crea, y quien no está vinculado no entra. | `features/auth/` (simulado, ADR-0004) |
+| RN-53 | **La cuenta de un residente nace vinculada**: existe porque alguien lo registró en una unidad. La persona la **activa**, no la crea, y quien no está vinculado no entra. **Quién lo registra depende del eslabón (RN-63)**: la administración crea propietarios, el propietario crea a los demás de su unidad. | `features/auth/` (simulado, ADR-0004) |
 | RN-54 | En un **dispositivo nuevo** se exige un **código de un solo uso** además de la clave. Desde la app se paga. | `estado/acceso.ts` (simulado) |
 | RN-55 | La clave es de **4 números**, no una contraseña: la app la usan adultos mayores. Lo que sostiene esa decisión es que la clave **solo sirve en un dispositivo ya probado** (RN-54) y que **los intentos se acaban**; agotados, se vuelve a exigir el código. | `estado/acceso.ts` |
 | RN-56 | La **huella** reemplaza teclear la clave en el dispositivo donde se registró. Nunca crea la cuenta ni sustituye la identidad, y **solo se ofrece donde hay lector**. | `servicios/plataforma.ts` (WebAuthn) |
 | RN-52 | **La portería hace lo de la entrada, y nada más**: registra y entrega correspondencia y valida visitantes. **No accede a la cartera ni a las PQRS.** Quien recibe el paquete queda registrado en él. | `dominio/reglas.ts` (`puede`) + `LayoutPorteria` |
+| RN-57 | **Ningún registro de persona existe sin dos soportes**: foto del documento de identidad y foto de la persona. Sin las dos, el registro no pasa de «esperando soportes» y no se puede autorizar. | `dominio/reglas.ts` (`soportesCompletos`) |
+| RN-58 | **Los soportes los adjunta la persona registrada, desde su propio dispositivo**, con su documento y el código que le pasó quien la registró. Una foto de cédula que sube un tercero no prueba nada sobre quién la subió. | `features/auth/AdjuntarPage.tsx` |
+| RN-59 | **El vínculo lo crea la autorización, no el formulario.** Quien registró mira los soportes y responde; hasta ese momento no existe ni residencia ni visitante. Autorizar es decir «los vi y es quien dice ser», y por eso deja constancia de quién y cuándo. | `dominio/reglas.ts` (`puedeAutorizar`) + `repositorio.ts` |
+| RN-60 | **Quién registra a quién**: el propietario registra residentes, arrendatarios y temporales de su unidad; el arrendatario, solo visitantes; el `autorizado`, a nadie. Darle a una autorización la facultad de traer más gente la convierte en una cadena sin dueño. | `dominio/reglas.ts` (`categoriasQuePuedeRegistrar`) |
+| RN-61 | **Nada se borra: se inhabilita** (Mary, 2026-09-07). Un residente se desvincula cerrando el vínculo con fecha; un visitante se revoca; un registro se rechaza o se retira. El histórico es lo único que después permite responder quién vivía aquí en tal fecha, o quién autorizó a quien recibió aquel paquete. | `repositorio.ts` + `dominio/reglas.ts` (`residenciaVigente`) |
+| RN-62 | **La categoría decide la vigencia.** El residente se queda hasta que lo inhabiliten; el residente temporal y el visitante **exigen** fecha de fin — es justamente lo que los distingue de un residente. | `dominio/reglas.ts` (`exigeVigencia`) |
+| RN-63 | **La cadena de registro: cada eslabón crea el siguiente, y solo ese.** El operador de Idiky crea al administrador de la copropiedad; el administrador, a los propietarios; el propietario, a los demás de su unidad. Corrige RN-53: la cuenta sigue naciendo vinculada, lo que cambia es **quién** la vincula. Nadie se salta un eslabón — que el administrador creara arrendatarios directamente rompería que el propietario sepa quién vive en su unidad. | `dominio/reglas.ts` (`CADENA_DE_REGISTRO`) |
+
+### RegistroPersona — el trámite de entrada de una persona (CU-R-27, CU-R-28)
+
+Registrar a alguien **son tres actos con tres actores**, y entre uno y otro pasa tiempo real:
+se registra hoy, la persona adjunta esta noche, se autoriza mañana. Por eso es una entidad y
+no un formulario.
+
+| Campo | Qué es |
+|---|---|
+| `categoria` | `residente`, `residente_temporal` o `visitante`. Decide la vigencia (RN-62) y qué se crea al autorizar |
+| `rol` | Solo para residentes: con qué título queda vinculado (propietario o arrendatario) |
+| `creadoPor` | Quién lo registró. Es también quien lo autoriza (RN-59) |
+| `codigo` | Lo que la persona escribe, junto con su documento, para abrir su registro y adjuntar (RN-58) |
+| `fotoDocumento`, `fotoPersona` | Los dos soportes (RN-57). Ver [ADR-0009](./adr/0009-soportes-fotograficos.md) |
+| `estado` | `esperando_soportes` → `esperando_autorizacion` → `autorizado`, o bien `rechazado` / `anulado` |
+| `residenciaId`, `visitanteId` | Lo que produjo al autorizarse. Uno de los dos, según la categoría |
+
+**Las dos esperas no se pueden juntar en un «pendiente».** En `esperando_soportes` la pelota
+la tiene la persona registrada; en `esperando_autorizacion`, quien la registró. Decirle
+«pendiente» a los dos es la forma segura de que ninguno haga nada.
+
+**Un registro no se borra nunca** (RN-61). Un registro rechazado es justamente el que hay que
+poder consultar después.
 
 ## 3 bis. El principio del respaldo
 

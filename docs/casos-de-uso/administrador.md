@@ -600,3 +600,40 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 > no el cálculo.
 
 **Estado en el demo:** ⬜ — hoy no se calcula ningún interés (CU-S-02 está parcial).
+
+---
+
+## CU-A-26 — Registrar propietarios y ver los registros de la copropiedad
+
+- **Actor principal:** Administrador.
+- **Precondiciones:** Sesión iniciada en la consola.
+- **Disparador:** Se vende una unidad, o hay que dar de alta al primer propietario.
+- **Resultado esperado:** El propietario queda registrado, con sus soportes, y desde ahí él
+  registra a los demás de su unidad.
+
+**El segundo eslabón de RN-63.** El operador de Idiky crea al administrador; el administrador
+crea a los propietarios; el propietario crea a los demás de su unidad. Por eso aquí **la única
+categoría es residente**, en la práctica propietario: que el administrador pudiera crear
+arrendatarios directamente parece un atajo cómodo y es lo que rompe la trazabilidad — el
+propietario dejaría de saber quién vive en su unidad.
+
+**Flujo principal**
+1. El administrador abre **Registros**.
+2. Ve la tabla de toda la copropiedad, con **quién registró a quién**: es la cadena de RN-63
+   hecha visible.
+3. Toca **Registrar propietario**, escoge la unidad y llena los datos.
+4. El resto es igual que CU-R-27: la persona adjunta, el administrador autoriza.
+
+**Flujos alternativos**
+- A1. Un registro de otra unidad → lo ve, pero **no lo autoriza**: eso es de su propietario
+  (RN-59).
+
+**Reglas de negocio**
+- RN-57 a RN-63.
+
+**Estado en el demo:** ✅ — `src/features/admin/RegistrosPage.tsx`, con el mismo trámite de la
+app del residente (`src/componentes/Registro.tsx`).
+
+**Pendiente:** el eslabón de arriba —**el operador de Idiky, que crea a los administradores**—
+es un actor por encima de la copropiedad y no existe todavía en el demo. Está escrito en
+`CADENA_DE_REGISTRO` para que el modelo no lo olvide.

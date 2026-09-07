@@ -13,8 +13,9 @@ persona o IA — tenga que reconstruir el razonamiento más adelante.
 | [0006](./0006-documentos-formales.md) | **Documentos formales:** se generan en el servidor, con HTML y CSS; se guardan con su huella y se verifican sin la app | Aceptada |
 | 0007 | **Proveedor de transmisión en vivo** para las asambleas | ⬜ Pendiente de escribir |
 | 0008 | **Stack de backend** | ⬜ Pendiente de escribir |
+| [0009](./0009-soportes-fotograficos.md) | **Soportes fotográficos** del registro de personas: se capturan con HTML de siempre, se reducen y se guardan en el navegador. Lo difícil no es la foto, es el dato | Aceptada |
 
-Los tres pendientes salen del alcance declarado el 2026-08-26
+Los dos pendientes salen del alcance declarado el 2026-08-26
 ([`../12-levantamiento-pendiente.md` §0](../12-levantamiento-pendiente.md)). **ADR-0006 y
 ADR-0007 bloquean trabajo**: sin ellos no se puede empezar ni el paz y salvo ni la
 transmisión. Recuerden la regla del [`CLAUDE.md`](../../CLAUDE.md): no se agregan

@@ -7,11 +7,13 @@
  * Aqui se muestra junto con lo que determina, para que el numero signifique algo.
  */
 
+import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { etiquetaUnidad, pesoDelVoto, periodoActual, sumaCoeficientes } from '../../dominio/reglas'
 import { capitalizar, formatearDinero, formatearPeriodo } from '../../utilidades/formato'
+import { Icono } from '../../componentes/Icono'
 import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 
@@ -134,6 +136,23 @@ export function MiUnidadPage() {
           </p>
         </div>
       </div>
+
+      {/* Quien vive aqui es parte de «mi unidad» tanto como el coeficiente, y
+          este es el sitio donde alguien lo va a buscar (CU-R-27). */}
+      <Link to="/app/unidad/personas" className="tarjeta tarjeta--accion">
+        <div className="fila">
+          <div className="tarjeta__cuerpo">
+            <span className="marca-tarjeta">
+              <Icono nombre="personas" tamano={20} />
+            </span>
+            <div className="columna">
+              <strong>Personas de la unidad</strong>
+              <span className="subtitulo">Quién vive aquí, y registrar a alguien más</span>
+            </div>
+          </div>
+          <Icono nombre="chevron" tamano={16} className="tenue" />
+        </div>
+      </Link>
 
       <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
         El coeficiente lo fija el reglamento de propiedad horizontal. Si crees que el tuyo no

@@ -8,11 +8,13 @@
 
 import type {
   Asamblea,
+  CategoriaRegistro,
   RolUsuario,
   Cuota,
   FechaISO,
   Periodo,
   Pqrs,
+  RegistroPersona,
   Reserva,
   RolResidencia,
   Unidad,
@@ -441,6 +443,148 @@ export function solicitudesEsperandoRespuesta(pqrs: Pqrs[], reservas: Reserva[])
 // ---------------------------------------------------------------------------
 // Porteria — CU-P-01, CU-P-02
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Registro de personas — RN-57 a RN-62 · CU-R-27, CU-R-28
+//
+// Tres actos separados: **registrar**, **adjuntar** y **autorizar**. Nunca los
+// hace la misma persona en el mismo momento, y de ahi sale todo lo demas.
+// ---------------------------------------------------------------------------
+
+/**
+ * RN-63 — La cadena de registro: cada eslabon crea el siguiente, y solo ese.
+ *
+ * «El administrador de Idiky crea al administrador del edificio, y el
+ * administrador del edificio crea a un propietario, y el propietario a otros
+ * propietarios de su propiedad» (Mary, 2026-09-07).
+ *
+ *   Idiky (operador)  ->  administrador de la copropiedad
+ *   administrador     ->  propietario de una unidad
+ *   propietario       ->  otros propietarios, arrendatarios y temporales de SU unidad
+ *   propietario o arrendatario -> visitantes de su unidad
+ *
+ * Esto **no reemplaza** a RN-53, la corrige: la cuenta sigue naciendo vinculada,
+ * lo que cambia es quien la vincula segun el eslabon. Y explica por que nadie se
+ * registra solo: en una copropiedad no existe el «crea tu cuenta», porque el
+ * derecho a estar aqui se lo da a uno alguien que ya esta.
+ *
+ * Nadie puede saltarse un eslabon. Que el administrador pudiera crear
+ * arrendatarios directamente parece un atajo comodo y es justamente lo que
+ * rompe la trazabilidad: el propietario dejaria de saber quien vive en su
+ * unidad.
+ *
+ * **El operador de Idiky todavia no existe en el demo**: es un actor por encima
+ * de la copropiedad y su consola es trabajo de otra fase. Aqui esta el eslabon
+ * escrito para que el modelo no lo olvide.
+ */
+export const CADENA_DE_REGISTRO: ReadonlyArray<{
+  quien: string
+  registra: string
+  donde: string
+}> = [
+  { quien: 'Operador de Idiky', registra: 'Administrador de la copropiedad', donde: 'La plataforma' },
+  { quien: 'Administrador', registra: 'Propietario de una unidad', donde: 'La copropiedad' },
+  { quien: 'Propietario', registra: 'Propietarios, arrendatarios y temporales', donde: 'Su unidad' },
+  { quien: 'Propietario o arrendatario', registra: 'Visitantes', donde: 'Su unidad' },
+]
+
+/**
+ * RN-60 — Quien puede registrar a quien.
+ *
+ * El **propietario** registra a quien va a vivir en su unidad —otros
+ * propietarios y arrendatarios— porque es el titular del derecho de dominio y
+ * quien responde por la unidad ante la copropiedad. El **arrendatario** vive
+ * ahi, pero no dispone de quien mas vive ahi: puede registrar **visitantes** y
+ * nada mas.
+ *
+ * El `autorizado` no registra a nadie. Es alguien a quien un residente le dio
+ * acceso; darle la facultad de traer mas gente convierte una autorizacion en una
+ * cadena sin dueno.
+ */
+const CATEGORIAS_POR_ROL: Record<RolResidencia, readonly CategoriaRegistro[]> = {
+  propietario: ['residente', 'residente_temporal', 'visitante'],
+  arrendatario: ['visitante'],
+  autorizado: [],
+}
+
+export function categoriasQuePuedeRegistrar(
+  rol: RolResidencia | undefined,
+): readonly CategoriaRegistro[] {
+  return rol ? CATEGORIAS_POR_ROL[rol] : []
+}
+
+export function puedeRegistrar(
+  rol: RolResidencia | undefined,
+  categoria: CategoriaRegistro,
+): boolean {
+  return categoriasQuePuedeRegistrar(rol).includes(categoria)
+}
+
+/**
+ * RN-59 — Quien autoriza es quien responde por la unidad.
+ *
+ * «El propietario o arrendatario segun sea el caso» (Mary, 2026-09-07): quien
+ * creo el registro es quien lo autoriza. No es un tramite doble por gusto —
+ * entre crear y autorizar pasa algo, que es que la persona adjunta sus soportes,
+ * y autorizar es decir «los vi y son quien dice ser».
+ */
+export function puedeAutorizar(registro: RegistroPersona, personaId: string): boolean {
+  return registro.creadoPor === personaId && registro.estado === 'esperando_autorizacion'
+}
+
+/** RN-57 — Un registro no pasa de la espera de soportes sin las dos fotos. */
+export function soportesCompletos(registro: RegistroPersona): boolean {
+  return !!registro.fotoDocumento && !!registro.fotoPersona
+}
+
+/**
+ * RN-62 — La vigencia depende de la categoria, no del capricho de quien registra.
+ *
+ * El residente se queda hasta que lo desvinculen: ponerle fecha de fin a quien
+ * compro un apartamento no tiene sentido. Las otras dos **exigen** fecha de fin,
+ * y esa es justamente la diferencia entre un residente temporal y un residente.
+ */
+export function exigeVigencia(categoria: CategoriaRegistro): boolean {
+  return categoria !== 'residente'
+}
+
+/** El rol con el que queda vinculada la persona; el visitante no se vincula. */
+export function rolDeCategoria(
+  categoria: CategoriaRegistro,
+  rolPedido?: RolResidencia,
+): RolResidencia | undefined {
+  if (categoria === 'visitante') return undefined
+  if (categoria === 'residente_temporal') return 'autorizado'
+  return rolPedido ?? 'arrendatario'
+}
+
+/** Un registro sigue vivo mientras espera algo de alguien. */
+export function registroEnCurso(registro: RegistroPersona): boolean {
+  return registro.estado === 'esperando_soportes' || registro.estado === 'esperando_autorizacion'
+}
+
+/** Lo que le toca a **esta** persona, que es lo unico que hay que mostrarle. */
+export function registrosPorAutorizar(
+  registros: RegistroPersona[],
+  personaId: string,
+): RegistroPersona[] {
+  return registros.filter((registro) => puedeAutorizar(registro, personaId))
+}
+
+/**
+ * Los residentes vigentes de una unidad (RN-61).
+ *
+ * Vigente = sin fecha de fin, o con una fecha de fin que todavia no llega.
+ * **Desvincular no borra**: cierra el vinculo con fecha, y el historico queda
+ * para poder responder despues quien vivia aqui en tal fecha.
+ */
+export function residenciaVigente(
+  residencia: { desde: FechaISO; hasta?: FechaISO },
+  hoy: FechaISO = hoyISO(),
+): boolean {
+  if (residencia.desde > hoy) return false
+  return !residencia.hasta || residencia.hasta >= hoy
+}
 
 /**
  * RN-52 — La porteria hace lo de la entrada, y nada mas.

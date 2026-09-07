@@ -349,6 +349,14 @@ export function AccesoPage() {
             )}
             <Link to="/acceso/recuperar">Olvidé mi clave</Link>
           </div>
+
+          {/* Quien tiene que adjuntar sus documentos todavia no tiene cuenta:
+              si esto estuviera detras del ingreso, no podria llegar (CU-R-28). */}
+          <div className="separador" />
+          <Link to="/acceso/adjuntar" className="boton boton--bloque">
+            <Icono nombre="camara" tamano={16} />
+            Adjuntar mis documentos
+          </Link>
         </form>
 
         <AtajoDemo alSeleccionar={(id) => entrar(id)} />

@@ -12,6 +12,7 @@
 import type {
   BaseDatos,
   CategoriaComunicado,
+  CategoriaRegistro,
   CategoriaPqrs,
   Comunicado,
   Correspondencia,
@@ -21,6 +22,7 @@ import type {
   Pago,
   Periodo,
   Pqrs,
+  RegistroPersona,
   Reserva,
   Residencia,
   RolResidencia,
@@ -35,7 +37,11 @@ import {
   calcularSaldo,
   hoyISO,
   prorratearPorCoeficiente,
+  exigeVigencia,
+  puedeAutorizar,
   puedeVotar,
+  rolDeCategoria,
+  soportesCompletos,
   vencimientoDelPeriodo,
   votacionRecibeVotos,
   yaVoto,
@@ -567,6 +573,224 @@ export async function desvincularResidente(
   if (!residencia) throw new ErrorDeNegocio('El vinculo no existe.')
   residencia.hasta = hoyISO()
   return persistir(bd, residencia)
+}
+
+// ---------------------------------------------------------------------------
+// CU-R-27 / CU-R-28 — Registrar una persona en la unidad
+//
+// Cuatro operaciones porque son cuatro momentos, y entre uno y otro pasa tiempo
+// real: se registra hoy, la persona adjunta esta noche, se autoriza manana.
+// ---------------------------------------------------------------------------
+
+/**
+ * Codigo con el que la persona registrada abre su registro para adjuntar.
+ *
+ * Mismo alfabeto sin ambiguedades que los documentos formales: se dicta por
+ * telefono o por WhatsApp, y una O que se lee como cero manda a la persona a
+ * llamar a quien la registro.
+ */
+function nuevoCodigoRegistro(): string {
+  const alfabeto = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
+  let codigo = 'REG-'
+  for (let i = 0; i < 5; i += 1) {
+    codigo += alfabeto[Math.floor(Math.random() * alfabeto.length)]
+  }
+  return codigo
+}
+
+export async function crearRegistroPersona(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    unidadId: string
+    creadoPor: string
+    categoria: CategoriaRegistro
+    rol?: RolResidencia
+    nombres: string
+    apellidos: string
+    documento: string
+    email: string
+    telefono: string
+    vigenciaDesde?: string
+    vigenciaHasta?: string
+    placa?: string
+  },
+): Promise<Resultado<RegistroPersona>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  // RN-62: la vigencia no es opcional donde la categoria la exige. Se valida aqui
+  // y no solo en el formulario: el formulario es una comodidad, la regla es esto.
+  if (exigeVigencia(parametros.categoria) && !parametros.vigenciaHasta) {
+    throw new ErrorDeNegocio('Un registro temporal o de visitante necesita fecha de fin.')
+  }
+
+  // Dos registros en curso para el mismo documento en la misma unidad son la
+  // forma de que despues nadie sepa cual autorizo.
+  const enCurso = bd.registros.find(
+    (registro) =>
+      registro.unidadId === parametros.unidadId &&
+      registro.documento === parametros.documento &&
+      (registro.estado === 'esperando_soportes' || registro.estado === 'esperando_autorizacion'),
+  )
+  if (enCurso) {
+    throw new ErrorDeNegocio('Ya hay un registro en curso para ese documento en esta unidad.')
+  }
+
+  const registro: RegistroPersona = {
+    id: nuevoId('reg'),
+    ...parametros,
+    codigo: nuevoCodigoRegistro(),
+    estado: 'esperando_soportes',
+    creadoEn: ahoraISO(),
+  }
+  bd.registros.unshift(registro)
+  return persistir(bd, registro)
+}
+
+/**
+ * RN-58 — Los soportes los adjunta la persona registrada, no quien la registro.
+ *
+ * Es la razon de ser del rodeo: una foto del documento que sube un tercero no
+ * prueba nada sobre quien la subio. Que la traiga la propia persona, desde su
+ * telefono, es lo que convierte el tramite en un soporte.
+ */
+export async function adjuntarSoportes(
+  bdActual: BaseDatos,
+  parametros: { registroId: string; fotoDocumento: string; fotoPersona: string },
+): Promise<Resultado<RegistroPersona>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const registro = bd.registros.find((r) => r.id === parametros.registroId)
+  if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  if (registro.estado !== 'esperando_soportes') {
+    throw new ErrorDeNegocio('Ese registro ya no está esperando soportes.')
+  }
+
+  const ahora = ahoraISO()
+  registro.fotoDocumento = { imagen: parametros.fotoDocumento, adjuntadoEn: ahora }
+  registro.fotoPersona = { imagen: parametros.fotoPersona, adjuntadoEn: ahora }
+  registro.soportesEn = ahora
+  registro.estado = 'esperando_autorizacion'
+  return persistir(bd, registro)
+}
+
+/**
+ * RN-59 — La autorizacion es lo que crea el vinculo o el visitante.
+ *
+ * Hasta aqui no existia nada: habia una solicitud con unas fotos. Este es el
+ * acto que la convierte en alguien que puede entrar, y por eso deja constancia
+ * de quien lo hizo y cuando.
+ */
+export async function autorizarRegistro(
+  bdActual: BaseDatos,
+  parametros: { registroId: string; personaId: string },
+): Promise<Resultado<RegistroPersona>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const registro = bd.registros.find((r) => r.id === parametros.registroId)
+  if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  if (!puedeAutorizar(registro, parametros.personaId)) {
+    throw new ErrorDeNegocio('Solo quien creó el registro puede autorizarlo.')
+  }
+  if (!soportesCompletos(registro)) {
+    throw new ErrorDeNegocio('Faltan los soportes: no se puede autorizar sin las dos fotos.')
+  }
+
+  // La persona puede existir ya (un arrendatario que se muda a otra unidad del
+  // mismo conjunto). Se reutiliza por documento, que es lo que no cambia.
+  let persona = bd.personas.find((p) => p.documento === registro.documento)
+  if (!persona) {
+    persona = {
+      id: nuevoId('per'),
+      nombres: registro.nombres,
+      apellidos: registro.apellidos,
+      documento: registro.documento,
+      email: registro.email,
+      telefono: registro.telefono,
+    }
+    bd.personas.push(persona)
+  }
+
+  if (registro.categoria === 'visitante') {
+    const visitante: Visitante = {
+      id: nuevoId('vis'),
+      unidadId: registro.unidadId,
+      personaId: registro.creadoPor,
+      nombre: `${registro.nombres} ${registro.apellidos}`,
+      documento: registro.documento,
+      placa: registro.placa,
+      vigenciaDesde: registro.vigenciaDesde ?? hoyISO(),
+      vigenciaHasta: registro.vigenciaHasta ?? hoyISO(),
+      codigo: generarCodigoVisitante(),
+      recurrente: false,
+      estado: 'activo',
+      creadoEn: ahoraISO(),
+      registroId: registro.id,
+      // La porteria compara la cara con la foto: es para lo que sirve tenerla.
+      fotoPersona: registro.fotoPersona?.imagen,
+    }
+    bd.visitantes.unshift(visitante)
+    registro.visitanteId = visitante.id
+  } else {
+    const residencia: Residencia = {
+      id: nuevoId('res'),
+      personaId: persona.id,
+      unidadId: registro.unidadId,
+      rol: rolDeCategoria(registro.categoria, registro.rol) ?? 'arrendatario',
+      desde: registro.vigenciaDesde ?? hoyISO(),
+      hasta: registro.vigenciaHasta,
+      principal: false,
+      registroId: registro.id,
+    }
+    bd.residencias.push(residencia)
+    registro.residenciaId = residencia.id
+  }
+
+  registro.estado = 'autorizado'
+  registro.decididoEn = ahoraISO()
+  registro.decididoPor = parametros.personaId
+  return persistir(bd, registro)
+}
+
+/**
+ * Rechazar o retirar un registro. **Nunca se borra** (Mary, 2026-09-07: «no se
+ * borran, se inhabilitan»): un registro rechazado es justamente el que hay que
+ * poder consultar despues.
+ */
+export async function cerrarRegistro(
+  bdActual: BaseDatos,
+  parametros: { registroId: string; personaId: string; motivo: string; anular?: boolean },
+): Promise<Resultado<RegistroPersona>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const registro = bd.registros.find((r) => r.id === parametros.registroId)
+  if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  if (registro.creadoPor !== parametros.personaId) {
+    throw new ErrorDeNegocio('Solo quien creó el registro puede cerrarlo.')
+  }
+  if (registro.estado === 'autorizado') {
+    throw new ErrorDeNegocio('Ese registro ya fue autorizado: inhabilita a la persona.')
+  }
+  registro.estado = parametros.anular ? 'anulado' : 'rechazado'
+  registro.motivo = parametros.motivo
+  registro.decididoEn = ahoraISO()
+  registro.decididoPor = parametros.personaId
+  return persistir(bd, registro)
+}
+
+/** Busca un registro por documento y codigo: es como la persona lo abre (RN-58). */
+export function registroPorCodigo(
+  bd: BaseDatos,
+  documento: string,
+  codigo: string,
+): RegistroPersona | undefined {
+  const limpio = (valor: string) => valor.replace(/[\s.,-]/g, '').toUpperCase()
+  return bd.registros.find(
+    (registro) =>
+      limpio(registro.documento) === limpio(documento) &&
+      limpio(registro.codigo) === limpio(codigo),
+  )
 }
 
 // ---------------------------------------------------------------------------

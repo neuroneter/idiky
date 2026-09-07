@@ -14,6 +14,7 @@ import { AvisoGlobal } from './Aviso'
 
 const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta?: boolean }> = [
   { ruta: '/admin', texto: 'Tablero', icono: 'tablero', exacta: true },
+  { ruta: '/admin/registros', texto: 'Registros', icono: 'personas' },
   { ruta: '/admin/unidades', texto: 'Unidades', icono: 'unidades' },
   { ruta: '/admin/cartera', texto: 'Cartera', icono: 'cartera' },
   { ruta: '/admin/reservas', texto: 'Reservas', icono: 'reservas' },
@@ -24,6 +25,7 @@ const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta
 
 const TITULOS: Record<string, string> = {
   '/admin': 'Tablero de la copropiedad',
+  '/admin/registros': 'Registro de personas',
   '/admin/unidades': 'Unidades y residentes',
   '/admin/cartera': 'Cartera',
   '/admin/reservas': 'Reservas por aprobar',

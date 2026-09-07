@@ -30,6 +30,8 @@ export type NombreIcono =
   | 'chevron'
   | 'reiniciar'
   | 'letra'
+  | 'camara'
+  | 'personas'
 
 const TRAZOS: Record<NombreIcono, string> = {
   inicio: 'M3 10.5 12 3l9 7.5M5 9.5V21h14V9.5',
@@ -65,6 +67,9 @@ const TRAZOS: Record<NombreIcono, string> = {
   // Una A grande y una chica: es el simbolo de «tamano de la letra» en
   // todas partes, y se entiende sin leer la etiqueta.
   letra: 'M2.5 19 7.5 6l5 13M4.3 15h6.4M15 19l3.2-8.5L21.5 19M16.2 16.5h4.6',
+  camara: 'M3 8.5h3.5L8 6h8l1.5 2.5H21v11H3zM12 17a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7',
+  // Dos personas: la unidad no la habita uno solo, y de eso trata el registro.
+  personas: 'M9.5 11a3.2 3.2 0 1 0 0-6.4 3.2 3.2 0 0 0 0 6.4M3 20c0-3.1 2.9-5.2 6.5-5.2s6.5 2.1 6.5 5.2M16.5 11.2a3 3 0 0 0 0-6M18 14.9c2 .6 3.5 2 3.5 4.1',
 }
 
 export function Icono({

@@ -656,12 +656,26 @@
 .app-movil--marca .encabezado-seccion h2 {
   color: var(--color-texto-inverso);
 }
-.app-movil--marca .encabezado-seccion a {
+.app-movil--marca .encabezado-seccion a,
+.app-movil--marca .encabezado-seccion .enlace {
   color: var(--color-texto-inverso);
   background: rgba(255, 255, 255, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: var(--radio-completo);
   padding: 0.18rem 0.7rem;
+}
+
+/* Dentro de una hoja el fondo es blanco, no el degradado.
+   Las reglas de arriba pintan los titulos en blanco porque en la app van sobre
+   el degradado; un modal es hijo de la misma app y las heredaba, asi que sus
+   titulos salian blancos sobre blanco — invisibles. Paso dos veces (la hoja de
+   perfil y la de un registro) antes de arreglarlo aqui, que es donde se arregla
+   una sola vez. Misma especificidad que las de arriba, y va despues. */
+.modal .titulo-seccion {
+  color: var(--color-texto-tenue);
+}
+.modal .encabezado-seccion h2 {
+  color: var(--color-texto);
 }
 
 /* ------------------------------------------- Distintivos de cada tarjeta */
@@ -781,6 +795,111 @@
   color: #fff;
   font-size: calc(0.6rem * var(--escala-texto));
   line-height: calc(17px * var(--escala-texto));
+}
+
+/* ============================== Registro de personas (CU-R-27, CU-R-28) */
+/* La zona de captura es grande a proposito: se toca de pie, con una mano, y a
+   veces con el telefono en la otra apuntando a una cedula. */
+.captura {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+}
+.captura__zona {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e2);
+  min-height: 132px;
+  padding: var(--e4);
+  border: 2px dashed var(--color-borde-fuerte);
+  border-radius: var(--radio);
+  background: var(--color-superficie-2);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+.captura__zona:hover:not(:disabled) {
+  border-color: var(--color-acento);
+  color: var(--color-acento);
+}
+.captura__hecha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+}
+.captura__vista {
+  width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+  border-radius: var(--radio);
+  background: var(--color-superficie-2);
+  border: 1px solid var(--color-borde);
+}
+/* Los dos soportes lado a lado: quien autoriza compara la cara con el documento,
+   y compararlos exige verlos juntos. */
+.soportes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e3);
+  margin-top: var(--e3);
+}
+.soporte {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+}
+.soporte img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--color-borde);
+  background: var(--color-superficie-2);
+}
+.soporte figcaption {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+  text-align: center;
+}
+/* El codigo se dicta por telefono: separado, grande y en tabular. */
+.codigo-registro {
+  display: inline-block;
+  align-self: flex-start;
+  padding: var(--e2) var(--e4);
+  border-radius: var(--radio-sm);
+  background: var(--color-marca-suave);
+  color: var(--color-marca);
+  font-size: var(--texto-xl);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.opcion-categoria {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e3);
+  min-height: 56px;
+  padding: var(--e3);
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie);
+  text-align: left;
+}
+.opcion-categoria[aria-pressed='true'] {
+  border-color: var(--color-acento);
+  background: var(--color-acento-suave);
+}
+.opcion-categoria[aria-pressed='true'] strong {
+  color: var(--color-acento);
+}
+.historial > summary {
+  cursor: pointer;
+  font-size: var(--texto-sm);
+  font-weight: 650;
+  color: var(--color-marca);
+  padding: var(--e2) 0;
 }
 
 /* ============================================================ Indicadores */

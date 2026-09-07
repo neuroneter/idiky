@@ -40,3 +40,23 @@ Leyenda: `L` leer · `E` escribir · `A` aprobar · `—` sin acceso
 
 > En el demo v0.1 la identidad se simula: se elige un perfil de una lista, sin contraseña.
 > Ver [ADR-0004](./adr/0004-autenticacion-demo.md).
+
+---
+
+## Operador de Idiky — el actor que falta
+
+**Quién es:** quien opera la plataforma, por encima de cualquier copropiedad. No vive en
+ninguna, no paga cuota y no vota.
+
+**Qué hace, y es lo único que hace en el modelo:** **crea a los administradores de las
+copropiedades**. Es el primer eslabón de RN-63 —el operador crea al administrador, el
+administrador crea a los propietarios, el propietario crea a los demás de su unidad— y sin él
+la cadena no tiene principio: alguien tiene que dar de alta al primer administrador de un
+conjunto nuevo.
+
+**No existe todavía en el demo.** Su consola es trabajo de otra fase; aquí queda escrito el
+eslabón (`CADENA_DE_REGISTRO` en `dominio/reglas.ts`) para que el modelo no lo olvide.
+
+**Lo que hay que decidir cuando llegue:** si puede entrar a los datos de una copropiedad —y con
+qué justificación—, y qué ve de las cédulas que guardan los registros
+([ADR-0009](./adr/0009-soportes-fotograficos.md)).

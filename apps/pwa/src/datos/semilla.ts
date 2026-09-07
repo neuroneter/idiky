@@ -34,7 +34,7 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 3 — rol de porteria: la correspondencia guarda quien la recibio del mensajero.
 // 4 — paz y salvo: cubiertoHasta, codigo de verificacion y una unidad sin saldo.
 // 5 — el portero entra al demo como persona y perfil.
-export const VERSION_ESQUEMA = 5
+export const VERSION_ESQUEMA = 6
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -841,6 +841,9 @@ export function crearSemilla(): BaseDatos {
     comunicados: construirComunicados(),
     correspondencia: construirCorrespondencia(),
     visitantes: construirVisitantes(),
+    // Sin registros de ejemplo: llevan fotos, y una foto en la semilla es peso
+    // muerto en el paquete del demo para todo el que lo abra (ADR-0009).
+    registros: [],
     asambleas,
     votaciones,
     votos,
@@ -873,6 +876,18 @@ export function crearSemilla(): BaseDatos {
         personaId: 'per-2',
         copropiedadId: COPROPIEDAD_ID,
         unidadId: 'uni-torre2-901',
+      },
+      {
+        id: 'perfil-arrendataria',
+        etiqueta: 'Sandra Milena Ortiz',
+        // El unico perfil que NO es propietario: sirve para ver que RN-60 se
+        // cumple de verdad — solo puede registrar visitantes, y la pantalla se
+        // lo dice en vez de esconderle el boton sin explicacion.
+        descripcion: 'Arrendataria · Torre 1 · 301',
+        rol: 'residente',
+        personaId: 'per-5',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre1-301',
       },
       {
         id: 'perfil-porteria',

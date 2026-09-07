@@ -14,8 +14,8 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 62 documentados: 21 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
-| **Reglas de negocio** | 56 (RN-01…RN-56) |
+| **Casos de uso** | 65 documentados: 24 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
+| **Reglas de negocio** | 63 (RN-01…RN-63) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -26,13 +26,16 @@ nueva o una sesión de IA distinta.
 activación y recuperación en tres pasos · **tamaño de la letra al 100 %, 125 % o 150 %**, que
 aplica a toda la app (CU-R-26). Todo simulado salvo la huella, y cada pantalla lo dice.
 
-**App del residente:** inicio con resumen · estado de cuenta · pago simulado con comprobante
+**App del residente:** **registro de las personas de la unidad** —con foto del documento y de
+la persona, que adjunta ella misma, y autorización de quien registró (CU-R-27, CU-R-28)— ·
+inicio con resumen · estado de cuenta · pago simulado con comprobante
 (PSE, Bre-B y tarjeta) · **solicitudes** —zonas comunes, PQRS y el **paz y salvo, que se emite,
 se ve y se guarda como PDF**— · **asambleas
 con votación ponderada por coeficiente** · cartelera de comunicados · autorización de
 visitantes con código · consulta de correspondencia · consulta del coeficiente.
 
-**Consola del administrador:** tablero de indicadores · unidades y residentes con búsqueda,
+**Consola del administrador:** **registro de propietarios**, con la tabla de quién registró a
+quién (CU-A-26) · tablero de indicadores · unidades y residentes con búsqueda,
 ficha y vinculación · cartera con morosidad · registro de pagos manuales · generación de
 cuotas con previsualización · aprobación y rechazo de reservas · bandeja de PQRS con SLA ·
 publicación de comunicados · registro y entrega de correspondencia.
@@ -72,6 +75,86 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-07 · Mary + IA (Claude) · Quién mete gente a una unidad, y con qué soportes
+
+La pieza más grande desde que arrancó el demo. Mary pidió que el propietario pueda **crear y
+dar de baja propietarios y arrendatarios**, que el residente pueda hacer lo mismo con
+**visitantes**, que en todos los casos se exija **foto del documento y foto de la persona**,
+que haya una **categoría** —residente, residente temporal o visitante—, que **los soportes los
+adjunte la propia persona registrada desde su app**, y que después de eso **el propietario o
+arrendatario autorice**.
+
+**Lo que corrigió sobre la marcha, y cambió el modelo:**
+
+1. *«Tienen razón, no se borran, se inhabilitan»* — le había marcado que «eliminar» choca con
+   la regla del proyecto. Ahora es RN-61 y es la palabra que usan los botones: **Inhabilitar**,
+   no «desvincular», que no le dice nada a quien lo lee.
+2. *«El administrador de Idiky crea al administrador del edificio, el administrador del
+   edificio crea a un propietario, y el propietario a otros propietarios de su propiedad»* —
+   esto resolvió la tensión que le había planteado con RN-53. **No se le quita la facultad a la
+   administración: se delega por eslabones** (RN-63). Y de paso apareció un actor que el modelo
+   no tenía: **el operador de Idiky**, por encima de la copropiedad. Su consola es de otra
+   fase; el eslabón queda escrito para que no se olvide.
+
+**La tesis del diseño:** registrar a alguien **son tres actos con tres actores**, no un
+formulario. Registrar (quien responde por la unidad), adjuntar (**la propia persona**) y
+autorizar (quien registró, después de mirar las fotos). El rodeo tiene una razón concreta:
+*una foto de cédula que sube un tercero no prueba nada sobre quién la subió*. Que la traiga la
+propia persona es lo que convierte el trámite en un soporte.
+
+De ahí salen dos decisiones que se notan en la interfaz:
+
+- **Las dos esperas no se juntan en un «pendiente».** En `esperando_soportes` la pelota la
+  tiene la persona registrada; en `esperando_autorizacion`, quien la registró. Decirle
+  «pendiente» a los dos es la forma segura de que ninguno haga nada.
+- **La pantalla de adjuntar vive fuera de la sesión.** Quien tiene que subir sus documentos no
+  es nadie todavía para la copropiedad. Pedirle que active una cuenta para poder subir los
+  soportes que hacen falta para autorizarle la cuenta es un círculo, y es donde el trámite se
+  muere. Se identifica con su documento y el código, como el paz y salvo.
+
+**Un trámite, tres consolas.** El administrador registra propietarios, el propietario registra
+residentes y arrendatarios, el arrendatario registra visitantes: cambia quién escoge qué
+categoría, no el trámite. Vive en `componentes/Registro.tsx` — dos formularios distintos para
+lo mismo acaban pidiendo cosas distintas, y el modelo de datos diría que los dos traen soportes.
+
+**Autorizar un visitante también pasa por aquí ahora.** Tener dos formas de meter gente a la
+unidad era tener una con soportes y otra sin ellos.
+
+**Las fotos:** [ADR-0009](./adr/0009-soportes-fotograficos.md). Se capturan con
+`<input type="file" capture>` —el HTML de siempre, cero dependencias, funciona igual dentro de
+Capacitor— y se reducen a 720 px antes de guardarse: el demo entero vive en `localStorage`, que
+da unos 5 MB, y dos fotos de cámara sin reducir llenan la cuota en el primer registro. Ahí la
+app deja de guardar **en silencio**.
+
+**Y lo que de verdad es difícil de esta funcionalidad no es la foto, es el dato.** Una cédula
+es un dato personal cubierto por la Ley 1581 de 2012. Cuánto se conserva, quién la ve, y qué
+pasa al inhabilitar a alguien —donde RN-61 «nada se borra» **choca de frente** con el derecho a
+que sí se borre— está sin decidir y queda en el levantamiento (§3 sexies). No bloquea el demo;
+bloquea producción.
+
+**Tres fallos que solo aparecieron al probarlo en el navegador**, y los tres valen como nota:
+
+- El registro se guardaba **sin unidad**: el formulario compartido mandaba `unidadId: undefined`
+  y, al ir después en el objeto, pisaba la unidad de la sesión. Un `undefined` explícito no es
+  lo mismo que una clave ausente.
+- **Un residente temporal desaparecía al autorizarlo.** El selector daba por vigente todo
+  vínculo «sin fecha de fin», que alcanzaba solo porque ninguno la tenía; los temporales sí la
+  tienen. Ahora `residenciaVigente()` es la única definición.
+- **Los títulos de sección salían blancos sobre blanco dentro de las hojas.** La app los pinta
+  en blanco porque van sobre el degradado, y un modal es hijo de la misma app. Pasó dos veces
+  hoy —el perfil y el registro— antes de arreglarlo donde se arregla una vez.
+
+**Verificado de punta a punta con Playwright**, en los tres perfiles que Mary pidió ver:
+propietaria (tres categorías) → adjuntar con dos fotos reales → autorizar viendo los soportes →
+la persona aparece en «Viven aquí»; arrendataria (solo visitantes, y la pantalla le dice por
+qué); administradora (registra propietarios, escoge unidad, ve la tabla con **quién registró a
+quién**). Sin errores de consola.
+
+**Lo que falta:** avisarle a la persona cuando la autorizan; el código viaja por pantalla y no
+por mensaje (como el de ingreso, ADR-0004); y la consola del operador de Idiky.
+
+---
 
 ### 2026-09-07 · Mary + IA (Claude) · El tamaño de la letra, en la puerta
 

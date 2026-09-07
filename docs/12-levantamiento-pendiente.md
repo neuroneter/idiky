@@ -240,12 +240,35 @@ lo cobra. Falta lo que **no podemos suponer sin equivocarnos**:
 - **Interés impago.** ¿Cuenta como mora para bloquear reservas (RN-08) y para el paz y salvo
   (RN-26)? → *(respuesta)*
 
+## 3 sexies. Las cédulas del registro de personas — lo que bloquea producción
+
+Desde el 2026-09-07 registrar a una persona exige **foto de su documento de identidad y foto
+de ella** (RN-57). El demo las guarda en el navegador de quien las sube y no las manda a
+ningún lado, así que ahí no hay problema. **En producción sí lo hay**, y no es técnico: una
+foto de cédula es un dato personal y en Colombia lo cubre la **Ley 1581 de 2012 (habeas
+data)**.
+
+Lo que hay que decidir antes de que esto salga a un servidor:
+
+| Pregunta | Por qué no se puede dejar para después | Respuesta |
+|---|---|---|
+| ¿Con qué **autorización** se recoge, y para qué? | El titular tiene que autorizar el tratamiento y saber el fin | *(pendiente)* |
+| ¿**Cuánto se conserva**? | La cédula de un visitante de un día no puede quedarse para siempre | *(pendiente)* |
+| ¿**Quién la ve**? ¿La portería para comparar en la entrada, la administración, el propietario que autorizó? | Cada respuesta es un permiso distinto en el modelo | *(pendiente)* |
+| Al **inhabilitar** a la persona, ¿la foto se borra? | RN-61 dice que nada se borra; un dato personal sí puede tener que borrarse. **Las dos reglas chocan** | *(pendiente)* |
+| ¿**Dónde** se almacena? | Un servidor con las cédulas de un conjunto entero es un objetivo, no un archivo | *(pendiente)* |
+
+Detalle técnico y lo ya decidido: [ADR-0009](./adr/0009-soportes-fotograficos.md).
+
 ## 4. Usuarios y roles
 
 - ¿Qué roles existen además de residente y administrador? (Portería, consejo, revisor fiscal,
   contador, personal de mantenimiento…) → *(respuesta)*
 - ¿Quién crea las cuentas de los residentes: el administrador, o el residente se registra y el
-  administrador aprueba? → *(respuesta)*
+  administrador aprueba? → **Respondido (Mary, 2026-09-07): nadie se registra solo.** Es una
+  cadena — el operador de Idiky crea al administrador, el administrador crea a los
+  propietarios, el propietario crea a los demás de su unidad, y el residente crea visitantes
+  (RN-63). En una copropiedad el derecho a estar ahí se lo da a uno alguien que ya está.
 - ¿Cómo se identifica un residente al registrarse: correo, celular, número de documento?
   → *(respuesta)*
 - ¿Un arrendatario ve la cartera de la unidad, o solo el propietario? → *(respuesta)*

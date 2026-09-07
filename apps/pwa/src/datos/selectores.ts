@@ -14,6 +14,7 @@ import type {
   Cuota,
   Persona,
   Pqrs,
+  RegistroPersona,
   Reserva,
   Residencia,
   Unidad,
@@ -22,7 +23,7 @@ import type {
   Voto,
   ZonaComun,
 } from '../dominio/tipos'
-import { hoyISO, ordenAsamblea } from '../dominio/reglas'
+import { hoyISO, ordenAsamblea, residenciaVigente } from '../dominio/reglas'
 
 export function copropiedad(bd: BaseDatos, copropiedadId: string) {
   return bd.copropiedades.find((c) => c.id === copropiedadId)
@@ -48,13 +49,23 @@ export function nombreCompleto(p?: Persona): string {
   return p ? `${p.nombres} ${p.apellidos}` : 'Sin registrar'
 }
 
-/** Vinculos vigentes de una unidad (sin fecha de salida). */
+/** Los registros de una unidad, del mas reciente al mas viejo (CU-R-27). */
+export function registrosDeUnidad(bd: BaseDatos, unidadId?: string): RegistroPersona[] {
+  if (!unidadId) return []
+  return bd.registros.filter((registro) => registro.unidadId === unidadId)
+}
+
+export function registro(bd: BaseDatos, registroId?: string): RegistroPersona | undefined {
+  return bd.registros.find((r) => r.id === registroId)
+}
+
+/** Vinculos vigentes de una unidad: sin fecha de fin, o con una que aun no llega. */
 export function residenciasDeUnidad(bd: BaseDatos, unidadId: string): Residencia[] {
-  return bd.residencias.filter((r) => r.unidadId === unidadId && !r.hasta)
+  return bd.residencias.filter((r) => r.unidadId === unidadId && residenciaVigente(r))
 }
 
 export function residenciasDePersona(bd: BaseDatos, personaId: string): Residencia[] {
-  return bd.residencias.filter((r) => r.personaId === personaId && !r.hasta)
+  return bd.residencias.filter((r) => r.personaId === personaId && residenciaVigente(r))
 }
 
 export function cuotasDeUnidad(bd: BaseDatos, unidadId?: string): Cuota[] {

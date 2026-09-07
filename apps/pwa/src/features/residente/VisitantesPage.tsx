@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
@@ -73,10 +74,18 @@ export function VisitantesPage() {
         <BotonVolver />
       </div>
 
-      <button className="boton boton--primario boton--bloque" onClick={() => setCreando(true)}>
+      {/* Ya no se autoriza aqui de un toque: desde el 2026-09-07 un visitante
+          tambien necesita sus dos fotos y la autorizacion de quien lo registro
+          (RN-57, RN-59), y eso es el mismo tramite que el de cualquier persona.
+          Tener dos formas de meter gente a la unidad era tener una con soportes y
+          otra sin ellos. */}
+      <Link
+        to="/app/unidad/personas?nuevo=visitante"
+        className="boton boton--primario boton--bloque"
+      >
         <Icono nombre="mas" tamano={16} />
         Autorizar visitante
-      </button>
+      </Link>
 
       {visitantes.length === 0 ? (
         <EstadoVacio

@@ -682,3 +682,110 @@ Dos ajustes que salieron de probarlo al 150 %, y que valen como nota de diseño:
 **Pendiente:** las consolas de administrador y portería no tienen dónde cambiarlo: heredan lo
 que se escogió en la puerta, que es de donde vienen sus usuarios. Cuando esas consolas tengan
 su propia hoja de perfil, ahí va.
+
+---
+
+## CU-R-27 — Registrar y dar de baja a las personas de mi unidad
+
+- **Actor principal:** Propietario (residentes, arrendatarios, temporales y visitantes) ·
+  Arrendatario (solo visitantes).
+- **Precondiciones:** CU-R-01 completado y una unidad activa.
+- **Disparador:** Se muda alguien, entra un arrendatario, llega una visita.
+- **Resultado esperado:** La persona queda registrada en la unidad, **con sus soportes**, o el
+  registro queda cerrado con motivo.
+
+**Los tres actos** (RN-57 a RN-59)
+
+| | Quién | Qué |
+|---|---|---|
+| 1. Registrar | Quien responde por la unidad | Dice a quién quiere meter y con qué categoría |
+| 2. Adjuntar | **La propia persona registrada** | Sube foto de su documento y foto suya, desde su teléfono (CU-R-28) |
+| 3. Autorizar | Quien registró | Mira los soportes y responde. Recién ahí la persona existe |
+
+El rodeo tiene una razón: **una foto de cédula que sube un tercero no prueba nada sobre quién
+la subió**. Que la traiga la propia persona es lo que convierte el trámite en un soporte.
+
+**Las categorías** (RN-62)
+
+| Categoría | Vigencia | Qué se crea al autorizar |
+|---|---|---|
+| Residente | Sin fecha de fin | Una residencia como propietario o arrendatario |
+| Residente temporal | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
+| Visitante | **Exige** fecha de fin | Un visitante con su código para la portería |
+
+**Flujo principal**
+1. El residente abre **Mi unidad → Personas de la unidad**.
+2. Toca **Registrar** y escoge la categoría. Lo que se pregunta después depende de ella:
+   pedirle fecha de salida a quien compró un apartamento no tiene sentido.
+3. El sistema crea el registro en `esperando_soportes` y muestra **el código**.
+4. El residente le pasa el código a la persona (en el producto real se lo manda un mensaje).
+5. La persona adjunta (CU-R-28) y el registro pasa a `esperando_autorizacion`.
+6. El residente ve las dos fotos y **autoriza**. El sistema crea la residencia o el visitante.
+
+**Flujos alternativos**
+- A1. Las fotos no se leen → **Rechazar** con motivo. Sin motivo el rechazo no le dice nada a
+  nadie, y la persona vuelve a intentar a ciegas.
+- A2. Se registró por error, antes de que la persona adjunte → **Retirar** el registro.
+- A3. Ya hay un registro en curso para ese documento en esta unidad → el sistema lo impide: dos
+  registros en curso son la forma de que después nadie sepa cuál se autorizó.
+- A4. Un arrendatario abre la pantalla → solo puede registrar visitantes, **y la pantalla se lo
+  dice** en vez de esconderle el botón sin explicación (RN-60).
+- A5. La persona se va → **Inhabilitar**. Cierra el vínculo con fecha; no borra nada (RN-61).
+- A6. Nadie se inhabilita a sí mismo: quedaría una unidad sin quien responda por ella.
+
+**Reglas de negocio**
+- RN-57 (dos soportes), RN-58 (los adjunta la persona), RN-59 (autoriza quien registró),
+  RN-60 (quién registra a quién), RN-61 (nada se borra), RN-62 (la categoría decide la
+  vigencia), RN-63 (la cadena de registro).
+
+**Estado en el demo:** ✅ — `src/features/residente/PersonasPage.tsx`, con el trámite en
+`src/componentes/Registro.tsx` (compartido con la consola del administrador: dos formularios
+distintos para lo mismo acaban pidiendo cosas distintas). Desde el 2026-09-07 **autorizar un
+visitante también pasa por aquí**: tener dos formas de meter gente a la unidad era tener una
+con soportes y otra sin ellos.
+
+**Pendiente:** en el producto real el código viaja por mensaje; aquí se muestra en pantalla
+(misma honestidad que ADR-0004). Y falta avisarle a la persona cuando la autorizan.
+
+---
+
+## CU-R-28 — Adjuntar mis documentos a un registro
+
+- **Actor principal:** La persona que están registrando. **Todavía no tiene cuenta.**
+- **Precondiciones:** Alguien la registró y le pasó el código.
+- **Disparador:** Le llega el código.
+- **Resultado esperado:** Sus dos fotos quedan adjuntas y el registro pasa a esperar
+  autorización.
+
+**Por qué está fuera de la sesión.** Quien tiene que adjuntar no es nadie todavía para la
+copropiedad. Pedirle que active una cuenta para poder subir los soportes que hacen falta para
+autorizarle la cuenta es un círculo, y es donde el trámite se muere. Se identifica con lo que
+sí tiene: **su documento y el código** — la misma pareja con la que se verifica un paz y salvo,
+un dato que la persona sabe y un código que solo pudo darle quien hizo el trámite.
+
+**Flujo principal**
+1. En la pantalla de ingreso toca **Adjuntar mis documentos**.
+2. Escribe su documento y el código.
+3. El sistema le muestra su nombre —para que sepa que es su registro— y le pide dos fotos.
+4. Toma la foto del documento y la suya. **Ve cada una antes de enviarla**: si salió ilegible,
+   el rechazo llegaría dos días después.
+5. Envía. El registro queda esperando autorización.
+
+**Flujos alternativos**
+- A1. Documento o código que no coinciden → «revísalo con quien te registró», no «datos
+  incorrectos».
+- A2. Ya adjuntó → se le dice que falta la autorización, no que el código está mal.
+- A3. El registro ya se cerró → que hable con quien lo registró.
+- A4. La imagen no se puede leer → lo dice y no guarda nada. Guardar el original de 4 MB «por
+  si acaso» es lo que rompe el almacenamiento del demo (ADR-0009).
+
+**Reglas de negocio**
+- RN-57, RN-58.
+
+**Estado en el demo:** ✅ — `src/features/auth/AdjuntarPage.tsx` y
+`src/componentes/CapturaFoto.tsx`. Las fotos se reducen a 720 px y se guardan en el navegador;
+**no salen a ningún servidor**, y la pantalla lo dice.
+
+**Pendiente:** lo serio de esto no es la foto, es el dato. Cuánto se conserva una cédula, quién
+la ve y qué pasa al inhabilitar a la persona está sin decidir — ver
+[ADR-0009](../adr/0009-soportes-fotograficos.md).

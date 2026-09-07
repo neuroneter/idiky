@@ -11,8 +11,10 @@ import { LayoutAdmin } from './componentes/LayoutAdmin'
 import { LayoutPorteria } from './componentes/LayoutPorteria'
 import { AccesoPage } from './features/auth/AccesoPage'
 import { ActivarPage } from './features/auth/ActivarPage'
+import { AdjuntarPage } from './features/auth/AdjuntarPage'
 import { InicioPage } from './features/residente/InicioPage'
 import { MiUnidadPage } from './features/residente/MiUnidadPage'
+import { PersonasPage } from './features/residente/PersonasPage'
 import { CuentaPage } from './features/residente/CuentaPage'
 import { PagoPage } from './features/residente/PagoPage'
 import { ReservasPage } from './features/residente/ReservasPage'
@@ -26,6 +28,7 @@ import { VisitantesPage } from './features/residente/VisitantesPage'
 import { CorrespondenciaPage } from './features/residente/CorrespondenciaPage'
 import { TableroPage } from './features/admin/TableroPage'
 import { UnidadesPage } from './features/admin/UnidadesPage'
+import { RegistrosPage } from './features/admin/RegistrosPage'
 import { CarteraPage } from './features/admin/CarteraPage'
 import { ReservasAdminPage } from './features/admin/ReservasAdminPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
@@ -58,6 +61,8 @@ export function App() {
           no el flujo (CU-R-25). */}
       <Route path="/acceso/activar" element={<ActivarPage modo="activar" />} />
       <Route path="/acceso/recuperar" element={<ActivarPage modo="recuperar" />} />
+      {/* Fuera de la sesion: quien adjunta todavia no tiene cuenta (CU-R-28). */}
+      <Route path="/acceso/adjuntar" element={<AdjuntarPage />} />
 
       {/* App movil del residente — CU-R-xx */}
       <Route
@@ -91,6 +96,7 @@ export function App() {
         <Route path="visitantes" element={<VisitantesPage />} />
         <Route path="correspondencia" element={<CorrespondenciaPage />} />
         <Route path="unidad" element={<MiUnidadPage />} />
+        <Route path="unidad/personas" element={<PersonasPage />} />
       </Route>
 
       {/* Consola de administracion — CU-A-xx */}
@@ -104,6 +110,7 @@ export function App() {
       >
         <Route index element={<TableroPage />} />
         <Route path="unidades" element={<UnidadesPage />} />
+        <Route path="registros" element={<RegistrosPage />} />
         <Route path="cartera" element={<CarteraPage />} />
         <Route path="reservas" element={<ReservasAdminPage />} />
         <Route path="pqrs" element={<PqrsAdminPage />} />

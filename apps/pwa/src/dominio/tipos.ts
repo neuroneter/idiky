@@ -68,6 +68,8 @@ export interface Residencia {
   hasta?: FechaISO
   /** Contacto principal de la unidad. */
   principal: boolean
+  /** Registro que la origino, si nacio por CU-R-27. Las de la semilla no tienen. */
+  registroId?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -245,6 +247,97 @@ export interface Visitante {
   recurrente: boolean
   estado: EstadoVisitante
   creadoEn: FechaHoraISO
+  /** Registro que lo origino (CU-R-27). Los de la semilla no tienen. */
+  registroId?: string
+  /** Foto de la persona, para que la porteria compare en la entrada (RN-57). */
+  fotoPersona?: string
+}
+
+// ---------------------------------------------------------------------------
+// Registro de personas — CU-R-27, CU-R-28 · docs/05-modelo-de-datos.md
+//
+// Quien vive o entra a una unidad no aparece de la nada: alguien lo registra,
+// **la propia persona adjunta sus soportes** y el responsable de la unidad
+// autoriza. Las tres cosas son pasos distintos, con actores distintos, y por eso
+// el registro es una entidad y no un formulario (RN-57 a RN-62).
+// ---------------------------------------------------------------------------
+
+/**
+ * Que es la persona que se registra.
+ *
+ * La categoria no es una etiqueta: **decide la vigencia y lo que se crea al
+ * autorizar**. Un residente queda vinculado a la unidad sin fecha de fin; un
+ * residente temporal, con ella; un visitante no se vincula, obtiene un codigo.
+ */
+export type CategoriaRegistro = 'residente' | 'residente_temporal' | 'visitante'
+
+/**
+ * Los cinco estados por los que pasa un registro.
+ *
+ * `esperando_soportes` y `esperando_autorizacion` son dos esperas distintas y no
+ * se pueden juntar en un «pendiente»: en la primera la pelota la tiene la
+ * persona registrada, en la segunda quien la registro. Mostrar «pendiente» a los
+ * dos es la forma segura de que ninguno haga nada.
+ */
+export type EstadoRegistro =
+  | 'esperando_soportes'
+  | 'esperando_autorizacion'
+  | 'autorizado'
+  | 'rechazado'
+  | 'anulado'
+
+/**
+ * Una foto adjuntada como soporte.
+ *
+ * `imagen` es un data URI reducido; en la fase 2 sera la URL de un archivo en el
+ * servidor y este tipo no cambia de forma (ADR-0009).
+ */
+export interface Soporte {
+  imagen: string
+  adjuntadoEn: FechaHoraISO
+}
+
+/**
+ * El registro de una persona en una unidad, con su rastro completo.
+ *
+ * No se borra nunca: se anula, se rechaza o se autoriza, y en los tres casos
+ * queda. Es lo unico que despues permite responder «¿quien autorizo a esta
+ * persona a entrar aqui, y con que soportes?».
+ */
+export interface RegistroPersona {
+  id: string
+  copropiedadId: string
+  unidadId: string
+  /** Quien lo creo. Propietario para residentes; cualquier residente para visitantes. */
+  creadoPor: string
+  categoria: CategoriaRegistro
+  /** Solo para las categorias de residente: con que rol queda vinculado. */
+  rol?: RolResidencia
+  nombres: string
+  apellidos: string
+  documento: string
+  email: string
+  telefono: string
+  /** Obligatoria salvo para el residente sin fecha de fin (RN-62). */
+  vigenciaDesde?: FechaISO
+  vigenciaHasta?: FechaISO
+  placa?: string
+  /** Foto del documento de identidad (RN-57). */
+  fotoDocumento?: Soporte
+  /** Foto de la persona (RN-57). */
+  fotoPersona?: Soporte
+  /** Lo que la persona escribe para abrir su registro y adjuntar (RN-58). */
+  codigo: string
+  estado: EstadoRegistro
+  creadoEn: FechaHoraISO
+  soportesEn?: FechaHoraISO
+  decididoEn?: FechaHoraISO
+  decididoPor?: string
+  /** Por que se rechazo. Sin esto, el rechazo no le dice nada a nadie. */
+  motivo?: string
+  /** Lo que produjo al autorizarse. Uno de los dos, segun la categoria. */
+  residenciaId?: string
+  visitanteId?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -399,6 +492,7 @@ export interface BaseDatos {
   comunicados: Comunicado[]
   correspondencia: Correspondencia[]
   visitantes: Visitante[]
+  registros: RegistroPersona[]
   asambleas: Asamblea[]
   votaciones: Votacion[]
   votos: Voto[]
