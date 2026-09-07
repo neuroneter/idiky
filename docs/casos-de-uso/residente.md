@@ -618,13 +618,16 @@ de la copropiedad. El peso del voto sale de `pesoDelVoto()` en `dominio/reglas.t
 - **Resultado esperado:** Toda la app —las tres caras— se ve con la letra que escogió, en este
   aparato, hoy y las próximas veces.
 
-**Por qué está en la pantalla de ingreso y no en el perfil**
+**Dónde está, y por qué en esos dos sitios** (Mary, 2026-09-07)
 
-Quien no alcanza a leer la pantalla de ingreso **no puede entrar a buscar el ajuste adentro**.
-Un control de accesibilidad detrás del acceso le sirve a todo el mundo menos a quien lo
-necesita. Es el mismo razonamiento de la clave de 4 números (RN-55): la app la usan adultos
-mayores, y las barreras que ponemos en la puerta son las que hacen que la persona deje de
-entrar y vuelva a llamar a la administración.
+| | |
+|---|---|
+| **En la puerta** — ingresar y activar la cuenta | Quien no alcanza a leer la pantalla de ingreso **no puede entrar a buscar el ajuste adentro**. Y porque *«la mayoría de las personas seleccionan el tamaño de letra apenas ingresan, porque es un tema de dificultad al leer»*: se escoge una vez, al principio, no se va a buscar después |
+| **En la configuración del perfil** | Para corregirlo sin cerrar sesión. Va junto a la huella: las dos son preferencias **de este teléfono**, no de la copropiedad |
+
+Es el mismo razonamiento de la clave de 4 números (RN-55): la app la usan adultos mayores, y
+las barreras que ponemos en la puerta son las que hacen que la persona deje de entrar y vuelva
+a llamar a la administración.
 
 **Los tres niveles** (Mary, 2026-09-07)
 
@@ -640,11 +643,15 @@ botón. El tope de 150 % está dentro de lo que la WCAG (1.4.4) exige que una in
 —hasta el 200 % sin perder contenido—, no en el límite.
 
 **Flujo principal**
-1. En la pantalla de ingreso, arriba a la derecha, la persona toca **Tamaño de la letra**.
+1. En la pantalla de ingreso —o en la de activar la cuenta—, arriba a la derecha, la persona
+   toca **Tamaño de la letra**.
 2. El sistema despliega tres opciones, cada una con una muestra en su tamaño real.
 3. La persona escoge una y **la pantalla cambia debajo del dedo**: es la única forma de saber
    si escogió bien.
 4. El sistema guarda la preferencia en el aparato y la aplica a toda la app.
+5. Más adelante puede cambiarla desde **Tu perfil**, sin cerrar sesión: ahí las tres opciones
+   salen desplegadas, porque la hoja de ajustes ya está abierta y esconderlas detrás de otro
+   toque no ahorra nada.
 
 **Flujos alternativos**
 - A1. El navegador tiene el almacenamiento bloqueado → el tamaño vale para esta sesión y no se
@@ -657,9 +664,12 @@ botón. El tope de 150 % está dentro de lo que la WCAG (1.4.4) exige que una in
   `estado/preferencias.ts` y no pasa por el repositorio.
 
 **Estado en el demo:** ✅ — `src/componentes/ControlTamanoTexto.tsx`, montado en
-`src/features/auth/AccesoPage.tsx`. La escala se aplica en `estilos/tokens.css` sobre los
-tokens `--texto-*`, así que **ninguna pantalla tuvo que enterarse**: crecen la app del
-residente, las dos consolas y la previsualización del paz y salvo.
+`AccesoPage.tsx`, `ActivarPage.tsx` y en la hoja de perfil de `LayoutResidente.tsx`. El
+componente exporta dos cosas: `ControlTamanoTexto` (el botón que despliega, para la puerta) y
+`OpcionesTamanoTexto` (las tres opciones sueltas, para una hoja de ajustes ya abierta). La
+escala se aplica en `estilos/tokens.css` sobre los tokens `--texto-*`, así que **ninguna
+pantalla tuvo que enterarse**: crecen la app del residente, las dos consolas y la
+previsualización del paz y salvo.
 
 Dos ajustes que salieron de probarlo al 150 %, y que valen como nota de diseño:
 
@@ -669,5 +679,6 @@ Dos ajustes que salieron de probarlo al 150 %, y que valen como nota de diseño:
 - **Los cuatro accesos del inicio pasan a dos filas de dos** en el tamaño mayor. La
   alternativa era encoger la letra, que es justo lo que la persona pidió que no pasara.
 
-**Pendiente:** el control existe solo en la puerta. Falta repetirlo dentro de la app (perfil
-del residente) para quien quiera cambiarlo sin cerrar sesión.
+**Pendiente:** las consolas de administrador y portería no tienen dónde cambiarlo: heredan lo
+que se escogió en la puerta, que es de donde vienen sus usuarios. Cuando esas consolas tengan
+su propia hoja de perfil, ahí va.

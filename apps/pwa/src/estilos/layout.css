@@ -419,9 +419,9 @@
   color: var(--color-marca);
 }
 /* --- Tamano de la letra (CU-R-26) ---
-   Va arriba de todo y alineado a la derecha, en el sitio donde la gente ya busca
-   los ajustes. Discreto pero **no escondido**: si hay que descubrirlo, no cumple
-   su funcion. */
+   Vive en dos sitios: plegado en la puerta, y desplegado dentro de la hoja de
+   perfil. Por eso las opciones (`.opciones-tamano`) no traen fondo propio: lo
+   pone quien las contiene. */
 .tamano-letra {
   align-self: flex-end;
   display: flex;
@@ -451,17 +451,20 @@
   outline: 2px solid #fff;
   outline-offset: 2px;
 }
-.tamano-letra__opciones {
-  display: flex;
-  flex-direction: column;
-  gap: var(--e2);
+/* La tarjeta blanca que sostiene las opciones sobre el degradado de la puerta. */
+.tamano-letra__panel {
   width: 100%;
   padding: var(--e3);
   border-radius: var(--radio);
   background: var(--color-superficie);
   box-shadow: var(--sombra-2);
 }
-.tamano-letra__opcion {
+.opciones-tamano {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+.opcion-tamano {
   display: flex;
   align-items: center;
   gap: var(--e3);
@@ -472,30 +475,30 @@
   background: var(--color-superficie);
   text-align: left;
 }
-.tamano-letra__opcion[aria-pressed='true'] {
+.opcion-tamano[aria-pressed='true'] {
   border-color: var(--color-acento);
   background: var(--color-acento-suave);
 }
 /* La muestra ocupa siempre el mismo ancho para que las tres A queden alineadas
    y la diferencia de tamano se vea de un vistazo. */
-.tamano-letra__muestra {
+.opcion-tamano__muestra {
   flex: 0 0 2.6rem;
   text-align: center;
   font-weight: 700;
   line-height: 1;
   color: var(--color-marca);
 }
-.tamano-letra__nombre {
+.opcion-tamano__nombre {
   flex: 1;
   font-size: var(--texto-sm);
   font-weight: 650;
 }
-.tamano-letra__porcentaje {
+.opcion-tamano__porcentaje {
   font-size: var(--texto-xs);
   color: var(--color-texto-tenue);
 }
-.tamano-letra__opcion[aria-pressed='true'] .tamano-letra__nombre,
-.tamano-letra__opcion[aria-pressed='true'] .tamano-letra__muestra {
+.opcion-tamano[aria-pressed='true'] .opcion-tamano__nombre,
+.opcion-tamano[aria-pressed='true'] .opcion-tamano__muestra {
   color: var(--color-acento);
 }
 

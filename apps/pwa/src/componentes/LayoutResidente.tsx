@@ -15,6 +15,7 @@ import { Icono, type NombreIcono } from './Icono'
 import { Logotipo } from './Logotipo'
 import { SiluetaTorres } from './SiluetaTorres'
 import { Modal } from './Modal'
+import { OpcionesTamanoTexto } from './ControlTamanoTexto'
 import { AvisoGlobal } from './Aviso'
 import { biometria } from '../servicios/plataforma'
 
@@ -182,6 +183,18 @@ export function LayoutResidente() {
               {persona?.email && <span className="subtitulo">{persona.email}</span>}
             </div>
           </div>
+
+          <div className="separador" />
+
+          {/* Los ajustes **de este telefono**, no de la copropiedad: el tamano de
+              la letra y la huella. Van juntos porque son la misma clase de cosa —
+              no viajan al backend de la fase 2 ni acompanan a la persona a otro
+              aparato. */}
+          <div className="columna" style={{ gap: 'var(--e1)', marginBottom: 'var(--e3)' }}>
+            <strong>Tamaño de la letra</strong>
+            <span className="subtitulo">Aplica a toda la app, en este teléfono.</span>
+          </div>
+          <OpcionesTamanoTexto />
 
           <div className="separador" />
 

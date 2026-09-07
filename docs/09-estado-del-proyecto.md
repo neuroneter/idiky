@@ -114,8 +114,25 @@ espaciado de los dígitos; lo que se teclea sigue grande.
 aplican, la preferencia sobrevive a recargar, no hay desbordamiento horizontal en el inicio ni
 en la consola del administrador, y no hay errores de consola.
 
-**Lo que falta:** el control existe solo en la puerta. Falta repetirlo dentro de la app (perfil
-del residente) para quien quiera cambiarlo sin cerrar sesión.
+**Y dónde va el control, que Mary precisó enseguida:** *«está bien solo en la puerta cuando
+estás creando tu usuario, después debe cambiarlo en la configuración»*, con la observación que
+lo explica — *«la mayoría de las personas seleccionan el tamaño de letra apenas ingresan porque
+es un tema de dificultad al leer»*. O sea: **se escoge una vez, al principio**, y lo de adentro
+es para corregir, no para descubrir. Quedó en tres sitios: ingresar, **activar la cuenta** —que
+es literalmente donde se crea el usuario, y donde faltaba— y **Tu perfil**, junto a la huella,
+porque las dos son preferencias de este teléfono y no de la copropiedad.
+
+En el perfil las tres opciones salen **desplegadas**: la hoja de ajustes ya está abierta y
+esconderlas detrás de otro toque no ahorra nada. En la puerta van plegadas, donde no se puede
+gastar media pantalla en algo que la mayoría toca una sola vez.
+
+**Un error que valió la pena:** el título de la sección salió blanco sobre blanco. Dentro de la
+app `.titulo-seccion` se pinta en blanco para el fondo degradado, y la hoja de perfil es
+blanca. Una clase que depende del fondo donde suele vivir se rompe la primera vez que se la
+saca de ahí.
+
+**Lo que falta:** las consolas de administrador y portería no tienen dónde cambiarlo — heredan
+lo que se escogió en la puerta, que es de donde vienen sus usuarios.
 
 ---
 

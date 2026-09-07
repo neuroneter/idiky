@@ -30,6 +30,7 @@ import { rutaInicial } from '../../dominio/reglas'
 import { biometria } from '../../servicios/plataforma'
 import { Logotipo } from '../../componentes/Logotipo'
 import { SiluetaTorres } from '../../componentes/SiluetaTorres'
+import { ControlTamanoTexto } from '../../componentes/ControlTamanoTexto'
 import { Icono } from '../../componentes/Icono'
 import { nombreCompleto } from '../../datos/selectores'
 import { perfilDe } from './perfil'
@@ -140,6 +141,11 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
           mismo edificio. */}
       <SiluetaTorres className="acceso-fondo__siluetas" />
       <div className="acceso">
+        {/* Aqui es donde la persona crea su usuario, y es el momento en que la
+            mayoria escoge el tamano de la letra: es un problema para leer, no un
+            ajuste que se vaya a buscar despues (Mary, 2026-09-07). */}
+        <ControlTamanoTexto />
+
         <div className="acceso__marca">
           <Logotipo inverso tamano="var(--texto-3xl)" />
           <p className="acceso__lema">
