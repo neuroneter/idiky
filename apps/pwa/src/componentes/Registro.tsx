@@ -341,6 +341,9 @@ export function FormularioRegistro({
 export function DetalleRegistro({
   registro,
   mensaje,
+  mostrarSoportes = true,
+  accesos,
+  alAbrirSoportes,
   puedoAutorizar,
   esMio,
   alAutorizar,
@@ -350,6 +353,11 @@ export function DetalleRegistro({
   registro: RegistroPersona
   /** El mensaje que se le mandó a la persona, si hubo (RN-64). */
   mensaje?: Mensaje
+  /** Si las fotos se muestran ya, o hay que abrirlas dejando constancia (RN-67). */
+  mostrarSoportes?: boolean
+  /** Quiénes las han mirado, en orden. */
+  accesos?: Array<{ id: string; quien: string; vistoEn: string }>
+  alAbrirSoportes?: () => Promise<void>
   puedoAutorizar: boolean
   esMio: boolean
   alAutorizar: () => Promise<void>
@@ -417,16 +425,52 @@ export function DetalleRegistro({
               {registro.consentimiento.version}
             </span>
           )}
-          <div className="soportes">
-            <figure className="soporte">
-              <img src={registro.fotoDocumento.imagen} alt="Documento de identidad" />
-              <figcaption>Documento</figcaption>
-            </figure>
-            <figure className="soporte">
-              <img src={registro.fotoPersona.imagen} alt="Foto de la persona" />
-              <figcaption>La persona</figcaption>
-            </figure>
-          </div>
+          {/* Mientras se decide, las fotos están a la vista: compararlas **es**
+              autorizar, y pedir un clic extra ahí sería estorbo. Una vez
+              decidido se guardan, y abrirlas deja constancia de quién las miró
+              (RN-67) — no por desconfianza, sino para que el día que alguien
+              pregunte «¿quién vio mi documento?» la respuesta exista. */}
+          {mostrarSoportes ? (
+            <div className="soportes">
+              <figure className="soporte">
+                <img src={registro.fotoDocumento.imagen} alt="Documento de identidad" />
+                <figcaption>Documento</figcaption>
+              </figure>
+              <figure className="soporte">
+                <img src={registro.fotoPersona.imagen} alt="Foto de la persona" />
+                <figcaption>La persona</figcaption>
+              </figure>
+            </div>
+          ) : (
+            <button
+              className="boton boton--bloque"
+              style={{ marginTop: 'var(--e3)' }}
+              onClick={() => void alAbrirSoportes?.()}
+            >
+              <Icono nombre="buscar" tamano={16} />
+              Ver los soportes
+            </button>
+          )}
+          {!mostrarSoportes && (
+            <span className="ayuda-campo" style={{ display: 'block', marginTop: 'var(--e2)' }}>
+              Quedará constancia de que los abriste.
+            </span>
+          )}
+          {mostrarSoportes && accesos && accesos.length > 0 && (
+            <details className="historial" style={{ marginTop: 'var(--e3)' }}>
+              <summary>Quién los ha mirado ({accesos.length})</summary>
+              <div className="lista lista--compacta" style={{ marginTop: 'var(--e2)' }}>
+                {accesos.map((acceso) => (
+                  <div key={acceso.id} className="fila">
+                    <span className="subtitulo">{acceso.quien}</span>
+                    <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                      {formatearFechaHora(acceso.vistoEn)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </details>
+          )}
         </>
       )}
 

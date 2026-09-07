@@ -37,12 +37,14 @@ import {
   cerrarRegistro,
   crearRegistroPersona,
   desvincularResidente,
+  registrarAccesoSoportes,
 } from '../../datos/repositorio'
 import {
   categoriasQuePuedeRegistrar,
   puedeAutorizar,
   puedeInhabilitar,
   registroEnCurso,
+  verSoportesDejaConstancia,
 } from '../../dominio/reglas'
 import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import {
@@ -64,6 +66,8 @@ export function PersonasPage() {
   const pedida = parametros.get('nuevo')
   const [registrando, setRegistrando] = useState(pedida === 'visitante')
   const [viendo, setViendo] = useState<string | null>(null)
+  /** Registros cuyos soportes se abrieron en esta visita a la pantalla. */
+  const [abiertos, setAbiertos] = useState<string[]>([])
 
   if (!sesion) return null
 
@@ -258,6 +262,24 @@ export function PersonasPage() {
         <DetalleRegistro
           registro={enDetalle}
           mensaje={bd.mensajes.find((m) => m.registroId === enDetalle.id)}
+          // Ya decidido, las fotos se abren a propósito y queda constancia (RN-67).
+          mostrarSoportes={!verSoportesDejaConstancia(enDetalle) || abiertos.includes(enDetalle.id)}
+          accesos={bd.accesosSoportes
+            .filter((acceso) => acceso.registroId === enDetalle.id)
+            .map((acceso) => ({
+              id: acceso.id,
+              quien: nombreCompleto(sel.persona(bd, acceso.personaId)),
+              vistoEn: acceso.vistoEn,
+            }))}
+          alAbrirSoportes={async () => {
+            setAbiertos((antes) => [...antes, enDetalle.id])
+            await ejecutar((base) =>
+              registrarAccesoSoportes(base, {
+                registroId: enDetalle.id,
+                personaId: sesion.personaId,
+              }),
+            )
+          }}
           puedoAutorizar={puedeAutorizar(enDetalle, sesion.personaId)}
           esMio={enDetalle.creadoPor === sesion.personaId}
           alCerrar={() => setViendo(null)}

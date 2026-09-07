@@ -34,7 +34,7 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 3 — rol de porteria: la correspondencia guarda quien la recibio del mensajero.
 // 4 — paz y salvo: cubiertoHasta, codigo de verificacion y una unidad sin saldo.
 // 5 — el portero entra al demo como persona y perfil.
-export const VERSION_ESQUEMA = 7
+export const VERSION_ESQUEMA = 8
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -847,6 +847,8 @@ export function crearSemilla(): BaseDatos {
     // Sin mensajes de ejemplo: los mensajes son consecuencia de algo que
     // alguien hizo, y sembrar consecuencias sin causa confunde mas que ayuda.
     mensajes: [],
+    // Sin accesos a soportes: la constancia nace cuando alguien mira una foto.
+    accesosSoportes: [],
     asambleas,
     votaciones,
     votos,

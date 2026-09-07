@@ -249,8 +249,6 @@ export interface Visitante {
   creadoEn: FechaHoraISO
   /** Registro que lo origino (CU-R-27). Los de la semilla no tienen. */
   registroId?: string
-  /** Foto de la persona, para que la porteria compare en la entrada (RN-57). */
-  fotoPersona?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -344,6 +342,22 @@ export interface RegistroPersona {
   /** Lo que produjo al autorizarse. Uno de los dos, segun la categoria. */
   residenciaId?: string
   visitanteId?: string
+}
+
+/**
+ * Constancia de que alguien miro un soporte (RN-67).
+ *
+ * Una foto de cedula archivada que cualquiera puede abrir sin dejar rastro es
+ * una foto de cedula sin dueno. **No se trata de desconfiar de la
+ * administracion**: se trata de que el dia que un titular pregunte «¿quien vio mi
+ * documento?», la respuesta exista.
+ */
+export interface AccesoSoporte {
+  id: string
+  registroId: string
+  /** Quien lo miro. */
+  personaId: string
+  vistoEn: FechaHoraISO
 }
 
 // ---------------------------------------------------------------------------
@@ -526,6 +540,7 @@ export interface BaseDatos {
   visitantes: Visitante[]
   registros: RegistroPersona[]
   mensajes: Mensaje[]
+  accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
   votaciones: Votacion[]
   votos: Voto[]

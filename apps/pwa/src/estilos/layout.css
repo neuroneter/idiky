@@ -797,6 +797,35 @@
   line-height: calc(17px * var(--escala-texto));
 }
 
+/* --- Rostros para la porteria (CU-P-03, RN-67) --- */
+/* Tarjetas anchas y foto grande: se miran de pie, de reojo, con alguien
+   esperando del otro lado del vidrio. */
+.rejilla-rostros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--e3);
+}
+.rostro {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+}
+.rostro__foto,
+.rostro__sin-foto {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: var(--radio);
+  object-fit: cover;
+  background: var(--color-marca-suave);
+}
+.rostro__sin-foto {
+  display: grid;
+  place-items: center;
+  color: var(--color-marca);
+  font-weight: 700;
+}
+
 /* --- Autorizacion de tratamiento de datos (RN-66) --- */
 .politica {
   display: flex;

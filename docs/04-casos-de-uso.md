@@ -91,6 +91,7 @@ minuta del turno. Detalle en [`casos-de-uso/porteria.md`](./casos-de-uso/porteri
 |---|---|---|---|---|
 | CU-P-01 | **Registrar y entregar correspondencia** | 2 | 🟡 Parcial (falta la minuta) | [ver](./casos-de-uso/porteria.md#cu-p-01) |
 | CU-P-02 | **Validar el código de un visitante** | 2 | 🟡 Parcial (valida; no registra el ingreso) | [ver](./casos-de-uso/porteria.md#cu-p-02) |
+| CU-P-03 | **Reconocer a quien vive aquí** | 1 | ✅ Demo | [ver](./casos-de-uso/porteria.md#cu-p-03) |
 
 ## 3. Sistema — procesos automáticos
 

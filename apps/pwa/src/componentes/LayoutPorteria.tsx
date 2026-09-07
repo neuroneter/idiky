@@ -40,6 +40,12 @@ const SECCIONES: Array<{
     permiso: 'visitantes:validar',
   },
   {
+    ruta: '/porteria/residentes',
+    texto: 'Residentes',
+    icono: 'personas',
+    permiso: 'residentes:reconocer',
+  },
+  {
     ruta: '/porteria/correspondencia',
     texto: 'Correspondencia',
     icono: 'correspondencia',
@@ -50,6 +56,7 @@ const SECCIONES: Array<{
 const TITULOS: Record<string, string> = {
   '/porteria': 'El turno',
   '/porteria/visitantes': 'Validar visitantes',
+  '/porteria/residentes': 'Reconocer a quien vive aquí',
   '/porteria/correspondencia': 'Correspondencia',
 }
 

@@ -73,3 +73,37 @@ definir. Con esto CU-R-10 deja de tener una mitad en el aire.
 - **Los turnos**: si la sesión es de la persona o del puesto, y qué pasa al cambiar de turno
   con lo que quedó registrado.
 - **Peatonal y vehicular**: ¿el mismo flujo?
+
+---
+
+## CU-P-03 — Reconocer a quien vive aquí
+
+- **Actor principal:** Portería.
+- **Precondiciones:** Turno abierto.
+- **Disparador:** Alguien llega a la entrada y dice que vive ahí.
+- **Resultado esperado:** El portero sabe si esa cara corresponde a esa unidad.
+
+*«La portería debe poder ver la foto porque, ¿cómo reconoce al que ingresa?»* (Mary,
+2026-09-07). Es su trabajo: un portero que nunca vio la cara de quien vive ahí no puede
+distinguirlo de un desconocido — y menos de noche, o en un turno nuevo.
+
+**Ve el rostro, nunca el documento** (RN-67). Es la diferencia entre *reconocerte* y *tener tu
+identidad*. Por eso la pantalla no tiene números de cédula, ni teléfonos, ni saldos: tiene
+caras, nombres y unidades, que es lo que hace falta para abrir o no abrir la puerta.
+
+**Flujo principal**
+1. El portero abre **Residentes** y busca por nombre o por unidad.
+2. Ve la cara, el nombre, la unidad y el título (propietario, arrendatario, temporal).
+
+**Flujos alternativos**
+- A1. La persona no tiene foto → se muestran sus iniciales, y la pantalla dice cuántos
+  residentes tienen foto y por qué faltan las demás: aparece cuando la persona la adjunta al
+  registrarse (CU-R-28), y quienes ya vivían ahí antes no la tienen.
+
+**Reglas de negocio**
+- RN-52 (la portería no ve cartera ni PQRS), RN-67 (rostro sí, documento no).
+
+**Estado en el demo:** ✅ — `src/features/porteria/ResidentesPage.tsx`.
+
+**Pendiente:** los visitantes **no tienen foto** desde que se les quitó el requisito de
+soportes (RN-57), así que a ellos el portero los valida por código y documento, no por la cara.

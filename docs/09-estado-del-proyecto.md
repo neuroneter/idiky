@@ -14,8 +14,8 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 65 documentados: 24 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
-| **Reglas de negocio** | 66 (RN-01…RN-66) |
+| **Casos de uso** | 66 documentados: 25 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
+| **Reglas de negocio** | 67 (RN-01…RN-67) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -75,6 +75,45 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-07 · Mary + IA (Claude) · Quién ve la foto, y qué queda cuando la ve
+
+Mary aprobó las dos propuestas que le hice sobre el acceso a los soportes, y **corrigió una**.
+La corrección es la parte interesante.
+
+**Lo aprobado:** la administración puede ver la foto del documento después de autorizada,
+**con registro**. Así quedó: mientras se decide, las fotos están a la vista —compararlas *es*
+autorizar, y pedir un clic extra ahí sería estorbo—; ya autorizado se guardan, y abrirlas es un
+acto deliberado que deja constancia de quién y cuándo. No por desconfiar de la administración,
+sino para que el día que un titular pregunte «¿quién vio mi documento?» la respuesta exista.
+
+**La corrección:** yo había concluido que la portería no necesitaba ver fotos. Mary:
+*«corrige, pero la portería debe poder ver la foto porque, ¿cómo reconoce al que ingresa?»*.
+
+Tenía razón y mi razonamiento estaba al revés: un portero que nunca vio la cara de quien vive
+ahí no puede distinguirlo de un desconocido, y menos de noche o en un turno nuevo. Yo había
+tomado «la ve a diario» como si el portero fuera siempre el mismo y conociera a todos, que es
+justo lo que no pasa en un puesto donde rota el personal.
+
+Así que la portería tiene su pantalla (CU-P-03) y **ve el rostro, nunca el documento**. Es la
+diferencia entre *reconocerte* y *tener tu identidad*: para lo primero basta una cara; lo
+segundo suele quedar en manos de personal de una empresa externa. Su consulta no deja
+constancia individual, y es deliberado — mirar caras es su trabajo de todo el día, y registrar
+cada mirada sería ruido que esconde los accesos que sí importan.
+
+**Un efecto secundario que hay que tener presente:** desde que el visitante no lleva fotos
+(RN-57), el portero **no tiene cara que comparar con un visitante**; a ellos los valida por
+código y documento. La foto sirve para los residentes, que son los que entran a diario.
+
+**Dos hallazgos de la revisión:**
+
+- El campo `fotoPersona` del visitante quedó muerto al quitarle los soportes y **se eliminó**.
+  Un campo que nunca se llena miente sobre el modelo.
+- La pantalla de la portería **no mostraba a los residentes temporales**: los filtré por «sin
+  fecha de salida» en vez de por vigencia. Es la tercera vez que aparece el mismo error, y son
+  justo los que el portero no conoce de vista.
+
+---
 
 ### 2026-09-07 · Mary + IA (Claude) · El consentimiento de tratamiento de datos
 

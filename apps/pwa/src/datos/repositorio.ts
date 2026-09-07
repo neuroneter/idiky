@@ -10,6 +10,7 @@
  */
 
 import type {
+  AccesoSoporte,
   BaseDatos,
   CategoriaComunicado,
   CategoriaRegistro,
@@ -735,8 +736,6 @@ function crearVisitanteDeRegistro(bd: BaseDatos, registro: RegistroPersona): Vis
     estado: 'activo',
     creadoEn: ahoraISO(),
     registroId: registro.id,
-    // Solo la hay si alguien la adjunto; el visitante de una tarde no trae foto.
-    fotoPersona: registro.fotoPersona?.imagen,
   }
   bd.visitantes.unshift(visitante)
   return visitante
@@ -878,6 +877,31 @@ export async function cerrarRegistro(
   // nadie mas; uno que se rechaza despues de que adjunto, si: estuvo esperando.
   if (!parametros.anular) avisar(bd, registro, 'registro_rechazado')
   return persistir(bd, registro)
+}
+
+/**
+ * Deja constancia de que alguien miro los soportes de un registro (RN-67).
+ *
+ * Se llama al **abrirlos**, no al entrar a la pantalla: entrar no es mirar, y una
+ * constancia que se dispara por navegar no dice nada de nadie.
+ */
+export async function registrarAccesoSoportes(
+  bdActual: BaseDatos,
+  parametros: { registroId: string; personaId: string },
+): Promise<Resultado<AccesoSoporte>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const registro = bd.registros.find((r) => r.id === parametros.registroId)
+  if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+
+  const acceso: AccesoSoporte = {
+    id: nuevoId('acc'),
+    registroId: parametros.registroId,
+    personaId: parametros.personaId,
+    vistoEn: ahoraISO(),
+  }
+  bd.accesosSoportes.unshift(acceso)
+  return persistir(bd, acceso)
 }
 
 /** Busca un registro por documento y codigo: es como la persona lo abre (RN-58). */

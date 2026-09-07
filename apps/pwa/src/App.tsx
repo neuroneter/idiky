@@ -36,6 +36,7 @@ import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
 import { CorrespondenciaPage as CorrespondenciaGestionPage } from './features/porteria/CorrespondenciaPage'
 import { TurnoPage } from './features/porteria/TurnoPage'
 import { ValidarVisitantePage } from './features/porteria/ValidarVisitantePage'
+import { ResidentesPage } from './features/porteria/ResidentesPage'
 
 /** Deja pasar solo si hay sesion con el rol esperado (ADR-0004). */
 function Protegida({
@@ -129,6 +130,7 @@ export function App() {
       >
         <Route index element={<TurnoPage />} />
         <Route path="visitantes" element={<ValidarVisitantePage />} />
+        <Route path="residentes" element={<ResidentesPage />} />
         <Route path="correspondencia" element={<CorrespondenciaGestionPage />} />
       </Route>
 

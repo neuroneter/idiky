@@ -452,6 +452,61 @@ export function solicitudesEsperandoRespuesta(pqrs: Pqrs[], reservas: Reserva[])
 // ---------------------------------------------------------------------------
 
 /**
+ * RN-67 — Quien puede mirar los soportes, y que queda cuando los mira.
+ *
+ * Dos accesos distintos, y conviene no confundirlos:
+ *
+ *  - **Mientras se decide**, quien tiene que autorizar ve las dos fotos a la
+ *    vista. Es el acto: comparar la cara con el documento *es* autorizar. Pedirle
+ *    un clic extra ahi seria estorbo, no cuidado.
+ *  - **Despues de autorizado**, las fotos quedan guardadas y **abrirlas es un
+ *    acto deliberado que deja constancia** (Mary, 2026-09-07: la administracion
+ *    puede verlas, «con registro»). Una foto de cedula archivada que cualquiera
+ *    abre sin dejar rastro es una foto de cedula sin dueno.
+ *
+ * No se trata de desconfiar de la administracion: se trata de que el dia que un
+ * titular pregunte «¿quien vio mi documento?», la respuesta exista.
+ *
+ * Quien puede: **la administracion siempre** —responde legalmente por el
+ * tratamiento— y **quien registro a la persona**.
+ *
+ * ## La porteria es un caso aparte, y va al reves de lo que parecia
+ *
+ * «La porteria debe poder ver la foto porque, ¿como reconoce al que ingresa?»
+ * (Mary, 2026-09-07). Es cierto y es su trabajo: un portero que nunca vio la cara
+ * de quien vive ahi no puede distinguirlo de un desconocido, y menos de noche o
+ * en un turno nuevo.
+ *
+ * Pero ve **solo el rostro, nunca el documento**. Es la diferencia entre
+ * *reconocerte* y *tener tu identidad*: para lo primero basta una cara; lo
+ * segundo es un dato que la porteria no necesita para nada, y que ademas suele
+ * quedar en manos de personal de una empresa externa que rota.
+ *
+ * Su consulta **no deja constancia individual**, y es deliberado: mirar caras es
+ * su tarea de todo el dia, y un registro de cada mirada seria ruido que esconde
+ * los accesos que si importan. Lo que se registra es quien abre **el documento**,
+ * que es el dato sensible.
+ */
+export function puedeVerSoportes(parametros: {
+  creadoPor: string
+  personaId: string
+  rol: RolUsuario
+}): boolean {
+  if (parametros.rol === 'admin') return true
+  return parametros.creadoPor === parametros.personaId
+}
+
+/** La porteria ve el rostro de quien vive ahi; el documento, nunca. */
+export function puedeVerRostros(rol: RolUsuario | undefined): boolean {
+  return rol === 'porteria' || rol === 'admin'
+}
+
+/** Si mirarlos deja constancia. Solo despues de decidir; durante, es el acto. */
+export function verSoportesDejaConstancia(registro: RegistroPersona): boolean {
+  return registro.estado === 'autorizado'
+}
+
+/**
  * RN-65 — Quien inhabilita depende de quien creo.
  *
  * «Lo que crea el propietario lo puede inhabilitar el propietario o el
@@ -671,7 +726,7 @@ export function residenciaVigente(
 const PERMISOS: Record<RolUsuario, readonly string[]> = {
   residente: ['cartera:propia', 'reservas:propias', 'pqrs:propias', 'visitantes:propios'],
   admin: ['cartera', 'unidades', 'reservas', 'pqrs', 'comunicados', 'correspondencia'],
-  porteria: ['correspondencia', 'visitantes:validar'],
+  porteria: ['correspondencia', 'visitantes:validar', 'residentes:reconocer'],
 }
 
 export function puede(rol: RolUsuario | undefined, permiso: string): boolean {
