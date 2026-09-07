@@ -242,19 +242,22 @@ lo cobra. Falta lo que **no podemos suponer sin equivocarnos**:
 
 ## 3 sexies. Las cédulas del registro de personas — lo que bloquea producción
 
-Desde el 2026-09-07 registrar a una persona exige **foto de su documento de identidad y foto
-de ella** (RN-57). El demo las guarda en el navegador de quien las sube y no las manda a
-ningún lado, así que ahí no hay problema. **En producción sí lo hay**, y no es técnico: una
-foto de cédula es un dato personal y en Colombia lo cubre la **Ley 1581 de 2012 (habeas
-data)**.
+Desde el 2026-09-07 registrar a alguien **que se queda a dormir** —residente o residente
+temporal— exige **foto de su documento de identidad y foto de la persona** (RN-57). El
+visitante no sube fotos, así que **el problema es más chico de lo que parecía**: no se acumulan
+cédulas de gente que vino una tarde, solo de quien vive ahí.
+
+El demo las guarda en el navegador de quien las sube y no las manda a ningún lado, así que ahí
+no hay problema. **En producción sí lo hay**, y no es técnico: una foto de cédula es un dato
+personal y en Colombia lo cubre la **Ley 1581 de 2012 (habeas data)**.
 
 Lo que hay que decidir antes de que esto salga a un servidor:
 
 | Pregunta | Por qué no se puede dejar para después | Respuesta |
 |---|---|---|
 | ¿Con qué **autorización** se recoge, y para qué? | El titular tiene que autorizar el tratamiento y saber el fin | *(pendiente)* |
-| ¿**Cuánto se conserva**? | La cédula de un visitante de un día no puede quedarse para siempre | *(pendiente)* |
-| ¿**Quién la ve**? ¿La portería para comparar en la entrada, la administración, el propietario que autorizó? | Cada respuesta es un permiso distinto en el modelo | *(pendiente)* |
+| ¿**Cuánto se conserva**? | La cédula de un arrendatario que se fue hace tres años no puede seguir ahí. Y un residente temporal que estuvo dos meses, menos | *(pendiente)* |
+| ¿**Quién la ve**? ¿La portería para comparar en la entrada, la administración, el propietario que autorizó? | Cada respuesta es un permiso distinto en el modelo. Hoy la ve quien autorizó, y nadie más | *(pendiente)* |
 | Al **inhabilitar** a la persona, ¿la foto se borra? | RN-61 dice que nada se borra; un dato personal sí puede tener que borrarse. **Las dos reglas chocan** | *(pendiente)* |
 | ¿**Dónde** se almacena? | Un servidor con las cédulas de un conjunto entero es un objetivo, no un archivo | *(pendiente)* |
 
