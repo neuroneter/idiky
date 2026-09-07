@@ -532,8 +532,26 @@ export function puedeAutorizar(registro: RegistroPersona, personaId: string): bo
   return registro.creadoPor === personaId && registro.estado === 'esperando_autorizacion'
 }
 
-/** RN-57 — Un registro no pasa de la espera de soportes sin las dos fotos. */
+/**
+ * RN-57 — Los soportes se le exigen **a quien se queda a dormir**.
+ *
+ * «El tramite le corresponde a quien se queda a dormir» (Mary, 2026-09-07). El
+ * residente y el residente temporal —el huesped de Airbnb, el familiar unos
+ * meses— usan las zonas comunes y la porteria los ve a diario: ahi las dos fotos
+ * y la autorizacion valen lo que cuestan. El visitante de una tarde, no.
+ *
+ * No es una comodidad, es seguridad: **pedirle cedula fotografiada a quien viene
+ * a almorzar es el requisito que hace que la gente deje de registrar visitas y
+ * las meta sin avisar**. Un tramite que se evade protege menos que uno liviano
+ * que se cumple.
+ */
+export function exigeSoportes(categoria: CategoriaRegistro): boolean {
+  return categoria !== 'visitante'
+}
+
+/** Un registro no pasa de la espera de soportes sin las dos fotos (RN-57). */
 export function soportesCompletos(registro: RegistroPersona): boolean {
+  if (!exigeSoportes(registro.categoria)) return true
   return !!registro.fotoDocumento && !!registro.fotoPersona
 }
 

@@ -27,7 +27,7 @@
  */
 
 import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
@@ -55,6 +55,7 @@ export function PersonasPage() {
   // La pantalla de visitantes entra aqui con la categoria ya escogida: quien
   // venia a autorizar una visita no deberia tener que volver a decir que es.
   const [parametros] = useSearchParams()
+  const navegar = useNavigate()
   const pedida = parametros.get('nuevo')
   const [registrando, setRegistrando] = useState(pedida === 'visitante')
   const [viendo, setViendo] = useState<string | null>(null)
@@ -227,7 +228,12 @@ export function PersonasPage() {
             )
             if (creado) {
               setRegistrando(false)
-              setViendo(creado.id)
+              // Una visita queda autorizada de una vez: lo que la persona
+              // necesita enseguida es el codigo de entrada, que vive en la
+              // pantalla de visitantes. Mostrarle el detalle del registro seria
+              // dejarla a un toque de lo que vino a buscar.
+              if (creado.categoria === 'visitante') navegar('/app/visitantes')
+              else setViendo(creado.id)
             }
           }}
         />

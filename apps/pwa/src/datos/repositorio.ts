@@ -37,6 +37,7 @@ import {
   calcularSaldo,
   hoyISO,
   prorratearPorCoeficiente,
+  exigeSoportes,
   exigeVigencia,
   puedeAutorizar,
   puedeVotar,
@@ -637,15 +638,54 @@ export async function crearRegistroPersona(
     throw new ErrorDeNegocio('Ya hay un registro en curso para ese documento en esta unidad.')
   }
 
+  const ahora = ahoraISO()
   const registro: RegistroPersona = {
     id: nuevoId('reg'),
     ...parametros,
     codigo: nuevoCodigoRegistro(),
     estado: 'esperando_soportes',
-    creadoEn: ahoraISO(),
+    creadoEn: ahora,
   }
   bd.registros.unshift(registro)
+
+  // RN-57: al visitante no se le piden soportes, asi que su registro no espera
+  // nada de nadie — se resuelve aqui mismo y sale con su codigo.
+  //
+  // **Sigue siendo un registro**, y esa es la parte que importa: aunque el
+  // tramite sea de un toque, queda escrito quien dejo entrar a quien y cuando.
+  // Aliviar el requisito no es renunciar al rastro.
+  if (!exigeSoportes(registro.categoria)) {
+    const visitante = crearVisitanteDeRegistro(bd, registro)
+    registro.visitanteId = visitante.id
+    registro.estado = 'autorizado'
+    registro.decididoEn = ahora
+    registro.decididoPor = registro.creadoPor
+  }
+
   return persistir(bd, registro)
+}
+
+/** El visitante que sale de un registro. Comparte forma con el que se autoriza. */
+function crearVisitanteDeRegistro(bd: BaseDatos, registro: RegistroPersona): Visitante {
+  const visitante: Visitante = {
+    id: nuevoId('vis'),
+    unidadId: registro.unidadId,
+    personaId: registro.creadoPor,
+    nombre: `${registro.nombres} ${registro.apellidos}`,
+    documento: registro.documento,
+    placa: registro.placa,
+    vigenciaDesde: registro.vigenciaDesde ?? hoyISO(),
+    vigenciaHasta: registro.vigenciaHasta ?? hoyISO(),
+    codigo: generarCodigoVisitante(),
+    recurrente: false,
+    estado: 'activo',
+    creadoEn: ahoraISO(),
+    registroId: registro.id,
+    // Solo la hay si alguien la adjunto; el visitante de una tarde no trae foto.
+    fotoPersona: registro.fotoPersona?.imagen,
+  }
+  bd.visitantes.unshift(visitante)
+  return visitante
 }
 
 /**
@@ -713,25 +753,7 @@ export async function autorizarRegistro(
   }
 
   if (registro.categoria === 'visitante') {
-    const visitante: Visitante = {
-      id: nuevoId('vis'),
-      unidadId: registro.unidadId,
-      personaId: registro.creadoPor,
-      nombre: `${registro.nombres} ${registro.apellidos}`,
-      documento: registro.documento,
-      placa: registro.placa,
-      vigenciaDesde: registro.vigenciaDesde ?? hoyISO(),
-      vigenciaHasta: registro.vigenciaHasta ?? hoyISO(),
-      codigo: generarCodigoVisitante(),
-      recurrente: false,
-      estado: 'activo',
-      creadoEn: ahoraISO(),
-      registroId: registro.id,
-      // La porteria compara la cara con la foto: es para lo que sirve tenerla.
-      fotoPersona: registro.fotoPersona?.imagen,
-    }
-    bd.visitantes.unshift(visitante)
-    registro.visitanteId = visitante.id
+    registro.visitanteId = crearVisitanteDeRegistro(bd, registro).id
   } else {
     const residencia: Residencia = {
       id: nuevoId('res'),

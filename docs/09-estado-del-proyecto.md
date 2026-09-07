@@ -118,18 +118,31 @@ residentes y arrendatarios, el arrendatario registra visitantes: cambia quién e
 categoría, no el trámite. Vive en `componentes/Registro.tsx` — dos formularios distintos para
 lo mismo acaban pidiendo cosas distintas, y el modelo de datos diría que los dos traen soportes.
 
-**Autorizar un visitante también pasa por aquí ahora.** Se le planteó a Mary que para una
-visita de una tarde el trámite completo es pesado, y que cabía una vía rápida solo para
-visitantes; respondió *«no, déjala así, igual tanto para residentes como para visitantes»*.
-Queda escrito en el CU porque es la clase de decisión que alguien querrá «optimizar» más
-adelante: tener dos formas de meter gente a la unidad es tener una con soportes y otra sin
-ellos, y la que no los pide se vuelve la que todo el mundo usa.
+**El visitante entra por aquí, pero sin fotos y en un solo paso.** Vale dejar el camino
+completo, porque la conclusión no fue la primera respuesta y el recorrido es la parte útil.
 
-Y al revisarlo apareció lo que de verdad separa las categorías: el caso pesado que Mary tenía
-en mente —**el apartamento de un propietario que está en Airbnb**— no es un visitante, es un
-**residente temporal**, y para eso ya existía su categoría. Los dos ejemplos —el huésped de
-Airbnb y la visita de una tarde— pasaron al texto que la gente lee al escoger. La ayuda decía
-«se queda un tiempo definido», que obliga a traducir el caso propio; ahora se reconoce de una.
+Se le planteó a Mary que para una visita de una tarde el trámite completo es pesado y que cabía
+una vía rápida; respondió *«no, déjala así»*. Al revisarlo ella misma vio lo que faltaba: **el
+caso pesado que tenía en mente —el apartamento de un propietario que está en Airbnb— no es un
+visitante, es un residente temporal**, y esa categoría ya existía. De ahí salió el criterio, en
+sus palabras: **«el trámite le corresponde a quien se queda a dormir»**, precisado después como
+*«el trámite del documento de identidad y la foto son para los usuarios con marca de residente
+y residente temporal»* y *«el visitante no requiere de fotos»*.
+
+Así quedó RN-57. **Y la razón de fondo es de seguridad, no de comodidad**: pedirle cédula
+fotografiada a quien viene a almorzar es el requisito que hace que la gente deje de registrar
+visitas y las meta sin avisar. Un trámite que se evade protege menos que uno liviano que se
+cumple. El huésped de Airbnb sí duerme ahí, usa las zonas comunes y la portería lo ve a diario:
+ahí las dos fotos valen lo que cuestan.
+
+**El visitante sigue dejando registro** —queda escrito quién lo dejó entrar y cuándo—; lo que
+se alivió es el requisito, no el rastro. En el código el registro de un visitante nace
+`autorizado` y crea el visitante en el acto, así que hay un solo camino de entrada a la unidad
+y una sola tabla que responde «¿quién autorizó a esta persona?».
+
+Los dos ejemplos de Mary —el huésped de Airbnb y la visita de una tarde— pasaron al texto que
+la gente lee al escoger. La ayuda decía «se queda un tiempo definido», que obliga a traducir el
+caso propio; ahora se reconoce de una.
 
 **Las fotos:** [ADR-0009](./adr/0009-soportes-fotograficos.md). Se capturan con
 `<input type="file" capture>` —el HTML de siempre, cero dependencias, funciona igual dentro de

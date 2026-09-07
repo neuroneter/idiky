@@ -694,7 +694,7 @@ su propia hoja de perfil, ahí va.
 - **Resultado esperado:** La persona queda registrada en la unidad, **con sus soportes**, o el
   registro queda cerrado con motivo.
 
-**Los tres actos** (RN-57 a RN-59)
+**Los tres actos — solo para quien se queda a dormir** (RN-57 a RN-59)
 
 | | Quién | Qué |
 |---|---|---|
@@ -705,13 +705,27 @@ su propia hoja de perfil, ahí va.
 El rodeo tiene una razón: **una foto de cédula que sube un tercero no prueba nada sobre quién
 la subió**. Que la traiga la propia persona es lo que convierte el trámite en un soporte.
 
+**El visitante no pasa por esto** (Mary, 2026-09-07: *«el trámite del documento de identidad y
+la foto son para los usuarios con marca de residente y residente temporal»*, *«el visitante no
+requiere de fotos»*). Se registra con nombre, documento y vigencia, y **sale con su código en
+un solo paso**.
+
+No es una concesión a la comodidad, es la decisión más segura de las dos: **pedirle cédula
+fotografiada a quien viene a almorzar es el requisito que hace que la gente deje de registrar
+visitas y las meta sin avisar**. Un trámite que se evade protege menos que uno liviano que se
+cumple. El caso que sí justifica el trámite completo —el huésped de Airbnb— tiene su propia
+categoría, y ahí sí duerme, usa las zonas comunes y la portería lo ve a diario.
+
+**El visitante sigue dejando registro.** Aunque su trámite sea de un toque, queda escrito quién
+lo dejó entrar y cuándo: aliviar el requisito no es renunciar al rastro.
+
 **Las categorías** (RN-62)
 
-| Categoría | Quién es, en concreto | Vigencia | Qué se crea al autorizar |
-|---|---|---|---|
-| Residente | El dueño, quien le arrienda, su familia | Sin fecha de fin | Una residencia como propietario o arrendatario |
-| **Residente temporal** | **Un huésped de Airbnb, un familiar unos meses** | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
-| Visitante | **Quien viene una tarde o unos días** | **Exige** fecha de fin | Un visitante con su código para la portería |
+| Categoría | Quién es, en concreto | ¿Fotos? | Vigencia | Qué se crea al autorizar |
+|---|---|---|---|---|
+| Residente | El dueño, quien le arrienda, su familia | **Sí** | Sin fecha de fin | Una residencia como propietario o arrendatario |
+| **Residente temporal** | **Un huésped de Airbnb, un familiar unos meses** | **Sí** | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
+| Visitante | **Quien viene una tarde o unos días** | **No** | **Exige** fecha de fin | Un visitante con su código, de una vez |
 
 Los ejemplos son de Mary (2026-09-07) y no son adorno: **son lo que separa las dos categorías
 de estadía**. El huésped de Airbnb duerme ahí, usa las zonas comunes y la portería lo va a ver
@@ -744,15 +758,14 @@ ahora lo reconoce de una.
   RN-60 (quién registra a quién), RN-61 (nada se borra), RN-62 (la categoría decide la
   vigencia), RN-63 (la cadena de registro).
 
-**El visitante pasa por el mismo trámite, y es a propósito** (Mary, 2026-09-07)
+**Cómo se llegó a que el visitante no lleve fotos** (2026-09-07)
 
-Se le planteó que exigirle dos fotos y una autorización a una visita de una tarde es
-notablemente más pesado que el toque único de antes, y que se podía dejar una vía rápida solo
-para visitantes. La respuesta fue **dejarlo igual para residentes y visitantes** — con una
-aclaración que vale más que la decisión: el caso pesado que Mary tenía en mente (*«el
-apartamento de un propietario que está en Airbnb»*) **no es un visitante, es un residente
-temporal**, y para eso ya existe su propia categoría. El trámite completo le corresponde a
-quien se queda a dormir.
+Vale dejar el camino, porque la conclusión no fue la primera respuesta. Se planteó que exigirle
+dos fotos y una autorización a una visita de una tarde es más pesado que el toque único de
+antes; la respuesta inicial fue dejarlo igual para todos. Al revisarlo apareció que **el caso
+pesado que se tenía en mente —el apartamento en Airbnb— no es un visitante, es un residente
+temporal**, y esa categoría ya existía. De ahí salió el criterio, en las palabras de Mary:
+**«el trámite le corresponde a quien se queda a dormir»**.
 
 Queda escrito porque es la clase de decisión que alguien va a querer «optimizar» más adelante
 sin saber que se tomó a conciencia: **tener dos formas de meter gente a la unidad es tener una
@@ -771,7 +784,8 @@ distintos para lo mismo acaban pidiendo cosas distintas).
 
 ## CU-R-28 — Adjuntar mis documentos a un registro
 
-- **Actor principal:** La persona que están registrando. **Todavía no tiene cuenta.**
+- **Actor principal:** La persona que están registrando **como residente o residente temporal**.
+  **Todavía no tiene cuenta.** Un visitante no llega aquí: no lleva fotos (RN-57).
 - **Precondiciones:** Alguien la registró y le pasó el código.
 - **Disparador:** Le llega el código.
 - **Resultado esperado:** Sus dos fotos quedan adjuntas y el registro pasa a esperar

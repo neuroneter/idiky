@@ -15,10 +15,15 @@
  */
 
 import { useState } from 'react'
-import { exigeVigencia, hoyISO, sumarDias } from '../dominio/reglas'
 import { formatearFecha } from '../utilidades/formato'
 import type { CategoriaRegistro, RegistroPersona, RolResidencia, Unidad } from '../dominio/tipos'
-import { etiquetaUnidad } from '../dominio/reglas'
+import {
+  etiquetaUnidad,
+  exigeSoportes,
+  exigeVigencia,
+  hoyISO,
+  sumarDias,
+} from '../dominio/reglas'
 import { Modal } from './Modal'
 import { Icono } from './Icono'
 
@@ -97,6 +102,10 @@ export function FormularioRegistro({
   const [error, setError] = useState<string | null>(null)
 
   const conVigencia = exigeVigencia(categoria)
+  /* Lo que se le promete a quien registra cambia con la categoria, porque el
+     tramite cambia con ella (RN-57): anunciarle fotos a quien registra una
+     visita de una tarde seria prometerle un paso que no va a existir. */
+  const conSoportes = exigeSoportes(categoria)
 
   function enviar(evento: React.FormEvent) {
     evento.preventDefault()
@@ -137,7 +146,11 @@ export function FormularioRegistro({
   return (
     <Modal
       titulo="Registrar una persona"
-      descripcion="Después de crearlo, la persona adjunta sus fotos desde su teléfono y tú autorizas."
+      descripcion={
+        conSoportes
+          ? 'Después de crearlo, la persona adjunta sus fotos desde su teléfono y tú autorizas.'
+          : 'Queda autorizado de una vez, con su código para la portería.'
+      }
       onCerrar={alCerrar}
     >
       <form onSubmit={enviar}>
@@ -216,8 +229,9 @@ export function FormularioRegistro({
             onChange={(e) => setDocumento(e.target.value)}
           />
           <span className="ayuda-campo">
-            Con este número y el código que sale al terminar, la persona abre su registro para
-            adjuntar las fotos.
+            {conSoportes
+              ? 'Con este número y el código que sale al terminar, la persona abre su registro para adjuntar las fotos.'
+              : 'Es lo que la portería le pide en la entrada, junto con su código.'}
           </span>
         </div>
 
@@ -275,7 +289,7 @@ export function FormularioRegistro({
         {error && <p className="acceso__error">{error}</p>}
 
         <button className="boton boton--primario boton--bloque" type="submit">
-          Crear el registro
+          {conSoportes ? 'Crear el registro' : 'Autorizar la visita'}
         </button>
       </form>
     </Modal>
@@ -332,6 +346,9 @@ export function DetalleRegistro({
         </div>
       </div>
 
+      {/* Al visitante no se le piden soportes (RN-57), asi que su registro nace
+          autorizado y no tiene codigo que dictarle a nadie: el codigo que
+          importa es el del visitante, y vive en la pantalla de visitantes. */}
       {registro.estado === 'esperando_soportes' && (
         <>
           <div className="separador" />
