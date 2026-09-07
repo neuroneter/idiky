@@ -728,7 +728,9 @@ lo dejó entrar y cuándo: aliviar el requisito no es renunciar al rastro.
 | Visitante | **Quien viene una tarde** | **No** | **Un solo día** | Un visitante con su código, de una vez |
 
 **El visitante es de un solo día** (Mary, 2026-09-07). No se registra un rango: se escoge el día
-en que viene, y ese día entra y sale. Es lo que mantiene separadas las dos categorías de
+en que viene, y ese día entra y sale. **Ese día puede ser futuro** —una visita del sábado se
+autoriza el martes—; lo que no se admite es un rango ni un día ya pasado. Queda dicho porque
+«fechas del mismo día» se puede leer como «solo hoy», y no es eso. Es lo que mantiene separadas las dos categorías de
 estadía — una autorización de visitante «del 5 al 20» sería un residente temporal sin sus
 soportes, y por ahí se colaría justo lo que RN-57 le exige a quien se queda a dormir. Y es lo
 que hace barato no pedirle fotos: **una autorización que caduca esta misma noche no es una
