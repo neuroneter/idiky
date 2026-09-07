@@ -125,6 +125,12 @@ Queda escrito en el CU porque es la clase de decisión que alguien querrá «opt
 adelante: tener dos formas de meter gente a la unidad es tener una con soportes y otra sin
 ellos, y la que no los pide se vuelve la que todo el mundo usa.
 
+Y al revisarlo apareció lo que de verdad separa las categorías: el caso pesado que Mary tenía
+en mente —**el apartamento de un propietario que está en Airbnb**— no es un visitante, es un
+**residente temporal**, y para eso ya existía su categoría. Los dos ejemplos —el huésped de
+Airbnb y la visita de una tarde— pasaron al texto que la gente lee al escoger. La ayuda decía
+«se queda un tiempo definido», que obliga a traducir el caso propio; ahora se reconoce de una.
+
 **Las fotos:** [ADR-0009](./adr/0009-soportes-fotograficos.md). Se capturan con
 `<input type="file" capture>` —el HTML de siempre, cero dependencias, funciona igual dentro de
 Capacitor— y se reducen a 720 px antes de guardarse: el demo entero vive en `localStorage`, que

@@ -26,15 +26,15 @@ import { Icono } from './Icono'
 export const CATEGORIAS: Record<CategoriaRegistro, { texto: string; ayuda: string }> = {
   residente: {
     texto: 'Residente',
-    ayuda: 'Vive aquí de forma permanente. Propietario o arrendatario.',
+    ayuda: 'Vive aquí. El dueño, quien le arrienda, su familia.',
   },
   residente_temporal: {
     texto: 'Residente temporal',
-    ayuda: 'Se queda un tiempo definido. Necesita fecha de salida.',
+    ayuda: 'Se queda a dormir un tiempo: un huésped de Airbnb, un familiar unos meses.',
   },
   visitante: {
     texto: 'Visitante',
-    ayuda: 'Entra por unos días con un código para la portería.',
+    ayuda: 'Viene de visita, una tarde o unos días. Entra con un código para la portería.',
   },
 }
 

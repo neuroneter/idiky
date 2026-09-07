@@ -707,11 +707,17 @@ la subió**. Que la traiga la propia persona es lo que convierte el trámite en 
 
 **Las categorías** (RN-62)
 
-| Categoría | Vigencia | Qué se crea al autorizar |
-|---|---|---|
-| Residente | Sin fecha de fin | Una residencia como propietario o arrendatario |
-| Residente temporal | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
-| Visitante | **Exige** fecha de fin | Un visitante con su código para la portería |
+| Categoría | Quién es, en concreto | Vigencia | Qué se crea al autorizar |
+|---|---|---|---|
+| Residente | El dueño, quien le arrienda, su familia | Sin fecha de fin | Una residencia como propietario o arrendatario |
+| **Residente temporal** | **Un huésped de Airbnb, un familiar unos meses** | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
+| Visitante | **Quien viene una tarde o unos días** | **Exige** fecha de fin | Un visitante con su código para la portería |
+
+Los ejemplos son de Mary (2026-09-07) y no son adorno: **son lo que separa las dos categorías
+de estadía**. El huésped de Airbnb duerme ahí, usa las zonas comunes y la portería lo va a ver
+a diario — por eso el trámite completo le corresponde. La visita de una tarde es otra cosa.
+Antes la ayuda decía «se queda un tiempo definido», que obliga a la persona a traducir su caso;
+ahora lo reconoce de una.
 
 **Flujo principal**
 1. El residente abre **Mi unidad → Personas de la unidad**.
@@ -742,7 +748,11 @@ la subió**. Que la traiga la propia persona es lo que convierte el trámite en 
 
 Se le planteó que exigirle dos fotos y una autorización a una visita de una tarde es
 notablemente más pesado que el toque único de antes, y que se podía dejar una vía rápida solo
-para visitantes. La respuesta fue **dejarlo igual para residentes y visitantes**.
+para visitantes. La respuesta fue **dejarlo igual para residentes y visitantes** — con una
+aclaración que vale más que la decisión: el caso pesado que Mary tenía en mente (*«el
+apartamento de un propietario que está en Airbnb»*) **no es un visitante, es un residente
+temporal**, y para eso ya existe su propia categoría. El trámite completo le corresponde a
+quien se queda a dormir.
 
 Queda escrito porque es la clase de decisión que alguien va a querer «optimizar» más adelante
 sin saber que se tomó a conciencia: **tener dos formas de meter gente a la unidad es tener una
