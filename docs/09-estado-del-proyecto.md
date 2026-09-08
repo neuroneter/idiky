@@ -76,6 +76,46 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-08 · Mary + IA (Claude) · El manual de convivencia, y quién define las multas
+
+Al proponerle el catálogo de multas resumí mal la regla: dije que *«el administrador define las
+infracciones y sus montos»*. Mary corrigió: **«el administrador no define las multas, estas las
+define la asamblea normalmente, o están ya establecidas en el reglamento de propiedad
+horizontal o el manual de convivencia»**, y luego: **«de acuerdo, el administrador
+parametriza»**.
+
+La documentación ya lo decía bien —RN-38 exige el respaldo desde el 2026-08-27— así que el
+error fue de mi resumen, no del modelo. Pero la corrección destapó algo que sí faltaba.
+
+**El manual de convivencia no estaba en el modelo.** El respaldo admitía «reglamento o acta», y
+son dos documentos distintos:
+
+- El **reglamento de propiedad horizontal** es el constitutivo: se eleva a escritura pública y
+  se registra, y define coeficientes, bienes comunes y órganos.
+- El **manual de convivencia** lo adopta la asamblea para regular el día a día —horarios,
+  mascotas, ruido, uso de zonas comunes—, y **en la práctica el catálogo de sanciones suele
+  vivir ahí**.
+
+Obligar a citar «reglamento» donde la conducta está en el manual haría que la referencia **no
+se pudiera comprobar**, que es justo lo que el principio del respaldo existe para evitar. Los
+tres se citan distinto: reglamento y manual por **artículo**, acta por **fecha**. Y el manual,
+aunque lo apruebe la asamblea, se cita como manual: quien quiera verificar la multa busca el
+artículo, no el acta que adoptó el documento hace seis años.
+
+**Y quedó dicho lo que RN-49 daba por entendido:** parametrizar no es decidir. La facultad de
+operar el catálogo es del administrador; la de crear la sanción, no. Es la misma distinción que
+ya regía la extraordinaria —el administrador la traslada del acta, no la escribe— aplicada a
+las multas.
+
+Se agregó también un flujo alternativo a CU-A-22: **si se reforma el manual**, los conceptos
+afectados se dan de baja y se crean de nuevo citando el artículo nuevo. No se editan en sitio,
+porque una multa impuesta bajo el manual anterior tiene que seguir apuntando al texto que la
+respaldaba (RN-37).
+
+Sin cambios de código: CU-A-22 sigue sin construirse, y ahora arranca con el modelo correcto.
+
+---
+
 ### 2026-09-07 · Mary + IA (Claude) · La marca de residente
 
 Justo después de precisar que «residente» es una marca y no un título, Mary la convirtió en una

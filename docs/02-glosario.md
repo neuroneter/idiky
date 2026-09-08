@@ -6,6 +6,9 @@ el código usan estos términos en español** (ver [convenciones](./08-convencio
 | Término | Definición | Nombre en código |
 |---|---|---|
 | **Propiedad Horizontal (PH)** | Régimen jurídico donde coexisten bienes privados y bienes comunes bajo un reglamento. | — |
+| **Reglamento de propiedad horizontal** | El documento **constitutivo** de la copropiedad: se eleva a escritura pública y se registra. Define coeficientes, bienes comunes y órganos. | — |
+| **Manual de convivencia** | Documento **distinto del reglamento**, adoptado por la asamblea, que regula el día a día: horarios, mascotas, ruido, uso de zonas comunes. **En la práctica el catálogo de sanciones suele vivir aquí** (Mary, 2026-09-08), así que es un respaldo válido para una multa por derecho propio (RN-38). | `ConceptoSancion.origen = 'manual'` |
+| **Parametrizar** | Trasladar al sistema **lo que el reglamento, el manual o la asamblea ya decidieron**: qué cuotas, multas e intereses existen y cuánto valen. Es facultad exclusiva del administrador (RN-49), y **no es lo mismo que decidir**: el administrador no define las multas. | — |
 | **Copropiedad** | El conjunto residencial/edificio administrado. Es el tenant del sistema. | `Copropiedad` |
 | **Unidad privada** | Apartamento, casa o local de propiedad individual. | `Unidad` |
 | **Torre / Bloque / Etapa** | Agrupación física de unidades dentro de la copropiedad. | `Unidad.torre` |

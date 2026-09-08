@@ -441,22 +441,34 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 ## CU-A-22 — Administrar el catálogo de multas
 
 - **Actor principal:** Administrador
-- **Precondiciones:** El reglamento de la copropiedad define qué conductas se sancionan.
-- **Disparador:** Se configura la copropiedad, o el reglamento cambia.
+- **Precondiciones:** Las conductas sancionables ya están definidas — en el **reglamento de
+  propiedad horizontal**, en el **manual de convivencia** o en un **acta de asamblea**.
+- **Disparador:** Se configura la copropiedad, cambia el manual de convivencia, o la asamblea
+  aprueba sanciones nuevas.
 - **Resultado esperado:** Queda definido **qué multas existen** y por cuánto. Sin catálogo no
   se puede imponer ninguna (RN-38).
 
 **Flujo principal**
 1. El administrador ve los conceptos de multa de su copropiedad, activos e inactivos.
-2. Crea uno: nombre, descripción de la conducta, valor sugerido y **qué lo autoriza** — el
-   artículo del reglamento, o el acta de la asamblea que lo aprobó.
+2. Crea uno: nombre, descripción de la conducta, valor y **qué lo autoriza** — el artículo del
+   reglamento, el artículo del **manual de convivencia**, o el acta de la asamblea que lo
+   aprobó. El reglamento y el manual se citan por artículo; el acta, por fecha.
 3. El sistema lo guarda como activo y queda disponible para CU-A-23.
 
-> **Una multa solo existe si el reglamento la contempla o la asamblea la aprobó**
-> (decisión del equipo, 2026-08-27). No es un cobro que el administrador pueda inventar, así
-> que el respaldo **no es opcional**: sin él, el concepto no se crea. Es el mismo principio que
-> rige la tasa de interés y las cuotas extraordinarias — ver
+> **El administrador no define las multas: las parametriza** (Mary, 2026-09-08). *«Las define
+> la asamblea normalmente, o ya están establecidas en el reglamento de propiedad horizontal o
+> el manual de convivencia.»* Esta pantalla **traslada al sistema** lo que esos documentos ya
+> dicen; no es donde se inventa una sanción.
+>
+> Por eso el respaldo **no es opcional**: sin él, el concepto no se crea. Es el mismo principio
+> que rige la tasa de interés y las cuotas extraordinarias — ver
 > [`../05-modelo-de-datos.md`](../05-modelo-de-datos.md) §3 bis, «El principio del respaldo».
+>
+> **El manual de convivencia cuenta aparte del reglamento**, y no es un detalle: el reglamento
+> de PH es el constitutivo —escritura pública, registrado—, mientras que el manual lo adopta la
+> asamblea para el día a día, y **en la práctica el catálogo de sanciones suele vivir ahí**.
+> Obligar a citar «reglamento» donde la conducta está en el manual haría que la referencia no
+> se pudiera comprobar.
 
 **Flujos alternativos**
 - A1. Editar un concepto → **no cambia las multas ya impuestas**, que copiaron su valor (RN-37).
@@ -464,9 +476,14 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
   lo referencian (RN-40).
 - A3. La asamblea aprueba multas nuevas → se crean los conceptos citando esa acta, y quedan
   disponibles desde entonces.
+- A4. **Se reforma el manual de convivencia** → los conceptos afectados se dan de baja y se
+  crean de nuevo citando el artículo nuevo. No se editan en sitio: una multa impuesta bajo el
+  manual anterior tiene que seguir apuntando al texto que la respaldaba (RN-37).
 
 **Reglas de negocio**
-- RN-38: solo entra al catálogo lo que el reglamento contempla o la asamblea aprobó.
+- RN-38: solo entra al catálogo lo que el reglamento, el manual de convivencia o la asamblea
+  contemplan.
+- RN-49: el administrador **parametriza**, no decide.
 - RN-40, RN-45.
 
 **Estado en el demo:** ⬜ — no existe.

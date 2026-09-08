@@ -350,7 +350,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-35 | El acta se construye desde los datos registrados; aprobada, no se edita — se aclara con un acta nueva. | *pendiente* |
 | RN-36 | Todo documento formal lleva **consecutivo único por tipo** y un **código de verificación** aleatorio, y se comprueba desde fuera de la app sin exponer datos personales (ADR-0006). | `datos/repositorio.ts` (paz y salvo); falta la página pública de verificación |
 | RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | `datos/repositorio.ts` (`emitirVoto` copia el coeficiente) |
-| RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si el reglamento lo contempla o una asamblea lo aprobó. | *pendiente* |
+| RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si lo contempla **el reglamento de propiedad horizontal, el manual de convivencia** o un **acta de asamblea** (Mary, 2026-09-08). **El administrador no define las multas**: las define la asamblea o ya están en esos documentos; él las parametriza (RN-49). El reglamento y el manual se citan por artículo; el acta, por fecha. | *pendiente* |
 | RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al proponerla. **(? — depende del debido proceso, Ley 675)** | *pendiente* |
 | RN-40 | Un concepto del catálogo no se borra: se desactiva, porque las multas impuestas lo referencian. | *pendiente* |
 | RN-41 | Una cuota adicional exige concepto y valor explícitos; no se prorratea por coeficiente. | *pendiente* |
@@ -361,7 +361,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-46 | Una cuota **extraordinaria** exige el acta de asamblea que la aprobó. No admite la opción «reglamento»: siempre es acta. | *pendiente* |
 | RN-47 | El respaldo se **justifica por escrito**: el cobro exige una justificación que cite el acta y su fecha y diga para qué se aprobó. Sin ella el cobro no se crea. El copropietario la lee desde su estado de cuenta. | *pendiente* |
 | RN-48 | La cuota extraordinaria tiene **destinación específica**: el concepto la describe en texto libre —cada obra es distinta— pero es la destinación que aprobó el acta, y el recaudo se destina a eso. | *pendiente* |
-| RN-49 | **Parametrizar la cartera es facultad exclusiva del administrador de esa copropiedad**: qué cuotas, multas e intereses existen y cuánto valen. Ningún otro rol lo hace, y la comprobación no puede vivir solo en la interfaz. | *parcial* (`App.tsx` protege la ruta; `repositorio.ts` no comprueba quién llama) |
+| RN-49 | **Parametrizar la cartera es facultad exclusiva del administrador de esa copropiedad**: qué cuotas, multas e intereses existen y cuánto valen. Ningún otro rol lo hace, y la comprobación no puede vivir solo en la interfaz. **Parametrizar no es decidir**: lo que el administrador traslada al sistema lo decidieron antes el reglamento, el manual de convivencia o la asamblea (RN-38, RN-43, RN-46). | *parcial* (`App.tsx` protege la ruta; `repositorio.ts` no comprueba quién llama) |
 | RN-50 | **Lo que cae en la cuenta de una unidad se sigue de la parametrización y de su regla, no de una decisión caso por caso.** El interés lo liquida el sistema (RN-42, RN-44), la multa exige un concepto del catálogo y quedar firme (RN-38, RN-39), la extraordinaria sale del acta (RN-46, RN-48). | *pendiente* |
 | RN-51 | **Vota el propietario de la unidad**, no quien la habita: el voto va con la propiedad, igual que la cuota. **(? — falta definir el rol `autorizado` y el apoderado, CU-R-23)** | `dominio/reglas.ts` (`puedeVotar`) + `repositorio.ts` |
 | RN-53 | **La cuenta de un residente nace vinculada**: existe porque alguien lo registró en una unidad. La persona la **activa**, no la crea, y quien no está vinculado no entra. **Quién lo registra depende del eslabón (RN-63)**: la administración crea propietarios, el propietario crea a los demás de su unidad. | `features/auth/` (simulado, ADR-0004) |
@@ -424,7 +424,7 @@ Tres requisitos distintos —la tasa de interés, las multas y las cuotas extrao
 llegaron a la misma forma, así que conviene nombrarla una vez:
 
 > **Ningún cobro que no sea la cuota ordinaria puede existir sin apuntar a qué lo autoriza:
-> el reglamento de la copropiedad o un acta de asamblea.**
+> el reglamento de propiedad horizontal, el manual de convivencia o un acta de asamblea.**
 
 En el modelo eso son siempre los mismos tres campos: `origen`, `actaId` y `referencia`. Los
 llevan `TasaInteres`, `ConceptoSancion` y `Cuota`.
@@ -435,7 +435,7 @@ llevan `TasaInteres`, `ConceptoSancion` y `Cuota`.
 |---|---|
 | Cuota ordinaria | Ninguno: es el cobro base de la copropiedad |
 | **Cuota extraordinaria** | **Siempre un acta de asamblea.** No admite reglamento (RN-46) |
-| Multa | Reglamento **o** acta (RN-38) |
+| Multa | Reglamento, **manual de convivencia** o acta (RN-38) |
 | Interés de mora | Reglamento **o** acta (RN-43) |
 | Cobro adicional | **(?)** por definir |
 
@@ -444,6 +444,23 @@ previsto y que puede ser grande, así que la única forma de imponerlo es que lo
 lo hayan votado. Y además **tiene destinación específica**: la asamblea no aprueba «una
 extraordinaria», aprueba una extraordinaria **para algo** —impermeabilizar la cubierta, cambiar
 el ascensor—.
+
+**El manual de convivencia es un origen aparte, no «el reglamento»** (Mary, 2026-09-08). Son
+dos documentos distintos: el **reglamento de propiedad horizontal** es el constitutivo —se eleva
+a escritura pública y se registra, y define coeficientes, bienes comunes y órganos—, mientras
+que el **manual de convivencia** lo adopta la asamblea para regular el día a día: horarios,
+mascotas, ruido, uso de zonas comunes. **En la práctica el catálogo de sanciones suele vivir en
+el manual**, no en el reglamento, así que obligar a citar «reglamento» donde la conducta está en
+el manual haría que la referencia no se pudiera comprobar.
+
+Los tres son rastreables, pero se citan distinto: el reglamento y el manual por **artículo**, el
+acta por **fecha**. Y el manual, aunque lo apruebe la asamblea, se cita como manual: quien
+quiera verificar la multa busca el artículo, no el acta que adoptó el documento hace seis años.
+
+**Lo que no cambia: el administrador no decide las multas.** Las define la asamblea, o ya están
+en el reglamento o en el manual (Mary, 2026-09-08). El administrador **parametriza** —traslada
+al sistema lo que esos documentos dicen— y esa distinción es toda RN-49: la facultad de operar
+el catálogo es suya; la de crear la sanción, no.
 
 **El `concepto` sí es texto libre** (Mary, 2026-08-27), y tiene que serlo: el «para qué» puede
 ser un proyecto de mejora de zonas comunes, la reparación de un daño del edificio, automatizar
