@@ -442,7 +442,8 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 
 - **Actor principal:** Administrador
 - **Precondiciones:** Las conductas sancionables ya están definidas — en el **reglamento de
-  propiedad horizontal**, en el **manual de convivencia** o en un **acta de asamblea**.
+  propiedad horizontal**, en el **manual de convivencia**, en un **acta de asamblea** o en
+  **otro documento** que haya que nombrar.
 - **Disparador:** Se configura la copropiedad, cambia el manual de convivencia, o la asamblea
   aprueba sanciones nuevas.
 - **Resultado esperado:** Queda definido **qué multas existen** y por cuánto. Sin catálogo no
@@ -450,9 +451,15 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 
 **Flujo principal**
 1. El administrador ve los conceptos de multa de su copropiedad, activos e inactivos.
-2. Crea uno: nombre, descripción de la conducta, valor y **qué lo autoriza** — el artículo del
-   reglamento, el artículo del **manual de convivencia**, o el acta de la asamblea que lo
-   aprobó. El reglamento y el manual se citan por artículo; el acta, por fecha.
+2. Crea uno: nombre, descripción de la conducta, valor y **qué lo autoriza**, escogiendo entre
+   cuatro orígenes:
+
+   | Origen | Qué se escribe |
+   |---|---|
+   | Reglamento de propiedad horizontal | El artículo |
+   | Manual de convivencia | El artículo |
+   | Acta de asamblea | La fecha del acta |
+   | **Otro documento** | **Cuál es el documento**, y dónde dice lo que dice |
 3. El sistema lo guarda como activo y queda disponible para CU-A-23.
 
 > **El administrador no define las multas: las parametriza** (Mary, 2026-09-08). *«Las define
@@ -469,6 +476,11 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 > asamblea para el día a día, y **en la práctica el catálogo de sanciones suele vivir ahí**.
 > Obligar a citar «reglamento» donde la conducta está en el manual haría que la referencia no
 > se pudiera comprobar.
+>
+> **Y existe «otro documento»** (Mary, 2026-09-08), porque una lista cerrada obligaría a forzar
+> el caso raro dentro de una opción que no le corresponde. **Pero exige nombrar cuál**: sin ese
+> campo, «otro» sería la puerta por donde se escapa el respaldo entero —bastaría marcarlo para
+> no justificar nada—. Nombrándolo sigue siendo comprobable.
 
 **Flujos alternativos**
 - A1. Editar un concepto → **no cambia las multas ya impuestas**, que copiaron su valor (RN-37).
@@ -479,6 +491,8 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 - A4. **Se reforma el manual de convivencia** → los conceptos afectados se dan de baja y se
   crean de nuevo citando el artículo nuevo. No se editan en sitio: una multa impuesta bajo el
   manual anterior tiene que seguir apuntando al texto que la respaldaba (RN-37).
+- A5. Se escoge **otro documento** y no se escribe cuál → el sistema no crea el concepto. No es
+  un campo opcional: es lo único que hace comprobable ese origen.
 
 **Reglas de negocio**
 - RN-38: solo entra al catálogo lo que el reglamento, el manual de convivencia o la asamblea

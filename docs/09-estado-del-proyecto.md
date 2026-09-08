@@ -107,10 +107,22 @@ operar el catálogo es del administrador; la de crear la sanción, no. Es la mis
 ya regía la extraordinaria —el administrador la traslada del acta, no la escribe— aplicada a
 las multas.
 
-Se agregó también un flujo alternativo a CU-A-22: **si se reforma el manual**, los conceptos
-afectados se dan de baja y se crean de nuevo citando el artículo nuevo. No se editan en sitio,
+**Y un cuarto origen, «otro documento»** (Mary: *«tal vez pueden existir otros documentos que
+establezcan estas multas»*). Es cierto —una resolución del consejo, un reglamento interno de
+una zona común, un convenio— y una lista cerrada obligaría a forzar el caso raro dentro de una
+opción que no le corresponde, que es peor que admitirlo.
+
+**Con una condición que es la que lo hace útil en vez de peligroso: «otro» exige nombrar el
+documento.** Sin ese campo obligatorio sería la puerta por donde se escapa el principio entero
+—bastaría marcarlo para no justificar nada, y el respaldo dejaría de ser comprobable—.
+«Resolución del consejo N.º 12 del 3 de marzo, artículo 4» se puede ir a buscar; «otro» a
+secas, no. Es la misma forma de la decisión sobre el concepto de la extraordinaria: **el campo
+es abierto, el dato no es discrecional**.
+
+Se agregaron dos flujos alternativos a CU-A-22: **si se reforma el manual**, los conceptos
+afectados se dan de baja y se crean de nuevo citando el artículo nuevo —no se editan en sitio,
 porque una multa impuesta bajo el manual anterior tiene que seguir apuntando al texto que la
-respaldaba (RN-37).
+respaldaba (RN-37)—; y si se escoge «otro» sin escribir cuál, **el concepto no se crea**.
 
 Sin cambios de código: CU-A-22 sigue sin construirse, y ahora arranca con el modelo correcto.
 

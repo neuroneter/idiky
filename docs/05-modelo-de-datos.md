@@ -350,7 +350,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-35 | El acta se construye desde los datos registrados; aprobada, no se edita — se aclara con un acta nueva. | *pendiente* |
 | RN-36 | Todo documento formal lleva **consecutivo único por tipo** y un **código de verificación** aleatorio, y se comprueba desde fuera de la app sin exponer datos personales (ADR-0006). | `datos/repositorio.ts` (paz y salvo); falta la página pública de verificación |
 | RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | `datos/repositorio.ts` (`emitirVoto` copia el coeficiente) |
-| RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si lo contempla **el reglamento de propiedad horizontal, el manual de convivencia** o un **acta de asamblea** (Mary, 2026-09-08). **El administrador no define las multas**: las define la asamblea o ya están en esos documentos; él las parametriza (RN-49). El reglamento y el manual se citan por artículo; el acta, por fecha. | *pendiente* |
+| RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si lo contempla **el reglamento de propiedad horizontal, el manual de convivencia, un acta de asamblea, u otro documento que haya que nombrar** (Mary, 2026-09-08). **El administrador no define las multas**: las define la asamblea o ya están en esos documentos; él las parametriza (RN-49). El reglamento y el manual se citan por artículo; el acta, por fecha; **`otro` exige escribir cuál es el documento** — sin eso sería la puerta por donde se escapa el respaldo entero. | *pendiente* |
 | RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al proponerla. **(? — depende del debido proceso, Ley 675)** | *pendiente* |
 | RN-40 | Un concepto del catálogo no se borra: se desactiva, porque las multas impuestas lo referencian. | *pendiente* |
 | RN-41 | Una cuota adicional exige concepto y valor explícitos; no se prorratea por coeficiente. | *pendiente* |
@@ -424,7 +424,8 @@ Tres requisitos distintos —la tasa de interés, las multas y las cuotas extrao
 llegaron a la misma forma, así que conviene nombrarla una vez:
 
 > **Ningún cobro que no sea la cuota ordinaria puede existir sin apuntar a qué lo autoriza:
-> el reglamento de propiedad horizontal, el manual de convivencia o un acta de asamblea.**
+> el reglamento de propiedad horizontal, el manual de convivencia, un acta de asamblea —o
+> cualquier otro documento, siempre que se diga cuál.**
 
 En el modelo eso son siempre los mismos tres campos: `origen`, `actaId` y `referencia`. Los
 llevan `TasaInteres`, `ConceptoSancion` y `Cuota`.
@@ -435,7 +436,7 @@ llevan `TasaInteres`, `ConceptoSancion` y `Cuota`.
 |---|---|
 | Cuota ordinaria | Ninguno: es el cobro base de la copropiedad |
 | **Cuota extraordinaria** | **Siempre un acta de asamblea.** No admite reglamento (RN-46) |
-| Multa | Reglamento, **manual de convivencia** o acta (RN-38) |
+| Multa | Reglamento, **manual de convivencia**, acta, u **otro documento nombrado** (RN-38) |
 | Interés de mora | Reglamento **o** acta (RN-43) |
 | Cobro adicional | **(?)** por definir |
 
@@ -456,6 +457,19 @@ el manual haría que la referencia no se pudiera comprobar.
 Los tres son rastreables, pero se citan distinto: el reglamento y el manual por **artículo**, el
 acta por **fecha**. Y el manual, aunque lo apruebe la asamblea, se cita como manual: quien
 quiera verificar la multa busca el artículo, no el acta que adoptó el documento hace seis años.
+
+**Y hay un cuarto origen, `otro`** (Mary, 2026-09-08): *«tal vez pueden existir otros documentos
+que establezcan estas multas»*. Es cierto —una resolución del consejo, un reglamento interno de
+una zona común, un convenio— y una lista cerrada obligaría a forzar el caso dentro de una
+opción que no le corresponde, que es peor que admitirlo.
+
+**Pero `otro` exige nombrar el documento.** Sin ese campo obligatorio sería la puerta por donde
+se escapa el principio entero: bastaría marcar «otro» para no justificar nada, y el respaldo
+dejaría de ser comprobable. Nombrándolo sigue siéndolo — «Resolución del consejo de
+administración N.º 12 del 3 de marzo, artículo 4» se puede ir a buscar; «otro» a secas, no.
+
+Es la misma forma de la decisión sobre el `concepto` de la extraordinaria: **el campo es
+abierto, el dato no es discrecional**.
 
 **Lo que no cambia: el administrador no decide las multas.** Las define la asamblea, o ya están
 en el reglamento o en el manual (Mary, 2026-09-08). El administrador **parametriza** —traslada
