@@ -14,6 +14,8 @@ import {
   estadoRealVisitante,
   etiquetaUnidad,
   hoyISO,
+  puedeImpugnar,
+  puedePresentarDescargos,
   solicitudesEsperandoRespuesta,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearFechaCorta } from '../../utilidades/formato'
@@ -48,6 +50,11 @@ export function InicioPage() {
     sel.pqrsDeUnidad(bd, unidadId),
     sel.reservasDeUnidad(bd, unidadId),
   )
+  // Un proceso sancionatorio con el plazo corriendo entra al inicio (CU-R-29):
+  // es lo unico de la app que se pierde solo si no se mira a tiempo.
+  const procesosPorResponder = sel
+    .sancionesDeUnidad(bd, unidadId)
+    .filter((sancion) => puedePresentarDescargos(sancion) || puedeImpugnar(sancion))
   const visitantesVigentes = sel
     .visitantesDeUnidad(bd, unidadId)
     .filter((visitante) => estadoRealVisitante(visitante, hoyISO()) === 'activo')
@@ -200,6 +207,36 @@ export function InicioPage() {
           </Link>
         )}
       </div>
+
+      {/* Proceso sancionatorio — CU-R-29. Va antes que la correspondencia
+          porque el paquete espera y el plazo no. */}
+      {procesosPorResponder.length > 0 && (
+        <div className="pila">
+          <div className="encabezado-seccion">
+            <h2>Te toca responder</h2>
+          </div>
+          <Link to="/app/procesos" className="tarjeta tarjeta--accion tarjeta--pendiente">
+            <div className="fila">
+              <div className="tarjeta__cuerpo">
+                <span className="marca-tarjeta marca-tarjeta--acento">
+                  <Icono nombre="certificado" tamano={20} />
+                </span>
+                <div className="columna">
+                  <strong>
+                    {procesosPorResponder.length === 1
+                      ? 'Hay un proceso abierto contra tu unidad'
+                      : `Hay ${procesosPorResponder.length} procesos abiertos contra tu unidad`}
+                  </strong>
+                  <span className="subtitulo">
+                    {procesosPorResponder[0].concepto} · tienes plazo para responder
+                  </span>
+                </div>
+              </div>
+              <Icono nombre="chevron" tamano={16} className="tenue" />
+            </div>
+          </Link>
+        </div>
+      )}
 
       {/* Correspondencia — CU-R-11 */}
       {correspondenciaPendiente.length > 0 && (

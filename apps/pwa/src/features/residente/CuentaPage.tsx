@@ -8,10 +8,17 @@ import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
-import { calcularSaldo, calcularSaldoVencido, diasDeMora, estadoRealCuota } from '../../dominio/reglas'
+import {
+  calcularSaldo,
+  calcularSaldoVencido,
+  diasDeMora,
+  estadoRealCuota,
+  sancionEnCurso,
+} from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearPeriodo } from '../../utilidades/formato'
 import { ChipCuota } from '../../componentes/Etiquetas'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
+import { Icono } from '../../componentes/Icono'
 
 type Filtro = 'todas' | 'pendientes' | 'pagadas'
 
@@ -31,6 +38,11 @@ export function CuentaPage() {
   const saldo = calcularSaldo(cuotas)
   const vencido = calcularSaldoVencido(cuotas)
   const mora = diasDeMora(cuotas)
+  // Los procesos abiertos NO suman al valor adeudado: una multa se convierte en
+  // cuota solo al quedar en firme (RN-39). Se enlazan desde aqui —que es donde
+  // la persona viene a ver que debe— justamente para dejar claro que todavia no
+  // debe eso (CU-R-29).
+  const procesosAbiertos = sel.sancionesDeUnidad(bd, sesion.unidadActivaId).filter(sancionEnCurso)
 
   const visibles = cuotas.filter((cuota) => {
     if (filtro === 'pendientes') return cuota.estado !== 'pagada'
@@ -65,6 +77,29 @@ export function CuentaPage() {
           </Link>
         )}
       </div>
+
+      {procesosAbiertos.length > 0 && (
+        <Link to="/app/procesos" className="tarjeta tarjeta--accion tarjeta--plana">
+          <div className="fila">
+            <div className="tarjeta__cuerpo">
+              <span className="marca-tarjeta marca-tarjeta--acento">
+                <Icono nombre="certificado" tamano={20} />
+              </span>
+              <div className="columna">
+                <strong>
+                  {procesosAbiertos.length === 1
+                    ? '1 proceso sancionatorio abierto'
+                    : `${procesosAbiertos.length} procesos sancionatorios abiertos`}
+                </strong>
+                <span className="subtitulo">
+                  Todavía no se cobra nada: solo se carga aquí si queda en firme.
+                </span>
+              </div>
+            </div>
+            <Icono nombre="chevron" tamano={16} className="tenue" />
+          </div>
+        </Link>
+      )}
 
       <div className="filtros">
         {FILTROS.map((opcion) => (

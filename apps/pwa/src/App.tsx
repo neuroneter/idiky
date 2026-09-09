@@ -14,6 +14,7 @@ import { ActivarPage } from './features/auth/ActivarPage'
 import { AdjuntarPage } from './features/auth/AdjuntarPage'
 import { InicioPage } from './features/residente/InicioPage'
 import { MiUnidadPage } from './features/residente/MiUnidadPage'
+import { ProcesosPage } from './features/residente/ProcesosPage'
 import { PersonasPage } from './features/residente/PersonasPage'
 import { CuentaPage } from './features/residente/CuentaPage'
 import { PagoPage } from './features/residente/PagoPage'
@@ -31,6 +32,7 @@ import { UnidadesPage } from './features/admin/UnidadesPage'
 import { RegistrosPage } from './features/admin/RegistrosPage'
 import { CarteraPage } from './features/admin/CarteraPage'
 import { CatalogoMultasPage } from './features/admin/CatalogoMultasPage'
+import { SancionesPage } from './features/admin/SancionesPage'
 import { ReservasAdminPage } from './features/admin/ReservasAdminPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
@@ -97,6 +99,7 @@ export function App() {
         <Route path="comunicados" element={<ComunicadosPage />} />
         <Route path="visitantes" element={<VisitantesPage />} />
         <Route path="correspondencia" element={<CorrespondenciaPage />} />
+        <Route path="procesos" element={<ProcesosPage />} />
         <Route path="unidad" element={<MiUnidadPage />} />
         <Route path="unidad/personas" element={<PersonasPage />} />
       </Route>
@@ -115,6 +118,7 @@ export function App() {
         <Route path="registros" element={<RegistrosPage />} />
         <Route path="cartera" element={<CarteraPage />} />
         <Route path="multas" element={<CatalogoMultasPage />} />
+        <Route path="sanciones" element={<SancionesPage />} />
         <Route path="reservas" element={<ReservasAdminPage />} />
         <Route path="pqrs" element={<PqrsAdminPage />} />
         <Route path="comunicados" element={<ComunicadosAdminPage />} />

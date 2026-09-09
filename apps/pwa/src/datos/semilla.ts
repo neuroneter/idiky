@@ -21,6 +21,7 @@ import type {
   Pqrs,
   Reserva,
   Residencia,
+  Sancion,
   Unidad,
   Visitante,
   Votacion,
@@ -35,7 +36,7 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 3 — rol de porteria: la correspondencia guarda quien la recibio del mensajero.
 // 4 — paz y salvo: cubiertoHasta, codigo de verificacion y una unidad sin saldo.
 // 5 — el portero entra al demo como persona y perfil.
-export const VERSION_ESQUEMA = 10
+export const VERSION_ESQUEMA = 11
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -892,12 +893,94 @@ const conceptosSancion: ConceptoSancion[] = [
   },
 ]
 
+/**
+ * Dos expedientes sancionatorios, cada uno en una etapa distinta (CU-A-23).
+ *
+ * Uno **espera los descargos del copropietario** y el otro **espera que la
+ * administracion resuelva** los que ya presento: son los dos turnos del proceso,
+ * y con uno solo no se ve que el debido proceso es de ida y vuelta.
+ *
+ * Ninguno esta en firme, asi que **ninguno genero cuota** — que es justo lo que
+ * RN-39 exige y lo que un demo tiene que dejar ver.
+ */
+function construirSanciones(): { sanciones: Sancion[]; consecutivo: number } {
+  const hoy = hoyISO()
+  const anio = new Date().getFullYear()
+
+  const sanciones: Sancion[] = [
+    {
+      id: 'san-1',
+      copropiedadId: COPROPIEDAD_ID,
+      unidadId: 'uni-torre2-901',
+      conceptoId: 'cs-1',
+      concepto: 'Ruido fuera de horario',
+      valor: 180000,
+      hechos:
+        'El sábado 5 a la 1:30 a. m. se recibieron tres llamadas de vecinos por música a alto volumen. La portería subió y pidió bajarla; volvió a subir a las 2:10 a. m. por el mismo motivo.',
+      estado: 'notificada',
+      radicado: `SAN-${anio}-0001`,
+      impuestaPor: 'per-admin',
+      fechaImposicion: fechaHoraRelativa(-3, '09:40'),
+      limiteDescargos: sumarDias(hoy, 7),
+      actuaciones: [
+        {
+          id: 'act-1',
+          fecha: fechaHoraRelativa(-3, '09:40'),
+          autor: 'administracion',
+          personaId: 'per-admin',
+          titulo: 'Se notificó la apertura del proceso',
+          texto:
+            'Se le comunicaron los hechos, la norma del manual de convivencia (artículo 14, numeral 3) y el plazo para presentar descargos.',
+        },
+      ],
+    },
+    {
+      id: 'san-2',
+      copropiedadId: COPROPIEDAD_ID,
+      unidadId: 'uni-torre1-402',
+      conceptoId: 'cs-3',
+      concepto: 'Uso indebido del parqueadero de visitantes',
+      valor: 150000,
+      hechos:
+        'Los días 2, 3 y 4 el vehículo de la unidad permaneció en el cupo de visitantes número 4 durante la noche.',
+      estado: 'en_estudio',
+      radicado: `SAN-${anio}-0002`,
+      impuestaPor: 'per-admin',
+      fechaImposicion: fechaHoraRelativa(-9, '11:15'),
+      limiteDescargos: sumarDias(hoy, 1),
+      actuaciones: [
+        {
+          id: 'act-2',
+          fecha: fechaHoraRelativa(-9, '11:15'),
+          autor: 'administracion',
+          personaId: 'per-admin',
+          titulo: 'Se notificó la apertura del proceso',
+          texto:
+            'Se le comunicaron los hechos, la norma del manual de convivencia (artículo 18, parágrafo 2) y el plazo para presentar descargos.',
+        },
+        {
+          id: 'act-3',
+          fecha: fechaHoraRelativa(-2, '20:05'),
+          autor: 'copropietario',
+          personaId: 'per-1',
+          titulo: 'Presentó descargos',
+          texto:
+            'El parqueadero asignado estuvo bloqueado esas tres noches por la obra de impermeabilización. La administración autorizó por WhatsApp usar el cupo de visitantes mientras durara el trabajo.',
+        },
+      ],
+    },
+  ]
+
+  return { sanciones, consecutivo: 2 }
+}
+
 // ---------------------------------------------------------------------------
 // Semilla completa
 // ---------------------------------------------------------------------------
 export function crearSemilla(): BaseDatos {
   const { cuotas, pagos, consecutivoComprobante } = construirCartera()
   const { pqrs, consecutivo: consecutivoPqrs } = construirPqrs()
+  const { sanciones, consecutivo: consecutivoSancion } = construirSanciones()
 
   return {
     version: VERSION_ESQUEMA,
@@ -909,6 +992,10 @@ export function crearSemilla(): BaseDatos {
         direccion: 'Calle 134 # 45-20',
         ciudad: 'Bogotá',
         tipo: 'residencial',
+        // Los terminos del debido proceso, tomados del reglamento de esta
+        // copropiedad. No son constantes de la app (RN-69).
+        diasDescargos: 10,
+        diasImpugnacion: 5,
       },
     ],
     unidades,
@@ -917,6 +1004,7 @@ export function crearSemilla(): BaseDatos {
     cuotas,
     pagos,
     conceptosSancion,
+    sanciones,
     zonasComunes,
     reservas: construirReservas(),
     pqrs,
@@ -995,6 +1083,7 @@ export function crearSemilla(): BaseDatos {
     ],
     consecutivos: {
       pqrs: consecutivoPqrs,
+      sancion: consecutivoSancion,
       comprobante: consecutivoComprobante,
       pazYSalvo: 1,
     },

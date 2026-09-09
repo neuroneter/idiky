@@ -30,6 +30,16 @@ export interface Copropiedad {
   direccion: string
   ciudad: string
   tipo: 'residencial' | 'comercial' | 'mixto'
+  /**
+   * Dias que tiene el copropietario para presentar descargos, y dias para
+   * impugnar la decision (Ley 675 de 2001, debido proceso).
+   *
+   * **Son parametros, no constantes**: el termino lo fija el reglamento de cada
+   * copropiedad, no la app. La administracion los traslada, igual que traslada
+   * el catalogo de multas (RN-49).
+   */
+  diasDescargos: number
+  diasImpugnacion: number
 }
 
 export type TipoUnidad = 'apartamento' | 'casa' | 'local'
@@ -181,6 +191,83 @@ export interface ConceptoSancion {
   creadoEn: FechaHoraISO
   /** Cuando se dio de baja. El concepto queda, deja de ofrecerse (RN-40). */
   inactivoDesde?: FechaISO
+}
+
+// ---------------------------------------------------------------------------
+// Sanciones — CU-A-23, CU-R-29 · RN-39, RN-69
+//
+// **Una multa no es un cobro cualquiera.** La Ley 675 de 2001 exige debido
+// proceso antes de sancionar: el copropietario tiene que ser oido, poder
+// defenderse y poder impugnar. Por eso la sancion es una maquina de estados con
+// su expediente, y **la cuota nace solo cuando queda firme** (RN-39).
+// ---------------------------------------------------------------------------
+
+/**
+ * Las etapas del debido proceso.
+ *
+ *   notificada  -> se le comunicaron los hechos; corre el plazo de descargos
+ *   en_estudio  -> presento descargos; la administracion los estudia
+ *   resuelta    -> hay decision de sancionar; corre el plazo de impugnacion
+ *   impugnada   -> el copropietario impugno; falta resolver el recurso
+ *   firme       -> ya no admite recurso. **Aqui, y solo aqui, nace la cuota**
+ *   archivada   -> se le dio la razon, o la administracion desistio. No cobra
+ */
+export type EstadoSancion =
+  | 'notificada'
+  | 'en_estudio'
+  | 'resuelta'
+  | 'impugnada'
+  | 'firme'
+  | 'archivada'
+
+/** Quien actua en el expediente. */
+export type AutorActuacion = 'administracion' | 'copropietario'
+
+/**
+ * Cada paso del expediente, con fecha y autor.
+ *
+ * **Es la prueba del debido proceso**, no un historial decorativo: si alguien
+ * discute la multa, lo que se revisa es si se le notifico, si tuvo plazo, si lo
+ * oyeron y si pudo impugnar. Un expediente sin actuaciones es una multa que no
+ * se puede defender.
+ */
+export interface ActuacionSancion {
+  id: string
+  fecha: FechaHoraISO
+  autor: AutorActuacion
+  /** Quien la hizo, cuando se sabe. */
+  personaId?: string
+  /** Que paso, en una linea. */
+  titulo: string
+  /** Lo que se escribio: los hechos, los descargos, la motivacion. */
+  texto?: string
+}
+
+export interface Sancion {
+  id: string
+  copropiedadId: string
+  unidadId: string
+  /** Del catalogo (RN-38). Se guarda tambien lo copiado, por si se inhabilita. */
+  conceptoId: string
+  /** Copiados al imponerla, como el coeficiente (RN-37). */
+  concepto: string
+  valor: Dinero
+  /** Que paso, cuando y donde. Es lo que se le notifica. */
+  hechos: string
+  estado: EstadoSancion
+  /** Consecutivo del expediente: se cita en la notificacion y en la cuota. */
+  radicado: string
+  impuestaPor: string
+  fechaImposicion: FechaHoraISO
+  /** Hasta cuando puede presentar descargos (se copia del parametro). */
+  limiteDescargos: FechaISO
+  /** Hasta cuando puede impugnar. Solo existe una vez resuelta. */
+  limiteImpugnacion?: FechaISO
+  /** Por que se archivo, o por que se sanciono pese a los descargos. */
+  motivo?: string
+  /** La cuota que genera. **Solo cuando queda firme** (RN-39). */
+  cuotaId?: string
+  actuaciones: ActuacionSancion[]
 }
 
 // ---------------------------------------------------------------------------
@@ -620,6 +707,7 @@ export interface BaseDatos {
   cuotas: Cuota[]
   pagos: Pago[]
   conceptosSancion: ConceptoSancion[]
+  sanciones: Sancion[]
   zonasComunes: ZonaComun[]
   reservas: Reserva[]
   pqrs: Pqrs[]
@@ -636,6 +724,7 @@ export interface BaseDatos {
   perfilesDemo: PerfilDemo[]
   consecutivos: {
     pqrs: number
+    sancion: number
     comprobante: number
     pazYSalvo: number
   }

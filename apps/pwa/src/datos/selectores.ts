@@ -10,6 +10,7 @@ import type {
   BaseDatos,
   Comunicado,
   ConceptoSancion,
+  Sancion,
   Documento,
   Correspondencia,
   Cuota,
@@ -89,6 +90,20 @@ export function conceptosSancionDe(bd: BaseDatos, copropiedadId: string): Concep
       if (a.activo !== b.activo) return a.activo ? -1 : 1
       return a.nombre.localeCompare(b.nombre)
     })
+}
+
+/**
+ * Los procesos sancionatorios de una unidad, del mas nuevo al mas viejo
+ * (CU-R-29).
+ *
+ * El copropietario ve los de **su** unidad y ninguno mas: un expediente
+ * sancionatorio dice que hizo una persona en su casa, y eso no es informacion
+ * de la comunidad.
+ */
+export function sancionesDeUnidad(bd: BaseDatos, unidadId?: string): Sancion[] {
+  return bd.sanciones
+    .filter((sancion) => sancion.unidadId === unidadId)
+    .sort((a, b) => b.fechaImposicion.localeCompare(a.fechaImposicion))
 }
 
 export function zonasDe(bd: BaseDatos, copropiedadId: string): ZonaComun[] {

@@ -105,7 +105,7 @@ hay que responderlo explícitamente, no asumirlo.
 | Chat entre residentes | ❓ Sin confirmar | No mencionado |
 | Reserva de parqueaderos de visitantes | ❓ Sin confirmar | No mencionado |
 | Control de mascotas | ❓ Sin confirmar | No mencionado |
-| **Multas y sanciones por convivencia** | ✅ v1 | Pedido el 2026-08-27. **CU-A-23 bloqueado** por el debido proceso (§3 quater) |
+| **Multas y sanciones por convivencia** | ✅ v1 | Pedido el 2026-08-27. **CU-A-23 desbloqueado el 2026-09-09**: el debido proceso lo fija el reglamento y la app lo parametriza (§3 quater, RN-69) |
 | **Cobros adicionales por unidad** | ✅ v1 | Parqueadero, mascota, uso de zonas, reposición de daños (CU-A-24) |
 | Facturación electrónica | ❓ Sin confirmar | No mencionado |
 
@@ -187,9 +187,12 @@ CU-A-22, CU-A-23 y CU-A-24.
 
 **Antes de construirlo hay que responder esto**, porque una multa mal impuesta es nula:
 
-- **Debido proceso.** La Ley 675 de 2001 exige oír al copropietario antes de sancionar.
-  ¿Cuáles son los pasos en esta copropiedad: notificación, plazo de descargos, decisión?
-  ¿Cuánto dura el plazo? → *(respuesta)*
+- ~~**Debido proceso.**~~ → ✅ **Respondido (Mary, 2026-09-09):** *«el debido proceso ya está
+  reglamentado»*. **No lo decide la app, lo dice el reglamento de cada copropiedad**, así que
+  los plazos son **parámetros** (`Copropiedad.diasDescargos`, `diasImpugnacion`) y no
+  constantes del código (RN-69). Los pasos implementados son: notificar → descargos →
+  decisión motivada → impugnación → firmeza. **Falta** el número concreto de días de *esta*
+  copropiedad; el demo usa 10 y 5 como ejemplo.
 - **Quién impone.** ¿El administrador solo, el consejo de administración, o la asamblea?
   → *(respuesta)*
 - **Quién decide los descargos.** ¿La misma persona que impuso la multa, u otra? → *(respuesta)*
@@ -208,8 +211,11 @@ CU-A-22, CU-A-23 y CU-A-24.
 - **Cuotas adicionales.** ¿Qué se cobra realmente por esta vía —parqueadero, mascota, uso de
   zonas, reposición de daños— y quién lo autoriza? → *(respuesta)*
 
-> **Mientras no haya respuestas, no se implementa CU-A-23.** El catálogo (CU-A-22) y la cuota
-> adicional (CU-A-24) sí se pueden construir sin ellas: no tienen consecuencias jurídicas.
+> ~~**Mientras no haya respuestas, no se implementa CU-A-23.**~~ → **Levantado el 2026-09-09.**
+> CU-A-23 y CU-R-29 están construidos sobre la respuesta de Mary: la app **no fija** el debido
+> proceso, lo parametriza. Las preguntas que siguen abiertas arriba no bloquean el flujo —lo
+> afinan—, y ninguna de ellas puede llevar una multa a la cartera sin pasar por las cinco
+> etapas: la cuota nace en un solo sitio del código (RN-39).
 
 ## 3 quinquies. Interés de mora — lo que falta de la respuesta
 

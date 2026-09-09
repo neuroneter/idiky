@@ -10,7 +10,9 @@ import type {
   Asamblea,
   CategoriaRegistro,
   ConceptoSancion,
+  EstadoSancion,
   OrigenRespaldo,
+  Sancion,
   RolUsuario,
   Cuota,
   FechaISO,
@@ -452,6 +454,90 @@ export function solicitudesEsperandoRespuesta(pqrs: Pqrs[], reservas: Reserva[])
 // Tres actos separados: **registrar**, **adjuntar** y **autorizar**. Nunca los
 // hace la misma persona en el mismo momento, y de ahi sale todo lo demas.
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Debido proceso sancionatorio — RN-39, RN-69 · CU-A-23, CU-R-29
+//
+// La Ley 675 de 2001 exige que el copropietario sea oido antes de sancionarlo.
+// **Los terminos no los fija la app**: los fija el reglamento de cada
+// copropiedad, y aqui se leen de sus parametros (RN-49).
+// ---------------------------------------------------------------------------
+
+/**
+ * Las seis etapas, con lo que significan y quien tiene la pelota.
+ *
+ * Saber **de quien es el turno** es la mitad de lo que hace util esta pantalla:
+ * un expediente en el que los dos creen que espera al otro es un expediente que
+ * se vence solo.
+ */
+export const ETAPAS_SANCION: Record<
+  EstadoSancion,
+  { texto: string; chip: string; turno: 'copropietario' | 'administracion' | 'nadie' }
+> = {
+  notificada: { texto: 'Esperando descargos', chip: 'chip chip--alerta', turno: 'copropietario' },
+  en_estudio: { texto: 'Descargos por revisar', chip: 'chip chip--info', turno: 'administracion' },
+  resuelta: { texto: 'Sancionada, puede impugnar', chip: 'chip chip--alerta', turno: 'copropietario' },
+  impugnada: { texto: 'Impugnación por resolver', chip: 'chip chip--info', turno: 'administracion' },
+  firme: { texto: 'En firme', chip: 'chip chip--error', turno: 'nadie' },
+  archivada: { texto: 'Archivada', chip: 'chip chip--exito', turno: 'nadie' },
+}
+
+/** Un expediente sigue vivo mientras alguien pueda hacer algo con el. */
+export function sancionEnCurso(sancion: Sancion): boolean {
+  return sancion.estado !== 'firme' && sancion.estado !== 'archivada'
+}
+
+/**
+ * RN-69 — El copropietario puede hablar mientras su plazo no se venza.
+ *
+ * Se compara con la fecha limite que se **copio al imponer la sancion**, no con
+ * el parametro de hoy: si la copropiedad cambia el termino manana, los
+ * expedientes en curso conservan el que se les notifico. Cambiar las reglas a
+ * mitad del proceso es exactamente lo que el debido proceso prohibe.
+ */
+export function puedePresentarDescargos(sancion: Sancion, hoy: FechaISO = hoyISO()): boolean {
+  return sancion.estado === 'notificada' && hoy <= sancion.limiteDescargos
+}
+
+export function puedeImpugnar(sancion: Sancion, hoy: FechaISO = hoyISO()): boolean {
+  return (
+    sancion.estado === 'resuelta' &&
+    !!sancion.limiteImpugnacion &&
+    hoy <= sancion.limiteImpugnacion
+  )
+}
+
+/**
+ * RN-39 — Cuando la sancion puede quedar en firme, que es cuando nace la cuota.
+ *
+ * Dos caminos: **se vencio el plazo de impugnacion sin que impugnara**, o
+ * **se resolvio la impugnacion**. Nunca antes: una multa que se cobra mientras
+ * el copropietario todavia puede impugnarla es una multa cobrada sin proceso.
+ */
+export function puedeQuedarEnFirme(sancion: Sancion, hoy: FechaISO = hoyISO()): boolean {
+  if (sancion.estado === 'impugnada') return true
+  return (
+    sancion.estado === 'resuelta' &&
+    !!sancion.limiteImpugnacion &&
+    hoy > sancion.limiteImpugnacion
+  )
+}
+
+/** Dias que le quedan a quien tenga el turno. Negativo si ya se vencio. */
+export function diasDePlazo(sancion: Sancion, hoy: FechaISO = hoyISO()): number | null {
+  if (sancion.estado === 'notificada') return diasEntre(hoy, sancion.limiteDescargos)
+  if (sancion.estado === 'resuelta' && sancion.limiteImpugnacion) {
+    return diasEntre(hoy, sancion.limiteImpugnacion)
+  }
+  return null
+}
+
+/** Lo que le toca a la administracion resolver ahora. */
+export function sancionesPorResolver(sanciones: Sancion[]): Sancion[] {
+  return sanciones.filter(
+    (sancion) => sancion.estado === 'en_estudio' || sancion.estado === 'impugnada',
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Catalogo de multas — RN-38, RN-40 · CU-A-22

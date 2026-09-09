@@ -33,6 +33,8 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 | `direccion`, `ciudad` | string | |
 | `tipo` | `'residencial' \| 'comercial' \| 'mixto'` | |
 | `totalUnidades` | number | Derivado, para el tablero |
+| `diasDescargos` | number | Días que tiene el copropietario para presentar descargos. **Sale del reglamento de esta copropiedad, no de la app** (RN-69) |
+| `diasImpugnacion` | number | Días para impugnar la decisión. Mismo origen |
 
 ### Unidad
 | Campo | Tipo | Notas |
@@ -199,27 +201,46 @@ Un campo de prosa que repite lo que las columnas dicen se llena con lo primero q
 > pueda inventar: por eso `origen` y `referencia` no son opcionales. Es la misma estructura que
 > `TasaInteres`, y por la misma razón.
 
-### Sancion — la multa impuesta
+### Sancion — el expediente sancionatorio
+
+> ✅ **Implementada** (CU-A-23, CU-R-29). Dejó de ser propuesta el 2026-09-09, cuando Mary
+> cerró la pregunta que la bloqueaba: *«el debido proceso ya está reglamentado»*.
 
 | Campo | Tipo | Notas |
 |---|---|---|
-| `conceptoId` | string | Del catálogo |
+| `conceptoId` | string | Del catálogo (RN-38) |
+| `concepto`, `valor` | string, number | **Copiados al imponer**, como el coeficiente (RN-37): si mañana el catálogo cambia, el expediente sigue diciendo por qué y por cuánto se sancionó |
 | `unidadId` | string | A quién se le impone |
-| `valor` | number | Copiado al imponerla, como el coeficiente (RN-37) |
-| `hechos` | string | Qué pasó, cuándo y dónde |
-| `estado` | `'propuesta' \| 'notificada' \| 'en_descargos' \| 'firme' \| 'anulada'` | **(?)** — ver la advertencia de abajo |
-| `cuotaId` | string? | La cuota que genera, **solo cuando queda firme** |
+| `hechos` | string | Qué pasó, cuándo y dónde. Es lo único que el copropietario puede controvertir |
+| `estado` | `'notificada' \| 'en_estudio' \| 'resuelta' \| 'impugnada' \| 'firme' \| 'archivada'` | Seis etapas, cada una con un turno (RN-69) |
+| `radicado` | string | `SAN-<año>-<consecutivo>` (RN-36) |
+| `limiteDescargos` | fecha ISO | **Copiado al imponer** desde `Copropiedad.diasDescargos` |
+| `limiteImpugnacion` | fecha ISO? | Copiado al resolver, desde `Copropiedad.diasImpugnacion` |
+| `motivo` | string? | La motivación de la decisión |
+| `cuotaId` | string? | La cuota que genera, **solo al quedar firme** (RN-39) |
+| `actuaciones` | `ActuacionSancion[]` | La línea de tiempo, en orden de ocurrencia |
 | `impuestaPor`, `fechaImposicion` | string, fecha ISO | |
 
-> ⚠️ **Una multa no es un cobro cualquiera.** En Colombia la Ley 675 de 2001 exige **debido
-> proceso** antes de sancionar: el copropietario tiene que ser oído. Una app que permita
-> imponer una multa de un toque y mandarla directo a la cartera puede producir **multas
-> jurídicamente nulas** y demandas contra la administración.
->
-> Por eso `Sancion` se modela con **estados** y no como una cuota inmediata: la cuota nace solo
-> cuando la sanción queda `firme`. Cuántos estados hacen falta y quién decide en cada uno **es
-> una pregunta para el reglamento de la copropiedad**, no un supuesto que podamos cerrar aquí.
-> Ver [`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md) §3 quater.
+### ActuacionSancion — cada cosa que pasó en el expediente
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `fecha` | fecha ISO completa | |
+| `autor` | `'administracion' \| 'copropietario'` | Quién actuó |
+| `personaId` | string? | Quién en concreto |
+| `titulo` | string | «Presentó descargos», «Se decidió sancionar» |
+| `texto` | string? | El contenido: los descargos, la motivación, la impugnación |
+
+> **Las actuaciones no se editan ni se borran: se agregan.** Un expediente es una secuencia, y
+> lo que se revisa si la multa se controvierte es exactamente esa secuencia — si se notificó,
+> si hubo plazo, si lo oyeron y si pudo impugnar. Por eso las dos caras de la app —consola y
+> app del residente— **leen el mismo expediente en el mismo orden**: el día que discutan, tiene
+> que haber un documento común sobre el cual discutir. Lo que cambia entre las dos pantallas es
+> **qué se puede hacer**, no **qué se ve**.
+
+> ⚠️ **Una multa no es un cobro cualquiera.** La Ley 675 de 2001 exige **debido proceso** antes
+> de sancionar. Por eso la cuota nace en **un solo sitio del sistema** —`darFirmezaSancion`—
+> y no hay ningún camino de la imposición a la cartera que se lo salte (RN-39).
 
 ### Entidades del módulo de asambleas y documentos
 
@@ -357,7 +378,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-36 | Todo documento formal lleva **consecutivo único por tipo** y un **código de verificación** aleatorio, y se comprueba desde fuera de la app sin exponer datos personales (ADR-0006). | `datos/repositorio.ts` (paz y salvo); falta la página pública de verificación |
 | RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | `datos/repositorio.ts` (`emitirVoto` copia el coeficiente) |
 | RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si lo contempla **el reglamento de propiedad horizontal, el manual de convivencia, un acta de asamblea, u otro documento que haya que nombrar** (Mary, 2026-09-08). **El administrador no define las multas**: las define la asamblea o ya están en esos documentos; él las parametriza (RN-49). El reglamento y el manual se citan por artículo; el acta, por fecha; **`otro` exige escribir cuál es el documento** — sin eso sería la puerta por donde se escapa el respaldo entero. | `dominio/reglas.ts` (`respaldoCompleto`) + `repositorio.ts` |
-| RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al proponerla. **(? — depende del debido proceso, Ley 675)** | *pendiente* |
+| RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al imponerla. Y queda firme por dos caminos: **se venció el plazo de impugnación sin que impugnara**, o **se resolvió la impugnación**. En el código eso es literal: `darFirmezaSancion` es **el único sitio del sistema** donde nace una `Cuota` de tipo `sancion`. Es lo que separa una sanción de un cobro. | `repositorio.ts` (`darFirmezaSancion`) + `dominio/reglas.ts` (`puedeQuedarEnFirme`) |
 | RN-40 | Un concepto del catálogo no se borra: **se inhabilita**, porque las multas impuestas lo referencian. Los inhabilitados **siguen a la vista**, en su propia sección: esconderlos haría creer que se borraron. Mismo verbo que con las personas (RN-61), porque es lo mismo que pasa (Mary, 2026-09-09). | `repositorio.ts` (`cambiarEstadoConceptoSancion`) |
 | RN-41 | Una cuota adicional exige concepto y valor explícitos; no se prorratea por coeficiente. | *pendiente* |
 | RN-42 | El interés de mora solo se calcula si la copropiedad lo tiene activado; apagado, no se genera ninguno. | *pendiente* |
@@ -387,6 +408,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-66 | **No se recoge una foto de cédula sin autorización de tratamiento de datos** (Ley 1581 de 2012). La autorización es **informada** —dice quién responde, qué datos, para qué, cuánto se guardan y qué derechos tiene el titular—, **expresa** —una casilla que la persona marca, nunca premarcada— y **registrada con su versión**: guardar solo «aceptó» deja sin saber *qué* aceptó, y el día que cambie el texto no se sabría a quién volver a preguntarle. La constancia vive en el registro, que no se borra. | `dominio/consentimiento.ts` + `repositorio.ts` |
 | RN-67 | **Quién ve los soportes, y qué queda cuando los ve.** Mientras se decide, quien autoriza ve las dos fotos a la vista: compararlas *es* autorizar. **Ya autorizado, abrirlas es un acto deliberado que deja constancia** de quién y cuándo (Mary, 2026-09-07: la administración puede verlas, «con registro») — no por desconfianza, sino para que el día que un titular pregunte «¿quién vio mi documento?» la respuesta exista. Pueden: la administración siempre, y quien registró a la persona. **La portería ve el rostro y nunca el documento** — *«¿cómo reconoce al que ingresa?»* (Mary): para reconocer basta una cara; el documento es tener la identidad de alguien, y suele quedar en manos de personal externo que rota. Su consulta no deja constancia individual: mirar caras es su tarea de todo el día, y registrar cada mirada sería ruido que esconde los accesos que sí importan. | `dominio/reglas.ts` (`puedeVerSoportes`, `puedeVerRostros`) |
 | RN-68 | **La marca de residente** (Mary, 2026-09-07). Dice si la persona **vive** en la unidad, y es distinta del título: **al crear un propietario se ofrecen las dos opciones** —vive aquí o no—, porque puede tenerla arrendada o vacía y sigue siendo propietario (vota, recibe la cuota, registra gente). **El arrendatario y el residente temporal la traen por defecto** —uno arrienda para vivir ahí, al otro se le llama temporal porque vive ahí un tiempo— y **el visitante nace sin ella**. Decide una cosa concreta: **quién aparece en la lista de rostros de la portería** (CU-P-03), que tiene que reconocer a quien entra a diario y no a quien viene dos veces al año. **Se ve siempre al registrar y solo se cambia en el propietario**: quien registra tiene que saber qué marca va a quedar antes de crear a la persona, pero en las otras categorías no hay nada que decidir. **Y no se repite en las demás vistas**: en una lista de residentes no aporta nada. | `componentes/Registro.tsx` (`marcaResidente`) + `Residencia.reside` |
+| RN-69 | **El debido proceso sancionatorio, y sus plazos, los fija el reglamento de cada copropiedad** (Mary, 2026-09-09: *«el debido proceso ya está reglamentado»*). La app no los inventa: `diasDescargos` y `diasImpugnacion` son **parámetros de la copropiedad**, no constantes del código. El expediente pasa por seis etapas y **cada una tiene un turno**: notificada y resuelta esperan al copropietario; en estudio e impugnada, a la administración; firme y archivada no esperan a nadie. Y lo que sostiene todo lo demás: **el plazo se copia al imponer**, no se lee del parámetro de hoy — si la copropiedad cambia el término mañana, los expedientes abiertos conservan el que se les notificó. Cambiar las reglas a mitad del proceso es exactamente lo que el debido proceso prohíbe. | `dominio/reglas.ts` (`ETAPAS_SANCION`, `puedePresentarDescargos`, `puedeImpugnar`, `puedeQuedarEnFirme`) |
 
 ### RegistroPersona — el trámite de entrada de una persona (CU-R-27, CU-R-28)
 

@@ -847,3 +847,51 @@ un dato que la persona sabe y un código que solo pudo darle quien hizo el trám
 **Pendiente:** lo serio de esto no es la foto, es el dato. Cuánto se conserva una cédula, quién
 la ve y qué pasa al inhabilitar a la persona está sin decidir — ver
 [ADR-0009](../adr/0009-soportes-fotograficos.md).
+
+---
+
+### CU-R-29
+## CU-R-29 — Ver un proceso sancionatorio y defenderme
+
+- **Actor principal:** Copropietario o arrendatario de la unidad
+- **Precondiciones:** Hay un proceso abierto contra su unidad (CU-A-23).
+- **Disparador:** La administración abrió el proceso, o decidió sancionar.
+- **Resultado esperado:** La persona lee de qué se le acusa, cuánto tiempo tiene y responde;
+  lo que escribe entra al expediente con su nombre y la fecha.
+
+**Flujo principal**
+1. En el inicio aparece «Te toca responder» cuando hay un plazo corriendo. Va **antes** que la
+   correspondencia: el paquete espera, el plazo no.
+2. Abre el expediente y ve **exactamente lo mismo que ve la administración**: la conducta, el
+   valor, los hechos, y la línea de tiempo completa de lo que ha pasado.
+3. Escribe sus **descargos** dentro del plazo → el proceso pasa a `en_estudio` y el turno
+   vuelve a la administración.
+4. Si la administración decide sancionar, la persona ve la motivación en la línea de tiempo y
+   puede **impugnar** dentro de su plazo → `impugnada`.
+5. Si la sanción queda en firme, el valor aparece en su estado de cuenta con el radicado.
+
+**Flujos alternativos**
+- A1. El plazo se venció → la pantalla lo dice («el plazo para presentar descargos venció el
+  16 de septiembre»), no muestra una fecha pasada que haya que interpretar. El expediente
+  sigue siendo legible; lo que ya no hay es formulario.
+- A2. El proceso se archivó → «no hay sanción y no se cobró nada».
+- A3. No hay ningún proceso → se explica qué vería si lo hubiera, en vez de una pantalla vacía.
+
+**Decisiones de interfaz**
+- **Los dos lados leen el mismo expediente**, en el mismo orden y con las mismas actuaciones
+  (`componentes/Expediente.tsx`). Si cada uno viera su propia versión, el día que discutan no
+  habría un documento común sobre el cual discutir. Lo que cambia es **qué se puede hacer**.
+- **La línea de tiempo va de lo más viejo a lo más nuevo**, al revés que casi todo lo demás en
+  la app: aquí no se viene a ver la novedad, se viene a seguir un proceso.
+- **Se dice en voz alta que todavía no hay nada que pagar.** Mientras el proceso vive, la multa
+  no es una deuda (RN-39). Confundir las dos cosas es lo que hace que la gente pague por miedo
+  en vez de defenderse. Por eso el enlace también está en el estado de cuenta, que es donde
+  viene a mirar qué debe.
+
+**Reglas de negocio**
+- RN-39 (la cuota nace solo al quedar firme), RN-69 (las etapas, los turnos y los plazos).
+
+**Estado en el demo:** ✅ — `src/features/residente/ProcesosPage.tsx`, ruta `/app/procesos`.
+En el demo, el perfil **Andrés Felipe Gómez** (Torre 2 · 901) tiene un proceso esperando sus
+descargos, y **María Camila Restrepo** (Torre 1 · 402) uno que ya está en manos de la
+administración.

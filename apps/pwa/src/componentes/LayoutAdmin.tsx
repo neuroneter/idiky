@@ -18,6 +18,10 @@ const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta
   { ruta: '/admin/unidades', texto: 'Unidades', icono: 'unidades' },
   { ruta: '/admin/cartera', texto: 'Cartera', icono: 'cartera' },
   { ruta: '/admin/multas', texto: 'Multas', icono: 'alerta' },
+  // El catalogo dice que multas existen; los procesos, a quien se le esta
+  // imponiendo una y en que etapa va. Son dos cosas distintas y por eso son dos
+  // entradas: parametrizar no es sancionar (RN-49, RN-69).
+  { ruta: '/admin/sanciones', texto: 'Procesos', icono: 'certificado' },
   { ruta: '/admin/reservas', texto: 'Reservas', icono: 'reservas' },
   { ruta: '/admin/pqrs', texto: 'PQRS', icono: 'pqrs' },
   { ruta: '/admin/comunicados', texto: 'Comunicados', icono: 'comunicados' },
@@ -30,6 +34,7 @@ const TITULOS: Record<string, string> = {
   '/admin/unidades': 'Unidades y residentes',
   '/admin/cartera': 'Cartera',
   '/admin/multas': 'Catálogo de multas',
+  '/admin/sanciones': 'Procesos sancionatorios',
   '/admin/reservas': 'Reservas por aprobar',
   '/admin/pqrs': 'Bandeja de PQRS',
   '/admin/comunicados': 'Comunicados',

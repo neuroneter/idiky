@@ -49,6 +49,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-26 | **Ajustar el tamaño de la letra** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-26) |
 | CU-R-27 | **Registrar y dar de baja a las personas de mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-27) |
 | CU-R-28 | **Adjuntar mis documentos a un registro** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-28) |
+| CU-R-29 | **Ver un proceso sancionatorio y defenderme** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-29) |
 
 ## 2. Administrador — consola web
 
@@ -76,7 +77,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-20 | **Generar el acta de la asamblea** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-20) |
 | CU-A-21 | **Administrar los coeficientes de las unidades** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-21) |
 | CU-A-22 | **Administrar el catálogo de multas** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-22) |
-| CU-A-23 | **Imponer una multa a una unidad** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-23) |
+| CU-A-23 | **Imponer una multa y llevar el proceso** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-23) |
 | CU-A-24 | **Cobrar una cuota adicional a una unidad** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-24) |
 | CU-A-25 | **Configurar si la copropiedad cobra interés de mora** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-25) |
 | CU-A-26 | **Registrar propietarios y ver los registros de la copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-26) |

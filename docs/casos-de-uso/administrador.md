@@ -526,41 +526,64 @@ al imponerse (RN-37).
 ---
 
 ### CU-A-23
-## CU-A-23 — Imponer una multa a una unidad
+## CU-A-23 — Imponer una multa y llevar el proceso
 
-- **Actor principal:** Administrador (o el consejo, **(?)**)
-- **Precondiciones:** El catálogo tiene al menos un concepto activo (CU-A-22).
+- **Actor principal:** Administrador
+- **Precondiciones:** El catálogo tiene al menos una multa habilitada (CU-A-22), y la
+  copropiedad tiene parametrizados sus plazos (`diasDescargos`, `diasImpugnacion`).
 - **Disparador:** Ocurre una conducta sancionable.
-- **Resultado esperado:** Queda registrada la sanción con sus hechos, y **solo cuando queda
-  firme** se convierte en una cuota en la cartera de la unidad.
+- **Resultado esperado:** Queda abierto un expediente con sus hechos y su línea de tiempo, y
+  **solo si queda en firme** se convierte en una cuota en la cartera de la unidad.
+
+> ✅ **Desbloqueado el 2026-09-09.** Mary: *«el debido proceso ya está reglamentado»*. La app
+> no inventa los pasos ni los plazos: los toma del reglamento de cada copropiedad (RN-69).
 
 **Flujo principal**
-1. El administrador elige la unidad y un concepto del catálogo (RN-38).
-2. Describe **los hechos**: qué pasó, cuándo y dónde. Ajusta el valor si el reglamento lo
-   permite **(?)**.
-3. La sanción queda `propuesta` y se **notifica** al copropietario.
-4. El copropietario tiene un plazo para presentar **descargos** **(? — plazo por definir)**.
-5. Con los descargos a la vista, la sanción queda `firme` o `anulada`.
-6. Al quedar firme, el sistema genera una `Cuota` de tipo `sancion` con el valor y su
-   vencimiento (RN-39). Desde ahí se comporta como cualquier otra cuota: suma al saldo,
-   entra en la imputación por antigüedad y aparece en el estado de cuenta.
+1. El administrador abre el proceso: elige la unidad, una multa del catálogo y describe **los
+   hechos** —qué pasó, cuándo y dónde—. El valor y el respaldo **no se escriben**: salen del
+   catálogo, que es lo que los hace comprobables (RN-38, RN-49).
+2. El sistema copia el concepto, el valor y el plazo de descargos, asigna radicado
+   `SAN-<año>-<consecutivo>` y deja el expediente `notificada`. **Todavía no se cobra nada.**
+3. El copropietario presenta descargos dentro del plazo (CU-R-29) → `en_estudio`.
+4. La administración decide, **con motivación escrita**: sancionar → `resuelta`, y arranca el
+   plazo de impugnación; archivar → `archivada`, y ahí termina.
+5. Si el copropietario impugna (CU-R-29) → `impugnada`, y vuelve a ser turno de la
+   administración.
+6. La sanción queda **en firme** por dos caminos: se venció el plazo de impugnación sin que
+   impugnara, o se resolvió la impugnación. **Ahí, y solo ahí, nace la cuota** de tipo
+   `sancion` (RN-39). Desde ese momento se comporta como cualquier otra: suma al saldo, entra
+   en la imputación por antigüedad y aparece en el estado de cuenta.
 
 **Flujos alternativos**
-- A1. El copropietario presenta descargos y se le da la razón → `anulada`, con motivo. **No se
-  borra**, queda el registro (O3).
-- A2. Anular una multa ya firme → la cuota se anula también **(?)**; si ya fue pagada, hay que
-  definir si se devuelve o se abona.
+- A1. El copropietario deja vencer el plazo sin decir nada → la administración puede resolver
+  igual. La pantalla lo permite antes de que venza, **pero lo advierte**: decidir sin haberlo
+  oído es lo que hace que una sanción se caiga.
+- A2. Se le da la razón → `archivada`, con motivo. **No se borra** (RN-61): el expediente
+  queda, porque un proceso archivado sin rastro es un proceso que después nadie puede revisar.
+- A3. La multa que respaldaba el proceso se inhabilita después → el expediente sigue vivo con
+  el concepto y el valor que copió (RN-37). Lo que ya no se puede es abrir procesos nuevos
+  con ella.
+
+**Decisiones de interfaz**
+- **Lo primero es de quién es el turno.** Arriba, «Te toca resolver»; abajo, «Esperando al
+  copropietario»; al final, cerrados. Un proceso en el que los dos creen que espera al otro es
+  un proceso que se vence solo, y un plazo vencido es una multa que se cae.
+- **Los plazos se dicen en días, no en fechas.** «Hasta el 19 de septiembre» obliga a hacer la
+  cuenta; «quedan 7 días» no. Y cuando ya venció, se dice que venció.
+- **El catálogo y los procesos son dos entradas distintas** en el menú: parametrizar no es
+  sancionar (RN-49).
 
 **Reglas de negocio**
-- RN-38, RN-39.
+- RN-36 (radicado), RN-37 (valor copiado), RN-38 (solo del catálogo), RN-39 (la cuota nace al
+  quedar firme), RN-61 (no se borra), RN-69 (el debido proceso y sus plazos).
 
-> ⚠️ **Este caso de uso tiene consecuencias jurídicas.** La Ley 675 de 2001 exige debido
-> proceso antes de sancionar. Un flujo que imponga la multa de un toque y la mande directo a
-> la cartera puede producir **multas nulas** y demandas contra la administración. Los estados
-> de este flujo tienen que salir del reglamento de la copropiedad, no de una suposición
-> nuestra — ver [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 quater.
+> **Lo que sigue abierto** —y no bloquea el flujo, pero sí el reglamento de cada
+> copropiedad—: quién impone (administrador, consejo o asamblea), si quien decide los
+> descargos debe ser distinto de quien impuso, la reincidencia, qué pasa con una multa anulada
+> después de pagada, y si una multa impaga cuenta como mora para RN-08 y RN-26. Ver
+> [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 quater.
 
-**Estado en el demo:** ⬜ — no existe.
+**Estado en el demo:** ✅ — `/admin/sanciones`.
 
 ---
 

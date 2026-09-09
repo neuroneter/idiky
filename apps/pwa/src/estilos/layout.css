@@ -1031,3 +1031,55 @@
   color: var(--color-texto-tenue);
   margin-bottom: var(--e1);
 }
+
+/* ============================================ Expediente sancionatorio
+   La linea de tiempo del debido proceso (CU-A-23, CU-R-29). Se dibuja con
+   una linea vertical y un punto por actuacion: lo que importa de un
+   expediente es que se vea que hubo una secuencia, no cada caja por
+   separado. El color del punto dice quien actuo — que es exactamente lo
+   que se revisa si la sancion se controvierte. */
+.actuaciones {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 var(--e4);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+}
+.actuaciones::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--color-borde);
+}
+.actuacion {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.actuacion::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--e4) * -1 + 1px);
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radio-completo);
+  background: var(--color-superficie);
+  border: 2px solid var(--color-borde-fuerte);
+}
+.actuacion--administracion::before {
+  border-color: var(--color-marca);
+}
+.actuacion--copropietario::before {
+  border-color: var(--color-acento);
+}
+.actuacion > .fila {
+  align-items: baseline;
+  gap: var(--e2);
+}

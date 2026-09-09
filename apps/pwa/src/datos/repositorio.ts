@@ -11,6 +11,7 @@
 
 import type {
   AccesoSoporte,
+  AutorActuacion,
   BaseDatos,
   CategoriaComunicado,
   ConceptoSancion,
@@ -29,6 +30,7 @@ import type {
   RegistroPersona,
   Reserva,
   Residencia,
+  Sancion,
   RolResidencia,
   TipoCorrespondencia,
   TipoPqrs,
@@ -44,11 +46,16 @@ import {
   exigeSoportes,
   exigeVigencia,
   puedeAutorizar,
+  puedeImpugnar,
+  puedePresentarDescargos,
+  puedeQuedarEnFirme,
   puedeVotar,
   respaldoCompleto,
   rolDeCategoria,
   soloUnDia,
   soportesCompletos,
+  sumarDias,
+  textoRespaldo,
   vencimientoDelPeriodo,
   votacionRecibeVotos,
   yaVoto,
@@ -667,6 +674,246 @@ export async function cambiarEstadoConceptoSancion(
   concepto.activo = parametros.activo
   concepto.inactivoDesde = parametros.activo ? undefined : hoyISO()
   return persistir(bd, concepto)
+}
+
+// ---------------------------------------------------------------------------
+// CU-A-23 / CU-R-29 — El proceso sancionatorio
+//
+// **Cada paso deja su actuacion.** No es un historial decorativo: si alguien
+// discute la multa, lo que se revisa es si se le notifico, si tuvo plazo, si lo
+// oyeron y si pudo impugnar. Por eso las actuaciones se escriben aqui y no en la
+// pantalla — una pantalla que se olvide de anotar deja un expediente que no
+// prueba nada.
+// ---------------------------------------------------------------------------
+
+function anotar(
+  sancion: Sancion,
+  autor: AutorActuacion,
+  titulo: string,
+  texto?: string,
+  personaId?: string,
+): void {
+  sancion.actuaciones.push({
+    id: nuevoId('act'),
+    fecha: ahoraISO(),
+    autor,
+    personaId,
+    titulo,
+    texto,
+  })
+}
+
+export async function imponerSancion(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    unidadId: string
+    conceptoId: string
+    hechos: string
+    impuestaPor: string
+  },
+): Promise<Resultado<Sancion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  const concepto = bd.conceptosSancion.find((c) => c.id === parametros.conceptoId)
+  if (!concepto) throw new ErrorDeNegocio('Esa multa no está en el catálogo.')
+  // RN-38: solo se impone lo que el catalogo tiene vigente. Una multa inhabilitada
+  // perdio su respaldo, y sancionar con ella seria sancionar sin norma.
+  if (!concepto.activo) {
+    throw new ErrorDeNegocio('Esa multa está inhabilitada: ya no se puede imponer.')
+  }
+  if (parametros.hechos.trim().length < 20) {
+    throw new ErrorDeNegocio(
+      'Describe los hechos: qué pasó, cuándo y dónde. Es lo que se le notifica y lo que puede controvertir.',
+    )
+  }
+
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  const consecutivo = bd.consecutivos.sancion + 1
+  bd.consecutivos.sancion = consecutivo
+
+  const sancion: Sancion = {
+    id: nuevoId('san'),
+    copropiedadId: parametros.copropiedadId,
+    unidadId: parametros.unidadId,
+    conceptoId: concepto.id,
+    // Se copian, como el coeficiente (RN-37): si manana el catalogo cambia, este
+    // expediente sigue diciendo por que y por cuanto se sanciono.
+    concepto: concepto.nombre,
+    valor: concepto.valor,
+    hechos: parametros.hechos.trim(),
+    estado: 'notificada',
+    radicado: `SAN-${new Date().getFullYear()}-${String(consecutivo).padStart(4, '0')}`,
+    impuestaPor: parametros.impuestaPor,
+    fechaImposicion: ahoraISO(),
+    // El plazo se COPIA del parametro. Si el reglamento cambia manana, este
+    // expediente conserva el termino que se le notifico (RN-69).
+    limiteDescargos: sumarDias(hoyISO(), copropiedad?.diasDescargos ?? 10),
+    actuaciones: [],
+  }
+  anotar(
+    sancion,
+    'administracion',
+    'Se notificó la apertura del proceso',
+    `Se le comunicaron los hechos, la norma que los sanciona (${textoRespaldo(concepto)}) y el plazo para presentar descargos.`,
+    parametros.impuestaPor,
+  )
+  bd.sanciones.unshift(sancion)
+  return persistir(bd, sancion)
+}
+
+/** RN-69 — El copropietario es oido. Es el nucleo del debido proceso. */
+export async function presentarDescargos(
+  bdActual: BaseDatos,
+  parametros: { sancionId: string; personaId: string; texto: string },
+): Promise<Resultado<Sancion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const sancion = bd.sanciones.find((s) => s.id === parametros.sancionId)
+  if (!sancion) throw new ErrorDeNegocio('Ese proceso no existe.')
+  if (!puedePresentarDescargos(sancion)) {
+    throw new ErrorDeNegocio('El plazo para presentar descargos ya pasó.')
+  }
+  if (parametros.texto.trim().length < 10) {
+    throw new ErrorDeNegocio('Escribe tus descargos: es lo que la administración va a estudiar.')
+  }
+
+  sancion.estado = 'en_estudio'
+  anotar(sancion, 'copropietario', 'Presentó descargos', parametros.texto.trim(), parametros.personaId)
+  return persistir(bd, sancion)
+}
+
+/**
+ * La administracion decide: sanciona o archiva.
+ *
+ * **Archivar no es borrar** (RN-61): el expediente queda con su motivo. Un
+ * proceso que se archiva sin dejar rastro es un proceso que despues nadie puede
+ * revisar — ni para bien ni para mal.
+ */
+export async function resolverSancion(
+  bdActual: BaseDatos,
+  parametros: {
+    sancionId: string
+    personaId: string
+    sanciona: boolean
+    motivo: string
+  },
+): Promise<Resultado<Sancion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const sancion = bd.sanciones.find((s) => s.id === parametros.sancionId)
+  if (!sancion) throw new ErrorDeNegocio('Ese proceso no existe.')
+  if (sancion.estado !== 'notificada' && sancion.estado !== 'en_estudio') {
+    throw new ErrorDeNegocio('Ese proceso ya no está para resolver.')
+  }
+  if (parametros.motivo.trim().length < 10) {
+    throw new ErrorDeNegocio(
+      'Escribe la motivación: sin ella la decisión no se puede controvertir.',
+    )
+  }
+
+  const copropiedad = bd.copropiedades.find((c) => c.id === sancion.copropiedadId)
+  sancion.motivo = parametros.motivo.trim()
+
+  if (!parametros.sanciona) {
+    sancion.estado = 'archivada'
+    anotar(sancion, 'administracion', 'Se archivó el proceso', sancion.motivo, parametros.personaId)
+    return persistir(bd, sancion)
+  }
+
+  sancion.estado = 'resuelta'
+  sancion.limiteImpugnacion = sumarDias(hoyISO(), copropiedad?.diasImpugnacion ?? 5)
+  anotar(
+    sancion,
+    'administracion',
+    'Se decidió sancionar',
+    `${sancion.motivo} Puede impugnar hasta el ${sancion.limiteImpugnacion}.`,
+    parametros.personaId,
+  )
+  return persistir(bd, sancion)
+}
+
+export async function impugnarSancion(
+  bdActual: BaseDatos,
+  parametros: { sancionId: string; personaId: string; texto: string },
+): Promise<Resultado<Sancion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const sancion = bd.sanciones.find((s) => s.id === parametros.sancionId)
+  if (!sancion) throw new ErrorDeNegocio('Ese proceso no existe.')
+  if (!puedeImpugnar(sancion)) {
+    throw new ErrorDeNegocio('El plazo para impugnar ya pasó.')
+  }
+  if (parametros.texto.trim().length < 10) {
+    throw new ErrorDeNegocio('Escribe por qué impugnas la decisión.')
+  }
+
+  sancion.estado = 'impugnada'
+  anotar(sancion, 'copropietario', 'Impugnó la decisión', parametros.texto.trim(), parametros.personaId)
+  return persistir(bd, sancion)
+}
+
+/**
+ * RN-39 — La sancion queda en firme y **ahi nace la cuota**.
+ *
+ * Es el unico sitio del sistema donde una multa se convierte en plata que se
+ * cobra, y esta detras de todo el proceso a proposito.
+ */
+export async function darFirmezaSancion(
+  bdActual: BaseDatos,
+  parametros: { sancionId: string; personaId: string; motivo?: string },
+): Promise<Resultado<Sancion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const sancion = bd.sanciones.find((s) => s.id === parametros.sancionId)
+  if (!sancion) throw new ErrorDeNegocio('Ese proceso no existe.')
+  if (!puedeQuedarEnFirme(sancion)) {
+    throw new ErrorDeNegocio(
+      'Todavía no puede quedar en firme: el copropietario está dentro del plazo para impugnar.',
+    )
+  }
+
+  if (sancion.estado === 'impugnada') {
+    anotar(
+      sancion,
+      'administracion',
+      'Se resolvió la impugnación',
+      parametros.motivo ?? 'Se mantiene la sanción.',
+      parametros.personaId,
+    )
+  } else {
+    anotar(
+      sancion,
+      'administracion',
+      'Quedó en firme',
+      'Venció el plazo para impugnar sin que se presentara recurso.',
+      parametros.personaId,
+    )
+  }
+
+  const cuota: Cuota = {
+    id: nuevoId('cuo'),
+    unidadId: sancion.unidadId,
+    periodo: hoyISO().slice(0, 7),
+    tipo: 'sancion',
+    concepto: `${sancion.concepto} · ${sancion.radicado}`,
+    valor: sancion.valor,
+    fechaVencimiento: sumarDias(hoyISO(), 30),
+    estado: 'pendiente',
+  }
+  bd.cuotas.push(cuota)
+
+  sancion.estado = 'firme'
+  sancion.cuotaId = cuota.id
+  anotar(
+    sancion,
+    'administracion',
+    'Se cargó a la cartera de la unidad',
+    `Cuota de ${cuota.valor} con vencimiento el ${cuota.fechaVencimiento}.`,
+    parametros.personaId,
+  )
+  return persistir(bd, sancion)
 }
 
 // ---------------------------------------------------------------------------

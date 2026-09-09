@@ -14,8 +14,8 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 66 documentados: 26 ✅ en el demo, 9 🟡 a medias, 31 ⬜ pendientes |
-| **Reglas de negocio** | 68 (RN-01…RN-68) |
+| **Casos de uso** | 67 documentados: 29 ✅ en el demo, 10 🟡 a medias, 28 ⬜ pendientes |
+| **Reglas de negocio** | 69 (RN-01…RN-69) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -32,10 +32,13 @@ inicio con resumen · estado de cuenta · pago simulado con comprobante
 (PSE, Bre-B y tarjeta) · **solicitudes** —zonas comunes, PQRS y el **paz y salvo, que se emite,
 se ve y se guarda como PDF**— · **asambleas
 con votación ponderada por coeficiente** · cartelera de comunicados · autorización de
-visitantes con código · consulta de correspondencia · consulta del coeficiente.
+visitantes con código · consulta de correspondencia · consulta del coeficiente ·
+**el proceso sancionatorio de su unidad, con descargos e impugnación** (CU-R-29).
 
 **Consola del administrador:** **registro de propietarios**, con la tabla de quién registró a
-quién (CU-A-26) · **catálogo de multas con su respaldo** (CU-A-22) · tablero de indicadores ·
+quién (CU-A-26) · **catálogo de multas con su respaldo** (CU-A-22) · **procesos sancionatorios con debido
+proceso completo** —notificar, oír, decidir, impugnar y dar firmeza (CU-A-23)— ·
+tablero de indicadores ·
 unidades y residentes con búsqueda,
 ficha y vinculación · cartera con morosidad · registro de pagos manuales · generación de
 cuotas con previsualización · aprobación y rechazo de reservas · bandeja de PQRS con SLA ·
@@ -76,6 +79,64 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-09 · Mary + IA (Claude) · El debido proceso sancionatorio (CU-A-23, CU-R-29)
+
+Mary desbloqueó lo que llevaba desde el 27 de agosto detenido: *«el debido proceso ya está
+reglamentado, genera una vista para administrador y propietario del debido proceso»*.
+
+**Lo que esa frase resolvió no fue el flujo, fue de quién es la decisión.** El bloqueo no era
+técnico: era que la app no podía inventar los pasos ni los plazos de un proceso con
+consecuencias jurídicas. La respuesta es que **ya están escritos, en el reglamento de cada
+copropiedad**. Así que `diasDescargos` y `diasImpugnacion` son **parámetros de la
+copropiedad**, no constantes del código (RN-69) — la app lleva el proceso, no lo define.
+
+**Seis etapas, y cada una con un turno**: notificada y resuelta esperan al copropietario; en
+estudio e impugnada, a la administración; firme y archivada no esperan a nadie. Las dos
+pantallas se ordenan por eso, no por fecha ni por valor. Un proceso en el que los dos creen que
+espera al otro es un proceso que se vence solo, y un plazo vencido es una multa que se cae.
+
+**Los dos lados leen el mismo expediente** (`componentes/Expediente.tsx`): los mismos hechos,
+las mismas actuaciones, el mismo orden. Si cada uno viera su propia versión, el día que
+discutan no habría un documento común sobre el cual discutir. Lo que cambia entre la consola y
+la app es **qué se puede hacer**, no **qué se ve**.
+
+**Tres decisiones que conviene revisar:**
+
+- **El plazo se copia al imponer**, no se lee del parámetro de hoy. Si la copropiedad cambia el
+  término mañana, los expedientes abiertos conservan el que se les notificó. Cambiar las reglas
+  a mitad del proceso es exactamente lo que el debido proceso prohíbe.
+- **La cuota nace en un solo sitio del sistema**: `darFirmezaSancion`. Ni al imponer, ni al
+  resolver. No hay ningún camino del expediente a la cartera que se lo salte, y eso es lo que
+  separa una sanción de un cobro (RN-39).
+- **Resolver antes de que venza el plazo de descargos se permite, pero se advierte.** Prohibirlo
+  sería suponer un reglamento que no conocemos; hacerlo en silencio sería ayudar a anular la
+  sanción. La pantalla lo dice con todas las letras.
+
+**En la app del residente se dice en voz alta que todavía no hay nada que pagar.** Mientras el
+proceso vive, la multa no es una deuda. Por eso el enlace también está en el estado de cuenta,
+que es donde la persona viene a mirar qué debe: confundir las dos cosas es lo que hace que la
+gente pague por miedo en vez de defenderse.
+
+**El menú del administrador quedó con dos entradas, no una:** *Multas* es el catálogo
+—parametrizar— y *Procesos* es imponer y resolver. Son dos cosas distintas y por eso son dos
+sitios (RN-49).
+
+**Verificado con Playwright, la cadena completa**: el propietario ve el proceso en su inicio,
+presenta descargos y el expediente pasa a «Descargos por revisar» → la administración lo
+resuelve con motivación y arranca el plazo de impugnación → el propietario impugna → la
+administración resuelve la impugnación y da firmeza → **y ahí, y solo ahí, la multa aparece en
+su estado de cuenta con el radicado** (el saldo pasó de $ 4.466.000 a $ 4.646.000).
+
+**Lo que sigue abierto**, y no bloquea: quién impone (administrador, consejo o asamblea), si
+quien decide los descargos debe ser distinto de quien impuso, la reincidencia, qué pasa con una
+multa anulada después de pagada, y si una multa impaga cuenta como mora para bloquear reservas
+(RN-08) o el paz y salvo (RN-26). Ver §3 quater.
+
+**Lo que sigue:** CU-A-24 (cuota extraordinaria) y ADR-0007 (transmisión en vivo), que no
+tienen bloqueos.
+
+---
 
 ### 2026-09-09 · Mary + IA (Claude) · El catálogo de multas (CU-A-22)
 
