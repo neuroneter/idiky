@@ -1,0 +1,592 @@
+/**
+ * CU-A-12 — Convocar la asamblea y su orden del día.
+ * CU-A-17 — Instalar la asamblea y ver quién asiste.
+ * Doc: docs/casos-de-uso/administrador.md#cu-a-12 · docs/adr/0007-transmision-en-vivo.md
+ *
+ * **La modalidad es lo primero que se pregunta, y no por orden estético.**
+ * Decide qué más hay que pedir —lugar, enlace, o los dos— y qué va a ver el
+ * copropietario. Preguntarla al final obliga a rehacer el formulario mentalmente
+ * cuando ya se llenó.
+ *
+ * **Idiky no transmite: enlaza** (ADR-0007). Aquí se pega el enlace de Zoom, de
+ * Meet o de lo que la copropiedad use, y eso es todo lo que la app hace con el
+ * video. Lo que sí es suyo —y es lo que Zoom no puede dar— es la asistencia
+ * ponderada por coeficiente, que se ve abajo mientras la asamblea corre.
+ *
+ * **Lo que esta pantalla no dice, a propósito: si hay quórum.** Suma
+ * coeficientes, que es aritmética; el umbral, si lo virtual pesa igual que lo
+ * presencial y cómo entran los poderes son derecho, y están sin decidir (RN-28,
+ * §3 bis).
+ */
+
+import { useState } from 'react'
+import { useDatos } from '../../estado/DatosContext'
+import { useSesion } from '../../estado/SesionContext'
+import * as sel from '../../datos/selectores'
+import { nombreCompleto } from '../../datos/selectores'
+import { cambiarEstadoAsamblea, convocarAsamblea } from '../../datos/repositorio'
+import {
+  MODALIDADES,
+  convocatoriaCompleta,
+  definicionModalidad,
+  etiquetaUnidad,
+  ordenAsamblea,
+  resumenAsistencia,
+} from '../../dominio/reglas'
+import { formatearFechaHora } from '../../utilidades/formato'
+import type { Asamblea, ModalidadAsamblea, TipoAsamblea } from '../../dominio/tipos'
+import { Modal } from '../../componentes/Modal'
+import { Icono } from '../../componentes/Icono'
+import { EstadoVacio } from '../../componentes/EstadoVacio'
+import { ChipAsamblea } from '../../componentes/Etiquetas'
+
+function formatearCoeficiente(coeficiente: number): string {
+  return `${coeficiente.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
+}
+
+export function AsambleasAdminPage() {
+  const { bd, ejecutar, cargando } = useDatos()
+  const { sesion } = useSesion()
+  const [convocando, setConvocando] = useState(false)
+  const [viendo, setViendo] = useState<string | null>(null)
+
+  if (!sesion) return null
+
+  const asambleas = sel
+    .asambleasDe(bd, sesion.copropiedadId)
+    .slice()
+    .sort((a, b) => ordenAsamblea(a) - ordenAsamblea(b))
+  const enDetalle = asambleas.find((a) => a.id === viendo)
+
+  async function cambiar(asambleaId: string, estado: Asamblea['estado'], mensaje: string) {
+    const hecho = await ejecutar(
+      (base) => cambiarEstadoAsamblea(base, { asambleaId, estado }),
+      mensaje,
+    )
+    if (hecho && estado !== 'instalada') setViendo(null)
+  }
+
+  return (
+    <div className="pila">
+      <div className="fila">
+        <span className="subtitulo">
+          Idiky no transmite la asamblea: enlaza la reunión que ustedes ya hacen por Zoom o Meet
+          (ADR-0007). Lo que sí lleva es quién asiste y cuánto pesa.
+        </span>
+        <button className="boton boton--primario" onClick={() => setConvocando(true)}>
+          <Icono nombre="mas" tamano={16} />
+          Convocar
+        </button>
+      </div>
+
+      {asambleas.length === 0 ? (
+        <EstadoVacio
+          titulo="No hay asambleas"
+          detalle="Cuando convoques una, aquí la instalas el día de la reunión y ves quién va llegando."
+        />
+      ) : (
+        <div className="tarjeta" style={{ padding: 0 }}>
+          <div className="contenedor-tabla">
+            <table className="tabla">
+              <thead>
+                <tr>
+                  <th>Asamblea</th>
+                  <th>Cuándo</th>
+                  <th>Modalidad</th>
+                  <th>Estado</th>
+                  <th />
+                </tr>
+              </thead>
+              <tbody>
+                {asambleas.map((asamblea) => {
+                  const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
+                  return (
+                    <tr key={asamblea.id}>
+                      <td>
+                        <strong>{asamblea.titulo}</strong>
+                        <div className="subtitulo">{asamblea.citacion}</div>
+                      </td>
+                      <td className="suave">{formatearFechaHora(asamblea.fechaHora)}</td>
+                      <td className="suave">
+                        {definicionModalidad(asamblea.modalidad).texto}
+                        {/* El enlace se ve en la tabla: es lo que hay que revisar
+                            antes de que empiece, no algo escondido en un detalle. */}
+                        {asamblea.enlaceTransmision && <div className="subtitulo">Con enlace</div>}
+                      </td>
+                      <td>
+                        <ChipAsamblea estado={asamblea.estado} />
+                        {resumen.unidades > 0 && (
+                          <div className="subtitulo numerico">
+                            {resumen.unidades} unidades ·{' '}
+                            {formatearCoeficiente(resumen.coeficiente)}
+                          </div>
+                        )}
+                      </td>
+                      <td>
+                        <button
+                          className="boton boton--pequeno"
+                          onClick={() => setViendo(asamblea.id)}
+                        >
+                          Abrir
+                        </button>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {convocando && (
+        <FormularioConvocatoria
+          alCerrar={() => setConvocando(false)}
+          alConvocar={async (datos) => {
+            const creada = await ejecutar(
+              (base) => convocarAsamblea(base, { copropiedadId: sesion.copropiedadId, ...datos }),
+              'Asamblea convocada.',
+            )
+            if (creada) setConvocando(false)
+          }}
+        />
+      )}
+
+      {enDetalle && (
+        <DetalleAsamblea
+          asamblea={enDetalle}
+          bd={bd}
+          cargando={cargando}
+          alCerrar={() => setViendo(null)}
+          alCambiar={cambiar}
+        />
+      )}
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+
+function DetalleAsamblea({
+  asamblea,
+  bd,
+  cargando,
+  alCambiar,
+  alCerrar,
+}: {
+  asamblea: Asamblea
+  bd: ReturnType<typeof useDatos>['bd']
+  cargando: boolean
+  alCambiar: (id: string, estado: Asamblea['estado'], mensaje: string) => Promise<void>
+  alCerrar: () => void
+}) {
+  const definicion = definicionModalidad(asamblea.modalidad)
+  const asistencias = sel.asistenciasDeAsamblea(bd, asamblea.id)
+  const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
+
+  return (
+    <Modal titulo={asamblea.titulo} descripcion={asamblea.citacion} onCerrar={alCerrar}>
+      <div className="lista lista--compacta">
+        <div className="fila">
+          <span className="subtitulo">Cuándo</span>
+          <strong>{formatearFechaHora(asamblea.fechaHora)}</strong>
+        </div>
+        <div className="fila">
+          <span className="subtitulo">Modalidad</span>
+          <strong>{definicion.texto}</strong>
+        </div>
+        {asamblea.lugar && (
+          <div className="fila fila-inicio">
+            <span className="subtitulo">Lugar</span>
+            <strong style={{ textAlign: 'right' }}>{asamblea.lugar}</strong>
+          </div>
+        )}
+        {asamblea.enlaceTransmision && (
+          <div className="fila fila-inicio">
+            <span className="subtitulo">Reunión</span>
+            <a
+              href={asamblea.enlaceTransmision}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textAlign: 'right', wordBreak: 'break-all' }}
+            >
+              {asamblea.enlaceTransmision}
+            </a>
+          </div>
+        )}
+        <div className="fila">
+          <span className="subtitulo">Estado</span>
+          <ChipAsamblea estado={asamblea.estado} />
+        </div>
+      </div>
+
+      <div className="separador" />
+      <span className="titulo-seccion">Orden del día</span>
+      <ol className="lista lista--compacta" style={{ paddingLeft: 'var(--e4)' }}>
+        {asamblea.ordenDelDia.map((punto) => (
+          <li key={punto.id}>
+            <strong>{punto.titulo}</strong>
+            {punto.seVota && <span className="chip chip--marca">Se vota</span>}
+          </li>
+        ))}
+      </ol>
+
+      {asamblea.estado !== 'convocada' && (
+        <>
+          <div className="separador" />
+          <span className="titulo-seccion">Quién asiste</span>
+          {/* Se suma y se reparte por forma —que es lo que el acta necesita en una
+              mixta— pero **no se declara quórum**: el umbral está sin decidir
+              (RN-28, §3 bis). */}
+          <div className="lista lista--compacta">
+            <div className="fila">
+              <span className="subtitulo">Unidades</span>
+              <strong className="numerico">{resumen.unidades}</strong>
+            </div>
+            <div className="fila">
+              <span className="subtitulo">Coeficiente reunido</span>
+              <strong className="numerico">{formatearCoeficiente(resumen.coeficiente)}</strong>
+            </div>
+            {asamblea.modalidad === 'mixta' && (
+              <div className="fila">
+                <span className="subtitulo">Cómo</span>
+                <span className="subtitulo">
+                  {resumen.presenciales} en el salón · {resumen.virtuales} conectadas
+                </span>
+              </div>
+            )}
+          </div>
+
+          <p className="acceso__nota" style={{ margin: 'var(--e3) 0' }}>
+            Falta decidir cuánto quórum se exige, si la asistencia virtual pesa igual que la
+            presencial y cómo entran los poderes (RN-28). Por eso aquí se suma, pero no se afirma
+            que haya quórum.
+          </p>
+
+          {asistencias.length > 0 && (
+            <div className="contenedor-tabla" style={{ maxHeight: 240, overflowY: 'auto' }}>
+              <table className="tabla">
+                <tbody>
+                  {asistencias.map((asistencia) => {
+                    const unidad = sel.unidad(bd, asistencia.unidadId)
+                    const persona = sel.persona(bd, asistencia.personaId)
+                    return (
+                      <tr key={asistencia.id}>
+                        <td>
+                          <strong>{unidad ? etiquetaUnidad(unidad) : '—'}</strong>
+                          <div className="subtitulo">{persona ? nombreCompleto(persona) : '—'}</div>
+                        </td>
+                        <td className="suave">
+                          {asistencia.forma === 'presencial' ? 'En el salón' : 'Conectada'}
+                        </td>
+                        <td className="numerico">{formatearCoeficiente(asistencia.coeficiente)}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
+      )}
+
+      <div className="separador" />
+
+      {asamblea.estado === 'convocada' && (
+        <div className="grupo-botones">
+          <button
+            className="boton boton--primario"
+            disabled={cargando}
+            onClick={() =>
+              void alCambiar(
+                asamblea.id,
+                'instalada',
+                'Asamblea instalada. Ya se puede marcar asistencia.',
+              )
+            }
+          >
+            Instalar la asamblea
+          </button>
+          <button
+            className="boton"
+            disabled={cargando}
+            onClick={() => void alCambiar(asamblea.id, 'cancelada', 'Asamblea cancelada.')}
+          >
+            Cancelar
+          </button>
+        </div>
+      )}
+
+      {asamblea.estado === 'instalada' && (
+        <button
+          className="boton boton--bloque"
+          disabled={cargando}
+          onClick={() =>
+            void alCambiar(
+              asamblea.id,
+              'cerrada',
+              'Asamblea cerrada. La asistencia y los votos quedan.',
+            )
+          }
+        >
+          Cerrar la asamblea
+        </button>
+      )}
+    </Modal>
+  )
+}
+
+// ---------------------------------------------------------------------------
+
+interface DatosConvocatoria {
+  tipo: TipoAsamblea
+  titulo: string
+  fechaHora: string
+  modalidad: ModalidadAsamblea
+  lugar?: string
+  enlaceTransmision?: string
+  citacion: string
+  ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean }>
+}
+
+function FormularioConvocatoria({
+  alConvocar,
+  alCerrar,
+}: {
+  alConvocar: (datos: DatosConvocatoria) => Promise<void>
+  alCerrar: () => void
+}) {
+  // La modalidad primero: decide qué más se pide (ADR-0007).
+  const [modalidad, setModalidad] = useState<ModalidadAsamblea>('mixta')
+  const [tipo, setTipo] = useState<TipoAsamblea>('ordinaria')
+  const [titulo, setTitulo] = useState('')
+  const [fechaHora, setFechaHora] = useState('')
+  const [lugar, setLugar] = useState('')
+  const [enlace, setEnlace] = useState('')
+  const [citacion, setCitacion] = useState('')
+  const [puntos, setPuntos] = useState<
+    Array<{ titulo: string; descripcion: string; seVota: boolean }>
+  >([{ titulo: '', descripcion: '', seVota: false }])
+  const [error, setError] = useState<string | null>(null)
+
+  const definicion = definicionModalidad(modalidad)
+  const respaldoListo = convocatoriaCompleta({
+    modalidad,
+    lugar,
+    enlaceTransmision: enlace,
+  })
+
+  function enviar(evento: React.FormEvent) {
+    evento.preventDefault()
+    setError(null)
+    if (titulo.trim().length < 6) {
+      setError('Ponle un título que diga de qué es la asamblea.')
+      return
+    }
+    if (!fechaHora) {
+      setError('Falta la fecha y la hora.')
+      return
+    }
+    if (citacion.trim().length < 4) {
+      setError('Di qué la convoca: el acta del consejo o la citación con su número.')
+      return
+    }
+    const utiles = puntos.filter((punto) => punto.titulo.trim())
+    if (utiles.length === 0) {
+      setError('Una convocatoria sin orden del día no convoca a nada.')
+      return
+    }
+    void alConvocar({
+      tipo,
+      titulo: titulo.trim(),
+      // El input entrega hora local; se guarda con el desfase de Colombia, que
+      // es donde ocurre la asamblea.
+      fechaHora: `${fechaHora}:00-05:00`,
+      modalidad,
+      lugar: definicion.exigeLugar ? lugar.trim() : undefined,
+      enlaceTransmision: definicion.exigeEnlace ? enlace.trim() : undefined,
+      citacion: citacion.trim(),
+      ordenDelDia: utiles,
+    })
+  }
+
+  return (
+    <Modal
+      titulo="Convocar una asamblea"
+      descripcion="Lo primero es la modalidad: decide qué más hace falta y qué va a ver el copropietario."
+      onCerrar={alCerrar}
+    >
+      <form onSubmit={enviar}>
+        {/* La modalidad, arriba del todo y como opciones a la vista: es una
+            decisión, no un desplegable que se deja como venga (ADR-0007). */}
+        <div className="campo">
+          <label>¿Cómo se reúnen?</label>
+          <div className="pila" style={{ gap: 'var(--e2)' }}>
+            {MODALIDADES.map((opcion) => (
+              <button
+                key={opcion.id}
+                type="button"
+                className="opcion-categoria"
+                aria-pressed={modalidad === opcion.id}
+                onClick={() => setModalidad(opcion.id)}
+              >
+                <strong>{opcion.texto}</strong>
+                <span className="subtitulo">{opcion.detalle}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {definicion.exigeLugar && (
+          <div className="campo">
+            <label htmlFor="lugar">¿Dónde?</label>
+            <input
+              id="lugar"
+              value={lugar}
+              onChange={(evento) => setLugar(evento.target.value)}
+              placeholder="Salón social, Torre 1"
+            />
+          </div>
+        )}
+
+        {definicion.exigeEnlace && (
+          <div className="campo">
+            <label htmlFor="enlace">Enlace de la reunión</label>
+            <input
+              id="enlace"
+              value={enlace}
+              onChange={(evento) => setEnlace(evento.target.value)}
+              placeholder="https://meet.google.com/abc-defg-hij"
+            />
+            <span className="ayuda-campo">
+              El de Zoom, Meet o la herramienta que usen. Idiky no transmite: enlaza la reunión que
+              ustedes ya hacen (ADR-0007).
+            </span>
+          </div>
+        )}
+
+        <div className="separador" />
+
+        <div className="fila-campos">
+          <div className="campo">
+            <label htmlFor="tipo-asamblea">Tipo</label>
+            <select
+              id="tipo-asamblea"
+              value={tipo}
+              onChange={(evento) => setTipo(evento.target.value as TipoAsamblea)}
+            >
+              <option value="ordinaria">Ordinaria</option>
+              <option value="extraordinaria">Extraordinaria</option>
+            </select>
+          </div>
+          <div className="campo">
+            <label htmlFor="fecha-hora">Fecha y hora</label>
+            <input
+              id="fecha-hora"
+              type="datetime-local"
+              value={fechaHora}
+              onChange={(evento) => setFechaHora(evento.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="campo">
+          <label htmlFor="titulo-asamblea">Título</label>
+          <input
+            id="titulo-asamblea"
+            value={titulo}
+            onChange={(evento) => setTitulo(evento.target.value)}
+            placeholder="Asamblea ordinaria anual"
+          />
+        </div>
+
+        <div className="campo">
+          <label htmlFor="citacion">¿Qué la convoca?</label>
+          <input
+            id="citacion"
+            value={citacion}
+            onChange={(evento) => setCitacion(evento.target.value)}
+            placeholder="Citación 004 del consejo de administración"
+          />
+        </div>
+
+        <div className="separador" />
+        <span className="titulo-seccion">Orden del día</span>
+        {puntos.map((punto, i) => (
+          <div key={i} className="campo">
+            <label htmlFor={`punto-${i}`}>Punto {i + 1}</label>
+            <input
+              id={`punto-${i}`}
+              value={punto.titulo}
+              onChange={(evento) =>
+                setPuntos(
+                  puntos.map((p, j) => (i === j ? { ...p, titulo: evento.target.value } : p)),
+                )
+              }
+              placeholder="Aprobación del presupuesto"
+            />
+            <input
+              value={punto.descripcion}
+              onChange={(evento) =>
+                setPuntos(
+                  puntos.map((p, j) => (i === j ? { ...p, descripcion: evento.target.value } : p)),
+                )
+              }
+              placeholder="De qué se trata"
+              style={{ marginTop: 'var(--e2)' }}
+            />
+            <label
+              className="fila"
+              style={{ justifyContent: 'flex-start', gap: 'var(--e2)', marginTop: 'var(--e2)' }}
+            >
+              <input
+                type="checkbox"
+                checked={punto.seVota}
+                onChange={(evento) =>
+                  setPuntos(
+                    puntos.map((p, j) => (i === j ? { ...p, seVota: evento.target.checked } : p)),
+                  )
+                }
+              />
+              <span className="subtitulo">Este punto se somete a votación</span>
+            </label>
+          </div>
+        ))}
+        <button
+          type="button"
+          className="boton boton--pequeno"
+          onClick={() => setPuntos([...puntos, { titulo: '', descripcion: '', seVota: false }])}
+        >
+          <Icono nombre="mas" tamano={14} />
+          Agregar punto
+        </button>
+
+        {error && (
+          <p className="acceso__error" style={{ marginTop: 'var(--e3)' }}>
+            {error}
+          </p>
+        )}
+
+        {/* Deshabilitado y con el motivo a la vista, como en la extraordinaria:
+            dejar pulsar para contestar «falta el enlace» enseña a llenar por
+            llenar. El repositorio lo vuelve a comprobar. */}
+        {!respaldoListo && (
+          <p className="acceso__nota" style={{ margin: 'var(--e3) 0' }}>
+            {definicion.exigeLugar && !lugar.trim()
+              ? 'Falta el lugar: una asamblea presencial tiene que decir dónde es.'
+              : 'Falta el enlace de la reunión: es donde se van a encontrar.'}
+          </p>
+        )}
+
+        <button
+          className="boton boton--primario boton--bloque"
+          type="submit"
+          disabled={!respaldoListo}
+          style={{ marginTop: 'var(--e3)' }}
+        >
+          Convocar
+        </button>
+      </form>
+    </Modal>
+  )
+}

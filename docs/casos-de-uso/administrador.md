@@ -247,8 +247,16 @@ cuenta, plegado bajo «¿Por qué se cobra?».
   asamblea queda creada con su orden del día.
 
 **Flujo principal**
-1. El administrador crea la asamblea: tipo (ordinaria | extraordinaria), fecha, hora,
-   modalidad (presencial | virtual | mixta **(?)**) y lugar o enlace.
+1. El administrador crea la asamblea. **Lo primero es la modalidad** (ADR-0007), porque decide
+   qué más hay que pedir y qué va a ver el copropietario:
+
+   | Modalidad | Se exige | El copropietario ve |
+   |---|---|---|
+   | Presencial | **Lugar** | Dónde es y a qué hora |
+   | Virtual | **Enlace** de Zoom, Meet o lo que usen | El botón para entrar a la reunión |
+   | Mixta | **Lugar y enlace** | Los dos, y escoge cómo asiste |
+
+   Después: tipo (ordinaria | extraordinaria), fecha, hora y qué la convoca.
 2. Redacta el orden del día como una lista de puntos; marca cuáles se someten a votación.
 3. El sistema valida la antelación mínima frente a la fecha (RN-33) y avisa si no se cumple.
 4. El sistema genera el documento de convocatoria y lo envía a todas las unidades.
@@ -263,7 +271,12 @@ cuenta, plegado bajo «¿Por qué se cobra?».
 **Reglas de negocio**
 - RN-33: antelación mínima de la convocatoria **(?)**.
 
-**Estado en el demo:** ⬜ — no existe.
+**Estado en el demo:** 🟡 — `/admin/asambleas`, botón «Convocar». Se convoca con su orden del
+día y **la modalidad manda**: el botón queda deshabilitado diciendo qué falta, y
+`convocarAsamblea()` lo vuelve a comprobar.
+
+**Falta:** el **documento de convocatoria** y su envío (paso 4) —depende de ADR-0006— y la
+**antelación mínima** del paso 3, que es RN-33 y sigue sin definir.
 
 ---
 
@@ -294,27 +307,45 @@ cuenta, plegado bajo «¿Por qué se cobra?».
 ---
 
 ### CU-A-17
-## CU-A-17 — Transmitir la asamblea en vivo
+## CU-A-17 — Instalar la asamblea y llevar la asistencia
 
 - **Actor principal:** Administrador
 - **Precondiciones:** La asamblea está convocada y llegó su fecha.
-- **Resultado esperado:** Los copropietarios ven la asamblea desde la app (CU-R-21).
+- **Resultado esperado:** La sala queda abierta: los copropietarios pueden marcar asistencia
+  (CU-R-21) y el administrador ve el coeficiente que se va reuniendo.
+
+> 🔄 **Este caso de uso cambió de nombre el 2026-09-10.** Se llamaba «Transmitir la asamblea en
+> vivo» y suponía que Idiky ponía el video. **No lo pone** ([ADR-0007](../adr/0007-transmision-en-vivo.md)):
+> la copropiedad ya hace la reunión por Zoom o Meet, e Idiky la enlaza. Lo que sí es de Idiky
+> —y es lo que Zoom no puede dar— es **la asistencia ponderada por coeficiente**.
 
 **Flujo principal**
-1. El administrador abre la sala e inicia la transmisión.
-2. El sistema registra la instalación de la asamblea y empieza a contar el quórum (CU-S-07).
-3. El administrador marca en qué punto del orden del día va; los asistentes lo ven.
-4. Al terminar, cierra la transmisión y la asamblea pasa a `cerrada`.
+1. El administrador abre la asamblea y la **instala**. Ahí empieza a contar la asistencia.
+2. Los copropietarios marcan asistencia desde su app, diciendo **cómo**: en el salón o
+   conectados. En una mixta las dos formas suman al mismo total.
+3. El administrador ve en vivo cuántas unidades hay y **cuánto coeficiente** reunido, repartido
+   entre presenciales y conectadas.
+4. Al terminar, cierra la asamblea. **La asistencia y los votos quedan** — es de lo que sale el
+   acta (RN-61).
 
 **Flujos alternativos**
-- A1. Se cae la transmisión → **la asamblea no se interrumpe**: el quórum y las votaciones
-  siguen vigentes. El video es un canal, no el sistema de registro.
-- A2. Se graba la sesión como soporte del acta **(?)** — pendiente de definir.
+- A1. Se cae la reunión de Zoom → **la asamblea no se cae**: la asistencia y las votaciones
+  están en Idiky. Se cae el canal, no el registro.
+- A2. Alguien se pasa del salón a la reunión, o al revés → vuelve a marcar y **se corrige la
+  forma, no se duplica la unidad**. En una mixta es normal.
+- A3. Se graba la sesión como soporte del acta **(?)** — la grabación queda en Zoom o Meet,
+  fuera de Idiky. Sigue sin definir dónde vive y cuánto se conserva.
 
 **Reglas de negocio**
-- RN-28: el quórum se mide en coeficientes.
+- RN-27: asiste la unidad, no la persona; el peso es su coeficiente.
+- RN-37: el coeficiente se copia al marcar.
+- RN-51: hace quórum el propietario. El arrendatario puede entrar a oír, y la pantalla se lo
+  dice en vez de esconderle el botón.
+- RN-28: **el quórum sigue sin decidirse.** Idiky suma y reparte; **no afirma que haya
+  quórum**, y lo dice en pantalla.
 
-**Estado en el demo:** ⬜ — requiere ADR-0007 (proveedor de video).
+**Estado en el demo:** ✅ — `/admin/asambleas`. Se instala, se ve quién va llegando con su
+coeficiente y se cierra.
 
 ---
 

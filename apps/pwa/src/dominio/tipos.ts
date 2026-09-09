@@ -624,8 +624,15 @@ export interface Mensaje {
 // Asambleas — CU-R-13, CU-R-20 · docs/05-modelo-de-datos.md
 //
 // Es un subconjunto deliberado del modelo documentado: estan las entidades que
-// necesita el copropietario para enterarse de la asamblea y votar sus puntos.
-// **Faltan a proposito** `Asistencia`, `Poder` y el quorum: dependen de reglas
+// necesita el copropietario para enterarse de la asamblea, marcar asistencia y
+// votar sus puntos.
+//
+// `Asistencia` entro el 2026-09-10 con ADR-0007, y conviene decir por que se
+// pudo: **registrar quien asistio y sumar sus coeficientes no exige saber cuanto
+// quorum se necesita**. Son dos cosas distintas, y solo la segunda depende de
+// reglas sin confirmar. Idiky registra y suma; **no afirma que haya quorum**.
+//
+// **Sigue faltando a proposito** `Poder` y el quorum en si: dependen de reglas
 // que el equipo todavia no ha confirmado (RN-28, RN-30, T-10 y T-11), y
 // escribirlas de memoria seria inventar la ley.
 // ---------------------------------------------------------------------------
@@ -657,6 +664,39 @@ export interface Asamblea {
   estado: EstadoAsamblea
   /** Lo que convoca: numero y fecha del acta o de la citacion. */
   citacion: string
+}
+
+/**
+ * Por donde entro quien asistio (ADR-0007).
+ *
+ * No es un dato de curiosidad: en una asamblea **mixta** las dos formas suman al
+ * mismo quorum, y el acta tiene que poder decir cuantos habia de cada lado. Y en
+ * la virtual es la unica prueba util — **la lista de asistentes de Zoom no
+ * sirve**, porque no conoce unidades ni coeficientes, y el quorum se mide en
+ * coeficientes (RN-28).
+ */
+export type FormaAsistencia = 'presencial' | 'virtual'
+
+/**
+ * Que una unidad estuvo en la asamblea, y con que peso.
+ *
+ * **Asiste la unidad, no la persona.** El coeficiente es de la unidad, asi que
+ * dos copropietarios del mismo apartamento no suman dos veces — igual que en el
+ * voto (RN-27). Se guarda quien marco por ella para el acta.
+ */
+export interface Asistencia {
+  id: string
+  asambleaId: string
+  unidadId: string
+  /** Quien marco la asistencia por la unidad. */
+  personaId: string
+  forma: FormaAsistencia
+  /**
+   * Copiado al marcar, como en el voto (RN-37): si el coeficiente cambia
+   * despues, el acta de esta asamblea sigue diciendo con cuanto se conto.
+   */
+  coeficiente: number
+  registradaEn: FechaHoraISO
 }
 
 export type EstadoVotacion = 'preparada' | 'abierta' | 'cerrada' | 'anulada'
@@ -789,6 +829,7 @@ export interface BaseDatos {
   mensajes: Mensaje[]
   accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
+  asistencias: Asistencia[]
   votaciones: Votacion[]
   votos: Voto[]
   documentos: Documento[]

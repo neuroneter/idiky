@@ -17,20 +17,24 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import { useParams } from 'react-router-dom'
 import * as sel from '../../datos/selectores'
-import { emitirVoto } from '../../datos/repositorio'
-import { contarVotacion, pesoDelVoto, puedeVotar, yaVoto } from '../../dominio/reglas'
+import { emitirVoto, marcarAsistencia } from '../../datos/repositorio'
+import {
+  admiteAsistencia,
+  asistenciaDeUnidad,
+  contarVotacion,
+  definicionModalidad,
+  formasDeAsistir,
+  pesoDelVoto,
+  puedeVotar,
+  resumenAsistencia,
+  yaVoto,
+} from '../../dominio/reglas'
 import { formatearFechaHora } from '../../utilidades/formato'
 import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { Icono } from '../../componentes/Icono'
 import { ChipAsamblea } from '../../componentes/Etiquetas'
-import type { Asamblea, PuntoOrdenDelDia, Votacion } from '../../dominio/tipos'
-
-const MODALIDAD: Record<Asamblea['modalidad'], string> = {
-  presencial: 'Presencial',
-  virtual: 'Virtual',
-  mixta: 'Presencial y virtual',
-}
+import type { FormaAsistencia, PuntoOrdenDelDia, Votacion } from '../../dominio/tipos'
 
 function formatearCoeficiente(coeficiente: number): string {
   return `${coeficiente.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
@@ -62,6 +66,26 @@ export function AsambleaDetallePage() {
     .residenciasDeUnidad(bd, sesion.unidadActivaId ?? '')
     .find((residencia) => residencia.personaId === sesion.personaId)?.rol
   const puedo = puedeVotar(miRol)
+  const definicion = definicionModalidad(asamblea.modalidad)
+  const formas = formasDeAsistir(asamblea.modalidad)
+  const miAsistencia = asistenciaDeUnidad(bd.asistencias, asamblea.id, sesion.unidadActivaId ?? '')
+  const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
+
+  async function marcar(forma: FormaAsistencia) {
+    if (!unidad) return
+    await ejecutar(
+      (base) =>
+        marcarAsistencia(base, {
+          asambleaId: asamblea!.id,
+          unidadId: unidad.id,
+          personaId: sesion!.personaId,
+          forma,
+        }),
+      forma === 'presencial'
+        ? 'Quedaste registrado en el salón.'
+        : 'Quedaste registrado como conectado.',
+    )
+  }
 
   async function votar(votacion: Votacion, opcionId: string) {
     if (!unidad) return
@@ -206,24 +230,129 @@ export function AsambleaDetallePage() {
           <strong>{asamblea.titulo}</strong>
           <span className="subtitulo">{formatearFechaHora(asamblea.fechaHora)}</span>
           <span className="subtitulo">
-            {MODALIDAD[asamblea.modalidad]}
+            {definicion.texto}
             {asamblea.lugar ? ` · ${asamblea.lugar}` : ''}
           </span>
           <span className="subtitulo">{asamblea.citacion}</span>
         </div>
       </div>
 
-      {/* La transmisión en vivo es CU-R-21 y depende del proveedor (ADR-0007, sin
-          escribir). Se anuncia el enlace en vez de fingir un reproductor. */}
-      {asamblea.estado === 'instalada' && asamblea.enlaceTransmision && (
-        <div className="tarjeta tarjeta--plana">
-          <div className="columna">
-            <strong>Transmisión en vivo</strong>
-            <span className="subtitulo">
-              La asamblea se está transmitiendo. La reproducción dentro de la app llega con la
-              versión real: falta elegir el proveedor (ADR-0007).
-            </span>
+      {/* CU-R-21 — La sala, que cambia con la modalidad (ADR-0007).
+          Idiky no transmite: enlaza la reunión que la copropiedad ya hace. Lo que
+          sí es de Idiky —y por eso está aquí abajo, no allá— es la asistencia. */}
+      {admiteAsistencia(asamblea) && (
+        <div className="tarjeta">
+          <div className="columna" style={{ gap: 'var(--e1)' }}>
+            <strong>{definicion.texto}</strong>
+            <span className="subtitulo">{definicion.detalle}</span>
           </div>
+
+          {asamblea.lugar && (
+            <div className="fila fila-inicio" style={{ marginTop: 'var(--e3)' }}>
+              <span className="subtitulo">Dónde</span>
+              <strong style={{ textAlign: 'right' }}>{asamblea.lugar}</strong>
+            </div>
+          )}
+
+          {/* Se abre fuera de la app a propósito: el video es de un tercero, y
+              fingir que es nuestro sería mentir sobre dónde están los datos. */}
+          {asamblea.enlaceTransmision && (
+            <a
+              className="boton boton--primario boton--bloque"
+              href={asamblea.enlaceTransmision}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ marginTop: 'var(--e3)' }}
+            >
+              Entrar a la reunión
+            </a>
+          )}
+
+          <div className="separador" />
+
+          {!puedo ? (
+            /* RN-51: vota y hace quórum el propietario. El arrendatario puede
+               entrar a oír, pero su asistencia no suma coeficiente — y se le
+               dice, en vez de esconderle el botón sin explicación. */
+            <p className="subtitulo">
+              Puedes entrar a la asamblea, pero la asistencia que cuenta para el quórum es la del
+              propietario de la unidad.
+            </p>
+          ) : miAsistencia ? (
+            <div className="columna" style={{ gap: 'var(--e2)' }}>
+              <div className="fila">
+                <span className="subtitulo">Tu asistencia</span>
+                <span className="chip chip--exito">
+                  {miAsistencia.forma === 'presencial' ? 'En el salón' : 'Conectado'}
+                </span>
+              </div>
+              {formas.length > 1 && (
+                <div className="grupo-botones">
+                  {formas
+                    .filter((forma) => forma !== miAsistencia!.forma)
+                    .map((forma) => (
+                      <button
+                        key={forma}
+                        className="boton boton--pequeno"
+                        disabled={cargando}
+                        onClick={() => marcar(forma)}
+                      >
+                        {forma === 'presencial' ? 'Me pasé al salón' : 'Me pasé a la reunión'}
+                      </button>
+                    ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="columna" style={{ gap: 'var(--e2)' }}>
+              <span className="subtitulo">
+                Marca tu asistencia: es la que cuenta para el quórum, no la lista de la reunión.
+              </span>
+              <div className="grupo-botones">
+                {formas.map((forma) => (
+                  <button
+                    key={forma}
+                    className="boton boton--primario"
+                    disabled={cargando}
+                    onClick={() => marcar(forma)}
+                  >
+                    {forma === 'presencial' ? 'Estoy en el salón' : 'Estoy conectado'}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="separador" />
+
+          {/* Se suma y se reparte, pero **no se dice si hay quórum**: el umbral
+              está sin decidir (RN-28, §3 bis), y afirmarlo con un número
+              inventado sería peor que no decir nada. */}
+          <div className="lista lista--compacta">
+            <div className="fila">
+              <span className="subtitulo">Unidades presentes</span>
+              <strong className="numerico">{resumen.unidades}</strong>
+            </div>
+            <div className="fila">
+              <span className="subtitulo">Coeficiente reunido</span>
+              <strong className="numerico">{formatearCoeficiente(resumen.coeficiente)}</strong>
+            </div>
+            {asamblea.modalidad === 'mixta' && (
+              <div className="fila">
+                <span className="subtitulo">Cómo asisten</span>
+                <span className="subtitulo">
+                  {resumen.presenciales} en el salón · {resumen.virtuales} conectadas
+                </span>
+              </div>
+            )}
+          </div>
+
+          {asamblea.enlaceTransmision && (
+            <p className="acceso__nota" style={{ marginTop: 'var(--e3)' }}>
+              Las votaciones se hacen <strong>aquí</strong>, no en la reunión. Vuelve a esta
+              pantalla cuando se abra un punto a votación.
+            </p>
+          )}
         </div>
       )}
 

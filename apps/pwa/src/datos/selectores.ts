@@ -9,6 +9,7 @@ import type {
   Asamblea,
   BaseDatos,
   Comunicado,
+  Asistencia,
   ConceptoSancion,
   Sancion,
   Documento,
@@ -104,6 +105,13 @@ export function sancionesDeUnidad(bd: BaseDatos, unidadId?: string): Sancion[] {
   return bd.sanciones
     .filter((sancion) => sancion.unidadId === unidadId)
     .sort((a, b) => b.fechaImposicion.localeCompare(a.fechaImposicion))
+}
+
+/** La asistencia registrada a una asamblea, en el orden en que fue llegando. */
+export function asistenciasDeAsamblea(bd: BaseDatos, asambleaId: string): Asistencia[] {
+  return bd.asistencias
+    .filter((asistencia) => asistencia.asambleaId === asambleaId)
+    .sort((a, b) => a.registradaEn.localeCompare(b.registradaEn))
 }
 
 export function zonasDe(bd: BaseDatos, copropiedadId: string): ZonaComun[] {

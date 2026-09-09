@@ -8,6 +8,9 @@
 
 import type {
   Asamblea,
+  Asistencia,
+  FormaAsistencia,
+  ModalidadAsamblea,
   CategoriaRegistro,
   ConceptoSancion,
   EstadoSancion,
@@ -449,6 +452,117 @@ export function contarVotacion(
 /** Orden de la lista: primero lo que esta pasando, despues lo que viene, al final lo cerrado. */
 export function ordenAsamblea(asamblea: Asamblea): number {
   return { instalada: 0, convocada: 1, cerrada: 2, cancelada: 3 }[asamblea.estado]
+}
+
+// ---------------------------------------------------------------------------
+// Modalidad y asistencia — ADR-0007
+//
+// **La asistencia es la constante; el video es la variable.** El video existe en
+// dos de las tres modalidades y en ninguna es el sistema de registro: por eso lo
+// puede poner un tercero (Zoom, Meet) sin que Idiky pierda nada.
+// ---------------------------------------------------------------------------
+
+/** Que exige cada modalidad al convocar, y como se le explica a quien convoca. */
+export const MODALIDADES: ReadonlyArray<{
+  id: ModalidadAsamblea
+  texto: string
+  /** Que le pasa a quien asiste. */
+  detalle: string
+  exigeLugar: boolean
+  exigeEnlace: boolean
+}> = [
+  {
+    id: 'presencial',
+    texto: 'Presencial',
+    detalle: 'Se reúnen en un lugar. No hay transmisión.',
+    exigeLugar: true,
+    exigeEnlace: false,
+  },
+  {
+    id: 'virtual',
+    texto: 'Virtual',
+    detalle: 'Se reúnen por Zoom, Meet o la herramienta que usen. Idiky enlaza esa reunión.',
+    exigeLugar: false,
+    exigeEnlace: true,
+  },
+  {
+    id: 'mixta',
+    texto: 'Mixta',
+    detalle: 'Unos en el salón y otros conectados. Las dos formas suman al mismo quórum.',
+    exigeLugar: true,
+    exigeEnlace: true,
+  },
+]
+
+export function definicionModalidad(modalidad: ModalidadAsamblea) {
+  return MODALIDADES.find((m) => m.id === modalidad)!
+}
+
+/**
+ * ADR-0007 — La convocatoria esta completa segun **su** modalidad.
+ *
+ * Una asamblea virtual sin enlace no dice donde es, y una presencial sin lugar
+ * tampoco. Es el mismo examen que el respaldo de un cobro (RN-45): lo que se
+ * exige depende de que clase de cosa se esta creando, no de un formulario que
+ * pide todo por si acaso.
+ */
+export function convocatoriaCompleta(asamblea: {
+  modalidad: ModalidadAsamblea
+  lugar?: string
+  enlaceTransmision?: string
+}): boolean {
+  const definicion = definicionModalidad(asamblea.modalidad)
+  if (definicion.exigeLugar && !asamblea.lugar?.trim()) return false
+  if (definicion.exigeEnlace && !asamblea.enlaceTransmision?.trim()) return false
+  return true
+}
+
+/** Formas de asistir que admite la modalidad (ADR-0007). */
+export function formasDeAsistir(modalidad: ModalidadAsamblea): FormaAsistencia[] {
+  if (modalidad === 'presencial') return ['presencial']
+  if (modalidad === 'virtual') return ['virtual']
+  return ['presencial', 'virtual']
+}
+
+/** La asistencia de una unidad a una asamblea, si la marco. */
+export function asistenciaDeUnidad(
+  asistencias: Asistencia[],
+  asambleaId: string,
+  unidadId: string,
+): Asistencia | undefined {
+  return asistencias.find((a) => a.asambleaId === asambleaId && a.unidadId === unidadId)
+}
+
+/**
+ * ADR-0007 — Lo que se puede decir de la asistencia **sin decidir el quorum**.
+ *
+ * Registrar quien asistio y sumar sus coeficientes no exige saber cuanto quorum
+ * se necesita: son dos cosas distintas y solo la segunda esta sin decidir
+ * (RN-28, §3 bis). Asi que esto suma y reparte por forma —que es lo que el acta
+ * necesita en una mixta— y **deliberadamente no devuelve `hayQuorum`**: afirmarlo
+ * con un umbral inventado seria peor que no decir nada.
+ */
+export function resumenAsistencia(
+  asistencias: Asistencia[],
+  asambleaId: string,
+): {
+  unidades: number
+  coeficiente: number
+  presenciales: number
+  virtuales: number
+} {
+  const dela = asistencias.filter((a) => a.asambleaId === asambleaId)
+  return {
+    unidades: dela.length,
+    coeficiente: dela.reduce((total, a) => total + a.coeficiente, 0),
+    presenciales: dela.filter((a) => a.forma === 'presencial').length,
+    virtuales: dela.filter((a) => a.forma === 'virtual').length,
+  }
+}
+
+/** Solo tiene sentido marcar asistencia mientras la asamblea esta instalada. */
+export function admiteAsistencia(asamblea: Asamblea): boolean {
+  return asamblea.estado === 'instalada'
 }
 
 // ---------------------------------------------------------------------------

@@ -10,9 +10,11 @@
 
 import type {
   Asamblea,
+  Asistencia,
   BaseDatos,
   Comunicado,
   ConceptoSancion,
+  FormaAsistencia,
   Correspondencia,
   Cuota,
   Pago,
@@ -40,7 +42,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 13 — el concepto puede llevar reincidencia, con su propio respaldo (RN-72).
 // 14 — la reincidencia caduca: mesesReincidencia en la copropiedad (RN-72).
 // 15 — la cuota lleva el respaldo que la autoriza: acta y para que (RN-46, RN-47).
-export const VERSION_ESQUEMA = 15
+// 16 — asistencia a la asamblea, con su forma y su coeficiente (ADR-0007).
+export const VERSION_ESQUEMA = 16
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -656,7 +659,9 @@ const asambleas: Asamblea[] = [
     fechaHora: fechaHoraRelativa(0, '19:00'),
     modalidad: 'mixta',
     lugar: 'Salón social, Torre 1',
-    enlaceTransmision: 'https://transmision.idiky.demo/asamblea-cubierta',
+    // Con ADR-0007 el enlace es el de la herramienta que la copropiedad ya usa.
+    // Se ve asi a proposito: es lo que hace evidente que el video no es de Idiky.
+    enlaceTransmision: 'https://meet.google.com/idiky-demo-asm',
     estado: 'instalada',
     citacion: 'Citación 003 del consejo de administración',
     ordenDelDia: [
@@ -996,6 +1001,34 @@ function construirSanciones(): { sanciones: Sancion[]; consecutivo: number } {
   return { sanciones, consecutivo: 2 }
 }
 
+/**
+ * Asistencia a la asamblea en curso, que es mixta (ADR-0007).
+ *
+ * Cinco unidades y de las dos formas, a proposito: en una mixta el acta tiene
+ * que poder decir cuantos habia de cada lado, y con todas iguales eso no se
+ * veria. **Quedan sin marcar las dos unidades de los perfiles del demo** —Torre
+ * 1 · 402 y Torre 2 · 901— para que quien lo abra pueda marcar la suya.
+ */
+function construirAsistencias(): Asistencia[] {
+  const definicion: Array<[unidadId: string, personaId: string, forma: FormaAsistencia, hora: string]> = [
+    ['uni-torre1-201', 'per-3', 'presencial', '19:02'],
+    ['uni-torre1-202', 'per-4', 'presencial', '19:05'],
+    ['uni-torre1-301', 'per-5', 'virtual', '19:03'],
+    ['uni-torre2-501', 'per-8', 'virtual', '19:08'],
+    ['uni-torre2-602', 'per-11', 'presencial', '19:11'],
+  ]
+  return definicion.map(([unidadId, personaId, forma, hora], i) => ({
+    id: `asi-${i + 1}`,
+    asambleaId: ASAMBLEA_EN_CURSO,
+    unidadId,
+    personaId,
+    forma,
+    // Copiado al marcar, como el voto (RN-37).
+    coeficiente: unidades.find((u) => u.id === unidadId)!.coeficiente,
+    registradaEn: fechaHoraRelativa(0, hora),
+  }))
+}
+
 // ---------------------------------------------------------------------------
 // Semilla completa
 // ---------------------------------------------------------------------------
@@ -1045,6 +1078,7 @@ export function crearSemilla(): BaseDatos {
     // Sin accesos a soportes: la constancia nace cuando alguien mira una foto.
     accesosSoportes: [],
     asambleas,
+    asistencias: construirAsistencias(),
     votaciones,
     votos,
     // Sin paz y salvo emitido: que la primera emision del demo sea la de quien lo prueba.

@@ -19,7 +19,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-11 | **Confirmar el tope legal de poderes** (Ley 675 de 2001) | Los tres | 📋 Por hacer | Hay que leer el artículo y citarlo. **No se implementa RN-30 con una cifra supuesta** |
 | T-12 | **Decidir si visitantes, correspondencia y cartelera siguen** | Los tres | 📋 Por hacer | Están implementados pero nadie los mencionó en el alcance |
 | T-13 | **ADR-0006 — cómo se generan los PDF** | Daniel | ✅ Hecho | Escrito el 2026-08-28. Los cinco documentos quedan bloqueados por el backend (ADR-0008), no por la decisión |
-| T-14 | **ADR-0007 — proveedor de transmisión en vivo** | Daniel | 📋 Por hacer | Costo por minuto, grabación, ancho de banda |
+| T-14 | ~~ADR-0007 — proveedor de transmisión en vivo~~ | Daniel | ✅ Hecho (2026-09-10) | **No hay proveedor que elegir**: se enlaza Zoom/Meet. El costo por minuto desaparece; queda abierto si la grabación es soporte del acta |
 | T-15 | Corregir los bugs del demo detectados en la revisión | Zona A / D | ✅ Hecho | Zona horaria, íconos PWA, vigencia del visitante y doble toque. Ver bitácora del 2026-08-26 |
 | T-17 | **Definir qué se intercambia con la app contable de Jeimy** | Mary + Jeimy | 📋 Por hacer | La destinación específica de una extraordinaria (RN-48) es dato contable: lo recaudado tiene que poder cruzarse con lo gastado en esa destinación |
 | T-18 | **Cómo se envía el código de un solo uso** (SMS, WhatsApp o correo) y con qué proveedor | Daniel | 📋 Por hacer | Sale del flujo de acceso decidido el 2026-08-28 (RN-54). Tiene costo por mensaje y afecta el ADR de backend |

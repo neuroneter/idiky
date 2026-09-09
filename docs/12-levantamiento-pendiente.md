@@ -50,9 +50,13 @@ alcance que viene del equipo y no de un supuesto**, así que manda sobre el demo
    formales. Es una capacidad transversal nueva que **exige un ADR** (hoy no hay ninguna
    dependencia que lo haga). → ADR-0006, pendiente.
 
-3. **La transmisión en vivo no se construye, se integra.** Video en vivo tiene costo por
-   minuto y complejidad propia; la decisión (proveedor externo embebido vs. desarrollo
-   propio) **exige un ADR**. → ADR-0007, pendiente.
+3. ~~**La transmisión en vivo no se construye, se integra.**~~ → ✅ **Resuelto el 2026-09-10
+   con [ADR-0007](./adr/0007-transmision-en-vivo.md).** La pregunta estaba mal puesta: no era
+   qué proveedor, sino que **el video no es de Idiky en ninguna modalidad**. Mary: *«las
+   asambleas se pueden hacer por Zoom o por Meet»* y *«una asamblea puede ser virtual o
+   presencial; debemos partir de ahí»*. Idiky enlaza la reunión que la copropiedad ya hace y
+   se queda con lo insustituible —asistencia ponderada, votación, acta—. **Sin dependencias
+   nuevas y sin costo por minuto.**
 
 ### Lo que quedó sin mencionar — pendiente de confirmar
 

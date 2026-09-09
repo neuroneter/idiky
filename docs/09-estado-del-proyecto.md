@@ -14,7 +14,7 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 67 documentados: 30 ✅ en el demo, 9 🟡 a medias, 27 ⬜ pendientes, 1 ⛔ retirado |
+| **Casos de uso** | 67 documentados: 32 ✅ en el demo, 10 🟡 a medias, 24 ⬜ pendientes, 1 ⛔ retirado |
 | **Reglas de negocio** | 73 (RN-01…RN-73; RN-41 retirada) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -30,13 +30,14 @@ aplica a toda la app (CU-R-26). Todo simulado salvo la huella, y cada pantalla l
 la persona, que adjunta ella misma, y autorización de quien registró (CU-R-27, CU-R-28)— ·
 inicio con resumen · estado de cuenta · pago simulado con comprobante
 (PSE, Bre-B y tarjeta) · **solicitudes** —zonas comunes, PQRS y el **paz y salvo, que se emite,
-se ve y se guarda como PDF**— · **asambleas
-con votación ponderada por coeficiente** · cartelera de comunicados · autorización de
+se ve y se guarda como PDF**— · **asambleas con votación ponderada por coeficiente y
+asistencia según la modalidad** (CU-R-21) · cartelera de comunicados · autorización de
 visitantes con código · consulta de correspondencia · consulta del coeficiente ·
 **el proceso sancionatorio de su unidad, con descargos e impugnación** (CU-R-29).
 
-**Consola del administrador:** **registro de propietarios**, con la tabla de quién registró a
-quién (CU-A-26) · **catálogo de multas con su respaldo, y la reincidencia con el
+**Consola del administrador:** **asambleas: convocar según la modalidad, instalar y ver la
+asistencia con su coeficiente** (CU-A-12, CU-A-17) · **registro de propietarios**, con la tabla
+de quién registró a quién (CU-A-26) · **catálogo de multas con su respaldo, y la reincidencia con el
 suyo** (CU-A-22) · **procesos sancionatorios con debido proceso completo** —notificar citando
 la norma, oír, decidir, impugnar y dar firmeza (CU-A-23)— ·
 tablero de indicadores ·
@@ -81,6 +82,72 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-10 · Mary + IA (Claude) · La asamblea parte de su modalidad (ADR-0007)
+
+ADR-0007 llevaba desde el 26 de agosto pendiente, planteado como *«elegir proveedor de
+transmisión: costo por minuto, grabación, ancho de banda»*. **Dos frases de Mary lo dieron
+vuelta, y la decisión terminó siendo que no hay proveedor que elegir.**
+
+La primera: *«las asambleas se pueden hacer por Zoom o por Meet»*. Si la copropiedad ya tiene
+con qué, ese costo no es de Idiky y esa complejidad tampoco.
+
+La segunda, y es la que ordena todo: *«una asamblea puede ser virtual o presencial; debemos
+partir de ahí»*. Yo había saltado a **cómo** hacer el video cuando la pregunta anterior era
+**qué tipo de asamblea es**. `modalidad` ya existía en el modelo y se estaba diseñando como si
+todas fueran virtuales.
+
+Puestas al lado, las tres modalidades dicen solas la respuesta: **la asistencia es la
+constante; el video es la variable.** Solo existe en dos de las tres, y en ninguna es el
+sistema de registro. Por eso puede ser de un tercero sin que Idiky pierda nada — y al revés,
+**Zoom no conoce los coeficientes y nunca los va a conocer**.
+
+**La decisión que parecía la más cara resultó la más barata**: enlazar una reunión es un
+enlace, no un SDK. Sin dependencias nuevas, sin costo por minuto, sin backend.
+
+**Lo que se construyó:**
+
+- **Consola del administrador → Asambleas** (nueva). Convoca preguntando **primero la
+  modalidad**, porque decide qué más hace falta: presencial exige lugar, virtual exige enlace,
+  mixta los dos. El botón se deshabilita diciendo qué falta, y `convocarAsamblea()` lo vuelve a
+  comprobar. Instala, ve la asistencia llegar con su coeficiente, y cierra.
+- **Sala del copropietario**, que cambia con la modalidad: dónde es, el botón para entrar a la
+  reunión, o los dos. Y **marcar asistencia diciendo cómo** — en el salón o conectado.
+- La entidad `Asistencia`, con su forma y su coeficiente copiado (RN-37).
+
+**Cuatro decisiones que conviene revisar:**
+
+- **Asiste la unidad, no la persona** (RN-27): dos copropietarios del mismo apartamento no
+  suman dos veces. Y si alguien se pasa del salón a la reunión, **se corrige la forma, no se
+  duplica** — en una mixta es normal.
+- **El arrendatario puede entrar pero no cuenta** (RN-51), y la pantalla se lo dice en vez de
+  esconderle el botón.
+- **Se suma, pero no se declara quórum.** Registrar quién asistió y sumar coeficientes es
+  aritmética y se puede hacer hoy; el umbral, si lo virtual pesa igual que lo presencial y cómo
+  entran los poderes son derecho, y están sin decidir (RN-28). Las dos pantallas lo dicen.
+- **Se nombra el costo de la decisión en vez de taparlo.** Al abrir Zoom en el celular, Idiky se
+  va al fondo; la sala avisa *«las votaciones se hacen aquí, no en la reunión»*. Con push (fase
+  2) mejora; mientras tanto, se dice.
+
+**Verificado con Playwright, 30 comprobaciones** entre las dos caras: que la modalidad decida
+qué se pide al convocar (presencial no pide enlace, virtual no pide lugar, mixta los dos), que
+el bloqueo diga qué falta, que instalar abra el panel de asistencia, que marcar sume el
+coeficiente correcto (43,2 % → 51,4 %), que el arrendatario vea la explicación y no el botón, y
+que en ninguna pantalla se afirme que hay quórum.
+
+**De paso, un arreglo en el revisor de ortografía.** Entre dos cadenas vacías seguidas
+—`{ titulo: '', descripcion: '' }`— la heurística de «prosa entre comillas» tomaba el código de
+en medio por texto y pedía tildar el nombre de un campo. Comprobado que el arreglo no lo ciega:
+una tilde de verdad sigue saliendo.
+
+**CU-A-17 y CU-R-21 cambiaron de nombre**, porque los dos suponían que Idiky ponía el video:
+ahora son «Instalar la asamblea y llevar la asistencia» y «Entrar a la asamblea y marcar mi
+asistencia».
+
+**Lo que sigue:** el corazón del producto — **quórum, mayorías, poderes y acta** (§3 bis, once
+preguntas). Es lo único que ya no tiene un rodeo: hay que responderlas.
+
+---
 
 ### 2026-09-09 · Mary + IA (Claude) · El debido proceso sancionatorio (CU-A-23, CU-R-29)
 

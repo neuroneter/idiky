@@ -280,8 +280,8 @@ Un campo de prosa que repite lo que las columnas dicen se llena con lo primero q
 | `tipo` | `'ordinaria' \| 'extraordinaria'` | |
 | `numeroConvocatoria` | number | 1 = primera convocatoria, 2 = segunda **(?)** |
 | `fechaHora` | fecha ISO completa | |
-| `modalidad` | `'presencial' \| 'virtual' \| 'mixta'` | **(?)** |
-| `lugar` / `enlaceTransmision` | string? | Según modalidad |
+| `modalidad` | `'presencial' \| 'virtual' \| 'mixta'` | **Es el punto de partida** (ADR-0007): decide qué se exige al convocar y qué ve el copropietario |
+| `lugar` / `enlaceTransmision` | string? | Según modalidad: presencial exige lugar, virtual exige enlace, mixta los dos. El enlace es el de **Zoom o Meet** — Idiky no transmite (ADR-0007) |
 | `ordenDelDia` | `PuntoOrdenDelDia[]` | |
 | `estado` | `'convocada' \| 'instalada' \| 'cerrada' \| 'cancelada' \| 'no_instalada'` | Nunca se borra |
 | `quorumMinimo` | number | Porcentaje de coeficientes exigido (RN-28) **(?)** |
@@ -311,6 +311,29 @@ Un campo de prosa que repite lo que las columnas dicen se llena con lo primero q
 | `documentoId` | string? | El PDF del poder **(?)** |
 | `validadoPor` / `validadoEn` | string? / fecha ISO? | CU-A-19 |
 | `motivoRechazo` | string? | |
+
+### Asistencia — quién estuvo, y con cuánto peso
+
+> ✅ **Implementada** (ADR-0007). Entró el 2026-09-10, y conviene decir por qué se pudo:
+> **registrar quién asistió y sumar coeficientes no exige saber cuánto quórum se necesita.**
+> Son dos cosas distintas y solo la segunda depende de reglas sin confirmar.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `asambleaId` | string | |
+| `unidadId` | string | **Asiste la unidad, no la persona**: dos copropietarios del mismo apartamento no suman dos veces (igual que el voto, RN-27) |
+| `personaId` | string | Quién marcó por la unidad. Va al acta |
+| `forma` | `'presencial' \| 'virtual'` | En una **mixta** las dos suman al mismo total, y el acta tiene que poder decir cuántos había de cada lado |
+| `coeficiente` | number | **Copiado al marcar** (RN-37): si el coeficiente cambia después, el acta de esta asamblea sigue diciendo con cuánto se contó |
+| `registradaEn` | fecha ISO completa | |
+
+> **La lista de asistentes de Zoom no reemplaza esto.** No conoce unidades ni coeficientes, y
+> el quórum se mide en coeficientes (RN-28). Quien entra por el enlace **también** marca
+> asistencia en Idiky, y es esa la que cuenta.
+>
+> Y lo que el sistema **no** hace: **declarar que hay quórum**. Suma y reparte por forma;
+> el umbral, si lo virtual pesa igual que lo presencial y cómo entran los poderes siguen sin
+> decidir (RN-28, §3 bis).
 
 ### Votacion
 | Campo | Tipo | Notas |

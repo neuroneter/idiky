@@ -15,6 +15,13 @@ import type {
   BaseDatos,
   CategoriaComunicado,
   ConceptoSancion,
+  Asamblea,
+  Asistencia,
+  EstadoAsamblea,
+  FechaHoraISO,
+  FormaAsistencia,
+  ModalidadAsamblea,
+  TipoAsamblea,
   OrigenRespaldo,
   Reincidencia,
   CategoriaRegistro,
@@ -52,6 +59,10 @@ import {
   puedeQuedarEnFirme,
   puedeVotar,
   multaAplicable,
+  admiteAsistencia,
+  convocatoriaCompleta,
+  definicionModalidad,
+  formasDeAsistir,
   respaldoCompleto,
   respaldoDeCuotaCompleto,
   rolDeCategoria,
@@ -979,6 +990,164 @@ export async function darFirmezaSancion(
     parametros.personaId,
   )
   return persistir(bd, sancion)
+}
+
+// ---------------------------------------------------------------------------
+// CU-A-12 / CU-A-17 — Convocar e instalar la asamblea
+// ---------------------------------------------------------------------------
+
+/**
+ * CU-A-12 — Convocar. **La modalidad decide que se exige** (ADR-0007).
+ *
+ * Una asamblea virtual sin enlace no dice donde es, y una presencial sin lugar
+ * tampoco. Es el mismo examen que el respaldo de un cobro (RN-45): lo que se
+ * pide depende de que clase de cosa se esta creando.
+ */
+export async function convocarAsamblea(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    tipo: TipoAsamblea
+    titulo: string
+    fechaHora: FechaHoraISO
+    modalidad: ModalidadAsamblea
+    lugar?: string
+    enlaceTransmision?: string
+    citacion: string
+    ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean }>
+  },
+): Promise<Resultado<Asamblea>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  if (!convocatoriaCompleta(parametros)) {
+    const definicion = definicionModalidad(parametros.modalidad)
+    throw new ErrorDeNegocio(
+      definicion.exigeLugar && !parametros.lugar?.trim()
+        ? 'Falta el lugar: una asamblea presencial tiene que decir dónde es.'
+        : 'Falta el enlace de la reunión: es donde se van a encontrar (ADR-0007).',
+    )
+  }
+  if (parametros.ordenDelDia.length === 0) {
+    throw new ErrorDeNegocio('Una convocatoria sin orden del día no convoca a nada.')
+  }
+
+  const asamblea: Asamblea = {
+    id: nuevoId('asa'),
+    copropiedadId: parametros.copropiedadId,
+    tipo: parametros.tipo,
+    titulo: parametros.titulo.trim(),
+    fechaHora: parametros.fechaHora,
+    modalidad: parametros.modalidad,
+    lugar: parametros.lugar?.trim() || undefined,
+    enlaceTransmision: parametros.enlaceTransmision?.trim() || undefined,
+    citacion: parametros.citacion.trim(),
+    ordenDelDia: parametros.ordenDelDia.map((punto, i) => ({
+      id: nuevoId('pto'),
+      orden: i + 1,
+      titulo: punto.titulo.trim(),
+      descripcion: punto.descripcion.trim(),
+      seVota: punto.seVota,
+    })),
+    estado: 'convocada',
+  }
+  bd.asambleas.push(asamblea)
+  return persistir(bd, asamblea)
+}
+
+/**
+ * CU-A-17 — Instalar, cerrar o cancelar. **Nunca borrar** (RN-61).
+ *
+ * Instalar es lo que abre la sala: desde ahi se marca asistencia y se pueden
+ * abrir votaciones. Cerrar no deshace nada — la asamblea cerrada conserva su
+ * asistencia y sus votos, que es de lo que sale el acta.
+ */
+export async function cambiarEstadoAsamblea(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; estado: EstadoAsamblea },
+): Promise<Resultado<Asamblea>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+
+  const permitido: Record<EstadoAsamblea, EstadoAsamblea[]> = {
+    convocada: ['instalada', 'cancelada'],
+    instalada: ['cerrada'],
+    cerrada: [],
+    cancelada: [],
+  }
+  if (!permitido[asamblea.estado].includes(parametros.estado)) {
+    throw new ErrorDeNegocio(
+      `Una asamblea ${asamblea.estado} no puede pasar a ${parametros.estado}.`,
+    )
+  }
+
+  asamblea.estado = parametros.estado
+  return persistir(bd, asamblea)
+}
+
+// ---------------------------------------------------------------------------
+// ADR-0007 — Asistencia a la asamblea
+//
+// Es la constante de las tres modalidades: en el salon se marca en la puerta, en
+// la virtual al entrar por el enlace, y en la mixta por los dos lados sumando al
+// mismo total. **La lista de asistentes de Zoom no reemplaza esto**: no conoce
+// unidades ni coeficientes, y el quorum se mide en coeficientes (RN-28).
+// ---------------------------------------------------------------------------
+
+export async function marcarAsistencia(
+  bdActual: BaseDatos,
+  parametros: {
+    asambleaId: string
+    unidadId: string
+    personaId: string
+    forma: FormaAsistencia
+  },
+): Promise<Resultado<Asistencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (!admiteAsistencia(asamblea)) {
+    throw new ErrorDeNegocio(
+      'Solo se puede marcar asistencia mientras la asamblea está instalada.',
+    )
+  }
+  // La forma tiene que caber en la modalidad: no se «asiste presencialmente» a
+  // una asamblea que se hace solo por Meet (ADR-0007).
+  if (!formasDeAsistir(asamblea.modalidad).includes(parametros.forma)) {
+    throw new ErrorDeNegocio('Esa forma de asistir no corresponde a la modalidad de la asamblea.')
+  }
+
+  const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
+  if (!unidad) throw new ErrorDeNegocio('Esa unidad no existe.')
+
+  // **Asiste la unidad, no la persona** (RN-27): dos copropietarios del mismo
+  // apartamento no suman dos veces. Si vuelve a marcar, se corrige la forma en
+  // vez de duplicar — cambiar de la sala al salon es normal en una mixta.
+  const previa = bd.asistencias.find(
+    (a) => a.asambleaId === parametros.asambleaId && a.unidadId === parametros.unidadId,
+  )
+  if (previa) {
+    previa.forma = parametros.forma
+    previa.personaId = parametros.personaId
+    return persistir(bd, previa)
+  }
+
+  const asistencia: Asistencia = {
+    id: nuevoId('asi'),
+    asambleaId: parametros.asambleaId,
+    unidadId: parametros.unidadId,
+    personaId: parametros.personaId,
+    forma: parametros.forma,
+    // Copiado al marcar, como el voto (RN-37).
+    coeficiente: unidad.coeficiente,
+    registradaEn: ahoraISO(),
+  }
+  bd.asistencias.push(asistencia)
+  return persistir(bd, asistencia)
 }
 
 // ---------------------------------------------------------------------------

@@ -87,7 +87,7 @@ apps/pwa/
 | `/app/solicitudes/pqrs` | PQRS | CU-R-07, CU-R-08 |
 | `/app/solicitudes/paz-y-salvo` | Paz y salvo | CU-R-12 |
 | `/app/asambleas` | Asambleas de la copropiedad | CU-R-20 |
-| `/app/asambleas/:id` | Orden del día y votaciones | CU-R-13, CU-R-20 |
+| `/app/asambleas/:id` | Sala: cómo asistir, asistencia y votaciones | CU-R-13, CU-R-20, CU-R-21 |
 | `/app/comunicados` | Cartelera | CU-R-09 |
 | `/app/reservas`, `/app/pqrs` | Redirigen a `/app/solicitudes/…` | — |
 | `/app/visitantes` | Visitantes y códigos | CU-R-10 |
@@ -101,6 +101,7 @@ apps/pwa/
 | `/admin/cartera` | Cartera, pagos y generación | CU-A-03, CU-A-04, CU-A-05 |
 | `/admin/multas` | Catálogo de multas (parametrizar) | CU-A-22 |
 | `/admin/sanciones` | Procesos sancionatorios (imponer y resolver) | CU-A-23 |
+| `/admin/asambleas` | Convocar, instalar y llevar la asistencia | CU-A-12, CU-A-17 |
 | `/admin/reservas` | Aprobación de reservas | CU-A-06 |
 | `/admin/pqrs` | Bandeja de PQRS | CU-A-07 |
 | `/admin/comunicados` | Publicación de comunicados | CU-A-08 |

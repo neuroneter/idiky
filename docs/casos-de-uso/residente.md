@@ -492,33 +492,47 @@ confirma asistencia** (paso 2) ni entrega la convocatoria en PDF (ADR-0006).
 ---
 
 ### CU-R-21
-## CU-R-21 — Ver la transmisión en vivo de la asamblea
+## CU-R-21 — Entrar a la asamblea y marcar mi asistencia
 
 - **Actor principal:** Copropietario
-- **Precondiciones:** La asamblea está instalada y el administrador inició la transmisión
-  (CU-A-17).
+- **Precondiciones:** La asamblea está instalada (CU-A-17).
 - **Disparador:** Entra a la asamblea desde la app a la hora convocada.
-- **Resultado esperado:** Ve y oye la asamblea desde el celular, y desde la misma pantalla
-  puede votar cuando se habilite una votación.
+- **Resultado esperado:** Sabe cómo asistir según la modalidad, **su asistencia queda
+  registrada con el peso de su unidad**, y desde la misma pantalla vota cuando se habilite.
+
+> 🔄 **Cambió de nombre el 2026-09-10.** Se llamaba «Ver la transmisión en vivo» y suponía un
+> reproductor dentro de la app. **No lo hay**
+> ([ADR-0007](../adr/0007-transmision-en-vivo.md)): la reunión es de Zoom o Meet e Idiky la
+> enlaza. Lo que la app aporta es lo otro — quién asiste y cuánto pesa.
 
 **Flujo principal**
-1. El sistema muestra la sala de la asamblea: transmisión en vivo, orden del día con el
-   punto en curso, y el quórum actualizado (CU-S-07).
-2. Cuando el administrador abre una votación, aparece sobre la transmisión sin sacarlo de
-   ella (CU-R-13).
-3. Su presencia en la sala cuenta para el quórum **(?)** — pendiente de confirmar si la
-   asistencia virtual suma igual que la presencial.
+1. La sala muestra **lo que corresponde a la modalidad**: dónde es si hay lugar, un botón para
+   entrar a la reunión si hay enlace, o las dos cosas en una mixta.
+2. Marca su asistencia diciendo **cómo**: «Estoy en el salón» o «Estoy conectado». En una mixta
+   puede cambiar de una a otra si se pasa.
+3. Ve el orden del día y, cuando el administrador abre una votación, vota desde ahí (CU-R-13).
 
 **Flujos alternativos**
-- A1. Conexión inestable → la transmisión baja de calidad pero la votación sigue disponible.
-  **La votación nunca debe depender del video.**
-- A2. Entra tarde → se une en el punto en curso; no hay reproducción hacia atrás en vivo.
-- A3. La transmisión no ha empezado → sala de espera con la hora convocada.
+- A1. **La votación nunca depende del video.** Si la reunión de Zoom se cae, o si el
+  copropietario nunca entra a ella, puede votar igual: el voto vive en Idiky.
+- A2. Es arrendatario → puede entrar a la reunión, pero **su asistencia no cuenta para el
+  quórum** (RN-51), y la pantalla se lo explica en vez de esconderle el botón.
+- A3. La asamblea todavía no se instala → no hay sala; solo la citación y el orden del día.
+
+**Decisiones de interfaz**
+- **Se dice dónde se vota.** Al abrir Zoom en el celular, Idiky se va al fondo; la sala avisa
+  *«las votaciones se hacen aquí, no en la reunión»* para que la persona sepa cuándo volver.
+  Es el costo real de que el video sea de un tercero, y se nombra en vez de taparlo.
+- **Se suma, pero no se declara quórum.** Se muestran las unidades presentes y el coeficiente
+  reunido; el umbral está sin decidir (RN-28) y afirmarlo con un número inventado sería peor
+  que no decir nada.
 
 **Reglas de negocio**
-- RN-28: el quórum se mide en coeficientes, no en número de personas conectadas.
+- RN-27 (asiste la unidad, con su coeficiente), RN-37 (se copia al marcar), RN-51 (hace quórum
+  el propietario), RN-28 (**el quórum sigue sin decidirse**).
 
-**Estado en el demo:** ⬜ — requiere decidir el proveedor de video (ADR-0007, pendiente).
+**Estado en el demo:** ✅ — `/app/asambleas/:id`. En el demo, la asamblea extraordinaria en
+curso es **mixta**, así que se ven las dos formas de asistir.
 
 ---
 

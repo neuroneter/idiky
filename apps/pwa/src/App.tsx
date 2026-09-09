@@ -33,6 +33,7 @@ import { RegistrosPage } from './features/admin/RegistrosPage'
 import { CarteraPage } from './features/admin/CarteraPage'
 import { CatalogoMultasPage } from './features/admin/CatalogoMultasPage'
 import { SancionesPage } from './features/admin/SancionesPage'
+import { AsambleasAdminPage } from './features/admin/AsambleasAdminPage'
 import { ReservasAdminPage } from './features/admin/ReservasAdminPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
@@ -119,6 +120,7 @@ export function App() {
         <Route path="cartera" element={<CarteraPage />} />
         <Route path="multas" element={<CatalogoMultasPage />} />
         <Route path="sanciones" element={<SancionesPage />} />
+        <Route path="asambleas" element={<AsambleasAdminPage />} />
         <Route path="reservas" element={<ReservasAdminPage />} />
         <Route path="pqrs" element={<PqrsAdminPage />} />
         <Route path="comunicados" element={<ComunicadosAdminPage />} />

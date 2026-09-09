@@ -82,6 +82,10 @@ NO_ES_TEXTO = re.compile(
 # Comentarios: son para quien lee el codigo, no para el usuario. No se revisan.
 ES_COMENTARIO = re.compile(r'^\s*(//|/\*|\*)')
 
+# Lo que queda entre dos cadenas vacias seguidas: `, descripcion: ` y parecidos.
+# Es codigo que el escaner atrapa por accidente, no una frase.
+ENTRE_CADENAS_VACIAS = re.compile(r'^[\s,]*[A-Za-z_$][\w$]*\s*:\s*$')
+
 # Propiedades cuyo valor SI se muestra en pantalla.
 PROPS_VISIBLES = re.compile(
     r"""(?:texto|ayuda|titulo|detalle|placeholder|title|concepto|autor|motivo)"""
@@ -103,8 +107,14 @@ def frases_visibles(linea: str):
     # Cadenas de prosa: varias palabras entre comillas. Un valor del dominio
     # ('peticion') es una sola palabra y no entra por aqui.
     for cadena in re.findall(r"""['"]([^'"]{6,})['"]""", linea):
-        if ' ' in cadena.strip() and re.search(r'[a-zñ]{3}', cadena):
-            trozos.append(cadena)
+        if not (' ' in cadena.strip() and re.search(r'[a-zñ]{3}', cadena)):
+            continue
+        # Entre DOS cadenas vacias seguidas —`{ titulo: '', descripcion: '' }`—
+        # lo que queda entre comillas no es prosa, es el codigo de en medio. Sin
+        # esto el revisor pedia tildar el nombre de un campo (2026-09-10).
+        if ENTRE_CADENAS_VACIAS.match(cadena):
+            continue
+        trozos.append(cadena)
 
     # Texto de JSX que ocupa su propia linea, sin etiquetas alrededor. Es el caso
     # que se escapo en la primera revision a mano ("Generar codigo de acceso").

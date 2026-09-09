@@ -41,7 +41,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-18 | **Descargar el informe de estado de cuenta** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-18) |
 | CU-R-19 | **Consultar y descargar mis comprobantes de pago** | 1 | 🟡 Parcial | [ver](./casos-de-uso/residente.md#cu-r-19) |
 | CU-R-20 | **Recibir la citación a asamblea y confirmar asistencia** | 1 | 🟡 Parcial (muestra la citación y el orden del día; no confirma asistencia) | [ver](./casos-de-uso/residente.md#cu-r-20) |
-| CU-R-21 | **Ver la transmisión en vivo de la asamblea** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-21) |
+| CU-R-21 | **Entrar a la asamblea y marcar mi asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-21) |
 | CU-R-22 | **Otorgar poder a otro copropietario** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-22) |
 | CU-R-23 | **Recibir y ejercer poderes de otros copropietarios** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-23) |
 | CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-24) |
@@ -66,12 +66,12 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-09 | Registrar correspondencia recibida | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-09) |
 | CU-A-10 | Configurar zonas comunes y sus reglas | 2 | ⬜ Pendiente | — |
 | CU-A-11 | Cargar presupuesto anual | 3 | ⬜ Pendiente | — |
-| CU-A-12 | **Convocar la asamblea y emitir las citaciones** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-12) |
+| CU-A-12 | **Convocar la asamblea y emitir las citaciones** | 1 | 🟡 Parcial (convoca con su modalidad; falta el documento de citación, ADR-0006) | [ver](./casos-de-uso/administrador.md#cu-a-12) |
 | CU-A-13 | **Emitir el paz y salvo** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-13) |
 | CU-A-14 | Gestionar proveedores y mantenimientos | 3 | ⬜ Pendiente | — |
 | CU-A-15 | Administrar varias copropiedades | 3 | ⬜ Pendiente | — |
 | CU-A-16 | Exportar informes (cartera, PQRS) | 2 | ⬜ Pendiente | — |
-| CU-A-17 | **Transmitir la asamblea en vivo** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-17) |
+| CU-A-17 | **Instalar la asamblea y llevar la asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-17) |
 | CU-A-18 | **Habilitar, abrir y cerrar una votación** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-18) |
 | CU-A-19 | **Validar y registrar los poderes** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-19) |
 | CU-A-20 | **Generar el acta de la asamblea** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-20) |
