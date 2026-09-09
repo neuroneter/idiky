@@ -21,6 +21,8 @@ import type {
   FechaHoraISO,
   FormaAsistencia,
   ModalidadAsamblea,
+  Persona,
+  Poder,
   TipoAsamblea,
   OrigenRespaldo,
   Reincidencia,
@@ -61,6 +63,8 @@ import {
   multaAplicable,
   admiteAsistencia,
   convocatoriaCompleta,
+  poderDeUnidad,
+  residenciaVigente,
   definicionModalidad,
   formasDeAsistir,
   respaldoCompleto,
@@ -1096,6 +1100,137 @@ export async function cambiarEstadoAsamblea(
 // unidades ni coeficientes, y el quorum se mide en coeficientes (RN-28).
 // ---------------------------------------------------------------------------
 
+/**
+ * CU-A-19 — El administrador registra un poder y crea a quien lo ejerce (RN-30).
+ *
+ * **El poder se otorga fuera de la aplicacion** (Mary, 2026-09-10): ante notario
+ * o de puno y letra. Idiky no puede exigirle al mundo que use Idiky, asi que lo
+ * que hace es recibirlo — el administrador lo valida, adjunta el papel y da de
+ * alta a quien lo ejerce.
+ *
+ * **Tres cosas pasan de una vez, y por eso viven en una sola operacion:**
+ *
+ * 1. Se crea el **usuario temporal de asamblea** si el apoderado no existe
+ *    (Mary, 2026-09-10). Si su documento ya esta, **se reutiliza la persona**:
+ *    la misma regla del registro de personas (RN-61), y por lo mismo — un
+ *    documento es una persona, no una fila por formulario.
+ *
+ *    «Temporal» no es un campo ni un estado: es que **su unica vinculacion con
+ *    la copropiedad es este poder**, y el poder muere con la asamblea. Lo que
+ *    caduca por construccion no hay que acordarse de apagarlo.
+ * 2. Se guarda **el papel**, fotografiado (ADR-0009). Un voto impugnado sin el
+ *    poder que lo respalda se cae.
+ * 3. Queda validado. **Registrarlo es validarlo**: quien adjunta el papel es
+ *    quien lo tuvo en la mano, y no hay nadie mas en el flujo.
+ *
+ * Lo que esta operacion **no** comprueba, y hay que decirlo: **el tope** de
+ * unidades que un apoderado puede acumular (RN-30). La cifra la fija la Ley 675
+ * y no la tenemos (§3 bis). En vez de inventarla, la pantalla **pone el
+ * acumulado delante** de quien registra.
+ */
+export async function registrarPoder(
+  bdActual: BaseDatos,
+  parametros: {
+    asambleaId: string
+    unidadId: string
+    nombresApoderado: string
+    apellidosApoderado: string
+    documentoApoderado: string
+    /** Para avisarle que quedo registrado. Un externo puede no tenerlo. */
+    telefonoApoderado?: string
+    imagen: string
+    registradoPor: string
+  },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') {
+    throw new ErrorDeNegocio('Esa asamblea ya terminó: no admite poderes nuevos.')
+  }
+
+  const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
+  if (!unidad) throw new ErrorDeNegocio('Esa unidad no existe.')
+
+  // **Quien otorga no se pregunta: se deriva.** Es el propietario de la unidad
+  // (RN-51) — el arrendatario no puede ceder un voto que no tiene, y dejar que
+  // quien registra escriba un nombre seria abrir justo esa puerta.
+  const propietario = bd.residencias.find(
+    (r) => r.unidadId === unidad.id && r.rol === 'propietario' && residenciaVigente(r),
+  )
+  if (!propietario) {
+    throw new ErrorDeNegocio('Esa unidad no tiene un propietario registrado que pueda dar poder.')
+  }
+
+  const documento = parametros.documentoApoderado.trim()
+  if (documento.length < 5) throw new ErrorDeNegocio('Falta el documento del apoderado.')
+  if (parametros.nombresApoderado.trim().length < 2) {
+    throw new ErrorDeNegocio('Falta el nombre del apoderado.')
+  }
+  // La decision de Mary (2026-09-10): el poder va con su papel adjunto.
+  if (!parametros.imagen) {
+    throw new ErrorDeNegocio('Falta la foto del poder firmado: sin ella el poder no se registra.')
+  }
+
+  const duenoDeLaUnidad = bd.personas.find((p) => p.id === propietario.personaId)
+  if (duenoDeLaUnidad && duenoDeLaUnidad.documento === documento) {
+    throw new ErrorDeNegocio('No hace falta un poder para votar por su propia unidad.')
+  }
+
+  // Una unidad, un representante (RN-28, RN-29).
+  const previo = poderDeUnidad(bd.poderes, parametros.asambleaId, parametros.unidadId)
+  if (previo) {
+    throw new ErrorDeNegocio(
+      'Esa unidad ya tiene un poder vigente en esta asamblea. Revócalo antes de registrar otro.',
+    )
+  }
+
+  // **El usuario temporal de asamblea.** Reutilizado por documento (RN-61).
+  const existente = bd.personas.find((p) => p.documento === documento)
+  // `Persona` exige correo y telefono, y de un apoderado externo puede no
+  // haberlos. Se guardan vacios en vez de inventarlos: un correo falso es peor
+  // que un correo ausente el dia que haya que escribirle.
+  const apoderado: Persona = existente ?? {
+    id: nuevoId('per'),
+    nombres: parametros.nombresApoderado.trim(),
+    apellidos: parametros.apellidosApoderado.trim(),
+    documento,
+    email: '',
+    telefono: parametros.telefonoApoderado?.trim() ?? '',
+  }
+  if (!existente) bd.personas.push(apoderado)
+
+  const poder: Poder = {
+    id: nuevoId('pod'),
+    asambleaId: parametros.asambleaId,
+    unidadId: unidad.id,
+    otorgadoPor: propietario.personaId,
+    apoderadoId: apoderado.id,
+    soporte: { imagen: parametros.imagen, adjuntadoEn: ahoraISO() },
+    registradoPor: parametros.registradoPor,
+    registradoEn: ahoraISO(),
+  }
+  bd.poderes.push(poder)
+  return persistir(bd, poder)
+}
+
+/** RN-61 — Un poder no se borra: se revoca, y queda en el expediente. */
+export async function revocarPoder(
+  bdActual: BaseDatos,
+  parametros: { poderId: string },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const poder = bd.poderes.find((p) => p.id === parametros.poderId)
+  if (!poder) throw new ErrorDeNegocio('Ese poder no existe.')
+  if (poder.revocadoEn) throw new ErrorDeNegocio('Ese poder ya estaba revocado.')
+
+  poder.revocadoEn = ahoraISO()
+  return persistir(bd, poder)
+}
+
 export async function marcarAsistencia(
   bdActual: BaseDatos,
   parametros: {
@@ -1103,6 +1238,8 @@ export async function marcarAsistencia(
     unidadId: string
     personaId: string
     forma: FormaAsistencia
+    /** Cuando la unidad viene representada (RN-30). */
+    poderId?: string
   },
 ): Promise<Resultado<Asistencia>> {
   await esperar()
@@ -1133,6 +1270,7 @@ export async function marcarAsistencia(
   if (previa) {
     previa.forma = parametros.forma
     previa.personaId = parametros.personaId
+    previa.poderId = parametros.poderId
     return persistir(bd, previa)
   }
 
@@ -1142,6 +1280,7 @@ export async function marcarAsistencia(
     unidadId: parametros.unidadId,
     personaId: parametros.personaId,
     forma: parametros.forma,
+    ...(parametros.poderId ? { poderId: parametros.poderId } : {}),
     // Copiado al marcar, como el voto (RN-37).
     coeficiente: unidad.coeficiente,
     registradaEn: ahoraISO(),

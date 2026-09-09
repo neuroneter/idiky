@@ -688,8 +688,16 @@ export interface Asistencia {
   id: string
   asambleaId: string
   unidadId: string
-  /** Quien marco la asistencia por la unidad. */
+  /** Quien marco la asistencia por la unidad, o quien la representa. */
   personaId: string
+  /**
+   * El poder con el que asiste, si viene representada (RN-30).
+   *
+   * Se guarda el **id**, no una copia: si el poder se revoca despues, el
+   * expediente tiene que poder llegar a el y ver que paso. Sin esto, una
+   * asistencia por poder seria indistinguible de una del propietario.
+   */
+  poderId?: string
   forma: FormaAsistencia
   /**
    * Copiado al marcar, como en el voto (RN-37): si el coeficiente cambia
@@ -697,6 +705,61 @@ export interface Asistencia {
    */
   coeficiente: number
   registradaEn: FechaHoraISO
+}
+
+/**
+ * Un poder: quien representa a una unidad en una asamblea (RN-30).
+ *
+ * **La asamblea es de propietarios, y el poder es lo que deja entrar a quien no
+ * lo es** (Mary, 2026-09-10: *«puede entrar un externo si tiene poder»*). El
+ * apoderado puede ser un hijo, un abogado, alguien sin ninguna relacion con el
+ * conjunto — y por eso **casi nunca tiene cuenta en Idiky**. De ahi salen dos
+ * cosas del modelo:
+ *
+ * 1. **Lo registra el administrador**, no el apoderado ni el propietario desde
+ *    su telefono (CU-A-19). Es tambien quien lo valida.
+ * 2. **Lleva el poder adjunto como soporte** (Mary, 2026-09-10). El poder se
+ *    otorga **fuera de la aplicacion** —ante notario o de puno y letra—, y la
+ *    app no puede exigirle al mundo que use la app. Asi que se fotografia, como
+ *    las cedulas del registro de personas (ADR-0009), con el mismo problema de
+ *    habeas data detras (RN-66).
+ *
+ *    Otorgarlo **desde** la app queda para cuando se responda si la ley admite
+ *    firma electronica (§3 bis) — y aun entonces el PDF espera al backend
+ *    (ADR-0006).
+ *
+ * **No se borra: se revoca** (RN-61). Un poder revocado sigue en el expediente
+ * de la asamblea, porque si voto antes de revocarse hay que poder explicarlo.
+ */
+export interface Poder {
+  id: string
+  asambleaId: string
+  /** La unidad representada. El coeficiente es suyo, no del apoderado. */
+  unidadId: string
+  /** Quien lo otorga: el propietario de la unidad. */
+  otorgadoPor: string
+  /**
+   * El apoderado, como **persona del sistema**.
+   *
+   * Si su documento ya existe se reutiliza; si no, se le crea ahi mismo un
+   * **usuario temporal de asamblea** (Mary, 2026-09-10). «Temporal» no es un
+   * campo ni un estado: es que **su unica vinculacion con la copropiedad es este
+   * poder**, y el poder muere con la asamblea. Lo que caduca por construccion no
+   * hay que acordarse de apagarlo.
+   */
+  apoderadoId: string
+  /** El poder firmado, fotografiado o escaneado (ADR-0009). */
+  soporte: Soporte
+  /**
+   * Quien lo valido y lo registro: el administrador (CU-A-19).
+   *
+   * Registrarlo **es** validarlo: no hay un paso aparte porque no hay nadie mas
+   * en el flujo. Quien adjunta el papel es quien lo tuvo en la mano.
+   */
+  registradoPor: string
+  registradoEn: FechaHoraISO
+  /** Cuando se revoco. Presente = ya no representa (RN-61). */
+  revocadoEn?: FechaHoraISO
 }
 
 export type EstadoVotacion = 'preparada' | 'abierta' | 'cerrada' | 'anulada'
@@ -830,6 +893,7 @@ export interface BaseDatos {
   accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
   asistencias: Asistencia[]
+  poderes: Poder[]
   votaciones: Votacion[]
   votos: Voto[]
   documentos: Documento[]

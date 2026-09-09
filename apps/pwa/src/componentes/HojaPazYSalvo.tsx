@@ -58,7 +58,7 @@ export function HojaPazYSalvo({
           ` y el parqueadero ${parqueaderos.length > 1 ? 'número' : 'número'} ${parqueaderos.join(' y ')}`}
         , a nombre de <strong>{nombres.length > 0 ? nombres.join(' Y ') : 'su propietario'}</strong>,
         se encuentra <strong>a paz y salvo por concepto de cuotas de administración</strong>{' '}
-        hasta el día {formatearFecha(documento.cubiertoHasta)}.
+        hasta el día {formatearFecha(documento.cubiertoHasta ?? documento.emitidoEn)}.
       </p>
 
       <p>

@@ -14,7 +14,7 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 67 documentados: 32 ✅ en el demo, 10 🟡 a medias, 24 ⬜ pendientes, 1 ⛔ retirado |
+| **Casos de uso** | 67 documentados: 32 ✅ en el demo, 11 🟡 a medias, 23 ⬜ pendientes, 1 ⛔ retirado |
 | **Reglas de negocio** | 73 (RN-01…RN-73; RN-41 retirada) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -144,8 +144,47 @@ una tilde de verdad sigue saliendo.
 ahora son «Instalar la asamblea y llevar la asistencia» y «Entrar a la asamblea y marcar mi
 asistencia».
 
-**Lo que sigue:** el corazón del producto — **quórum, mayorías, poderes y acta** (§3 bis, once
-preguntas). Es lo único que ya no tiene un rodeo: hay que responderlas.
+**Y en la misma sesión, los poderes** (CU-A-19). Mary aportó cuatro cosas seguidas, y tres de
+ellas **confirmaron lo que ya estaba construido**: *«la asamblea es para propietarios»*
+(RN-51), *«el quórum cuenta por unidad: pueden participar 3 propietarios pero solo es un voto»*
+(RN-28) y *«igual con las votaciones de cada punto: un voto por unidad»* (RN-29, que el
+repositorio ya rechazaba). La cuarta era nueva: **«puede entrar un externo si tiene poder»**.
+
+**El apoderado casi nunca tiene cuenta en Idiky**, y de ahí salió todo lo demás: lo registra el
+administrador, y si esa persona no existe **se le crea un usuario temporal de asamblea**. Lo
+bonito del modelo es que «temporal» **no es un campo ni un estado**: es que su única vinculación
+con la copropiedad es el poder, y el poder muere con la asamblea. Lo que caduca por
+construcción no hay que acordarse de apagarlo.
+
+**Aquí me equivoqué de camino y conviene dejarlo escrito.** Mary dijo primero que el poder se
+creara *en la app* y se descargara sin salir del flujo; alcancé a construirlo así —documento
+emitido con consecutivo, como el paz y salvo— y después ella corrigió: *«este poder se da por
+fuera de la aplicación»*. Y me preguntó cuál era mi propuesta. La respuesta que dimos, y que
+sostiene lo construido: **los dos caminos existen, pero solo uno funciona hoy**. Un poder ante
+notario se produce fuera de Idiky y la app no puede exigirle al mundo que use la app; y el
+otorgamiento desde la app depende de si la ley admite firma electrónica —pregunta abierta de
+§3 bis— y aun entonces el PDF esperaría al backend (ADR-0006). Así que se construyó el de
+papel, y el otro queda escrito para cuando el abogado responda.
+
+**Lo que el sistema no hace, y lo dice:** aplicar el **tope** de unidades que un apoderado puede
+acumular (RN-30). La cifra la fija la Ley 675 y no la tenemos. En vez de inventarla, la pantalla
+**pone el acumulado delante** —cuántas unidades y cuánto coeficiente lleva cada apoderado— y
+avisa que no está rechazando a nadie. Es la misma decisión que con el quórum: sumar es
+aritmética, poner el umbral es derecho.
+
+**Y una consecuencia que conviene no dejar pasar:** el poder lleva nombre, documento y firma de
+alguien **que no es residente**, y hoy no se le pide autorización de tratamiento de datos — lo
+trae el administrador, no él (RN-66). Quedó anotado en §3 sexies, que dejó de llamarse «las
+cédulas del registro de personas» para llamarse «los documentos con datos personales».
+
+**De paso, dos arreglos de interfaz:** el detalle de la asamblea **se esconde mientras se
+registra un poder** —dos modales encimados dejan dos fondos oscurecidos y un «cerrar»
+ambiguo—; y quité de la app una afirmación mía que no era de Mary: la modalidad mixta decía que
+*«las dos formas suman al mismo quórum»*, y eso es **justo una de las preguntas abiertas**.
+Ahora dice lo que sí hace: llevar las dos cuentas por separado.
+
+**Lo que sigue:** el corazón del producto — **quórum, mayorías y acta** (§3 bis). De las once
+preguntas quedan ocho, y son las que ya no tienen rodeo.
 
 ---
 

@@ -43,7 +43,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 14 — la reincidencia caduca: mesesReincidencia en la copropiedad (RN-72).
 // 15 — la cuota lleva el respaldo que la autoriza: acta y para que (RN-46, RN-47).
 // 16 — asistencia a la asamblea, con su forma y su coeficiente (ADR-0007).
-export const VERSION_ESQUEMA = 16
+// 17 — poderes: quien representa a una unidad, con el documento adjunto (RN-30).
+export const VERSION_ESQUEMA = 17
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1079,6 +1080,10 @@ export function crearSemilla(): BaseDatos {
     accesosSoportes: [],
     asambleas,
     asistencias: construirAsistencias(),
+    // Sin poderes de ejemplo: llevan el documento firmado adjunto, y una imagen
+    // en la semilla es peso muerto en el paquete del demo para todo el que lo
+    // abra (ADR-0009). Que el primer poder del demo sea el de quien lo prueba.
+    poderes: [],
     votaciones,
     votos,
     // Sin paz y salvo emitido: que la primera emision del demo sea la de quien lo prueba.

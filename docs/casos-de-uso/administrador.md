@@ -322,7 +322,8 @@ día y **la modalidad manda**: el botón queda deshabilitado diciendo qué falta
 **Flujo principal**
 1. El administrador abre la asamblea y la **instala**. Ahí empieza a contar la asistencia.
 2. Los copropietarios marcan asistencia desde su app, diciendo **cómo**: en el salón o
-   conectados. En una mixta las dos formas suman al mismo total.
+   conectados. En una mixta **se cuentan por separado**: si pesan igual para el quórum está
+   sin decidir (RN-28), y el acta va a necesitar el reparto de todos modos.
 3. El administrador ve en vivo cuántas unidades hay y **cuánto coeficiente** reunido, repartido
    entre presenciales y conectadas.
 4. Al terminar, cierra la asamblea. **La asistencia y los votos quedan** — es de lo que sale el
@@ -382,30 +383,56 @@ coeficiente y se cierra.
 ---
 
 ### CU-A-19
-## CU-A-19 — Validar y registrar los poderes
+## CU-A-19 — Registrar un poder y dar de alta a quien lo ejerce
 
 - **Actor principal:** Administrador
-- **Precondiciones:** Hay poderes otorgados para una asamblea convocada (CU-R-22).
-- **Disparador:** Antes de instalar la asamblea, se verifica la representación.
-- **Resultado esperado:** Cada poder queda aceptado o rechazado, y el quórum se calcula con
-  los aceptados.
+- **Precondiciones:** La asamblea está convocada o instalada.
+- **Disparador:** Alguien llega con un poder firmado para representar a una unidad.
+- **Resultado esperado:** La unidad queda con un representante, y ese representante existe en
+  el sistema aunque no tenga nada que ver con la copropiedad.
+
+> **La asamblea es de propietarios** (Mary, 2026-09-10), y el poder es lo que deja entrar a
+> quien no lo es: *«puede entrar un externo si tiene poder»*. Un hijo, un abogado, alguien sin
+> ninguna relación con el conjunto.
 
 **Flujo principal**
-1. El sistema lista los poderes de la asamblea: quién otorga, a quién, y qué coeficiente.
-2. El sistema marca automáticamente los que superan el tope (RN-30) o tienen inhabilidad **(?)**.
-3. El administrador acepta o rechaza cada uno, con motivo en el rechazo.
-4. Los aceptados suman al peso de voto del apoderado (CU-R-23) y al quórum (CU-S-07).
+1. El administrador registra el poder. **Lo primero es el papel**: la foto o el escaneo del
+   documento firmado. Es lo que hace válido el poder; pedirlo al final invita a registrar de
+   memoria «lo que trajo don Jorge» y buscar el papel después.
+2. Escoge **qué unidad** representa —el coeficiente es de ella, no del apoderado— y escribe los
+   datos del apoderado.
+3. El sistema busca a esa persona **por documento**. Si existe, la reutiliza (RN-61); si no,
+   le crea un **usuario temporal de asamblea**.
+4. Queda registrado y vigente. **Registrarlo es validarlo**: quien adjunta el papel es quien lo
+   tuvo en la mano, y no hay nadie más en el flujo.
 
 **Flujos alternativos**
-- A1. Poder revocado por quien lo otorgó → sale de la lista automáticamente.
-- A2. Poder presentado en papel el día de la asamblea → el administrador lo registra a mano,
-  indicando que el soporte es físico.
+- A1. Esa unidad ya tiene poder vigente → se rechaza. **Una unidad, un representante**
+  (RN-28, RN-29). Hay que revocar el anterior.
+- A2. El apoderado es el propietario mismo → se rechaza: no hace falta un poder para votar por
+  la propia unidad.
+- A3. Revocar → el poder **no se borra**, queda con su fecha de revocación (RN-61). Si votó
+  antes de revocarse, hay que poder explicarlo.
+- A4. La asamblea ya cerró → no admite poderes nuevos.
+
+**Lo que el sistema NO comprueba, y lo dice en pantalla**
+- **El tope** de unidades y coeficientes que un apoderado puede acumular (RN-30). La cifra la
+  fija la Ley 675 y no la tenemos (§3 bis). En vez de inventarla, la pantalla **muestra el
+  acumulado por apoderado** —cuántas unidades y cuánto coeficiente— para que quien registra lo
+  juzgue con el reglamento en la mano, y avisa que no está rechazando a nadie.
+- **Las inhabilidades**: si el administrador, los empleados o el consejo pueden ser apoderados.
+  También abierto.
 
 **Reglas de negocio**
-- RN-30: tope de representación por apoderado **(? — por confirmar)**.
-- RN-31: el poder vale solo para esa asamblea.
+- RN-30 (el apoderado no tiene que ser copropietario), RN-51 (quien otorga es el propietario;
+  no se pregunta, se deriva de la unidad), RN-61 (no se borra, se revoca), RN-28 y RN-29 (una
+  unidad, un representante).
 
-**Estado en el demo:** ⬜ — no existe.
+**Estado en el demo:** ✅ — `/admin/asambleas`, dentro de cada asamblea, sección **Poderes**.
+
+> **Pendiente que no es del flujo sino del dato:** el poder lleva nombre, documento y firma de
+> alguien **que no es residente**, y hoy no se le pide autorización de tratamiento de datos —
+> lo trae el administrador, no él (RN-66). Anotado en §3 sexies.
 
 ---
 

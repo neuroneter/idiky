@@ -143,7 +143,7 @@ export function PazYSalvoPage() {
                   que dia la unidad esta al dia (modelo de Mary, 2026-08-28). */}
               <div className="fila">
                 <span className="subtitulo">A paz y salvo hasta</span>
-                <strong>{formatearFecha(vigente.cubiertoHasta)}</strong>
+                <strong>{formatearFecha(vigente.cubiertoHasta ?? vigente.emitidoEn)}</strong>
               </div>
             </div>
             <div className="separador" />
@@ -203,7 +203,7 @@ export function PazYSalvoPage() {
                       hasta cuando la unidad estaba al dia, y eso sigue siendo
                       cierto manana. */}
                   <span className="subtitulo">
-                    Hasta {formatearFecha(documento.cubiertoHasta)}
+                    Hasta {formatearFecha(documento.cubiertoHasta ?? documento.emitidoEn)}
                   </span>
                 </div>
               </div>

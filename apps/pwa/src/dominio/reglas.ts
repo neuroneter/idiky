@@ -11,6 +11,7 @@ import type {
   Asistencia,
   FormaAsistencia,
   ModalidadAsamblea,
+  Poder,
   CategoriaRegistro,
   ConceptoSancion,
   EstadoSancion,
@@ -488,7 +489,10 @@ export const MODALIDADES: ReadonlyArray<{
   {
     id: 'mixta',
     texto: 'Mixta',
-    detalle: 'Unos en el salón y otros conectados. Las dos formas suman al mismo quórum.',
+    // No dice «las dos suman al mismo quorum»: **eso esta sin decidir** (RN-28,
+    // §3 bis) y la app no puede afirmarlo. Dice lo que si hace — contarlas por
+    // separado — que es lo que el acta va a necesitar cuando se decida.
+    detalle: 'Unos en el salón y otros conectados. Idiky lleva las dos cuentas por separado.',
     exigeLugar: true,
     exigeEnlace: true,
   },
@@ -564,6 +568,75 @@ export function resumenAsistencia(
 export function admiteAsistencia(asamblea: Asamblea): boolean {
   return asamblea.estado === 'instalada'
 }
+
+// ---------------------------------------------------------------------------
+// Poderes — RN-29, RN-30 · CU-A-19
+// ---------------------------------------------------------------------------
+
+/** Un poder deja de representar cuando se revoca. **No se borra** (RN-61). */
+export function poderVigente(poder: Poder): boolean {
+  return !poder.revocadoEn
+}
+
+/** Los poderes vigentes de una asamblea. */
+export function poderesDeAsamblea(poderes: Poder[], asambleaId: string): Poder[] {
+  return poderes.filter((poder) => poder.asambleaId === asambleaId && poderVigente(poder))
+}
+
+/** Quien representa a esta unidad en esta asamblea, si alguien la representa. */
+export function poderDeUnidad(
+  poderes: Poder[],
+  asambleaId: string,
+  unidadId: string,
+): Poder | undefined {
+  return poderesDeAsamblea(poderes, asambleaId).find((poder) => poder.unidadId === unidadId)
+}
+
+/** Las unidades que una persona representa en esta asamblea (RN-29, RN-30). */
+export function unidadesRepresentadas(
+  poderes: Poder[],
+  asambleaId: string,
+  apoderadoId: string,
+): Poder[] {
+  return poderesDeAsamblea(poderes, asambleaId).filter(
+    (poder) => poder.apoderadoId === apoderadoId,
+  )
+}
+
+/**
+ * RN-30 — **Esta funcion no existe todavia, y es a proposito.**
+ *
+ * Aqui iria el tope: cuantos poderes puede acumular un apoderado y hasta que
+ * porcentaje de coeficientes puede representar. **La cifra la fija la Ley 675 y
+ * no la tenemos** (§3 bis). Escribir un numero de memoria seria peor que no
+ * tener la regla: la app diria «cumple el tope» sin saber cual es, y quien la
+ * usa dejaria de mirar.
+ *
+ * Lo que si se puede hacer, y se hace, es **poner el dato a la vista**: cuantas
+ * unidades y cuanto coeficiente acumula cada apoderado, para que el
+ * administrador lo juzgue con el reglamento en la mano. Ver
+ * `acumuladoPorApoderado`.
+ */
+export function acumuladoPorApoderado(
+  poderes: Poder[],
+  asambleaId: string,
+  coeficienteDe: (unidadId: string) => number,
+): Array<{ apoderadoId: string; unidades: number; coeficiente: number }> {
+  const porPersona = new Map<string, { apoderadoId: string; unidades: number; coeficiente: number }>()
+  for (const poder of poderesDeAsamblea(poderes, asambleaId)) {
+    const actual = porPersona.get(poder.apoderadoId) ?? {
+      apoderadoId: poder.apoderadoId,
+      unidades: 0,
+      coeficiente: 0,
+    }
+    actual.unidades += 1
+    actual.coeficiente += coeficienteDe(poder.unidadId)
+    porPersona.set(poder.apoderadoId, actual)
+  }
+  return [...porPersona.values()].sort((a, b) => b.coeficiente - a.coeficiente)
+}
+
+
 
 // ---------------------------------------------------------------------------
 // Solicitudes — lo que el residente le pidio a la administracion

@@ -11,6 +11,7 @@ import type {
   Comunicado,
   Asistencia,
   ConceptoSancion,
+  Poder,
   Sancion,
   Documento,
   Correspondencia,
@@ -112,6 +113,13 @@ export function asistenciasDeAsamblea(bd: BaseDatos, asambleaId: string): Asiste
   return bd.asistencias
     .filter((asistencia) => asistencia.asambleaId === asambleaId)
     .sort((a, b) => a.registradaEn.localeCompare(b.registradaEn))
+}
+
+/** Los poderes de una asamblea, vigentes y revocados: ninguno se borra (RN-61). */
+export function poderesDeAsambleaTodos(bd: BaseDatos, asambleaId: string): Poder[] {
+  return bd.poderes
+    .filter((poder) => poder.asambleaId === asambleaId)
+    .sort((a, b) => a.registradoEn.localeCompare(b.registradoEn))
 }
 
 export function zonasDe(bd: BaseDatos, copropiedadId: string): ZonaComun[] {

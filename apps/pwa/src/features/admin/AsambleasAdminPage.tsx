@@ -24,13 +24,20 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { cambiarEstadoAsamblea, convocarAsamblea } from '../../datos/repositorio'
+import {
+  cambiarEstadoAsamblea,
+  convocarAsamblea,
+  registrarPoder,
+  revocarPoder,
+} from '../../datos/repositorio'
 import {
   MODALIDADES,
+  acumuladoPorApoderado,
   convocatoriaCompleta,
   definicionModalidad,
   etiquetaUnidad,
   ordenAsamblea,
+  poderVigente,
   resumenAsistencia,
 } from '../../dominio/reglas'
 import { formatearFechaHora } from '../../utilidades/formato'
@@ -39,6 +46,7 @@ import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipAsamblea } from '../../componentes/Etiquetas'
+import { CapturaFoto } from '../../componentes/CapturaFoto'
 
 function formatearCoeficiente(coeficiente: number): string {
   return `${coeficiente.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
@@ -49,6 +57,7 @@ export function AsambleasAdminPage() {
   const { sesion } = useSesion()
   const [convocando, setConvocando] = useState(false)
   const [viendo, setViendo] = useState<string | null>(null)
+  const [dandoPoder, setDandoPoder] = useState<string | null>(null)
 
   if (!sesion) return null
 
@@ -152,13 +161,42 @@ export function AsambleasAdminPage() {
         />
       )}
 
-      {enDetalle && (
+      {/* El detalle se esconde mientras se registra un poder: dos modales
+          encimados dejan dos fondos oscurecidos, dos `aria-modal` peleando por
+          el foco y un «cerrar» ambiguo. Al cerrar el formulario, vuelve. */}
+      {enDetalle && !dandoPoder && (
         <DetalleAsamblea
           asamblea={enDetalle}
           bd={bd}
           cargando={cargando}
           alCerrar={() => setViendo(null)}
           alCambiar={cambiar}
+          alRegistrarPoder={setDandoPoder}
+          alRevocar={async (poderId) => {
+            await ejecutar(
+              (base) => revocarPoder(base, { poderId }),
+              'Poder revocado. Queda en el expediente de la asamblea.',
+            )
+          }}
+        />
+      )}
+
+      {dandoPoder && (
+        <FormularioPoder
+          unidades={sel.unidadesDe(bd, sesion.copropiedadId)}
+          alCerrar={() => setDandoPoder(null)}
+          alRegistrar={async (datos) => {
+            const hecho = await ejecutar(
+              (base) =>
+                registrarPoder(base, {
+                  asambleaId: dandoPoder,
+                  registradoPor: sesion.personaId,
+                  ...datos,
+                }),
+              'Poder registrado. El apoderado queda como usuario temporal de la asamblea.',
+            )
+            if (hecho) setDandoPoder(null)
+          }}
         />
       )}
     </div>
@@ -172,17 +210,28 @@ function DetalleAsamblea({
   bd,
   cargando,
   alCambiar,
+  alRegistrarPoder,
+  alRevocar,
   alCerrar,
 }: {
   asamblea: Asamblea
   bd: ReturnType<typeof useDatos>['bd']
   cargando: boolean
   alCambiar: (id: string, estado: Asamblea['estado'], mensaje: string) => Promise<void>
+  alRegistrarPoder: (asambleaId: string) => void
+  alRevocar: (poderId: string) => Promise<void>
   alCerrar: () => void
 }) {
   const definicion = definicionModalidad(asamblea.modalidad)
   const asistencias = sel.asistenciasDeAsamblea(bd, asamblea.id)
   const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
+  const poderes = sel.poderesDeAsambleaTodos(bd, asamblea.id)
+  const vigentes = poderes.filter(poderVigente)
+  const acumulado = acumuladoPorApoderado(
+    bd.poderes,
+    asamblea.id,
+    (unidadId) => sel.unidad(bd, unidadId)?.coeficiente ?? 0,
+  )
 
   return (
     <Modal titulo={asamblea.titulo} descripcion={asamblea.citacion} onCerrar={alCerrar}>
@@ -230,6 +279,96 @@ function DetalleAsamblea({
           </li>
         ))}
       </ol>
+
+      {asamblea.estado !== 'cerrada' && asamblea.estado !== 'cancelada' && (
+        <>
+          <div className="separador" />
+          <div className="fila">
+            <span className="titulo-seccion">Poderes ({vigentes.length})</span>
+            <button className="boton boton--pequeno" onClick={() => alRegistrarPoder(asamblea.id)}>
+              <Icono nombre="mas" tamano={14} />
+              Registrar poder
+            </button>
+          </div>
+          <p className="subtitulo">
+            La asamblea es de propietarios; el poder es lo que deja entrar a quien no lo es (RN-30).
+            Se otorga fuera de la app, así que aquí se valida y se adjunta el papel.
+          </p>
+
+          {/* El acumulado por apoderado, a la vista: el tope legal no lo tenemos
+              (RN-30, §3 bis), así que en vez de inventar un número se le pone el
+              dato delante a quien registra, para que juzgue con el reglamento. */}
+          {acumulado.length > 0 && (
+            <div className="lista lista--compacta" style={{ marginTop: 'var(--e2)' }}>
+              {acumulado.map((linea) => {
+                const persona = sel.persona(bd, linea.apoderadoId)
+                return (
+                  <div key={linea.apoderadoId} className="fila">
+                    <span className="subtitulo">
+                      {persona ? nombreCompleto(persona) : 'Apoderado'}
+                    </span>
+                    <span className="subtitulo numerico">
+                      {linea.unidades} {linea.unidades === 1 ? 'unidad' : 'unidades'} ·{' '}
+                      {formatearCoeficiente(linea.coeficiente)}
+                    </span>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+
+          {poderes.length > 0 && (
+            <div className="contenedor-tabla" style={{ maxHeight: 220, overflowY: 'auto' }}>
+              <table className="tabla">
+                <tbody>
+                  {poderes.map((poder) => {
+                    const unidad = sel.unidad(bd, poder.unidadId)
+                    const persona = sel.persona(bd, poder.apoderadoId)
+                    return (
+                      <tr key={poder.id}>
+                        <td>
+                          <strong>{unidad ? etiquetaUnidad(unidad) : '—'}</strong>
+                          <div className="subtitulo">
+                            {persona ? nombreCompleto(persona) : '—'}
+                            {persona?.documento ? ` · ${persona.documento}` : ''}
+                          </div>
+                        </td>
+                        <td>
+                          {poder.revocadoEn ? (
+                            <span className="chip">Revocado</span>
+                          ) : (
+                            <span className="chip chip--exito">Vigente</span>
+                          )}
+                        </td>
+                        <td>
+                          {!poder.revocadoEn && (
+                            <button
+                              className="boton boton--pequeno"
+                              disabled={cargando}
+                              onClick={() => void alRevocar(poder.id)}
+                            >
+                              Revocar
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {acumulado.length > 0 && (
+            <p className="acceso__nota" style={{ margin: 'var(--e3) 0' }}>
+              Falta el <strong>tope</strong> que fija la Ley 675: cuántas unidades puede acumular un
+              apoderado y hasta qué porcentaje. Mientras no esté, Idiky muestra el acumulado pero{' '}
+              <strong>no rechaza a nadie</strong> — el número de arriba es para juzgarlo con el
+              reglamento en la mano.
+            </p>
+          )}
+        </>
+      )}
 
       {asamblea.estado !== 'convocada' && (
         <>
@@ -585,6 +724,154 @@ function FormularioConvocatoria({
           style={{ marginTop: 'var(--e3)' }}
         >
           Convocar
+        </button>
+      </form>
+    </Modal>
+  )
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Registrar un poder (CU-A-19).
+ *
+ * **El papel primero.** Es lo que hace válido el poder; pedir los datos y el
+ * documento al final invita a registrar de memoria «lo que trajo don Jorge» y
+ * buscar el papel después.
+ */
+function FormularioPoder({
+  unidades,
+  alRegistrar,
+  alCerrar,
+}: {
+  unidades: ReturnType<typeof sel.unidadesDe>
+  alRegistrar: (datos: {
+    unidadId: string
+    nombresApoderado: string
+    apellidosApoderado: string
+    documentoApoderado: string
+    telefonoApoderado?: string
+    imagen: string
+  }) => Promise<void>
+  alCerrar: () => void
+}) {
+  const [imagen, setImagen] = useState<string | null>(null)
+  const [unidadId, setUnidadId] = useState(unidades[0]?.id ?? '')
+  const [nombres, setNombres] = useState('')
+  const [apellidos, setApellidos] = useState('')
+  const [documento, setDocumento] = useState('')
+  const [telefono, setTelefono] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  return (
+    <Modal
+      titulo="Registrar un poder"
+      descripcion="El poder se otorga fuera de la app. Aquí se valida, se adjunta y se da de alta a quien lo ejerce."
+      onCerrar={alCerrar}
+    >
+      <form
+        onSubmit={(evento) => {
+          evento.preventDefault()
+          setError(null)
+          if (!imagen) {
+            setError('Falta la foto del poder firmado: sin ella el poder no se registra.')
+            return
+          }
+          if (nombres.trim().length < 2 || apellidos.trim().length < 2) {
+            setError('Escribe el nombre completo del apoderado, como aparece en el poder.')
+            return
+          }
+          if (documento.trim().length < 5) {
+            setError('Falta el documento de identidad del apoderado.')
+            return
+          }
+          void alRegistrar({
+            unidadId,
+            nombresApoderado: nombres.trim(),
+            apellidosApoderado: apellidos.trim(),
+            documentoApoderado: documento.trim(),
+            telefonoApoderado: telefono.trim() || undefined,
+            imagen,
+          })
+        }}
+      >
+        <CapturaFoto
+          etiqueta="El poder firmado"
+          ayuda="Fotografía o escaneo del documento. Es lo que respalda el voto si alguien lo impugna."
+          valor={imagen}
+          alCambiar={setImagen}
+        />
+
+        <div className="separador" />
+
+        <div className="campo">
+          <label htmlFor="unidad-poder">¿Qué unidad representa?</label>
+          <select
+            id="unidad-poder"
+            value={unidadId}
+            onChange={(evento) => setUnidadId(evento.target.value)}
+          >
+            {unidades.map((unidad) => (
+              <option key={unidad.id} value={unidad.id}>
+                {etiquetaUnidad(unidad)}
+              </option>
+            ))}
+          </select>
+          <span className="ayuda-campo">
+            El coeficiente que va a representar es el de esta unidad, no el del apoderado.
+          </span>
+        </div>
+
+        <div className="fila-campos">
+          <div className="campo">
+            <label htmlFor="nombres-apoderado">Nombres</label>
+            <input
+              id="nombres-apoderado"
+              value={nombres}
+              onChange={(evento) => setNombres(evento.target.value)}
+            />
+          </div>
+          <div className="campo">
+            <label htmlFor="apellidos-apoderado">Apellidos</label>
+            <input
+              id="apellidos-apoderado"
+              value={apellidos}
+              onChange={(evento) => setApellidos(evento.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="campo">
+          <label htmlFor="documento-apoderado">Documento de identidad</label>
+          <input
+            id="documento-apoderado"
+            inputMode="numeric"
+            value={documento}
+            onChange={(evento) => setDocumento(evento.target.value)}
+          />
+          {/* Se busca por documento, no por nombre: si esa persona ya está en el
+              sistema se reutiliza en vez de duplicarla (RN-61). */}
+          <span className="ayuda-campo">
+            Si esa persona ya existe en Idiky, se reutiliza. Si no, queda como{' '}
+            <strong>usuario temporal de la asamblea</strong>: su única vinculación con la
+            copropiedad es este poder.
+          </span>
+        </div>
+
+        <div className="campo">
+          <label htmlFor="telefono-apoderado">Celular (opcional)</label>
+          <input
+            id="telefono-apoderado"
+            value={telefono}
+            onChange={(evento) => setTelefono(evento.target.value)}
+            placeholder="+57 300 000 0000"
+          />
+        </div>
+
+        {error && <p className="acceso__error">{error}</p>}
+
+        <button className="boton boton--primario boton--bloque" type="submit">
+          Registrar el poder
         </button>
       </form>
     </Modal>

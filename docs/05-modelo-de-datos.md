@@ -323,7 +323,7 @@ Un campo de prosa que repite lo que las columnas dicen se llena con lo primero q
 | `asambleaId` | string | |
 | `unidadId` | string | **Asiste la unidad, no la persona**: dos copropietarios del mismo apartamento no suman dos veces (igual que el voto, RN-27) |
 | `personaId` | string | Quién marcó por la unidad. Va al acta |
-| `forma` | `'presencial' \| 'virtual'` | En una **mixta** las dos suman al mismo total, y el acta tiene que poder decir cuántos había de cada lado |
+| `forma` | `'presencial' \| 'virtual'` | En una **mixta** se llevan **por separado**: el acta tiene que poder decir cuántos había de cada lado, y **si pesan igual para el quórum está sin decidir** (RN-28) |
 | `coeficiente` | number | **Copiado al marcar** (RN-37): si el coeficiente cambia después, el acta de esta asamblea sigue diciendo con cuánto se contó |
 | `registradaEn` | fecha ISO completa | |
 
@@ -334,6 +334,36 @@ Un campo de prosa que repite lo que las columnas dicen se llena con lo primero q
 > Y lo que el sistema **no** hace: **declarar que hay quórum**. Suma y reparte por forma;
 > el umbral, si lo virtual pesa igual que lo presencial y cómo entran los poderes siguen sin
 > decidir (RN-28, §3 bis).
+
+### Poder — quién representa a una unidad
+
+> ✅ **Implementado** (CU-A-19, 2026-09-10). **La asamblea es de propietarios, y el poder es lo
+> que deja entrar a quien no lo es** (Mary: *«puede entrar un externo si tiene poder»*).
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `asambleaId` | string | Un poder vale para **una** asamblea |
+| `unidadId` | string | La unidad representada. **El coeficiente es de ella**, no del apoderado |
+| `otorgadoPor` | string | El propietario. **No se pregunta: se deriva** de la unidad (RN-51) |
+| `apoderadoId` | string | El apoderado, **como persona del sistema** |
+| `soporte` | `Soporte` | El poder firmado, fotografiado (ADR-0009) |
+| `registradoPor`, `registradoEn` | string, fecha ISO | El administrador. **Registrarlo es validarlo** |
+| `revocadoEn` | fecha ISO? | Presente = ya no representa. **No se borra** (RN-61) |
+
+**El usuario temporal de asamblea.** Si el apoderado no existe, se le crea la `Persona` al
+registrar el poder (Mary, 2026-09-10). Si su documento ya está, **se reutiliza** — la misma
+regla del registro de personas (RN-61): un documento es una persona, no una fila por
+formulario.
+
+> **«Temporal» no es un campo ni un estado**, y esa es la parte bonita: es que **su única
+> vinculación con la copropiedad es este poder**, y el poder muere con la asamblea. Lo que
+> caduca por construcción no hay que acordarse de apagarlo. Un apoderado no tiene `Residencia`,
+> no paga cuota, no aparece en la portería.
+
+**Por qué lo registra el administrador y no el propietario desde su app.** El poder se otorga
+**fuera de la aplicación** —ante notario o de puño y letra— e Idiky no puede exigirle al mundo
+que use Idiky. Otorgarlo *desde* la app queda para cuando se responda si la ley admite firma
+electrónica (§3 bis); y aun entonces, el PDF espera al backend (ADR-0006).
 
 ### Votacion
 | Campo | Tipo | Notas |
@@ -415,9 +445,9 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-25 | La correspondencia entregada no se edita. | `features/admin/CorrespondenciaAdminPage.tsx` |
 | RN-26 | El paz y salvo solo se emite si el saldo de la unidad es cero, **incluida la cuota ya facturada del periodo aunque todavía no haya vencido**. Estar sin mora no basta. | `datos/repositorio.ts` (`emitirPazYSalvo`) |
 | RN-27 | El voto en asamblea se pondera por el coeficiente de la unidad. **Confirmada por el equipo el 2026-08-26.** | `dominio/reglas.ts` (`pesoDelVoto`) |
-| RN-28 | El quórum se mide en coeficientes (presentes + representados), no en personas. | *pendiente* |
-| RN-29 | Un voto por unidad y por votación; quien representa N unidades emite N votos. | `dominio/reglas.ts` (`yaVoto`); los poderes siguen pendientes |
-| RN-30 | Un apoderado no puede superar el tope de coeficientes que puede representar. **(? — cifra por confirmar en la Ley 675 de 2001)** | *pendiente* |
+| RN-28 | **La unidad de cuenta es la unidad, no la persona** (Mary, 2026-09-10: *«el quórum cuenta por unidad; pueden participar 3 propietarios pero solo es un voto para el quórum»*). Tres copropietarios del mismo apartamento pueden entrar los tres, y el apartamento cuenta **una vez**. El peso de esa cuenta es su coeficiente, presentes **y representados** (RN-30). Idiky ya registra y suma así; **lo que sigue sin decidir es el umbral** —cuánto quórum se exige, y si la asistencia virtual pesa igual que la presencial—. | `dominio/reglas.ts` (`resumenAsistencia`) + `repositorio.ts` (`marcarAsistencia`) · **falta el umbral** |
+| RN-29 | **Un voto por unidad y por votación** — confirmado por Mary el 2026-09-10: *«igual sucede con las votaciones de cada uno de los puntos: es un voto por unidad»*. Es la misma regla que RN-28 aplicada al punto: la unidad de cuenta es la unidad. Quien representa N unidades emite N votos (RN-30). | `dominio/reglas.ts` (`yaVoto`) + `repositorio.ts` (`emitirVoto` lo rechaza); **los poderes siguen pendientes** |
+| RN-30 | **El apoderado no tiene que ser copropietario** (Mary, 2026-09-10: *«puede entrar un externo si tiene poder»*): un hijo, un abogado, alguien sin ninguna relación con el conjunto. La asamblea es de propietarios, y el poder es lo que deja entrar a quien no lo es. El apoderado se da de alta como **usuario temporal de asamblea** al registrar el poder, y el poder **lleva el papel adjunto**. **Una unidad, un representante** (RN-28, RN-29): no se acumulan dos poderes que se contradigan. **Lo que falta, y no impide el registro pero sí el control**: el **tope** de unidades y coeficientes que un apoderado puede acumular **(? — cifra por confirmar en la Ley 675)** y las **inhabilidades** (administrador, empleados, consejo). Mientras tanto la app **muestra el acumulado por apoderado y no rechaza a nadie**: inventar un tope sería peor que no tenerlo, porque diría «cumple» sin saber con qué. | `dominio/reglas.ts` (`acumuladoPorApoderado`) + `repositorio.ts` (`registrarPoder`) · **falta el tope** |
 | RN-31 | El poder vale para una sola asamblea y vence al cerrarse (CU-S-09). | *pendiente* |
 | RN-32 | Quien otorgó poder no puede votar esa unidad directamente. | *pendiente* |
 | RN-33 | La citación se emite con la antelación mínima del reglamento. **(?)** | *pendiente* |
@@ -438,7 +468,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-48 | La cuota extraordinaria tiene **destinación específica**: el concepto la describe en texto libre —cada obra es distinta— pero es la destinación que aprobó el acta, y el recaudo se destina a eso. La justificación obligatoria (RN-47) es lo que la deja escrita y comprobable. | `repositorio.ts` (`generarCuotas`) |
 | RN-49 | **Parametrizar la cartera es facultad exclusiva del administrador de esa copropiedad**: qué cuotas, multas e intereses existen y cuánto valen. Ningún otro rol lo hace, y la comprobación no puede vivir solo en la interfaz. **Parametrizar no es decidir**: lo que el administrador traslada al sistema lo decidieron antes el reglamento, el manual de convivencia o la asamblea (RN-38, RN-43, RN-46). **Y no toca el caso**: al imponer una multa **no puede ajustar el valor** (Mary, 2026-09-09), que se copia del catálogo tal cual. Ese es el límite exacto entre parametrizar e imponer — si el valor se moviera caso por caso, volvería a estar decidiendo la sanción. En sanciones eso no vive en la interfaz: `imponerSancion` **no recibe un valor**, así que no hay por dónde pasarlo. | *parcial* (`App.tsx` protege la ruta; `generarCuotas` no comprueba **quién** llama, aunque sí comprueba **qué** se cobra — el respaldo de la extraordinaria y el valor de la multa están cerrados en el repositorio) |
 | RN-50 | **Lo que cae en la cuenta de una unidad se sigue de la parametrización y de su regla, no de una decisión caso por caso.** El interés lo liquida el sistema (RN-42, RN-44), la multa exige un concepto del catálogo y quedar firme (RN-38, RN-39), la extraordinaria sale del acta (RN-46, RN-48). | *pendiente* |
-| RN-51 | **Vota el propietario de la unidad**, no quien la habita: el voto va con la propiedad, igual que la cuota. **(? — falta definir el rol `autorizado` y el apoderado, CU-R-23)** | `dominio/reglas.ts` (`puedeVotar`) + `repositorio.ts` |
+| RN-51 | **Vota el propietario de la unidad**, no quien la habita: el voto va con la propiedad, igual que la cuota. *«La asamblea es para propietarios»* (Mary, 2026-09-10), así que el arrendatario puede entrar a oír pero no suma ni vota — y la pantalla se lo dice en vez de esconderle el botón. La única forma de que vote alguien que no es el propietario es el **poder** (RN-30). | `dominio/reglas.ts` (`puedeVotar`) + `repositorio.ts` |
 | RN-53 | **La cuenta de un residente nace vinculada**: existe porque alguien lo registró en una unidad. La persona la **activa**, no la crea, y quien no está vinculado no entra. **Quién lo registra depende del eslabón (RN-63)**: la administración crea propietarios, el propietario crea a los demás de su unidad. | `features/auth/` (simulado, ADR-0004) |
 | RN-54 | En un **dispositivo nuevo** se exige un **código de un solo uso** además de la clave. Desde la app se paga. | `estado/acceso.ts` (simulado) |
 | RN-55 | La clave es de **4 números**, no una contraseña: la app la usan adultos mayores. Lo que sostiene esa decisión es que la clave **solo sirve en un dispositivo ya probado** (RN-54) y que **los intentos se acaban**; agotados, se vuelve a exigir el código. | `estado/acceso.ts` |

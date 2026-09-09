@@ -148,12 +148,21 @@ reglamento de la copropiedad y la Ley 675 de 2001.
 - **Poderes — el tope:** ¿cuántos poderes puede acumular un apoderado, y hasta qué
   porcentaje de coeficientes puede representar? La Ley 675 fija un límite; **hay que
   confirmar el artículo y la cifra exacta antes de implementar RN-30**. → *(respuesta)*
-- **Poderes — la forma:** ¿basta con otorgarlo dentro de la app, o la ley exige documento
-  escrito y firmado? Si exige firma, ¿sirve una firma electrónica? → *(respuesta)*
-- **Poderes — a quién:** ¿se puede dar poder a cualquier copropietario, o hay
-  inhabilidades (administrador, empleados, consejo)? → *(respuesta)*
-- **Arrendatario y voto:** ¿vota el arrendatario, o solo el propietario? La app muestra el
-  rol en la unidad, pero no restringe nada todavía. → *(respuesta)*
+- **Poderes — la forma:** → 🟡 **Resuelto en la práctica, abierto en el derecho.** Mary
+  (2026-09-10): *«este usuario lo crea el administrador adjuntando el poder como soporte,
+  porque este poder se da por fuera de la aplicación»*. Así quedó construido, y funciona con la
+  ley como está hoy. **Sigue abierta la otra mitad:** si la ley admitiera **firma electrónica**,
+  el propietario podría otorgarlo desde su app sin salir del flujo —que es lo que Mary quería—;
+  y aun así el PDF esperaría al backend (ADR-0006). Pregunta para el abogado.
+- **Poderes — a quién:** → 🟡 **Respondido a medias (Mary, 2026-09-10):** *«la asamblea es
+  para propietarios, puede entrar un externo si tiene poder»*. Es decir: **el apoderado no
+  tiene que ser copropietario** — puede ser cualquiera, un hijo, un abogado, alguien sin
+  ninguna relación con el conjunto. **Falta** la otra mitad: si hay **inhabilidades**
+  (administrador, empleados, miembros del consejo), que es donde suele estar el abuso.
+- ~~**Arrendatario y voto:**~~ → ✅ **Respondido (Mary, 2026-09-10):** *«la asamblea es para
+  propietarios»*. Solo el propietario, o su apoderado. Ya está implementado: el arrendatario
+  puede entrar a oír y la pantalla se lo dice, pero su asistencia no suma coeficiente
+  (RN-51, CU-R-21).
 - **Mora y voto:** ¿el copropietario en mora puede votar? ¿Puede recibir poderes?
   *(Hoy la mora solo bloquea reservas — RN-08.)* → *(respuesta)*
 - **Asistencia:** ¿la asamblea es presencial, virtual o mixta? Si es mixta, ¿el quórum
@@ -280,7 +289,7 @@ lo cobra. Falta lo que **no podemos suponer sin equivocarnos**:
 - **Interés impago.** ¿Cuenta como mora para bloquear reservas (RN-08) y para el paz y salvo
   (RN-26)? → *(respuesta)*
 
-## 3 sexies. Las cédulas del registro de personas — lo que bloquea producción
+## 3 sexies. Los documentos con datos personales — lo que bloquea producción
 
 Desde el 2026-09-07 registrar a alguien **que se queda a dormir** —residente o residente
 temporal— exige **foto de su documento de identidad y foto de la persona** (RN-57). El
@@ -300,6 +309,7 @@ Lo que hay que decidir antes de que esto salga a un servidor:
 | ¿**Quién la ve**? | Cada respuesta es un permiso distinto en el modelo | **Respondida (Mary, 2026-09-07)**: quien registró y la administración ven las dos, y **después de autorizar queda constancia de quién las abre**; la portería ve **solo el rostro**, porque necesita reconocer a quien entra pero no tener su identidad (RN-67) |
 | Al **inhabilitar** a la persona, ¿la foto se borra? | RN-61 dice que nada se borra; un dato personal sí puede tener que borrarse | **Resuelto en principio (Mary, 2026-09-07)**: *«me refería a conservar el registro; la documentación se debe guardar el tiempo que la normatividad lo permita»*, y *«si el registro se habilita nuevamente y ya no tenemos los documentos se solicitan nuevamente»*. El registro queda, las fotos tienen plazo, y rehabilitar es volver a registrar. **Falta el plazo concreto que fija la norma y el proceso que borra las fotos al cumplirse** |
 | ¿**Dónde** se almacena? | Un servidor con las cédulas de un conjunto entero es un objetivo, no un archivo | *(pendiente)* |
+| **El poder de asamblea también es un documento personal** (2026-09-10) | Lleva nombre, documento de identidad y firma de alguien que **no es residente** y con quien la copropiedad no tiene ninguna otra relación. Las cuatro preguntas de arriba le aplican igual, y una más: **¿el apoderado autorizó el tratamiento de sus datos?** Hoy no se le pide nada — lo trae el administrador, no él (RN-66) | *(pendiente)* |
 
 Detalle técnico y lo ya decidido: [ADR-0009](./adr/0009-soportes-fotograficos.md).
 
