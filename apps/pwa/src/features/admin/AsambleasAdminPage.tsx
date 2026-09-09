@@ -25,13 +25,21 @@ import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
 import {
   cambiarEstadoAsamblea,
+  aprobarActa,
   convocarAsamblea,
+  crearActaAclaratoria,
+  editarActa,
+  generarActa,
   registrarPoder,
   revocarPoder,
 } from '../../datos/repositorio'
 import {
   MODALIDADES,
+  actaCongelada,
+  actaDeAsamblea,
   acumuladoPorApoderado,
+  faltaEnActa,
+  sumaCoeficientes,
   convocatoriaCompleta,
   definicionModalidad,
   etiquetaUnidad,
@@ -41,7 +49,7 @@ import {
   poderVigente,
   resumenAsistencia,
 } from '../../dominio/reglas'
-import { formatearFechaHora } from '../../utilidades/formato'
+import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import type { Asamblea, ModalidadAsamblea, TipoAsamblea } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
@@ -49,6 +57,7 @@ import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipAsamblea } from '../../componentes/Etiquetas'
 import { CapturaFoto } from '../../componentes/CapturaFoto'
 import { HojaPoder } from '../../componentes/HojaPoder'
+import { HojaActa } from '../../componentes/HojaActa'
 
 function formatearCoeficiente(coeficiente: number): string {
   return `${coeficiente.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
@@ -61,6 +70,7 @@ export function AsambleasAdminPage() {
   const [viendo, setViendo] = useState<string | null>(null)
   const [dandoPoder, setDandoPoder] = useState<string | null>(null)
   const [viendoPoder, setViendoPoder] = useState<string | null>(null)
+  const [viendoActa, setViendoActa] = useState<string | null>(null)
 
   if (!sesion) return null
 
@@ -167,7 +177,7 @@ export function AsambleasAdminPage() {
       {/* El detalle se esconde mientras se registra un poder: dos modales
           encimados dejan dos fondos oscurecidos, dos `aria-modal` peleando por
           el foco y un «cerrar» ambiguo. Al cerrar el formulario, vuelve. */}
-      {enDetalle && !dandoPoder && !viendoPoder && (
+      {enDetalle && !dandoPoder && !viendoPoder && !viendoActa && (
         <DetalleAsamblea
           asamblea={enDetalle}
           bd={bd}
@@ -176,6 +186,14 @@ export function AsambleasAdminPage() {
           alCambiar={cambiar}
           alRegistrarPoder={setDandoPoder}
           alVerPoder={setViendoPoder}
+          alVerActa={setViendoActa}
+          alGenerarActa={async (asambleaId) => {
+            const creada = await ejecutar(
+              (base) => generarActa(base, { asambleaId }),
+              'Acta levantada. Falta quién presidió y qué se dijo.',
+            )
+            if (creada) setViendoActa(creada.id)
+          }}
           alRevocar={async (poderId) => {
             await ejecutar(
               (base) => revocarPoder(base, { poderId }),
@@ -187,6 +205,34 @@ export function AsambleasAdminPage() {
 
       {viendoPoder && (
         <VistaPoder bd={bd} poderId={viendoPoder} alCerrar={() => setViendoPoder(null)} />
+      )}
+
+      {viendoActa && (
+        <VistaActa
+          bd={bd}
+          actaId={viendoActa}
+          cargando={cargando}
+          alCerrar={() => setViendoActa(null)}
+          alGuardar={async (datos) => {
+            await ejecutar(
+              (base) => editarActa(base, { actaId: viendoActa, ...datos }),
+              'Acta guardada.',
+            )
+          }}
+          alAprobar={async () => {
+            await ejecutar(
+              (base) => aprobarActa(base, { actaId: viendoActa }),
+              'Acta aprobada. Ya está a disposición de los copropietarios.',
+            )
+          }}
+          alAclarar={async () => {
+            const nueva = await ejecutar(
+              (base) => crearActaAclaratoria(base, { actaId: viendoActa }),
+              'Acta aclaratoria creada. La original no se toca.',
+            )
+            if (nueva) setViendoActa(nueva.id)
+          }}
+        />
       )}
 
       {dandoPoder && (
@@ -220,6 +266,8 @@ function DetalleAsamblea({
   alCambiar,
   alRegistrarPoder,
   alVerPoder,
+  alGenerarActa,
+  alVerActa,
   alRevocar,
   alCerrar,
 }: {
@@ -229,6 +277,8 @@ function DetalleAsamblea({
   alCambiar: (id: string, estado: Asamblea['estado'], mensaje: string) => Promise<void>
   alRegistrarPoder: (asambleaId: string) => void
   alVerPoder: (poderId: string) => void
+  alGenerarActa: (asambleaId: string) => Promise<void>
+  alVerActa: (actaId: string) => void
   alRevocar: (poderId: string) => Promise<void>
   alCerrar: () => void
 }) {
@@ -241,6 +291,7 @@ function DetalleAsamblea({
   const quorumMinimo = copropiedad?.quorumMinimo ?? 50
   const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
   const falta = faltaParaQuorum(asamblea, resumen, quorumMinimo)
+  const acta = actaDeAsamblea(bd.actas, asamblea.id)
   const acumulado = acumuladoPorApoderado(
     bd.poderes,
     asamblea.id,
@@ -479,6 +530,53 @@ function DetalleAsamblea({
                 </tbody>
               </table>
             </div>
+          )}
+        </>
+      )}
+
+      {/* CU-A-20 — El acta, solo cuando ya hay de qué dar fe. */}
+      {asamblea.estado === 'cerrada' && (
+        <>
+          <div className="separador" />
+          <div className="fila">
+            <span className="titulo-seccion">Acta</span>
+            {!acta && (
+              <button
+                className="boton boton--pequeno"
+                disabled={cargando}
+                onClick={() => void alGenerarActa(asamblea.id)}
+              >
+                <Icono nombre="mas" tamano={14} />
+                Levantar el acta
+              </button>
+            )}
+          </div>
+          {acta ? (
+            <div className="columna" style={{ gap: 'var(--e2)' }}>
+              <div className="fila">
+                <span className="subtitulo">
+                  {acta.estado === 'aprobada' ? 'Aprobada y publicada' : 'Borrador'}
+                </span>
+                <span className={acta.estado === 'aprobada' ? 'chip chip--exito' : 'chip'}>
+                  {acta.estado === 'aprobada' ? 'Firme' : 'Sin aprobar'}
+                </span>
+              </div>
+              {acta.estado === 'borrador' && (
+                <span className="subtitulo">
+                  Hay hasta el {formatearFecha(acta.limiteVerificacion)} para verificarla y
+                  ponerla a disposición (Ley 675, art. 47).
+                </span>
+              )}
+              <button className="boton boton--primario" onClick={() => alVerActa(acta.id)}>
+                {acta.estado === 'aprobada' ? 'Ver el acta' : 'Trabajar el acta'}
+              </button>
+            </div>
+          ) : (
+            <p className="subtitulo">
+              El acta se arma sola con lo que ya está registrado —convocatoria, quórum,
+              asistentes con su coeficiente y los votos de cada punto (Ley 675, art. 47)—. Solo
+              hay que agregar quién presidió y qué se dijo.
+            </p>
           )}
         </>
       )}
@@ -1005,6 +1103,181 @@ function VistaPoder({
           />
         </>
       )}
+    </Modal>
+  )
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * El acta: se lee entera y se completa lo que falta (CU-A-20).
+ *
+ * **Se ve la hoja mientras se edita**, no un formulario a un lado. Un acta es un
+ * documento que alguien va a leer entero, y escribirla a ciegas en unos campos
+ * sueltos es cómo salen las actas que no cuadran con lo que pasó.
+ */
+function VistaActa({
+  bd,
+  actaId,
+  cargando,
+  alGuardar,
+  alAprobar,
+  alAclarar,
+  alCerrar,
+}: {
+  bd: ReturnType<typeof useDatos>['bd']
+  actaId: string
+  cargando: boolean
+  alGuardar: (datos: {
+    presidenteId?: string
+    secretarioId?: string
+    desarrollo?: string
+  }) => Promise<void>
+  alAprobar: () => Promise<void>
+  alAclarar: () => Promise<void>
+  alCerrar: () => void
+}) {
+  const acta = bd.actas.find((a) => a.id === actaId)
+  const asamblea = acta ? sel.asamblea(bd, acta.asambleaId) : undefined
+  const [presidenteId, setPresidenteId] = useState(acta?.presidenteId ?? '')
+  const [secretarioId, setSecretarioId] = useState(acta?.secretarioId ?? '')
+  const [desarrollo, setDesarrollo] = useState(acta?.desarrollo ?? '')
+
+  if (!acta || !asamblea) return null
+
+  const congelada = actaCongelada(acta)
+  // Quienes pueden firmar: los que estuvieron. Ofrecer toda la copropiedad
+  // dejaría firmar como presidente a alguien que no fue.
+  const asistentes = sel
+    .asistenciasDeAsamblea(bd, asamblea.id)
+    .map((asistencia) => sel.persona(bd, asistencia.personaId))
+    .filter((persona): persona is NonNullable<typeof persona> => !!persona)
+  const falta = faltaEnActa({ ...acta, presidenteId, secretarioId, desarrollo })
+
+  return (
+    <Modal
+      titulo={acta.aclaraActaId ? 'Acta aclaratoria' : 'Acta de la asamblea'}
+      descripcion={asamblea.titulo}
+      onCerrar={alCerrar}
+    >
+      {!congelada && (
+        <>
+          <div className="fila-campos">
+            <div className="campo">
+              <label htmlFor="presidente">Presidió la asamblea</label>
+              <select
+                id="presidente"
+                value={presidenteId}
+                onChange={(evento) => setPresidenteId(evento.target.value)}
+              >
+                <option value="">Sin elegir</option>
+                {asistentes.map((persona) => (
+                  <option key={persona.id} value={persona.id}>
+                    {nombreCompleto(persona)}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="campo">
+              <label htmlFor="secretario">Actuó como secretario</label>
+              <select
+                id="secretario"
+                value={secretarioId}
+                onChange={(evento) => setSecretarioId(evento.target.value)}
+              >
+                <option value="">Sin elegir</option>
+                {asistentes.map((persona) => (
+                  <option key={persona.id} value={persona.id}>
+                    {nombreCompleto(persona)}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <span className="ayuda-campo">
+            Solo aparecen quienes asistieron: la firman quienes estuvieron (Ley 675, art. 47).
+          </span>
+
+          <div className="campo" style={{ marginTop: 'var(--e3)' }}>
+            <label htmlFor="desarrollo">Constancias e intervenciones</label>
+            <textarea
+              id="desarrollo"
+              value={desarrollo}
+              onChange={(evento) => setDesarrollo(evento.target.value)}
+              placeholder="Lo que el sistema no puede saber: quién intervino, qué se propuso, a qué se comprometieron. Un párrafo por línea."
+              style={{ minHeight: 140 }}
+            />
+            <span className="ayuda-campo">
+              El resto del acta —convocatoria, quórum, asistentes con su coeficiente y los votos
+              de cada punto— <strong>ya está</strong>: sale de lo registrado, no se transcribe.
+            </span>
+          </div>
+
+          <div className="grupo-botones">
+            <button
+              className="boton"
+              disabled={cargando}
+              onClick={() => void alGuardar({ presidenteId, secretarioId, desarrollo })}
+            >
+              Guardar borrador
+            </button>
+            <button
+              className="boton boton--primario"
+              disabled={cargando || falta.length > 0}
+              onClick={async () => {
+                await alGuardar({ presidenteId, secretarioId, desarrollo })
+                await alAprobar()
+              }}
+            >
+              Aprobar y publicar
+            </button>
+          </div>
+
+          {/* Se dice qué falta, en vez de un botón muerto sin explicación. */}
+          {falta.length > 0 && (
+            <p className="acceso__nota" style={{ marginTop: 'var(--e3)' }}>
+              Antes de aprobar falta {falta.join(', ')}.
+            </p>
+          )}
+        </>
+      )}
+
+      {congelada && (
+        <>
+          <p className="acceso__nota">
+            Esta acta está <strong>aprobada y no se edita</strong> (RN-35). Para corregirla se
+            emite un acta aclaratoria que la referencia; la original no se toca.
+          </p>
+          <button className="boton" disabled={cargando} onClick={() => void alAclarar()}>
+            Emitir acta aclaratoria
+          </button>
+        </>
+      )}
+
+      <div className="separador" />
+
+      <div className="previsualizacion-hoja">
+        <HojaActa
+          acta={{ ...acta, presidenteId, secretarioId, desarrollo }}
+          documento={
+            acta.documentoId ? bd.documentos.find((d) => d.id === acta.documentoId) : undefined
+          }
+          copropiedad={sel.copropiedad(bd, asamblea.copropiedadId)}
+          asamblea={asamblea}
+          asistencias={bd.asistencias}
+          personaDe={(id) => sel.persona(bd, id)}
+          unidadDe={(id) => sel.unidad(bd, id)}
+          votacionDePunto={(puntoId) => sel.votacionDePunto(bd, puntoId)}
+          votosDe={(votacionId) => sel.votosDe(bd, votacionId)}
+          presidente={sel.persona(bd, presidenteId)}
+          secretario={sel.persona(bd, secretarioId)}
+          coeficienteEdificio={sumaCoeficientes(sel.unidadesDe(bd, asamblea.copropiedadId))}
+          quorumMinimo={sel.copropiedad(bd, asamblea.copropiedadId)?.quorumMinimo ?? 50}
+          actaOriginal={
+            acta.aclaraActaId ? bd.actas.find((a) => a.id === acta.aclaraActaId) : undefined
+          }
+        />
+      </div>
     </Modal>
   )
 }

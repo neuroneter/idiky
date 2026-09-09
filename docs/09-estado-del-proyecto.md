@@ -14,7 +14,7 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 67 documentados: 33 ✅ en el demo, 11 🟡 a medias, 22 ⬜ pendientes, 1 ⛔ retirado |
+| **Casos de uso** | 67 documentados: 34 ✅ en el demo, 11 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
 | **Reglas de negocio** | 74 (RN-01…RN-74; RN-41 retirada) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -37,8 +37,8 @@ visitantes con código · consulta de correspondencia · consulta del coeficient
 
 **Consola del administrador:** **asambleas: convocar según la modalidad, instalar y ver la
 asistencia con su coeficiente** (CU-A-12, CU-A-17) · **registro de propietarios**, con la tabla
-de quién registró a quién (CU-A-26) · **catálogo de multas con su respaldo, y la reincidencia con el
-suyo** (CU-A-22) · **procesos sancionatorios con debido proceso completo** —notificar citando
+de quién registró a quién (CU-A-26) · **el acta de la asamblea, armada con lo que exige el artículo 47**
+(CU-A-20) · **catálogo de multas con su respaldo, y la reincidencia con el suyo** (CU-A-22) · **procesos sancionatorios con debido proceso completo** —notificar citando
 la norma, oír, decidir, impugnar y dar firmeza (CU-A-23)— ·
 tablero de indicadores ·
 unidades y residentes con búsqueda,
@@ -82,6 +82,65 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-10 · Mary + IA (Claude) · El acta, y lo que la norma ya había respondido (CU-A-20)
+
+Antes de escribir una línea, verifiqué el **artículo 47 de la Ley 675** — la costumbre que
+Mary instaló el día anterior con *«revisa la norma»*. Y la norma resultó ser **casi un
+inventario de lo que Idiky ya tenía**:
+
+| El art. 47 exige | De dónde sale |
+|---|---|
+| Si fue ordinaria o extraordinaria | `Asamblea.tipo` |
+| La forma de la convocatoria | `Asamblea.citacion` |
+| El orden del día | `Asamblea.ordenDelDia` |
+| Nombre y calidad de los asistentes, su unidad y su **coeficiente** | `Asistencia` |
+| Los **votos emitidos en cada caso** | `Voto` |
+
+**Ahí se cobró una decisión vieja.** Copiar el coeficiente al marcar asistencia y al votar
+(RN-37) parecía redundante —está en la unidad, ¿para qué duplicarlo?—. Es **exactamente lo que
+hace que el acta valga**: si mañana cambia el coeficiente de una unidad, el acta sigue diciendo
+con cuánto se contó. Y por eso el acta **no congela una copia de nada**: la asamblea cerrada ya
+no admite asistencia ni votos nuevos, y cada dato guarda su propio número. Lo que se congela es
+**el texto y el estado**, que es lo único que una persona podría cambiar después.
+
+**Lo único que faltaba: presidente y secretario**, que la firman. Se eligen **solo entre quienes
+asistieron** — ofrecer toda la copropiedad dejaría firmar como presidente a alguien que no fue.
+
+**La hoja se ve mientras se edita**, no un formulario a un lado. Un acta es un documento que
+alguien va a leer entero; escribirla a ciegas en campos sueltos es cómo salen las actas que no
+cuadran con lo que pasó.
+
+**Un problema que se vio en la primera captura, y era serio.** El acta decía *«no se verificó el
+quórum»* y a renglón seguido reportaba puntos **aprobados**. Sin quórum no hay decisiones
+válidas: un acta que dice las dos cosas se contradice a sí misma, y es justo la que se anula.
+Ahora, sin quórum, dice que la asamblea **no quedó habilitada para adoptar decisiones** y ningún
+punto sale aprobado — cada votación queda «como constancia de lo actuado, sin producir efectos».
+
+**Y dos plazos que la norma trajo**: la verificación y la puesta a disposición tienen el término
+del reglamento y, en su defecto, **20 días hábiles**. Hizo falta `sumarDiasHabiles`, que salta
+sábados y domingos pero **no festivos** —eso exige el calendario colombiano de cada año, que la
+app no tiene—, así que calcula **el plazo más corto posible**: nunca dice que hay más tiempo del
+que hay.
+
+**Aprobada, no se edita** (RN-35). Para corregirla se emite un **acta aclaratoria** que la
+referencia; la original no se toca. Es la misma idea que la sanción archivada y el poder
+revocado: lo que ya produjo efectos se explica, no se borra.
+
+**Verificado con Playwright, 20 comprobaciones**: que no se ofrezca acta antes de cerrar; que al
+levantarla ya traiga quórum, asistentes y votos con su artículo; que aprobar quede bloqueado
+diciendo qué falta; que al aprobar se numere y se congele; que el copropietario la lea **a
+disposición** desde su app con las dos firmas; y que sin quórum ningún punto salga aprobado.
+
+**De paso, RN-32 quedó marcada como implementada**: quien otorgó poder no vota esa unidad, y ya
+estaba construido desde ayer.
+
+**Lo que sigue:** de §3 bis quedan cuatro preguntas, y **ninguna es de derecho general**: son de
+esta copropiedad —qué puntos exigen mayoría calificada según su reglamento, si fija tope de
+poderes, si designa comisión verificadora— más si la asistencia virtual pesa igual que la
+presencial. El módulo de asambleas, con eso, está completo hasta donde la ley alcanza.
+
+---
 
 ### 2026-09-10 · Mary + IA (Claude) · La asamblea parte de su modalidad (ADR-0007)
 

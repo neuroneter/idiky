@@ -817,6 +817,59 @@ export interface Poder {
   revocadoEn?: FechaHoraISO
 }
 
+/**
+ * El acta de una asamblea — Ley 675 de 2001, articulo 47.
+ *
+ * **La mitad del acta la sabe el sistema y la otra mitad no**, y el modelo
+ * separa las dos a proposito. El articulo 47 exige que el acta indique «si la
+ * reunion es ordinaria o extraordinaria, la forma de la convocatoria, orden del
+ * dia, nombre y calidad de los asistentes, su unidad privada y su respectivo
+ * coeficiente, y los votos emitidos en cada caso». **Todo eso ya esta
+ * registrado**: no se copia aqui, se lee de donde vive.
+ *
+ * Lo que el sistema no puede saber —lo que se dijo, lo que se propuso, a que se
+ * comprometieron— va en `desarrollo`, y lo escribe quien estuvo.
+ *
+ * **Por que no se congela una copia al aprobar** (RN-35): porque no hace falta.
+ * Una asamblea cerrada no admite asistencia nueva (ADR-0007) ni votos nuevos
+ * (RN-34), y **cada asistencia y cada voto guardan su propio coeficiente,
+ * copiado en su momento** (RN-37). Si manana cambia el coeficiente de una
+ * unidad, esta acta sigue diciendo con cuanto se conto. Lo que se congela es el
+ * texto y el estado, que es lo unico que una persona podria cambiar.
+ */
+export interface Acta {
+  id: string
+  asambleaId: string
+  /**
+   * Quienes la firman (art. 47). Los elige la asamblea, normalmente como primer
+   * punto del orden del dia — por eso no viven en `Asamblea`: al convocar
+   * todavia no se sabe quienes van a ser.
+   */
+  presidenteId?: string
+  secretarioId?: string
+  /** Lo que el sistema no puede saber: intervenciones, proposiciones, compromisos. */
+  desarrollo: string
+  estado: 'borrador' | 'aprobada'
+  /**
+   * Hasta cuando hay para verificarla y ponerla a disposicion: el termino del
+   * reglamento y, **en su defecto, veinte dias habiles** siguientes a la reunion
+   * (art. 47). Se copia al generarla, como los plazos del debido proceso (RN-69).
+   */
+  limiteVerificacion: FechaISO
+  /** El documento con su consecutivo, cuando se aprueba (RN-36, ADR-0006). */
+  documentoId?: string
+  /**
+   * Si esta acta **aclara** otra ya aprobada (CU-A-20, A2).
+   *
+   * Un acta aprobada no se edita: se aclara con una nueva que la referencia
+   * (RN-35). La original no se toca — corregir el pasado y corregirlo *a la
+   * vista* no son lo mismo.
+   */
+  aclaraActaId?: string
+  creadaEn: FechaHoraISO
+  aprobadaEn?: FechaHoraISO
+}
+
 export type EstadoVotacion = 'preparada' | 'abierta' | 'cerrada' | 'anulada'
 
 export interface OpcionVotacion {
@@ -850,7 +903,7 @@ export interface Voto {
 // ---------------------------------------------------------------------------
 // Documentos formales — CU-R-12
 // ---------------------------------------------------------------------------
-export type TipoDocumento = 'paz_y_salvo' | 'poder'
+export type TipoDocumento = 'paz_y_salvo' | 'acta' | 'poder'
 
 export interface Documento {
   id: string
@@ -879,7 +932,7 @@ export interface Documento {
    */
   /** Solo en el paz y salvo. */
   cubiertoHasta?: FechaISO
-  /** Solo en el poder: la asamblea para la que vale. */
+  /** La asamblea a la que se refiere: el acta da fe de ella, el poder vale para ella. */
   asambleaId?: string
   estado: 'vigente' | 'anulado'
 }
@@ -952,6 +1005,7 @@ export interface BaseDatos {
   asambleas: Asamblea[]
   asistencias: Asistencia[]
   poderes: Poder[]
+  actas: Acta[]
   votaciones: Votacion[]
   votos: Voto[]
   documentos: Documento[]
@@ -962,5 +1016,6 @@ export interface BaseDatos {
     comprobante: number
     pazYSalvo: number
     poder: number
+    acta: number
   }
 }

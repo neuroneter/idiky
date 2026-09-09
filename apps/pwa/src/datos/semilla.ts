@@ -46,7 +46,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 17 — poderes: quien representa a una unidad, con el documento adjunto (RN-30).
 // 18 — el poder tambien se otorga desde la app, y ahi Idiky emite el documento.
 // 19 — quorum y mayorias segun la Ley 675 (arts. 41, 45 y 46), verificada.
-export const VERSION_ESQUEMA = 19
+// 20 — el acta de la asamblea, con lo que exige el articulo 47.
+export const VERSION_ESQUEMA = 20
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1096,6 +1097,9 @@ export function crearSemilla(): BaseDatos {
     // en la semilla es peso muerto en el paquete del demo para todo el que lo
     // abra (ADR-0009). Que el primer poder del demo sea el de quien lo prueba.
     poderes: [],
+    // Sin actas de ejemplo: el acta se genera de una asamblea cerrada, y que la
+    // primera del demo sea la que arme quien lo prueba.
+    actas: [],
     votaciones,
     votos,
     // Sin paz y salvo emitido: que la primera emision del demo sea la de quien lo prueba.
@@ -1163,6 +1167,7 @@ export function crearSemilla(): BaseDatos {
       comprobante: consecutivoComprobante,
       pazYSalvo: 1,
       poder: 1,
+      acta: 1,
     },
   }
 }

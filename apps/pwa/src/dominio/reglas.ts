@@ -7,6 +7,7 @@
  */
 
 import type {
+  Acta,
   Asamblea,
   Asistencia,
   FormaAsistencia,
@@ -65,6 +66,25 @@ export function sumarDias(fecha: FechaISO, dias: number): FechaISO {
   const mes = String(base.getMonth() + 1).padStart(2, '0')
   const dia = String(base.getDate()).padStart(2, '0')
   return `${base.getFullYear()}-${mes}-${dia}`
+}
+
+/**
+ * Suma **dias habiles**: salta sabados y domingos.
+ *
+ * Hace falta porque la Ley 675 cuenta asi los plazos del acta (art. 47: «veinte
+ * dias habiles»). No contempla festivos —eso exige el calendario colombiano de
+ * cada ano, que es un dato que la app no tiene— y por eso el plazo que calcula
+ * es **el mas corto posible**: nunca dice que hay mas tiempo del que hay.
+ */
+export function sumarDiasHabiles(fecha: FechaISO, dias: number): FechaISO {
+  let resultado = fecha
+  let restantes = dias
+  while (restantes > 0) {
+    resultado = sumarDias(resultado, 1)
+    const diaSemana = new Date(`${resultado}T12:00:00`).getDay()
+    if (diaSemana !== 0 && diaSemana !== 6) restantes -= 1
+  }
+  return resultado
 }
 
 /** Corre una fecha `meses` hacia atras. Usa el calendario, no 30 dias por mes. */
@@ -663,6 +683,71 @@ export function resultadoVotacion(parametros: {
     base: Number(base.toFixed(4)),
     baseTexto,
   }
+}
+
+// ---------------------------------------------------------------------------
+// El acta — Ley 675 de 2001, articulo 47 · CU-A-20
+// ---------------------------------------------------------------------------
+
+/**
+ * RN-35 — Un acta se genera **de una asamblea cerrada**, no antes.
+ *
+ * Antes de cerrar no hay de que dar fe: podrian entrar mas asistentes y abrirse
+ * mas votaciones, y un acta que cambia sola no es un acta.
+ */
+export function puedeGenerarActa(asamblea: Asamblea): boolean {
+  return asamblea.estado === 'cerrada'
+}
+
+/**
+ * Art. 47 — El plazo para verificarla y ponerla a disposicion.
+ *
+ * «Dentro del termino que fije el reglamento y, en su defecto, dentro de los
+ * **veinte (20) dias habiles** siguientes al de la respectiva reunion».
+ */
+export const DIAS_HABILES_ACTA = 20
+
+export function limiteVerificacionActa(fechaAsamblea: string): FechaISO {
+  return sumarDiasHabiles(fechaAsamblea.slice(0, 10), DIAS_HABILES_ACTA)
+}
+
+/**
+ * Que le falta al acta para poder aprobarse (art. 47).
+ *
+ * Devuelve **la lista de lo que falta**, no un booleano: un boton que se niega
+ * sin decir por que obliga a adivinar, y aqui lo que falta son cosas concretas
+ * y distintas entre si.
+ */
+export function faltaEnActa(acta: Acta): string[] {
+  const falta: string[] = []
+  if (!acta.presidenteId) falta.push('quién presidió la asamblea')
+  if (!acta.secretarioId) falta.push('quién actuó como secretario')
+  if (acta.desarrollo.trim().length < 20) falta.push('el desarrollo de la reunión')
+  return falta
+}
+
+/**
+ * RN-35 — **Un acta aprobada no se edita.**
+ *
+ * Y no se edita de verdad: la comprobacion vive en el repositorio, no en un
+ * boton escondido. Para corregirla se emite un **acta aclaratoria** que la
+ * referencia (CU-A-20, A2) — corregir el pasado y corregirlo *a la vista* no
+ * son lo mismo, y de un acta lo segundo es lo unico admisible.
+ */
+export function actaCongelada(acta: Acta): boolean {
+  return acta.estado === 'aprobada'
+}
+
+/** El acta de una asamblea, si ya se genero. */
+export function actaDeAsamblea(actas: Acta[], asambleaId: string): Acta | undefined {
+  return actas.find((acta) => acta.asambleaId === asambleaId && !acta.aclaraActaId)
+}
+
+/** Las aclaratorias de un acta, de la mas vieja a la mas nueva. */
+export function aclaratoriasDe(actas: Acta[], actaId: string): Acta[] {
+  return actas
+    .filter((acta) => acta.aclaraActaId === actaId)
+    .sort((a, b) => a.creadaEn.localeCompare(b.creadaEn))
 }
 
 /** La mayoria que exige un punto. Sin decir nada, la general de la ley. */

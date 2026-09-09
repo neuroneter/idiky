@@ -648,6 +648,48 @@ textarea {
   border-top: 1px solid #000;
   margin: 2.5em 0 0.6em;
 }
+/* El acta es el único documento con secciones, tabla y dos firmas: un paz y
+   salvo es un párrafo, un acta es un relato con constataciones. */
+.hoja-documento h2 {
+  font-size: 0.95em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 2em 0 0.8em;
+  text-align: left;
+}
+.hoja-documento ol {
+  margin: 0 0 1.2em;
+  padding-left: 1.4em;
+  text-align: left;
+}
+.hoja-documento__tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86em;
+  margin-bottom: 1.4em;
+  text-align: left;
+}
+.hoja-documento__tabla th,
+.hoja-documento__tabla td {
+  border-bottom: 1px solid #999;
+  padding: 0.35em 0.5em;
+  vertical-align: top;
+}
+.hoja-documento__tabla th {
+  font-weight: 650;
+  border-bottom-width: 1.5px;
+}
+/* Las dos firmas van lado a lado; en una hoja angosta, una debajo de la otra
+   sin partirse a la mitad. */
+.hoja-documento__firmas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2em;
+  margin-top: 1em;
+}
+.hoja-documento__firmas .hoja-documento__firma {
+  flex: 1 1 62mm;
+}
 .hoja-documento__pie {
   font-size: 0.72em;
   text-align: center;

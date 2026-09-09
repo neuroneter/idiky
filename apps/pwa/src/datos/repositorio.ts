@@ -15,6 +15,7 @@ import type {
   BaseDatos,
   CategoriaComunicado,
   ConceptoSancion,
+  Acta,
   Asamblea,
   Asistencia,
   EstadoAsamblea,
@@ -63,8 +64,13 @@ import {
   puedeQuedarEnFirme,
   puedeVotar,
   multaAplicable,
+  actaCongelada,
+  actaDeAsamblea,
   admiteAsistencia,
   convocatoriaCompleta,
+  faltaEnActa,
+  limiteVerificacionActa,
+  puedeGenerarActa,
   poderDeUnidad,
   residenciaVigente,
   definicionModalidad,
@@ -1100,6 +1106,159 @@ export async function cambiarEstadoAsamblea(
 
   asamblea.estado = parametros.estado
   return persistir(bd, asamblea)
+}
+
+// ---------------------------------------------------------------------------
+// CU-A-20 — El acta · Ley 675 de 2001, articulo 47
+//
+// **Casi todo el contenido que exige la ley ya esta registrado.** El articulo 47
+// pide que el acta indique si la reunion fue ordinaria o extraordinaria, la forma
+// de la convocatoria, el orden del dia, el nombre y la calidad de los
+// asistentes con su unidad y su coeficiente, y los votos emitidos en cada caso.
+// Idiky tiene las cinco cosas, asi que el acta **no las copia: las lee**.
+//
+// Lo unico que se guarda aqui es lo que el sistema no puede saber —quien
+// presidio, quien fue secretario, y que se dijo— mas el estado, que es lo unico
+// que una persona podria cambiar despues.
+// ---------------------------------------------------------------------------
+
+export async function generarActa(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string },
+): Promise<Resultado<Acta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (!puedeGenerarActa(asamblea)) {
+    throw new ErrorDeNegocio(
+      'El acta se levanta de una asamblea cerrada: antes de cerrar no hay de qué dar fe.',
+    )
+  }
+  if (actaDeAsamblea(bd.actas, asamblea.id)) {
+    throw new ErrorDeNegocio('Esa asamblea ya tiene acta. Para corregirla se emite una aclaratoria.')
+  }
+
+  const acta: Acta = {
+    id: nuevoId('act'),
+    asambleaId: asamblea.id,
+    desarrollo: '',
+    estado: 'borrador',
+    // Se copia al generarla, como los plazos del debido proceso (RN-69): si
+    // manana cambia el reglamento, esta acta conserva el termino que tuvo.
+    limiteVerificacion: limiteVerificacionActa(asamblea.fechaHora),
+    creadaEn: ahoraISO(),
+  }
+  bd.actas.push(acta)
+  return persistir(bd, acta)
+}
+
+/** RN-35 — Se edita **mientras es borrador**. Aprobada, no. */
+export async function editarActa(
+  bdActual: BaseDatos,
+  parametros: {
+    actaId: string
+    presidenteId?: string
+    secretarioId?: string
+    desarrollo?: string
+  },
+): Promise<Resultado<Acta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const acta = bd.actas.find((a) => a.id === parametros.actaId)
+  if (!acta) throw new ErrorDeNegocio('Esa acta no existe.')
+  // La comprobacion vive aqui y no en un boton escondido (T-16): que un acta
+  // aprobada no se edite es lo unico que la hace valer como prueba.
+  if (actaCongelada(acta)) {
+    throw new ErrorDeNegocio(
+      'Un acta aprobada no se edita. Para corregirla se emite un acta aclaratoria.',
+    )
+  }
+
+  if (parametros.presidenteId !== undefined) acta.presidenteId = parametros.presidenteId
+  if (parametros.secretarioId !== undefined) acta.secretarioId = parametros.secretarioId
+  if (parametros.desarrollo !== undefined) acta.desarrollo = parametros.desarrollo
+  return persistir(bd, acta)
+}
+
+/**
+ * CU-A-20 — Aprobar el acta: se numera, se congela y queda a disposicion.
+ *
+ * Art. 47: la firman el presidente y el secretario, y el administrador debe
+ * ponerla a disposicion de los residentes. Aqui «a disposicion» es literal —
+ * desde ese momento el copropietario la ve desde su app.
+ */
+export async function aprobarActa(
+  bdActual: BaseDatos,
+  parametros: { actaId: string },
+): Promise<Resultado<Acta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const acta = bd.actas.find((a) => a.id === parametros.actaId)
+  if (!acta) throw new ErrorDeNegocio('Esa acta no existe.')
+  if (actaCongelada(acta)) throw new ErrorDeNegocio('Esa acta ya estaba aprobada.')
+
+  const falta = faltaEnActa(acta)
+  if (falta.length > 0) {
+    throw new ErrorDeNegocio(`Antes de aprobar falta ${falta.join(', ')}.`)
+  }
+
+  const asamblea = bd.asambleas.find((a) => a.id === acta.asambleaId)
+  const consecutivo = bd.consecutivos.acta
+  const hoy = hoyISO()
+  const documento: Documento = {
+    id: nuevoId('doc'),
+    tipo: 'acta',
+    numero: `ACTA-${hoy.slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`,
+    codigoVerificacion: nuevoCodigoVerificacion(),
+    copropiedadId: asamblea?.copropiedadId ?? '',
+    // El acta es de la asamblea, no de una unidad: no hay `unidadId` que poner.
+    unidadId: '',
+    asambleaId: acta.asambleaId,
+    emitidoEn: hoy,
+    estado: 'vigente',
+  }
+  bd.documentos.push(documento)
+  bd.consecutivos.acta = consecutivo + 1
+
+  acta.estado = 'aprobada'
+  acta.documentoId = documento.id
+  acta.aprobadaEn = ahoraISO()
+  return persistir(bd, acta)
+}
+
+/**
+ * CU-A-20 A2 — Corregir un acta aprobada: **con otra acta, no encima**.
+ *
+ * La original no se toca. Es la misma idea que la sancion archivada o el poder
+ * revocado (RN-61): lo que ya produjo efectos se explica, no se borra.
+ */
+export async function crearActaAclaratoria(
+  bdActual: BaseDatos,
+  parametros: { actaId: string },
+): Promise<Resultado<Acta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const original = bd.actas.find((a) => a.id === parametros.actaId)
+  if (!original) throw new ErrorDeNegocio('Esa acta no existe.')
+  if (!actaCongelada(original)) {
+    throw new ErrorDeNegocio('Esa acta todavía es borrador: se corrige editándola.')
+  }
+
+  const acta: Acta = {
+    id: nuevoId('act'),
+    asambleaId: original.asambleaId,
+    presidenteId: original.presidenteId,
+    secretarioId: original.secretarioId,
+    desarrollo: '',
+    estado: 'borrador',
+    limiteVerificacion: original.limiteVerificacion,
+    aclaraActaId: original.id,
+    creadaEn: ahoraISO(),
+  }
+  bd.actas.push(acta)
+  return persistir(bd, acta)
 }
 
 // ---------------------------------------------------------------------------

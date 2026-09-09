@@ -444,34 +444,61 @@ alguien lo impugne.
 ---
 
 ### CU-A-20
-## CU-A-20 — Generar el acta de la asamblea
+## CU-A-20 — Levantar el acta de la asamblea
 
 - **Actor principal:** Administrador
-- **Precondiciones:** La asamblea está cerrada (CU-A-17).
-- **Disparador:** Terminó la asamblea.
-- **Resultado esperado:** Un acta en PDF que refleja lo que efectivamente pasó, construida
-  desde los datos registrados y no escrita a mano.
+- **Precondiciones:** La asamblea está **cerrada** (CU-A-17). Antes no hay de qué dar fe.
+- **Resultado esperado:** Un acta que refleja lo que pasó, **construida desde lo registrado** y
+  no escrita a mano, a disposición de los copropietarios.
+
+> ✅ **Construida el 2026-09-10**, tras verificar el **artículo 47 de la Ley 675**. La norma
+> resultó ser casi un inventario de lo que Idiky ya tenía:
+>
+> | El art. 47 exige | De dónde sale |
+> |---|---|
+> | Si fue ordinaria o extraordinaria | `Asamblea.tipo` |
+> | La forma de la convocatoria | `Asamblea.citacion` |
+> | El orden del día | `Asamblea.ordenDelDia` |
+> | Nombre y **calidad** de los asistentes, su unidad y su **coeficiente** | `Asistencia` — con el coeficiente copiado al marcar |
+> | Los **votos emitidos en cada caso** | `Voto`, con su coeficiente copiado |
+>
+> Lo único que faltaba: **presidente y secretario, que la firman**.
 
 **Flujo principal**
-1. El sistema arma el borrador del acta con lo que ya tiene: fecha y hora de instalación y
-   cierre, quórum alcanzado, lista de asistentes y representados, orden del día, y el
-   resultado de cada votación con sus coeficientes (RN-35).
-2. El administrador agrega lo que el sistema no puede saber: intervenciones, proposiciones
-   y compromisos.
-3. El acta pasa a revisión de la comisión verificadora **(?)**.
-4. Al aprobarse, el sistema la numera (RN-36), la publica para los copropietarios y **la
-   congela**: desde ahí no se edita (RN-35).
+1. El administrador **levanta el acta**. El sistema la arma con todo lo anterior; no se
+   transcribe nada.
+2. Elige **quién presidió y quién fue secretario** — solo entre quienes asistieron: la firman
+   quienes estuvieron.
+3. Escribe **lo que el sistema no puede saber**: intervenciones, proposiciones, compromisos.
+4. La aprueba. El sistema la **numera** (RN-36), la **congela** (RN-35) y queda **a disposición
+   del copropietario en su app** — que es lo que el art. 47 le exige al administrador dentro de
+   los 20 días hábiles.
 
 **Flujos alternativos**
-- A1. La comisión pide correcciones → vuelve a borrador con las observaciones.
-- A2. Corregir un acta ya aprobada → se emite un **acta aclaratoria** nueva que la referencia;
-  la original no se toca.
+- A1. Falta algo → el botón de aprobar queda deshabilitado **diciendo qué falta**, no mudo.
+- A2. Corregir un acta aprobada → **acta aclaratoria** que la referencia. La original no se
+  toca: corregir el pasado y corregirlo *a la vista* no son lo mismo.
+- A3. **No hubo quórum** → el acta lo dice y **ningún punto sale aprobado**: sin quórum no hubo
+  decisiones válidas, y un acta que reporta aprobaciones tras constatar que faltó quórum se
+  contradice a sí misma.
+
+**Decisiones de interfaz**
+- **La hoja se ve mientras se edita**, no un formulario a un lado. Un acta es un documento que
+  alguien va a leer entero; escribirla a ciegas en campos sueltos es cómo salen las actas que no
+  cuadran con lo que pasó.
+- **Solo asistentes pueden firmar.** Ofrecer toda la copropiedad dejaría firmar como presidente
+  a alguien que no fue.
 
 **Reglas de negocio**
-- RN-35: el acta se construye desde los datos registrados y no se edita una vez aprobada.
-- RN-36: consecutivo único.
+- RN-35 (se construye de los datos; aprobada no se edita), RN-36 (consecutivo y código),
+  RN-37 (los coeficientes copiados son los que hacen que el acta valga), RN-28 y RN-74 (quórum
+  y mayorías, que el acta cita por artículo).
 
-**Estado en el demo:** ⬜ — requiere ADR-0006.
+**Pendiente:** la **comisión verificadora** —si esta copropiedad designa una y con qué término—
+sigue sin definir; hoy el acta lleva el plazo legal supletorio de 20 días hábiles. Y el **PDF**
+espera al backend (ADR-0006): el acta se lee en pantalla y sale al imprimir, sin fingir descarga.
+
+**Estado en el demo:** ✅ — `/admin/asambleas`, dentro de una asamblea cerrada.
 
 ---
 

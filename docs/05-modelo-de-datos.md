@@ -386,6 +386,40 @@ vota** (RN-29, RN-30): serían dos personas con derecho al mismo voto y ganaría
 primero, que es justo lo que un poder resuelve. Si cambia de opinión, revoca y vota él. Se
 comprueba en el repositorio, no solo escondiendo el botón (T-16).
 
+### Acta — Ley 675 de 2001, artículo 47
+
+> ✅ **Implementada** (CU-A-20, 2026-09-10). **Casi todo lo que la ley exige ya estaba
+> registrado.**
+
+El artículo 47 pide que el acta indique **si la reunión fue ordinaria o extraordinaria**, **la
+forma de la convocatoria**, el **orden del día**, el **nombre y la calidad de los asistentes con
+su unidad privada y su respectivo coeficiente**, y **los votos emitidos en cada caso**. Idiky
+tiene las cinco cosas, así que el acta **no las copia: las lee**.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `asambleaId` | string | De la que da fe |
+| `presidenteId`, `secretarioId` | string? | **Quienes la firman** (art. 47). Los elige la asamblea, así que no viven en `Asamblea`: al convocar todavía no se sabe |
+| `desarrollo` | string | **Lo único que el sistema no puede saber**: intervenciones, proposiciones, compromisos |
+| `estado` | `'borrador' \| 'aprobada'` | Aprobada, **no se edita** (RN-35) |
+| `limiteVerificacion` | fecha ISO | El término del reglamento y, en su defecto, **20 días hábiles** (art. 47). Copiado al generarla |
+| `documentoId` | string? | Su consecutivo y código, al aprobar (RN-36) |
+| `aclaraActaId` | string? | Si aclara otra: la original **no se toca** |
+
+> **Por qué no se congela una copia al aprobar.** Porque no hace falta: una asamblea cerrada no
+> admite asistencia nueva ni votos nuevos (RN-34), y **cada asistencia y cada voto guardan su
+> propio coeficiente, copiado en su momento** (RN-37). Si mañana cambia el coeficiente de una
+> unidad, el acta sigue diciendo con cuánto se contó. Lo que se congela es **el texto y el
+> estado**, que es lo único que una persona podría cambiar después.
+>
+> Ahí se cobra una decisión vieja: copiar el coeficiente al marcar asistencia parecía redundante
+> y es lo que hace que el acta valga.
+
+> **El acta se niega a reportar decisiones sin quórum.** Si no se verificó, dice que la asamblea
+> **no quedó habilitada para adoptar decisiones válidas** y ningún punto sale «aprobado». Un
+> acta que constata que faltó quórum y a renglón seguido reporta aprobaciones se contradice a sí
+> misma — y es exactamente la que se anula.
+
 ### Votacion
 | Campo | Tipo | Notas |
 |---|---|---|
@@ -471,10 +505,10 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-30 | **El apoderado no tiene que ser copropietario** (Mary, 2026-09-10: *«puede entrar un externo si tiene poder»*): un hijo, un abogado, alguien sin ninguna relación con el conjunto. La asamblea es de propietarios, y el poder es lo que deja entrar a quien no lo es. El apoderado se da de alta como **usuario temporal de asamblea** al registrar el poder, y el poder **lleva el papel adjunto**. **Una unidad, un representante** (RN-28, RN-29): no se acumulan dos poderes que se contradigan. **Lo que falta, y no impide el registro pero sí el control**: el **tope** de unidades y coeficientes que un apoderado puede acumular **(? — cifra por confirmar en la Ley 675)** y las **inhabilidades** (administrador, empleados, consejo). Mientras tanto la app **muestra el acumulado por apoderado y no rechaza a nadie**: inventar un tope sería peor que no tenerlo, porque diría «cumple» sin saber con qué. | `dominio/reglas.ts` (`acumuladoPorApoderado`) + `repositorio.ts` (`registrarPoder`) · **falta el tope** |
 | RN-74 | **Las dos mayorías se miden sobre bases distintas, y confundirlas anula la votación** (Ley 675, arts. 45 y 46, verificada el 2026-09-10). La **simple** es «la mitad más uno de los coeficientes **representados en la respectiva sesión**»: la base es lo que asistió. La **calificada** es «el setenta por ciento (70 %) de los coeficientes **que integran el edificio**»: aquí la base sí es el edificio entero, y por eso es tan difícil — es a propósito. La calificada **se alcanza** (≥ 70 %); la simple **se supera** (> mitad). Exige calificada, entre otras: cambiar la destinación de bienes comunes, una extraordinaria que supere cuatro veces las expensas mensuales necesarias, gastos distintos de los necesarios, dar un bien común al uso exclusivo de una unidad, y la reconstrucción. **Ninguna decisión puede exigir más del 70 %**, salvo la extinción de la propiedad horizontal. | `dominio/reglas.ts` (`resultadoVotacion`, `mayoriaDelPunto`) |
 | RN-31 | El poder vale para **una sola asamblea** y vence al cerrarse. Está en el modelo, no en una comprobación: `Poder.asambleaId` lo ata a una, y `registrarPoder`/`otorgarPoder` rechazan una asamblea cerrada. Es lo mismo que hace temporal al usuario de asamblea (RN-30). | `dominio/tipos.ts` (`Poder.asambleaId`) + `repositorio.ts` |
-| RN-32 | Quien otorgó poder no puede votar esa unidad directamente. | *pendiente* |
+| RN-32 | **Quien otorgó poder no puede votar esa unidad directamente.** Serían dos personas con derecho al mismo voto, ganando quien llegue primero — que es justo lo que un poder resuelve. Se comprueba en el repositorio; en la pantalla las opciones quedan **deshabilitadas, no escondidas** (Mary, 2026-09-10), para que quien dio poder siga viendo qué se decide en su unidad. | `repositorio.ts` (`emitirVoto`) |
 | RN-33 | La citación se emite con la antelación mínima del reglamento. **(?)** | *pendiente* |
 | RN-34 | Una votación cerrada no se reabre ni se modifica; se anula y se repite. | `dominio/reglas.ts` (`votacionRecibeVotos`) |
-| RN-35 | El acta se construye desde los datos registrados; aprobada, no se edita — se aclara con un acta nueva. | *pendiente* |
+| RN-35 | **El acta se construye desde los datos registrados; aprobada, no se edita — se aclara con un acta nueva.** Ley 675 art. 47, verificada el 2026-09-10: la firman **presidente y secretario**, y hay **20 días hábiles** (o el término del reglamento) para verificarla y ponerla a disposición de los residentes. «A disposición» es literal: el copropietario la lee desde su app. Y **sin quórum el acta no reporta aprobaciones**, porque sin quórum no hubo decisiones válidas. | `dominio/reglas.ts` (`puedeGenerarActa`, `faltaEnActa`, `actaCongelada`, `limiteVerificacionActa`) + `componentes/HojaActa.tsx` |
 | RN-36 | Todo documento formal lleva **consecutivo único por tipo** y un **código de verificación** aleatorio, y se comprueba desde fuera de la app sin exponer datos personales (ADR-0006). | `datos/repositorio.ts` (paz y salvo); falta la página pública de verificación |
 | RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | `datos/repositorio.ts` (`emitirVoto` copia el coeficiente) |
 | RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si lo contempla **el reglamento de propiedad horizontal, el manual de convivencia, un acta de asamblea, u otro documento que haya que nombrar** (Mary, 2026-09-08). **El administrador no define las multas**: las define la asamblea o ya están en esos documentos; él las parametriza (RN-49) y después **las aplica** (Mary, 2026-09-09: *«la multa la impone el administrador de acuerdo con las multas aprobadas en asamblea, en el reglamento de propiedad horizontal, etc.»*). Por eso la norma **se copia al expediente** (`Sancion.respaldo`) y se muestra al lado de los hechos: una multa se comprueba por sus dos mitades, y sin la cita «te multaron por ruido» es la palabra del administrador contra la del copropietario. El reglamento y el manual se citan por artículo; el acta, por fecha; **`otro` exige escribir cuál es el documento** — sin eso sería la puerta por donde se escapa el respaldo entero. | `dominio/reglas.ts` (`respaldoCompleto`) + `repositorio.ts` |

@@ -23,6 +23,8 @@ import { emitirVoto, marcarAsistencia, otorgarPoder, revocarPoder } from '../../
 import {
   admiteAsistencia,
   asistenciaDeUnidad,
+  actaCongelada,
+  actaDeAsamblea,
   contarVotacion,
   definicionModalidad,
   hayQuorum,
@@ -44,6 +46,7 @@ import { Icono } from '../../componentes/Icono'
 import { ChipAsamblea } from '../../componentes/Etiquetas'
 import { Modal } from '../../componentes/Modal'
 import { HojaPoder } from '../../componentes/HojaPoder'
+import { HojaActa } from '../../componentes/HojaActa'
 import type { FormaAsistencia, PuntoOrdenDelDia, Votacion } from '../../dominio/tipos'
 
 function formatearCoeficiente(coeficiente: number): string {
@@ -56,6 +59,7 @@ export function AsambleaDetallePage() {
   const { asambleaId } = useParams()
   const [dandoPoder, setDandoPoder] = useState(false)
   const [viendoHoja, setViendoHoja] = useState(false)
+  const [viendoActa, setViendoActa] = useState(false)
   if (!sesion) return null
 
   const asamblea = sel.asamblea(bd, asambleaId)
@@ -84,6 +88,12 @@ export function AsambleaDetallePage() {
   const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
   const quorumMinimo = sel.copropiedad(bd, sesion.copropiedadId)?.quorumMinimo ?? 50
   const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
+  // Solo la aprobada: un borrador no está «a disposición», está a medio hacer.
+  const acta = actaDeAsamblea(bd.actas, asamblea.id)
+  const actaAprobada = acta && actaCongelada(acta) ? acta : undefined
+  const documentoActa = actaAprobada?.documentoId
+    ? bd.documentos.find((d) => d.id === actaAprobada.documentoId)
+    : undefined
   const miPoder = poderDeUnidad(bd.poderes, asamblea.id, sesion.unidadActivaId ?? '')
   const apoderado = miPoder ? sel.persona(bd, miPoder.apoderadoId) : undefined
   const documentoPoder = miPoder?.documentoId
@@ -533,6 +543,51 @@ export function AsambleaDetallePage() {
             if (hecho) setDandoPoder(false)
           }}
         />
+      )}
+
+      {/* CU-A-20 · Ley 675 art. 47: el administrador debe **poner el acta a
+          disposición** de los residentes. Aquí «a disposición» es literal. */}
+      {actaAprobada && (
+        <div className="tarjeta">
+          <div className="columna" style={{ gap: 'var(--e2)' }}>
+            <div className="fila">
+              <strong>Acta de la asamblea</strong>
+              <span className="chip chip--exito">Aprobada</span>
+            </div>
+            {documentoActa && (
+              <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                {documentoActa.numero} · código {documentoActa.codigoVerificacion}
+              </span>
+            )}
+            <button
+              className="boton boton--primario"
+              onClick={() => setViendoActa(!viendoActa)}
+            >
+              <Icono nombre={viendoActa ? 'cerrar' : 'buscar'} tamano={16} />
+              {viendoActa ? 'Ocultar el acta' : 'Ver el acta'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {actaAprobada && (
+        <div className={viendoActa ? 'previsualizacion-hoja' : undefined}>
+          <HojaActa
+            acta={actaAprobada}
+            documento={documentoActa}
+            copropiedad={sel.copropiedad(bd, sesion.copropiedadId)}
+            asamblea={asamblea}
+            asistencias={bd.asistencias}
+            personaDe={(id) => sel.persona(bd, id)}
+            unidadDe={(id) => sel.unidad(bd, id)}
+            votacionDePunto={(puntoId) => sel.votacionDePunto(bd, puntoId)}
+            votosDe={(votacionId) => sel.votosDe(bd, votacionId)}
+            presidente={sel.persona(bd, actaAprobada.presidenteId ?? '')}
+            secretario={sel.persona(bd, actaAprobada.secretarioId ?? '')}
+            coeficienteEdificio={sumaCoeficientes(sel.unidadesDe(bd, sesion.copropiedadId))}
+            quorumMinimo={quorumMinimo}
+          />
+        </div>
       )}
 
       <div className="pila">
