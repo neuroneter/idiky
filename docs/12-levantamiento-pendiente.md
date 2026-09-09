@@ -201,10 +201,12 @@ CU-A-22, CU-A-23 y CU-A-24.
   debido proceso es el administrador»* — el mismo, de principio a fin. No es un descuido que
   sea la misma persona: no está decidiendo sobre la norma sino sobre si los hechos ocurrieron.
   Lo que lo controla es que todo quede escrito y que el copropietario pueda impugnar (RN-69).
-- **El valor.** ¿Es fijo por concepto, o el que impone puede ajustarlo? Si puede, ¿con qué
-  tope? → *(respuesta)* — **es el límite entre parametrizar e imponer** (RN-49 / RN-50): si el
-  valor se puede mover al imponer la multa, el administrador sí está decidiendo sobre el caso
-  concreto y no solo configurando la regla.
+- ~~**El valor.**~~ → ✅ **Respondido (Mary, 2026-09-09):** *«el administrador no puede
+  ajustar el valor»*. Es fijo por concepto: el que fija el documento, copiado al imponer
+  (RN-37). Era **el límite entre parametrizar e imponer** (RN-49 / RN-50), y queda del lado
+  correcto — el administrador configura la regla, no toca el caso. En el código no es una
+  restricción de pantalla: `imponerSancion` **no recibe un valor**, así que no hay por dónde
+  pasarlo.
 - ~~**Sin artículo del reglamento.**~~ → ✅ **Respondido (Mary, 2026-08-27):** una multa solo
   se da si **está en el reglamento o fue aprobada en asamblea**. El respaldo es obligatorio:
   sin él, el concepto no se crea. Es el mismo principio que rige la tasa de interés (RN-45).
@@ -228,6 +230,10 @@ CU-A-22, CU-A-23 y CU-A-24.
 - **Cuotas adicionales.** ¿Qué se cobra realmente por esta vía —parqueadero, mascota, uso de
   zonas, reposición de daños— y quién lo autoriza? → *(respuesta)*
 
+> ✅ **Todo el bloque del debido proceso quedó respondido el 2026-09-09.** De §3 quater solo
+> sigue abierta la última pregunta, la de las **cuotas adicionales**, que es de CU-A-24 y no
+> toca las multas.
+>
 > ~~**Mientras no haya respuestas, no se implementa CU-A-23.**~~ → **Levantado el 2026-09-09.**
 > CU-A-23 y CU-R-29 están construidos sobre la respuesta de Mary: la app **no fija** el debido
 > proceso, lo parametriza. Las preguntas que siguen abiertas arriba no bloquean el flujo —lo

@@ -188,8 +188,15 @@ cualquier antecedente, que es justo lo que dejó de ser cierto.
 ($ 360.000); uno de hace 13 meses no agrava, vuelve a $ 180.000 y **ni se menciona**; y uno de
 hace ~11,6 meses todavía agrava.
 
-**Lo único que sigue abierto** de §3 quater: si quien impone puede **ajustar el valor** dentro
-de algún tope. Hoy no puede, y es deliberado — es el límite entre parametrizar e imponer.
+**Y con la última respuesta se cerró todo lo que bloqueaba las multas:** *«el administrador no
+puede ajustar el valor»*. Era **el límite entre parametrizar e imponer** (RN-49) y quedó del
+lado correcto: el valor sale del catálogo y se copia tal cual. Lo confirmé en el código y no es
+una restricción de pantalla — **`imponerSancion` no recibe un valor**, así que no hay por dónde
+pasarlo. Una regla que solo esconde un campo se salta el día que alguien llame a la función
+desde otro sitio.
+
+De §3 quater solo queda abierta la pregunta por las **cuotas adicionales** —qué se cobra por
+esa vía y quién lo autoriza—, que es de CU-A-24 y no toca las multas.
 
 **Lo que sigue:** CU-A-24 (cuota extraordinaria) y ADR-0007 (transmisión en vivo), que no
 tienen bloqueos.

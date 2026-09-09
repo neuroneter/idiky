@@ -548,8 +548,8 @@ al imponerse (RN-37).
 
 **Flujo principal**
 1. El administrador abre el proceso: elige la unidad, una multa del catálogo y describe **los
-   hechos** —qué pasó, cuándo y dónde—. El valor y el respaldo **no se escriben**: salen del
-   catálogo, que es lo que los hace comprobables (RN-38, RN-49).
+   hechos** —qué pasó, cuándo y dónde—. El valor y el respaldo **no se escriben ni se
+   ajustan**: salen del catálogo, que es lo que los hace comprobables (RN-38, RN-49).
    Si la unidad ya tiene sanciones **en firme y dentro del término de reincidencia** —un año en
    esta copropiedad— por esa misma conducta, la pantalla lo dice
    antes de abrir el proceso, y dice también qué valor va a aplicar: el agravado si el
@@ -600,10 +600,11 @@ al imponerse (RN-37).
   anula), RN-71 (la multa cuenta como mora igual que cualquier cuota), RN-72 (la reincidencia
   agrava solo si un documento lo dice).
 
-> **Lo único que sigue abierto de §3 quater:** si el que impone puede **ajustar el valor**
-> dentro de algún tope. Hoy no puede, y es deliberado — es el límite entre parametrizar e
-> imponer (RN-49): si el valor se mueve caso por caso, el administrador vuelve a estar
-> decidiendo la sanción. Ver
+> ✅ **Todo lo que bloqueaba las multas quedó respondido el 2026-09-09.** La última: *«el
+> administrador no puede ajustar el valor»*. Es el límite entre parametrizar e imponer (RN-49), y queda del
+> lado correcto — si el valor se moviera caso por caso, el administrador volvería a estar
+> decidiendo la sanción en vez de aplicarla. En el código no es una restricción de pantalla:
+> `imponerSancion` **no recibe un valor**. Ver
 > [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 quater.
 
 **Estado en el demo:** ✅ — `/admin/sanciones`.

@@ -184,7 +184,7 @@ antes de poder imponer ninguna.
 | `copropiedadId` | string | RN-01 |
 | `nombre` | string | «Ruido fuera de horario», «Mascota sin correa» |
 | `descripcion` | string | Qué conducta se sanciona |
-| `valor` | number | Valor sugerido; se puede ajustar al imponerla **(?)** |
+| `valor` | number | **Fijo, el que fija el documento.** No se ajusta al imponer (Mary, 2026-09-09) — se copia tal cual (RN-37, RN-49) |
 | `origen` | `'reglamento' \| 'manual' \| 'asamblea' \| 'otro'` | **Qué la autoriza. Obligatorio** (RN-38) |
 | `referencia` | string | El artículo del reglamento o del manual, la fecha del acta, o dónde lo diga el otro documento |
 | `documento` | string? | **Solo con `origen: 'otro'`: cuál es el documento. Sin esto no se crea** |
@@ -411,7 +411,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-46 | Una cuota **extraordinaria** exige el acta de asamblea que la aprobó. No admite la opción «reglamento»: siempre es acta. | *pendiente* |
 | RN-47 | El respaldo se **justifica por escrito**: el cobro exige una justificación que cite el acta y su fecha y diga para qué se aprobó. Sin ella el cobro no se crea. El copropietario la lee desde su estado de cuenta. | *pendiente* |
 | RN-48 | La cuota extraordinaria tiene **destinación específica**: el concepto la describe en texto libre —cada obra es distinta— pero es la destinación que aprobó el acta, y el recaudo se destina a eso. | *pendiente* |
-| RN-49 | **Parametrizar la cartera es facultad exclusiva del administrador de esa copropiedad**: qué cuotas, multas e intereses existen y cuánto valen. Ningún otro rol lo hace, y la comprobación no puede vivir solo en la interfaz. **Parametrizar no es decidir**: lo que el administrador traslada al sistema lo decidieron antes el reglamento, el manual de convivencia o la asamblea (RN-38, RN-43, RN-46). | *parcial* (`App.tsx` protege la ruta; `repositorio.ts` no comprueba quién llama) |
+| RN-49 | **Parametrizar la cartera es facultad exclusiva del administrador de esa copropiedad**: qué cuotas, multas e intereses existen y cuánto valen. Ningún otro rol lo hace, y la comprobación no puede vivir solo en la interfaz. **Parametrizar no es decidir**: lo que el administrador traslada al sistema lo decidieron antes el reglamento, el manual de convivencia o la asamblea (RN-38, RN-43, RN-46). **Y no toca el caso**: al imponer una multa **no puede ajustar el valor** (Mary, 2026-09-09), que se copia del catálogo tal cual. Ese es el límite exacto entre parametrizar e imponer — si el valor se moviera caso por caso, volvería a estar decidiendo la sanción. En sanciones eso no vive en la interfaz: `imponerSancion` **no recibe un valor**, así que no hay por dónde pasarlo. | *parcial* (`App.tsx` protege la ruta; `generarCuotas` no comprueba quién llama — el valor de la multa sí está cerrado en el repositorio) |
 | RN-50 | **Lo que cae en la cuenta de una unidad se sigue de la parametrización y de su regla, no de una decisión caso por caso.** El interés lo liquida el sistema (RN-42, RN-44), la multa exige un concepto del catálogo y quedar firme (RN-38, RN-39), la extraordinaria sale del acta (RN-46, RN-48). | *pendiente* |
 | RN-51 | **Vota el propietario de la unidad**, no quien la habita: el voto va con la propiedad, igual que la cuota. **(? — falta definir el rol `autorizado` y el apoderado, CU-R-23)** | `dominio/reglas.ts` (`puedeVotar`) + `repositorio.ts` |
 | RN-53 | **La cuenta de un residente nace vinculada**: existe porque alguien lo registró en una unidad. La persona la **activa**, no la crea, y quien no está vinculado no entra. **Quién lo registra depende del eslabón (RN-63)**: la administración crea propietarios, el propietario crea a los demás de su unidad. | `features/auth/` (simulado, ADR-0004) |
@@ -585,10 +585,14 @@ que protege al administrador —el punto que Mary planteó con el interés—: c
 reclama, el cobro no es una decisión suya sobre esa unidad, es la regla vigente aplicada a
 todas.
 
-> **Queda una frontera por definir:** ¿puede ajustar el valor de una multa al imponerla, o el
-> valor del catálogo es fijo? Es exactamente el límite entre parametrizar e imponer, y sigue
-> abierto en [`./12-levantamiento-pendiente.md` §3 quater](./12-levantamiento-pendiente.md).
-> El modelo lo tiene marcado con **(?)** en `ConceptoSancion.valor`.
+> ✅ **La frontera quedó definida** (Mary, 2026-09-09): *«el administrador no puede ajustar el
+> valor»*. El del catálogo es fijo, y se copia al imponer (RN-37). Es la respuesta que hace
+> verdadera toda esta sección: si el valor se pudiera mover al imponer la multa, el
+> administrador estaría decidiendo sobre el caso concreto y no solo configurando la regla.
+>
+> Y no vive en la interfaz: **`imponerSancion` no recibe un valor**, así que no hay por dónde
+> pasarlo. Una regla que solo esconde un campo se salta el día que alguien llame a la función
+> desde otro sitio.
 
 > ⚠️ **Hoy esto vive solo en la interfaz.** `App.tsx` protege `/admin` con `Protegida
 > rol="admin"`, pero `generarCuotas()` no recibe quién la llama ni lo comprueba: la regla es una
