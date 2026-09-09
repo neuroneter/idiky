@@ -60,14 +60,14 @@ export function CatalogoMultasPage() {
         </div>
         <button className="boton boton--primario" onClick={() => setCreando(true)}>
           <Icono nombre="mas" tamano={16} />
-          Agregar concepto
+          Agregar multa
         </button>
       </div>
 
       {conceptos.length === 0 ? (
         <EstadoVacio
           titulo="El catálogo está vacío"
-          detalle="Sin conceptos no se puede imponer ninguna multa. Agrega los que estén en el manual de convivencia o en el reglamento."
+          detalle="Sin multas en el catálogo no se puede imponer ninguna. Agrega las que estén en el manual de convivencia o en el reglamento."
         />
       ) : (
         <>
@@ -80,7 +80,7 @@ export function CatalogoMultasPage() {
               alCambiar={(id) =>
                 void ejecutar(
                   (base) => cambiarEstadoConceptoSancion(base, { conceptoId: id, activo: false }),
-                  'Concepto inhabilitado. Sigue en el catálogo, ya no se puede imponer.',
+                  'Multa inhabilitada. Sigue en el catálogo, ya no se puede imponer.',
                 )
               }
             />
@@ -98,13 +98,13 @@ export function CatalogoMultasPage() {
                 alCambiar={(id) =>
                   void ejecutar(
                     (base) => cambiarEstadoConceptoSancion(base, { conceptoId: id, activo: true }),
-                    'Concepto habilitado.',
+                    'Multa habilitada.',
                   )
                 }
               />
               <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
-                Un concepto inhabilitado no se borra (RN-40): las multas que se impusieron con
-                él lo siguen citando.
+                Una multa inhabilitada no se borra (RN-40): las que se impusieron con ella la
+                siguen citando.
               </p>
             </div>
           )}
@@ -118,7 +118,7 @@ export function CatalogoMultasPage() {
             const creado = await ejecutar(
               (base) =>
                 crearConceptoSancion(base, { copropiedadId: sesion.copropiedadId, ...datos }),
-              'Concepto agregado al catálogo.',
+              'Multa agregada al catálogo.',
             )
             if (creado) setCreando(false)
           }}
@@ -148,7 +148,7 @@ function TablaConceptos({
           <thead>
             <tr>
               <th>Conducta</th>
-              <th>Qué la autoriza</th>
+              <th>Qué la aprueba</th>
               <th className="numerico">Valor</th>
               <th />
             </tr>
@@ -258,14 +258,14 @@ function FormularioConcepto({
 
   return (
     <Modal
-      titulo="Agregar un concepto al catálogo"
-      descripcion="Traslada lo que ya dice el reglamento, el manual o un acta. Aquí no se inventan multas."
+      titulo="Agregar una multa al catálogo"
+      descripcion="Traslada lo que ya dice el reglamento, el manual o un acta. Aquí no se inventan multas: se registran las que esos documentos ya contemplan."
       onCerrar={alCerrar}
     >
       <form onSubmit={enviar}>
         {/* El respaldo primero: es lo que decide si el concepto puede existir. */}
         <div className="campo">
-          <label htmlFor="origen">¿Qué autoriza esta multa?</label>
+          <label htmlFor="origen">¿Qué aprueba esta multa?</label>
           <select
             id="origen"
             value={origen}

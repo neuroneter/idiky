@@ -630,7 +630,7 @@ export async function crearConceptoSancion(
       concepto.nombre.trim().toLowerCase() === parametros.nombre.trim().toLowerCase(),
   )
   if (repetido) {
-    throw new ErrorDeNegocio('Ya hay un concepto activo con ese nombre.')
+    throw new ErrorDeNegocio('Ya hay una multa activa con ese nombre.')
   }
 
   const concepto: ConceptoSancion = {
