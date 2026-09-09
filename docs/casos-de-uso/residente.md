@@ -560,7 +560,7 @@ curso es **mixta**, así que se ven las dos formas de asistir.
 - A3. La asamblea ya se instaló → no se aceptan poderes nuevos.
 
 **Reglas de negocio**
-- RN-30: tope de coeficientes por apoderado **(? — cifra por confirmar en la Ley 675)**.
+- RN-30: el apoderado puede ser externo. **La Ley 675 no fija tope** de poderes por persona (revisado el 2026-09-10); lo puede fijar el reglamento.
 - RN-31: el poder vale para una asamblea y vence al cerrarse (CU-S-09).
 - RN-32: quien otorga poder no vota esa unidad directamente.
 

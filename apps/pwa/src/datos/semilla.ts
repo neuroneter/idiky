@@ -45,7 +45,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 16 — asistencia a la asamblea, con su forma y su coeficiente (ADR-0007).
 // 17 — poderes: quien representa a una unidad, con el documento adjunto (RN-30).
 // 18 — el poder tambien se otorga desde la app, y ahi Idiky emite el documento.
-export const VERSION_ESQUEMA = 18
+// 19 — quorum y mayorias segun la Ley 675 (arts. 41, 45 y 46), verificada.
+export const VERSION_ESQUEMA = 19
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -660,6 +661,7 @@ const asambleas: Asamblea[] = [
     titulo: 'Asamblea extraordinaria — obras de la cubierta',
     fechaHora: fechaHoraRelativa(0, '19:00'),
     modalidad: 'mixta',
+    numeroConvocatoria: 1,
     lugar: 'Salón social, Torre 1',
     // Con ADR-0007 el enlace es el de la herramienta que la copropiedad ya usa.
     // Se ve asi a proposito: es lo que hace evidente que el video no es de Idiky.
@@ -678,6 +680,10 @@ const asambleas: Asamblea[] = [
         id: 'pun-ex-2',
         orden: 2,
         titulo: 'Cuota extraordinaria para impermeabilizar la cubierta',
+        // Ley 675 art. 46: una extraordinaria que supere cuatro veces las
+        // expensas mensuales necesarias exige el 70 % del coeficiente del
+        // edificio. $ 40.000.000 contra ~$ 4.500.000 al mes: lo supera de sobra.
+        mayoria: 'calificada' as const,
         descripcion:
           'Se somete a consideración una cuota extraordinaria de $40.000.000, prorrateada por coeficiente, con destinación exclusiva a la impermeabilización de la cubierta de las dos torres.',
         seVota: true,
@@ -699,6 +705,7 @@ const asambleas: Asamblea[] = [
     titulo: 'Asamblea ordinaria anual',
     fechaHora: fechaHoraRelativa(22, '18:30'),
     modalidad: 'presencial',
+    numeroConvocatoria: 1,
     lugar: 'Salón social, Torre 1',
     estado: 'convocada',
     citacion: 'Convocatoria 001 de la administración',
@@ -740,6 +747,7 @@ const asambleas: Asamblea[] = [
     titulo: 'Asamblea ordinaria del periodo anterior',
     fechaHora: fechaHoraRelativa(-150, '18:30'),
     modalidad: 'presencial',
+    numeroConvocatoria: 1,
     lugar: 'Salón social, Torre 1',
     estado: 'cerrada',
     citacion: 'Convocatoria 004 de la administración',
@@ -1056,6 +1064,9 @@ export function crearSemilla(): BaseDatos {
         // Un ano, tomado del reglamento de esta copropiedad. Como los plazos:
         // no es una constante de la app (RN-72).
         mesesReincidencia: 12,
+        // Ley 675 art. 45: «mas de la mitad». Es el piso legal — el reglamento
+        // puede exigir mas, nunca menos (RN-28).
+        quorumMinimo: 50,
       },
     ],
     unidades,

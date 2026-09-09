@@ -13,10 +13,9 @@
  * video. Lo que sí es suyo —y es lo que Zoom no puede dar— es la asistencia
  * ponderada por coeficiente, que se ve abajo mientras la asamblea corre.
  *
- * **Lo que esta pantalla no dice, a propósito: si hay quórum.** Suma
- * coeficientes, que es aritmética; el umbral, si lo virtual pesa igual que lo
- * presencial y cómo entran los poderes son derecho, y están sin decidir (RN-28,
- * §3 bis).
+ * **Y desde el 2026-09-10 sí dice si hay quórum**, con la Ley 675 verificada
+ * (arts. 41 y 45). Antes no lo decía porque el umbral estaba sin confirmar; ahora
+ * lo dice **citando el artículo**, que es lo que permite comprobarlo.
  */
 
 import { useState } from 'react'
@@ -36,6 +35,8 @@ import {
   convocatoriaCompleta,
   definicionModalidad,
   etiquetaUnidad,
+  faltaParaQuorum,
+  hayQuorum,
   ordenAsamblea,
   poderVigente,
   resumenAsistencia,
@@ -236,6 +237,10 @@ function DetalleAsamblea({
   const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
   const poderes = sel.poderesDeAsambleaTodos(bd, asamblea.id)
   const vigentes = poderes.filter(poderVigente)
+  const copropiedad = sel.copropiedad(bd, asamblea.copropiedadId)
+  const quorumMinimo = copropiedad?.quorumMinimo ?? 50
+  const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
+  const falta = faltaParaQuorum(asamblea, resumen, quorumMinimo)
   const acumulado = acumuladoPorApoderado(
     bd.poderes,
     asamblea.id,
@@ -300,8 +305,9 @@ function DetalleAsamblea({
             </button>
           </div>
           <p className="subtitulo">
-            La asamblea es de propietarios; el poder es lo que deja entrar a quien no lo es (RN-30).
-            Se otorga fuera de la app, así que aquí se valida y se adjunta el papel.
+            La asamblea es de propietarios; el poder es lo que deja entrar a quien no lo es
+            (RN-30). Aquí se registran los que llegan <strong>en papel</strong>; los que el
+            propietario otorga desde su app aparecen solos.
           </p>
 
           {/* El acumulado por apoderado, a la vista: el tope legal no lo tenemos
@@ -422,11 +428,33 @@ function DetalleAsamblea({
             )}
           </div>
 
-          <p className="acceso__nota" style={{ margin: 'var(--e3) 0' }}>
-            Falta decidir cuánto quórum se exige, si la asistencia virtual pesa igual que la
-            presencial y cómo entran los poderes (RN-28). Por eso aquí se suma, pero no se afirma
-            que haya quórum.
-          </p>
+          {/* Ya se puede afirmar, y se cita el artículo: un «hay quórum» sin
+              decir con qué regla es un número que nadie puede comprobar. */}
+          <div
+            className={`tarjeta tarjeta--plana ${quorum ? 'tarjeta--exito' : 'tarjeta--alerta'}`}
+            style={{ margin: 'var(--e3) 0' }}
+          >
+            <div className="fila">
+              <strong>{quorum ? 'Hay quórum' : 'No hay quórum'}</strong>
+              <span className={quorum ? 'chip chip--exito' : 'chip chip--alerta'}>
+                {asamblea.numeroConvocatoria === 2
+                  ? 'Segunda convocatoria'
+                  : 'Primera convocatoria'}
+              </span>
+            </div>
+            <span className="subtitulo">
+              {asamblea.numeroConvocatoria === 2
+                ? 'En segunda convocatoria sesiona cualquier número plural de propietarios, sea cual sea el coeficiente (Ley 675, art. 41).'
+                : `Se exige número plural de propietarios y más del ${quorumMinimo} % de los coeficientes (Ley 675, art. 45).`}
+            </span>
+            {!quorum && asamblea.numeroConvocatoria === 1 && (
+              <span className="subtitulo" style={{ marginTop: 'var(--e1)' }}>
+                {resumen.unidades < 2
+                  ? 'Falta al menos otro propietario: una sola unidad no hace número plural.'
+                  : `Faltan ${formatearCoeficiente(falta)} de coeficiente.`}
+              </span>
+            )}
+          </div>
 
           {asistencias.length > 0 && (
             <div className="contenedor-tabla" style={{ maxHeight: 240, overflowY: 'auto' }}>

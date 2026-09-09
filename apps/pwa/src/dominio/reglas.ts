@@ -10,6 +10,7 @@ import type {
   Asamblea,
   Asistencia,
   FormaAsistencia,
+  MayoriaExigida,
   ModalidadAsamblea,
   Poder,
   CategoriaRegistro,
@@ -564,6 +565,111 @@ export function resumenAsistencia(
   }
 }
 
+/**
+ * RN-28 — **¿Hay quorum?** Ley 675 de 2001, articulos 41 y 45.
+ *
+ * Verificado contra la norma el 2026-09-10, y conviene escribir lo que dice
+ * porque de memoria se repite mal:
+ *
+ * > «La asamblea general sesionara con un **numero plural de propietarios** de
+ * > unidades privadas que representen por lo menos, **mas de la mitad de los
+ * > coeficientes** de propiedad» (art. 45).
+ *
+ * Tres cosas que no son lo que uno diria:
+ *
+ * 1. **Son dos condiciones, no una.** «Numero plural» significa **dos
+ *    propietarios como minimo**: una sola unidad con el 60 % del edificio **no
+ *    hace quorum**. Es lo que impide que un solo dueno mayoritario sesione solo.
+ * 2. **Se supera la mitad, no se alcanza.** Con 50 exacto no hay quorum; con
+ *    50,5 si. El «51 %» que se dice de memoria deja fuera asambleas validas.
+ * 3. **El 50 + 1 no es esto.** Ese es el umbral de la *decision*, y sobre lo
+ *    representado en la sesion, no sobre el edificio (ver `resultadoVotacion`).
+ *
+ * Y la valvula de escape (art. 41): si la primera convocatoria no pudo sesionar,
+ * **la segunda sesiona con cualquier numero plural de propietarios, sea cual sea
+ * el coeficiente**. Sin eso, una copropiedad donde la gente no va quedaria
+ * paralizada para siempre.
+ */
+export function hayQuorum(
+  asamblea: Asamblea,
+  resumen: { unidades: number; coeficiente: number },
+  quorumMinimo: number,
+): boolean {
+  // Numero plural: en las dos convocatorias.
+  if (resumen.unidades < 2) return false
+  if (asamblea.numeroConvocatoria === 2) return true
+  return resumen.coeficiente > quorumMinimo
+}
+
+/** Lo que le falta al quorum, en coeficiente. `0` si ya lo hay. */
+export function faltaParaQuorum(
+  asamblea: Asamblea,
+  resumen: { unidades: number; coeficiente: number },
+  quorumMinimo: number,
+): number {
+  if (hayQuorum(asamblea, resumen, quorumMinimo)) return 0
+  if (asamblea.numeroConvocatoria === 2) return 0
+  return Number((quorumMinimo - resumen.coeficiente).toFixed(4))
+}
+
+/**
+ * RN-74 — **¿Se aprobo el punto?** Ley 675 de 2001, articulos 45 y 46.
+ *
+ * Las dos mayorias se miden **sobre bases distintas**, y confundirlas es el
+ * error que anula una votacion:
+ *
+ * - **Simple** (art. 45): «el voto favorable de la **mitad mas uno de los
+ *   coeficientes representados en la respectiva sesion**». La base es **lo que
+ *   asistio**, no el edificio.
+ * - **Calificada** (art. 46): «el **setenta por ciento (70 %) de los
+ *   coeficientes que integran el edificio** o conjunto». Aqui la base **si** es
+ *   el edificio entero, y por eso es tan dificil de alcanzar — es a proposito.
+ *
+ * Se devuelve tambien `base` para poder **decir sobre que se calculo**: un
+ * resultado que no dice su base es un numero que nadie puede comprobar.
+ */
+export function resultadoVotacion(parametros: {
+  conteo: ConteoVotacion
+  mayoria: MayoriaExigida
+  /** Coeficiente representado en la sesion (asistencia), para la simple. */
+  coeficienteRepresentado: number
+  /** Coeficiente total del edificio, para la calificada. Normalmente 100. */
+  coeficienteEdificio: number
+}): {
+  aprobada?: { opcionId: string; texto: string; coeficiente: number }
+  umbral: number
+  base: number
+  baseTexto: string
+} {
+  const { conteo, mayoria, coeficienteRepresentado, coeficienteEdificio } = parametros
+  const base = mayoria === 'calificada' ? coeficienteEdificio : coeficienteRepresentado
+  const umbral = mayoria === 'calificada' ? base * 0.7 : base / 2
+  const baseTexto =
+    mayoria === 'calificada'
+      ? 'del coeficiente del edificio'
+      : 'del coeficiente representado en la sesión'
+
+  // La calificada se **alcanza** (70 %); la simple se **supera** (mas de la
+  // mitad). No es un detalle: con exactamente la mitad, la simple no pasa.
+  const ganadora = conteo.porOpcion.find((opcion) =>
+    mayoria === 'calificada' ? opcion.coeficiente >= umbral : opcion.coeficiente > umbral,
+  )
+
+  return {
+    aprobada: ganadora
+      ? { opcionId: ganadora.opcionId, texto: ganadora.texto, coeficiente: ganadora.coeficiente }
+      : undefined,
+    umbral: Number(umbral.toFixed(4)),
+    base: Number(base.toFixed(4)),
+    baseTexto,
+  }
+}
+
+/** La mayoria que exige un punto. Sin decir nada, la general de la ley. */
+export function mayoriaDelPunto(punto: { mayoria?: MayoriaExigida }): MayoriaExigida {
+  return punto.mayoria ?? 'simple'
+}
+
 /** Solo tiene sentido marcar asistencia mientras la asamblea esta instalada. */
 export function admiteAsistencia(asamblea: Asamblea): boolean {
   return asamblea.estado === 'instalada'
@@ -604,13 +710,17 @@ export function unidadesRepresentadas(
 }
 
 /**
- * RN-30 — **Esta funcion no existe todavia, y es a proposito.**
+ * RN-30 — **El tope no existe en el codigo porque no existe en la ley.**
  *
- * Aqui iria el tope: cuantos poderes puede acumular un apoderado y hasta que
- * porcentaje de coeficientes puede representar. **La cifra la fija la Ley 675 y
- * no la tenemos** (§3 bis). Escribir un numero de memoria seria peor que no
- * tener la regla: la app diria «cumple el tope» sin saber cual es, y quien la
- * usa dejaria de mirar.
+ * Revisado el 2026-09-10 contra la Ley 675 de 2001: **no fija ningun tope** de
+ * poderes por apoderado. Lo puede fijar el **reglamento** de cada copropiedad
+ * —la practica comun son tres o cuatro— y mientras este no lo haga, no hay nada
+ * que comprobar.
+ *
+ * Lo que si se puede hacer, y se hace, es **poner el dato a la vista**: cuantas
+ * unidades y cuanto coeficiente acumula cada apoderado, para que el
+ * administrador lo juzgue con el reglamento en la mano. Ver
+ * `acumuladoPorApoderado`.
  *
  * Lo que si se puede hacer, y se hace, es **poner el dato a la vista**: cuantas
  * unidades y cuanto coeficiente acumula cada apoderado, para que el

@@ -25,6 +25,10 @@ import {
   asistenciaDeUnidad,
   contarVotacion,
   definicionModalidad,
+  hayQuorum,
+  mayoriaDelPunto,
+  resultadoVotacion,
+  sumaCoeficientes,
   etiquetaUnidad,
   formasDeAsistir,
   pesoDelVoto,
@@ -78,6 +82,8 @@ export function AsambleaDetallePage() {
   const formas = formasDeAsistir(asamblea.modalidad)
   const miAsistencia = asistenciaDeUnidad(bd.asistencias, asamblea.id, sesion.unidadActivaId ?? '')
   const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
+  const quorumMinimo = sel.copropiedad(bd, sesion.copropiedadId)?.quorumMinimo ?? 50
+  const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
   const miPoder = poderDeUnidad(bd.poderes, asamblea.id, sesion.unidadActivaId ?? '')
   const apoderado = miPoder ? sel.persona(bd, miPoder.apoderadoId) : undefined
   const documentoPoder = miPoder?.documentoId
@@ -115,6 +121,7 @@ export function AsambleaDetallePage() {
   }
 
   function bloqueVotacion(punto: PuntoOrdenDelDia) {
+    const mayoria = mayoriaDelPunto(punto)
     const votacion = sel.votacionDePunto(bd, punto.id)
     if (!votacion) {
       return (
@@ -131,13 +138,54 @@ export function AsambleaDetallePage() {
     // cree que votó. El repositorio lo rechaza igual (T-16).
     const representada = !!miPoder && miPoder.apoderadoId !== sesion!.personaId
     const conteo = contarVotacion(votacion, votos)
+    // El resultado se calcula sobre la base que exige la ley: lo representado
+    // para la simple, el edificio entero para la calificada (arts. 45 y 46).
+    const resultado = resultadoVotacion({
+      conteo,
+      mayoria,
+      coeficienteRepresentado: resumen.coeficiente,
+      coeficienteEdificio: sumaCoeficientes(sel.unidadesDe(bd, sesion!.copropiedadId)),
+    })
     const abierta = votacion.estado === 'abierta'
 
     return (
       <>
-        <p style={{ margin: '0 0 var(--e3)' }}>
+        <p style={{ margin: '0 0 var(--e2)' }}>
           <strong>{votacion.pregunta}</strong>
         </p>
+
+        {/* **Qué mayoría exige, antes de votar y no después.** Saber que este
+            punto necesita el 70 % del edificio cambia cómo se lee la papeleta:
+            es la diferencia entre «opino» y «esto no va a pasar sin más gente».
+            La Ley 675 se verificó el 2026-09-10 (arts. 45 y 46). */}
+        <div className="fila fila-inicio" style={{ marginBottom: 'var(--e3)' }}>
+          <span className="subtitulo">
+            {mayoria === 'calificada' ? 'Mayoría calificada' : 'Mayoría simple'}
+          </span>
+          {/* Cada mayoría dice su cifra una sola vez, y con la precisión que
+              importa: la calificada **se alcanza** (70 %), la simple **se
+              supera** (más de la mitad). Con exactamente la mitad, no pasa. */}
+          <span className="subtitulo" style={{ textAlign: 'right' }}>
+            {mayoria === 'calificada'
+              ? `${formatearCoeficiente(resultado.umbral)} ${resultado.baseTexto} (art. 46)`
+              : `más de ${formatearCoeficiente(resultado.umbral)} ${resultado.baseTexto} (art. 45)`}
+          </span>
+        </div>
+
+        {votacion.estado === 'cerrada' && (
+          <p className={resultado.aprobada ? 'chip chip--exito' : 'chip chip--error'}>
+            {resultado.aprobada
+              ? `Aprobado: ${resultado.aprobada.texto}`
+              : 'No alcanzó la mayoría exigida'}
+          </p>
+        )}
+
+        {votacion.estado === 'abierta' && resultado.aprobada && (
+          <p className="subtitulo" style={{ marginBottom: 'var(--e3)' }}>
+            Con los votos de ahora, <strong>{resultado.aprobada.texto}</strong> ya supera el
+            umbral. El resultado se fija al cerrar la votación.
+          </p>
+        )}
 
         {votacion.estado === 'preparada' && (
           <p className="subtitulo">
@@ -236,6 +284,8 @@ export function AsambleaDetallePage() {
               {conteo.unidadesVotantes === 1 ? 'unidad' : 'unidades'}, que suman{' '}
               {formatearCoeficiente(conteo.coeficienteVotante)} de coeficiente.
             </span>
+
+
           </div>
         )}
       </>
@@ -354,9 +404,21 @@ export function AsambleaDetallePage() {
 
           <div className="separador" />
 
-          {/* Se suma y se reparte, pero **no se dice si hay quórum**: el umbral
-              está sin decidir (RN-28, §3 bis), y afirmarlo con un número
-              inventado sería peor que no decir nada. */}
+          {/* Ya se dice si hay quórum: la Ley 675 se verificó el 2026-09-10
+              (arts. 41 y 45). Va **con el artículo**, porque un veredicto sin
+              su regla es un número que nadie puede comprobar. */}
+          <div className={`fila ${quorum ? '' : ''}`} style={{ marginBottom: 'var(--e2)' }}>
+            <strong>{quorum ? 'Hay quórum' : 'Todavía no hay quórum'}</strong>
+            <span className={quorum ? 'chip chip--exito' : 'chip chip--alerta'}>
+              {asamblea.numeroConvocatoria === 2 ? 'Segunda convocatoria' : 'Primera'}
+            </span>
+          </div>
+          <span className="subtitulo">
+            {asamblea.numeroConvocatoria === 2
+              ? 'En segunda convocatoria basta un número plural de propietarios (Ley 675, art. 41).'
+              : `Hace falta más del ${quorumMinimo} % de los coeficientes y al menos dos propietarios (Ley 675, art. 45).`}
+          </span>
+
           <div className="lista lista--compacta">
             <div className="fila">
               <span className="subtitulo">Unidades presentes</span>

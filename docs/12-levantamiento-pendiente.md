@@ -142,12 +142,24 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   *Nota:* esto confirma el **peso del voto**, no cómo se mide el **quórum** — sigue abierto
   justo debajo.
 - **Quórum:** ¿qué porcentaje de coeficientes se necesita para instalar la asamblea? ¿Hay
-  segunda convocatoria con quórum menor? → *(respuesta)*
-- **Mayorías:** ¿qué decisiones exigen mayoría simple, cuáles calificada (70 %), cuáles
-  unanimidad? El reglamento manda sobre esto. → *(respuesta)*
-- **Poderes — el tope:** ¿cuántos poderes puede acumular un apoderado, y hasta qué
-  porcentaje de coeficientes puede representar? La Ley 675 fija un límite; **hay que
-  confirmar el artículo y la cifra exacta antes de implementar RN-30**. → *(respuesta)*
+  segunda convocatoria con quórum menor? → ✅ **Respondido por la norma (verificada el
+  2026-09-10).** Ley 675 **art. 45**: sesiona con **número plural de propietarios** que
+  representen **más de la mitad** de los coeficientes. Y **art. 41**: si no hubo quórum, la
+  segunda convocatoria sesiona con **cualquier número plural, sea cual sea el coeficiente**.
+  El reglamento puede exigir **más**, nunca menos. Implementado (RN-28).
+- **Mayorías:** → ✅ **Respondido por la norma (verificada el 2026-09-10).** **Art. 45**:
+  simple = «la mitad más uno de los coeficientes **representados en la sesión**». **Art. 46**:
+  calificada = **70 % de los coeficientes que integran el edificio** —otra base—, y ninguna
+  decisión puede exigir más, salvo la extinción de la propiedad horizontal. El art. 46 lista
+  qué exige calificada. Implementado (RN-74). **Queda por revisar con el reglamento** qué
+  puntos de *esta* copropiedad caen en esa lista.
+- **Poderes — el tope:** → ✅ **Resuelto, y al revés de lo que suponíamos** (verificado el
+  2026-09-10). **La Ley 675 no fija ningún tope.** Lo puede fijar el **reglamento** de cada
+  copropiedad —la práctica común son tres o cuatro poderes por persona— y la jurisprudencia
+  reconoce un límite implícito cuando un apoderado concentra tanto que distorsiona la voluntad
+  colectiva. **No hay una cifra que averiguar: hay una decisión que tomar**, y es de la
+  asamblea. Mientras el reglamento no la tome, Idiky muestra el acumulado y no rechaza a
+  nadie (RN-30).
 - **Poderes — la forma:** → 🟡 **Las dos puertas están construidas; falta que el derecho diga
   si la segunda basta.** Mary (2026-09-10) pidió primero el camino de papel —*«este usuario lo
   crea el administrador adjuntando el poder como soporte, porque este poder se da por fuera de

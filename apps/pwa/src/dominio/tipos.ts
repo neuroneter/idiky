@@ -48,6 +48,19 @@ export interface Copropiedad {
    * la app. Doce en esta (Mary, 2026-09-09: «la reincidencia caduca al ano»).
    */
   mesesReincidencia: number
+  /**
+   * Coeficiente que hay que **superar** para que la asamblea sesione, en
+   * porcentaje (Ley 675, art. 45: «mas de la mitad»).
+   *
+   * Es 50 por ley y **el reglamento solo puede subirlo, nunca bajarlo** — el
+   * articulo dice «con excepcion de los casos en que la ley o el reglamento
+   * exijan un quorum o mayoria superior».
+   *
+   * Se supera, no se alcanza: con 50 exacto **no hay quorum**; con 50,5 si. Por
+   * eso «el 51 %» que se dice de memoria deja fuera asambleas que si podian
+   * sesionar.
+   */
+  quorumMinimo: number
 }
 
 export type TipoUnidad = 'apartamento' | 'casa' | 'local'
@@ -642,6 +655,9 @@ export type EstadoAsamblea = 'convocada' | 'instalada' | 'cerrada' | 'cancelada'
 
 export type ModalidadAsamblea = 'presencial' | 'virtual' | 'mixta'
 
+/** Ley 675 de 2001, articulos 45 y 46. Revisado contra la norma el 2026-09-10. */
+export type MayoriaExigida = 'simple' | 'calificada'
+
 export interface PuntoOrdenDelDia {
   id: string
   orden: number
@@ -649,6 +665,21 @@ export interface PuntoOrdenDelDia {
   descripcion: string
   /** Los puntos informativos no se votan (un informe de gestion, por ejemplo). */
   seVota: boolean
+  /**
+   * Que mayoria exige este punto (Ley 675 de 2001, articulos 45 y 46).
+   *
+   * - `simple`: la regla general — **la mitad mas uno de los coeficientes
+   *   representados en la sesion** (art. 45). Ojo: sobre lo representado, no
+   *   sobre el edificio entero.
+   * - `calificada`: **el 70 % de los coeficientes que integran el edificio**
+   *   (art. 46), y esta vez si sobre el total. Es para lo grave: cambiar la
+   *   destinacion de bienes comunes, extraordinarias que superen cuatro veces
+   *   las expensas mensuales, gastos distintos de los necesarios, dar un bien
+   *   comun al uso exclusivo de una unidad, reconstruccion.
+   *
+   * Si falta, se asume `simple`, que es la regla general de la ley.
+   */
+  mayoria?: MayoriaExigida
 }
 
 export interface Asamblea {
@@ -658,6 +689,15 @@ export interface Asamblea {
   titulo: string
   fechaHora: FechaHoraISO
   modalidad: ModalidadAsamblea
+  /**
+   * 1 = primera convocatoria; 2 = **segunda convocatoria** (Ley 675, art. 41).
+   *
+   * No es un dato administrativo: **cambia el quorum**. Si la primera no pudo
+   * sesionar por falta de quorum, la segunda sesiona con **cualquier numero
+   * plural de propietarios, sea cual sea el coeficiente que representen**. Es lo
+   * que impide que una copropiedad quede paralizada porque la gente no va.
+   */
+  numeroConvocatoria: 1 | 2
   lugar?: string
   enlaceTransmision?: string
   ordenDelDia: PuntoOrdenDelDia[]

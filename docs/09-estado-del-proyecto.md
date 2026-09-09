@@ -15,7 +15,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 67 documentados: 33 ✅ en el demo, 11 🟡 a medias, 22 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 73 (RN-01…RN-73; RN-41 retirada) |
+| **Reglas de negocio** | 74 (RN-01…RN-74; RN-41 retirada) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -166,11 +166,11 @@ otorgamiento desde la app depende de si la ley admite firma electrónica —preg
 §3 bis— y aun entonces el PDF esperaría al backend (ADR-0006). Así que se construyó el de
 papel, y el otro queda escrito para cuando el abogado responda.
 
-**Lo que el sistema no hace, y lo dice:** aplicar el **tope** de unidades que un apoderado puede
-acumular (RN-30). La cifra la fija la Ley 675 y no la tenemos. En vez de inventarla, la pantalla
-**pone el acumulado delante** —cuántas unidades y cuánto coeficiente lleva cada apoderado— y
-avisa que no está rechazando a nadie. Es la misma decisión que con el quórum: sumar es
-aritmética, poner el umbral es derecho.
+**Lo que el sistema no hace:** aplicar un **tope** de unidades por apoderado. Escribí que «la
+cifra la fija la Ley 675 y no la tenemos», y **eso resultó falso**: al revisar la norma al día
+siguiente quedó claro que **la ley no fija ningún tope**. Lo puede fijar el reglamento —la
+práctica común son tres o cuatro— y este no lo ha hecho. La pantalla **pone el acumulado
+delante** de quien registra y dice que no está rechazando a nadie.
 
 **Y una consecuencia que conviene no dejar pasar:** el poder lleva nombre, documento y firma de
 alguien **que no es residente**, y hoy no se le pide autorización de tratamiento de datos — lo
@@ -239,8 +239,47 @@ decidiendo en su unidad**, que es información suya aunque no sea su voto.
 fórmula notarial de siempre — y se lo decía a una mujer. El sistema no sabe el género de nadie,
 así que ahora dice **«con documento»**: lo mismo, y no se equivoca nunca.
 
-**Lo que sigue:** el corazón del producto — **quórum, mayorías y acta** (§3 bis). De las once
-preguntas quedan ocho, y son las que ya no tienen rodeo.
+**Y al final del día, el quórum.** Mary: *«el quórum por normativa el 50 + 1, pero revisa la
+norma»* — y revisarla dio tres correcciones, una de ellas mía:
+
+| Lo que se decía | Lo que dice la Ley 675 (verificada el 2026-09-10) |
+|---|---|
+| «el quórum es 50 + 1» | El 50 + 1 es la **mayoría decisoria**, no el quórum — y sobre lo **representado en la sesión**, no sobre el total (art. 45) |
+| «o el 51 % de la sumatoria» | El quórum es **«más de la mitad»**: 50,5 % alcanza. Y exige además **número plural** de propietarios |
+| *(mío)* «el tope de poderes que fija la Ley 675» | **La ley no fija ningún tope.** Lo puede fijar el reglamento. Lo había escrito en la app y en los documentos |
+
+**La tercera es la que más importa como lección:** afirmé que una cifra la fijaba la ley y no la
+teníamos, cuando lo que pasaba es que **la ley no la fija**. No es lo mismo «falta un dato» que
+«no hay dato que buscar»: lo primero deja una tarea abierta para siempre, lo segundo convierte
+la pregunta en una **decisión de la asamblea**. Corregido en los dos sitios.
+
+**Tres precisiones que de memoria se repiten mal**, y por eso quedaron escritas en el código:
+
+- **Son dos condiciones, no una.** «Número plural» significa mínimo dos propietarios: una sola
+  unidad con el 60 % del edificio **no hace quórum**. Es lo que impide que un dueño mayoritario
+  sesione solo.
+- **Se supera la mitad, no se alcanza.** Con 50 exacto no hay quórum; con 50,5 sí. El «51 %»
+  deja fuera asambleas válidas.
+- **Las dos mayorías se miden sobre bases distintas.** La simple, sobre lo representado; la
+  calificada, sobre el edificio entero. Confundirlas es lo que anula una votación.
+
+**Lo construido:** `hayQuorum` con la segunda convocatoria del art. 41 —que sesiona con
+cualquier número plural, y es lo que impide que una copropiedad quede paralizada porque la
+gente no va—, `resultadoVotacion` con las dos bases, y `Asamblea.numeroConvocatoria`. Las dos
+pantallas **dejaron de decir «no puedo afirmar el quórum» y lo afirman citando el artículo**:
+un veredicto sin su regla es un número que nadie puede comprobar.
+
+**Y la mayoría de cada punto se ve antes de votar, no después.** Saber que la extraordinaria
+necesita el 70 % del edificio cambia cómo se lee la papeleta: es la diferencia entre «opino» y
+«esto no va a pasar sin más gente».
+
+**Verificado con Playwright, 10 comprobaciones**: que con 43,2 % diga que no hay quórum y
+cuánto falta; que al superar la mitad lo haya; que en segunda convocatoria baste un número
+plural citando el art. 41; y que cada punto muestre su mayoría sobre la base correcta.
+
+**Lo que sigue:** de las once preguntas de §3 bis quedan **cinco**. Y la que más pesa ya no es
+de derecho sino de esta copropiedad: **qué puntos de su reglamento exigen mayoría calificada**,
+y **si fija un tope de poderes** — que resultó ser una decisión suya, no un dato que buscar.
 
 ---
 

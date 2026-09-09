@@ -20,6 +20,7 @@ import type {
   EstadoAsamblea,
   FechaHoraISO,
   FormaAsistencia,
+  MayoriaExigida,
   ModalidadAsamblea,
   Persona,
   Poder,
@@ -1016,10 +1017,17 @@ export async function convocarAsamblea(
     titulo: string
     fechaHora: FechaHoraISO
     modalidad: ModalidadAsamblea
+    /** 2 = segunda convocatoria, que sesiona sin minimo de coeficiente (RN-28). */
+    numeroConvocatoria?: 1 | 2
     lugar?: string
     enlaceTransmision?: string
     citacion: string
-    ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean }>
+    ordenDelDia: Array<{
+      titulo: string
+      descripcion: string
+      seVota: boolean
+      mayoria?: MayoriaExigida
+    }>
   },
 ): Promise<Resultado<Asamblea>> {
   await esperar()
@@ -1044,6 +1052,7 @@ export async function convocarAsamblea(
     titulo: parametros.titulo.trim(),
     fechaHora: parametros.fechaHora,
     modalidad: parametros.modalidad,
+    numeroConvocatoria: parametros.numeroConvocatoria ?? 1,
     lugar: parametros.lugar?.trim() || undefined,
     enlaceTransmision: parametros.enlaceTransmision?.trim() || undefined,
     citacion: parametros.citacion.trim(),
@@ -1053,6 +1062,7 @@ export async function convocarAsamblea(
       titulo: punto.titulo.trim(),
       descripcion: punto.descripcion.trim(),
       seVota: punto.seVota,
+      ...(punto.mayoria ? { mayoria: punto.mayoria } : {}),
     })),
     estado: 'convocada',
   }
@@ -1211,10 +1221,11 @@ function prepararPoder(
  * 3. Queda validado. **Registrarlo es validarlo**: quien adjunta el papel es
  *    quien lo tuvo en la mano, y no hay nadie mas en el flujo.
  *
- * Lo que esta operacion **no** comprueba, y hay que decirlo: **el tope** de
- * unidades que un apoderado puede acumular (RN-30). La cifra la fija la Ley 675
- * y no la tenemos (§3 bis). En vez de inventarla, la pantalla **pone el
- * acumulado delante** de quien registra.
+ * Lo que esta operacion **no** comprueba, y hay que decir por que: **el tope**
+ * de unidades que un apoderado puede acumular. **La Ley 675 no lo fija** —
+ * revisado el 2026-09-10—; lo puede fijar el reglamento, y este no lo ha hecho.
+ * En vez de inventar un numero, la pantalla **pone el acumulado delante** de
+ * quien registra (RN-30).
  */
 export async function registrarPoder(
   bdActual: BaseDatos,
