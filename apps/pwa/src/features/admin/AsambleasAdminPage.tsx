@@ -339,6 +339,12 @@ function DetalleAsamblea({
                           ) : (
                             <span className="chip chip--exito">Vigente</span>
                           )}
+                          {/* De dónde salió: es lo que dice qué lo respalda —el
+                              papel firmado, o la sesión del propietario— y por
+                              tanto qué mirar si alguien lo impugna. */}
+                          <div className="subtitulo">
+                            {poder.origen === 'papel' ? 'En papel' : 'Otorgado en la app'}
+                          </div>
                         </td>
                         <td>
                           {!poder.revocadoEn && (

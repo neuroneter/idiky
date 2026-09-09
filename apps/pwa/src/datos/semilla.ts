@@ -44,7 +44,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 15 — la cuota lleva el respaldo que la autoriza: acta y para que (RN-46, RN-47).
 // 16 — asistencia a la asamblea, con su forma y su coeficiente (ADR-0007).
 // 17 — poderes: quien representa a una unidad, con el documento adjunto (RN-30).
-export const VERSION_ESQUEMA = 17
+// 18 — el poder tambien se otorga desde la app, y ahi Idiky emite el documento.
+export const VERSION_ESQUEMA = 18
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1150,6 +1151,7 @@ export function crearSemilla(): BaseDatos {
       sancion: consecutivoSancion,
       comprobante: consecutivoComprobante,
       pazYSalvo: 1,
+      poder: 1,
     },
   }
 }

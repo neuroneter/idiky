@@ -396,8 +396,8 @@ coeficiente y se cierra.
 > ninguna relación con el conjunto.
 
 **Flujo principal**
-1. El administrador registra el poder. **Lo primero es el papel**: la foto o el escaneo del
-   documento firmado. Es lo que hace válido el poder; pedirlo al final invita a registrar de
+1. El administrador registra el poder que **llegó en papel**. Lo primero es la foto o el
+   escaneo del documento firmado. Es lo que hace válido el poder; pedirlo al final invita a registrar de
    memoria «lo que trajo don Jorge» y buscar el papel después.
 2. Escoge **qué unidad** representa —el coeficiente es de ella, no del apoderado— y escribe los
    datos del apoderado.
@@ -427,6 +427,10 @@ coeficiente y se cierra.
 - RN-30 (el apoderado no tiene que ser copropietario), RN-51 (quien otorga es el propietario;
   no se pregunta, se deriva de la unidad), RN-61 (no se borra, se revoca), RN-28 y RN-29 (una
   unidad, un representante).
+
+> **Hay una segunda puerta, y es del propietario:** puede otorgarlo **desde su app** sin papel
+> (CU-R-23). Lo que cambia es qué lo respalda —su autenticación en vez de una firma— y quién lo
+> da de alta. El administrador ve los dos en la misma lista, marcados por origen.
 
 **Estado en el demo:** ✅ — `/admin/asambleas`, dentro de cada asamblea, sección **Poderes**.
 

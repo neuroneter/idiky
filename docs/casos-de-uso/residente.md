@@ -920,3 +920,49 @@ la ve y qué pasa al inhabilitar a la persona está sin decidir — ver
 En el demo, el perfil **Andrés Felipe Gómez** (Torre 2 · 901) tiene un proceso esperando sus
 descargos, y **María Camila Restrepo** (Torre 1 · 402) uno que ya está en manos de la
 administración.
+
+
+---
+
+### CU-R-23
+## CU-R-23 — Dar poder para que otro vote por mi unidad
+
+- **Actor principal:** Propietario
+- **Precondiciones:** Hay una asamblea convocada o instalada, y su unidad no tiene ya un poder
+  vigente.
+- **Disparador:** No puede asistir.
+- **Resultado esperado:** Otra persona vota por su unidad, con el coeficiente de ella.
+
+**Flujo principal**
+1. En la asamblea aparece **«¿No puedes asistir?»**. Escribe el nombre y el documento de quien
+   lo va a representar. **No tiene que vivir ahí ni ser copropietario** (RN-30).
+2. Si esa persona no está en Idiky, se le crea un **usuario temporal de asamblea**: su única
+   vinculación con la copropiedad es este poder, y muere con la asamblea.
+3. Idiky **emite el documento** con su número y su código de verificación (RN-36).
+4. Desde ese momento **el propietario deja de ver los botones de votar** y la pantalla le dice
+   por qué: ese punto lo vota su apoderado.
+
+**Flujos alternativos**
+- A1. Cambia de opinión → **revoca el poder** y vuelve a votar él. El documento queda anulado.
+- A2. Su unidad ya tiene poder → no se ofrece dar otro. **Una unidad, un representante**
+  (RN-28, RN-29).
+- A3. Es arrendatario → no puede dar poder: no puede ceder un voto que no tiene (RN-51).
+- A4. El poder llegó en papel → lo registra el administrador (CU-A-19), no esta pantalla.
+
+**Decisiones de interfaz**
+- **No pide una foto de nada**, y esa es la diferencia con el camino del papel: aquí lo que
+  respalda el poder es que quien lo otorga **está autenticado**.
+- **No se finge la descarga.** El documento se emite y se muestra con su número; el PDF lo
+  genera el servidor y el servidor no existe todavía (ADR-0006), y la pantalla lo dice.
+- **El bloque va antes del orden del día**: dar poder es una decisión sobre *si vas o no vas*, y
+  se toma antes de leer los puntos.
+
+**Reglas de negocio**
+- RN-30 (el apoderado puede ser externo), RN-51 (solo el propietario otorga), RN-29 (una unidad,
+  un voto: mientras esté representada, no vota el propietario), RN-36 (consecutivo y código),
+  RN-61 (no se borra, se revoca).
+
+> **Lo que sigue abierto es jurídico:** si la ley exige documento escrito y firmado, esta puerta
+> no basta por sí sola (§3 bis). Por eso la de papel no se quita.
+
+**Estado en el demo:** ✅ — `/app/asambleas/:id`, en la asamblea en curso.

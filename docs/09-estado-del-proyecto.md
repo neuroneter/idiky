@@ -14,7 +14,7 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 67 documentados: 32 ✅ en el demo, 11 🟡 a medias, 23 ⬜ pendientes, 1 ⛔ retirado |
+| **Casos de uso** | 67 documentados: 33 ✅ en el demo, 11 🟡 a medias, 22 ⬜ pendientes, 1 ⛔ retirado |
 | **Reglas de negocio** | 73 (RN-01…RN-73; RN-41 retirada) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -182,6 +182,41 @@ registra un poder** —dos modales encimados dejan dos fondos oscurecidos y un �
 ambiguo—; y quité de la app una afirmación mía que no era de Mary: la modalidad mixta decía que
 *«las dos formas suman al mismo quórum»*, y eso es **justo una de las preguntas abiertas**.
 Ahora dice lo que sí hace: llevar las dos cuentas por separado.
+
+**Y enseguida la segunda puerta.** Mary, al ver la comparación: *«me gusta la opción de que el
+propietario lo haga en la APP, perdón, no pensé en ese camino»*. Así que **conviven las dos**,
+que era lo que yo había propuesto: no compiten, y lo que cambia es **qué respalda cada poder**.
+
+| | `papel` | `app` |
+|---|---|---|
+| Quién lo da de alta | El administrador | El propietario, desde su teléfono |
+| Qué lo respalda | La firma del documento adjunto | **Su autenticación**: es su voto y lo cede él |
+| Qué guarda Idiky | La foto del papel | Un documento con consecutivo y código (RN-36) |
+
+La de papel **no se quita**: un poder ante notario se produce fuera de Idiky. La de la app
+existe porque no hay razón para obligar a imprimir algo cuando quien lo otorga ya está
+autenticado. El administrador ve las dos en la misma lista, marcadas por origen.
+
+**La validación común se extrajo a una función aparte** (`prepararPoder`), y no por elegancia:
+si mañana cambia quién puede otorgar, o la regla de una unidad un representante, tiene que
+cambiar en los dos caminos a la vez o **uno se vuelve el hueco por donde se cuela lo que el
+otro impide**.
+
+**Dos errores encontrados al construirlo, y el segundo salió del primero:**
+
+- **La propietaria que ya había dado poder seguía viendo los botones de votar.** Se vio en una
+  captura. Si votaba ella y luego el apoderado, el segundo se rechazaba — pero el primero no
+  debió permitirse: serían dos personas con derecho al mismo voto, ganando quien llegue primero,
+  que es justo lo que un poder resuelve. Arreglado **en el repositorio**, no escondiendo el
+  botón (T-16), y la pantalla dice por qué no están.
+- Al arreglarlo apareció el otro: la comprobación de RN-51 corría antes y **el apoderado no
+  tiene residencia**, así que nunca habría podido votar. Las dos comprobaciones ahora viven
+  juntas porque son **una sola pregunta**: ¿quién puede votar por esta unidad?
+
+**Verificado con Playwright, 17 comprobaciones** en esta parte: que el formulario del
+propietario no pida foto, que emita el documento con número y código, que al otorgar
+desaparezcan los botones de votar y se explique por qué, que el administrador lo vea marcado
+como «Otorgado en la app», y que revocar anule el documento y devuelva el voto.
 
 **Lo que sigue:** el corazón del producto — **quórum, mayorías y acta** (§3 bis). De las once
 preguntas quedan ocho, y son las que ya no tienen rodeo.

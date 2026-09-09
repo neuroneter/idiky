@@ -43,7 +43,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-20 | **Recibir la citación a asamblea y confirmar asistencia** | 1 | 🟡 Parcial (muestra la citación y el orden del día; no confirma asistencia) | [ver](./casos-de-uso/residente.md#cu-r-20) |
 | CU-R-21 | **Entrar a la asamblea y marcar mi asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-21) |
 | CU-R-22 | **Otorgar poder a otro copropietario** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-22) |
-| CU-R-23 | **Recibir y ejercer poderes de otros copropietarios** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-23) |
+| CU-R-23 | **Dar poder para que otro vote por mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-23) |
 | CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-24) |
 | CU-R-25 | **Activar mi cuenta o recuperar mi contraseña** | 1 | 🟡 Parcial (el flujo, sin autenticar) | [ver](./casos-de-uso/residente.md#cu-r-25) |
 | CU-R-26 | **Ajustar el tamaño de la letra** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-26) |
@@ -73,7 +73,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-16 | Exportar informes (cartera, PQRS) | 2 | ⬜ Pendiente | — |
 | CU-A-17 | **Instalar la asamblea y llevar la asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-17) |
 | CU-A-18 | **Habilitar, abrir y cerrar una votación** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-18) |
-| CU-A-19 | **Registrar un poder y dar de alta a quien lo ejerce** | 1 | 🟡 Parcial (registra y muestra el acumulado; **no aplica el tope**, RN-30) | [ver](./casos-de-uso/administrador.md#cu-a-19) |
+| CU-A-19 | **Registrar un poder en papel y dar de alta a quien lo ejerce** | 1 | 🟡 Parcial (registra y muestra el acumulado; **no aplica el tope**, RN-30) | [ver](./casos-de-uso/administrador.md#cu-a-19) |
 | CU-A-20 | **Generar el acta de la asamblea** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-20) |
 | CU-A-21 | **Administrar los coeficientes de las unidades** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-21) |
 | CU-A-22 | **Administrar el catálogo de multas** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-22) |

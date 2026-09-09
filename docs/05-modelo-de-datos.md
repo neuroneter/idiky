@@ -346,8 +346,10 @@ Un campo de prosa que repite lo que las columnas dicen se llena con lo primero q
 | `unidadId` | string | La unidad representada. **El coeficiente es de ella**, no del apoderado |
 | `otorgadoPor` | string | El propietario. **No se pregunta: se deriva** de la unidad (RN-51) |
 | `apoderadoId` | string | El apoderado, **como persona del sistema** |
-| `soporte` | `Soporte` | El poder firmado, fotografiado (ADR-0009) |
-| `registradoPor`, `registradoEn` | string, fecha ISO | El administrador. **Registrarlo es validarlo** |
+| `origen` | `'papel' \| 'app'` | **Qué lo respalda.** Ver abajo |
+| `soporte` | `Soporte?` | Solo con `papel`: el documento firmado, fotografiado (ADR-0009) |
+| `documentoId` | string? | Solo con `app`: el documento que emitió Idiky (RN-36, ADR-0006) |
+| `registradoPor`, `registradoEn` | string, fecha ISO | El administrador (papel) o el propietario (app). **Darlo de alta es validarlo** en los dos casos: quien lo hace es quien tiene la potestad |
 | `revocadoEn` | fecha ISO? | Presente = ya no representa. **No se borra** (RN-61) |
 
 **El usuario temporal de asamblea.** Si el apoderado no existe, se le crea la `Persona` al
@@ -360,10 +362,27 @@ formulario.
 > caduca por construcción no hay que acordarse de apagarlo. Un apoderado no tiene `Residencia`,
 > no paga cuota, no aparece en la portería.
 
-**Por qué lo registra el administrador y no el propietario desde su app.** El poder se otorga
-**fuera de la aplicación** —ante notario o de puño y letra— e Idiky no puede exigirle al mundo
-que use Idiky. Otorgarlo *desde* la app queda para cuando se responda si la ley admite firma
-electrónica (§3 bis); y aun entonces, el PDF espera al backend (ADR-0006).
+**Dos puertas, y lo que cambia es qué respalda el poder** (Mary, 2026-09-10). No compiten:
+
+| | `papel` | `app` |
+|---|---|---|
+| Quién lo da de alta | El administrador | **El propietario, desde su teléfono** |
+| Qué lo respalda | La firma del documento adjunto | **Su autenticación**: es su voto y lo está cediendo él |
+| Qué guarda Idiky | La foto del papel (ADR-0009) | Un `Documento` con consecutivo y código (RN-36) |
+
+El camino de papel **tiene que existir siempre**: un poder ante notario se produce fuera de
+Idiky y la app no puede exigirle al mundo que use la app. El de la app existe porque no hay
+razón para obligar a imprimir algo cuando quien lo otorga ya está autenticado.
+
+> **Lo que sigue abierto es jurídico, no técnico:** si la ley exige documento escrito y
+> firmado, la puerta `app` no basta por sí sola (§3 bis). Y su PDF espera al backend, como
+> todos los documentos formales (ADR-0006): el demo emite el registro y lo muestra en pantalla,
+> **sin fingir una descarga**.
+
+**Y el poder decide quién vota.** Mientras la unidad esté representada, **el propietario no
+vota** (RN-29, RN-30): serían dos personas con derecho al mismo voto y ganaría quien llegue
+primero, que es justo lo que un poder resuelve. Si cambia de opinión, revoca y vota él. Se
+comprueba en el repositorio, no solo escondiendo el botón (T-16).
 
 ### Votacion
 | Campo | Tipo | Notas |

@@ -23,6 +23,7 @@ import type {
   ModalidadAsamblea,
   Persona,
   Poder,
+  Unidad,
   TipoAsamblea,
   OrigenRespaldo,
   Reincidencia,
@@ -1101,6 +1102,93 @@ export async function cambiarEstadoAsamblea(
 // ---------------------------------------------------------------------------
 
 /**
+ * Lo que las dos puertas del poder tienen que comprobar igual.
+ *
+ * Vive aparte para que **no se separen con el tiempo**: si manana cambia quien
+ * puede otorgar, o la regla de una unidad un representante, tiene que cambiar en
+ * los dos caminos a la vez o uno se vuelve el hueco por donde se cuela lo que el
+ * otro impide.
+ *
+ * Devuelve tambien **el usuario temporal de asamblea**, creado o reutilizado:
+ * es la parte que ninguna de las dos puertas puede hacer distinto (RN-61).
+ */
+function prepararPoder(
+  bd: BaseDatos,
+  parametros: {
+    asambleaId: string
+    unidadId: string
+    nombresApoderado: string
+    apellidosApoderado: string
+    documentoApoderado: string
+    telefonoApoderado?: string
+    /** Si viene, ese es el propietario que tiene que estar otorgando. */
+    exigirPropietario?: string
+  },
+): { asamblea: Asamblea; unidad: Unidad; apoderado: Persona; otorgadoPor: string } {
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') {
+    throw new ErrorDeNegocio('Esa asamblea ya terminó: no admite poderes nuevos.')
+  }
+
+  const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
+  if (!unidad) throw new ErrorDeNegocio('Esa unidad no existe.')
+
+  // **Quien otorga es el propietario** (RN-51): el arrendatario no puede ceder
+  // un voto que no tiene.
+  const propietario = bd.residencias.find(
+    (r) =>
+      r.unidadId === unidad.id &&
+      r.rol === 'propietario' &&
+      residenciaVigente(r) &&
+      (!parametros.exigirPropietario || r.personaId === parametros.exigirPropietario),
+  )
+  if (!propietario) {
+    throw new ErrorDeNegocio(
+      parametros.exigirPropietario
+        ? 'Solo el propietario de la unidad puede otorgar un poder sobre ella.'
+        : 'Esa unidad no tiene un propietario registrado que pueda dar poder.',
+    )
+  }
+
+  const documento = parametros.documentoApoderado.trim()
+  if (documento.length < 5) throw new ErrorDeNegocio('Falta el documento del apoderado.')
+  if (parametros.nombresApoderado.trim().length < 2) {
+    throw new ErrorDeNegocio('Falta el nombre del apoderado.')
+  }
+
+  const dueno = bd.personas.find((p) => p.id === propietario.personaId)
+  if (dueno && dueno.documento === documento) {
+    throw new ErrorDeNegocio('No hace falta un poder para votar por su propia unidad.')
+  }
+
+  // Una unidad, un representante (RN-28, RN-29).
+  if (poderDeUnidad(bd.poderes, parametros.asambleaId, parametros.unidadId)) {
+    throw new ErrorDeNegocio(
+      'Esa unidad ya tiene un poder vigente en esta asamblea. Hay que revocarlo antes de dar otro.',
+    )
+  }
+
+  // **El usuario temporal de asamblea.** Reutilizado por documento (RN-61):
+  // un documento es una persona, no una fila por formulario.
+  const existente = bd.personas.find((p) => p.documento === documento)
+  // `Persona` exige correo y telefono, y de un apoderado externo puede no
+  // haberlos. Se guardan vacios en vez de inventarlos: un correo falso es peor
+  // que un correo ausente el dia que haya que escribirle.
+  const apoderado: Persona = existente ?? {
+    id: nuevoId('per'),
+    nombres: parametros.nombresApoderado.trim(),
+    apellidos: parametros.apellidosApoderado.trim(),
+    documento,
+    email: '',
+    telefono: parametros.telefonoApoderado?.trim() ?? '',
+  }
+  if (!existente) bd.personas.push(apoderado)
+
+  return { asamblea, unidad, apoderado, otorgadoPor: propietario.personaId }
+}
+
+/**
  * CU-A-19 — El administrador registra un poder y crea a quien lo ejerce (RN-30).
  *
  * **El poder se otorga fuera de la aplicacion** (Mary, 2026-09-10): ante notario
@@ -1145,71 +1233,97 @@ export async function registrarPoder(
   await esperar()
   const bd = clonar(bdActual)
 
-  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
-  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
-  if (asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') {
-    throw new ErrorDeNegocio('Esa asamblea ya terminó: no admite poderes nuevos.')
-  }
-
-  const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
-  if (!unidad) throw new ErrorDeNegocio('Esa unidad no existe.')
-
-  // **Quien otorga no se pregunta: se deriva.** Es el propietario de la unidad
-  // (RN-51) — el arrendatario no puede ceder un voto que no tiene, y dejar que
-  // quien registra escriba un nombre seria abrir justo esa puerta.
-  const propietario = bd.residencias.find(
-    (r) => r.unidadId === unidad.id && r.rol === 'propietario' && residenciaVigente(r),
-  )
-  if (!propietario) {
-    throw new ErrorDeNegocio('Esa unidad no tiene un propietario registrado que pueda dar poder.')
-  }
-
-  const documento = parametros.documentoApoderado.trim()
-  if (documento.length < 5) throw new ErrorDeNegocio('Falta el documento del apoderado.')
-  if (parametros.nombresApoderado.trim().length < 2) {
-    throw new ErrorDeNegocio('Falta el nombre del apoderado.')
-  }
-  // La decision de Mary (2026-09-10): el poder va con su papel adjunto.
+  // La decision de Mary (2026-09-10): por esta puerta, el poder va con su papel.
+  // Se comprueba **antes** que lo demas porque es lo que la distingue: sin foto
+  // no hay nada que registrar.
   if (!parametros.imagen) {
     throw new ErrorDeNegocio('Falta la foto del poder firmado: sin ella el poder no se registra.')
   }
 
-  const duenoDeLaUnidad = bd.personas.find((p) => p.id === propietario.personaId)
-  if (duenoDeLaUnidad && duenoDeLaUnidad.documento === documento) {
-    throw new ErrorDeNegocio('No hace falta un poder para votar por su propia unidad.')
-  }
-
-  // Una unidad, un representante (RN-28, RN-29).
-  const previo = poderDeUnidad(bd.poderes, parametros.asambleaId, parametros.unidadId)
-  if (previo) {
-    throw new ErrorDeNegocio(
-      'Esa unidad ya tiene un poder vigente en esta asamblea. Revócalo antes de registrar otro.',
-    )
-  }
-
-  // **El usuario temporal de asamblea.** Reutilizado por documento (RN-61).
-  const existente = bd.personas.find((p) => p.documento === documento)
-  // `Persona` exige correo y telefono, y de un apoderado externo puede no
-  // haberlos. Se guardan vacios en vez de inventarlos: un correo falso es peor
-  // que un correo ausente el dia que haya que escribirle.
-  const apoderado: Persona = existente ?? {
-    id: nuevoId('per'),
-    nombres: parametros.nombresApoderado.trim(),
-    apellidos: parametros.apellidosApoderado.trim(),
-    documento,
-    email: '',
-    telefono: parametros.telefonoApoderado?.trim() ?? '',
-  }
-  if (!existente) bd.personas.push(apoderado)
+  const { unidad, apoderado, otorgadoPor } = prepararPoder(bd, parametros)
 
   const poder: Poder = {
     id: nuevoId('pod'),
     asambleaId: parametros.asambleaId,
     unidadId: unidad.id,
-    otorgadoPor: propietario.personaId,
+    otorgadoPor,
     apoderadoId: apoderado.id,
+    origen: 'papel',
     soporte: { imagen: parametros.imagen, adjuntadoEn: ahoraISO() },
     registradoPor: parametros.registradoPor,
+    registradoEn: ahoraISO(),
+  }
+  bd.poderes.push(poder)
+  return persistir(bd, poder)
+}
+
+/**
+ * CU-R-23 — El propietario otorga un poder **desde su app** (RN-30).
+ *
+ * Mary, 2026-09-10: *«me gusta la opción de que el propietario lo haga en la
+ * app»*. Es la otra puerta al mismo sitio, y lo que cambia es **que la
+ * respalda**: aqui no hay papel firmado, hay **una sesion autenticada**. El
+ * propietario esta cediendo un voto que es suyo, y eso es lo que le da validez
+ * — la misma logica por la que registrar el papel *es* validarlo cuando lo hace
+ * quien lo tuvo en la mano.
+ *
+ * **Idiky emite el documento** con su consecutivo y su codigo de verificacion
+ * (RN-36, ADR-0006), para que el apoderado tenga algo que mostrar. Lo que **no**
+ * hace es fingir una descarga: el PDF lo genera el servidor y el servidor no
+ * existe todavia (ADR-0008). Igual que el paz y salvo.
+ *
+ * **Lo que sigue abierto es juridico, no tecnico:** si la ley exige documento
+ * escrito y firmado, esta puerta no basta por si sola (§3 bis). Por eso la de
+ * papel no se quita.
+ */
+export async function otorgarPoder(
+  bdActual: BaseDatos,
+  parametros: {
+    asambleaId: string
+    unidadId: string
+    otorgadoPor: string
+    nombresApoderado: string
+    apellidosApoderado: string
+    documentoApoderado: string
+    telefonoApoderado?: string
+  },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  const { asamblea, unidad, apoderado } = prepararPoder(bd, {
+    ...parametros,
+    // Aqui si importa **quien** lo otorga: tiene que ser el propietario que esta
+    // en la sesion, no cualquier propietario de la unidad.
+    exigirPropietario: parametros.otorgadoPor,
+  })
+
+  // El documento del poder, con su consecutivo y su codigo (RN-36, ADR-0006).
+  const consecutivo = bd.consecutivos.poder
+  const hoy = hoyISO()
+  const documento: Documento = {
+    id: nuevoId('doc'),
+    tipo: 'poder',
+    numero: `POD-${hoy.slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`,
+    codigoVerificacion: nuevoCodigoVerificacion(),
+    copropiedadId: asamblea.copropiedadId,
+    unidadId: unidad.id,
+    asambleaId: asamblea.id,
+    emitidoEn: hoy,
+    estado: 'vigente',
+  }
+  bd.documentos.push(documento)
+  bd.consecutivos.poder = consecutivo + 1
+
+  const poder: Poder = {
+    id: nuevoId('pod'),
+    asambleaId: parametros.asambleaId,
+    unidadId: unidad.id,
+    otorgadoPor: parametros.otorgadoPor,
+    apoderadoId: apoderado.id,
+    origen: 'app',
+    documentoId: documento.id,
+    registradoPor: parametros.otorgadoPor,
     registradoEn: ahoraISO(),
   }
   bd.poderes.push(poder)
@@ -1228,6 +1342,12 @@ export async function revocarPoder(
   if (poder.revocadoEn) throw new ErrorDeNegocio('Ese poder ya estaba revocado.')
 
   poder.revocadoEn = ahoraISO()
+  // Si Idiky emitio el documento, se anula con el: un poder revocado cuyo papel
+  // sigue diciendo «vigente» es exactamente lo que alguien presentaria.
+  if (poder.documentoId) {
+    const documento = bd.documentos.find((d) => d.id === poder.documentoId)
+    if (documento) documento.estado = 'anulado'
+  }
   return persistir(bd, poder)
 }
 
@@ -1676,19 +1796,45 @@ export async function emitirVoto(
   const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
   if (!unidad) throw new ErrorDeNegocio('La unidad no existe.')
 
-  // RN-51: vota el propietario. La comprobacion va aqui y no solo en la pantalla:
-  // esconder el boton no es una regla (T-16).
-  const residencia = bd.residencias.find(
-    (r) => r.unidadId === unidad.id && r.personaId === parametros.personaId && !r.hasta,
+  // **Quien puede votar por esta unidad: el propietario, o su apoderado.**
+  //
+  // Las dos comprobaciones van juntas porque son una sola pregunta, y separarlas
+  // fue lo que rompio el flujo del apoderado la primera vez: un apoderado **no
+  // tiene residencia**, asi que el examen de RN-51 lo rechazaba antes de llegar
+  // al del poder. La comprobacion vive aqui y no solo en la pantalla: esconder
+  // el boton no es una regla (T-16).
+  const asambleaDelPunto = bd.asambleas.find((a) =>
+    a.ordenDelDia.some((punto) => punto.id === votacion.puntoId),
   )
-  if (!puedeVotar(residencia?.rol)) {
-    throw new ErrorDeNegocio('Solo el propietario de la unidad puede votar.')
+  const poder = asambleaDelPunto
+    ? poderDeUnidad(bd.poderes, asambleaDelPunto.id, unidad.id)
+    : undefined
+
+  if (poder) {
+    // RN-30: si la unidad esta representada, **el voto es del apoderado**. Que
+    // el propietario pudiera votar igual serian dos personas con derecho al
+    // mismo voto y ganaria quien llegue primero — que es justo lo que un poder
+    // resuelve. Si cambio de opinion, revoca y vota el.
+    if (poder.apoderadoId !== parametros.personaId) {
+      throw new ErrorDeNegocio(
+        'Esta unidad está representada por un apoderado en esta asamblea. Revoca el poder si quieres votar tú.',
+      )
+    }
+  } else {
+    // RN-51: sin poder de por medio, vota el propietario.
+    const residencia = bd.residencias.find(
+      (r) => r.unidadId === unidad.id && r.personaId === parametros.personaId && !r.hasta,
+    )
+    if (!puedeVotar(residencia?.rol)) {
+      throw new ErrorDeNegocio('Solo el propietario de la unidad puede votar.')
+    }
   }
 
   // RN-29: un voto por unidad y por votacion.
   if (yaVoto(bd.votos, votacion.id, unidad.id)) {
     throw new ErrorDeNegocio('Esta unidad ya voto este punto.')
   }
+
 
   if (!votacion.opciones.some((opcion) => opcion.id === parametros.opcionId)) {
     throw new ErrorDeNegocio('La opcion elegida no pertenece a esta votacion.')

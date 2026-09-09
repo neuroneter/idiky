@@ -718,19 +718,28 @@ export interface Asistencia {
  *
  * 1. **Lo registra el administrador**, no el apoderado ni el propietario desde
  *    su telefono (CU-A-19). Es tambien quien lo valida.
- * 2. **Lleva el poder adjunto como soporte** (Mary, 2026-09-10). El poder se
- *    otorga **fuera de la aplicacion** —ante notario o de puno y letra—, y la
- *    app no puede exigirle al mundo que use la app. Asi que se fotografia, como
- *    las cedulas del registro de personas (ADR-0009), con el mismo problema de
- *    habeas data detras (RN-66).
+ * 2. **Hay dos puertas, y lo que cambia es que lo respalda** (Mary, 2026-09-10).
+ *    No compiten: son dos caminos al mismo sitio.
  *
- *    Otorgarlo **desde** la app queda para cuando se responda si la ley admite
- *    firma electronica (§3 bis) — y aun entonces el PDF espera al backend
- *    (ADR-0006).
+ *    - `papel`: el poder se otorga **fuera** de la app —ante notario o de puno y
+ *      letra— y el administrador lo registra con **la foto del documento**
+ *      (ADR-0009). Idiky no puede exigirle al mundo que use Idiky, asi que este
+ *      camino tiene que existir siempre.
+ *    - `app`: el **propietario lo otorga desde su telefono**, sin salir del
+ *      flujo. Aqui no hay papel firmado: lo que lo respalda es **su
+ *      autenticacion** — es el quien lo esta otorgando, en su sesion. Idiky
+ *      **emite el documento** con su consecutivo y su codigo de verificacion,
+ *      como el paz y salvo (RN-36, ADR-0006).
+ *
+ *    **Lo que sigue abierto es juridico, no tecnico:** si la ley exige documento
+ *    escrito y firmado, el camino `app` no basta por si solo (§3 bis). Y su PDF
+ *    espera al backend, como todos los documentos formales.
  *
  * **No se borra: se revoca** (RN-61). Un poder revocado sigue en el expediente
  * de la asamblea, porque si voto antes de revocarse hay que poder explicarlo.
  */
+export type OrigenPoder = 'papel' | 'app'
+
 export interface Poder {
   id: string
   asambleaId: string
@@ -748,13 +757,19 @@ export interface Poder {
    * hay que acordarse de apagarlo.
    */
   apoderadoId: string
-  /** El poder firmado, fotografiado o escaneado (ADR-0009). */
-  soporte: Soporte
+  /** Que lo respalda: el papel firmado, o la autenticacion de quien lo otorgo. */
+  origen: OrigenPoder
+  /** Solo con `origen: 'papel'`: el documento firmado, fotografiado (ADR-0009). */
+  soporte?: Soporte
+  /** Solo con `origen: 'app'`: el documento que emitio Idiky (RN-36, ADR-0006). */
+  documentoId?: string
   /**
-   * Quien lo valido y lo registro: el administrador (CU-A-19).
+   * Quien lo dio de alta: el **administrador** si vino en papel, el **propietario**
+   * si lo otorgo desde su app.
    *
-   * Registrarlo **es** validarlo: no hay un paso aparte porque no hay nadie mas
-   * en el flujo. Quien adjunta el papel es quien lo tuvo en la mano.
+   * En los dos casos darlo de alta **es** validarlo, y por la misma razon: quien
+   * lo hace es quien tiene la potestad. El administrador tuvo el papel en la
+   * mano; el propietario esta cediendo un voto que es suyo.
    */
   registradoPor: string
   registradoEn: FechaHoraISO
@@ -795,7 +810,7 @@ export interface Voto {
 // ---------------------------------------------------------------------------
 // Documentos formales — CU-R-12
 // ---------------------------------------------------------------------------
-export type TipoDocumento = 'paz_y_salvo'
+export type TipoDocumento = 'paz_y_salvo' | 'poder'
 
 export interface Documento {
   id: string
@@ -822,7 +837,10 @@ export interface Documento {
    * papel; si la copropiedad ademas quiere darle vigencia al documento, esa es
    * otra decision y sigue abierta (§3 ter del levantamiento).
    */
-  cubiertoHasta: FechaISO
+  /** Solo en el paz y salvo. */
+  cubiertoHasta?: FechaISO
+  /** Solo en el poder: la asamblea para la que vale. */
+  asambleaId?: string
   estado: 'vigente' | 'anulado'
 }
 
@@ -903,5 +921,6 @@ export interface BaseDatos {
     sancion: number
     comprobante: number
     pazYSalvo: number
+    poder: number
   }
 }

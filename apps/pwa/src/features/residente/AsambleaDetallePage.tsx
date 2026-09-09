@@ -13,18 +13,22 @@
  * escribe de memoria. Por eso se muestra el conteo por coeficiente y nada mas.
  */
 
+import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import { useParams } from 'react-router-dom'
 import * as sel from '../../datos/selectores'
-import { emitirVoto, marcarAsistencia } from '../../datos/repositorio'
+import { nombreCompleto } from '../../datos/selectores'
+import { emitirVoto, marcarAsistencia, otorgarPoder, revocarPoder } from '../../datos/repositorio'
 import {
   admiteAsistencia,
   asistenciaDeUnidad,
   contarVotacion,
   definicionModalidad,
+  etiquetaUnidad,
   formasDeAsistir,
   pesoDelVoto,
+  poderDeUnidad,
   puedeVotar,
   resumenAsistencia,
   yaVoto,
@@ -34,6 +38,7 @@ import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { Icono } from '../../componentes/Icono'
 import { ChipAsamblea } from '../../componentes/Etiquetas'
+import { Modal } from '../../componentes/Modal'
 import type { FormaAsistencia, PuntoOrdenDelDia, Votacion } from '../../dominio/tipos'
 
 function formatearCoeficiente(coeficiente: number): string {
@@ -44,6 +49,7 @@ export function AsambleaDetallePage() {
   const { bd, ejecutar, cargando } = useDatos()
   const { sesion } = useSesion()
   const { asambleaId } = useParams()
+  const [dandoPoder, setDandoPoder] = useState(false)
   if (!sesion) return null
 
   const asamblea = sel.asamblea(bd, asambleaId)
@@ -70,6 +76,11 @@ export function AsambleaDetallePage() {
   const formas = formasDeAsistir(asamblea.modalidad)
   const miAsistencia = asistenciaDeUnidad(bd.asistencias, asamblea.id, sesion.unidadActivaId ?? '')
   const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
+  const miPoder = poderDeUnidad(bd.poderes, asamblea.id, sesion.unidadActivaId ?? '')
+  const apoderado = miPoder ? sel.persona(bd, miPoder.apoderadoId) : undefined
+  const documentoPoder = miPoder?.documentoId
+    ? bd.documentos.find((d) => d.id === miPoder.documentoId)
+    : undefined
 
   async function marcar(forma: FormaAsistencia) {
     if (!unidad) return
@@ -113,8 +124,12 @@ export function AsambleaDetallePage() {
 
     const votos = sel.votosDe(bd, votacion.id)
     const miVoto = yaVoto(votos, votacion.id, unidad?.id)
+    // Si la unidad está representada, el voto es del apoderado (RN-30). Mostrar
+    // los botones y rechazarlos después es peor que no mostrarlos: la persona
+    // cree que votó. El repositorio lo rechaza igual (T-16).
+    const representada = !!miPoder && miPoder.apoderadoId !== sesion!.personaId
     const conteo = contarVotacion(votacion, votos)
-    const abierta = votacion.estado === 'abierta'
+    const abierta = votacion.estado === 'abierta' && !representada
 
     return (
       <>
@@ -132,6 +147,17 @@ export function AsambleaDetallePage() {
           <p className="subtitulo">
             Vota el propietario de la unidad. Puedes seguir la discusión, pero no votar este
             punto.
+          </p>
+        )}
+
+        {/* No basta con esconder los botones: hay que decir por qué no están,
+            o la persona cree que la app se rompió. */}
+        {votacion.estado === 'abierta' && representada && (
+          <p className="subtitulo">
+            Este punto lo vota{' '}
+            <strong>{apoderado ? nombreCompleto(apoderado) : 'tu apoderado'}</strong>, que
+            representa tu unidad en esta asamblea. Si prefieres votar tú, revoca el poder
+            arriba.
           </p>
         )}
 
@@ -356,6 +382,74 @@ export function AsambleaDetallePage() {
         </div>
       )}
 
+      {/* CU-R-23 — Dar poder desde la app. Aparece antes del orden del día
+          porque es una decisión sobre **si vas o no vas**: quien la toma, la
+          toma antes de leer los puntos, no después. */}
+      {puedo && !!unidad && asamblea.estado !== 'cerrada' && asamblea.estado !== 'cancelada' && (
+        <div className="tarjeta">
+          {miPoder ? (
+            <div className="columna" style={{ gap: 'var(--e2)' }}>
+              <div className="fila">
+                <strong>Tu unidad la representa alguien más</strong>
+                <span className="chip chip--alerta">Con poder</span>
+              </div>
+              <span className="subtitulo">
+                {apoderado ? nombreCompleto(apoderado) : 'Apoderado'} vota por{' '}
+                {etiquetaUnidad(unidad)} en esta asamblea.
+              </span>
+              {documentoPoder && (
+                <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                  {documentoPoder.numero} · código {documentoPoder.codigoVerificacion}
+                </span>
+              )}
+              <button
+                className="boton"
+                disabled={cargando}
+                onClick={() =>
+                  void ejecutar(
+                    (base) => revocarPoder(base, { poderId: miPoder!.id }),
+                    'Poder revocado. Vuelves a votar tú.',
+                  )
+                }
+              >
+                Revocar el poder
+              </button>
+            </div>
+          ) : (
+            <div className="columna" style={{ gap: 'var(--e2)' }}>
+              <strong>¿No puedes asistir?</strong>
+              <span className="subtitulo">
+                Puedes dar poder a alguien para que vote por tu unidad. No tiene que vivir aquí
+                ni ser copropietario.
+              </span>
+              <button className="boton boton--primario" onClick={() => setDandoPoder(true)}>
+                Dar poder
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {dandoPoder && unidad && (
+        <FormularioDarPoder
+          unidad={etiquetaUnidad(unidad)}
+          alCerrar={() => setDandoPoder(false)}
+          alOtorgar={async (datos) => {
+            const hecho = await ejecutar(
+              (base) =>
+                otorgarPoder(base, {
+                  asambleaId: asamblea!.id,
+                  unidadId: unidad.id,
+                  otorgadoPor: sesion!.personaId,
+                  ...datos,
+                }),
+              'Poder otorgado. Quien lo recibe ya puede votar por tu unidad.',
+            )
+            if (hecho) setDandoPoder(false)
+          }}
+        />
+      )}
+
       <div className="pila">
         <span className="titulo-seccion">Orden del día</span>
         {asamblea.ordenDelDia.map((punto) => (
@@ -390,5 +484,120 @@ export function AsambleaDetallePage() {
         que definir.
       </p>
     </>
+  )
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * Dar poder desde la app (CU-R-23).
+ *
+ * **No pide una foto de nada**, y esa es la diferencia con el camino del papel:
+ * aquí lo que respalda el poder es que **quien lo otorga está autenticado** —es
+ * su voto y lo está cediendo él—. Idiky emite el documento y le da su número.
+ */
+function FormularioDarPoder({
+  unidad,
+  alOtorgar,
+  alCerrar,
+}: {
+  unidad: string
+  alOtorgar: (datos: {
+    nombresApoderado: string
+    apellidosApoderado: string
+    documentoApoderado: string
+    telefonoApoderado?: string
+  }) => Promise<void>
+  alCerrar: () => void
+}) {
+  const [nombres, setNombres] = useState('')
+  const [apellidos, setApellidos] = useState('')
+  const [documento, setDocumento] = useState('')
+  const [telefono, setTelefono] = useState('')
+  const [error, setError] = useState<string | null>(null)
+
+  return (
+    <Modal
+      titulo="Dar poder"
+      descripcion={`Alguien más votará por ${unidad} en esta asamblea.`}
+      onCerrar={alCerrar}
+    >
+      <form
+        onSubmit={(evento) => {
+          evento.preventDefault()
+          setError(null)
+          if (nombres.trim().length < 2 || apellidos.trim().length < 2) {
+            setError('Escribe el nombre completo de quien va a representarte.')
+            return
+          }
+          if (documento.trim().length < 5) {
+            setError('Falta su documento de identidad: es con lo que se identifica en la asamblea.')
+            return
+          }
+          void alOtorgar({
+            nombresApoderado: nombres.trim(),
+            apellidosApoderado: apellidos.trim(),
+            documentoApoderado: documento.trim(),
+            telefonoApoderado: telefono.trim() || undefined,
+          })
+        }}
+      >
+        <div className="fila-campos">
+          <div className="campo">
+            <label htmlFor="nombres-poder">Nombres</label>
+            <input
+              id="nombres-poder"
+              value={nombres}
+              onChange={(evento) => setNombres(evento.target.value)}
+            />
+          </div>
+          <div className="campo">
+            <label htmlFor="apellidos-poder">Apellidos</label>
+            <input
+              id="apellidos-poder"
+              value={apellidos}
+              onChange={(evento) => setApellidos(evento.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className="campo">
+          <label htmlFor="documento-poder">Documento de identidad</label>
+          <input
+            id="documento-poder"
+            inputMode="numeric"
+            value={documento}
+            onChange={(evento) => setDocumento(evento.target.value)}
+          />
+          <span className="ayuda-campo">
+            No tiene que vivir aquí ni ser copropietario. Si no está en Idiky, se le crea una
+            cuenta que existe solo para esta asamblea.
+          </span>
+        </div>
+
+        <div className="campo">
+          <label htmlFor="telefono-poder">Su celular (opcional)</label>
+          <input
+            id="telefono-poder"
+            value={telefono}
+            onChange={(evento) => setTelefono(evento.target.value)}
+            placeholder="+57 300 000 0000"
+          />
+        </div>
+
+        {/* Se dice qué respalda el poder, porque es lo que la persona se está
+            preguntando: «¿y esto vale?». Y se dice lo que todavía no hay. */}
+        <p className="acceso__nota">
+          El poder queda a tu nombre y con su número, porque lo estás otorgando tú desde tu
+          cuenta. <strong>La descarga en PDF llega con la versión real</strong> (ADR-0006).
+        </p>
+
+        {error && <p className="acceso__error">{error}</p>}
+
+        <button className="boton boton--primario boton--bloque" type="submit">
+          Dar el poder
+        </button>
+      </form>
+    </Modal>
   )
 }

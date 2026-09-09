@@ -148,12 +148,15 @@ reglamento de la copropiedad y la Ley 675 de 2001.
 - **Poderes — el tope:** ¿cuántos poderes puede acumular un apoderado, y hasta qué
   porcentaje de coeficientes puede representar? La Ley 675 fija un límite; **hay que
   confirmar el artículo y la cifra exacta antes de implementar RN-30**. → *(respuesta)*
-- **Poderes — la forma:** → 🟡 **Resuelto en la práctica, abierto en el derecho.** Mary
-  (2026-09-10): *«este usuario lo crea el administrador adjuntando el poder como soporte,
-  porque este poder se da por fuera de la aplicación»*. Así quedó construido, y funciona con la
-  ley como está hoy. **Sigue abierta la otra mitad:** si la ley admitiera **firma electrónica**,
-  el propietario podría otorgarlo desde su app sin salir del flujo —que es lo que Mary quería—;
-  y aun así el PDF esperaría al backend (ADR-0006). Pregunta para el abogado.
+- **Poderes — la forma:** → 🟡 **Las dos puertas están construidas; falta que el derecho diga
+  si la segunda basta.** Mary (2026-09-10) pidió primero el camino de papel —*«este usuario lo
+  crea el administrador adjuntando el poder como soporte, porque este poder se da por fuera de
+  la aplicación»*— y después el de la app —*«me gusta la opción de que el propietario lo haga
+  en la APP»*—. **No compiten:** el de papel funciona con la ley como está hoy y tiene que
+  existir siempre; el de la app existe porque no hay razón para obligar a imprimir algo cuando
+  quien lo otorga ya está autenticado.
+  **Lo que falta preguntarle al abogado:** si la ley exige documento escrito y firmado, la
+  puerta `app` no basta por sí sola. Y su PDF espera al backend (ADR-0006).
 - **Poderes — a quién:** → 🟡 **Respondido a medias (Mary, 2026-09-10):** *«la asamblea es
   para propietarios, puede entrar un externo si tiene poder»*. Es decir: **el apoderado no
   tiene que ser copropietario** — puede ser cualquiera, un hijo, un abogado, alguien sin
