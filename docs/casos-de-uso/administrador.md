@@ -528,7 +528,10 @@ al imponerse (RN-37).
 ### CU-A-23
 ## CU-A-23 — Imponer una multa y llevar el proceso
 
-- **Actor principal:** Administrador
+- **Actor principal:** Administrador — **el mismo de principio a fin**. Él impone y él
+  resuelve los descargos (Mary, 2026-09-09). No está decidiendo sobre la norma: la aprobó la
+  asamblea o ya está en el reglamento o el manual (RN-38); lo que él resuelve es si los hechos
+  ocurrieron.
 - **Precondiciones:** El catálogo tiene al menos una multa habilitada (CU-A-22), y la
   copropiedad tiene parametrizados sus plazos (`diasDescargos`, `diasImpugnacion`).
 - **Disparador:** Ocurre una conducta sancionable.
@@ -542,7 +545,8 @@ al imponerse (RN-37).
 1. El administrador abre el proceso: elige la unidad, una multa del catálogo y describe **los
    hechos** —qué pasó, cuándo y dónde—. El valor y el respaldo **no se escriben**: salen del
    catálogo, que es lo que los hace comprobables (RN-38, RN-49).
-2. El sistema copia el concepto, el valor y el plazo de descargos, asigna radicado
+2. El sistema copia el concepto, el valor, **la norma que lo respalda** y el plazo de
+   descargos, asigna radicado
    `SAN-<año>-<consecutivo>` y deja el expediente `notificada`. **Todavía no se cobra nada.**
 3. El copropietario presenta descargos dentro del plazo (CU-R-29) → `en_estudio`.
 4. La administración decide, **con motivación escrita**: sancionar → `resuelta`, y arranca el
@@ -561,8 +565,11 @@ al imponerse (RN-37).
 - A2. Se le da la razón → `archivada`, con motivo. **No se borra** (RN-61): el expediente
   queda, porque un proceso archivado sin rastro es un proceso que después nadie puede revisar.
 - A3. La multa que respaldaba el proceso se inhabilita después → el expediente sigue vivo con
-  el concepto y el valor que copió (RN-37). Lo que ya no se puede es abrir procesos nuevos
-  con ella.
+  el concepto, el valor y **la norma** que copió (RN-37). Lo que ya no se puede es abrir
+  procesos nuevos con ella.
+- A4. **Anular una sanción ya en firme → no existe.** *«Una multa no se anula porque para eso
+  existe el debido proceso»* (Mary, 2026-09-09). El momento de deshacerla es archivarla
+  durante el proceso; después no hay salida de `firme` (RN-70).
 
 **Decisiones de interfaz**
 - **Lo primero es de quién es el turno.** Arriba, «Te toca resolver»; abajo, «Esperando al
@@ -572,15 +579,19 @@ al imponerse (RN-37).
   cuenta; «quedan 7 días» no. Y cuando ya venció, se dice que venció.
 - **El catálogo y los procesos son dos entradas distintas** en el menú: parametrizar no es
   sancionar (RN-49).
+- **La norma se ve dos veces**: al elegir la conducta —para que el administrador sepa qué está
+  aplicando antes de abrir el proceso— y en la cabecera del expediente, en las dos caras. Una
+  multa se comprueba por sus dos mitades: qué norma y qué hechos.
 
 **Reglas de negocio**
-- RN-36 (radicado), RN-37 (valor copiado), RN-38 (solo del catálogo), RN-39 (la cuota nace al
-  quedar firme), RN-61 (no se borra), RN-69 (el debido proceso y sus plazos).
+- RN-36 (radicado), RN-37 (valor y norma copiados), RN-38 (solo del catálogo, y el
+  administrador aplica lo que otros decidieron), RN-39 (la cuota nace al quedar firme), RN-61
+  (no se borra), RN-69 (el debido proceso, sus plazos y quién lo lleva), RN-70 (en firme no se
+  anula), RN-71 (la multa cuenta como mora igual que cualquier cuota).
 
-> **Lo que sigue abierto** —y no bloquea el flujo, pero sí el reglamento de cada
-> copropiedad—: quién impone (administrador, consejo o asamblea), si quien decide los
-> descargos debe ser distinto de quien impuso, la reincidencia, qué pasa con una multa anulada
-> después de pagada, y si una multa impaga cuenta como mora para RN-08 y RN-26. Ver
+> **Lo que sigue abierto:** la **reincidencia** —si la multa sube cuando la conducta se
+> repite— y si el que impone puede **ajustar el valor** dentro de algún tope. Las demás
+> preguntas de §3 quater quedaron respondidas el 2026-09-09. Ver
 > [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 quater.
 
 **Estado en el demo:** ✅ — `/admin/sanciones`.

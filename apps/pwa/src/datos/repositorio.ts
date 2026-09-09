@@ -61,7 +61,7 @@ import {
   yaVoto,
 } from '../dominio/reglas'
 import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajeria'
-import { finDePeriodo } from '../utilidades/formato'
+import { finDePeriodo, formatearDinero, formatearFecha } from '../utilidades/formato'
 import { guardar, leer, sembrar } from './almacen'
 
 /** Resultado de una operacion: base de datos actualizada + lo que se creo. */
@@ -742,6 +742,7 @@ export async function imponerSancion(
     // expediente sigue diciendo por que y por cuanto se sanciono.
     concepto: concepto.nombre,
     valor: concepto.valor,
+    respaldo: textoRespaldo(concepto),
     hechos: parametros.hechos.trim(),
     estado: 'notificada',
     radicado: `SAN-${new Date().getFullYear()}-${String(consecutivo).padStart(4, '0')}`,
@@ -910,7 +911,7 @@ export async function darFirmezaSancion(
     sancion,
     'administracion',
     'Se cargó a la cartera de la unidad',
-    `Cuota de ${cuota.valor} con vencimiento el ${cuota.fechaVencimiento}.`,
+    `Cuota de ${formatearDinero(cuota.valor)} con vencimiento el ${formatearFecha(cuota.fechaVencimiento)}. Cuenta como cualquier otra: vencida, es mora (RN-70).`,
     parametros.personaId,
   )
   return persistir(bd, sancion)

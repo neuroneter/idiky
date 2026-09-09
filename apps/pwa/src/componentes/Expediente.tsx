@@ -14,18 +14,14 @@
  * impugnar.
  */
 
-import { ETAPAS_SANCION, diasDePlazo } from "../dominio/reglas";
-import {
-  formatearDinero,
-  formatearFecha,
-  formatearFechaHora,
-} from "../utilidades/formato";
-import type { Sancion } from "../dominio/tipos";
+import { ETAPAS_SANCION, diasDePlazo } from '../dominio/reglas'
+import { formatearDinero, formatearFecha, formatearFechaHora } from '../utilidades/formato'
+import type { Sancion } from '../dominio/tipos'
 
 /** El estado y de quién es el turno, que es lo primero que hay que saber. */
 export function EstadoSancionChip({ sancion }: { sancion: Sancion }) {
-  const etapa = ETAPAS_SANCION[sancion.estado];
-  return <span className={etapa.chip}>{etapa.texto}</span>;
+  const etapa = ETAPAS_SANCION[sancion.estado]
+  return <span className={etapa.chip}>{etapa.texto}</span>
 }
 
 /**
@@ -36,34 +32,38 @@ export function EstadoSancionChip({ sancion }: { sancion: Sancion }) {
  * que interpretar.
  */
 export function PlazoSancion({ sancion }: { sancion: Sancion }) {
-  const dias = diasDePlazo(sancion);
-  if (dias === null) return null;
+  const dias = diasDePlazo(sancion)
+  if (dias === null) return null
 
   const limite =
-    sancion.estado === "notificada"
-      ? sancion.limiteDescargos
-      : sancion.limiteImpugnacion;
-  const que =
-    sancion.estado === "notificada" ? "presentar descargos" : "impugnar";
+    sancion.estado === 'notificada' ? sancion.limiteDescargos : sancion.limiteImpugnacion
+  const que = sancion.estado === 'notificada' ? 'presentar descargos' : 'impugnar'
 
   if (dias < 0) {
     return (
       <span className="subtitulo">
         El plazo para {que} venció el {formatearFecha(limite!)}.
       </span>
-    );
+    )
   }
   return (
     <span className="subtitulo">
-      {dias === 0
-        ? `Hoy vence el plazo para ${que}`
-        : `Quedan ${dias} días para ${que}`}{" "}
-      · hasta el {formatearFecha(limite!)}
+      {dias === 0 ? `Hoy vence el plazo para ${que}` : `Quedan ${dias} días para ${que}`} · hasta el{' '}
+      {formatearFecha(limite!)}
     </span>
-  );
+  )
 }
 
-/** La cabecera: qué se sanciona, por cuánto y con qué radicado. */
+/**
+ * La cabecera: qué se sanciona, con qué norma, por cuánto y con qué radicado.
+ *
+ * **La norma va aquí, no escondida en la línea de tiempo.** El administrador no
+ * decide las multas: las aprobó la asamblea o ya están en el reglamento o el
+ * manual de convivencia, y él las aplica (Mary, 2026-09-09). Una multa se
+ * comprueba por dos mitades —qué norma y qué hechos—, así que las dos tienen que
+ * estar a la vista de quien la recibe. Sin la cita, «te multaron por ruido» es
+ * la palabra del administrador contra la del copropietario.
+ */
 export function CabeceraSancion({ sancion }: { sancion: Sancion }) {
   return (
     <div className="lista lista--compacta">
@@ -75,6 +75,10 @@ export function CabeceraSancion({ sancion }: { sancion: Sancion }) {
         <span className="subtitulo">Conducta</span>
         <strong>{sancion.concepto}</strong>
       </div>
+      <div className="fila fila-inicio">
+        <span className="subtitulo">Norma</span>
+        <strong style={{ textAlign: 'right' }}>{sancion.respaldo}</strong>
+      </div>
       <div className="fila">
         <span className="subtitulo">Valor</span>
         <strong>{formatearDinero(sancion.valor)}</strong>
@@ -84,17 +88,17 @@ export function CabeceraSancion({ sancion }: { sancion: Sancion }) {
         <EstadoSancionChip sancion={sancion} />
       </div>
     </div>
-  );
+  )
 }
 
 /** Los hechos, que son lo que se controvierte. */
 export function HechosSancion({ sancion }: { sancion: Sancion }) {
   return (
-    <div className="columna" style={{ gap: "var(--e1)" }}>
+    <div className="columna" style={{ gap: 'var(--e1)' }}>
       <span className="titulo-seccion">Los hechos</span>
       <p className="mensaje">{sancion.hechos}</p>
     </div>
-  );
+  )
 }
 
 /**
@@ -106,31 +110,26 @@ export function HechosSancion({ sancion }: { sancion: Sancion }) {
  */
 export function LineaDeTiempo({ sancion }: { sancion: Sancion }) {
   return (
-    <div className="columna" style={{ gap: "var(--e2)" }}>
+    <div className="columna" style={{ gap: 'var(--e2)' }}>
       <span className="titulo-seccion">Qué ha pasado</span>
       <ol className="actuaciones">
         {sancion.actuaciones.map((actuacion) => (
-          <li
-            key={actuacion.id}
-            className={`actuacion actuacion--${actuacion.autor}`}
-          >
+          <li key={actuacion.id} className={`actuacion actuacion--${actuacion.autor}`}>
             <div className="fila">
               <strong>{actuacion.titulo}</strong>
-              <span className="tenue" style={{ fontSize: "var(--texto-xs)" }}>
+              <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
                 {formatearFechaHora(actuacion.fecha)}
               </span>
             </div>
             {/* Quién actuó, siempre: un expediente donde no se sabe quién hizo
                 qué no prueba nada. */}
-            <span className="tenue" style={{ fontSize: "var(--texto-xs)" }}>
-              {actuacion.autor === "administracion"
-                ? "La administración"
-                : "El copropietario"}
+            <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+              {actuacion.autor === 'administracion' ? 'La administración' : 'El copropietario'}
             </span>
             {actuacion.texto && <p className="subtitulo">{actuacion.texto}</p>}
           </li>
         ))}
       </ol>
     </div>
-  );
+  )
 }

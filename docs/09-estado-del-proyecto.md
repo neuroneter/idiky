@@ -15,7 +15,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 67 documentados: 29 ✅ en el demo, 10 🟡 a medias, 28 ⬜ pendientes |
-| **Reglas de negocio** | 69 (RN-01…RN-69) |
+| **Reglas de negocio** | 71 (RN-01…RN-71) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -36,8 +36,9 @@ visitantes con código · consulta de correspondencia · consulta del coeficient
 **el proceso sancionatorio de su unidad, con descargos e impugnación** (CU-R-29).
 
 **Consola del administrador:** **registro de propietarios**, con la tabla de quién registró a
-quién (CU-A-26) · **catálogo de multas con su respaldo** (CU-A-22) · **procesos sancionatorios con debido
-proceso completo** —notificar, oír, decidir, impugnar y dar firmeza (CU-A-23)— ·
+quién (CU-A-26) · **catálogo de multas con su respaldo** (CU-A-22) · **procesos sancionatorios
+con debido proceso completo** —notificar citando la norma, oír, decidir, impugnar y dar
+firmeza (CU-A-23)— ·
 tablero de indicadores ·
 unidades y residentes con búsqueda,
 ficha y vinculación · cartera con morosidad · registro de pagos manuales · generación de
@@ -128,10 +129,32 @@ resuelve con motivación y arranca el plazo de impugnación → el propietario i
 administración resuelve la impugnación y da firmeza → **y ahí, y solo ahí, la multa aparece en
 su estado de cuenta con el radicado** (el saldo pasó de $ 4.466.000 a $ 4.646.000).
 
-**Lo que sigue abierto**, y no bloquea: quién impone (administrador, consejo o asamblea), si
-quien decide los descargos debe ser distinto de quien impuso, la reincidencia, qué pasa con una
-multa anulada después de pagada, y si una multa impaga cuenta como mora para bloquear reservas
-(RN-08) o el paz y salvo (RN-26). Ver §3 quater.
+**Y en la misma sesión Mary cerró cuatro de las cinco preguntas que quedaban** de §3 quater:
+
+- *«La multa la impone el administrador de acuerdo con las multas aprobadas en asamblea, en el
+  reglamento de propiedad horizontal, etc.»* → el administrador **aplica**, no decide. De ahí
+  salió un campo nuevo: `Sancion.respaldo` **copia la norma al imponer** y la muestra en la
+  cabecera del expediente, en las dos caras, junto a los hechos. Una multa se comprueba por sus
+  dos mitades; sin la cita, «te multaron por ruido» es la palabra del administrador contra la
+  del copropietario. El administrador también la ve **antes** de abrir el proceso, al elegir la
+  conducta: para saber qué está aplicando.
+- *«Quien hace el debido proceso es el administrador»* → el mismo de principio a fin. Que
+  imponga y resuelva no es un descuido: no está decidiendo sobre la norma sino sobre si los
+  hechos ocurrieron. Lo que lo controla es que todo quede escrito y que se pueda impugnar
+  (RN-69).
+- *«Una multa no se anula porque para eso existe el debido proceso»* → **RN-70**, y disuelve la
+  pregunta por la multa anulada después de pagada: no puede haberla. El momento de deshacerla
+  es archivarla durante el proceso; el código no tiene ninguna transición que salga de `firme`.
+  Es la consecuencia de tomarse el debido proceso en serio — si la multa se pudiera anular al
+  final, las cinco etapas serían decorativas.
+- *«Las multas como las cuotas ordinarias o extraordinarias cuentan como mora»* → **RN-71**.
+  Ya funcionaba así, porque ninguna regla de mora filtra por tipo de cuota, pero era un
+  supuesto; ahora es una decisión. Una multa que no cuenta como mora es una multa que no se
+  cobra.
+
+**Lo que sigue abierto** de §3 quater, y no bloquea: la **reincidencia** —si la multa sube
+cuando la conducta se repite— y si quien impone puede **ajustar el valor** dentro de algún
+tope.
 
 **Lo que sigue:** CU-A-24 (cuota extraordinaria) y ADR-0007 (transmisión en vivo), que no
 tienen bloqueos.

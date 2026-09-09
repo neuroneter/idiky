@@ -36,7 +36,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 3 — rol de porteria: la correspondencia guarda quien la recibio del mensajero.
 // 4 — paz y salvo: cubiertoHasta, codigo de verificacion y una unidad sin saldo.
 // 5 — el portero entra al demo como persona y perfil.
-export const VERSION_ESQUEMA = 11
+// 12 — la sancion guarda la norma que la respalda, copiada al imponerla (RN-38).
+export const VERSION_ESQUEMA = 12
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -915,6 +916,7 @@ function construirSanciones(): { sanciones: Sancion[]; consecutivo: number } {
       conceptoId: 'cs-1',
       concepto: 'Ruido fuera de horario',
       valor: 180000,
+      respaldo: 'Manual de convivencia · Artículo 14, numeral 3',
       hechos:
         'El sábado 5 a la 1:30 a. m. se recibieron tres llamadas de vecinos por música a alto volumen. La portería subió y pidió bajarla; volvió a subir a las 2:10 a. m. por el mismo motivo.',
       estado: 'notificada',
@@ -941,6 +943,7 @@ function construirSanciones(): { sanciones: Sancion[]; consecutivo: number } {
       conceptoId: 'cs-3',
       concepto: 'Uso indebido del parqueadero de visitantes',
       valor: 150000,
+      respaldo: 'Manual de convivencia · Artículo 18, parágrafo 2',
       hechos:
         'Los días 2, 3 y 4 el vehículo de la unidad permaneció en el cupo de visitantes número 4 durante la noche.',
       estado: 'en_estudio',

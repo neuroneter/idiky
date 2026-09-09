@@ -862,19 +862,25 @@ la ve y qué pasa al inhabilitar a la persona está sin decidir — ver
 **Flujo principal**
 1. En el inicio aparece «Te toca responder» cuando hay un plazo corriendo. Va **antes** que la
    correspondencia: el paquete espera, el plazo no.
-2. Abre el expediente y ve **exactamente lo mismo que ve la administración**: la conducta, el
-   valor, los hechos, y la línea de tiempo completa de lo que ha pasado.
+2. Abre el expediente y ve **exactamente lo mismo que ve la administración**: la conducta,
+   **la norma que la sanciona**, el valor, los hechos, y la línea de tiempo completa. La norma
+   está ahí porque una multa se controvierte por sus dos mitades: sin la cita, «te multaron
+   por ruido» es la palabra del administrador contra la suya (RN-38).
 3. Escribe sus **descargos** dentro del plazo → el proceso pasa a `en_estudio` y el turno
    vuelve a la administración.
 4. Si la administración decide sancionar, la persona ve la motivación en la línea de tiempo y
    puede **impugnar** dentro de su plazo → `impugnada`.
-5. Si la sanción queda en firme, el valor aparece en su estado de cuenta con el radicado.
+5. Si la sanción queda en firme, el valor aparece en su estado de cuenta con el radicado, y
+   desde ahí **cuenta como cualquier otra cuota**: vencida, es mora, y bloquea reservas
+   (RN-08) y pesa en el paz y salvo (RN-26) igual que la del mes (RN-71).
 
 **Flujos alternativos**
 - A1. El plazo se venció → la pantalla lo dice («el plazo para presentar descargos venció el
   16 de septiembre»), no muestra una fecha pasada que haya que interpretar. El expediente
   sigue siendo legible; lo que ya no hay es formulario.
-- A2. El proceso se archivó → «no hay sanción y no se cobró nada».
+- A2. El proceso se archivó → «no hay sanción y no se cobró nada». Es el único momento en que
+  la multa se deshace: **en firme ya no se anula** (RN-70), y por eso el plazo para hablar es
+  el que hay que usar.
 - A3. No hay ningún proceso → se explica qué vería si lo hubiera, en vez de una pantalla vacía.
 
 **Decisiones de interfaz**
@@ -889,7 +895,9 @@ la ve y qué pasa al inhabilitar a la persona está sin decidir — ver
   viene a mirar qué debe.
 
 **Reglas de negocio**
-- RN-39 (la cuota nace solo al quedar firme), RN-69 (las etapas, los turnos y los plazos).
+- RN-38 (la norma que respalda la multa), RN-39 (la cuota nace solo al quedar firme), RN-69
+  (las etapas, los turnos y los plazos), RN-70 (en firme no se anula), RN-71 (cuenta como mora
+  igual que cualquier cuota).
 
 **Estado en el demo:** ✅ — `src/features/residente/ProcesosPage.tsx`, ruta `/app/procesos`.
 En el demo, el perfil **Andrés Felipe Gómez** (Torre 2 · 901) tiene un proceso esperando sus

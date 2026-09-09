@@ -17,69 +17,56 @@
  * al resolver. Es lo que separa una sanción de un cobro.
  */
 
-import { useState } from "react";
-import { useDatos } from "../../estado/DatosContext";
-import { useSesion } from "../../estado/SesionContext";
-import * as sel from "../../datos/selectores";
-import {
-  darFirmezaSancion,
-  imponerSancion,
-  resolverSancion,
-} from "../../datos/repositorio";
+import { useState } from 'react'
+import { useDatos } from '../../estado/DatosContext'
+import { useSesion } from '../../estado/SesionContext'
+import * as sel from '../../datos/selectores'
+import { darFirmezaSancion, imponerSancion, resolverSancion } from '../../datos/repositorio'
 import {
   conceptosActivos,
   etiquetaUnidad,
   puedeQuedarEnFirme,
   sancionEnCurso,
-} from "../../dominio/reglas";
-import { formatearDinero } from "../../utilidades/formato";
-import type { Sancion } from "../../dominio/tipos";
+  textoRespaldo,
+} from '../../dominio/reglas'
+import { formatearDinero } from '../../utilidades/formato'
+import type { Sancion } from '../../dominio/tipos'
 import {
   CabeceraSancion,
   EstadoSancionChip,
   HechosSancion,
   LineaDeTiempo,
   PlazoSancion,
-} from "../../componentes/Expediente";
-import { Modal } from "../../componentes/Modal";
-import { Icono } from "../../componentes/Icono";
-import { EstadoVacio } from "../../componentes/EstadoVacio";
+} from '../../componentes/Expediente'
+import { Modal } from '../../componentes/Modal'
+import { Icono } from '../../componentes/Icono'
+import { EstadoVacio } from '../../componentes/EstadoVacio'
 
 export function SancionesPage() {
-  const { bd, ejecutar, mostrarAviso } = useDatos();
-  const { sesion } = useSesion();
-  const [imponiendo, setImponiendo] = useState(false);
-  const [viendo, setViendo] = useState<string | null>(null);
+  const { bd, ejecutar, mostrarAviso } = useDatos()
+  const { sesion } = useSesion()
+  const [imponiendo, setImponiendo] = useState(false)
+  const [viendo, setViendo] = useState<string | null>(null)
 
-  if (!sesion) return null;
+  if (!sesion) return null
 
-  const unidades = sel.unidadesDe(bd, sesion.copropiedadId);
-  const sanciones = bd.sanciones.filter(
-    (s) => s.copropiedadId === sesion.copropiedadId,
-  );
-  const mias = sanciones.filter(
-    (s) => s.estado === "en_estudio" || s.estado === "impugnada",
-  );
-  const esperando = sanciones.filter(
-    (s) => s.estado === "notificada" || s.estado === "resuelta",
-  );
-  const cerradas = sanciones.filter((s) => !sancionEnCurso(s));
-  const enDetalle = sanciones.find((s) => s.id === viendo);
+  const unidades = sel.unidadesDe(bd, sesion.copropiedadId)
+  const sanciones = bd.sanciones.filter((s) => s.copropiedadId === sesion.copropiedadId)
+  const mias = sanciones.filter((s) => s.estado === 'en_estudio' || s.estado === 'impugnada')
+  const esperando = sanciones.filter((s) => s.estado === 'notificada' || s.estado === 'resuelta')
+  const cerradas = sanciones.filter((s) => !sancionEnCurso(s))
+  const enDetalle = sanciones.find((s) => s.id === viendo)
 
   return (
     <div className="pila">
       <div className="fila">
         <div className="columna">
           <span className="subtitulo">
-            Ninguna multa llega a la cartera sin haber sido notificada, oída e
-            impugnable (Ley 675 de 2001). La cuota nace solo al quedar en firme
-            (RN-39).
+            Ninguna multa llega a la cartera sin haber sido notificada, oída e impugnable (Ley 675
+            de 2001). La cuota nace solo al quedar en firme (RN-39).
           </span>
         </div>
-        <button
-          className="boton boton--primario"
-          onClick={() => setImponiendo(true)}
-        >
+        <button className="boton boton--primario" onClick={() => setImponiendo(true)}>
           <Icono nombre="mas" tamano={16} />
           Abrir proceso
         </button>
@@ -95,9 +82,7 @@ export function SancionesPage() {
           {/* Lo que espera a la administración, primero: es lo único que ella
               puede mover hoy. */}
           <div className="pila">
-            <span className="titulo-seccion">
-              Te toca resolver ({mias.length})
-            </span>
+            <span className="titulo-seccion">Te toca resolver ({mias.length})</span>
             {mias.length === 0 ? (
               <p className="subtitulo">Nada pendiente de tu parte.</p>
             ) : (
@@ -106,29 +91,19 @@ export function SancionesPage() {
           </div>
 
           <div className="pila">
-            <span className="titulo-seccion">
-              Esperando al copropietario ({esperando.length})
-            </span>
+            <span className="titulo-seccion">Esperando al copropietario ({esperando.length})</span>
             {esperando.length === 0 ? (
               <p className="subtitulo">Ninguno en plazo del copropietario.</p>
             ) : (
-              <ListaSanciones
-                sanciones={esperando}
-                bd={bd}
-                alAbrir={setViendo}
-              />
+              <ListaSanciones sanciones={esperando} bd={bd} alAbrir={setViendo} />
             )}
           </div>
 
           {cerradas.length > 0 && (
             <details className="historial">
               <summary>Procesos cerrados ({cerradas.length})</summary>
-              <div style={{ marginTop: "var(--e3)" }}>
-                <ListaSanciones
-                  sanciones={cerradas}
-                  bd={bd}
-                  alAbrir={setViendo}
-                />
+              <div style={{ marginTop: 'var(--e3)' }}>
+                <ListaSanciones sanciones={cerradas} bd={bd} alAbrir={setViendo} />
               </div>
             </details>
           )}
@@ -138,9 +113,7 @@ export function SancionesPage() {
       {imponiendo && (
         <FormularioSancion
           unidades={unidades}
-          conceptos={conceptosActivos(
-            sel.conceptosSancionDe(bd, sesion.copropiedadId),
-          )}
+          conceptos={conceptosActivos(sel.conceptosSancionDe(bd, sesion.copropiedadId))}
           alCerrar={() => setImponiendo(false)}
           alImponer={async (datos) => {
             const creada = await ejecutar(
@@ -150,11 +123,11 @@ export function SancionesPage() {
                   impuestaPor: sesion.personaId,
                   ...datos,
                 }),
-              "Proceso abierto y notificado al copropietario.",
-            );
+              'Proceso abierto y notificado al copropietario.',
+            )
             if (creada) {
-              setImponiendo(false);
-              setViendo(creada.id);
+              setImponiendo(false)
+              setViendo(creada.id)
             }
           }}
         />
@@ -168,10 +141,10 @@ export function SancionesPage() {
           alResolver={async (sanciona, motivo) => {
             if (motivo.trim().length < 10) {
               mostrarAviso(
-                "Escribe la motivación: sin ella la decisión no se puede controvertir.",
-                "error",
-              );
-              return;
+                'Escribe la motivación: sin ella la decisión no se puede controvertir.',
+                'error',
+              )
+              return
             }
             const hecho = await ejecutar(
               (base) =>
@@ -182,10 +155,10 @@ export function SancionesPage() {
                   motivo,
                 }),
               sanciona
-                ? "Decisión registrada. El copropietario puede impugnar."
-                : "Proceso archivado.",
-            );
-            if (hecho) setViendo(null);
+                ? 'Decisión registrada. El copropietario puede impugnar.'
+                : 'Proceso archivado.',
+            )
+            if (hecho) setViendo(null)
           }}
           alDarFirmeza={async (motivo) => {
             const hecho = await ejecutar(
@@ -195,14 +168,14 @@ export function SancionesPage() {
                   personaId: sesion.personaId,
                   motivo: motivo || undefined,
                 }),
-              "La sanción quedó en firme y se cargó a la cartera de la unidad.",
-            );
-            if (hecho) setViendo(null);
+              'La sanción quedó en firme y se cargó a la cartera de la unidad.',
+            )
+            if (hecho) setViendo(null)
           }}
         />
       )}
     </div>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -212,9 +185,9 @@ function ListaSanciones({
   bd,
   alAbrir,
 }: {
-  sanciones: Sancion[];
-  bd: ReturnType<typeof useDatos>["bd"];
-  alAbrir: (id: string) => void;
+  sanciones: Sancion[]
+  bd: ReturnType<typeof useDatos>['bd']
+  alAbrir: (id: string) => void
 }) {
   return (
     <div className="tarjeta" style={{ padding: 0 }}>
@@ -231,11 +204,11 @@ function ListaSanciones({
           </thead>
           <tbody>
             {sanciones.map((sancion) => {
-              const unidad = sel.unidad(bd, sancion.unidadId);
+              const unidad = sel.unidad(bd, sancion.unidadId)
               return (
                 <tr key={sancion.id}>
                   <td>
-                    <strong>{unidad ? etiquetaUnidad(unidad) : "—"}</strong>
+                    <strong>{unidad ? etiquetaUnidad(unidad) : '—'}</strong>
                     <div className="subtitulo numerico">{sancion.radicado}</div>
                   </td>
                   <td className="suave">{sancion.concepto}</td>
@@ -247,21 +220,18 @@ function ListaSanciones({
                   </td>
                   <td className="numerico">{formatearDinero(sancion.valor)}</td>
                   <td>
-                    <button
-                      className="boton boton--pequeno"
-                      onClick={() => alAbrir(sancion.id)}
-                    >
+                    <button className="boton boton--pequeno" onClick={() => alAbrir(sancion.id)}>
                       Abrir
                     </button>
                   </td>
                 </tr>
-              );
+              )
             })}
           </tbody>
         </table>
       </div>
     </div>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -272,31 +242,27 @@ function FormularioSancion({
   alImponer,
   alCerrar,
 }: {
-  unidades: ReturnType<typeof sel.unidadesDe>;
-  conceptos: ReturnType<typeof conceptosActivos>;
-  alImponer: (datos: {
-    unidadId: string;
-    conceptoId: string;
-    hechos: string;
-  }) => Promise<void>;
-  alCerrar: () => void;
+  unidades: ReturnType<typeof sel.unidadesDe>
+  conceptos: ReturnType<typeof conceptosActivos>
+  alImponer: (datos: { unidadId: string; conceptoId: string; hechos: string }) => Promise<void>
+  alCerrar: () => void
 }) {
-  const [unidadId, setUnidadId] = useState(unidades[0]?.id ?? "");
-  const [conceptoId, setConceptoId] = useState(conceptos[0]?.id ?? "");
-  const [hechos, setHechos] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [unidadId, setUnidadId] = useState(unidades[0]?.id ?? '')
+  const [conceptoId, setConceptoId] = useState(conceptos[0]?.id ?? '')
+  const [hechos, setHechos] = useState('')
+  const [error, setError] = useState<string | null>(null)
 
-  const concepto = conceptos.find((c) => c.id === conceptoId);
+  const concepto = conceptos.find((c) => c.id === conceptoId)
 
   if (conceptos.length === 0) {
     return (
       <Modal titulo="No hay multas en el catálogo" onCerrar={alCerrar}>
         <p className="subtitulo">
-          Antes de abrir un proceso hay que tener en el catálogo la multa que lo
-          respalda (RN-38). Agrégala en <strong>Multas</strong>.
+          Antes de abrir un proceso hay que tener en el catálogo la multa que lo respalda (RN-38).
+          Agrégala en <strong>Multas</strong>.
         </p>
       </Modal>
-    );
+    )
   }
 
   return (
@@ -307,24 +273,20 @@ function FormularioSancion({
     >
       <form
         onSubmit={(evento) => {
-          evento.preventDefault();
-          setError(null);
+          evento.preventDefault()
+          setError(null)
           if (hechos.trim().length < 20) {
             setError(
-              "Describe los hechos: qué pasó, cuándo y dónde. Es lo que el copropietario puede controvertir.",
-            );
-            return;
+              'Describe los hechos: qué pasó, cuándo y dónde. Es lo que el copropietario puede controvertir.',
+            )
+            return
           }
-          void alImponer({ unidadId, conceptoId, hechos: hechos.trim() });
+          void alImponer({ unidadId, conceptoId, hechos: hechos.trim() })
         }}
       >
         <div className="campo">
           <label htmlFor="unidad">¿A qué unidad?</label>
-          <select
-            id="unidad"
-            value={unidadId}
-            onChange={(e) => setUnidadId(e.target.value)}
-          >
+          <select id="unidad" value={unidadId} onChange={(e) => setUnidadId(e.target.value)}>
             {unidades.map((unidad) => (
               <option key={unidad.id} value={unidad.id}>
                 {etiquetaUnidad(unidad)}
@@ -335,11 +297,7 @@ function FormularioSancion({
 
         <div className="campo">
           <label htmlFor="concepto">¿Qué conducta?</label>
-          <select
-            id="concepto"
-            value={conceptoId}
-            onChange={(e) => setConceptoId(e.target.value)}
-          >
+          <select id="concepto" value={conceptoId} onChange={(e) => setConceptoId(e.target.value)}>
             {conceptos.map((concepto) => (
               <option key={concepto.id} value={concepto.id}>
                 {concepto.nombre}
@@ -351,6 +309,11 @@ function FormularioSancion({
           {concepto && (
             <span className="ayuda-campo">
               {formatearDinero(concepto.valor)} · {concepto.descripcion}
+              {/* La norma, antes de imponer: el administrador aplica lo que
+                  aprobó la asamblea o ya dice el reglamento, y tiene que verlo
+                  para saber qué está aplicando (Mary, 2026-09-09). */}
+              <br />
+              <strong>{textoRespaldo(concepto)}</strong>
             </span>
           )}
         </div>
@@ -365,8 +328,8 @@ function FormularioSancion({
             style={{ minHeight: 120 }}
           />
           <span className="ayuda-campo">
-            Qué, cuándo y dónde. Es lo que se le notifica y lo único que puede
-            controvertir: unos hechos vagos hacen que la multa se caiga.
+            Qué, cuándo y dónde. Es lo que se le notifica y lo único que puede controvertir: unos
+            hechos vagos hacen que la multa se caiga.
           </span>
         </div>
 
@@ -377,7 +340,7 @@ function FormularioSancion({
         </button>
       </form>
     </Modal>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -389,20 +352,19 @@ function DetalleSancion({
   alDarFirmeza,
   alCerrar,
 }: {
-  sancion: Sancion;
-  unidad?: ReturnType<typeof sel.unidad>;
-  alResolver: (sanciona: boolean, motivo: string) => Promise<void>;
-  alDarFirmeza: (motivo: string) => Promise<void>;
-  alCerrar: () => void;
+  sancion: Sancion
+  unidad?: ReturnType<typeof sel.unidad>
+  alResolver: (sanciona: boolean, motivo: string) => Promise<void>
+  alDarFirmeza: (motivo: string) => Promise<void>
+  alCerrar: () => void
 }) {
-  const [motivo, setMotivo] = useState("");
-  const porResolver =
-    sancion.estado === "notificada" || sancion.estado === "en_estudio";
-  const enFirmeza = puedeQuedarEnFirme(sancion);
+  const [motivo, setMotivo] = useState('')
+  const porResolver = sancion.estado === 'notificada' || sancion.estado === 'en_estudio'
+  const enFirmeza = puedeQuedarEnFirme(sancion)
 
   return (
     <Modal
-      titulo={unidad ? etiquetaUnidad(unidad) : "Proceso sancionatorio"}
+      titulo={unidad ? etiquetaUnidad(unidad) : 'Proceso sancionatorio'}
       descripcion={sancion.radicado}
       onCerrar={alCerrar}
     >
@@ -420,9 +382,9 @@ function DetalleSancion({
           <div className="separador" />
           <div className="campo">
             <label htmlFor="motivo">
-              {enFirmeza && sancion.estado === "impugnada"
-                ? "Cómo se resuelve la impugnación"
-                : "Motivación de la decisión"}
+              {enFirmeza && sancion.estado === 'impugnada'
+                ? 'Cómo se resuelve la impugnación'
+                : 'Motivación de la decisión'}
             </label>
             <textarea
               id="motivo"
@@ -431,8 +393,7 @@ function DetalleSancion({
               placeholder="Por qué se sanciona, o por qué se archiva."
             />
             <span className="ayuda-campo">
-              Queda en el expediente y es lo que el copropietario puede
-              controvertir.
+              Queda en el expediente y es lo que el copropietario puede controvertir.
             </span>
           </div>
         </>
@@ -441,25 +402,19 @@ function DetalleSancion({
       {/* Resolver ANTES de que venza el plazo de descargos es posible pero se
           advierte: si todavía puede hablar, decidir sin oírlo es lo que anula
           una sanción. */}
-      {porResolver && sancion.estado === "notificada" && (
-        <p className="acceso__nota" style={{ marginBottom: "var(--e3)" }}>
-          Todavía está dentro del plazo para presentar descargos. Decidir ahora,
-          sin haberlo oído, es lo que hace que una sanción se caiga.
+      {porResolver && sancion.estado === 'notificada' && (
+        <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
+          Todavía está dentro del plazo para presentar descargos. Decidir ahora, sin haberlo oído,
+          es lo que hace que una sanción se caiga.
         </p>
       )}
 
       {porResolver && (
         <div className="grupo-botones">
-          <button
-            className="boton boton--primario"
-            onClick={() => void alResolver(true, motivo)}
-          >
+          <button className="boton boton--primario" onClick={() => void alResolver(true, motivo)}>
             Sancionar
           </button>
-          <button
-            className="boton"
-            onClick={() => void alResolver(false, motivo)}
-          >
+          <button className="boton" onClick={() => void alResolver(false, motivo)}>
             Archivar
           </button>
         </div>
@@ -475,12 +430,11 @@ function DetalleSancion({
         </button>
       )}
 
-      {sancion.estado === "resuelta" && !enFirmeza && (
+      {sancion.estado === 'resuelta' && !enFirmeza && (
         <p className="subtitulo">
-          Hay que esperar a que venza el plazo de impugnación antes de cargarla
-          a la cartera.
+          Hay que esperar a que venza el plazo de impugnación antes de cargarla a la cartera.
         </p>
       )}
     </Modal>
-  );
+  )
 }

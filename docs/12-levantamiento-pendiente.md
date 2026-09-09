@@ -193,9 +193,14 @@ CU-A-22, CU-A-23 y CU-A-24.
   constantes del código (RN-69). Los pasos implementados son: notificar → descargos →
   decisión motivada → impugnación → firmeza. **Falta** el número concreto de días de *esta*
   copropiedad; el demo usa 10 y 5 como ejemplo.
-- **Quién impone.** ¿El administrador solo, el consejo de administración, o la asamblea?
-  → *(respuesta)*
-- **Quién decide los descargos.** ¿La misma persona que impuso la multa, u otra? → *(respuesta)*
+- ~~**Quién impone.**~~ → ✅ **Respondido (Mary, 2026-09-09):** *«la multa la impone el
+  administrador de acuerdo con las multas aprobadas en asamblea, en el reglamento de propiedad
+  horizontal, etc.»*. El administrador **aplica**, no decide: por eso el expediente **copia la
+  norma** (`Sancion.respaldo`) y la muestra al lado de los hechos.
+- ~~**Quién decide los descargos.**~~ → ✅ **Respondido (Mary, 2026-09-09):** *«quien hace el
+  debido proceso es el administrador»* — el mismo, de principio a fin. No es un descuido que
+  sea la misma persona: no está decidiendo sobre la norma sino sobre si los hechos ocurrieron.
+  Lo que lo controla es que todo quede escrito y que el copropietario pueda impugnar (RN-69).
 - **El valor.** ¿Es fijo por concepto, o el que impone puede ajustarlo? Si puede, ¿con qué
   tope? → *(respuesta)* — **es el límite entre parametrizar e imponer** (RN-49 / RN-50): si el
   valor se puede mover al imponer la multa, el administrador sí está decidiendo sobre el caso
@@ -204,10 +209,14 @@ CU-A-22, CU-A-23 y CU-A-24.
   se da si **está en el reglamento o fue aprobada en asamblea**. El respaldo es obligatorio:
   sin él, el concepto no se crea. Es el mismo principio que rige la tasa de interés (RN-45).
 - **Reincidencia.** ¿La multa sube si se repite la conducta? → *(respuesta)*
-- **Multa anulada después de pagada.** ¿Se devuelve el dinero o se abona a la siguiente cuota?
-  → *(respuesta)*
-- **Efecto de la multa en otros derechos.** Una multa impaga, ¿cuenta como mora para bloquear
-  reservas (RN-08) o para el paz y salvo (RN-26)? → *(respuesta)*
+- ~~**Multa anulada después de pagada.**~~ → ✅ **Disuelta (Mary, 2026-09-09):** *«una multa no
+  se anula porque para eso existe el debido proceso»*. El momento de deshacerla es **durante**
+  el proceso, archivándola; después no hay marcha atrás, y por eso la pregunta no tiene objeto.
+  Si la multa se pudiera anular al final, las cinco etapas serían decorativas (RN-70).
+- ~~**Efecto de la multa en otros derechos.**~~ → ✅ **Respondido (Mary, 2026-09-09):** *«las
+  multas como las cuotas ordinarias o extraordinarias cuentan como mora»*. **La mora no
+  distingue el origen del cobro** (RN-71): una multa en firme y vencida bloquea reservas
+  (RN-08) y pesa en el paz y salvo (RN-26) igual que la cuota del mes.
 - **Cuotas adicionales.** ¿Qué se cobra realmente por esta vía —parqueadero, mascota, uso de
   zonas, reposición de daños— y quién lo autoriza? → *(respuesta)*
 

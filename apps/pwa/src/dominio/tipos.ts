@@ -252,6 +252,16 @@ export interface Sancion {
   /** Copiados al imponerla, como el coeficiente (RN-37). */
   concepto: string
   valor: Dinero
+  /**
+   * La norma que sanciona la conducta, tal como se citaba al imponerla
+   * («Manual de convivencia · Articulo 14, numeral 3»).
+   *
+   * Se copia y no se deriva del catalogo en cada lectura, por lo mismo que el
+   * valor: el expediente tiene que seguir diciendo **con que norma** se sanciono
+   * aunque manana el concepto se inhabilite o le cambien la cita. Es la mitad
+   * comprobable de la multa — la otra son los hechos (RN-38, RN-49).
+   */
+  respaldo: string
   /** Que paso, cuando y donde. Es lo que se le notifica. */
   hechos: string
   estado: EstadoSancion
