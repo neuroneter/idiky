@@ -19,9 +19,10 @@
  *    «referencia» a secas deja que cada quien escriba una cosa distinta, que es
  *    lo que hace que después nadie pueda comprobar nada.
  *
- * **Nada se borra** (RN-40): un concepto se da de baja y sigue en la lista, en
- * gris. Las multas impuestas con él lo referencian, y una multa que apunta a un
- * concepto que ya no existe es una multa que nadie puede explicar.
+ * **Nada se borra** (RN-40): un concepto se **inhabilita** —mismo verbo que con
+ * las personas (RN-61), porque es lo mismo que pasa— y sigue en la lista. Las
+ * multas impuestas con él lo referencian, y una multa que apunta a un concepto
+ * que ya no existe es una multa que nadie puede explicar.
  */
 
 import { useState } from 'react'
@@ -74,36 +75,36 @@ export function CatalogoMultasPage() {
             <span className="titulo-seccion">Se pueden imponer ({activos.length})</span>
             <TablaConceptos
               conceptos={activos}
-              accion="Dar de baja"
+              accion="Inhabilitar"
               deshabilitado={cargando}
               alCambiar={(id) =>
                 void ejecutar(
                   (base) => cambiarEstadoConceptoSancion(base, { conceptoId: id, activo: false }),
-                  'Concepto dado de baja. Sigue en el catálogo, ya no se puede imponer.',
+                  'Concepto inhabilitado. Sigue en el catálogo, ya no se puede imponer.',
                 )
               }
             />
           </div>
 
-          {/* Los dados de baja siguen a la vista, en su propia sección: esconderlos
+          {/* Los inhabilitados siguen a la vista, en su propia sección: esconderlos
               haría creer que se borraron, y las multas impuestas los citan. */}
           {inactivos.length > 0 && (
             <div className="pila">
-              <span className="titulo-seccion">Dados de baja ({inactivos.length})</span>
+              <span className="titulo-seccion">Inhabilitados ({inactivos.length})</span>
               <TablaConceptos
                 conceptos={inactivos}
-                accion="Reactivar"
+                accion="Habilitar"
                 deshabilitado={cargando}
                 alCambiar={(id) =>
                   void ejecutar(
                     (base) => cambiarEstadoConceptoSancion(base, { conceptoId: id, activo: true }),
-                    'Concepto reactivado.',
+                    'Concepto habilitado.',
                   )
                 }
               />
               <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
-                Un concepto dado de baja no se borra (RN-40): las multas que se impusieron con él
-                lo siguen citando.
+                Un concepto inhabilitado no se borra (RN-40): las multas que se impusieron con
+                él lo siguen citando.
               </p>
             </div>
           )}
@@ -166,7 +167,7 @@ function TablaConceptos({
                   {textoRespaldo(concepto)}
                   {concepto.inactivoDesde && (
                     <div className="subtitulo">
-                      De baja desde {formatearFecha(concepto.inactivoDesde)}
+                      Inhabilitado desde {formatearFecha(concepto.inactivoDesde)}
                     </div>
                   )}
                 </td>

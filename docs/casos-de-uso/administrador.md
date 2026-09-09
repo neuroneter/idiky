@@ -483,17 +483,18 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 > no justificar nada—. Nombrándolo sigue siendo comprobable.
 
 **Flujos alternativos**
-- A1. Corregir un concepto → **se da de baja y se crea de nuevo**. No se edita en sitio: el
+- A1. Corregir un concepto → **se inhabilita y se crea de nuevo**. No se edita en sitio: el
   valor y el respaldo son lo que la multa copia al imponerse (RN-37), y editarlos dejaría multas
   apuntando a un texto que ya no dice lo mismo.
-- A2. Dar de baja un concepto → se marca inactivo y **sigue a la vista**, en su propia sección.
-  No se borra, porque las multas impuestas lo referencian (RN-40). Se puede reactivar: a veces
-  la reforma que lo dejó sin sustento se revierte.
+- A2. **Inhabilitar** un concepto → se marca inactivo y **sigue a la vista**, en su propia
+  sección. No se borra, porque las multas impuestas lo referencian (RN-40). Se puede
+  **habilitar** de nuevo: a veces la reforma que lo dejó sin sustento se revierte. Es el mismo
+  verbo que con las personas (RN-61), porque es lo mismo que pasa (Mary, 2026-09-09).
 - A6. Nombre repetido entre los activos → el sistema no lo crea. Dos conceptos con el mismo
   nombre hacen que quien impone la multa no sepa cuál escoger.
 - A3. La asamblea aprueba multas nuevas → se crean los conceptos citando esa acta, y quedan
   disponibles desde entonces.
-- A4. **Se reforma el manual de convivencia** → los conceptos afectados se dan de baja y se
+- A4. **Se reforma el manual de convivencia** → los conceptos afectados se inhabilitan y se
   crean de nuevo citando el artículo nuevo. No se editan en sitio: una multa impuesta bajo el
   manual anterior tiene que seguir apuntando al texto que la respaldaba (RN-37).
 - A5. Se escoge **otro documento** y no se escribe cuál → el sistema no crea el concepto. No es

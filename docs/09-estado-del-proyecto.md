@@ -92,9 +92,14 @@ administrador parametriza, no decide**.
   una cosa distinta, que es lo que hace que después nadie pueda comprobar nada. La forma de
   cada cita vive en `ORIGENES_RESPALDO`, no repartida por la interfaz.
 
-**Los dados de baja siguen a la vista**, en su propia sección y con la fecha en que dejaron de
+**Los inhabilitados siguen a la vista**, en su propia sección y con la fecha en que dejaron de
 ofrecerse. Esconderlos haría creer que se borraron, y las multas impuestas los citan (RN-40).
-Se pueden reactivar: a veces la reforma que dejó un concepto sin sustento se revierte.
+Se pueden habilitar de nuevo: a veces la reforma que dejó un concepto sin sustento se revierte.
+
+**Y se llaman así por decisión de Mary**: *«dar de baja por Inhabilitar y reactivar por
+Habilitar»*. Es el mismo verbo que ya usan las personas (RN-61), y tiene que serlo — es
+exactamente lo mismo que pasa: el registro queda, deja de estar disponible. Dos palabras para
+una sola idea obligan a quien las lee a preguntarse si son cosas distintas.
 
 **La semilla trae cuatro conceptos del manual de convivencia y uno del reglamento**, más uno
 inactivo que salió de un acta. Es a propósito: el catálogo de sanciones vive en el manual en la

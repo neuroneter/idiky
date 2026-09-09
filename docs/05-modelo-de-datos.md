@@ -187,7 +187,7 @@ antes de poder imponer ninguna.
 | `documento` | string? | **Solo con `origen: 'otro'`: cuál es el documento. Sin esto no se crea** |
 | `actaId` | string? | El acta que la aprobó, cuando el origen es una asamblea del sistema |
 | `activo` | boolean | Se desactiva, **no se borra**: las multas ya impuestas lo referencian (RN-40) |
-| `inactivoDesde` | FechaISO? | Desde cuándo dejó de ofrecerse |
+| `inactivoDesde` | FechaISO? | Desde cuándo quedó inhabilitado |
 
 **No lleva `justificacion`**, a diferencia de la cuota extraordinaria. Ahí la justificación
 explica **para qué** se aprobó el cobro, que es un dato que no está en ningún otro campo; aquí
@@ -358,7 +358,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | `datos/repositorio.ts` (`emitirVoto` copia el coeficiente) |
 | RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si lo contempla **el reglamento de propiedad horizontal, el manual de convivencia, un acta de asamblea, u otro documento que haya que nombrar** (Mary, 2026-09-08). **El administrador no define las multas**: las define la asamblea o ya están en esos documentos; él las parametriza (RN-49). El reglamento y el manual se citan por artículo; el acta, por fecha; **`otro` exige escribir cuál es el documento** — sin eso sería la puerta por donde se escapa el respaldo entero. | `dominio/reglas.ts` (`respaldoCompleto`) + `repositorio.ts` |
 | RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al proponerla. **(? — depende del debido proceso, Ley 675)** | *pendiente* |
-| RN-40 | Un concepto del catálogo no se borra: se desactiva, porque las multas impuestas lo referencian. Los dados de baja **siguen a la vista**, en su propia sección: esconderlos haría creer que se borraron. | `repositorio.ts` (`cambiarEstadoConceptoSancion`) |
+| RN-40 | Un concepto del catálogo no se borra: **se inhabilita**, porque las multas impuestas lo referencian. Los inhabilitados **siguen a la vista**, en su propia sección: esconderlos haría creer que se borraron. Mismo verbo que con las personas (RN-61), porque es lo mismo que pasa (Mary, 2026-09-09). | `repositorio.ts` (`cambiarEstadoConceptoSancion`) |
 | RN-41 | Una cuota adicional exige concepto y valor explícitos; no se prorratea por coeficiente. | *pendiente* |
 | RN-42 | El interés de mora solo se calcula si la copropiedad lo tiene activado; apagado, no se genera ninguno. | *pendiente* |
 | RN-43 | La tasa la aprueba la copropiedad —su reglamento o un acta de asamblea— y el sistema exige registrar cuál. La ley solo pone el techo: una tasa por encima del tope legal se rechaza. **(? — tope por confirmar)** | *pendiente* |
