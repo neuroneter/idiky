@@ -433,6 +433,9 @@ coeficiente y se cierra.
 > da de alta. El administrador ve los dos en la misma lista, marcados por origen.
 
 **Estado en el demo:** ✅ — `/admin/asambleas`, dentro de cada asamblea, sección **Poderes**.
+Cada uno se **abre y se lee**: la misma hoja que ve el propietario, y debajo **la foto del papel**
+cuando llegó firmado. Registrar un poder que después nadie puede leer no sirve el día que
+alguien lo impugne.
 
 > **Pendiente que no es del flujo sino del dato:** el poder lleva nombre, documento y firma de
 > alguien **que no es residente**, y hoy no se le pide autorización de tratamiento de datos —

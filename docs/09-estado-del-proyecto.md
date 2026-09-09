@@ -218,6 +218,27 @@ propietario no pida foto, que emita el documento con número y código, que al o
 desaparezcan los botones de votar y se explique por qué, que el administrador lo vea marcado
 como «Otorgado en la app», y que revocar anule el documento y devuelva el voto.
 
+**Y faltaba lo más obvio, que Mary encontró enseguida:** *«debe ser posible que el propietario
+que da el poder y el administrador que lo recibe lo pueda ver, no encuentro en dónde verlo»*.
+Tenía razón — el número del documento aparecía, pero **el documento no se podía abrir en
+ninguna de las dos caras**. Registrar un poder que después nadie puede leer no sirve el día que
+alguien lo impugne.
+
+Ahora existe `HojaPoder`, con el patrón del paz y salvo: se lee en pantalla y sale al imprimir.
+**Es la misma hoja en las dos caras**, y eso es deliberado: el apoderado llega mostrando algo y
+la administración tiene que estar leyendo eso mismo. Dice a quién representa, **con qué
+coeficiente** —que es lo que se está cediendo— y cómo se otorgó; y cuando llegó en papel, la
+consola muestra debajo **la foto del documento firmado**.
+
+**Y los botones de votar quedan deshabilitados, no escondidos** (Mary: *«si el propietario da
+poder no puede votar, es decir que los botones quedan inhabilitados»*). Yo los había escondido;
+su palabra es mejor: a la vista pero sin pulsarse, quien dio poder **sigue viendo qué se está
+decidiendo en su unidad**, que es información suya aunque no sea su voto.
+
+**Un detalle del documento que conviene notar:** decía *«identificado con documento»*, la
+fórmula notarial de siempre — y se lo decía a una mujer. El sistema no sabe el género de nadie,
+así que ahora dice **«con documento»**: lo mismo, y no se equivoca nunca.
+
 **Lo que sigue:** el corazón del producto — **quórum, mayorías y acta** (§3 bis). De las once
 preguntas quedan ocho, y son las que ya no tienen rodeo.
 

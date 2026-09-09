@@ -939,8 +939,12 @@ administración.
 2. Si esa persona no está en Idiky, se le crea un **usuario temporal de asamblea**: su única
    vinculación con la copropiedad es este poder, y muere con la asamblea.
 3. Idiky **emite el documento** con su número y su código de verificación (RN-36).
-4. Desde ese momento **el propietario deja de ver los botones de votar** y la pantalla le dice
-   por qué: ese punto lo vota su apoderado.
+4. Desde ese momento **las opciones de votar quedan deshabilitadas** —a la vista, pero sin
+   poder pulsarse (Mary, 2026-09-10)— y la pantalla dice por qué: ese punto lo vota su
+   apoderado. Se ven porque **qué se está decidiendo en su unidad es información suya aunque no
+   sea su voto**; esconderlas la dejaría a ciegas.
+5. Puede **abrir el poder** y leerlo: la hoja dice a quién representa, con qué coeficiente y
+   cómo se otorgó. Es **la misma hoja** que ve la administración.
 
 **Flujos alternativos**
 - A1. Cambia de opinión → **revoca el poder** y vuelve a votar él. El documento queda anulado.
@@ -952,8 +956,13 @@ administración.
 **Decisiones de interfaz**
 - **No pide una foto de nada**, y esa es la diferencia con el camino del papel: aquí lo que
   respalda el poder es que quien lo otorga **está autenticado**.
-- **No se finge la descarga.** El documento se emite y se muestra con su número; el PDF lo
-  genera el servidor y el servidor no existe todavía (ADR-0006), y la pantalla lo dice.
+- **No se finge la descarga.** El documento se emite, **se puede abrir y leer en pantalla** y
+  sale al imprimir; el PDF lo genera el servidor y el servidor no existe todavía (ADR-0006).
+- **La hoja es la misma en las dos caras.** El apoderado llega mostrando algo y la
+  administración tiene que estar leyendo eso mismo: si cada uno viera su versión, el día que
+  discutan no habría un documento común sobre el cual discutir.
+- **El texto no supone el género de nadie.** La fórmula notarial de siempre —«identificado con
+  documento»— se equivoca la mitad de las veces; «con documento» dice lo mismo y no falla.
 - **El bloque va antes del orden del día**: dar poder es una decisión sobre *si vas o no vas*, y
   se toma antes de leer los puntos.
 

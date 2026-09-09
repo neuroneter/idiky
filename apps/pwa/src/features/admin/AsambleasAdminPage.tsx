@@ -47,6 +47,7 @@ import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipAsamblea } from '../../componentes/Etiquetas'
 import { CapturaFoto } from '../../componentes/CapturaFoto'
+import { HojaPoder } from '../../componentes/HojaPoder'
 
 function formatearCoeficiente(coeficiente: number): string {
   return `${coeficiente.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
@@ -58,6 +59,7 @@ export function AsambleasAdminPage() {
   const [convocando, setConvocando] = useState(false)
   const [viendo, setViendo] = useState<string | null>(null)
   const [dandoPoder, setDandoPoder] = useState<string | null>(null)
+  const [viendoPoder, setViendoPoder] = useState<string | null>(null)
 
   if (!sesion) return null
 
@@ -164,7 +166,7 @@ export function AsambleasAdminPage() {
       {/* El detalle se esconde mientras se registra un poder: dos modales
           encimados dejan dos fondos oscurecidos, dos `aria-modal` peleando por
           el foco y un «cerrar» ambiguo. Al cerrar el formulario, vuelve. */}
-      {enDetalle && !dandoPoder && (
+      {enDetalle && !dandoPoder && !viendoPoder && (
         <DetalleAsamblea
           asamblea={enDetalle}
           bd={bd}
@@ -172,6 +174,7 @@ export function AsambleasAdminPage() {
           alCerrar={() => setViendo(null)}
           alCambiar={cambiar}
           alRegistrarPoder={setDandoPoder}
+          alVerPoder={setViendoPoder}
           alRevocar={async (poderId) => {
             await ejecutar(
               (base) => revocarPoder(base, { poderId }),
@@ -179,6 +182,10 @@ export function AsambleasAdminPage() {
             )
           }}
         />
+      )}
+
+      {viendoPoder && (
+        <VistaPoder bd={bd} poderId={viendoPoder} alCerrar={() => setViendoPoder(null)} />
       )}
 
       {dandoPoder && (
@@ -211,6 +218,7 @@ function DetalleAsamblea({
   cargando,
   alCambiar,
   alRegistrarPoder,
+  alVerPoder,
   alRevocar,
   alCerrar,
 }: {
@@ -219,6 +227,7 @@ function DetalleAsamblea({
   cargando: boolean
   alCambiar: (id: string, estado: Asamblea['estado'], mensaje: string) => Promise<void>
   alRegistrarPoder: (asambleaId: string) => void
+  alVerPoder: (poderId: string) => void
   alRevocar: (poderId: string) => Promise<void>
   alCerrar: () => void
 }) {
@@ -347,15 +356,26 @@ function DetalleAsamblea({
                           </div>
                         </td>
                         <td>
-                          {!poder.revocadoEn && (
+                          <div className="grupo-botones">
+                            {/* Poder ver el documento es la mitad del trabajo:
+                                registrar uno que después nadie puede leer no
+                                sirve el día que alguien lo impugne. */}
                             <button
                               className="boton boton--pequeno"
-                              disabled={cargando}
-                              onClick={() => void alRevocar(poder.id)}
+                              onClick={() => alVerPoder(poder.id)}
                             >
-                              Revocar
+                              Ver
                             </button>
-                          )}
+                            {!poder.revocadoEn && (
+                              <button
+                                className="boton boton--pequeno"
+                                disabled={cargando}
+                                onClick={() => void alRevocar(poder.id)}
+                              >
+                                Revocar
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     )
@@ -880,6 +900,83 @@ function FormularioPoder({
           Registrar el poder
         </button>
       </form>
+    </Modal>
+  )
+}
+
+// ---------------------------------------------------------------------------
+
+/**
+ * El poder, tal como se lee (CU-A-19).
+ *
+ * **La misma hoja que ve el propietario**, y eso es deliberado: el apoderado
+ * llega mostrando algo y la administración tiene que estar leyendo eso mismo. Si
+ * cada uno viera su versión, el día que discutan no habría un documento común.
+ *
+ * Y cuando el poder llegó **en papel**, debajo va la foto: la hoja dice lo que
+ * dice, pero lo que respalda ese poder es la firma del documento adjunto.
+ */
+function VistaPoder({
+  bd,
+  poderId,
+  alCerrar,
+}: {
+  bd: ReturnType<typeof useDatos>['bd']
+  poderId: string
+  alCerrar: () => void
+}) {
+  const poder = bd.poderes.find((p) => p.id === poderId)
+  if (!poder) return null
+
+  const unidad = sel.unidad(bd, poder.unidadId)
+  const documento = poder.documentoId
+    ? bd.documentos.find((d) => d.id === poder.documentoId)
+    : undefined
+
+  return (
+    <Modal
+      titulo="Poder"
+      descripcion={unidad ? etiquetaUnidad(unidad) : undefined}
+      onCerrar={alCerrar}
+    >
+      {poder.revocadoEn && (
+        <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
+          Este poder está <strong>revocado</strong>. Se conserva porque, si votó antes de
+          revocarse, hay que poder explicarlo (RN-61).
+        </p>
+      )}
+
+      <div className="previsualizacion-hoja">
+        <HojaPoder
+          poder={poder}
+          documento={documento}
+          copropiedad={sel.copropiedad(bd, unidad?.copropiedadId ?? '')}
+          asamblea={sel.asamblea(bd, poder.asambleaId)}
+          unidad={unidad}
+          otorgante={sel.persona(bd, poder.otorgadoPor)}
+          apoderado={sel.persona(bd, poder.apoderadoId)}
+        />
+      </div>
+
+      {poder.soporte && (
+        <>
+          <div className="separador" />
+          <span className="titulo-seccion">El documento firmado</span>
+          <p className="subtitulo">
+            Es lo que respalda este poder: llegó en papel y la administración lo adjuntó.
+          </p>
+          <img
+            src={poder.soporte.imagen}
+            alt="Poder firmado"
+            style={{
+              width: '100%',
+              borderRadius: 'var(--radio-sm)',
+              border: '1px solid var(--color-borde)',
+              marginTop: 'var(--e2)',
+            }}
+          />
+        </>
+      )}
     </Modal>
   )
 }

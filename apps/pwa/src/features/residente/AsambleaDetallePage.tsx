@@ -39,6 +39,7 @@ import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { Icono } from '../../componentes/Icono'
 import { ChipAsamblea } from '../../componentes/Etiquetas'
 import { Modal } from '../../componentes/Modal'
+import { HojaPoder } from '../../componentes/HojaPoder'
 import type { FormaAsistencia, PuntoOrdenDelDia, Votacion } from '../../dominio/tipos'
 
 function formatearCoeficiente(coeficiente: number): string {
@@ -50,6 +51,7 @@ export function AsambleaDetallePage() {
   const { sesion } = useSesion()
   const { asambleaId } = useParams()
   const [dandoPoder, setDandoPoder] = useState(false)
+  const [viendoHoja, setViendoHoja] = useState(false)
   if (!sesion) return null
 
   const asamblea = sel.asamblea(bd, asambleaId)
@@ -129,7 +131,7 @@ export function AsambleaDetallePage() {
     // cree que votó. El repositorio lo rechaza igual (T-16).
     const representada = !!miPoder && miPoder.apoderadoId !== sesion!.personaId
     const conteo = contarVotacion(votacion, votos)
-    const abierta = votacion.estado === 'abierta' && !representada
+    const abierta = votacion.estado === 'abierta'
 
     return (
       <>
@@ -150,24 +152,17 @@ export function AsambleaDetallePage() {
           </p>
         )}
 
-        {/* No basta con esconder los botones: hay que decir por qué no están,
-            o la persona cree que la app se rompió. */}
-        {votacion.estado === 'abierta' && representada && (
-          <p className="subtitulo">
-            Este punto lo vota{' '}
-            <strong>{apoderado ? nombreCompleto(apoderado) : 'tu apoderado'}</strong>, que
-            representa tu unidad en esta asamblea. Si prefieres votar tú, revoca el poder
-            arriba.
-          </p>
-        )}
-
         {abierta && puedo && !miVoto && (
           <div className="lista">
+            {/* Representada: las opciones **se ven pero no se pulsan** (Mary,
+                2026-09-10). Esconderlas dejaría a quien dio poder sin saber qué
+                se está decidiendo en su unidad, que es información suya aunque
+                no sea su voto. El repositorio lo rechaza igual (T-16). */}
             {votacion.opciones.map((opcion) => (
               <button
                 key={opcion.id}
                 className="tarjeta tarjeta--accion"
-                disabled={cargando}
+                disabled={cargando || representada}
                 onClick={() => void votar(votacion, opcion.id)}
               >
                 <div className="fila">
@@ -176,11 +171,19 @@ export function AsambleaDetallePage() {
                 </div>
               </button>
             ))}
-            {unidad && (
+            {representada ? (
               <p className="subtitulo">
-                Tu voto pesa {formatearCoeficiente(pesoDelVoto(unidad))}, que es el coeficiente de
-                tu unidad. Una vez emitido no se cambia.
+                Este punto lo vota{' '}
+                <strong>{apoderado ? nombreCompleto(apoderado) : 'tu apoderado'}</strong>, que
+                representa tu unidad. Si prefieres votar tú, revoca el poder arriba.
               </p>
+            ) : (
+              unidad && (
+                <p className="subtitulo">
+                  Tu voto pesa {formatearCoeficiente(pesoDelVoto(unidad))}, que es el coeficiente
+                  de tu unidad. Una vez emitido no se cambia.
+                </p>
+              )
             )}
           </div>
         )}
@@ -402,6 +405,10 @@ export function AsambleaDetallePage() {
                   {documentoPoder.numero} · código {documentoPoder.codigoVerificacion}
                 </span>
               )}
+              <button className="boton boton--primario" onClick={() => setViendoHoja(!viendoHoja)}>
+                <Icono nombre={viendoHoja ? 'cerrar' : 'buscar'} tamano={16} />
+                {viendoHoja ? 'Ocultar el poder' : 'Ver el poder'}
+              </button>
               <button
                 className="boton"
                 disabled={cargando}
@@ -427,6 +434,22 @@ export function AsambleaDetallePage() {
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* La hoja del poder. Fuera de la previsualización no se ve en pantalla:
+          es lo que sale al imprimir (ADR-0006). */}
+      {miPoder && (
+        <div className={viendoHoja ? 'previsualizacion-hoja' : undefined}>
+          <HojaPoder
+            poder={miPoder}
+            documento={documentoPoder}
+            copropiedad={sel.copropiedad(bd, sesion.copropiedadId)}
+            asamblea={asamblea}
+            unidad={unidad}
+            otorgante={sel.persona(bd, miPoder.otorgadoPor)}
+            apoderado={apoderado}
+          />
         </div>
       )}
 
