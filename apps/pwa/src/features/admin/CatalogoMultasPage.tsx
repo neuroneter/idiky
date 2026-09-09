@@ -72,7 +72,7 @@ export function CatalogoMultasPage() {
       ) : (
         <>
           <div className="pila">
-            <span className="titulo-seccion">Se pueden imponer ({activos.length})</span>
+            <span className="titulo-seccion">Se imponen multas por ({activos.length}):</span>
             <TablaConceptos
               conceptos={activos}
               accion="Inhabilitar"
@@ -90,7 +90,7 @@ export function CatalogoMultasPage() {
               haría creer que se borraron, y las multas impuestas los citan. */}
           {inactivos.length > 0 && (
             <div className="pila">
-              <span className="titulo-seccion">Inhabilitados ({inactivos.length})</span>
+              <span className="titulo-seccion">Multas inhabilitadas ({inactivos.length})</span>
               <TablaConceptos
                 conceptos={inactivos}
                 accion="Habilitar"
