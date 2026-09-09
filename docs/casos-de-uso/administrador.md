@@ -139,8 +139,10 @@ y vincular residente).
 - RN-48: el concepto es texto libre, pero describe la destinación que aprobó el acta.
 - RN-49: solo el administrador de esa copropiedad crea cuotas.
 
-**Estado en el demo:** 🟡 — `src/features/admin/CarteraPage.tsx` (acción "Generar cuotas")
-genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
+**Estado en el demo:** ✅ — `/admin/cartera`, botón «Generar cuotas». La extraordinaria no se
+puede generar sin el acta y sin el «para qué»: el botón queda deshabilitado **diciendo qué
+falta**, y `generarCuotas()` lo vuelve a comprobar. Y el copropietario lo lee desde su estado de
+cuenta, plegado bajo «¿Por qué se cobra?».
 
 ---
 

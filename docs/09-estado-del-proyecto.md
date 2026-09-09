@@ -14,8 +14,8 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 67 documentados: 29 ✅ en el demo, 10 🟡 a medias, 28 ⬜ pendientes |
-| **Reglas de negocio** | 73 (RN-01…RN-73) |
+| **Casos de uso** | 67 documentados: 30 ✅ en el demo, 9 🟡 a medias, 27 ⬜ pendientes, 1 ⛔ retirado |
+| **Reglas de negocio** | 73 (RN-01…RN-73; RN-41 retirada) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -42,7 +42,8 @@ la norma, oír, decidir, impugnar y dar firmeza (CU-A-23)— ·
 tablero de indicadores ·
 unidades y residentes con búsqueda,
 ficha y vinculación · cartera con morosidad · registro de pagos manuales · generación de
-cuotas con previsualización · aprobación y rechazo de reservas · bandeja de PQRS con SLA ·
+cuotas con previsualización **y la extraordinaria exigiendo el acta que la aprobó** (CU-A-05) ·
+aprobación y rechazo de reservas · bandeja de PQRS con SLA ·
 publicación de comunicados · registro y entrega de correspondencia.
 
 ### Lo que NO existe
@@ -216,8 +217,50 @@ sin pedirla, y es lo que tiene a CU-A-05 en 🟡.
 
 Con esto **§3 quater es la primera sección del levantamiento que se cierra entera**.
 
-**Lo que sigue:** exigirle el acta a la cuota extraordinaria (RN-46, saca a CU-A-05 de 🟡) y
-ADR-0007 (transmisión en vivo). Ninguno tiene bloqueos.
+---
+
+### 2026-09-09 · Mary + IA (Claude) · La extraordinaria exige su acta (CU-A-05 → ✅)
+
+Lo que la «cuota adicional» estaba tapando. RN-46 y RN-47 llevaban desde el 27 de agosto
+escritas y sin implementar: `generarCuotas()` creaba extraordinarias sin pedir el acta.
+
+**La ordinaria sigue sin pedir nada, y eso es la regla, no una excepción.** Es la del mes, la
+que el reglamento autoriza de una vez y para siempre. Todo lo demás es un cobro que alguien
+decidió en algún momento, y el copropietario tiene derecho a saber quién y cuándo (RN-45).
+
+**No basta con marcar «asamblea»: hace falta cuál acta y para qué.** «Aprobado en asamblea» sin
+fecha no se puede comprobar, y sin destinación no se puede reclamar el día que la plata se va a
+otra cosa (RN-47, RN-48). Por eso son dos campos y los dos son obligatorios.
+
+**Tres decisiones que conviene revisar:**
+
+- **El botón se deshabilita diciendo qué falta**, en vez de dejar pulsar y contestar «falta el
+  acta». Un formulario que rechaza después de intentar enseña a escribir cualquier cosa con tal
+  de pasar.
+- **La comprobación vive en el repositorio, no solo en el formulario.** `generarCuotas()`
+  rechaza la extraordinaria sin respaldo aunque la llamen desde otro sitio. Una regla que solo
+  esconde un campo se salta el día que alguien no pase por esa pantalla — es lo mismo que ya
+  hacía `imponerSancion` con el valor.
+- **El respaldo viaja en cada cuota, no en un encabezado aparte.** Duplica el texto doce veces,
+  y aun así es lo correcto: quien reclama lo hace desde **su** línea del estado de cuenta, no
+  desde una tabla de lotes de facturación que nunca va a ver.
+
+En la app del residente se lee plegado, bajo **«¿Por qué se cobra?»**. Cerrado por defecto:
+quien viene a ver cuánto debe no necesita leer el acta, pero quien se pregunta «¿y esto qué
+es?» tiene que encontrarla sin salir de la pantalla.
+
+**Verificado con Playwright los cuatro estados**: la ordinaria no pide acta y genera; la
+extraordinaria sin acta queda bloqueada y dice por qué; con acta pero sin el «para qué» sigue
+bloqueada; completa, genera — y el copropietario ve la justificación y la cita del acta en su
+estado de cuenta.
+
+**Con esto RN-45, RN-46, RN-47 y RN-48 dejan de estar pendientes**, y CU-A-05 sale de 🟡. La
+cartera queda con un solo hueco de respaldo: **el interés de mora** (RN-43), que sigue esperando
+la respuesta de §3 quinquies.
+
+**Lo que sigue:** ADR-0007 (transmisión en vivo), sin bloqueos.
+
+---
 
 ---
 

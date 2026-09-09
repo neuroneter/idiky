@@ -138,6 +138,22 @@ export function CuentaPage() {
                         Comprobante {pago.comprobante}
                       </span>
                     )}
+                    {/* RN-47: el respaldo se lee **aquí**, en la línea del
+                        cobro, no en un documento aparte. Es donde la persona
+                        está cuando se pregunta «¿y esto qué es?». */}
+                    {cuota.justificacion && (
+                      <details className="respaldo-cuota">
+                        <summary>¿Por qué se cobra?</summary>
+                        <p className="subtitulo" style={{ marginTop: 'var(--e2)' }}>
+                          {cuota.justificacion}
+                        </p>
+                        {cuota.referencia && (
+                          <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                            Aprobada en {cuota.referencia}
+                          </span>
+                        )}
+                      </details>
+                    )}
                   </div>
                   <div className="columna" style={{ alignItems: 'flex-end' }}>
                     <strong className="numerico">{formatearDinero(cuota.valor)}</strong>

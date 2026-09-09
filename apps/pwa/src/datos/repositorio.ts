@@ -53,6 +53,7 @@ import {
   puedeVotar,
   multaAplicable,
   respaldoCompleto,
+  respaldoDeCuotaCompleto,
   rolDeCategoria,
   soloUnDia,
   soportesCompletos,
@@ -174,6 +175,10 @@ export interface ParametrosGeneracion {
   concepto: string
   /** Para ordinarias: valor por punto de coeficiente. Para extraordinarias: valor total. */
   valor: number
+  /** El acta que la aprobo: numero y fecha. Obligatoria en extraordinarias (RN-46). */
+  referencia?: string
+  /** Para que se aprobo, citando el acta. Obligatoria en extraordinarias (RN-47). */
+  justificacion?: string
 }
 
 /** Previsualiza las cuotas que se generarian, sin escribir nada (CU-A-05 paso 3). */
@@ -212,6 +217,16 @@ export async function generarCuotas(
     }
   }
 
+  // RN-46, RN-47: la extraordinaria no existe sin el acta que la aprobo ni sin
+  // decir para que. Se comprueba aqui y no solo en el formulario, porque es la
+  // condicion para que el cobro sea legitimo, no una comodidad de la pantalla.
+  if (!respaldoDeCuotaCompleto(parametros)) {
+    throw new ErrorDeNegocio(
+      'Una cuota extraordinaria exige el acta que la aprobó y para qué se aprobó. Sin eso el cobro no se puede comprobar (RN-46, RN-47).',
+    )
+  }
+
+  const esExtraordinaria = parametros.tipo === 'extraordinaria'
   const nuevas: Cuota[] = previsualizarCuotas(bd, parametros).map((linea) => ({
     id: nuevoId('cuo'),
     unidadId: linea.unidadId,
@@ -222,6 +237,15 @@ export async function generarCuotas(
     // RN-23: vencimiento por defecto el dia 10 del periodo.
     fechaVencimiento: vencimientoDelPeriodo(parametros.periodo),
     estado: 'pendiente',
+    // El respaldo viaja en **cada** cuota, no en un encabezado aparte: quien
+    // reclama lo hace desde su estado de cuenta, mirando su linea (RN-47).
+    ...(esExtraordinaria
+      ? {
+          origen: 'asamblea' as const,
+          referencia: parametros.referencia!.trim(),
+          justificacion: parametros.justificacion!.trim(),
+        }
+      : {}),
   }))
 
   bd.cuotas.push(...nuevas)

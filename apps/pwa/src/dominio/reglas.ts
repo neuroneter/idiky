@@ -21,6 +21,7 @@ import type {
   RegistroPersona,
   Reserva,
   RolResidencia,
+  TipoCuota,
   Unidad,
   Visitante,
   Votacion,
@@ -80,6 +81,27 @@ export function diasEntre(desde: FechaISO, hasta: FechaISO): number {
 // ---------------------------------------------------------------------------
 // Cartera
 // ---------------------------------------------------------------------------
+
+/**
+ * RN-46, RN-47 — Una cuota extraordinaria no existe sin el acta que la aprobo.
+ *
+ * **Solo la ordinaria puede ir sin respaldo.** Es la del mes, la que sostiene el
+ * edificio y la que el reglamento ya autoriza de una vez y para siempre. Todo lo
+ * demas es un cobro que alguien decidio en algun momento, y el copropietario
+ * tiene derecho a saber quien y cuando.
+ *
+ * Y no basta con marcar «asamblea»: hace falta **cual** acta y **para que**
+ * (RN-47, RN-48). «Aprobado en asamblea» sin fecha no se puede comprobar, y sin
+ * destinacion no se puede reclamar cuando la plata se va a otra cosa.
+ */
+export function respaldoDeCuotaCompleto(parametros: {
+  tipo: TipoCuota
+  referencia?: string
+  justificacion?: string
+}): boolean {
+  if (parametros.tipo !== 'extraordinaria') return true
+  return !!parametros.referencia?.trim() && !!parametros.justificacion?.trim()
+}
 
 /**
  * RN-04 — Una cuota es `vencida` si su vencimiento ya paso y no esta pagada.

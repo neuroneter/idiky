@@ -1083,3 +1083,15 @@
   align-items: baseline;
   gap: var(--e2);
 }
+
+/* El respaldo de una cuota, en su propia linea del estado de cuenta (RN-47).
+   Cerrado por defecto: quien viene a ver cuanto debe no necesita leer el acta,
+   pero quien se pregunta «¿y esto que es?» tiene que encontrarla sin salir de
+   la pantalla. */
+.respaldo-cuota > summary {
+  cursor: pointer;
+  font-size: var(--texto-xs);
+  font-weight: 650;
+  color: var(--color-marca);
+  padding: var(--e1) 0;
+}

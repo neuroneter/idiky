@@ -126,6 +126,27 @@ export interface Cuota {
   fechaVencimiento: FechaISO
   estado: EstadoCuota
   pagoId?: string
+  /**
+   * Que autoriza el cobro (RN-45).
+   *
+   * **Solo la ordinaria puede ir sin respaldo**: es la del mes, la que sostiene
+   * el edificio. Todo lo demas apunta a un documento. En la extraordinaria es
+   * siempre `'asamblea'`, nunca el reglamento (RN-46): una obra que nadie voto no
+   * se cobra porque el reglamento diga que pueden existir extraordinarias.
+   */
+  origen?: 'reglamento' | 'asamblea'
+  /** El acta del sistema, cuando la asamblea esta registrada aqui. */
+  actaId?: string
+  /** Numero y fecha del acta, o el articulo del reglamento. */
+  referencia?: string
+  /**
+   * **Por que se cobra**, citando el acta y su fecha (RN-47).
+   *
+   * No es prosa decorativa: es lo que el copropietario lee en su estado de
+   * cuenta cuando le aparece un cobro que no esperaba. Un cobro que no se puede
+   * explicar en una frase es un cobro que va a terminar en una PQRS.
+   */
+  justificacion?: string
 }
 
 /**

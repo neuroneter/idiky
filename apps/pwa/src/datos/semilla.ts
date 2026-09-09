@@ -39,7 +39,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 12 — la sancion guarda la norma que la respalda, copiada al imponerla (RN-38).
 // 13 — el concepto puede llevar reincidencia, con su propio respaldo (RN-72).
 // 14 — la reincidencia caduca: mesesReincidencia en la copropiedad (RN-72).
-export const VERSION_ESQUEMA = 14
+// 15 — la cuota lleva el respaldo que la autoriza: acta y para que (RN-46, RN-47).
+export const VERSION_ESQUEMA = 15
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -317,6 +318,12 @@ function construirCartera(): { cuotas: Cuota[]; pagos: Pago[]; consecutivoCompro
       valor: Math.round((EXTRAORDINARIA_TOTAL * unidad.coeficiente) / 100),
       fechaVencimiento: vencimientoDelPeriodo(periodoExtraordinaria),
       estado: periodosEnMora > 0 ? 'pendiente' : 'pagada',
+      // El respaldo viaja en cada cuota: es lo que el copropietario lee cuando
+      // le aparece un cobro que no esperaba (RN-46, RN-47, RN-48).
+      origen: 'asamblea',
+      referencia: 'Asamblea extraordinaria del 14 de febrero',
+      justificacion:
+        'Impermeabilización de las cubiertas de las dos torres, aprobada por unanimidad tras las filtraciones del invierno. El recaudo se destina exclusivamente a esa obra.',
     }
     if (extraordinaria.estado === 'pagada') {
       const pago: Pago = {
