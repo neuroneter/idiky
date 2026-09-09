@@ -75,7 +75,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-19 | **Validar y registrar los poderes** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-19) |
 | CU-A-20 | **Generar el acta de la asamblea** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-20) |
 | CU-A-21 | **Administrar los coeficientes de las unidades** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-21) |
-| CU-A-22 | **Administrar el catálogo de multas** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-22) |
+| CU-A-22 | **Administrar el catálogo de multas** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-22) |
 | CU-A-23 | **Imponer una multa a una unidad** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-23) |
 | CU-A-24 | **Cobrar una cuota adicional a una unidad** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-24) |
 | CU-A-25 | **Configurar si la copropiedad cobra interés de mora** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-25) |

@@ -182,16 +182,22 @@ antes de poder imponer ninguna.
 | `nombre` | string | «Ruido fuera de horario», «Mascota sin correa» |
 | `descripcion` | string | Qué conducta se sanciona |
 | `valor` | number | Valor sugerido; se puede ajustar al imponerla **(?)** |
-| `origen` | `'reglamento' \| 'asamblea'` | **Qué la autoriza. Obligatorio** |
-| `actaId` | string? | El acta que la aprobó, cuando el origen es una asamblea |
-| `referencia` | string | El artículo del reglamento, o el punto del orden del día |
-| `justificacion` | string | Qué autoriza esta multa y en qué acta o artículo, con su fecha (RN-47) |
-| `activo` | boolean | Se desactiva, **no se borra**: las multas ya impuestas lo referencian (O3) |
+| `origen` | `'reglamento' \| 'manual' \| 'asamblea' \| 'otro'` | **Qué la autoriza. Obligatorio** (RN-38) |
+| `referencia` | string | El artículo del reglamento o del manual, la fecha del acta, o dónde lo diga el otro documento |
+| `documento` | string? | **Solo con `origen: 'otro'`: cuál es el documento. Sin esto no se crea** |
+| `actaId` | string? | El acta que la aprobó, cuando el origen es una asamblea del sistema |
+| `activo` | boolean | Se desactiva, **no se borra**: las multas ya impuestas lo referencian (RN-40) |
+| `inactivoDesde` | FechaISO? | Desde cuándo dejó de ofrecerse |
 
-> **Una multa solo existe si el reglamento la contempla o la asamblea la aprobó**
-> (Mary, 2026-08-27). No es un cobro que el administrador pueda inventar: por eso `origen` y
-> `referencia` no son opcionales. Es la misma estructura que `TasaInteres`, y por la misma
-> razón.
+**No lleva `justificacion`**, a diferencia de la cuota extraordinaria. Ahí la justificación
+explica **para qué** se aprobó el cobro, que es un dato que no está en ningún otro campo; aquí
+el «para qué» ya es la descripción de la conducta, y el respaldo es `origen` + `referencia`.
+Un campo de prosa que repite lo que las columnas dicen se llena con lo primero que se ocurra.
+
+> **Una multa solo existe si la contempla el reglamento, el manual de convivencia, un acta o
+> un documento nombrado** (Mary, 2026-08-27 y 2026-09-08). No es un cobro que el administrador
+> pueda inventar: por eso `origen` y `referencia` no son opcionales. Es la misma estructura que
+> `TasaInteres`, y por la misma razón.
 
 ### Sancion — la multa impuesta
 
@@ -350,9 +356,9 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-35 | El acta se construye desde los datos registrados; aprobada, no se edita — se aclara con un acta nueva. | *pendiente* |
 | RN-36 | Todo documento formal lleva **consecutivo único por tipo** y un **código de verificación** aleatorio, y se comprueba desde fuera de la app sin exponer datos personales (ADR-0006). | `datos/repositorio.ts` (paz y salvo); falta la página pública de verificación |
 | RN-37 | El coeficiente es histórico: se copia al usarlo y cambiarlo no altera asambleas ni votaciones cerradas. | `datos/repositorio.ts` (`emitirVoto` copia el coeficiente) |
-| RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si lo contempla **el reglamento de propiedad horizontal, el manual de convivencia, un acta de asamblea, u otro documento que haya que nombrar** (Mary, 2026-09-08). **El administrador no define las multas**: las define la asamblea o ya están en esos documentos; él las parametriza (RN-49). El reglamento y el manual se citan por artículo; el acta, por fecha; **`otro` exige escribir cuál es el documento** — sin eso sería la puerta por donde se escapa el respaldo entero. | *pendiente* |
+| RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si lo contempla **el reglamento de propiedad horizontal, el manual de convivencia, un acta de asamblea, u otro documento que haya que nombrar** (Mary, 2026-09-08). **El administrador no define las multas**: las define la asamblea o ya están en esos documentos; él las parametriza (RN-49). El reglamento y el manual se citan por artículo; el acta, por fecha; **`otro` exige escribir cuál es el documento** — sin eso sería la puerta por donde se escapa el respaldo entero. | `dominio/reglas.ts` (`respaldoCompleto`) + `repositorio.ts` |
 | RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al proponerla. **(? — depende del debido proceso, Ley 675)** | *pendiente* |
-| RN-40 | Un concepto del catálogo no se borra: se desactiva, porque las multas impuestas lo referencian. | *pendiente* |
+| RN-40 | Un concepto del catálogo no se borra: se desactiva, porque las multas impuestas lo referencian. Los dados de baja **siguen a la vista**, en su propia sección: esconderlos haría creer que se borraron. | `repositorio.ts` (`cambiarEstadoConceptoSancion`) |
 | RN-41 | Una cuota adicional exige concepto y valor explícitos; no se prorratea por coeficiente. | *pendiente* |
 | RN-42 | El interés de mora solo se calcula si la copropiedad lo tiene activado; apagado, no se genera ninguno. | *pendiente* |
 | RN-43 | La tasa la aprueba la copropiedad —su reglamento o un acta de asamblea— y el sistema exige registrar cuál. La ley solo pone el techo: una tasa por encima del tope legal se rechaza. **(? — tope por confirmar)** | *pendiente* |

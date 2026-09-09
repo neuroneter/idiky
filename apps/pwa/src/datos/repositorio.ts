@@ -13,6 +13,8 @@ import type {
   AccesoSoporte,
   BaseDatos,
   CategoriaComunicado,
+  ConceptoSancion,
+  OrigenRespaldo,
   CategoriaRegistro,
   CategoriaPqrs,
   Comunicado,
@@ -43,6 +45,7 @@ import {
   exigeVigencia,
   puedeAutorizar,
   puedeVotar,
+  respaldoCompleto,
   rolDeCategoria,
   soloUnDia,
   soportesCompletos,
@@ -581,6 +584,89 @@ export async function desvincularResidente(
   if (!residencia) throw new ErrorDeNegocio('El vinculo no existe.')
   residencia.hasta = hoyISO()
   return persistir(bd, residencia)
+}
+
+// ---------------------------------------------------------------------------
+// CU-A-22 — El catalogo de multas
+//
+// **El administrador parametriza, no decide** (Mary, 2026-09-08): las multas las
+// define la asamblea, o ya estan en el reglamento o el manual de convivencia.
+// Estas operaciones trasladan al sistema lo que esos documentos dicen.
+// ---------------------------------------------------------------------------
+
+export async function crearConceptoSancion(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    nombre: string
+    descripcion: string
+    valor: number
+    origen: OrigenRespaldo
+    referencia: string
+    documento?: string
+  },
+): Promise<Resultado<ConceptoSancion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  // RN-38: sin respaldo comprobable el concepto no existe. Se valida aqui y no
+  // solo en el formulario, porque el formulario es una comodidad y esto es la
+  // condicion para que la multa se pueda cobrar.
+  if (!respaldoCompleto(parametros)) {
+    throw new ErrorDeNegocio(
+      parametros.origen === 'otro'
+        ? 'Di cuál es el documento y dónde lo dice: sin eso el respaldo no se puede comprobar.'
+        : 'Falta la referencia: el artículo o la fecha del acta que autoriza esta multa.',
+    )
+  }
+  if (parametros.valor <= 0) {
+    throw new ErrorDeNegocio('El valor de la multa tiene que ser mayor que cero.')
+  }
+
+  const repetido = bd.conceptosSancion.some(
+    (concepto) =>
+      concepto.copropiedadId === parametros.copropiedadId &&
+      concepto.activo &&
+      concepto.nombre.trim().toLowerCase() === parametros.nombre.trim().toLowerCase(),
+  )
+  if (repetido) {
+    throw new ErrorDeNegocio('Ya hay un concepto activo con ese nombre.')
+  }
+
+  const concepto: ConceptoSancion = {
+    id: nuevoId('cs'),
+    ...parametros,
+    nombre: parametros.nombre.trim(),
+    descripcion: parametros.descripcion.trim(),
+    referencia: parametros.referencia.trim(),
+    documento: parametros.documento?.trim() || undefined,
+    activo: true,
+    creadoEn: ahoraISO(),
+  }
+  bd.conceptosSancion.push(concepto)
+  return persistir(bd, concepto)
+}
+
+/**
+ * RN-40 — Un concepto no se borra: se desactiva.
+ *
+ * Las multas impuestas lo referencian, y una multa que apunta a un concepto que
+ * ya no existe es una multa que nadie puede explicar. Reactivar tambien es
+ * posible: un concepto se da de baja porque el documento cambio, y a veces el
+ * cambio se revierte.
+ */
+export async function cambiarEstadoConceptoSancion(
+  bdActual: BaseDatos,
+  parametros: { conceptoId: string; activo: boolean },
+): Promise<Resultado<ConceptoSancion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const concepto = bd.conceptosSancion.find((c) => c.id === parametros.conceptoId)
+  if (!concepto) throw new ErrorDeNegocio('Ese concepto no existe.')
+
+  concepto.activo = parametros.activo
+  concepto.inactivoDesde = parametros.activo ? undefined : hoyISO()
+  return persistir(bd, concepto)
 }
 
 // ---------------------------------------------------------------------------

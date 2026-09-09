@@ -14,7 +14,7 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 66 documentados: 25 ✅ en el demo, 9 🟡 a medias, 32 ⬜ pendientes |
+| **Casos de uso** | 66 documentados: 26 ✅ en el demo, 9 🟡 a medias, 31 ⬜ pendientes |
 | **Reglas de negocio** | 68 (RN-01…RN-68) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -35,7 +35,8 @@ con votación ponderada por coeficiente** · cartelera de comunicados · autoriz
 visitantes con código · consulta de correspondencia · consulta del coeficiente.
 
 **Consola del administrador:** **registro de propietarios**, con la tabla de quién registró a
-quién (CU-A-26) · tablero de indicadores · unidades y residentes con búsqueda,
+quién (CU-A-26) · **catálogo de multas con su respaldo** (CU-A-22) · tablero de indicadores ·
+unidades y residentes con búsqueda,
 ficha y vinculación · cartera con morosidad · registro de pagos manuales · generación de
 cuotas con previsualización · aprobación y rechazo de reservas · bandeja de PQRS con SLA ·
 publicación de comunicados · registro y entrega de correspondencia.
@@ -75,6 +76,55 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-09 · Mary + IA (Claude) · El catálogo de multas (CU-A-22)
+
+Construido en la consola del administrador, con el modelo que quedó corregido ayer: **el
+administrador parametriza, no decide**.
+
+**Dos decisiones ordenan la pantalla:**
+
+- **El respaldo se pregunta primero**, antes que la conducta y el valor. Es lo que decide si el
+  concepto puede existir (RN-38); un formulario que lo pregunta de último invita a escribir la
+  multa primero y buscarle sustento después.
+- **Cada origen pide lo suyo.** El reglamento y el manual piden artículo, el acta pide fecha, y
+  «otro documento» pide además cuál es. Pedir «referencia» a secas deja que cada quien escriba
+  una cosa distinta, que es lo que hace que después nadie pueda comprobar nada. La forma de
+  cada cita vive en `ORIGENES_RESPALDO`, no repartida por la interfaz.
+
+**Los dados de baja siguen a la vista**, en su propia sección y con la fecha en que dejaron de
+ofrecerse. Esconderlos haría creer que se borraron, y las multas impuestas los citan (RN-40).
+Se pueden reactivar: a veces la reforma que dejó un concepto sin sustento se revierte.
+
+**La semilla trae cuatro conceptos del manual de convivencia y uno del reglamento**, más uno
+inactivo que salió de un acta. Es a propósito: el catálogo de sanciones vive en el manual en la
+práctica, y el inactivo hace visible de entrada que dar de baja no borra.
+
+**Dos cosas que decidí y conviene revisar:**
+
+- **No se editan los conceptos.** Para corregir uno se da de baja y se crea de nuevo, que es lo
+  que ya exigía el flujo A4 cuando cambia el documento. Editar en sitio sería cómodo para
+  arreglar una palabra y peligroso para todo lo demás: el valor y el respaldo son lo que la
+  multa copia al imponerse (RN-37).
+- **Se quitó `justificacion` de la entidad.** A diferencia de la cuota extraordinaria —donde la
+  justificación explica **para qué** se aprobó el cobro, un dato que no está en ningún otro
+  campo—, aquí el «para qué» ya es la descripción de la conducta y el respaldo son `origen` y
+  `referencia`. Un campo de prosa que repite lo que las columnas dicen se llena con lo primero
+  que se le ocurra a quien lo llena.
+
+De paso, un arreglo que toca toda la app: **los botones ya no parten su texto en dos líneas**.
+«Agregar concepto» salía en dos renglones dentro de una fila apretada; un botón es una acción,
+no un párrafo. Verificado que no rompe ninguna otra pantalla.
+
+**Verificado con Playwright**: el catálogo lista activos e inactivos con su respaldo a la vista;
+«otro» sin nombrar el documento no crea el concepto y dice por qué; con el documento sí; dar de
+baja mueve el concepto a su sección en vez de borrarlo; y un nombre repetido entre los activos
+se rechaza.
+
+**Lo que sigue:** CU-A-23, imponer una multa — que necesita el debido proceso de la Ley 675
+(RN-39, sin resolver).
+
+---
 
 ### 2026-09-08 · Mary + IA (Claude) · El manual de convivencia, y quién define las multas
 

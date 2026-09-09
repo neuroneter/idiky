@@ -483,9 +483,14 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 > no justificar nada—. Nombrándolo sigue siendo comprobable.
 
 **Flujos alternativos**
-- A1. Editar un concepto → **no cambia las multas ya impuestas**, que copiaron su valor (RN-37).
-- A2. Dar de baja un concepto → se marca inactivo. **No se borra**, porque las multas impuestas
-  lo referencian (RN-40).
+- A1. Corregir un concepto → **se da de baja y se crea de nuevo**. No se edita en sitio: el
+  valor y el respaldo son lo que la multa copia al imponerse (RN-37), y editarlos dejaría multas
+  apuntando a un texto que ya no dice lo mismo.
+- A2. Dar de baja un concepto → se marca inactivo y **sigue a la vista**, en su propia sección.
+  No se borra, porque las multas impuestas lo referencian (RN-40). Se puede reactivar: a veces
+  la reforma que lo dejó sin sustento se revierte.
+- A6. Nombre repetido entre los activos → el sistema no lo crea. Dos conceptos con el mismo
+  nombre hacen que quien impone la multa no sepa cuál escoger.
 - A3. La asamblea aprueba multas nuevas → se crean los conceptos citando esa acta, y quedan
   disponibles desde entonces.
 - A4. **Se reforma el manual de convivencia** → los conceptos afectados se dan de baja y se
@@ -500,7 +505,22 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
 - RN-49: el administrador **parametriza**, no decide.
 - RN-40, RN-45.
 
-**Estado en el demo:** ⬜ — no existe.
+**Estado en el demo:** ✅ — `src/features/admin/CatalogoMultasPage.tsx`, con la semilla
+cargada desde el manual de convivencia, que es donde vive en la práctica.
+
+Dos decisiones de la pantalla, por si alguien las quiere cambiar:
+
+- **El respaldo se pregunta primero**, antes que la conducta y el valor. Es lo que decide si el
+  concepto puede existir; un formulario que lo pregunta de último invita a escribir la multa
+  primero y buscarle sustento después.
+- **Cada origen pide lo suyo**: el reglamento y el manual piden artículo, el acta pide fecha, y
+  «otro» pide además el nombre del documento. Pedir «referencia» a secas deja que cada quien
+  escriba una cosa distinta.
+
+**Pendiente:** **no se editan**. Para corregir un concepto se da de baja y se crea de nuevo, que
+es lo que ya exigía A4 cuando cambia el documento. Editar en sitio sería cómodo para arreglar
+una palabra, y peligroso para todo lo demás: el valor y el respaldo son lo que la multa copia
+al imponerse (RN-37).
 
 ---
 

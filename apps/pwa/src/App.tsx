@@ -30,6 +30,7 @@ import { TableroPage } from './features/admin/TableroPage'
 import { UnidadesPage } from './features/admin/UnidadesPage'
 import { RegistrosPage } from './features/admin/RegistrosPage'
 import { CarteraPage } from './features/admin/CarteraPage'
+import { CatalogoMultasPage } from './features/admin/CatalogoMultasPage'
 import { ReservasAdminPage } from './features/admin/ReservasAdminPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
@@ -113,6 +114,7 @@ export function App() {
         <Route path="unidades" element={<UnidadesPage />} />
         <Route path="registros" element={<RegistrosPage />} />
         <Route path="cartera" element={<CarteraPage />} />
+        <Route path="multas" element={<CatalogoMultasPage />} />
         <Route path="reservas" element={<ReservasAdminPage />} />
         <Route path="pqrs" element={<PqrsAdminPage />} />
         <Route path="comunicados" element={<ComunicadosAdminPage />} />

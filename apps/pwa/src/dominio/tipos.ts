@@ -134,6 +134,56 @@ export interface Pago {
 }
 
 // ---------------------------------------------------------------------------
+// Catalogo de multas — CU-A-22 · RN-38, RN-40
+// ---------------------------------------------------------------------------
+
+/**
+ * De donde sale la autoridad para cobrar algo que no es la cuota ordinaria.
+ *
+ * Los cuatro son rastreables y **se citan distinto**: el reglamento y el manual
+ * por articulo, el acta por fecha, y `otro` obligando a decir cual es el
+ * documento (RN-38).
+ *
+ * `manual` cuenta aparte de `reglamento` porque son documentos distintos: el
+ * reglamento de propiedad horizontal es el constitutivo —escritura publica,
+ * registrado— y el manual de convivencia lo adopta la asamblea para el dia a
+ * dia. **En la practica el catalogo de sanciones suele vivir en el manual**, y
+ * obligar a citar «reglamento» donde la conducta esta en el manual haria que la
+ * referencia no se pudiera comprobar (Mary, 2026-09-08).
+ */
+export type OrigenRespaldo = 'reglamento' | 'manual' | 'asamblea' | 'otro'
+
+/**
+ * Un concepto del catalogo de multas.
+ *
+ * **El administrador no lo inventa, lo traslada** (Mary, 2026-09-08): las multas
+ * las define la asamblea o ya estan en el reglamento o el manual de convivencia.
+ * Por eso `origen` y `referencia` no son opcionales, y por eso el concepto se
+ * desactiva pero no se borra (RN-40): las multas impuestas lo referencian.
+ */
+export interface ConceptoSancion {
+  id: string
+  copropiedadId: string
+  /** «Ruido fuera de horario», «Mascota sin correa». */
+  nombre: string
+  /** Que conducta se sanciona. Lo lee quien recibe la multa. */
+  descripcion: string
+  /** Valor que fija el documento. Se copia al imponer la multa (RN-37). */
+  valor: Dinero
+  origen: OrigenRespaldo
+  /** El articulo, la fecha del acta, o donde lo diga el otro documento. */
+  referencia: string
+  /** Solo con `origen: 'otro'`: cual es el documento. Sin esto no se crea (RN-38). */
+  documento?: string
+  /** El acta, cuando el origen es una asamblea del sistema. */
+  actaId?: string
+  activo: boolean
+  creadoEn: FechaHoraISO
+  /** Cuando se dio de baja. El concepto queda, deja de ofrecerse (RN-40). */
+  inactivoDesde?: FechaISO
+}
+
+// ---------------------------------------------------------------------------
 // Zonas comunes y reservas
 // ---------------------------------------------------------------------------
 export interface ZonaComun {
@@ -569,6 +619,7 @@ export interface BaseDatos {
   residencias: Residencia[]
   cuotas: Cuota[]
   pagos: Pago[]
+  conceptosSancion: ConceptoSancion[]
   zonasComunes: ZonaComun[]
   reservas: Reserva[]
   pqrs: Pqrs[]

@@ -9,6 +9,7 @@ import type {
   Asamblea,
   BaseDatos,
   Comunicado,
+  ConceptoSancion,
   Documento,
   Correspondencia,
   Cuota,
@@ -78,6 +79,16 @@ export function cuotasDeUnidad(bd: BaseDatos, unidadId?: string): Cuota[] {
 export function cuotasDeCopropiedad(bd: BaseDatos, copropiedadId: string): Cuota[] {
   const ids = new Set(unidadesDe(bd, copropiedadId).map((u) => u.id))
   return bd.cuotas.filter((c) => ids.has(c.unidadId))
+}
+
+/** El catalogo de multas de la copropiedad: activos primero (CU-A-22). */
+export function conceptosSancionDe(bd: BaseDatos, copropiedadId: string): ConceptoSancion[] {
+  return bd.conceptosSancion
+    .filter((concepto) => concepto.copropiedadId === copropiedadId)
+    .sort((a, b) => {
+      if (a.activo !== b.activo) return a.activo ? -1 : 1
+      return a.nombre.localeCompare(b.nombre)
+    })
 }
 
 export function zonasDe(bd: BaseDatos, copropiedadId: string): ZonaComun[] {

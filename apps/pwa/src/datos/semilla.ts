@@ -12,6 +12,7 @@ import type {
   Asamblea,
   BaseDatos,
   Comunicado,
+  ConceptoSancion,
   Correspondencia,
   Cuota,
   Pago,
@@ -34,7 +35,7 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 3 — rol de porteria: la correspondencia guarda quien la recibio del mensajero.
 // 4 — paz y salvo: cubiertoHasta, codigo de verificacion y una unidad sin saldo.
 // 5 — el portero entra al demo como persona y perfil.
-export const VERSION_ESQUEMA = 9
+export const VERSION_ESQUEMA = 10
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -814,6 +815,83 @@ const votos: Voto[] = VOTOS_ASAMBLEA_CERRADA.map(([unidadId, opcionId], i) => ({
   fecha: fechaHoraRelativa(-150, '19:2' + String(i % 10)),
 }))
 
+/**
+ * El catalogo de multas de la copropiedad (CU-A-22).
+ *
+ * **Los cuatro salen del manual de convivencia**, y es a proposito: es donde
+ * viven en la practica (Mary, 2026-09-08). El quinto esta inactivo para que se
+ * vea que un concepto dado de baja no desaparece — sigue ahi porque las multas
+ * que se impusieron con el lo referencian (RN-40).
+ *
+ * Los valores estan en salarios minimos diarios en la vida real; aqui van en
+ * pesos redondos porque el demo no tiene el SMLDV del ano.
+ */
+const conceptosSancion: ConceptoSancion[] = [
+  {
+    id: 'cs-1',
+    copropiedadId: COPROPIEDAD_ID,
+    nombre: 'Ruido fuera de horario',
+    descripcion:
+      'Música, fiestas o trabajos ruidosos entre las 10:00 p. m. y las 7:00 a. m., o fuera del horario que fije la administración.',
+    valor: 180000,
+    origen: 'manual',
+    referencia: 'Artículo 14, numeral 3',
+    activo: true,
+    creadoEn: fechaHoraRelativa(-320, '09:15'),
+  },
+  {
+    id: 'cs-2',
+    copropiedadId: COPROPIEDAD_ID,
+    nombre: 'Mascota sin correa en zonas comunes',
+    descripcion:
+      'Circular con la mascota suelta por pasillos, ascensores o zonas comunes, o no recoger sus excrementos.',
+    valor: 120000,
+    origen: 'manual',
+    referencia: 'Artículo 21',
+    activo: true,
+    creadoEn: fechaHoraRelativa(-320, '09:20'),
+  },
+  {
+    id: 'cs-3',
+    copropiedadId: COPROPIEDAD_ID,
+    nombre: 'Uso indebido del parqueadero de visitantes',
+    descripcion:
+      'Estacionar un vehículo de la unidad en los cupos de visitantes, o cederlos a terceros ajenos a una visita.',
+    valor: 150000,
+    origen: 'manual',
+    referencia: 'Artículo 18, parágrafo 2',
+    activo: true,
+    creadoEn: fechaHoraRelativa(-320, '09:25'),
+  },
+  {
+    id: 'cs-4',
+    copropiedadId: COPROPIEDAD_ID,
+    nombre: 'Daño a bienes comunes',
+    descripcion:
+      'Deterioro de ascensores, puertas, jardines o equipos de las zonas comunes por uso descuidado. Se cobra además la reparación.',
+    valor: 250000,
+    origen: 'reglamento',
+    referencia: 'Artículo 42',
+    activo: true,
+    creadoEn: fechaHoraRelativa(-320, '09:30'),
+  },
+  {
+    id: 'cs-5',
+    copropiedadId: COPROPIEDAD_ID,
+    nombre: 'Incumplimiento del aforo del salón social',
+    descripcion:
+      'Superar el número de asistentes autorizado en una reserva del salón social.',
+    valor: 200000,
+    origen: 'asamblea',
+    referencia: 'Asamblea ordinaria del 12 de marzo de 2025',
+    // Inactivo a proposito: la reforma del manual de 2026 absorbio esta conducta.
+    // Sigue en el catalogo porque las multas impuestas en su momento lo citan.
+    activo: false,
+    creadoEn: fechaHoraRelativa(-540, '11:00'),
+    inactivoDesde: sumarDias(hoyISO(), -60),
+  },
+]
+
 // ---------------------------------------------------------------------------
 // Semilla completa
 // ---------------------------------------------------------------------------
@@ -838,6 +916,7 @@ export function crearSemilla(): BaseDatos {
     residencias,
     cuotas,
     pagos,
+    conceptosSancion,
     zonasComunes,
     reservas: construirReservas(),
     pqrs,

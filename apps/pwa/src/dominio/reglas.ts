@@ -9,6 +9,8 @@
 import type {
   Asamblea,
   CategoriaRegistro,
+  ConceptoSancion,
+  OrigenRespaldo,
   RolUsuario,
   Cuota,
   FechaISO,
@@ -450,6 +452,90 @@ export function solicitudesEsperandoRespuesta(pqrs: Pqrs[], reservas: Reserva[])
 // Tres actos separados: **registrar**, **adjuntar** y **autorizar**. Nunca los
 // hace la misma persona en el mismo momento, y de ahi sale todo lo demas.
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Catalogo de multas — RN-38, RN-40 · CU-A-22
+// ---------------------------------------------------------------------------
+
+/**
+ * Como se cita cada origen del respaldo (RN-38).
+ *
+ * No es cosmetica: **decide que se le pide a quien parametriza**. Un reglamento
+ * se cita por articulo y un acta por fecha, y pedir «referencia» a secas deja
+ * que cada quien escriba una cosa distinta — que es lo que hace que despues nadie
+ * pueda comprobar nada.
+ */
+export const ORIGENES_RESPALDO: ReadonlyArray<{
+  id: OrigenRespaldo
+  texto: string
+  /** Que se escribe en `referencia`. */
+  etiqueta: string
+  ejemplo: string
+}> = [
+  {
+    id: 'reglamento',
+    texto: 'Reglamento de propiedad horizontal',
+    etiqueta: 'Artículo del reglamento',
+    ejemplo: 'Artículo 42',
+  },
+  {
+    id: 'manual',
+    texto: 'Manual de convivencia',
+    etiqueta: 'Artículo del manual',
+    ejemplo: 'Artículo 14, numeral 3',
+  },
+  {
+    id: 'asamblea',
+    texto: 'Acta de asamblea',
+    etiqueta: 'Fecha del acta',
+    ejemplo: 'Asamblea ordinaria del 15 de marzo de 2026',
+  },
+  {
+    id: 'otro',
+    texto: 'Otro documento',
+    etiqueta: 'Dónde lo dice',
+    ejemplo: 'Artículo 4',
+  },
+]
+
+/**
+ * RN-38 — El respaldo de un concepto de multa esta completo.
+ *
+ * Se exige **siempre** la referencia, y **ademas el nombre del documento cuando
+ * el origen es `otro`**. Sin ese campo, «otro» seria la puerta por donde se
+ * escapa el principio entero: bastaria marcarlo para no justificar nada, y el
+ * respaldo dejaria de ser comprobable (Mary, 2026-09-08).
+ *
+ * «Resolucion del consejo N.º 12 del 3 de marzo, articulo 4» se puede ir a
+ * buscar; «otro» a secas, no.
+ */
+export function respaldoCompleto(concepto: {
+  origen: OrigenRespaldo
+  referencia: string
+  documento?: string
+}): boolean {
+  if (!concepto.referencia.trim()) return false
+  if (concepto.origen === 'otro') return !!concepto.documento?.trim()
+  return true
+}
+
+/** Como se lee el respaldo de un concepto, en una linea. */
+export function textoRespaldo(concepto: {
+  origen: OrigenRespaldo
+  referencia: string
+  documento?: string
+}): string {
+  const nombre =
+    concepto.origen === 'otro'
+      ? (concepto.documento ?? 'Otro documento')
+      : (ORIGENES_RESPALDO.find((o) => o.id === concepto.origen)?.texto ?? concepto.origen)
+  return `${nombre} · ${concepto.referencia}`
+}
+
+/** RN-40 — Los que se pueden imponer hoy. Los inactivos siguen existiendo. */
+export function conceptosActivos(conceptos: ConceptoSancion[]): ConceptoSancion[] {
+  return conceptos.filter((concepto) => concepto.activo)
+}
 
 /**
  * RN-67 — Quien puede mirar los soportes, y que queda cuando los mira.

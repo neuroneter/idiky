@@ -192,6 +192,10 @@ textarea {
 .boton--bloque {
   width: 100%;
 }
+.boton {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
 .boton--pequeno {
   padding: 0.36rem 0.7rem;
   font-size: var(--texto-xs);
