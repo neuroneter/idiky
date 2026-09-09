@@ -537,7 +537,8 @@ al imponerse (RN-37).
   asamblea o ya está en el reglamento o el manual (RN-38); lo que él resuelve es si los hechos
   ocurrieron.
 - **Precondiciones:** El catálogo tiene al menos una multa habilitada (CU-A-22), y la
-  copropiedad tiene parametrizados sus plazos (`diasDescargos`, `diasImpugnacion`).
+  copropiedad tiene parametrizados sus plazos (`diasDescargos`, `diasImpugnacion`) y el
+  término de reincidencia (`mesesReincidencia`).
 - **Disparador:** Ocurre una conducta sancionable.
 - **Resultado esperado:** Queda abierto un expediente con sus hechos y su línea de tiempo, y
   **solo si queda en firme** se convierte en una cuota en la cartera de la unidad.
@@ -549,7 +550,8 @@ al imponerse (RN-37).
 1. El administrador abre el proceso: elige la unidad, una multa del catálogo y describe **los
    hechos** —qué pasó, cuándo y dónde—. El valor y el respaldo **no se escriben**: salen del
    catálogo, que es lo que los hace comprobables (RN-38, RN-49).
-   Si la unidad ya tiene sanciones **en firme** por esa misma conducta, la pantalla lo dice
+   Si la unidad ya tiene sanciones **en firme y dentro del término de reincidencia** —un año en
+   esta copropiedad— por esa misma conducta, la pantalla lo dice
    antes de abrir el proceso, y dice también qué valor va a aplicar: el agravado si el
    catálogo lo tiene parametrizado, **y el mismo de siempre si no** (RN-72). Que la unidad
    reincida no sube la multa por sí solo.
@@ -598,10 +600,10 @@ al imponerse (RN-37).
   anula), RN-71 (la multa cuenta como mora igual que cualquier cuota), RN-72 (la reincidencia
   agrava solo si un documento lo dice).
 
-> **Lo que sigue abierto:** si el que impone puede **ajustar el valor** dentro de algún tope
-> —hoy no puede, y es el límite entre parametrizar e imponer (RN-49)—, y si la **reincidencia
-> caduca**: hoy cuenta cualquier antecedente en firme, sin ventana de tiempo. Las demás
-> preguntas de §3 quater quedaron respondidas el 2026-09-09. Ver
+> **Lo único que sigue abierto de §3 quater:** si el que impone puede **ajustar el valor**
+> dentro de algún tope. Hoy no puede, y es deliberado — es el límite entre parametrizar e
+> imponer (RN-49): si el valor se mueve caso por caso, el administrador vuelve a estar
+> decidiendo la sanción. Ver
 > [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 quater.
 
 **Estado en el demo:** ✅ — `/admin/sanciones`.

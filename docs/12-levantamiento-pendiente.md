@@ -212,9 +212,11 @@ CU-A-22, CU-A-23 y CU-A-24.
   debe estar avalada por la asamblea, reglamento de propiedad horizontal, etc.»*. Es RN-38
   aplicada al agravante: sube **solo si un documento lo dice**, y ese documento se cita aparte
   —puede no ser el mismo que fija la multa base— (RN-72). Sin parametrizarlo, la multa no sube.
-  **Queda una punta suelta:** ¿la reincidencia **caduca**? Hoy cuenta cualquier antecedente en
-  firme, sin ventana de tiempo, así que una multa de hace cuatro años sigue agravando la de
-  hoy. Si el reglamento fija un plazo (el año calendario, doce meses), hay que parametrizarlo.
+  Y **caduca al año** (Mary, 2026-09-09): un antecedente deja de agravar pasada la ventana, que
+  es un parámetro de la copropiedad (`mesesReincidencia`, doce aquí) por lo mismo que los
+  plazos del debido proceso. Se cuenta **desde la imposición** del antecedente, no desde su
+  firmeza: si contara desde la firmeza, un proceso largo alargaría la ventana y quien se
+  defendió quedaría expuesto más tiempo que quien no dijo nada.
 - ~~**Multa anulada después de pagada.**~~ → ✅ **Disuelta (Mary, 2026-09-09):** *«una multa no
   se anula porque para eso existe el debido proceso»*. El momento de deshacerla es **durante**
   el proceso, archivándola; después no hay marcha atrás, y por eso la pregunta no tiene objeto.

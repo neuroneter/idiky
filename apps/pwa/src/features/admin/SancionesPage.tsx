@@ -116,6 +116,7 @@ export function SancionesPage() {
           unidades={unidades}
           conceptos={conceptosActivos(sel.conceptosSancionDe(bd, sesion.copropiedadId))}
           sanciones={sanciones}
+          mesesReincidencia={sel.copropiedad(bd, sesion.copropiedadId)?.mesesReincidencia ?? 12}
           alCerrar={() => setImponiendo(false)}
           alImponer={async (datos) => {
             const creada = await ejecutar(
@@ -242,12 +243,14 @@ function FormularioSancion({
   unidades,
   conceptos,
   sanciones,
+  mesesReincidencia,
   alImponer,
   alCerrar,
 }: {
   unidades: ReturnType<typeof sel.unidadesDe>
   conceptos: ReturnType<typeof conceptosActivos>
   sanciones: Sancion[]
+  mesesReincidencia: number
   alImponer: (datos: { unidadId: string; conceptoId: string; hechos: string }) => Promise<void>
   alCerrar: () => void
 }) {
@@ -260,8 +263,14 @@ function FormularioSancion({
   // Lo que se va a imponer de verdad, contando la reincidencia (RN-72). Se
   // calcula aqui y no se adivina: el administrador tiene que ver el valor antes
   // de abrir el proceso, no enterarse despues.
-  const vecesPrevias = concepto ? vecesSancionada(sanciones, unidadId, concepto.id) : 0
+  const vecesPrevias = concepto
+    ? vecesSancionada(sanciones, unidadId, concepto.id, mesesReincidencia)
+    : 0
   const aplicable = concepto ? multaAplicable(concepto, vecesPrevias) : null
+  // «Ya fue sancionada una vez» a secas invita a pensar que cuenta cualquier
+  // antecedente. La ventana se dice, porque es la mitad de la regla (RN-72).
+  const ventana =
+    mesesReincidencia === 12 ? 'el último año' : `los últimos ${mesesReincidencia} meses`
 
   if (conceptos.length === 0) {
     return (
@@ -336,17 +345,17 @@ function FormularioSancion({
             {aplicable.reincidencia ? (
               <>
                 Esta unidad ya fue sancionada{' '}
-                {vecesPrevias === 1 ? 'una vez' : `${vecesPrevias} veces`} por esta conducta, así
-                que aplica el valor agravado: <strong>{formatearDinero(aplicable.valor)}</strong>,
-                según {aplicable.respaldo}.
+                {vecesPrevias === 1 ? 'una vez' : `${vecesPrevias} veces`} por esta conducta en{' '}
+                {ventana}, así que aplica el valor agravado:{' '}
+                <strong>{formatearDinero(aplicable.valor)}</strong>, según {aplicable.respaldo}.
               </>
             ) : (
               <>
                 Esta unidad ya fue sancionada{' '}
-                {vecesPrevias === 1 ? 'una vez' : `${vecesPrevias} veces`} por esta conducta, pero{' '}
-                <strong>el valor no cambia</strong>: ningún documento dice que esta multa suba al
-                repetirse. Para que suba hay que parametrizarlo en el catálogo, con la norma que lo
-                respalde.
+                {vecesPrevias === 1 ? 'una vez' : `${vecesPrevias} veces`} por esta conducta en{' '}
+                {ventana}, pero <strong>el valor no cambia</strong>: ningún documento dice que esta
+                multa suba al repetirse. Para que suba hay que parametrizarlo en el catálogo, con la
+                norma que lo respalde.
               </>
             )}
           </p>

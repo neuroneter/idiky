@@ -169,13 +169,27 @@ agravante. Tiene dos mitades y la segunda importa igual que la primera:
 una abierta no ha establecido nada; contar cualquiera de las dos sería agravar una multa con
 hechos que nadie probó, que es justo lo que el debido proceso existe para impedir.
 
-**Una punta suelta que dejé abierta a propósito:** hoy la reincidencia **no caduca** —cuenta
-cualquier antecedente en firme, así sea de hace cuatro años—. No me pareció que pudiera
-inventarme una ventana de tiempo; si el reglamento fija un plazo, hay que parametrizarlo.
+**Y la caducidad, que había dejado abierta, Mary la cerró en la misma sesión:** *«la
+reincidencia caduca al año»*. Un antecedente deja de agravar pasada la ventana, que es un
+**parámetro de la copropiedad** (`mesesReincidencia`) por lo mismo que los plazos del debido
+proceso: la fija el reglamento, no la app. Una multa de hace cuatro años no dice nada sobre
+quien vive allí hoy.
 
-**Lo que sigue abierto** de §3 quater: si quien impone puede **ajustar el valor** dentro de
-algún tope —hoy no puede, y es el límite entre parametrizar e imponer— y la caducidad de la
-reincidencia.
+**La ventana se cuenta desde la imposición del antecedente, no desde su firmeza**, y es la
+decisión de esta parte que conviene mirar dos veces. Si contara desde la firmeza, un proceso
+largo —con descargos e impugnación— alargaría la ventana, y **quien se defendió quedaría
+expuesto más tiempo que quien no dijo nada**. Defenderse no puede costar caro.
+
+También hubo que cambiar el texto: «esta unidad ya fue sancionada una vez por esta conducta»
+pasó a decir **«…en el último año»**. Sin la ventana, la frase invita a creer que cuenta
+cualquier antecedente, que es justo lo que dejó de ser cierto.
+
+**Verificado con Playwright en los tres bordes**: un antecedente de hace 3 meses agrava
+($ 360.000); uno de hace 13 meses no agrava, vuelve a $ 180.000 y **ni se menciona**; y uno de
+hace ~11,6 meses todavía agrava.
+
+**Lo único que sigue abierto** de §3 quater: si quien impone puede **ajustar el valor** dentro
+de algún tope. Hoy no puede, y es deliberado — es el límite entre parametrizar e imponer.
 
 **Lo que sigue:** CU-A-24 (cuota extraordinaria) y ADR-0007 (transmisión en vivo), que no
 tienen bloqueos.

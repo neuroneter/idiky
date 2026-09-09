@@ -40,6 +40,14 @@ export interface Copropiedad {
    */
   diasDescargos: number
   diasImpugnacion: number
+  /**
+   * Meses que un antecedente en firme sigue agravando la multa (RN-72).
+   *
+   * Parametro por la misma razon que los plazos del debido proceso: **la
+   * caducidad de la reincidencia la fija el reglamento de cada copropiedad**, no
+   * la app. Doce en esta (Mary, 2026-09-09: «la reincidencia caduca al ano»).
+   */
+  mesesReincidencia: number
 }
 
 export type TipoUnidad = 'apartamento' | 'casa' | 'local'

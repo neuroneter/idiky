@@ -61,6 +61,15 @@ export function sumarDias(fecha: FechaISO, dias: number): FechaISO {
   return `${base.getFullYear()}-${mes}-${dia}`
 }
 
+/** Corre una fecha `meses` hacia atras. Usa el calendario, no 30 dias por mes. */
+export function restarMeses(fecha: FechaISO, meses: number): FechaISO {
+  const base = new Date(`${fecha}T12:00:00`)
+  base.setMonth(base.getMonth() - meses)
+  const mes = String(base.getMonth() + 1).padStart(2, '0')
+  const dia = String(base.getDate()).padStart(2, '0')
+  return `${base.getFullYear()}-${mes}-${dia}`
+}
+
 /** Diferencia en dias entre dos fechas ISO (positiva si `hasta` es posterior). */
 export function diasEntre(desde: FechaISO, hasta: FechaISO): number {
   const a = new Date(`${desde.slice(0, 10)}T12:00:00`).getTime()
@@ -619,23 +628,39 @@ export function textoRespaldo(concepto: {
 }
 
 /**
- * RN-72 — Cuantas veces se sanciono **en firme** a esta unidad por esta conducta.
+ * RN-72 — Cuantas veces se sanciono **en firme y dentro de la ventana** a esta
+ * unidad por esta conducta.
  *
  * Solo cuentan las firmes, y es deliberado: un proceso archivado termino en que
  * **no hubo infraccion**, y uno todavia abierto no ha establecido nada. Contar
  * cualquiera de los dos seria agravar una multa con hechos que nadie probo — que
  * es justo lo que el debido proceso existe para impedir (RN-69, RN-70).
+ *
+ * **Y la reincidencia caduca** (Mary, 2026-09-09): un antecedente deja de
+ * agravar cuando pasa la ventana que fija el reglamento —`mesesReincidencia`,
+ * doce meses en esta copropiedad—. Una multa de hace cuatro anos no dice nada
+ * sobre quien vive alli hoy.
  */
 export function vecesSancionada(
   sanciones: Sancion[],
   unidadId: string,
   conceptoId: string,
+  mesesVigencia: number,
+  hoy: FechaISO = hoyISO(),
 ): number {
+  const desde = restarMeses(hoy, mesesVigencia)
   return sanciones.filter(
     (sancion) =>
       sancion.unidadId === unidadId &&
       sancion.conceptoId === conceptoId &&
-      sancion.estado === 'firme',
+      sancion.estado === 'firme' &&
+      // La ventana se cuenta desde la **imposicion**, no desde la firmeza
+      // (Mary, 2026-09-09: «la reincidencia caduca al ano»). Es la fecha con la
+      // que la sancion esta fechada, y sobre todo **no se estira**: si contara
+      // desde la firmeza, un proceso largo —con descargos e impugnacion—
+      // alargaria la ventana, y quien se defendio quedaria expuesto mas tiempo
+      // que quien no dijo nada. Defenderse no puede costar caro.
+      sancion.fechaImposicion.slice(0, 10) >= desde,
   ).length
 }
 

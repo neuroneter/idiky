@@ -758,10 +758,15 @@ export async function imponerSancion(
   // RN-72: la reincidencia se cuenta sobre sanciones **en firme**, y solo agrava
   // si el catalogo la tiene parametrizada. Sin documento que lo diga, la multa
   // no sube por muchas veces que se repita la conducta.
-  const vecesPrevias = vecesSancionada(bd.sanciones, parametros.unidadId, concepto.id)
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  const vecesPrevias = vecesSancionada(
+    bd.sanciones,
+    parametros.unidadId,
+    concepto.id,
+    copropiedad?.mesesReincidencia ?? 12,
+  )
   const aplicable = multaAplicable(concepto, vecesPrevias)
 
-  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
   const consecutivo = bd.consecutivos.sancion + 1
   bd.consecutivos.sancion = consecutivo
 
@@ -791,7 +796,7 @@ export async function imponerSancion(
     'administracion',
     'Se notificó la apertura del proceso',
     aplicable.reincidencia
-      ? `Se le comunicaron los hechos y el plazo para presentar descargos. Es la vez ${vecesPrevias + 1} que se sanciona esta conducta en la unidad, así que aplica el valor agravado que fija ${aplicable.respaldo}.`
+      ? `Se le comunicaron los hechos y el plazo para presentar descargos. Es la vez ${vecesPrevias + 1} que se sanciona esta conducta en la unidad dentro del término de reincidencia, así que aplica el valor agravado que fija ${aplicable.respaldo}.`
       : `Se le comunicaron los hechos, la norma que los sanciona (${aplicable.respaldo}) y el plazo para presentar descargos.`,
     parametros.impuestaPor,
   )

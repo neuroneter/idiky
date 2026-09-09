@@ -38,7 +38,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 5 — el portero entra al demo como persona y perfil.
 // 12 — la sancion guarda la norma que la respalda, copiada al imponerla (RN-38).
 // 13 — el concepto puede llevar reincidencia, con su propio respaldo (RN-72).
-export const VERSION_ESQUEMA = 13
+// 14 — la reincidencia caduca: mesesReincidencia en la copropiedad (RN-72).
+export const VERSION_ESQUEMA = 14
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1010,6 +1011,9 @@ export function crearSemilla(): BaseDatos {
         // copropiedad. No son constantes de la app (RN-69).
         diasDescargos: 10,
         diasImpugnacion: 5,
+        // Un ano, tomado del reglamento de esta copropiedad. Como los plazos:
+        // no es una constante de la app (RN-72).
+        mesesReincidencia: 12,
       },
     ],
     unidades,
