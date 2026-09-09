@@ -162,17 +162,19 @@ aprobó esa copropiedad, y la ley solo dice hasta dónde puede llegar.
 > propiedad horizontal y su tope según la Ley 675. Ver
 > [`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md) §3 quinquies.
 
-### Entidades de multas y cobros adicionales
+### Entidades de multas
 
-> **Propuestas, no implementadas.** Salen del alcance que pidió Mary el 2026-08-27: el
-> administrador debe poder cobrar **cuotas adicionales** y **multas**, y dentro de multas
-> definir cuáles existen.
+> ✅ **Implementadas** (CU-A-22, CU-A-23, CU-R-29). Salieron del alcance que pidió Mary el
+> 2026-08-27: el administrador debe poder cobrar **multas**, y antes definir cuáles existen.
+>
+> Aquel encargo decía «cuotas adicionales **y** multas». **Las cuotas adicionales no
+> sobrevivieron**: el 2026-09-09 Mary aclaró que son lo mismo que las extraordinarias, así que
+> `TipoCuota` nunca ganó el valor `'adicional'` y CU-A-24 se retiró (RN-73).
 
-`TipoCuota` gana un valor: pasa a ser
-`'ordinaria' | 'extraordinaria' | 'adicional' | 'interes' | 'sancion'`. Una multa impuesta y
-un cobro adicional **no son entidades nuevas en la cartera**: son `Cuota` con su tipo, así que
-entran solos en el saldo (RN-03), en la imputación por antigüedad (RN-06) y en el estado de
-cuenta del residente, sin tocar nada de eso.
+`TipoCuota` quedó en `'ordinaria' | 'extraordinaria' | 'interes' | 'sancion'`. Una multa
+impuesta **no es una entidad nueva en la cartera**: es una `Cuota` con su tipo, así que entra
+sola en el saldo (RN-03), en la imputación por antigüedad (RN-06), en la mora (RN-71) y en el
+estado de cuenta del residente, sin tocar nada de eso.
 
 ### ConceptoSancion — el catálogo de multas
 
@@ -403,7 +405,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-38 | Solo se puede imponer una multa que exista en el catálogo, y un concepto solo entra al catálogo si lo contempla **el reglamento de propiedad horizontal, el manual de convivencia, un acta de asamblea, u otro documento que haya que nombrar** (Mary, 2026-09-08). **El administrador no define las multas**: las define la asamblea o ya están en esos documentos; él las parametriza (RN-49) y después **las aplica** (Mary, 2026-09-09: *«la multa la impone el administrador de acuerdo con las multas aprobadas en asamblea, en el reglamento de propiedad horizontal, etc.»*). Por eso la norma **se copia al expediente** (`Sancion.respaldo`) y se muestra al lado de los hechos: una multa se comprueba por sus dos mitades, y sin la cita «te multaron por ruido» es la palabra del administrador contra la del copropietario. El reglamento y el manual se citan por artículo; el acta, por fecha; **`otro` exige escribir cuál es el documento** — sin eso sería la puerta por donde se escapa el respaldo entero. | `dominio/reglas.ts` (`respaldoCompleto`) + `repositorio.ts` |
 | RN-39 | Una multa genera cuota **solo cuando queda firme**, nunca al imponerla. Y queda firme por dos caminos: **se venció el plazo de impugnación sin que impugnara**, o **se resolvió la impugnación**. En el código eso es literal: `darFirmezaSancion` es **el único sitio del sistema** donde nace una `Cuota` de tipo `sancion`. Es lo que separa una sanción de un cobro. | `repositorio.ts` (`darFirmezaSancion`) + `dominio/reglas.ts` (`puedeQuedarEnFirme`) |
 | RN-40 | Un concepto del catálogo no se borra: **se inhabilita**, porque las multas impuestas lo referencian. Los inhabilitados **siguen a la vista**, en su propia sección: esconderlos haría creer que se borraron. Mismo verbo que con las personas (RN-61), porque es lo mismo que pasa (Mary, 2026-09-09). | `repositorio.ts` (`cambiarEstadoConceptoSancion`) |
-| RN-41 | Una cuota adicional exige concepto y valor explícitos; no se prorratea por coeficiente. | *pendiente* |
+| ~~RN-41~~ | ⛔ **Retirada el 2026-09-09.** Decía que una cuota adicional exige concepto y valor explícitos y no se prorratea por coeficiente. **La figura no existe:** *«las cuotas adicionales son lo mismo que cuotas extraordinarias»* (Mary), y la extraordinaria sí se prorratea (RN-05) y sí la aprueba la asamblea (RN-46). El número no se reutiliza. | — |
 | RN-42 | El interés de mora solo se calcula si la copropiedad lo tiene activado; apagado, no se genera ninguno. | *pendiente* |
 | RN-43 | La tasa la aprueba la copropiedad —su reglamento o un acta de asamblea— y el sistema exige registrar cuál. La ley solo pone el techo: una tasa por encima del tope legal se rechaza. **(? — tope por confirmar)** | *pendiente* |
 | RN-44 | El interés se liquida sobre lo vencido y genera una cuota de tipo `interes`, que entra en la cartera como cualquier otra. | *pendiente* |
@@ -435,6 +437,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-70 | **Una sanción en firme no se anula** (Mary, 2026-09-09: *«una multa no se anula porque para eso existe el debido proceso»*). El momento de deshacerla es **durante** el proceso —archivándola con su motivo—, no después. Es la consecuencia de tomarse el debido proceso en serio: si la multa se pudiera anular al final, las cinco etapas serían un trámite decorativo y el copropietario no tendría por qué usarlas. Por eso el código no tiene ninguna transición que salga de `firme`, y por eso tampoco hay que responder qué pasa con una multa anulada después de pagada: no puede haberla. | `dominio/reglas.ts` (`ETAPAS_SANCION`) — `firme` no tiene salida |
 | RN-71 | **La mora no distingue el origen del cobro** (Mary, 2026-09-09: *«las multas como las cuotas ordinarias o extraordinarias cuentan como mora»*). Una multa en firme y vencida bloquea reservas (RN-08) y pesa en el paz y salvo (RN-26) igual que la cuota del mes. En el código eso ya era así porque ninguna regla de mora filtra por `Cuota.tipo` — pero era un supuesto, y ahora es una decisión: **una multa que no cuenta como mora es una multa que no se cobra**. | `dominio/reglas.ts` (`estaEnMora`, `calcularSaldo`, `calcularSaldoVencido`, `diasDeMora`) |
 | RN-72 | **La reincidencia también necesita respaldo** (Mary, 2026-09-09: *«la multa por reincidencia debe estar avalada por la asamblea, reglamento de propiedad horizontal, etc.»*). Es RN-38 aplicada al agravante, y tiene dos mitades. La primera: si el catálogo tiene parametrizada la reincidencia —**con su propia cita**, que puede ser un documento distinto del de la multa base—, a partir de la segunda vez se impone el valor agravado, y el expediente dice que lo es. **La segunda mitad importa igual**: si nadie la parametrizó, **la multa no sube** por muchas veces que se repita la conducta; la app no agrava por su cuenta ni «porque es obvio». Solo cuentan las sanciones **en firme**: una archivada terminó en que no hubo infracción y una abierta no ha establecido nada, así que contarlas sería agravar con hechos que nadie probó (RN-69, RN-70). **Y caduca** (Mary, 2026-09-09: *«la reincidencia caduca al año»*): un antecedente deja de agravar cuando pasa la ventana que fija el reglamento —`Copropiedad.mesesReincidencia`, parámetro por lo mismo que los plazos del debido proceso—. Una multa de hace cuatro años no dice nada sobre quien vive allí hoy. **La ventana se cuenta desde la imposición del antecedente, no desde su firmeza**, y esa es la parte que hay que mirar dos veces: si contara desde la firmeza, un proceso largo —con descargos e impugnación— alargaría la ventana, y **quien se defendió quedaría expuesto más tiempo que quien no dijo nada**. Defenderse no puede costar caro. | `dominio/reglas.ts` (`vecesSancionada`, `multaAplicable`, `restarMeses`) + `repositorio.ts` |
+| RN-73 | **No hay «cuota adicional»: lo que se cobra fuera de la ordinaria es la extraordinaria** (Mary, 2026-09-09: *«las cuotas adicionales se estipulan en la asamblea de propietarios»*, y enseguida: *«me retracto, las cuotas adicionales son lo mismo que cuotas extraordinarias»*). Las dos frases dicen lo mismo por dos caminos: si lo estipula la asamblea, ya es la extraordinaria — que es la que la asamblea aprueba (RN-46), con destinación específica (RN-48) y prorrateada por coeficiente (RN-05). La regla no agrega nada al modelo; **le quita**: `TipoCuota` no gana un valor `'adicional'`, CU-A-24 se retira y RN-41 con él. Dos nombres para una figura obligan a quien los lee a preguntarse en qué se diferencian, y la respuesta era «en nada». | `dominio/tipos.ts` (`TipoCuota` se queda en cuatro) |
 
 ### RegistroPersona — el trámite de entrada de una persona (CU-R-27, CU-R-28)
 

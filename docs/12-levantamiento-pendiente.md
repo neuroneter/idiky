@@ -106,7 +106,7 @@ hay que responderlo explícitamente, no asumirlo.
 | Reserva de parqueaderos de visitantes | ❓ Sin confirmar | No mencionado |
 | Control de mascotas | ❓ Sin confirmar | No mencionado |
 | **Multas y sanciones por convivencia** | ✅ v1 | Pedido el 2026-08-27. **CU-A-23 desbloqueado el 2026-09-09**: el debido proceso lo fija el reglamento y la app lo parametriza (§3 quater, RN-69) |
-| **Cobros adicionales por unidad** | ✅ v1 | Parqueadero, mascota, uso de zonas, reposición de daños (CU-A-24) |
+| ~~Cobros adicionales por unidad~~ | ⛔ | **Retirado el 2026-09-09**: son la cuota extraordinaria, no una figura aparte (RN-73). CU-A-24 retirado |
 | Facturación electrónica | ❓ Sin confirmar | No mencionado |
 
 ## 3. Funcionamiento de la copropiedad real
@@ -183,7 +183,8 @@ reglamento de la copropiedad y la Ley 675 de 2001.
 
 Mary pidió (2026-08-27) que el administrador pueda cobrar **cuotas adicionales** y **multas**,
 y que dentro de multas exista un subnivel para definir cuáles existen. Quedó documentado en
-CU-A-22, CU-A-23 y CU-A-24.
+CU-A-22, CU-A-23 y CU-A-24 — de los cuales **CU-A-24 se retiró el 2026-09-09**: las cuotas
+adicionales resultaron ser las extraordinarias (RN-73).
 
 **Antes de construirlo hay que responder esto**, porque una multa mal impuesta es nula:
 
@@ -227,12 +228,18 @@ CU-A-22, CU-A-23 y CU-A-24.
   multas como las cuotas ordinarias o extraordinarias cuentan como mora»*. **La mora no
   distingue el origen del cobro** (RN-71): una multa en firme y vencida bloquea reservas
   (RN-08) y pesa en el paz y salvo (RN-26) igual que la cuota del mes.
-- **Cuotas adicionales.** ¿Qué se cobra realmente por esta vía —parqueadero, mascota, uso de
-  zonas, reposición de daños— y quién lo autoriza? → *(respuesta)*
+- ~~**Cuotas adicionales.**~~ → ⛔ **La pregunta se disolvió (Mary, 2026-09-09):** *«me
+  retracto, las cuotas adicionales son lo mismo que cuotas extraordinarias»*. No había una vía
+  aparte que documentar: lo que se cobra fuera de la ordinaria es la **extraordinaria**, que
+  aprueba la asamblea (RN-46), lleva destinación específica (RN-48) y se prorratea por
+  coeficiente (RN-05). **CU-A-24 se retiró y RN-41 con él** (RN-73).
+  **Lo que quedó vivo de aquí** es el trabajo que la figura inventada estaba tapando: que la
+  extraordinaria **exija el acta que la aprobó**. Hoy `generarCuotas()` la crea sin pedirla, y
+  es lo que tiene a CU-A-05 en 🟡.
 
-> ✅ **Todo el bloque del debido proceso quedó respondido el 2026-09-09.** De §3 quater solo
-> sigue abierta la última pregunta, la de las **cuotas adicionales**, que es de CU-A-24 y no
-> toca las multas.
+> ✅ **§3 quater quedó respondida el 2026-09-09**, la sección entera — la primera del
+> levantamiento que se cierra. La última pregunta no se respondió: **se disolvió**, porque la
+> figura por la que preguntaba no existe.
 >
 > ~~**Mientras no haya respuestas, no se implementa CU-A-23.**~~ → **Levantado el 2026-09-09.**
 > CU-A-23 y CU-R-29 están construidos sobre la respuesta de Mary: la app **no fija** el debido

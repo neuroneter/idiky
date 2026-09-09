@@ -15,7 +15,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 67 documentados: 29 ✅ en el demo, 10 🟡 a medias, 28 ⬜ pendientes |
-| **Reglas de negocio** | 72 (RN-01…RN-72) |
+| **Reglas de negocio** | 73 (RN-01…RN-73) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -195,11 +195,29 @@ una restricción de pantalla — **`imponerSancion` no recibe un valor**, así q
 pasarlo. Una regla que solo esconde un campo se salta el día que alguien llame a la función
 desde otro sitio.
 
-De §3 quater solo queda abierta la pregunta por las **cuotas adicionales** —qué se cobra por
-esa vía y quién lo autoriza—, que es de CU-A-24 y no toca las multas.
+**Y la última no se respondió: se disolvió.** Mary primero dijo *«las cuotas adicionales se
+estipulan en la asamblea de propietarios»* y enseguida *«me retracto, las cuotas adicionales
+son lo mismo que cuotas extraordinarias»*. Las dos frases llevan al mismo sitio: si lo estipula
+la asamblea, **ya es la extraordinaria** — la que ella aprueba (RN-46), con destinación
+específica (RN-48) y prorrateada por coeficiente (RN-05).
 
-**Lo que sigue:** CU-A-24 (cuota extraordinaria) y ADR-0007 (transmisión en vivo), que no
-tienen bloqueos.
+**RN-73 no agrega nada al modelo: le quita.** `TipoCuota` nunca ganó el valor `'adicional'`,
+**CU-A-24 se retiró** y **RN-41 se retiró con él**. Alcancé a escribir el caso de uso corregido
+sobre la premisa de que eran dos figuras distintas; lo dejé en el documento tachado, con qué
+decía y por qué era un error, porque quien lea el histórico se va a topar con RN-41 y con
+menciones a un tipo de cuota que nunca existió y tiene que poder saber por qué desaparecieron.
+
+Dos nombres para una figura obligan a quien los lee a preguntarse en qué se diferencian, y aquí
+la respuesta era «en nada». La retractación **simplificó el modelo**.
+
+**Lo que queda vivo de ese encargo** es el trabajo que la figura inventada estaba tapando: que
+la cuota extraordinaria **exija el acta que la aprobó** (RN-46). Hoy `generarCuotas()` la crea
+sin pedirla, y es lo que tiene a CU-A-05 en 🟡.
+
+Con esto **§3 quater es la primera sección del levantamiento que se cierra entera**.
+
+**Lo que sigue:** exigirle el acta a la cuota extraordinaria (RN-46, saca a CU-A-05 de 🟡) y
+ADR-0007 (transmisión en vivo). Ninguno tiene bloqueos.
 
 ---
 

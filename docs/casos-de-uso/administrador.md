@@ -612,31 +612,33 @@ al imponerse (RN-37).
 ---
 
 ### CU-A-24
-## CU-A-24 — Cobrar una cuota adicional a una unidad
+## CU-A-24 — ~~Cobrar una cuota adicional a una unidad~~ · **Retirado**
 
-- **Actor principal:** Administrador
-- **Precondiciones:** Existe la unidad.
-- **Disparador:** Un cobro que no es la cuota del mes ni una extraordinaria de toda la
-  copropiedad: parqueadero adicional, mascota, uso de una zona con costo, reposición de un
-  daño.
-- **Resultado esperado:** La unidad tiene una cuota nueva de tipo `adicional`, con su concepto
-  y su vencimiento.
+> ⛔ **Retirado el 2026-09-09.** Mary: *«me retracto, las cuotas adicionales son lo mismo que
+> cuotas extraordinarias»*. No hay dos figuras: hay una, la **cuota extraordinaria**, y ya
+> tiene su caso de uso en la generación de cuotas (CU-A-05) y sus reglas (RN-05, RN-46, RN-48).
+>
+> **Se deja el registro en vez de borrar la sección**, por lo mismo que no se borra nada en
+> esta app: quien lea el histórico va a encontrar RN-41 y varias menciones a un tipo de cuota
+> `adicional` que nunca existió, y tiene que poder saber por qué desaparecieron.
 
-**Flujo principal**
-1. El administrador elige la unidad, escribe el concepto y el valor, y fija el vencimiento.
-2. El sistema crea la cuota de tipo `adicional` (RN-41).
-3. Entra sola en el saldo de la unidad y en el estado de cuenta del residente.
+**Qué decía, y por qué era un error.** El caso de uso suponía un cobro por unidad —parqueadero
+adicional, mascota, uso de una zona con costo, reposición de un daño— con concepto y valor
+escritos a mano por el administrador, sin prorrateo por coeficiente. Dos cosas estaban mal:
 
-**Flujos alternativos**
-- A1. Cobrar lo mismo a varias unidades → **(?)** por definir si hace falta un cobro masivo o
-  basta repetirlo.
-- A2. Anular una cuota adicional no pagada → se anula con motivo, no se borra (O3).
+1. **La figura no existe.** Lo que la copropiedad cobra fuera de la cuota ordinaria es la
+   extraordinaria, y esa **la aprueba la asamblea y se prorratea por coeficiente** (RN-05,
+   RN-46). Un cobro por unidad con valor libre habría sido exactamente lo que RN-49 prohíbe:
+   el administrador decidiendo sobre el caso concreto.
+2. **Multiplicaba el modelo sin necesidad.** `TipoCuota` iba a ganar un valor `'adicional'`
+   que se comportaba casi como `'extraordinaria'`; dos nombres para una idea obligan a quien
+   los lee a preguntarse en qué se diferencian.
 
-**Reglas de negocio**
-- RN-41: exige concepto y valor explícitos. **No se prorratea por coeficiente**, a diferencia
-  de la extraordinaria (RN-05): un parqueadero adicional no depende del tamaño del apartamento.
+**Lo que queda vivo de aquí:** que la extraordinaria **exija el acta que la aprobó** (RN-46).
+Hoy `generarCuotas()` la crea sin pedirla — es lo que tiene a CU-A-05 en 🟡, y es el trabajo
+real que este caso de uso estaba tapando.
 
-**Estado en el demo:** ⬜ — no existe.
+**Reglas retiradas con él:** RN-41.
 
 ---
 
