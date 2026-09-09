@@ -37,7 +37,8 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 4 — paz y salvo: cubiertoHasta, codigo de verificacion y una unidad sin saldo.
 // 5 — el portero entra al demo como persona y perfil.
 // 12 — la sancion guarda la norma que la respalda, copiada al imponerla (RN-38).
-export const VERSION_ESQUEMA = 12
+// 13 — el concepto puede llevar reincidencia, con su propio respaldo (RN-72).
+export const VERSION_ESQUEMA = 13
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -838,6 +839,16 @@ const conceptosSancion: ConceptoSancion[] = [
     valor: 180000,
     origen: 'manual',
     referencia: 'Artículo 14, numeral 3',
+    // La unica del catalogo con reincidencia parametrizada, y con un respaldo
+    // **distinto** del de la multa base: el manual fija la multa y una asamblea
+    // posterior agravo la repeticion. Es el caso que hay que poder mostrar
+    // (RN-72) — y que las otras cinco no la tengan es igual de informativo:
+    // sin documento que lo diga, la multa no sube.
+    reincidencia: {
+      valor: 360000,
+      origen: 'asamblea',
+      referencia: 'Asamblea ordinaria del 18 de marzo',
+    },
     activo: true,
     creadoEn: fechaHoraRelativa(-320, '09:15'),
   },

@@ -618,6 +618,50 @@ export function textoRespaldo(concepto: {
   return `${nombre} · ${concepto.referencia}`
 }
 
+/**
+ * RN-72 — Cuantas veces se sanciono **en firme** a esta unidad por esta conducta.
+ *
+ * Solo cuentan las firmes, y es deliberado: un proceso archivado termino en que
+ * **no hubo infraccion**, y uno todavia abierto no ha establecido nada. Contar
+ * cualquiera de los dos seria agravar una multa con hechos que nadie probo — que
+ * es justo lo que el debido proceso existe para impedir (RN-69, RN-70).
+ */
+export function vecesSancionada(
+  sanciones: Sancion[],
+  unidadId: string,
+  conceptoId: string,
+): number {
+  return sanciones.filter(
+    (sancion) =>
+      sancion.unidadId === unidadId &&
+      sancion.conceptoId === conceptoId &&
+      sancion.estado === 'firme',
+  ).length
+}
+
+/**
+ * RN-72 — El valor y la norma que aplican, segun sea la primera vez o no.
+ *
+ * **La mitad importante de esta funcion es la que no hace nada.** Si el concepto
+ * no tiene reincidencia parametrizada, devuelve el valor base por muchas veces
+ * que la unidad haya reincidido: agravar una multa sin un documento que lo diga
+ * es inventarse una sancion, y eso no lo puede hacer ni el administrador ni la
+ * app (RN-38, RN-49).
+ */
+export function multaAplicable(
+  concepto: ConceptoSancion,
+  vecesPrevias: number,
+): { valor: number; respaldo: string; reincidencia: boolean } {
+  if (vecesPrevias > 0 && concepto.reincidencia) {
+    return {
+      valor: concepto.reincidencia.valor,
+      respaldo: textoRespaldo(concepto.reincidencia),
+      reincidencia: true,
+    }
+  }
+  return { valor: concepto.valor, respaldo: textoRespaldo(concepto), reincidencia: false }
+}
+
 /** RN-40 — Los que se pueden imponer hoy. Los inactivos siguen existiendo. */
 export function conceptosActivos(conceptos: ConceptoSancion[]): ConceptoSancion[] {
   return conceptos.filter((concepto) => concepto.activo)

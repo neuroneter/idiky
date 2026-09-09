@@ -201,6 +201,26 @@ Un campo de prosa que repite lo que las columnas dicen se llena con lo primero q
 > pueda inventar: por eso `origen` y `referencia` no son opcionales. Es la misma estructura que
 > `TasaInteres`, y por la misma razón.
 
+### Reincidencia — lo que pasa si la conducta se repite
+
+> Campo opcional de `ConceptoSancion`. **Que sea opcional es la regla entera.**
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `valor` | number | Valor a partir de la segunda vez. Tiene que ser mayor que el base |
+| `origen` | `OrigenRespaldo` | **Su propio respaldo**, no el de la multa base |
+| `referencia` | string | Dónde lo dice |
+| `documento` | string? | Solo con `origen: 'otro'` |
+
+> **El aumento necesita su propio respaldo** (Mary, 2026-09-09: *«la multa por reincidencia
+> debe estar avalada por la asamblea, reglamento de propiedad horizontal, etc.»*). Agravar es
+> sancionar más duro, así que pasa el mismo examen que la multa base y por la misma razón
+> (RN-38).
+>
+> **Y no hereda la cita de la multa base**: es normal que el reglamento fije la multa y una
+> asamblea posterior agrave la repetición. Si heredara, el expediente diría que el aumento
+> sale de un artículo que no lo menciona.
+
 ### Sancion — el expediente sancionatorio
 
 > ✅ **Implementada** (CU-A-23, CU-R-29). Dejó de ser propuesta el 2026-09-09, cuando Mary
@@ -211,6 +231,7 @@ Un campo de prosa que repite lo que las columnas dicen se llena con lo primero q
 | `conceptoId` | string | Del catálogo (RN-38) |
 | `concepto`, `valor` | string, number | **Copiados al imponer**, como el coeficiente (RN-37): si mañana el catálogo cambia, el expediente sigue diciendo por qué y por cuánto se sancionó |
 | `respaldo` | string | **La norma, copiada al imponer**: «Manual de convivencia · Artículo 14, numeral 3». Se muestra en la cabecera del expediente, en las dos caras — es la mitad comprobable de la multa (RN-38) |
+| `reincidencia` | boolean? | Si se impuso con el valor agravado. **Se guarda, no se recalcula**: mañana la unidad puede tener más sanciones firmes, y el expediente tiene que seguir diciendo que era la segunda vez cuando se impuso (RN-72) |
 | `unidadId` | string | A quién se le impone |
 | `hechos` | string | Qué pasó, cuándo y dónde. Es lo único que el copropietario puede controvertir |
 | `estado` | `'notificada' \| 'en_estudio' \| 'resuelta' \| 'impugnada' \| 'firme' \| 'archivada'` | Seis etapas, cada una con un turno (RN-69) |
@@ -412,6 +433,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-69 | **El debido proceso sancionatorio, y sus plazos, los fija el reglamento de cada copropiedad** (Mary, 2026-09-09: *«el debido proceso ya está reglamentado»*). La app no los inventa: `diasDescargos` y `diasImpugnacion` son **parámetros de la copropiedad**, no constantes del código. El expediente pasa por seis etapas y **cada una tiene un turno**: notificada y resuelta esperan al copropietario; en estudio e impugnada, a la administración; firme y archivada no esperan a nadie. Y lo que sostiene todo lo demás: **el plazo se copia al imponer**, no se lee del parámetro de hoy — si la copropiedad cambia el término mañana, los expedientes abiertos conservan el que se les notificó. Cambiar las reglas a mitad del proceso es exactamente lo que el debido proceso prohíbe. **Lo lleva el administrador, de principio a fin** (Mary, 2026-09-09: *«quien hace el debido proceso es el administrador»*): él impone y él resuelve los descargos. No es un descuido que sea la misma persona — es que **no está decidiendo sobre la norma, está aplicándola**: la conducta y el valor los fijó antes la asamblea o el reglamento (RN-38, RN-49), y lo que él resuelve es si los hechos ocurrieron. Lo que sí lo controla es que todo quede escrito y que el copropietario pueda impugnar. | `dominio/reglas.ts` (`ETAPAS_SANCION`, `puedePresentarDescargos`, `puedeImpugnar`, `puedeQuedarEnFirme`) |
 | RN-70 | **Una sanción en firme no se anula** (Mary, 2026-09-09: *«una multa no se anula porque para eso existe el debido proceso»*). El momento de deshacerla es **durante** el proceso —archivándola con su motivo—, no después. Es la consecuencia de tomarse el debido proceso en serio: si la multa se pudiera anular al final, las cinco etapas serían un trámite decorativo y el copropietario no tendría por qué usarlas. Por eso el código no tiene ninguna transición que salga de `firme`, y por eso tampoco hay que responder qué pasa con una multa anulada después de pagada: no puede haberla. | `dominio/reglas.ts` (`ETAPAS_SANCION`) — `firme` no tiene salida |
 | RN-71 | **La mora no distingue el origen del cobro** (Mary, 2026-09-09: *«las multas como las cuotas ordinarias o extraordinarias cuentan como mora»*). Una multa en firme y vencida bloquea reservas (RN-08) y pesa en el paz y salvo (RN-26) igual que la cuota del mes. En el código eso ya era así porque ninguna regla de mora filtra por `Cuota.tipo` — pero era un supuesto, y ahora es una decisión: **una multa que no cuenta como mora es una multa que no se cobra**. | `dominio/reglas.ts` (`estaEnMora`, `calcularSaldo`, `calcularSaldoVencido`, `diasDeMora`) |
+| RN-72 | **La reincidencia también necesita respaldo** (Mary, 2026-09-09: *«la multa por reincidencia debe estar avalada por la asamblea, reglamento de propiedad horizontal, etc.»*). Es RN-38 aplicada al agravante, y tiene dos mitades. La primera: si el catálogo tiene parametrizada la reincidencia —**con su propia cita**, que puede ser un documento distinto del de la multa base—, a partir de la segunda vez se impone el valor agravado, y el expediente dice que lo es. **La segunda mitad importa igual**: si nadie la parametrizó, **la multa no sube** por muchas veces que se repita la conducta; la app no agrava por su cuenta ni «porque es obvio». Solo cuentan las sanciones **en firme**: una archivada terminó en que no hubo infracción y una abierta no ha establecido nada, así que contarlas sería agravar con hechos que nadie probó (RN-69, RN-70). **Falta** decidir si la reincidencia caduca —hoy cuenta cualquier antecedente firme, sin ventana de tiempo—. | `dominio/reglas.ts` (`vecesSancionada`, `multaAplicable`) + `repositorio.ts` |
 
 ### RegistroPersona — el trámite de entrada de una persona (CU-R-27, CU-R-28)
 

@@ -32,7 +32,7 @@ import * as sel from '../../datos/selectores'
 import { cambiarEstadoConceptoSancion, crearConceptoSancion } from '../../datos/repositorio'
 import { ORIGENES_RESPALDO, respaldoCompleto, textoRespaldo } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha } from '../../utilidades/formato'
-import type { OrigenRespaldo } from '../../dominio/tipos'
+import type { OrigenRespaldo, Reincidencia } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
@@ -173,6 +173,17 @@ function TablaConceptos({
                 </td>
                 <td className="numerico">
                   <strong>{formatearDinero(concepto.valor)}</strong>
+                  {/* La reincidencia va pegada al valor, que es lo que cambia.
+                      Y solo aparece si alguien la parametrizó: la ausencia
+                      también informa — esta multa no sube (RN-72). */}
+                  {concepto.reincidencia && (
+                    <div className="subtitulo">
+                      Si se repite: {formatearDinero(concepto.reincidencia.valor)}
+                      <div className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                        {textoRespaldo(concepto.reincidencia)}
+                      </div>
+                    </div>
+                  )}
                 </td>
                 <td>
                   <button
@@ -201,6 +212,7 @@ interface DatosConcepto {
   origen: OrigenRespaldo
   referencia: string
   documento?: string
+  reincidencia?: Reincidencia
 }
 
 function FormularioConcepto({
@@ -216,9 +228,17 @@ function FormularioConcepto({
   const [nombre, setNombre] = useState('')
   const [descripcion, setDescripcion] = useState('')
   const [valor, setValor] = useState('')
+  // La reincidencia es opcional y arranca apagada: encenderla es una decision,
+  // y la mayoria de las multas del manual no la tienen (RN-72).
+  const [agrava, setAgrava] = useState(false)
+  const [valorReincidencia, setValorReincidencia] = useState('')
+  const [origenReincidencia, setOrigenReincidencia] = useState<OrigenRespaldo>('manual')
+  const [referenciaReincidencia, setReferenciaReincidencia] = useState('')
+  const [documentoReincidencia, setDocumentoReincidencia] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const definicion = ORIGENES_RESPALDO.find((o) => o.id === origen)!
+  const definicionReincidencia = ORIGENES_RESPALDO.find((o) => o.id === origenReincidencia)!
 
   function enviar(evento: React.FormEvent) {
     evento.preventDefault()
@@ -246,6 +266,39 @@ function FormularioConcepto({
       return
     }
 
+    let reincidencia: Reincidencia | undefined
+    if (agrava) {
+      const montoReincidencia = Number(valorReincidencia.replace(/\D/g, ''))
+      if (!montoReincidencia) {
+        setError('Escribe el valor que fija el documento para la reincidencia.')
+        return
+      }
+      if (montoReincidencia <= monto) {
+        setError(
+          'El valor por reincidencia tiene que ser mayor que el de la primera vez. Si no sube, no hay nada que parametrizar.',
+        )
+        return
+      }
+      if (
+        !respaldoCompleto({
+          origen: origenReincidencia,
+          referencia: referenciaReincidencia,
+          documento: documentoReincidencia,
+        })
+      ) {
+        setError(
+          'Di dónde dice que la multa sube cuando la conducta se repite: sin eso el aumento no se puede comprobar.',
+        )
+        return
+      }
+      reincidencia = {
+        valor: montoReincidencia,
+        origen: origenReincidencia,
+        referencia: referenciaReincidencia.trim(),
+        documento: origenReincidencia === 'otro' ? documentoReincidencia.trim() : undefined,
+      }
+    }
+
     void alCrear({
       nombre: nombre.trim(),
       descripcion: descripcion.trim(),
@@ -253,6 +306,7 @@ function FormularioConcepto({
       origen,
       referencia: referencia.trim(),
       documento: origen === 'otro' ? documento.trim() : undefined,
+      reincidencia,
     })
   }
 
@@ -339,6 +393,85 @@ function FormularioConcepto({
             placeholder="180000"
           />
         </div>
+
+        <div className="separador" />
+
+        {/* La reincidencia, al final y apagada: agravar es sancionar mas duro y
+            tiene que haberlo decidido antes la asamblea o el reglamento, igual
+            que la multa base (Mary, 2026-09-09). Sin esto, la multa no sube. */}
+        <div className="campo">
+          <label
+            className="fila"
+            htmlFor="agrava"
+            style={{ justifyContent: 'flex-start', gap: 'var(--e2)' }}
+          >
+            <input
+              id="agrava"
+              type="checkbox"
+              checked={agrava}
+              onChange={(evento) => setAgrava(evento.target.checked)}
+            />
+            <span>¿El documento dice que la multa sube si la conducta se repite?</span>
+          </label>
+          <span className="ayuda-campo">
+            Si no lo dice, déjalo apagado: sin un documento que lo respalde la multa no sube,
+            por muchas veces que se repita.
+          </span>
+        </div>
+
+        {agrava && (
+          <>
+            <div className="campo">
+              <label htmlFor="valor-reincidencia">Valor a partir de la segunda vez</label>
+              <input
+                id="valor-reincidencia"
+                inputMode="numeric"
+                value={valorReincidencia}
+                onChange={(evento) => setValorReincidencia(evento.target.value)}
+                placeholder="360000"
+              />
+            </div>
+
+            {/* Con su propio respaldo, no el de la multa base: es normal que el
+                reglamento fije la multa y una asamblea posterior la agrave. */}
+            <div className="campo">
+              <label htmlFor="origen-reincidencia">¿Qué aprueba el aumento?</label>
+              <select
+                id="origen-reincidencia"
+                value={origenReincidencia}
+                onChange={(evento) => setOrigenReincidencia(evento.target.value as OrigenRespaldo)}
+              >
+                {ORIGENES_RESPALDO.map((opcion) => (
+                  <option key={opcion.id} value={opcion.id}>
+                    {opcion.texto}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {origenReincidencia === 'otro' && (
+              <div className="campo">
+                <label htmlFor="documento-reincidencia">¿Cuál documento?</label>
+                <input
+                  id="documento-reincidencia"
+                  value={documentoReincidencia}
+                  onChange={(evento) => setDocumentoReincidencia(evento.target.value)}
+                  placeholder="Acta de asamblea extraordinaria del 3 de marzo"
+                />
+              </div>
+            )}
+
+            <div className="campo">
+              <label htmlFor="referencia-reincidencia">{definicionReincidencia.etiqueta}</label>
+              <input
+                id="referencia-reincidencia"
+                value={referenciaReincidencia}
+                onChange={(evento) => setReferenciaReincidencia(evento.target.value)}
+                placeholder={definicionReincidencia.ejemplo}
+              />
+            </div>
+          </>
+        )}
 
         {error && <p className="acceso__error">{error}</p>}
 

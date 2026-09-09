@@ -15,7 +15,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 67 documentados: 29 ✅ en el demo, 10 🟡 a medias, 28 ⬜ pendientes |
-| **Reglas de negocio** | 71 (RN-01…RN-71) |
+| **Reglas de negocio** | 72 (RN-01…RN-72) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -36,9 +36,9 @@ visitantes con código · consulta de correspondencia · consulta del coeficient
 **el proceso sancionatorio de su unidad, con descargos e impugnación** (CU-R-29).
 
 **Consola del administrador:** **registro de propietarios**, con la tabla de quién registró a
-quién (CU-A-26) · **catálogo de multas con su respaldo** (CU-A-22) · **procesos sancionatorios
-con debido proceso completo** —notificar citando la norma, oír, decidir, impugnar y dar
-firmeza (CU-A-23)— ·
+quién (CU-A-26) · **catálogo de multas con su respaldo, y la reincidencia con el
+suyo** (CU-A-22) · **procesos sancionatorios con debido proceso completo** —notificar citando
+la norma, oír, decidir, impugnar y dar firmeza (CU-A-23)— ·
 tablero de indicadores ·
 unidades y residentes con búsqueda,
 ficha y vinculación · cartera con morosidad · registro de pagos manuales · generación de
@@ -129,7 +129,7 @@ resuelve con motivación y arranca el plazo de impugnación → el propietario i
 administración resuelve la impugnación y da firmeza → **y ahí, y solo ahí, la multa aparece en
 su estado de cuenta con el radicado** (el saldo pasó de $ 4.466.000 a $ 4.646.000).
 
-**Y en la misma sesión Mary cerró cuatro de las cinco preguntas que quedaban** de §3 quater:
+**Y en la misma sesión Mary cerró las cinco preguntas que quedaban** de §3 quater:
 
 - *«La multa la impone el administrador de acuerdo con las multas aprobadas en asamblea, en el
   reglamento de propiedad horizontal, etc.»* → el administrador **aplica**, no decide. De ahí
@@ -152,9 +152,30 @@ su estado de cuenta con el radicado** (el saldo pasó de $ 4.466.000 a $ 4.646.0
   supuesto; ahora es una decisión. Una multa que no cuenta como mora es una multa que no se
   cobra.
 
-**Lo que sigue abierto** de §3 quater, y no bloquea: la **reincidencia** —si la multa sube
-cuando la conducta se repite— y si quien impone puede **ajustar el valor** dentro de algún
-tope.
+**Y la quinta, en la misma sesión:** *«la multa por reincidencia debe estar avalada por la
+asamblea, reglamento de propiedad horizontal, etc.»* → **RN-72**, que es RN-38 aplicada al
+agravante. Tiene dos mitades y la segunda importa igual que la primera:
+
+- Si el catálogo tiene la reincidencia parametrizada —**con su propia cita**, que puede ser un
+  documento distinto del de la multa base—, a partir de la segunda vez se impone el valor
+  agravado y el expediente dice que lo es.
+- **Si nadie la parametrizó, la multa no sube**, por muchas veces que se repita. La app no
+  agrava por su cuenta. Y eso se dice en pantalla al abrir el proceso: «esta unidad ya fue
+  sancionada una vez por esta conducta, pero el valor no cambia: ningún documento dice que esta
+  multa suba al repetirse». Sin ese aviso, quien lo viera creería que el sistema se olvidó de
+  aplicarlo.
+
+**Solo cuentan las sanciones en firme.** Una archivada terminó en que **no hubo infracción** y
+una abierta no ha establecido nada; contar cualquiera de las dos sería agravar una multa con
+hechos que nadie probó, que es justo lo que el debido proceso existe para impedir.
+
+**Una punta suelta que dejé abierta a propósito:** hoy la reincidencia **no caduca** —cuenta
+cualquier antecedente en firme, así sea de hace cuatro años—. No me pareció que pudiera
+inventarme una ventana de tiempo; si el reglamento fija un plazo, hay que parametrizarlo.
+
+**Lo que sigue abierto** de §3 quater: si quien impone puede **ajustar el valor** dentro de
+algún tope —hoy no puede, y es el límite entre parametrizar e imponer— y la caducidad de la
+reincidencia.
 
 **Lo que sigue:** CU-A-24 (cuota extraordinaria) y ADR-0007 (transmisión en vivo), que no
 tienen bloqueos.

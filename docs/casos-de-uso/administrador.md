@@ -460,7 +460,11 @@ genera extraordinarias **sin pedir el acta**, así que hoy incumple RN-46.
    | Manual de convivencia | El artículo |
    | Acta de asamblea | La fecha del acta |
    | **Otro documento** | **Cuál es el documento**, y dónde dice lo que dice |
-3. El sistema lo guarda como activo y queda disponible para CU-A-23.
+3. Si el documento dice que la multa **sube cuando la conducta se repite**, se parametriza
+   también, **con su propia cita** — puede ser otro documento: es normal que el reglamento
+   fije la multa y una asamblea posterior agrave la repetición (RN-72). Si no lo dice, se deja
+   apagado: sin respaldo la multa no sube.
+4. El sistema lo guarda como activo y queda disponible para CU-A-23.
 
 > **El administrador no define las multas: las parametriza** (Mary, 2026-09-08). *«Las define
 > la asamblea normalmente, o ya están establecidas en el reglamento de propiedad horizontal o
@@ -545,6 +549,10 @@ al imponerse (RN-37).
 1. El administrador abre el proceso: elige la unidad, una multa del catálogo y describe **los
    hechos** —qué pasó, cuándo y dónde—. El valor y el respaldo **no se escriben**: salen del
    catálogo, que es lo que los hace comprobables (RN-38, RN-49).
+   Si la unidad ya tiene sanciones **en firme** por esa misma conducta, la pantalla lo dice
+   antes de abrir el proceso, y dice también qué valor va a aplicar: el agravado si el
+   catálogo lo tiene parametrizado, **y el mismo de siempre si no** (RN-72). Que la unidad
+   reincida no sube la multa por sí solo.
 2. El sistema copia el concepto, el valor, **la norma que lo respalda** y el plazo de
    descargos, asigna radicado
    `SAN-<año>-<consecutivo>` y deja el expediente `notificada`. **Todavía no se cobra nada.**
@@ -587,10 +595,12 @@ al imponerse (RN-37).
 - RN-36 (radicado), RN-37 (valor y norma copiados), RN-38 (solo del catálogo, y el
   administrador aplica lo que otros decidieron), RN-39 (la cuota nace al quedar firme), RN-61
   (no se borra), RN-69 (el debido proceso, sus plazos y quién lo lleva), RN-70 (en firme no se
-  anula), RN-71 (la multa cuenta como mora igual que cualquier cuota).
+  anula), RN-71 (la multa cuenta como mora igual que cualquier cuota), RN-72 (la reincidencia
+  agrava solo si un documento lo dice).
 
-> **Lo que sigue abierto:** la **reincidencia** —si la multa sube cuando la conducta se
-> repite— y si el que impone puede **ajustar el valor** dentro de algún tope. Las demás
+> **Lo que sigue abierto:** si el que impone puede **ajustar el valor** dentro de algún tope
+> —hoy no puede, y es el límite entre parametrizar e imponer (RN-49)—, y si la **reincidencia
+> caduca**: hoy cuenta cualquier antecedente en firme, sin ventana de tiempo. Las demás
 > preguntas de §3 quater quedaron respondidas el 2026-09-09. Ver
 > [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 quater.
 

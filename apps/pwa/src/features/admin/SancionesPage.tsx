@@ -26,8 +26,9 @@ import {
   conceptosActivos,
   etiquetaUnidad,
   puedeQuedarEnFirme,
+  multaAplicable,
   sancionEnCurso,
-  textoRespaldo,
+  vecesSancionada,
 } from '../../dominio/reglas'
 import { formatearDinero } from '../../utilidades/formato'
 import type { Sancion } from '../../dominio/tipos'
@@ -114,6 +115,7 @@ export function SancionesPage() {
         <FormularioSancion
           unidades={unidades}
           conceptos={conceptosActivos(sel.conceptosSancionDe(bd, sesion.copropiedadId))}
+          sanciones={sanciones}
           alCerrar={() => setImponiendo(false)}
           alImponer={async (datos) => {
             const creada = await ejecutar(
@@ -239,11 +241,13 @@ function ListaSanciones({
 function FormularioSancion({
   unidades,
   conceptos,
+  sanciones,
   alImponer,
   alCerrar,
 }: {
   unidades: ReturnType<typeof sel.unidadesDe>
   conceptos: ReturnType<typeof conceptosActivos>
+  sanciones: Sancion[]
   alImponer: (datos: { unidadId: string; conceptoId: string; hechos: string }) => Promise<void>
   alCerrar: () => void
 }) {
@@ -253,6 +257,11 @@ function FormularioSancion({
   const [error, setError] = useState<string | null>(null)
 
   const concepto = conceptos.find((c) => c.id === conceptoId)
+  // Lo que se va a imponer de verdad, contando la reincidencia (RN-72). Se
+  // calcula aqui y no se adivina: el administrador tiene que ver el valor antes
+  // de abrir el proceso, no enterarse despues.
+  const vecesPrevias = concepto ? vecesSancionada(sanciones, unidadId, concepto.id) : 0
+  const aplicable = concepto ? multaAplicable(concepto, vecesPrevias) : null
 
   if (conceptos.length === 0) {
     return (
@@ -306,17 +315,42 @@ function FormularioSancion({
           </select>
           {/* El valor y el respaldo no se escriben: salen del catálogo, que es
               lo que los hace comprobables (RN-38, RN-49). */}
-          {concepto && (
+          {concepto && aplicable && (
             <span className="ayuda-campo">
-              {formatearDinero(concepto.valor)} · {concepto.descripcion}
+              {formatearDinero(aplicable.valor)} · {concepto.descripcion}
               {/* La norma, antes de imponer: el administrador aplica lo que
                   aprobó la asamblea o ya dice el reglamento, y tiene que verlo
                   para saber qué está aplicando (Mary, 2026-09-09). */}
               <br />
-              <strong>{textoRespaldo(concepto)}</strong>
+              <strong>{aplicable.respaldo}</strong>
             </span>
           )}
         </div>
+
+        {/* Las dos caras de RN-72, y la segunda importa tanto como la primera:
+            que la unidad haya reincidido **no** sube la multa por sí solo. Si
+            ningún documento lo agrava, se dice — para que nadie crea que el
+            sistema se olvidó de aplicarlo. */}
+        {vecesPrevias > 0 && aplicable && (
+          <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
+            {aplicable.reincidencia ? (
+              <>
+                Esta unidad ya fue sancionada{' '}
+                {vecesPrevias === 1 ? 'una vez' : `${vecesPrevias} veces`} por esta conducta, así
+                que aplica el valor agravado: <strong>{formatearDinero(aplicable.valor)}</strong>,
+                según {aplicable.respaldo}.
+              </>
+            ) : (
+              <>
+                Esta unidad ya fue sancionada{' '}
+                {vecesPrevias === 1 ? 'una vez' : `${vecesPrevias} veces`} por esta conducta, pero{' '}
+                <strong>el valor no cambia</strong>: ningún documento dice que esta multa suba al
+                repetirse. Para que suba hay que parametrizarlo en el catálogo, con la norma que lo
+                respalde.
+              </>
+            )}
+          </p>
+        )}
 
         <div className="campo">
           <label htmlFor="hechos">¿Qué pasó?</label>

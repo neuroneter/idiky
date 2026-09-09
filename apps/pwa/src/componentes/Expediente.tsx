@@ -79,6 +79,15 @@ export function CabeceraSancion({ sancion }: { sancion: Sancion }) {
         <span className="subtitulo">Norma</span>
         <strong style={{ textAlign: 'right' }}>{sancion.respaldo}</strong>
       </div>
+      {/* Que se impuso como reincidencia va dicho, no deducido del valor: quien
+          recibe una multa mas cara tiene derecho a saber por que lo es, y esa
+          es una de las cosas que puede controvertir (RN-72). */}
+      {sancion.reincidencia && (
+        <div className="fila">
+          <span className="subtitulo">Reincidencia</span>
+          <span className="chip chip--alerta">Valor agravado</span>
+        </div>
+      )}
       <div className="fila">
         <span className="subtitulo">Valor</span>
         <strong>{formatearDinero(sancion.valor)}</strong>

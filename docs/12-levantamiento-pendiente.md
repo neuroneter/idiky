@@ -208,7 +208,13 @@ CU-A-22, CU-A-23 y CU-A-24.
 - ~~**Sin artículo del reglamento.**~~ → ✅ **Respondido (Mary, 2026-08-27):** una multa solo
   se da si **está en el reglamento o fue aprobada en asamblea**. El respaldo es obligatorio:
   sin él, el concepto no se crea. Es el mismo principio que rige la tasa de interés (RN-45).
-- **Reincidencia.** ¿La multa sube si se repite la conducta? → *(respuesta)*
+- ~~**Reincidencia.**~~ → ✅ **Respondido (Mary, 2026-09-09):** *«la multa por reincidencia
+  debe estar avalada por la asamblea, reglamento de propiedad horizontal, etc.»*. Es RN-38
+  aplicada al agravante: sube **solo si un documento lo dice**, y ese documento se cita aparte
+  —puede no ser el mismo que fija la multa base— (RN-72). Sin parametrizarlo, la multa no sube.
+  **Queda una punta suelta:** ¿la reincidencia **caduca**? Hoy cuenta cualquier antecedente en
+  firme, sin ventana de tiempo, así que una multa de hace cuatro años sigue agravando la de
+  hoy. Si el reglamento fija un plazo (el año calendario, doce meses), hay que parametrizarlo.
 - ~~**Multa anulada después de pagada.**~~ → ✅ **Disuelta (Mary, 2026-09-09):** *«una multa no
   se anula porque para eso existe el debido proceso»*. El momento de deshacerla es **durante**
   el proceso, archivándola; después no hay marcha atrás, y por eso la pregunta no tiene objeto.

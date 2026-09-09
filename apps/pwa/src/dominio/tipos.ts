@@ -171,6 +171,28 @@ export type OrigenRespaldo = 'reglamento' | 'manual' | 'asamblea' | 'otro'
  * Por eso `origen` y `referencia` no son opcionales, y por eso el concepto se
  * desactiva pero no se borra (RN-40): las multas impuestas lo referencian.
  */
+/**
+ * Lo que el documento dice que pasa **cuando la conducta se repite** (RN-72).
+ *
+ * Es opcional a proposito, y esa es la regla entera: **si nadie lo parametrizo,
+ * la multa no sube**. La app no agrava por su cuenta ni «porque es obvio» —
+ * agravar es sancionar mas duro, y eso lo tiene que haber decidido antes la
+ * asamblea, el reglamento o el manual (Mary, 2026-09-09).
+ *
+ * Lleva **su propio respaldo** y no hereda el de la multa base: es normal que el
+ * reglamento fije la multa y una asamblea posterior agrave la reincidencia, y si
+ * heredara la cita el expediente diria que el aumento sale de un articulo que no
+ * lo menciona.
+ */
+export interface Reincidencia {
+  /** Valor a partir de la segunda vez, tal como lo fija el documento. */
+  valor: Dinero
+  origen: OrigenRespaldo
+  referencia: string
+  /** Solo con `origen: 'otro'`: cual es el documento. */
+  documento?: string
+}
+
 export interface ConceptoSancion {
   id: string
   copropiedadId: string
@@ -187,6 +209,8 @@ export interface ConceptoSancion {
   documento?: string
   /** El acta, cuando el origen es una asamblea del sistema. */
   actaId?: string
+  /** Lo que pasa si la conducta se repite. Sin esto, no pasa nada (RN-72). */
+  reincidencia?: Reincidencia
   activo: boolean
   creadoEn: FechaHoraISO
   /** Cuando se dio de baja. El concepto queda, deja de ofrecerse (RN-40). */
@@ -262,6 +286,14 @@ export interface Sancion {
    * comprobable de la multa — la otra son los hechos (RN-38, RN-49).
    */
   respaldo: string
+  /**
+   * Si esta multa se impuso **como reincidencia** (RN-72).
+   *
+   * Se guarda y no se recalcula: manana la unidad puede tener mas sanciones
+   * firmes, y el expediente tiene que seguir diciendo que era la segunda vez
+   * cuando se impuso — no la quinta.
+   */
+  reincidencia?: boolean
   /** Que paso, cuando y donde. Es lo que se le notifica. */
   hechos: string
   estado: EstadoSancion

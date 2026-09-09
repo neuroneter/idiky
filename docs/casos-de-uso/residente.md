@@ -865,7 +865,10 @@ la ve y qué pasa al inhabilitar a la persona está sin decidir — ver
 2. Abre el expediente y ve **exactamente lo mismo que ve la administración**: la conducta,
    **la norma que la sanciona**, el valor, los hechos, y la línea de tiempo completa. La norma
    está ahí porque una multa se controvierte por sus dos mitades: sin la cita, «te multaron
-   por ruido» es la palabra del administrador contra la suya (RN-38).
+   por ruido» es la palabra del administrador contra la suya (RN-38). Si la multa se impuso
+   **agravada por reincidencia**, el expediente lo dice y cita la norma que lo permite —quien
+   recibe una multa más cara tiene derecho a saber por qué lo es, y eso también lo puede
+   controvertir (RN-72).
 3. Escribe sus **descargos** dentro del plazo → el proceso pasa a `en_estudio` y el turno
    vuelve a la administración.
 4. Si la administración decide sancionar, la persona ve la motivación en la línea de tiempo y
@@ -897,7 +900,7 @@ la ve y qué pasa al inhabilitar a la persona está sin decidir — ver
 **Reglas de negocio**
 - RN-38 (la norma que respalda la multa), RN-39 (la cuota nace solo al quedar firme), RN-69
   (las etapas, los turnos y los plazos), RN-70 (en firme no se anula), RN-71 (cuenta como mora
-  igual que cualquier cuota).
+  igual que cualquier cuota), RN-72 (la reincidencia agrava solo si un documento lo dice).
 
 **Estado en el demo:** ✅ — `src/features/residente/ProcesosPage.tsx`, ruta `/app/procesos`.
 En el demo, el perfil **Andrés Felipe Gómez** (Torre 2 · 901) tiene un proceso esperando sus

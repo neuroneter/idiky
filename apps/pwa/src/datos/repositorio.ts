@@ -16,6 +16,7 @@ import type {
   CategoriaComunicado,
   ConceptoSancion,
   OrigenRespaldo,
+  Reincidencia,
   CategoriaRegistro,
   CategoriaPqrs,
   Comunicado,
@@ -50,12 +51,13 @@ import {
   puedePresentarDescargos,
   puedeQuedarEnFirme,
   puedeVotar,
+  multaAplicable,
   respaldoCompleto,
   rolDeCategoria,
   soloUnDia,
   soportesCompletos,
   sumarDias,
-  textoRespaldo,
+  vecesSancionada,
   vencimientoDelPeriodo,
   votacionRecibeVotos,
   yaVoto,
@@ -611,6 +613,7 @@ export async function crearConceptoSancion(
     origen: OrigenRespaldo
     referencia: string
     documento?: string
+    reincidencia?: Reincidencia
   },
 ): Promise<Resultado<ConceptoSancion>> {
   await esperar()
@@ -630,6 +633,22 @@ export async function crearConceptoSancion(
     throw new ErrorDeNegocio('El valor de la multa tiene que ser mayor que cero.')
   }
 
+  // RN-72: agravar es sancionar mas duro, asi que el aumento necesita su propio
+  // respaldo — el mismo examen que la multa base, y por la misma razon.
+  const reincidencia = parametros.reincidencia
+  if (reincidencia) {
+    if (!respaldoCompleto(reincidencia)) {
+      throw new ErrorDeNegocio(
+        'Di dónde dice que la multa sube cuando la conducta se repite: sin eso el aumento no se puede comprobar.',
+      )
+    }
+    if (reincidencia.valor <= parametros.valor) {
+      throw new ErrorDeNegocio(
+        'El valor por reincidencia tiene que ser mayor que el de la primera vez. Si no sube, no hay nada que parametrizar.',
+      )
+    }
+  }
+
   const repetido = bd.conceptosSancion.some(
     (concepto) =>
       concepto.copropiedadId === parametros.copropiedadId &&
@@ -647,6 +666,13 @@ export async function crearConceptoSancion(
     descripcion: parametros.descripcion.trim(),
     referencia: parametros.referencia.trim(),
     documento: parametros.documento?.trim() || undefined,
+    reincidencia: reincidencia
+      ? {
+          ...reincidencia,
+          referencia: reincidencia.referencia.trim(),
+          documento: reincidencia.documento?.trim() || undefined,
+        }
+      : undefined,
     activo: true,
     creadoEn: ahoraISO(),
   }
@@ -729,6 +755,12 @@ export async function imponerSancion(
     )
   }
 
+  // RN-72: la reincidencia se cuenta sobre sanciones **en firme**, y solo agrava
+  // si el catalogo la tiene parametrizada. Sin documento que lo diga, la multa
+  // no sube por muchas veces que se repita la conducta.
+  const vecesPrevias = vecesSancionada(bd.sanciones, parametros.unidadId, concepto.id)
+  const aplicable = multaAplicable(concepto, vecesPrevias)
+
   const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
   const consecutivo = bd.consecutivos.sancion + 1
   bd.consecutivos.sancion = consecutivo
@@ -741,8 +773,9 @@ export async function imponerSancion(
     // Se copian, como el coeficiente (RN-37): si manana el catalogo cambia, este
     // expediente sigue diciendo por que y por cuanto se sanciono.
     concepto: concepto.nombre,
-    valor: concepto.valor,
-    respaldo: textoRespaldo(concepto),
+    valor: aplicable.valor,
+    respaldo: aplicable.respaldo,
+    ...(aplicable.reincidencia ? { reincidencia: true } : {}),
     hechos: parametros.hechos.trim(),
     estado: 'notificada',
     radicado: `SAN-${new Date().getFullYear()}-${String(consecutivo).padStart(4, '0')}`,
@@ -757,7 +790,9 @@ export async function imponerSancion(
     sancion,
     'administracion',
     'Se notificó la apertura del proceso',
-    `Se le comunicaron los hechos, la norma que los sanciona (${textoRespaldo(concepto)}) y el plazo para presentar descargos.`,
+    aplicable.reincidencia
+      ? `Se le comunicaron los hechos y el plazo para presentar descargos. Es la vez ${vecesPrevias + 1} que se sanciona esta conducta en la unidad, así que aplica el valor agravado que fija ${aplicable.respaldo}.`
+      : `Se le comunicaron los hechos, la norma que los sanciona (${aplicable.respaldo}) y el plazo para presentar descargos.`,
     parametros.impuestaPor,
   )
   bd.sanciones.unshift(sancion)
