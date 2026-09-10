@@ -5,7 +5,10 @@
 # Corre EN EL SERVIDOR, como el usuario `idiky` (nunca como root), desde la raiz de una
 # copia del repositorio. Normalmente lo llama infra/desplegar.sh.
 #
-#   REVISION=abc1234 sh infra/servidor/levantar.sh
+#   REVISION=abc1234 IDIKY_SERVICIOS="pwa contable" sh infra/servidor/levantar.sh
+#
+# IDIKY_SERVICIOS dice cuales se publican (pwa, contable, gestion); los demas no se tocan.
+# Sin la variable se publican los tres.
 #
 # Configuracion opcional, fuera del repositorio, en ~/.config/idiky/entorno:
 #   IDIKY_HOST=127.0.0.1         # 0.0.0.0 para publicar hacia la red
@@ -23,6 +26,7 @@ CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/entorno"
 [ ! -f "$CONFIG" ] || . "$CONFIG"
 
 REVISION="${REVISION:-sin-revision}"
+IDIKY_SERVICIOS="${IDIKY_SERVICIOS:-pwa contable gestion}"
 IDIKY_HOST="${IDIKY_HOST:-127.0.0.1}"
 IDIKY_PUERTO_PWA="${IDIKY_PUERTO_PWA:-8080}"
 IDIKY_PUERTO_CONTABLE="${IDIKY_PUERTO_CONTABLE:-8081}"
@@ -31,6 +35,17 @@ IDIKY_DATOS="${IDIKY_DATOS:-$HOME/datos}"
 IDIKY_MINIMO_DISCO_MB="${IDIKY_MINIMO_DISCO_MB:-3000}"
 UNIDADES="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 SECRETOS="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/secretos"
+
+for servicio in $IDIKY_SERVICIOS; do
+  case "$servicio" in
+    pwa | contable | gestion) ;;
+    *) echo "Servicio desconocido: $servicio. Son pwa, contable y gestion." >&2; exit 2 ;;
+  esac
+done
+incluye() {
+  case " $IDIKY_SERVICIOS " in *" $1 "*) return 0 ;; esac
+  return 1
+}
 
 # Clave de acceso del entorno (clave-acceso.sh). Si la carpeta no existe, no se monta nada.
 ACCESO="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/nginx"
@@ -76,6 +91,16 @@ levantar() {
   systemctl --user enable --now "container-$nombre.service"
 }
 
+# Antes de recrear el pod de BOB se respalda su base, si esta corriendo. Si el respaldo falla,
+# no se toca el pod: sin respaldo no se arriesga la base.
+respaldar_gestion() {
+  if podman container exists idiky-gestion-postgres \
+    && [ "$(podman inspect --format '{{.State.Running}}' idiky-gestion-postgres)" = "true" ]; then
+    echo "==> Respaldando la base de BOB antes de recrear el pod"
+    sh infra/gestion/respaldo.sh predespliegue
+  fi
+}
+
 # El sistema de gestion es un pod: nginx, Strapi y PostgreSQL comparten la red del pod y se
 # hablan por localhost. Solo el pod publica puerto, y ese puerto llega a nginx; Strapi y
 # PostgreSQL no son alcanzables desde fuera del pod (ADR-0012).
@@ -111,8 +136,8 @@ levantar_gestion() {
   systemctl --user enable --now "pod-$pod.service"
 }
 
-# Respaldo diario de la base (infra/gestion/respaldo.sh). Se copia fuera de ~/fuente porque
-# esa carpeta se reemplaza en cada despliegue.
+# Respaldo diario de la base (infra/gestion/respaldo.sh). Se copia fuera de la carpeta del
+# despliegue porque esa carpeta se reemplaza en cada despliegue.
 instalar_respaldo_gestion() {
   mkdir -p "$HOME/.local/bin" "$UNIDADES"
   install -m 755 infra/gestion/respaldo.sh "$HOME/.local/bin/idiky-gestion-respaldo"
@@ -142,33 +167,46 @@ esperar() {
   fi
 }
 
+echo "==> Servicios de este despliegue: $IDIKY_SERVICIOS"
+
 # Los secretos del sistema de gestion no estan en git. Se comprueba antes de detener nada.
-if [ ! -f "$SECRETOS/gestion-postgres.env" ] || [ ! -f "$SECRETOS/gestion-strapi.env" ]; then
+if incluye gestion && { [ ! -f "$SECRETOS/gestion-postgres.env" ] || [ ! -f "$SECRETOS/gestion-strapi.env" ]; }; then
   echo "Faltan los secretos del sistema de gestion. Se crean una vez: ssh idiky@<ip> 'sh -s' < infra/gestion/secretos.sh" >&2
   exit 1
 fi
 
 # Se construye (y se descarga) todo antes de detener nada: si algo falla, sigue en pie lo anterior.
-construir pwa
-construir contable
-construir gestion gestion/Containerfile 3g
-construir gestion-proxy gestion/proxy.Containerfile
-podman pull --quiet docker.io/library/postgres:17-alpine >/dev/null
+if incluye pwa; then construir pwa; fi
+if incluye contable; then construir contable; fi
+if incluye gestion; then
+  construir gestion gestion/Containerfile 3g
+  construir gestion-proxy gestion/proxy.Containerfile
+  podman pull --quiet docker.io/library/postgres:17-alpine >/dev/null
+  respaldar_gestion
+fi
 
-levantar pwa "$IDIKY_PUERTO_PWA"
-levantar contable "$IDIKY_PUERTO_CONTABLE"
-levantar_gestion "$IDIKY_PUERTO_GESTION"
-instalar_respaldo_gestion
+if incluye pwa; then levantar pwa "$IDIKY_PUERTO_PWA"; fi
+if incluye contable; then levantar contable "$IDIKY_PUERTO_CONTABLE"; fi
+if incluye gestion; then
+  levantar_gestion "$IDIKY_PUERTO_GESTION"
+  instalar_respaldo_gestion
+fi
 
-esperar pwa "$IDIKY_PUERTO_PWA"
-esperar contable "$IDIKY_PUERTO_CONTABLE"
-esperar gestion "$IDIKY_PUERTO_GESTION"
-# Strapi tarda en arrancar, y la primera vez crea todas sus tablas.
-esperar gestion "$IDIKY_PUERTO_GESTION" /_health 240
+if incluye pwa; then esperar pwa "$IDIKY_PUERTO_PWA"; fi
+if incluye contable; then esperar contable "$IDIKY_PUERTO_CONTABLE"; fi
+if incluye gestion; then
+  esperar gestion "$IDIKY_PUERTO_GESTION"
+  # Strapi tarda en arrancar, y la primera vez crea todas sus tablas.
+  esperar gestion "$IDIKY_PUERTO_GESTION" /_health 240
+fi
 
 # El disco del servidor es compartido y escaso: se borra toda imagen que no use un
 # contenedor en marcha, incluidos Node y las capas de construccion. Lo publicado queda; el
 # costo es volver a bajar las imagenes base en el siguiente despliegue.
 podman image prune --all --force >/dev/null
-podman system df
+
+echo "==> Lo que queda publicado (cada servicio con su revision)"
+for par in "pwa:$IDIKY_PUERTO_PWA" "contable:$IDIKY_PUERTO_CONTABLE" "gestion:$IDIKY_PUERTO_GESTION"; do
+  printf '    %-9s %s\n' "${par%%:*}" "$(curl -fsS --max-time 3 "http://$LOCAL:${par#*:}/revision.txt" 2>/dev/null || echo 'no responde')"
+done
 df -h "$HOME" | tail -1
