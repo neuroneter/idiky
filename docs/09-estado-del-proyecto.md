@@ -98,6 +98,62 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Cada quien despliega lo suyo desde main (T-35)
+
+**El pedido:** *«documenta todo para que tanto Mary como Yei puedan desde sus espacios de trabajo
+pedir cargar lo que llevan en main y desplegar directamente en el servidor»*. Con una precisión
+que ordena todo: *«lo que Yei y Mary están haciendo son mockups; no serán los espacios de
+desarrollo, estos no están creados todavía»*.
+
+**Antes de documentar hubo que arreglar el despliegue**, porque no era seguro que cada una lo
+usara sola:
+
+- **`desplegar.sh` publicaba los tres servicios a la vez.** Mary, al publicar su maqueta, habría
+  reconstruido BOB con lo que tuviera su rama.
+- **Y eso podía borrar datos.** Se verificó en el código de Strapi: su comparación de esquemas
+  **elimina las tablas y columnas** que el código con el que arranca no tiene. Desplegar BOB desde
+  una rama sin sus tipos de contenido se habría llevado copropiedades, personas y contratos.
+- **Dos despliegues simultáneos** pisaban la misma carpeta del servidor.
+
+**Cómo quedó:**
+
+| | |
+|---|---|
+| **Por servicio** | `infra/desplegar.sh <rama> <pwa\|contable\|gestion\|todo>`: los servicios que no se nombran no se tocan |
+| **BOB solo desde `main`** | Se niega a publicar `gestion` desde un commit que no esté en `origin/main`; forzarlo exige `IDIKY_GESTION_FUERA_DE_MAIN=si` |
+| **Respaldo antes de recrear BOB** | Si el respaldo falla, no se toca el pod. Los previos al despliegue se guardan aparte (5) de los diarios (7) |
+| **Un despliegue a la vez** | `flock` en el servidor: el segundo se detiene sin tocar nada |
+| **Registro** | `~/despliegues/registro.tsv`: fecha, persona, rama, commit, servicios y resultado. Se guardan las últimas 3 copias |
+| **Acceso** | `autorizar-llave.sh` agrega la llave **pública** de una persona, sin sudo y sin repetirla |
+
+**Probado en el servidor, una cosa por vez:** los tres rechazos (sin servicio, servicio
+desconocido, BOB fuera de `main`); publicar solo `pwa`, con la contable y BOB conservando su
+revisión y **el pod de BOB sin reiniciarse**; un segundo despliegue frenado por el candado; BOB con
+el permiso explícito, con **respaldo previo de 44 KB** y los datos intactos; y una llave de prueba
+que se autorizó, entró, se quitó y dejó de entrar. LangFlow, igual a la foto base al final.
+
+**La guía**, [`infra/guia-de-despliegue.md`](../infra/guia-de-despliegue.md), está escrita para
+que Mary y Jeimy —o su IA— la sigan paso a paso: quién despliega qué, la llave SSH de la primera
+vez, la foto de LangFlow antes y después, qué hacer con cada mensaje de error, qué no se hace, y la
+frase para pedírselo a Claude Code. `CLAUDE.md` le recuerda a cualquier IA las tres reglas: solo el
+servicio de quien lo pide, solo desde `main`, y LangFlow antes y después.
+
+**Lo que se dejó escrito para no confundirse:** `pwa` y `contable` son **maquetas**. **BLOKY y
+ALICE todavía no tienen espacio de desarrollo**; cuando se creen, tendrán su propio servicio,
+puerto y responsable.
+
+**Qué falta para que Mary y Jeimy desplieguen:**
+
+1. **Integrar esta rama a `main`.** Hoy `infra/`, BOB y la guía viven en
+   `claude/infra-podman-1wkn5z`, que se integra sin conflictos. Sin eso, desde `main` no hay qué
+   desplegar.
+2. **Sus llaves públicas**, autorizadas con `autorizar-llave.sh`.
+3. **La dirección del servidor y la clave del entorno**, por un canal privado.
+4. **Jeimy puede no tener `git` ni `ssh`** (ADR-0010): mientras no exista el despliegue automático,
+   el responsable de integración despliega por ella.
+
+---
+
 ### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · BOB ya crea copropiedades, perfiles raíz, planes y contratos (T-37, T-39)
 
 **El pedido:** *«generemos los ajustes ahora en BOB para que podamos ver un poco cómo se crean

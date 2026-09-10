@@ -128,28 +128,32 @@ server {
 }
 ```
 
-### 4.3 Registrarlo en `levantar.sh`
+### 4.3 Registrarlo en `levantar.sh` y en `desplegar.sh`
 
-Cuatro líneas, **cada una en su bloque**, y su puerto en el comentario de cabecera:
+En `levantar.sh`, su puerto y una línea en cada bloque, siempre dentro de `if incluye`, para que
+solo se toque cuando se nombra al desplegar:
 
 ```sh
 # Arriba, con los otros puertos:
 IDIKY_PUERTO_DOCS="${IDIKY_PUERTO_DOCS:-8083}"
 
+# En la validacion de IDIKY_SERVICIOS: pwa | contable | gestion | docs
+
 # Abajo, respetando el orden: TODO se construye antes de detener nada.
-construir pwa
-construir contable
-construir docs                                   # <-- nuevo
-levantar pwa "$IDIKY_PUERTO_PWA"
-levantar contable "$IDIKY_PUERTO_CONTABLE"
-levantar docs "$IDIKY_PUERTO_DOCS"               # <-- nuevo
-esperar pwa "$IDIKY_PUERTO_PWA"
-esperar contable "$IDIKY_PUERTO_CONTABLE"
-esperar docs "$IDIKY_PUERTO_DOCS"                # <-- nuevo
+if incluye docs; then construir docs; fi                        # <-- en el bloque de construir
+if incluye docs; then levantar docs "$IDIKY_PUERTO_DOCS"; fi    # <-- en el bloque de levantar
+if incluye docs; then esperar docs "$IDIKY_PUERTO_DOCS"; fi     # <-- en el bloque de esperar
 ```
 
+Y en el resumen final de `levantar.sh`, el par `"docs:$IDIKY_PUERTO_DOCS"`.
+
+En `desplegar.sh`, el nombre en la lista de servicios válidos (`pwa | contable | gestion | docs`)
+y en `todo`. Y en [`guia-de-despliegue.md`](./guia-de-despliegue.md), la fila con quién lo
+despliega.
+
 **No pongas un `construir` después de un `levantar`**: si esa construcción falla, los servicios
-anteriores ya quedaron detenidos.
+anteriores ya quedaron detenidos. **Si el servicio guarda datos**, haz como `gestion`: respáldalos
+antes de recrearlo, y piensa desde qué ramas es seguro desplegarlo.
 
 ### 4.4 Probar, publicar y verificar
 
@@ -159,7 +163,7 @@ anteriores ya quedaron detenidos.
 3. **Commit.** `desplegar.sh` publica lo que está en git.
 4. **Foto de LangFlow**, si no la tomaste en el §1:
    `ssh idiky@<ip> 'sh -s -- --base' < infra/servidor/verificar-vecino.sh`
-5. **Desplegar:** `IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave>.pem infra/desplegar.sh`.
+5. **Desplegar solo el servicio nuevo:** `IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh HEAD docs`.
    Debe terminar con `idiky-docs responde en 0.0.0.0:8083 con la revision <commit>`.
 6. **Comprobar el servicio** desde el servidor (o desde fuera, si ya está en la regla de
    Azure):

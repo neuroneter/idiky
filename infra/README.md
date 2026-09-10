@@ -5,6 +5,9 @@ que **no puede verse afectado**. Las decisiones y sus porqués están en
 [ADR-0011](../docs/adr/0011-entorno-de-desarrollo-en-contenedores.md) (el entorno) y
 [ADR-0012](../docs/adr/0012-sistema-de-gestion-strapi.md) (el sistema de gestión).
 
+> **¿Vas a desplegar?** Sigue [`guia-de-despliegue.md`](./guia-de-despliegue.md): quién publica
+> qué, desde dónde y cómo verificarlo.
+>
 > **¿Vas a crear o cambiar un servicio?** Lee este archivo para entender cómo está armado y
 > después sigue [`nuevo-servicio.md`](./nuevo-servicio.md), que es la receta paso a paso.
 
@@ -32,7 +35,8 @@ Y **antes y después de cualquier cambio** se verifica que LangFlow siga igual (
 Tu máquina                                    Servidor · usuario idiky · sin root
 ──────────                                    ───────────────────────────────────
 infra/desplegar.sh
-  git archive <commit> ───── ssh ─────▶  ~/fuente/            copia exacta del commit
+  git archive <commit> ───── ssh ─────▶  ~/despliegues/<fecha>-<commit>/   copia exacta del commit
+  (solo los servicios que se nombran)      flock: un despliegue a la vez
                                            │
                                            ▼
                                          infra/servidor/levantar.sh
@@ -192,19 +196,34 @@ Las seis imágenes suman 1,3 GB; la mayor parte es Strapi.
 | `servidor/clave-acceso.sh` | Servidor, como `idiky` | Pone una clave al azar a la PWA y la contable |
 | `servidor/cargar-integraciones.sh` | Tu máquina | Sube las credenciales de BLOKY (Twilio; luego Google y Microsoft) desde `.env.integraciones.local` al servidor |
 | `servidor/verificar-vecino.sh` | Servidor, como `idiky` | Foto de LangFlow antes y comparación después (§8) |
-| `desplegar.sh` | Tu máquina | Sube un commit y llama a `levantar.sh` |
+| `desplegar.sh` | Tu máquina | Sube un commit y publica **solo los servicios que se nombran** |
+| `guia-de-despliegue.md` | — | Quién despliega qué, desde dónde y cómo verificarlo |
+| `servidor/autorizar-llave.sh` | Tu máquina | Da acceso de despliegue a una persona, con su llave pública |
 | `nuevo-servicio.md` | — | La receta para agregar un servicio |
 | `../.dockerignore` | Construcción | Lo que no viaja al construir |
 
 ## 4. Desplegar
 
 ```bash
-IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave>.pem infra/desplegar.sh              # HEAD
-IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave>.pem infra/desplegar.sh origin/main  # otra rama
+IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main pwa
+IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main contable
+IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main gestion
+IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main todo
 ```
 
-La dirección del servidor **no va en el repositorio**; la tiene el responsable de integración.
-Para saber qué commit está publicado: `http://<ip>:8080/revision.txt`.
+- **Solo se tocan los servicios que se nombran.** Los demás siguen con su revisión, y cada uno
+  sirve la suya en `/revision.txt`.
+- **`gestion` (BOB) solo desde commits que ya estén en `origin/main`.** Strapi borra de la base
+  las tablas y columnas que el código con el que arranca no tenga. Forzarlo exige
+  `IDIKY_GESTION_FUERA_DE_MAIN=si`, y solo lo hace el responsable de integración. Además,
+  `levantar.sh` **respalda la base antes de recrear el pod**, y si el respaldo falla no sigue.
+- **Un despliegue a la vez.** Si hay otro en curso, el nuevo se detiene sin tocar nada.
+- **Cada despliegue queda registrado** en `~/despliegues/registro.tsv` (fecha, persona, rama,
+  commit, servicios, resultado), y se guardan las últimas 3 copias del código.
+
+**Quién despliega qué**, y el paso a paso para Mary y Jeimy:
+[`guia-de-despliegue.md`](./guia-de-despliegue.md). La dirección del servidor **no va en el
+repositorio**; la tiene el responsable de integración.
 
 **En un servidor nuevo**, antes del primer despliegue, van los secretos de gestión, una vez:
 `ssh idiky@<ip> 'sh -s' < infra/gestion/secretos.sh`. Sin ellos `levantar.sh` se detiene antes
@@ -288,8 +307,10 @@ ls -l ~/datos/respaldos/gestion/                     # los respaldos
 podman unshare du -sh ~/datos/gestion/postgres       # tamaño real de la base (ver §10)
 ```
 
-**Dar acceso a otra persona para desplegar:** quien tenga sudo agrega su llave pública a
-`/home/idiky/.ssh/authorized_keys`, o vuelve a correr `preparar-servidor.sh` pasándole la llave.
+**Dar acceso a otra persona para desplegar:** quien ya tenga acceso corre, en su máquina,
+`infra/servidor/autorizar-llave.sh <su-llave>.pub "Nombre"`, sin sudo. Solo se recibe la llave
+**pública**. Para quitar el acceso se borra su línea (termina en `idiky-<Nombre>`) de
+`/home/idiky/.ssh/authorized_keys`.
 Para **ver** la PWA y la contable basta la clave del §6; para gestión, un usuario de Strapi.
 
 ## 8. Verificar que LangFlow sigue igual
@@ -336,7 +357,9 @@ poner:
 | `~idiky/.config/systemd/user/*.service`, `*.timer` | Las unidades | `levantar.sh`. **No se editan a mano** |
 | `~idiky/.local/bin/idiky-gestion-respaldo` | Copia del script de respaldo | `levantar.sh` |
 | `~idiky/.config/cni/net.d/87-podman.conflist` | La red por defecto de Podman | Podman |
-| `~idiky/fuente/` | Copia del commit publicado | `desplegar.sh` |
+| `~idiky/despliegues/` | Las últimas 3 copias del código desplegado y `registro.tsv`, con quién desplegó qué | `desplegar.sh` |
+| `~idiky/.idiky-despliegue.lock` | El candado: un despliegue a la vez | `desplegar.sh` (`flock`) |
+| `~idiky/datos/respaldos/gestion/gestion-predespliegue-*` | Los últimos 5 respaldos tomados antes de recrear BOB (aparte de los 7 diarios) | `levantar.sh` |
 | `~idiky/.ssh/authorized_keys` | Llaves de quienes despliegan | `preparar-servidor.sh` |
 | `/etc/systemd/system.control/user-1001.slice.d/` | El techo de CPU y memoria | `preparar-servidor.sh` |
 | El grupo de seguridad de red de la VM, regla `Dev` | Prioridad 340 · TCP 8080,8081,8082 · origen cualquiera | El responsable, en el portal de Azure |
@@ -365,6 +388,7 @@ Cada una ya costó tiempo una vez:
 | Reinicio del servidor | No probado con Idiky instalado | Hacerlo en una ventana acordada, con `verificar-vecino.sh` antes y después |
 | Pestaña de BOB abierta durante un despliegue | Al ir a otra pantalla sale *«This screen couldn't be loaded · error loading dynamically imported module …/admin/ListPage-xxxx.js»*. Cada compilación le pone otro nombre a sus archivos, la pestaña pide los de la versión anterior y Strapi responde con su página HTML en vez de un 404 | **Recargar la página** (el botón del aviso o `Cmd + Shift + R`). No es un fallo del servidor: la página del panel se sirve sin caché, así que al recargar toma la versión nueva |
 | Comprobar una lista de archivos desde zsh | `for n in $lista` no separa por líneas en zsh: recorre toda la lista como un solo nombre y da resultados falsos | `while IFS= read -r n; do …; done < archivo` |
+| Desplegar BOB con código que no está en `main` | **Strapi borra las tablas y columnas** que ese código no tenga, y con ellas los datos (lo hace su comparación de esquemas al arrancar) | `desplegar.sh` se niega fuera de `main`, y `levantar.sh` respalda la base antes de recrear el pod |
 
 ## 11. Deshacer todo
 

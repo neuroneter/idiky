@@ -26,7 +26,7 @@ Instalado el 2026-09-10.
 | **Usuarios del equipo** | Los crea un administrador en el panel: *Settings → Administration panel → Users*. Cada persona con el suyo |
 | **Datos** | PostgreSQL 17 dentro del pod, sin puerto hacia afuera. **Solo datos ficticios** |
 | **Respaldo** | Diario a las 08:30 UTC; se guardan 7, en el mismo servidor |
-| **Desplegar** | `infra/desplegar.sh`, como el resto |
+| **Desplegar** | `infra/desplegar.sh origin/main gestion`, **solo el responsable de integración y solo desde `main`**: Strapi borra de la base lo que el código con el que arranca no tenga. Antes de recrear el pod se respalda la base ([`infra/guia-de-despliegue.md`](../../infra/guia-de-despliegue.md)) |
 
 ## La regla que más importa: el modelo se diseña en local
 
