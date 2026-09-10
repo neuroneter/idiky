@@ -80,7 +80,7 @@ Idiky.repo = (function () {
       .sort(porFechaDescendente)
   }
 
-  /** Abonos que los propietarios informaron y aun nadie concilio (RN-30). */
+  /** Abonos que los propietarios informaron y aun nadie concilio (RN-79). */
   function abonosReportados() {
     return cargar().pagos
       .filter(function (p) { return p.estado === 'reportado' })
@@ -136,7 +136,7 @@ Idiky.repo = (function () {
   // Operaciones sobre pagos y recibos de caja
   // -------------------------------------------------------------------------
 
-  /** Aplica el reparto sobre las cuotas. Con `signo` -1 lo revierte (RN-29). */
+  /** Aplica el reparto sobre las cuotas. Con `signo` -1 lo revierte (RN-78). */
   function moverSaldos(imputaciones, signo) {
     imputaciones.forEach(function (linea) {
       var cuota = bd.cuotas.filter(function (c) { return c.id === linea.cuotaId })[0]
@@ -146,7 +146,7 @@ Idiky.repo = (function () {
     })
   }
 
-  /** Toma el siguiente numero de recibo y avanza el consecutivo (RN-28). */
+  /** Toma el siguiente numero de recibo y avanza el consecutivo (RN-77). */
   function emitirRecibo() {
     var consecutivo = bd.consecutivos.recibo
     bd.consecutivos.recibo = consecutivo + 1
@@ -243,7 +243,7 @@ Idiky.repo = (function () {
   }
 
   /**
-   * Anula un recibo de caja (RN-29).
+   * Anula un recibo de caja (RN-78).
    *
    * No se borra el registro: se marca anulado con su motivo y el saldo vuelve
    * a las cuotas. El numero de recibo queda quemado, no se reutiliza — eso es

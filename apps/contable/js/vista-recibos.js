@@ -4,7 +4,7 @@
  * Un recibo de caja es la constancia de que la plata entro. Por eso aqui NO
  * hay boton de borrar: un recibo equivocado se anula, con motivo y con fecha,
  * y se queda en el libro. El consecutivo tampoco se reutiliza. Eso es lo que
- * hace que el libro sirva para auditar (RN-28, RN-29).
+ * hace que el libro sirva para auditar (RN-77, RN-78).
  */
 var Idiky = window.Idiky || (window.Idiky = {})
 

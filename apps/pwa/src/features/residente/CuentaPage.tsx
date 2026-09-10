@@ -15,6 +15,7 @@ import {
   cuotaPendiente,
   diasDeMora,
   estadoRealCuota,
+  sancionEnCurso,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearPeriodo } from '../../utilidades/formato'
 import { ChipCuota, ChipPago } from '../../componentes/Etiquetas'
@@ -39,6 +40,11 @@ export function CuentaPage() {
   const saldo = calcularSaldo(cuotas)
   const vencido = calcularSaldoVencido(cuotas)
   const mora = diasDeMora(cuotas)
+  // Los procesos abiertos NO suman al valor adeudado: una multa se convierte en
+  // cuota solo al quedar en firme (RN-39). Se enlazan desde aqui —que es donde
+  // la persona viene a ver que debe— justamente para dejar claro que todavia no
+  // debe eso (CU-R-29).
+  const procesosAbiertos = sel.sancionesDeUnidad(bd, sesion.unidadActivaId).filter(sancionEnCurso)
 
   const porConciliar = sel
     .pagosDeUnidad(bd, sesion.unidadActivaId)
@@ -53,13 +59,15 @@ export function CuentaPage() {
   return (
     <>
       <div className="tarjeta">
-        <span className="indicador__etiqueta">Saldo total</span>
+        {/* El mismo nombre que en el inicio. "Saldo" es lenguaje contable y se
+            queda en la consola, donde quien lee es el administrador. */}
+        <span className="indicador__etiqueta">Valor adeudado</span>
         <div className="dato-grande" style={{ margin: 'var(--e1) 0' }}>
           {formatearDinero(saldo)}
         </div>
         {vencido > 0 ? (
           <p className="subtitulo">
-            De ese total, <strong>{formatearDinero(vencido)}</strong> esta vencido
+            De ese total, <strong>{formatearDinero(vencido)}</strong> está vencido
             {mora > 0 && ` (${mora} dias de mora)`}.
           </p>
         ) : (
@@ -84,11 +92,34 @@ export function CuentaPage() {
         </Link>
       </div>
 
+      {procesosAbiertos.length > 0 && (
+        <Link to="/app/procesos" className="tarjeta tarjeta--accion tarjeta--plana">
+          <div className="fila">
+            <div className="tarjeta__cuerpo">
+              <span className="marca-tarjeta marca-tarjeta--acento">
+                <Icono nombre="certificado" tamano={20} />
+              </span>
+              <div className="columna">
+                <strong>
+                  {procesosAbiertos.length === 1
+                    ? '1 proceso sancionatorio abierto'
+                    : `${procesosAbiertos.length} procesos sancionatorios abiertos`}
+                </strong>
+                <span className="subtitulo">
+                  Todavía no se cobra nada: solo se carga aquí si queda en firme.
+                </span>
+              </div>
+            </div>
+            <Icono nombre="chevron" tamano={16} className="tenue" />
+          </div>
+        </Link>
+      )}
+
       {porConciliar.length > 0 && (
         <div className="tarjeta">
           <span className="titulo-seccion">Abonos que informaste</span>
           <p className="subtitulo">
-            La administracion todavia no los aplica, por eso no bajan tu saldo.
+            La administración todavía no los aplica, por eso no bajan tu saldo.
           </p>
           <div className="lista lista--compacta" style={{ marginTop: 'var(--e2)' }}>
             {porConciliar.map((pago) => (
@@ -122,7 +153,7 @@ export function CuentaPage() {
       {visibles.length === 0 ? (
         <EstadoVacio
           titulo="No hay movimientos"
-          detalle="Cuando la administracion genere cuotas apareceran aqui."
+          detalle="Cuando la administración genere cuotas aparecerán aquí."
         />
       ) : (
         <div className="lista lista--compacta">
@@ -149,6 +180,22 @@ export function CuentaPage() {
                       <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
                         Abonado {formatearDinero(abonado)} de {formatearDinero(cuota.valor)}
                       </span>
+                    )}
+                    {/* RN-47: el respaldo se lee **aquí**, en la línea del
+                        cobro, no en un documento aparte. Es donde la persona
+                        está cuando se pregunta «¿y esto qué es?». */}
+                    {cuota.justificacion && (
+                      <details className="respaldo-cuota">
+                        <summary>¿Por qué se cobra?</summary>
+                        <p className="subtitulo" style={{ marginTop: 'var(--e2)' }}>
+                          {cuota.justificacion}
+                        </p>
+                        {cuota.referencia && (
+                          <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                            Aprobada en {cuota.referencia}
+                          </span>
+                        )}
+                      </details>
                     )}
                   </div>
                   <div className="columna" style={{ alignItems: 'flex-end' }}>

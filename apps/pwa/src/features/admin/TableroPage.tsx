@@ -106,7 +106,7 @@ export function TableroPage() {
           valor={String(reservasPendientes.length)}
           detalle={correspondenciaPendiente.length > 0
             ? `${correspondenciaPendiente.length} envios sin entregar`
-            : 'Sin envios pendientes'}
+            : 'Sin envíos pendientes'}
           destino="/admin/reservas"
         />
       </div>
@@ -130,7 +130,7 @@ export function TableroPage() {
             </Link>
           </div>
           {reservasPendientes.length === 0 ? (
-            <EstadoVacio titulo="Nada pendiente" detalle="No hay reservas esperando decision." />
+            <EstadoVacio titulo="Nada pendiente" detalle="No hay reservas esperando decisión." />
           ) : (
             <div className="lista lista--compacta">
               {reservasPendientes.slice(0, 4).map((reserva) => {
@@ -160,7 +160,7 @@ export function TableroPage() {
             </Link>
           </div>
           {pqrsAbiertas.length === 0 ? (
-            <EstadoVacio titulo="Bandeja al dia" detalle="No hay solicitudes abiertas." />
+            <EstadoVacio titulo="Bandeja al día" detalle="No hay solicitudes abiertas." />
           ) : (
             <div className="lista lista--compacta">
               {pqrsAbiertas.slice(0, 4).map((solicitud) => {

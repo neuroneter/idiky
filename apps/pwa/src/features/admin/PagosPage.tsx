@@ -1,7 +1,7 @@
 /**
  * CU-A-04 — Registrar un pago manual.
- * CU-A-18 — Conciliar abonos informados y administrar recibos de caja.
- * Doc: docs/casos-de-uso/administrador.md#cu-a-18
+ * CU-A-27 — Conciliar abonos informados y administrar recibos de caja.
+ * Doc: docs/casos-de-uso/administrador.md#cu-a-27
  *
  * Este es el modulo de pagos: la caja de la copropiedad. Tiene dos entradas —
  * lo que el propietario informa (y hay que conciliar) y lo que la
@@ -126,7 +126,7 @@ function EditorReparto({
       )}
       {excedido && (
         <p className="ayuda-campo" style={{ color: 'var(--color-error)' }}>
-          Estas repartiendo mas de lo que se recibio.
+          Estas repartiendo más de lo que se recibio.
         </p>
       )}
     </>
@@ -303,12 +303,12 @@ export function PagosPage() {
         </div>
       </div>
 
-      {/* CU-A-18 — bandeja de abonos informados por los propietarios */}
+      {/* CU-A-27 — bandeja de abonos informados por los propietarios */}
       {pestana === 'conciliar' &&
         (porConciliar.length === 0 ? (
           <EstadoVacio
             titulo="No hay abonos por conciliar"
-            detalle="Cuando un propietario informe un pago desde su app aparecera aqui."
+            detalle="Cuando un propietario informe un pago desde su app aparecera aquí."
           />
         ) : (
           <div className="lista">
@@ -450,7 +450,7 @@ export function PagosPage() {
       {registrando && (
         <Modal
           titulo="Registrar pago"
-          descripcion="Para pagos que llegaron por fuera de la app: consignacion, efectivo o transferencia."
+          descripcion="Para pagos que llegaron por fuera de la app: consignación, efectivo o transferencia."
           onCerrar={() => setRegistrando(false)}
         >
           <div className="campo">
@@ -489,6 +489,7 @@ export function PagosPage() {
                 <option value="transferencia">Transferencia</option>
                 <option value="efectivo">Efectivo</option>
                 <option value="pse">PSE</option>
+                <option value="bre_b">Bre-B</option>
                 <option value="otro">Otro</option>
               </select>
             </div>
@@ -500,7 +501,7 @@ export function PagosPage() {
               id="referencia-pago"
               value={referencia}
               onChange={(evento) => setReferencia(evento.target.value)}
-              placeholder="Numero de consignacion"
+              placeholder="Número de consignación"
             />
           </div>
 
@@ -606,7 +607,7 @@ export function PagosPage() {
                   placeholder="Por que se anula este recibo"
                 />
                 <span className="ayuda-campo">
-                  El recibo no se borra: queda anulado y el saldo vuelve a las cuotas (RN-29).
+                  El recibo no se borra: queda anulado y el saldo vuelve a las cuotas (RN-78).
                 </span>
               </div>
               <button

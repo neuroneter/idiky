@@ -16,13 +16,23 @@ import { registrarPago } from '../../datos/repositorio'
 import { cuotasPorAntiguedad, estadoRealCuota } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import type { MedioPago, Pago } from '../../dominio/tipos'
+import { BotonVolver } from '../../componentes/BotonVolver'
 import { Icono } from '../../componentes/Icono'
 import { ChipCuota } from '../../componentes/Etiquetas'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 
-const MEDIOS: Array<{ id: MedioPago; texto: string }> = [
-  { id: 'pse', texto: 'PSE / debito a cuenta' },
-  { id: 'tarjeta', texto: 'Tarjeta de credito' },
+/**
+ * `ayuda` no es decoracion: Bre-B es nuevo y mucha gente no sabe todavia que es
+ * ni que necesita una llave. Un medio de pago que hay que adivinar no se usa.
+ */
+const MEDIOS: Array<{ id: MedioPago; texto: string; ayuda: string }> = [
+  { id: 'pse', texto: 'PSE / débito a cuenta', ayuda: 'Te lleva al portal de tu banco' },
+  {
+    id: 'bre_b',
+    texto: 'Bre-B',
+    ayuda: 'Pago inmediato con tu llave, desde la app de tu banco',
+  },
+  { id: 'tarjeta', texto: 'Tarjeta de crédito', ayuda: 'Visa, Mastercard o American Express' },
 ]
 
 export function PagoPage() {
@@ -119,7 +129,7 @@ export function PagoPage() {
   if (pendientes.length === 0) {
     return (
       <div className="pila">
-        <EstadoVacio titulo="No tienes cuotas por pagar" detalle="Tu unidad esta al dia." />
+        <EstadoVacio titulo="No tienes cuotas por pagar" detalle="Tu unidad está al día." />
         <Link to="/app/cuenta" className="boton boton--bloque">
           Volver
         </Link>
@@ -130,16 +140,13 @@ export function PagoPage() {
   return (
     <div className="pila">
       <div className="encabezado-pagina">
-        <Link to="/app/cuenta" className="boton-volver">
-          <Icono nombre="volver" tamano={16} />
-          Mi cuenta
-        </Link>
+        <BotonVolver a="/app/cuenta" texto="Mi cuenta" />
       </div>
 
       <div className="pila">
-        <span className="titulo-seccion">Que vas a pagar</span>
+        <span className="titulo-seccion">Qué vas a pagar</span>
         <p className="subtitulo">
-          Los pagos se aplican primero a la deuda mas antigua. Toca una cuota para pagar hasta
+          Los pagos se aplican primero a la deuda más antigua. Toca una cuota para pagar hasta
           esa fecha.
         </p>
         <div className="lista lista--compacta">
@@ -185,7 +192,10 @@ export function PagoPage() {
               onClick={() => setMedio(opcion.id)}
             >
               <div className="fila">
-                <span>{opcion.texto}</span>
+                <div className="columna">
+                  <span>{opcion.texto}</span>
+                  <span className="subtitulo">{opcion.ayuda}</span>
+                </div>
                 {medio === opcion.id && <Icono nombre="check" tamano={16} />}
               </div>
             </button>

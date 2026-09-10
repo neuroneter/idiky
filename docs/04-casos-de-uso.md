@@ -3,11 +3,17 @@
 Este es el **índice maestro funcional**. Cada caso de uso tiene un identificador estable
 que se usa en commits, ramas, issues y comentarios de código.
 
-**Nomenclatura:** `CU-<ÁMBITO>-<NN>` donde el ámbito es `R` (residente), `A` (administrador)
-o `S` (sistema).
+**Nomenclatura:** `CU-<ÁMBITO>-<NN>` donde el ámbito es `R` (residente), `A` (administrador),
+`P` (portería) o `S` (sistema).
 
 **Estados:** `✅ Demo` implementado en el demo v0.1 · `🟡 Parcial` implementado a medias ·
 `⬜ Pendiente` documentado pero no implementado.
+
+**Fase:** `1` entra en la primera versión real del producto · `2` siguiente · `3` después.
+**Ojo:** la columna *Fase* se recalculó el 2026-08-26 con el alcance declarado por el equipo
+([`12-levantamiento-pendiente.md` §0](./12-levantamiento-pendiente.md)). Un `✅ Demo` en fase 1
+significa "ya existe en el demo"; un `⬜ Pendiente` en fase 1 significa **hay que construirlo
+y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió explícitamente.
 
 ---
 
@@ -15,7 +21,7 @@ o `S` (sistema).
 
 | ID | Caso de uso | Fase | Estado | Detalle |
 |---|---|---|---|---|
-| CU-R-01 | Ingresar y seleccionar unidad activa | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-01) |
+| CU-R-01 | **Ingresar a la app** (documento y contraseña) | 1 | 🟡 Parcial (el flujo, sin autenticar) | [ver](./casos-de-uso/residente.md#cu-r-01) |
 | CU-R-02 | Ver resumen de mi copropiedad (inicio) | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-02) |
 | CU-R-03 | Consultar estado de cuenta | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-03) |
 | CU-R-04 | Pagar una cuota | 1 | ✅ Demo (simulado) | [ver](./casos-de-uso/residente.md#cu-r-04) |
@@ -26,13 +32,25 @@ o `S` (sistema).
 | CU-R-09 | Leer comunicados de la cartelera | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-09) |
 | CU-R-10 | Autorizar un visitante y generar su código | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-10) |
 | CU-R-11 | Ver correspondencia pendiente | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-11) |
-| CU-R-12 | Descargar paz y salvo | 2 | ⬜ Pendiente | — |
-| CU-R-13 | Participar en asamblea y votar | 2 | ⬜ Pendiente | — |
-| CU-R-14 | Reportar una novedad con foto (daño, ruido) | 2 | ⬜ Pendiente | — |
-| CU-R-15 | Registrar mis vehículos y mascotas | 2 | ⬜ Pendiente | — |
+| CU-R-12 | **Descargar el paz y salvo** | 1 | ✅ Demo (se emite e imprime a PDF desde el teléfono) | [ver](./casos-de-uso/residente.md#cu-r-12) |
+| CU-R-13 | **Votar en una asamblea** | 1 | 🟡 Parcial (se vota y se cuenta por coeficiente; falta mayoría y quórum) | [ver](./casos-de-uso/residente.md#cu-r-13) |
+| CU-R-14 | Reportar una novedad con foto (daño, ruido) | 3 | ⬜ Pendiente | — |
+| CU-R-15 | Registrar mis vehículos y mascotas | 3 | ⬜ Pendiente | — |
 | CU-R-16 | Recibir notificaciones push | 3 | ⬜ Pendiente | — |
-| CU-R-17 | Directorio de contactos útiles y emergencias | 2 | ⬜ Pendiente | — |
-| CU-R-18 | Informar un abono ya consignado | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-18) |
+| CU-R-17 | Directorio de contactos útiles y emergencias | 3 | ⬜ Pendiente | — |
+| CU-R-18 | **Descargar el informe de estado de cuenta** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-18) |
+| CU-R-19 | **Consultar y descargar mis comprobantes de pago** | 1 | 🟡 Parcial | [ver](./casos-de-uso/residente.md#cu-r-19) |
+| CU-R-20 | **Recibir la citación a asamblea y confirmar asistencia** | 1 | 🟡 Parcial (muestra la citación y el orden del día; no confirma asistencia) | [ver](./casos-de-uso/residente.md#cu-r-20) |
+| CU-R-21 | **Entrar a la asamblea y marcar mi asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-21) |
+| CU-R-22 | **Otorgar poder a otro copropietario** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-22) |
+| CU-R-23 | **Dar poder para que otro vote por mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-23) |
+| CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-24) |
+| CU-R-25 | **Activar mi cuenta o recuperar mi contraseña** | 1 | 🟡 Parcial (el flujo, sin autenticar) | [ver](./casos-de-uso/residente.md#cu-r-25) |
+| CU-R-26 | **Ajustar el tamaño de la letra** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-26) |
+| CU-R-27 | **Registrar y dar de baja a las personas de mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-27) |
+| CU-R-28 | **Adjuntar mis documentos a un registro** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-28) |
+| CU-R-29 | **Ver un proceso sancionatorio y defenderme** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-29) |
+| CU-R-30 | **Informar un abono ya consignado** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-30) |
 
 ## 2. Administrador — consola web
 
@@ -42,30 +60,55 @@ o `S` (sistema).
 | CU-A-02 | Administrar unidades y residentes | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-02) |
 | CU-A-03 | Consultar cartera y morosidad | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-03) |
 | CU-A-04 | Registrar un pago manual | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-04) |
-| CU-A-18 | Conciliar abonos y administrar recibos de caja | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-18) |
 | CU-A-05 | Generar cuotas del periodo | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-05) |
 | CU-A-06 | Aprobar o rechazar reservas | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-06) |
 | CU-A-07 | Atender la bandeja de PQRS | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-07) |
 | CU-A-08 | Publicar un comunicado | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-08) |
 | CU-A-09 | Registrar correspondencia recibida | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-09) |
 | CU-A-10 | Configurar zonas comunes y sus reglas | 2 | ⬜ Pendiente | — |
-| CU-A-11 | Cargar presupuesto anual | 2 | ⬜ Pendiente | — |
-| CU-A-12 | Convocar asamblea y controlar quórum | 2 | ⬜ Pendiente | — |
-| CU-A-13 | Emitir paz y salvo | 2 | ⬜ Pendiente | — |
+| CU-A-11 | Cargar presupuesto anual | 3 | ⬜ Pendiente | — |
+| CU-A-12 | **Convocar la asamblea y emitir las citaciones** | 1 | 🟡 Parcial (convoca con su modalidad; falta el documento de citación, ADR-0006) | [ver](./casos-de-uso/administrador.md#cu-a-12) |
+| CU-A-13 | **Emitir el paz y salvo** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-13) |
 | CU-A-14 | Gestionar proveedores y mantenimientos | 3 | ⬜ Pendiente | — |
 | CU-A-15 | Administrar varias copropiedades | 3 | ⬜ Pendiente | — |
 | CU-A-16 | Exportar informes (cartera, PQRS) | 2 | ⬜ Pendiente | — |
+| CU-A-17 | **Instalar la asamblea y llevar la asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-17) |
+| CU-A-18 | **Habilitar, abrir y cerrar una votación** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-18) |
+| CU-A-19 | **Registrar un poder en papel y dar de alta a quien lo ejerce** | 1 | 🟡 Parcial (registra y muestra el acumulado; **no aplica el tope**, RN-30) | [ver](./casos-de-uso/administrador.md#cu-a-19) |
+| CU-A-20 | **Levantar el acta de la asamblea** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-20) |
+| CU-A-21 | **Administrar los coeficientes de las unidades** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-21) |
+| CU-A-22 | **Administrar el catálogo de multas** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-22) |
+| CU-A-23 | **Imponer una multa y llevar el proceso** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-23) |
+| CU-A-24 | ~~Cobrar una cuota adicional a una unidad~~ | — | ⛔ Retirado — es la cuota extraordinaria (Mary, 2026-09-09) | [ver](./casos-de-uso/administrador.md#cu-a-24) |
+| CU-A-25 | **Configurar si la copropiedad cobra interés de mora** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-25) |
+| CU-A-26 | **Registrar propietarios y ver los registros de la copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-26) |
+| CU-A-27 | Conciliar abonos y administrar recibos de caja | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-27) |
+
+
+## 3. Portería — consola de la entrada
+
+Ámbito nuevo (2026-08-28), **construido el mismo día** tras aprobar la propuesta. Falta la
+minuta del turno. Detalle en [`casos-de-uso/porteria.md`](./casos-de-uso/porteria.md).
+
+| ID | Caso de uso | Fase | Estado | Detalle |
+|---|---|---|---|---|
+| CU-P-01 | **Registrar y entregar correspondencia** | 2 | 🟡 Parcial (falta la minuta) | [ver](./casos-de-uso/porteria.md#cu-p-01) |
+| CU-P-02 | **Validar el código de un visitante** | 2 | 🟡 Parcial (valida; no registra el ingreso) | [ver](./casos-de-uso/porteria.md#cu-p-02) |
+| CU-P-03 | **Reconocer a quien vive aquí** | 1 | ✅ Demo | [ver](./casos-de-uso/porteria.md#cu-p-03) |
 
 ## 3. Sistema — procesos automáticos
 
 | ID | Caso de uso | Fase | Estado |
 |---|---|---|---|
 | CU-S-01 | Generar cuotas ordinarias mensuales | 2 | ⬜ Pendiente (hoy es manual, CU-A-05) |
-| CU-S-02 | Marcar cuotas vencidas y calcular interés de mora | 2 | 🟡 Parcial (el vencimiento se marca; el interés no se calcula) |
+| CU-S-02 | Marcar cuotas vencidas y calcular interés de mora | 1 | 🟡 Parcial (el vencimiento se marca; el interés no se calcula — **solo si la copropiedad lo activó**, RN-42) |
 | CU-S-03 | Liberar reservas no confirmadas | 2 | ⬜ Pendiente |
 | CU-S-04 | Vencer códigos de visitante | 1 | ✅ Demo (por fecha de vigencia) |
 | CU-S-05 | Alertar PQRS próximas a vencer SLA | 2 | 🟡 Parcial (se muestra el indicador de vencida) |
 | CU-S-06 | Enviar recordatorios de pago | 3 | ⬜ Pendiente |
+| CU-S-07 | **Calcular el quórum en vivo por coeficientes (presentes + representados)** | 1 | ⬜ Pendiente |
+| CU-S-08 | **Consolidar el resultado de una votación ponderado por coeficiente** | 1 | ⬜ Pendiente |
+| CU-S-09 | **Vencer los poderes al cerrarse la asamblea** | 1 | ⬜ Pendiente |
 
 ---
 

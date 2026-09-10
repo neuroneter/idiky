@@ -12,7 +12,7 @@ abrirla desde un navegador, en vez de recibir la carpeta por correo.
 ## 1. Qué se publica
 
 **La carpeta `apps/contable/` tal cual.** No hay paso de construcción, ni `npm`, ni
-dependencias que bajar: son archivos estáticos ([ADR-0006](./adr/0006-stack-aplicacion-contable.md)).
+dependencias que bajar: son archivos estáticos ([ADR-0010](./adr/0010-stack-aplicacion-contable.md)).
 Lo que se copia al servidor es exactamente lo que Jeimy edita.
 
 ```
@@ -163,22 +163,18 @@ Idiky.contabilidad.situacionFinanciera(Idiky.repo.datosContables(), Idiky.domini
 
 ## 7. De qué rama se despliega
 
-La contable **ya está integrada en `main`**. La rama de trabajo de Jeimy
-(`claude/repository-review-1fbujq`) va por delante con el menú de tres entradas y con este
-documento, y `infra/` —lo que hace posible el despliegue— vive todavía en la rama de
-infraestructura.
+La contable está en **`main`**, al día. Lo que **todavía no está en `main`** es `infra/`: vive
+en la rama de infraestructura (`claude/infra-podman-1wkn5z`), junto con ADR-0011 (el
+entorno en contenedores) y ADR-0012 (BOB, el back office). Por eso esos dos ADR todavía no
+aparecen en `docs/adr/`.
 
-**Para publicar hay que desplegar un commit que tenga las dos cosas:** la contable al día y
-`infra/`. Mientras no estén las dos en `main`, el orden sano es:
+Así que hoy hay dos caminos:
 
-1. Integrar la rama de Jeimy en `main` (trae el menú de tres entradas y este documento).
-2. Integrar la rama de infraestructura en `main` (trae `infra/`, ADR-0011 y ADR-0012).
-3. Desplegar `main`.
-
-Publicar la rama de Jeimy sola no funciona: no tiene `infra/`. Publicar `main` hoy funciona,
-pero publica el menú de ocho entradas, que es el anterior.
-
----
+- **Con contenedor** (§3a): hay que integrar antes esa rama en `main` y desplegar `main`
+  (T-35). Es la forma prevista, y la que da `revision.txt` y el `no-cache` ya puesto.
+- **Sin esperar a eso** (§3b): copiar `apps/contable/` de `main` a cualquier servidor de
+  archivos y agregarle el `no-cache` de §4. Funciona igual; lo que se pierde es saber qué
+  commit está publicado.
 
 ## 8. Lo que hay que decir de este despliegue
 
@@ -190,7 +186,7 @@ Para que nadie se confunda al recibir la URL:
 - **No hay respaldo.** Nadie hace copia de seguridad de un `localStorage`. Lo que se registre
   ahí es para probar, no para contabilizar de verdad.
 - **Lo que sí es real es el comportamiento contable:** la partida doble, el PUC, los estados
-  financieros y las reglas RN-26 a RN-42 se comportan como se comportarían con backend.
+  financieros y las reglas RN-75 a RN-91 se comportan como se comportarían con backend.
 
 ---
 

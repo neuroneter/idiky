@@ -5,6 +5,7 @@
 
 import type {
   CategoriaComunicado,
+  EstadoAsamblea,
   EstadoCorrespondencia,
   EstadoCuota,
   EstadoPago,
@@ -57,7 +58,7 @@ export function ChipReserva({ estado }: { estado: EstadoReserva }) {
 
 const PQRS: Record<EstadoPqrs, [string, Variante]> = {
   abierta: ['Abierta', 'info'],
-  en_gestion: ['En gestion', 'alerta'],
+  en_gestion: ['En gestión', 'alerta'],
   resuelta: ['Resuelta', 'exito'],
   cerrada: ['Cerrada', ''],
 }
@@ -90,8 +91,22 @@ export function ChipComunicado({ categoria }: { categoria: CategoriaComunicado }
   return <Chip texto={texto} variante={variante} />
 }
 
+const ASAMBLEA: Record<EstadoAsamblea, [string, Variante]> = {
+  convocada: ['Convocada', 'marca'],
+  // La que esta pasando lleva el unico color de alarma de la lista: es la que
+  // tiene votaciones abiertas y la que caduca en minutos.
+  instalada: ['En curso', 'alerta'],
+  cerrada: ['Cerrada', ''],
+  cancelada: ['Cancelada', 'error'],
+}
+
+export function ChipAsamblea({ estado }: { estado: EstadoAsamblea }) {
+  const [texto, variante] = ASAMBLEA[estado]
+  return <Chip texto={texto} variante={variante} />
+}
+
 const CORRESPONDENCIA: Record<EstadoCorrespondencia, [string, Variante]> = {
-  en_porteria: ['En porteria', 'alerta'],
+  en_porteria: ['En portería', 'alerta'],
   entregada: ['Entregada', 'exito'],
 }
 
@@ -101,6 +116,7 @@ export function ChipCorrespondencia({ estado }: { estado: EstadoCorrespondencia 
 }
 
 const VISITANTE: Record<EstadoVisitante, [string, Variante]> = {
+  programado: ['Programado', 'marca'],
   activo: ['Vigente', 'exito'],
   vencido: ['Vencido', ''],
   revocado: ['Revocado', 'error'],

@@ -1,4 +1,4 @@
-# ADR-0006 — La aplicación contable se construye sin compilación: HTML, CSS y JavaScript
+# ADR-0010 — La aplicación contable se construye sin compilación: HTML, CSS y JavaScript
 
 - **Estado:** Aceptada
 - **Fecha:** 2026-08-27

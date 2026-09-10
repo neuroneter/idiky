@@ -1,11 +1,11 @@
 /**
- * CU-R-18 — Informar un abono ya consignado.
- * Doc: docs/casos-de-uso/residente.md#cu-r-18
+ * CU-R-30 — Informar un abono ya consignado.
+ * Doc: docs/casos-de-uso/residente.md#cu-r-30
  *
  * El propietario consigno por fuera de la app (banco, efectivo en porteria) y
  * necesita decirle a la administracion que ese dinero es suyo y a que lo quiere
  * aplicar. El abono queda `reportado`: no toca la cartera hasta que la
- * administracion lo concilie (RN-30).
+ * administracion lo concilie (RN-79).
  */
 
 import { useState } from 'react'
@@ -22,9 +22,10 @@ import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 
 const MEDIOS: Array<{ id: MedioPago; texto: string }> = [
-  { id: 'transferencia', texto: 'Transferencia o consignacion' },
-  { id: 'efectivo', texto: 'Efectivo en porteria' },
+  { id: 'transferencia', texto: 'Transferencia o consignación' },
+  { id: 'efectivo', texto: 'Efectivo en portería' },
   { id: 'pse', texto: 'PSE' },
+  { id: 'bre_b', texto: 'Bre-B (pago inmediato con llave)' },
   { id: 'otro', texto: 'Otro medio' },
 ]
 
@@ -58,7 +59,7 @@ export function InformarAbonoPage() {
           cuotasInformadas: cuotasSenaladas,
           reportadoPor: nombreCompleto(persona),
         }),
-      'Abono informado a la administracion.',
+      'Abono informado a la administración.',
     )
     if (abono) setEnviado(true)
   }
@@ -72,7 +73,7 @@ export function InformarAbonoPage() {
           </div>
           <h2 className="titulo">Abono informado</h2>
           <p className="subtitulo">
-            La administracion lo va a revisar y te va a emitir el recibo de caja. Mientras tanto lo
+            La administración lo va a revisar y te va a emitir el recibo de caja. Mientras tanto lo
             veras en tu cuenta como <strong>por conciliar</strong>.
           </p>
         </div>
@@ -95,7 +96,7 @@ export function InformarAbonoPage() {
       <div className="tarjeta">
         <span className="titulo-seccion">Ya pagaste por fuera de la app</span>
         <p className="subtitulo">
-          Cuentanos cuanto consignaste y a que corresponde, para que la administracion lo aplique
+          Cuentanos cuanto consignaste y a que corresponde, para que la administración lo aplique
           donde tu quieres y no donde el sistema suponga.
         </p>
       </div>
@@ -128,7 +129,7 @@ export function InformarAbonoPage() {
       </div>
 
       <div className="campo">
-        <label htmlFor="referencia-abono">Numero de consignacion o referencia</label>
+        <label htmlFor="referencia-abono">Número de consignación o referencia</label>
         <input
           id="referencia-abono"
           value={referencia}
@@ -144,10 +145,10 @@ export function InformarAbonoPage() {
           rows={3}
           value={concepto}
           onChange={(evento) => setConcepto(evento.target.value)}
-          placeholder="Ej: es el segundo contado de la cuota extraordinaria, no la administracion del mes."
+          placeholder="Ej: es el segundo contado de la cuota extraordinaria, no la administración del mes."
         />
         <span className="ayuda-campo">
-          Esto es lo que lee la administracion antes de aplicar el pago.
+          Esto es lo que lee la administración antes de aplicar el pago.
         </span>
       </div>
 

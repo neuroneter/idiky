@@ -9,7 +9,7 @@
  * servicios que lo automatizan son de terceros y de pago.
  *
  * Ademas, esta aplicacion abre desde un archivo local, sin servidor y sin
- * conexion garantizada (ADR-0006): no puede llamar a un servicio externo.
+ * conexion garantizada (ADR-0010): no puede llamar a un servicio externo.
  *
  * Por eso `consultarNit` busca en el DIRECTORIO PROPIO de la copropiedad, que
  * es lo que de verdad se necesita en el dia a dia — al proveedor de vigilancia

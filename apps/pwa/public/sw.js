@@ -11,7 +11,14 @@
  */
 
 const VERSION = 'idiky-demo-v1'
-const CASCARON = ['./', './index.html', './manifest.webmanifest', './icono.svg']
+const CASCARON = [
+  './',
+  './index.html',
+  './manifest.webmanifest',
+  './icono.svg',
+  './icono-192.png',
+  './icono-512.png',
+]
 
 self.addEventListener('install', (evento) => {
   evento.waitUntil(

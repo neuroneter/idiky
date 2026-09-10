@@ -69,7 +69,7 @@ Idiky.dominio = (function () {
 
   /**
    * RN-04 — Una cuota esta `vencida` si su vencimiento ya paso y aun tiene saldo.
-   * RN-26 — Si recibio abonos parciales pero todavia debe algo, esta `abonada`.
+   * RN-75 — Si recibio abonos parciales pero todavia debe algo, esta `abonada`.
    *
    * Ojo con el orden: una cuota vencida CON abonos se sigue reportando vencida.
    * Para la mora lo que cuenta es que todavia debe, no que abono algo.
@@ -153,7 +153,7 @@ Idiky.dominio = (function () {
 
   /**
    * RN-06 — Un pago se imputa primero a la deuda mas antigua.
-   * RN-27 — El abono puede cubrir una cuota solo en parte: se reparte hasta
+   * RN-76 — El abono puede cubrir una cuota solo en parte: se reparte hasta
    * agotar el valor recibido. Lo que sobra no se imputa y queda a favor.
    *
    * Devuelve una lista de `{ cuotaId, valor }`.
@@ -174,7 +174,7 @@ Idiky.dominio = (function () {
     return imputaciones.reduce(function (total, linea) { return total + linea.valor }, 0)
   }
 
-  /** RN-27 — Parte del pago que no quedo aplicada a ninguna cuota. */
+  /** RN-76 — Parte del pago que no quedo aplicada a ninguna cuota. */
   function saldoAFavorDelPago(valor, imputaciones) {
     return Math.max(0, valor - totalImputado(imputaciones))
   }
@@ -214,17 +214,17 @@ Idiky.dominio = (function () {
   // Recibos de caja
   // -------------------------------------------------------------------------
 
-  /** RN-28 — Numero de recibo de caja: consecutivo, sin reuso. */
+  /** RN-77 — Numero de recibo de caja: consecutivo, sin reuso. */
   function numeroRecibo(consecutivo) {
     return 'RC-' + String(consecutivo).padStart(5, '0')
   }
 
-  /** RN-29 — Solo se anula un recibo que este aplicado. */
+  /** RN-78 — Solo se anula un recibo que este aplicado. */
   function sePuedeAnular(pago) {
     return pago.estado === 'aplicado'
   }
 
-  /** RN-30 — Un abono informado por el propietario espera a que se aplique. */
+  /** RN-79 — Un abono informado por el propietario espera a que se aplique. */
   function esperaAplicacion(pago) {
     return pago.estado === 'reportado'
   }

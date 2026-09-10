@@ -1,36 +1,73 @@
 /**
  * Cascaron de la app movil del residente.
- * CU-R-01 (unidad activa) · CU-R-02 … CU-R-11 se renderizan dentro del <Outlet>.
+ * CU-R-01 (unidad activa) · CU-R-02 … CU-R-11 y CU-R-24 se renderizan dentro del <Outlet>.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useDatos } from '../estado/DatosContext'
 import { useSesion } from '../estado/SesionContext'
 import * as sel from '../datos/selectores'
+import { nombreCompleto } from '../datos/selectores'
 import { etiquetaUnidad } from '../dominio/reglas'
-import { iniciales } from '../utilidades/formato'
+import { capitalizar, iniciales } from '../utilidades/formato'
 import { Icono, type NombreIcono } from './Icono'
+import { Logotipo } from './Logotipo'
+import { SiluetaTorres } from './SiluetaTorres'
 import { Modal } from './Modal'
+import { OpcionesTamanoTexto } from './ControlTamanoTexto'
 import { AvisoGlobal } from './Aviso'
+import { biometria } from '../servicios/plataforma'
 
+/**
+ * Cinco pestanas, que es el maximo que caben sin que el texto se parta.
+ *
+ * Reservas y PQRS se unificaron en "Solicitudes" el 2026-08-27 para hacerle sitio
+ * a Asambleas (Mary). Es mejor reparto que el anterior: reservar el salon y
+ * radicar una queja son la misma accion —pedirle algo a la administracion— y no
+ * merecian dos pestanas, mientras que la asamblea, que es donde el copropietario
+ * decide, no tenia ninguna.
+ */
 const PESTANAS: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta?: boolean }> = [
   { ruta: '/app', texto: 'Inicio', icono: 'inicio', exacta: true },
   { ruta: '/app/cuenta', texto: 'Cuenta', icono: 'cuenta' },
-  { ruta: '/app/reservas', texto: 'Reservas', icono: 'reservas' },
-  { ruta: '/app/pqrs', texto: 'PQRS', icono: 'pqrs' },
+  { ruta: '/app/solicitudes', texto: 'Solicitudes', icono: 'solicitudes' },
+  { ruta: '/app/asambleas', texto: 'Asambleas', icono: 'asambleas' },
   { ruta: '/app/comunicados', texto: 'Cartelera', icono: 'comunicados' },
 ]
 
+/**
+ * Titulo de cada pantalla. `/app` no esta aqui a proposito: en el inicio la barra
+ * muestra el logotipo en vez del titulo, porque decir "Inicio" cuando ya estas en
+ * el inicio no informa nada, y esa es la unica cara de la app del residente donde
+ * la marca alcanza a verse.
+ */
 const TITULOS: Record<string, string> = {
-  '/app': 'Inicio',
   '/app/cuenta': 'Estado de cuenta',
   '/app/cuenta/pagar': 'Pagar',
-  '/app/reservas': 'Zonas comunes',
-  '/app/pqrs': 'Peticiones y quejas',
+  '/app/solicitudes/reservas': 'Zonas comunes',
+  '/app/solicitudes/pqrs': 'Peticiones y quejas',
+  '/app/solicitudes/paz-y-salvo': 'Paz y salvo',
+  '/app/asambleas': 'Asambleas',
   '/app/comunicados': 'Cartelera',
   '/app/visitantes': 'Visitantes',
   '/app/correspondencia': 'Correspondencia',
+  '/app/procesos': 'Procesos sancionatorios',
+  '/app/unidad': 'Mi unidad',
+}
+
+/**
+ * El titulo de la barra para una ruta.
+ *
+ * El detalle de una asamblea lleva id en la ruta, asi que no puede salir de una
+ * tabla fija. Antes de esto la barra decia "Idiky" en cualquier pantalla que no
+ * estuviera en la lista, que es como no decir nada.
+ */
+function tituloDe(pathname: string): string {
+  if (TITULOS[pathname]) return TITULOS[pathname]
+  if (pathname.startsWith('/app/asambleas/')) return 'Asamblea'
+  if (pathname.startsWith('/app/solicitudes')) return 'Solicitudes'
+  return 'Idiky'
 }
 
 export function LayoutResidente() {
@@ -38,22 +75,51 @@ export function LayoutResidente() {
   const { sesion, cerrar, cambiarUnidadActiva } = useSesion()
   const { pathname } = useLocation()
   const [eligiendoUnidad, setEligiendoUnidad] = useState(false)
+  const [viendoPerfil, setViendoPerfil] = useState(false)
+  /** `null` mientras se averigua si el aparato tiene lector (ADR-0002). */
+  const [huella, setHuella] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    let vigente = true
+    biometria.disponible().then((hay) => {
+      if (!vigente || !hay || !sesion) return
+      setHuella(biometria.registrada(sesion.personaId))
+    })
+    return () => {
+      vigente = false
+    }
+  }, [sesion])
 
   if (!sesion) return null
 
   const persona = sel.persona(bd, sesion.personaId)
   const unidadActiva = sel.unidad(bd, sesion.unidadActivaId)
   const misResidencias = sel.residenciasDePersona(bd, sesion.personaId)
+  const miRol = misResidencias.find((r) => r.unidadId === sesion.unidadActivaId)?.rol
+
 
   return (
-    <div className="app-movil">
+    <div className="app-movil app-movil--marca">
+      {/* Zona de marca: el degradado es el fondo de toda la app del residente, fijo
+          a la pantalla. La silueta de torres es la copropiedad misma, dibujada
+          con el mismo trazo del logotipo. */}
+      <div className="zona-marca" aria-hidden="true">
+        <SiluetaTorres className="zona-marca__siluetas" />
+      </div>
+
       <header className="barra-superior">
         <div className="barra-superior__fila">
+          {/* La marca encabeza la barra y debajo va donde estas. Queda en el
+              mismo sitio en todas las pantallas: una marca que cambia de lado
+              segun la vista no se memoriza, y la esquina derecha es la zona de
+              controles (unidad y avatar), que no es donde va un logotipo. */}
           <div className="columna">
-            <span className="barra-superior__saludo">
-              Hola, {persona?.nombres.split(' ')[0] ?? 'residente'}
+            <Logotipo inverso tamano="var(--texto-sm)" />
+            <span className="barra-superior__titulo">
+              {pathname === '/app'
+                ? `Hola, ${persona?.nombres.split(' ')[0] ?? 'residente'}`
+                : tituloDe(pathname)}
             </span>
-            <span className="barra-superior__titulo">{TITULOS[pathname] ?? 'Idiky'}</span>
           </div>
           <div className="fila" style={{ gap: 'var(--e2)' }}>
             <button
@@ -66,7 +132,15 @@ export function LayoutResidente() {
               {unidadActiva ? etiquetaUnidad(unidadActiva) : 'Sin unidad'}
               {misResidencias.length > 1 && <Icono nombre="chevron" tamano={12} />}
             </button>
-            <button className="avatar" onClick={cerrar} title="Cerrar sesion">
+            {/* El circulo abre el perfil, no cierra la sesion. Antes cerraba de
+                un toque y sin preguntar, y al leerse como un avatar la gente
+                esperaba justo lo contrario: ver quien es. La salida esta dentro,
+                que es un paso deliberado para algo irreversible. */}
+            <button
+              className="avatar"
+              onClick={() => setViendoPerfil(true)}
+              aria-label="Tu perfil"
+            >
               {persona ? iniciales(persona.nombres, persona.apellidos) : '··'}
             </button>
           </div>
@@ -94,6 +168,81 @@ export function LayoutResidente() {
       </nav>
 
       <AvisoGlobal />
+
+      {viendoPerfil && (
+        <Modal titulo="Tu perfil" onCerrar={() => setViendoPerfil(false)}>
+          <div className="fila fila-inicio" style={{ gap: 'var(--e3)' }}>
+            <span className="avatar avatar--perfil">
+              {persona ? iniciales(persona.nombres, persona.apellidos) : '··'}
+            </span>
+            <div className="columna" style={{ flex: 1 }}>
+              <strong>{nombreCompleto(persona)}</strong>
+              <span className="subtitulo">
+                {miRol ? `${capitalizar(miRol)} · ` : ''}
+                {unidadActiva ? etiquetaUnidad(unidadActiva) : 'Sin unidad'}
+              </span>
+              {persona?.email && <span className="subtitulo">{persona.email}</span>}
+            </div>
+          </div>
+
+          <div className="separador" />
+
+          {/* Los ajustes **de este telefono**, no de la copropiedad: el tamano de
+              la letra y la huella. Van juntos porque son la misma clase de cosa —
+              no viajan al backend de la fase 2 ni acompanan a la persona a otro
+              aparato. */}
+          <div className="columna" style={{ gap: 'var(--e1)', marginBottom: 'var(--e3)' }}>
+            <strong>Tamaño de la letra</strong>
+            <span className="subtitulo">Aplica a toda la app, en este teléfono.</span>
+          </div>
+          <OpcionesTamanoTexto />
+
+          <div className="separador" />
+
+          {/* Solo aparece si el aparato tiene lector: ofrecer una huella donde no
+              hay lector es prometer algo que no va a pasar (RN-55). */}
+          {huella !== null && (
+            <label className="opcion-huella">
+              <input
+                type="checkbox"
+                checked={huella}
+                onChange={async (evento) => {
+                  if (!evento.target.checked) {
+                    biometria.olvidar(sesion.personaId)
+                    setHuella(false)
+                    return
+                  }
+                  const listo = await biometria.registrar(
+                    sesion.personaId,
+                    nombreCompleto(persona),
+                  )
+                  setHuella(listo)
+                }}
+              />
+              <span>
+                <strong>Entrar con huella en este teléfono</strong>
+                <span className="subtitulo">
+                  Así no tienes que escribir tu clave cada vez.
+                </span>
+              </span>
+            </label>
+          )}
+
+          {/* Azul suave, no rojo: el rojo esta reservado para la plata (mora, cuota
+              vencida) y pintar aqui de rojo le quita fuerza a la senal que si tiene
+              que alarmar. Tampoco el violeta, que es el color de la accion
+              principal. El azul suave es el del avatar de esta misma hoja
+              (docs/08-convenciones.md). */}
+          <button
+            className="boton boton--salida boton--bloque"
+            onClick={cerrar}
+            style={{ minHeight: 44 }}
+          >
+            <Icono nombre="salir" tamano={16} />
+            Cerrar sesión
+          </button>
+        </Modal>
+      )}
 
       {eligiendoUnidad && (
         <Modal

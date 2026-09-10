@@ -46,7 +46,7 @@ export function ReservasPage() {
     // RN-08: el bloqueo por mora se avisa antes de que el residente pierda tiempo.
     if (enMora) {
       mostrarAviso(
-        'Tu unidad tiene cuotas vencidas. Ponte al dia para reservar zonas comunes.',
+        'Tu unidad tiene cuotas vencidas. Ponte al día para reservar zonas comunes.',
         'error',
       )
       return
@@ -86,7 +86,7 @@ export function ReservasPage() {
           horaFin: seleccionada.fin,
         }),
       zonaElegida.requiereAprobacion
-        ? 'Solicitud enviada. La administracion la revisara.'
+        ? 'Solicitud enviada. La administración la revisará.'
         : 'Reserva confirmada.',
     )
     if (reserva) setZonaElegida(null)
@@ -98,14 +98,15 @@ export function ReservasPage() {
         <div className="tarjeta" style={{ background: 'var(--color-error-suave)', borderColor: 'transparent' }}>
           <strong style={{ color: 'var(--color-error)' }}>Reservas bloqueadas</strong>
           <p className="subtitulo" style={{ marginTop: 'var(--e1)' }}>
-            El reglamento no permite reservar zonas comunes con cuotas vencidas. Ponte al dia
+            El reglamento no permite reservar zonas comunes con cuotas vencidas. Ponte al día
             desde tu estado de cuenta.
           </p>
         </div>
       )}
 
       <div className="pila">
-        <span className="titulo-seccion">Zonas comunes</span>
+        {/* Sin titulo de seccion: la barra superior ya dice "Zonas comunes" y
+            repetirlo dos veces seguidas no informa nada. */}
         <div className="lista lista--compacta">
           {zonas.map((zona) => (
             <button
@@ -119,7 +120,7 @@ export function ReservasPage() {
                   <span className="subtitulo">{zona.descripcion}</span>
                   <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
                     {zona.horaInicio} a {zona.horaFin} · aforo {zona.aforo} ·{' '}
-                    {zona.requiereAprobacion ? 'requiere aprobacion' : 'confirmacion inmediata'}
+                    {zona.requiereAprobacion ? 'requiere aprobacion' : 'confirmación inmediata'}
                   </span>
                 </div>
                 <span className="chip chip--marca">Reservar</span>
@@ -134,7 +135,7 @@ export function ReservasPage() {
         {misReservas.length === 0 ? (
           <EstadoVacio
             titulo="Todavia no has reservado"
-            detalle="Elige una zona comun arriba para hacer tu primera reserva."
+            detalle="Elige una zona común arriba para hacer tu primera reserva."
           />
         ) : (
           <div className="lista lista--compacta">
@@ -216,7 +217,7 @@ export function ReservasPage() {
               })}
             </div>
             <span className="ayuda-campo">
-              Las franjas tachadas ya estan reservadas por otra unidad.
+              Las franjas tachadas ya están reservadas por otra unidad.
             </span>
           </div>
 
