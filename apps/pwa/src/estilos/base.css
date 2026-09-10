@@ -91,16 +91,27 @@ textarea {
 /* ----------------------------------------------------------------- Tarjetas */
 .tarjeta {
   background: var(--color-superficie);
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio);
+  /* Sin filete: el borde de 1 px mas una sombra apenas visible era lo que hacia
+     que las tarjetas se leyeran como cajas de maqueta. Ahora se apoyan solo en la
+     sombra, y el fondo mas profundo hace el resto del trabajo. */
+  border: 1px solid transparent;
+  border-radius: var(--radio-lg);
   padding: var(--e4);
   box-shadow: var(--sombra-1);
 }
 .tarjeta--plana {
   box-shadow: none;
 }
+/* Estado en una tarjeta: un filo de color a la izquierda. Pintar la caja entera
+   de verde o ambar compite con el degradado del fondo y grita mas que el dato. */
+.tarjeta--exito {
+  border-left: 3px solid var(--color-exito);
+}
+.tarjeta--alerta {
+  border-left: 3px solid var(--color-alerta);
+}
 .tarjeta--marca {
-  background: linear-gradient(140deg, var(--color-marca), var(--color-marca-claro));
+  background: var(--degradado-marca);
   color: var(--color-texto-inverso);
   border-color: transparent;
 }
@@ -139,18 +150,34 @@ textarea {
   opacity: 0.5;
   cursor: not-allowed;
 }
+/* Fucsia, no azul. El azul es estructura —donde estas— y el fucsia es accion
+   —que puedes hacer—; la accion principal de la app estaba pintada del color
+   equivocado (docs/08-convenciones.md). Ademas, sobre el degradado de marca un
+   boton azul marino se enturbiaba.
+   `.boton--acento` existia con este mismo estilo y no lo usaba ninguna pantalla:
+   se elimina, porque ahora el primario ya es el acento. */
+/* Cerrar sesion: relleno azul suave, el mismo del avatar que esta arriba en la
+   misma hoja, para que el bloque se lea como parte del perfil (Mary, 2026-08-28).
+   No lleva el violeta —ese es el color de la accion principal, y salir no lo es—
+   ni el rojo, que esta reservado para la plata (mora, cuota vencida). */
+.boton--salida {
+  background: var(--color-marca-suave);
+  border-color: transparent;
+  color: var(--color-marca);
+  font-weight: 650;
+}
+.boton--salida:hover:not(:disabled) {
+  background: #dde2f4;
+}
+
 .boton--primario {
-  background: var(--color-marca);
-  border-color: var(--color-marca);
-  color: var(--color-texto-inverso);
-}
-.boton--primario:hover:not(:disabled) {
-  background: var(--color-marca-claro);
-}
-.boton--acento {
   background: var(--color-acento);
   border-color: var(--color-acento);
   color: var(--color-texto-inverso);
+}
+.boton--primario:hover:not(:disabled) {
+  background: var(--color-acento-fuerte);
+  border-color: var(--color-acento-fuerte);
 }
 .boton--peligro {
   color: var(--color-error);
@@ -164,6 +191,10 @@ textarea {
 }
 .boton--bloque {
   width: 100%;
+}
+.boton {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .boton--pequeno {
   padding: 0.36rem 0.7rem;
@@ -242,6 +273,58 @@ textarea {
   resize: vertical;
   min-height: 92px;
 }
+/* Campos que son numeros: cedula, codigo y clave. Grandes y espaciados porque
+   los teclea gente de 60 y 70 anos, muchas veces de pie en la porteria y sin las
+   gafas de leer (Mary, 2026-08-28). El tamano no es decoracion: es lo que decide
+   si la persona entra o llama a la administracion. */
+.campo-numeros {
+  font-size: calc(1.35rem * var(--escala-texto));
+  letter-spacing: 0.16em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  padding: 0.7rem !important;
+}
+
+/* El marcador («Sin puntos ni espacios») es una pista, no un dato: se queda en
+   tamano de texto normal y sin el espaciado de los digitos. Con la letra al
+   150 % la frase entera no cabia en el campo y se cortaba a la mitad. */
+.campo-numeros::placeholder {
+  font-size: var(--texto-sm);
+  letter-spacing: normal;
+}
+
+/* La huella se ofrece como una opcion marcada, no como un boton mas: es algo que
+   se acepta de paso, no una decision que haya que tomar aparte. */
+.opcion-huella {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e3);
+  margin: var(--e4) 0;
+  cursor: pointer;
+}
+.opcion-huella input {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  margin-top: 2px;
+  accent-color: var(--color-acento);
+}
+.opcion-huella > span {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+}
+
+/* Un enlace que en realidad es un boton (no navega, cambia el modo). */
+.enlace {
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--color-marca);
+}
+
 .campo--error input,
 .campo--error textarea {
   border-color: var(--color-error);
@@ -356,10 +439,70 @@ textarea {
   color: var(--color-texto-suave);
   white-space: nowrap;
 }
+/* Fucsia, igual que el boton primario: el filtro elegido es un control que la
+   persona toco, no un sitio donde esta. La linea es esa —navegar es azul, actuar
+   es fucsia—, y el azul marino ademas se enturbiaba sobre el degradado. */
+/* El borde claro no es decoracion: el violeta sale del propio degradado, asi que
+   en algun punto del scroll coincide con el fondo y el chip se disolveria. El filo
+   lo despega siempre. */
 .filtro[aria-pressed='true'] {
-  background: var(--color-marca);
-  border-color: var(--color-marca);
+  background: var(--color-acento);
+  border-color: rgba(255, 255, 255, 0.45);
   color: var(--color-texto-inverso);
+}
+
+/* --------------------------------------------------------------- Segmentos */
+/* Dos o tres vistas que viven bajo un mismo icono de la barra (Solicitudes).
+   No son filtros —cambian de pantalla, no de subconjunto—, por eso se pintan con
+   `aria-current` y no con `aria-pressed`. Miden 44 px porque son navegacion, y
+   navegar con el pulgar en un boton de 28 px falla a los 60 anos. */
+.segmentos {
+  display: flex;
+  gap: var(--e2);
+  margin-bottom: var(--e4);
+}
+.segmento {
+  flex: 1;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e2);
+  padding: 0 var(--e2);
+  border-radius: var(--radio-completo);
+  border: 1px solid var(--color-borde-fuerte);
+  background: var(--color-superficie);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-texto-suave);
+  text-align: center;
+}
+/* Un segmento que no se puede tocar tiene que parecerlo, y el que esta escogido
+   se sigue distinguiendo: se muestra el valor, no se esconde. */
+.segmento:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+.segmento[aria-current='page'] {
+  background: var(--color-acento);
+  border-color: rgba(255, 255, 255, 0.45);
+  color: var(--color-texto-inverso);
+}
+
+/* ----------------------------------------------------------------- Medidor */
+/* Barra de proporcion para el conteo de una votacion. Lleva el valor al lado en
+   numero: una barra sola se lee "como mas o menos la mitad", y aqui la cifra
+   exacta es el punto. */
+.medidor {
+  height: 8px;
+  border-radius: var(--radio-completo);
+  background: var(--color-borde);
+  overflow: hidden;
+}
+.medidor__relleno {
+  height: 100%;
+  background: var(--color-acento);
+  border-radius: var(--radio-completo);
 }
 
 /* ------------------------------------------------------------ Pantalla carga */
@@ -372,13 +515,6 @@ textarea {
   gap: var(--e3);
   color: var(--color-texto-suave);
 }
-.marca-carga {
-  font-size: var(--texto-2xl);
-  font-weight: 700;
-  color: var(--color-marca);
-  letter-spacing: -0.03em;
-}
-
 /* -------------------------------------------------------------------- Aviso */
 .aviso {
   position: fixed;
@@ -422,6 +558,9 @@ textarea {
   justify-content: center;
   z-index: 60;
   padding: var(--e4);
+  /* El modal sube desde abajo: sin esto, en un telefono con muesca el boton de
+     confirmar queda pegado al borde y encima del indicador del sistema. */
+  padding-bottom: calc(var(--e4) + env(safe-area-inset-bottom, 0px));
 }
 .modal {
   background: var(--color-superficie);
@@ -447,5 +586,181 @@ textarea {
 @media (min-width: 720px) {
   .fondo-modal {
     align-items: center;
+  }
+}
+
+/* --------------------------------------------------- Acciones del turno */
+/* Las dos cosas que la porteria hace cincuenta veces al dia. Grandes porque se
+   tocan con una mano mientras la otra sostiene el paquete. */
+.acciones-turno {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--e3);
+}
+.accion-turno {
+  min-height: 76px;
+  font-size: var(--texto-lg);
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+/* ------------------------------------------------------- Hoja imprimible */
+/* Como el residente obtiene su PDF sin servidor y sin conexion: el navegador
+   imprime, y el sistema operativo ofrece «Guardar como PDF» (ADR-0006, revision
+   del 2026-08-28).
+
+   El aspecto del documento se define **una sola vez** y lo usan las dos caras:
+   la vista previa en pantalla y la hoja impresa. Definirlo dentro de `@media
+   print` obligaba a repetirlo para la previa, y dos copias del mismo documento
+   se separan en cuanto alguien toca una. */
+.hoja-documento {
+  display: none;
+  /* Negro sobre blanco: una impresora domestica gasta el color y lo devuelve
+     lavado, y un certificado con el azul destenido parece una fotocopia. */
+  color: #000;
+  background: #fff;
+  line-height: 1.65;
+  text-align: justify;
+}
+.hoja-documento p {
+  margin: 0 0 1.2em;
+}
+.hoja-documento__encabezado {
+  text-align: center;
+  margin-bottom: 2.4em;
+}
+.hoja-documento__encabezado h1 {
+  font-size: 1.35em;
+  letter-spacing: 0.14em;
+  margin-bottom: 0.4em;
+}
+.hoja-documento__encabezado p {
+  font-size: 0.85em;
+  margin: 0;
+}
+.hoja-documento__firma {
+  margin-top: 3em;
+  text-align: left;
+}
+.hoja-documento__linea {
+  width: 62mm;
+  max-width: 70%;
+  border-top: 1px solid #000;
+  margin: 2.5em 0 0.6em;
+}
+/* El acta es el único documento con secciones, tabla y dos firmas: un paz y
+   salvo es un párrafo, un acta es un relato con constataciones. */
+.hoja-documento h2 {
+  font-size: 0.95em;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 2em 0 0.8em;
+  text-align: left;
+}
+.hoja-documento ol {
+  margin: 0 0 1.2em;
+  padding-left: 1.4em;
+  text-align: left;
+}
+.hoja-documento__tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86em;
+  margin-bottom: 1.4em;
+  text-align: left;
+}
+.hoja-documento__tabla th,
+.hoja-documento__tabla td {
+  border-bottom: 1px solid #999;
+  padding: 0.35em 0.5em;
+  vertical-align: top;
+}
+.hoja-documento__tabla th {
+  font-weight: 650;
+  border-bottom-width: 1.5px;
+}
+/* Las dos firmas van lado a lado; en una hoja angosta, una debajo de la otra
+   sin partirse a la mitad. */
+.hoja-documento__firmas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2em;
+  margin-top: 1em;
+}
+.hoja-documento__firmas .hoja-documento__firma {
+  flex: 1 1 62mm;
+}
+.hoja-documento__pie {
+  font-size: 0.72em;
+  text-align: center;
+  border-top: 1px solid #999;
+  padding-top: 0.6em;
+  margin-top: 2.5em;
+}
+
+/* Vista previa: la misma hoja, en pantalla y a escala de lectura. Sirve para
+   ver como queda antes de imprimir —y para poder mostrarla en el demo, donde el
+   marco del navegador bloquea el dialogo de impresion—. */
+.previsualizacion-hoja {
+  background: #fff;
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-2);
+  padding: var(--e5) var(--e4);
+  font-size: calc(0.82rem * var(--escala-texto));
+  overflow-x: auto;
+}
+.previsualizacion-hoja .hoja-documento {
+  display: block;
+}
+
+@media print {
+  /* Se oculta todo y se vuelve a mostrar solo la hoja. Con `display: none` en el
+     resto se perderia el arbol donde vive la hoja; con `visibility` el documento
+     queda solo en la pagina y el resto ocupa cero tinta. */
+  body * {
+    visibility: hidden;
+  }
+  .hoja-documento,
+  .hoja-documento * {
+    visibility: visible;
+  }
+  /* La app vive dentro de una columna de 480 px; la hoja no. Sin esto el
+     certificado sale impreso con el ancho de un telefono en medio de la pagina. */
+  html,
+  body,
+  #root,
+  .app-movil,
+  .contenido-movil,
+  .previsualizacion-hoja {
+    max-width: none;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    position: static;
+    background: #fff;
+    box-shadow: none;
+    padding: 0;
+  }
+  .hoja-documento {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    font-size: 12pt;
+  }
+  /* En papel el pie va al final de la hoja, no debajo del texto. */
+  .hoja-documento__pie {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    font-size: 8pt;
+    margin: 0;
+  }
+  /* Carta, que es el tamano de tramite en Colombia. */
+  @page {
+    size: letter;
+    margin: 25mm 22mm;
   }
 }

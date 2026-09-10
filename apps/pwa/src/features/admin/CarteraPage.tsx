@@ -25,6 +25,7 @@ import {
   estadoRealCuota,
   etiquetaUnidad,
   periodoActual,
+  respaldoDeCuotaCompleto,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearPeriodo } from '../../utilidades/formato'
 import type { MedioPago } from '../../dominio/tipos'
@@ -48,12 +49,15 @@ export function CarteraPage() {
     copropiedadId: '',
     periodo: periodoActual(),
     tipo: 'ordinaria',
-    concepto: 'Cuota de administracion',
+    referencia: '',
+    justificacion: '',
+    concepto: 'Cuota de administración',
     valor: 45000,
   })
 
   if (!sesion) return null
 
+  const respaldoListo = respaldoDeCuotaCompleto(generacion)
   const unidades = sel.unidadesDe(bd, sesion.copropiedadId)
   const persona = sel.persona(bd, sesion.personaId)
 
@@ -134,7 +138,7 @@ export function CarteraPage() {
             [
               ['todas', 'Todas'],
               ['mora', 'En mora'],
-              ['al-dia', 'Al dia'],
+              ['al-dia', 'Al día'],
             ] as Array<[Filtro, string]>
           ).map(([id, texto]) => (
             <button
@@ -232,7 +236,7 @@ export function CarteraPage() {
       {unidadPago && (
         <Modal
           titulo="Registrar pago"
-          descripcion="Los pagos se imputan a la deuda mas antigua primero."
+          descripcion="Los pagos se imputan a la deuda más antigua primero."
           onCerrar={() => setUnidadPago(null)}
         >
           <div className="lista lista--compacta">
@@ -287,6 +291,7 @@ export function CarteraPage() {
                 <option value="transferencia">Transferencia</option>
                 <option value="efectivo">Efectivo</option>
                 <option value="pse">PSE</option>
+                <option value="bre_b">Bre-B</option>
                 <option value="otro">Otro</option>
               </select>
             </div>
@@ -296,7 +301,7 @@ export function CarteraPage() {
                 id="referencia-pago"
                 value={referencia}
                 onChange={(evento) => setReferencia(evento.target.value)}
-                placeholder="Numero de consignacion"
+                placeholder="Número de consignación"
               />
             </div>
           </div>
@@ -326,7 +331,7 @@ export function CarteraPage() {
       {generando && (
         <Modal
           titulo="Generar cuotas del periodo"
-          descripcion="Revisa la previsualizacion antes de confirmar."
+          descripcion="Revisa la previsualización antes de confirmar."
           onCerrar={() => setGenerando(false)}
         >
           <div className="fila-campos">
@@ -352,7 +357,7 @@ export function CarteraPage() {
                     tipo: evento.target.value as 'ordinaria' | 'extraordinaria',
                     concepto:
                       evento.target.value === 'ordinaria'
-                        ? 'Cuota de administracion'
+                        ? 'Cuota de administración'
                         : 'Cuota extraordinaria',
                   })
                 }
@@ -389,10 +394,50 @@ export function CarteraPage() {
             />
             <span className="ayuda-campo">
               {generacion.tipo === 'ordinaria'
-                ? 'El valor de cada unidad es su coeficiente multiplicado por este numero.'
-                : 'Se reparte entre las unidades segun su coeficiente (RN-05).'}
+                ? 'El valor de cada unidad es su coeficiente multiplicado por este número.'
+                : 'Se reparte entre las unidades según su coeficiente (RN-05).'}
             </span>
           </div>
+
+          {/* El respaldo solo aparece en la extraordinaria, y no es un detalle
+              de completitud: la ordinaria es la del mes, la que el reglamento
+              autoriza de una vez y para siempre. Una obra que nadie votó, en
+              cambio, no se cobra (RN-45, RN-46). */}
+          {generacion.tipo === 'extraordinaria' && (
+            <>
+              <div className="campo">
+                <label htmlFor="acta">¿Qué acta la aprobó?</label>
+                <input
+                  id="acta"
+                  value={generacion.referencia}
+                  onChange={(evento) =>
+                    setGeneracion({ ...generacion, referencia: evento.target.value })
+                  }
+                  placeholder="Asamblea extraordinaria del 18 de marzo de 2026"
+                />
+                <span className="ayuda-campo">
+                  Siempre un acta, nunca el reglamento: el reglamento dice que pueden existir
+                  extraordinarias, no que esta se cobre (RN-46).
+                </span>
+              </div>
+
+              <div className="campo">
+                <label htmlFor="justificacion">¿Para qué se aprobó?</label>
+                <textarea
+                  id="justificacion"
+                  value={generacion.justificacion}
+                  onChange={(evento) =>
+                    setGeneracion({ ...generacion, justificacion: evento.target.value })
+                  }
+                  placeholder="Impermeabilización de las cubiertas de las dos torres, aprobada por unanimidad. El recaudo se destina exclusivamente a esa obra."
+                />
+                <span className="ayuda-campo">
+                  Es lo que el copropietario va a leer en su estado de cuenta cuando le aparezca
+                  el cobro (RN-47), y la destinación a la que se compromete el recaudo (RN-48).
+                </span>
+              </div>
+            </>
+          )}
 
           <div className="separador" />
           <span className="titulo-seccion">Previsualizacion</span>
@@ -415,9 +460,20 @@ export function CarteraPage() {
             </strong>
           </div>
 
+          {/* Deshabilitado y con el motivo a la vista: dejar pulsar para
+              contestar «falta el acta» hace escribir cualquier cosa con tal de
+              pasar. El repositorio lo vuelve a comprobar de todos modos. */}
+          {!respaldoListo && (
+            <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
+              Falta decir <strong>qué acta la aprobó</strong> y <strong>para qué</strong>. Una
+              extraordinaria sin eso no se puede comprobar, y es lo que el copropietario va a
+              pedir cuando le llegue el cobro (RN-46, RN-47).
+            </p>
+          )}
+
           <button
             className="boton boton--primario boton--bloque"
-            disabled={cargando}
+            disabled={cargando || !respaldoListo}
             onClick={confirmarGeneracion}
           >
             Generar {previsualizacion.length} cuotas

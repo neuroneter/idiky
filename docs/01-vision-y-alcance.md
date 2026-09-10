@@ -56,8 +56,15 @@ Una plataforma con **dos caras sobre un mismo núcleo de datos**:
 - Comunicados y cartelera digital.
 - Correspondencia y minuta de portería.
 - Autorización de visitantes con código QR.
-- Asambleas: convocatoria, poderes, quórum por coeficiente y votaciones.
+- Asambleas: convocatoria y citaciones, poderes, quórum por coeficiente, votaciones,
+  **transmisión en vivo** y **generación del acta**.
+- **Documentos formales descargables:** paz y salvo, informe de estado de cuenta,
+  comprobante de pago y acta de asamblea.
+- **Coeficientes** visibles para el copropietario y administrables por el administrador.
 - Multi-copropiedad y multi-rol para un mismo usuario.
+
+> Los tres puntos en negrita se agregaron el 2026-08-26 con el alcance declarado por el
+> equipo ([`12-levantamiento-pendiente.md` §0](./12-levantamiento-pendiente.md)).
 
 ### 4.2 Fuera del alcance (por ahora)
 

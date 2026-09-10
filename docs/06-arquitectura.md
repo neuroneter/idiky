@@ -76,22 +76,40 @@ apps/pwa/
 
 | Ruta | Pantalla | CU |
 |---|---|---|
-| `/acceso` | Selección de perfil demo | CU-R-01 |
+| `/acceso` | Ingreso con documento y contraseña | CU-R-01 |
+| `/acceso/activar` | Activar la cuenta | CU-R-25 |
+| `/acceso/recuperar` | Recuperar la contraseña | CU-R-25 |
 | `/app` | Inicio residente | CU-R-02 |
 | `/app/cuenta` | Estado de cuenta | CU-R-03 |
 | `/app/cuenta/pagar` | Pago | CU-R-04 |
-| `/app/reservas` | Zonas comunes y reservas | CU-R-05, CU-R-06 |
-| `/app/pqrs` | PQRS | CU-R-07, CU-R-08 |
+| `/app/solicitudes` | Redirige a reservas | — |
+| `/app/solicitudes/reservas` | Zonas comunes y reservas | CU-R-05, CU-R-06 |
+| `/app/solicitudes/pqrs` | PQRS | CU-R-07, CU-R-08 |
+| `/app/solicitudes/paz-y-salvo` | Paz y salvo | CU-R-12 |
+| `/app/asambleas` | Asambleas de la copropiedad | CU-R-20 |
+| `/app/asambleas/:id` | Sala: cómo asistir, asistencia y votaciones | CU-R-13, CU-R-20, CU-R-21 |
 | `/app/comunicados` | Cartelera | CU-R-09 |
+| `/app/reservas`, `/app/pqrs` | Redirigen a `/app/solicitudes/…` | — |
 | `/app/visitantes` | Visitantes y códigos | CU-R-10 |
 | `/app/correspondencia` | Correspondencia | CU-R-11 |
+| `/app/procesos` | Procesos sancionatorios de mi unidad | CU-R-29 |
+| `/app/unidad` | Mi coeficiente | CU-R-24 |
+| `/app/unidad/personas` | Personas de mi unidad | CU-R-27 |
 | `/admin` | Tablero | CU-A-01 |
+| `/admin/registros` | Registro de personas | CU-A-26 |
 | `/admin/unidades` | Unidades y residentes | CU-A-02 |
 | `/admin/cartera` | Cartera, pagos y generación | CU-A-03, CU-A-04, CU-A-05 |
+| `/admin/multas` | Catálogo de multas (parametrizar) | CU-A-22 |
+| `/admin/sanciones` | Procesos sancionatorios (imponer y resolver) | CU-A-23 |
+| `/admin/asambleas` | Convocar, instalar y llevar la asistencia | CU-A-12, CU-A-17 |
 | `/admin/reservas` | Aprobación de reservas | CU-A-06 |
 | `/admin/pqrs` | Bandeja de PQRS | CU-A-07 |
 | `/admin/comunicados` | Publicación de comunicados | CU-A-08 |
 | `/admin/correspondencia` | Registro de correspondencia | CU-A-09 |
+| `/porteria` | El turno: lo pendiente y las dos acciones | CU-P-01, CU-P-02 |
+| `/porteria/visitantes` | Validar el código de un visitante | CU-P-02 |
+| `/porteria/residentes` | Reconocer a quien vive aquí | CU-P-03 |
+| `/porteria/correspondencia` | Registrar y entregar | CU-P-01 |
 
 ## 5. Estrategia multiplataforma
 

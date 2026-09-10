@@ -8,13 +8,21 @@ import { useDatos } from '../estado/DatosContext'
 import { useSesion } from '../estado/SesionContext'
 import * as sel from '../datos/selectores'
 import { nombreCompleto } from '../datos/selectores'
+import { Logotipo } from './Logotipo'
 import { Icono, type NombreIcono } from './Icono'
 import { AvisoGlobal } from './Aviso'
 
 const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta?: boolean }> = [
   { ruta: '/admin', texto: 'Tablero', icono: 'tablero', exacta: true },
+  { ruta: '/admin/registros', texto: 'Registros', icono: 'personas' },
   { ruta: '/admin/unidades', texto: 'Unidades', icono: 'unidades' },
   { ruta: '/admin/cartera', texto: 'Cartera', icono: 'cartera' },
+  { ruta: '/admin/multas', texto: 'Multas', icono: 'alerta' },
+  // El catalogo dice que multas existen; los procesos, a quien se le esta
+  // imponiendo una y en que etapa va. Son dos cosas distintas y por eso son dos
+  // entradas: parametrizar no es sancionar (RN-49, RN-69).
+  { ruta: '/admin/sanciones', texto: 'Procesos', icono: 'certificado' },
+  { ruta: '/admin/asambleas', texto: 'Asambleas', icono: 'asambleas' },
   { ruta: '/admin/reservas', texto: 'Reservas', icono: 'reservas' },
   { ruta: '/admin/pqrs', texto: 'PQRS', icono: 'pqrs' },
   { ruta: '/admin/comunicados', texto: 'Comunicados', icono: 'comunicados' },
@@ -23,8 +31,12 @@ const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta
 
 const TITULOS: Record<string, string> = {
   '/admin': 'Tablero de la copropiedad',
+  '/admin/registros': 'Registro de personas',
   '/admin/unidades': 'Unidades y residentes',
   '/admin/cartera': 'Cartera',
+  '/admin/multas': 'Catálogo de multas',
+  '/admin/sanciones': 'Procesos sancionatorios',
+  '/admin/asambleas': 'Asambleas',
   '/admin/reservas': 'Reservas por aprobar',
   '/admin/pqrs': 'Bandeja de PQRS',
   '/admin/comunicados': 'Comunicados',
@@ -45,8 +57,8 @@ export function LayoutAdmin() {
     <div className="consola">
       <aside className="lateral">
         <div className="lateral__marca">
-          idiky
-          <span>{copropiedad?.nombre}</span>
+          <Logotipo inverso />
+          <span className="lateral__marca-sub">{copropiedad?.nombre}</span>
         </div>
 
         <nav className="lateral__nav">

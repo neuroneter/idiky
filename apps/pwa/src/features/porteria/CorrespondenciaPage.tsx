@@ -1,8 +1,18 @@
 /**
- * CU-A-09 — Registrar correspondencia recibida.
- * Doc: docs/casos-de-uso/administrador.md#cu-a-09
+ * CU-P-01 — Registrar y entregar la correspondencia de la porteria.
+ * CU-A-09 — El administrador la gestiona tambien, de respaldo.
+ * Doc: docs/casos-de-uso/porteria.md#cu-p-01
+ *
+ * Vive en `features/porteria/` porque **su actor principal es la porteria**:
+ * quien recibe el paquete del mensajero es quien esta en la entrada a las siete
+ * de la noche, no quien tiene horario de oficina. El administrador entra a la
+ * misma pantalla desde su consola, para cuando la porteria no alcanza o hay que
+ * corregir.
  *
  * RN-25: un registro entregado ya no se edita.
+ * RN-52: `registradoPor` guarda quien lo recibio del mensajero. Es el comienzo de
+ * la cadena de custodia, y no es lo mismo que `recibidoPor`, que es el residente
+ * que se lo lleva.
  */
 
 import { useState } from 'react'
@@ -19,7 +29,7 @@ import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipCorrespondencia } from '../../componentes/Etiquetas'
 
-export function CorrespondenciaAdminPage() {
+export function CorrespondenciaPage() {
   const { bd, ejecutar, cargando, mostrarAviso } = useDatos()
   const { sesion } = useSesion()
   const [creando, setCreando] = useState(false)
@@ -45,7 +55,13 @@ export function CorrespondenciaAdminPage() {
       return
     }
     const creado = await ejecutar(
-      (base) => registrarCorrespondencia(base, { ...formulario, unidadId }),
+      (base) =>
+        registrarCorrespondencia(base, {
+          ...formulario,
+          unidadId,
+          // Quien esta en el turno responde por el paquete hasta entregarlo.
+          registradoPor: nombreCompleto(sel.persona(base, sesion!.personaId)),
+        }),
       'Correspondencia registrada. El residente ya la ve en su app.',
     )
     if (creado) {
@@ -56,7 +72,7 @@ export function CorrespondenciaAdminPage() {
 
   async function entregar() {
     if (!entregando || recibidoPor.trim().length < 3) {
-      mostrarAviso('Indica quien recibio el envio.', 'error')
+      mostrarAviso('Indica quien recibió el envío.', 'error')
       return
     }
     const entregado = await ejecutar(
@@ -77,12 +93,12 @@ export function CorrespondenciaAdminPage() {
         </span>
         <button className="boton boton--primario" onClick={() => setCreando(true)}>
           <Icono nombre="mas" tamano={15} />
-          Registrar envio
+          Registrar envío
         </button>
       </div>
 
       {registros.length === 0 ? (
-        <EstadoVacio titulo="Sin registros" detalle="Registra la correspondencia que llega a porteria." />
+        <EstadoVacio titulo="Sin registros" detalle="Registra la correspondencia que llega a portería." />
       ) : (
         <div className="tarjeta" style={{ padding: 0 }}>
           <div className="contenedor-tabla">
@@ -113,7 +129,12 @@ export function CorrespondenciaAdminPage() {
                       </td>
                       <td className="suave">{capitalizar(registro.tipo)}</td>
                       <td className="suave">{registro.remitente}</td>
-                      <td className="suave">{formatearFechaHora(registro.fechaRecepcion)}</td>
+                      <td className="suave">
+                        {formatearFechaHora(registro.fechaRecepcion)}
+                        {/* Quien lo recibio del mensajero: sin esto, si el paquete
+                            se pierde el registro no dice quien lo tenia. */}
+                        <div className="subtitulo">{registro.registradoPor}</div>
+                      </td>
                       <td>
                         <ChipCorrespondencia estado={registro.estado} />
                         {registro.estado === 'entregada' && registro.fechaEntrega && (
@@ -144,7 +165,7 @@ export function CorrespondenciaAdminPage() {
       {creando && (
         <Modal
           titulo="Registrar correspondencia"
-          descripcion="El residente vera el aviso en su aplicacion."
+          descripcion="El residente verá el aviso en su aplicación."
           onCerrar={() => setCreando(false)}
         >
           <div className="fila-campos">
@@ -201,7 +222,7 @@ export function CorrespondenciaAdminPage() {
               onChange={(evento) =>
                 setFormulario({ ...formulario, observaciones: evento.target.value })
               }
-              placeholder="Ej: caja grande, requiere refrigeracion…"
+              placeholder="Ej: caja grande, requiere refrigeración…"
             />
           </div>
           <button className="boton boton--primario boton--bloque" disabled={cargando} onClick={registrar}>

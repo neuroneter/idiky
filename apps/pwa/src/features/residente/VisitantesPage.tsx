@@ -6,6 +6,7 @@
  */
 
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
@@ -15,6 +16,7 @@ import { formatearFecha } from '../../utilidades/formato'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { CodigoVisual } from '../../componentes/CodigoVisual'
+import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipVisitante } from '../../componentes/Etiquetas'
 
@@ -68,15 +70,27 @@ export function VisitantesPage() {
 
   return (
     <>
-      <button className="boton boton--primario boton--bloque" onClick={() => setCreando(true)}>
+      <div className="encabezado-pagina">
+        <BotonVolver />
+      </div>
+
+      {/* Ya no se autoriza aqui de un toque: desde el 2026-09-07 un visitante
+          tambien necesita sus dos fotos y la autorizacion de quien lo registro
+          (RN-57, RN-59), y eso es el mismo tramite que el de cualquier persona.
+          Tener dos formas de meter gente a la unidad era tener una con soportes y
+          otra sin ellos. */}
+      <Link
+        to="/app/unidad/personas?nuevo=visitante"
+        className="boton boton--primario boton--bloque"
+      >
         <Icono nombre="mas" tamano={16} />
         Autorizar visitante
-      </button>
+      </Link>
 
       {visitantes.length === 0 ? (
         <EstadoVacio
           titulo="Sin visitantes autorizados"
-          detalle="Autoriza a tus visitas para que porteria las deje entrar sin llamarte."
+          detalle="Autoriza a tus visitas para que portería las deje entrar sin llamarte."
         />
       ) : (
         <div className="lista lista--compacta">
@@ -104,7 +118,7 @@ export function VisitantesPage() {
                         className="boton boton--pequeno"
                         onClick={() => setVerCodigo(visitante.id)}
                       >
-                        Ver codigo
+                        Ver código
                       </button>
                     )}
                   </div>
@@ -118,7 +132,7 @@ export function VisitantesPage() {
       {creando && (
         <Modal
           titulo="Autorizar visitante"
-          descripcion="Porteria validara el codigo que generes."
+          descripcion="Portería validara el código que generes."
           onCerrar={() => setCreando(false)}
         >
           <div className="campo">
@@ -173,14 +187,14 @@ export function VisitantesPage() {
             </div>
           </div>
           <button className="boton boton--primario boton--bloque" disabled={cargando} onClick={autorizar}>
-            Generar codigo de acceso
+            Generar código de acceso
           </button>
         </Modal>
       )}
 
       {visitanteEnDetalle && (
         <Modal
-          titulo="Codigo de acceso"
+          titulo="Código de acceso"
           descripcion={`Comparte este codigo con ${visitanteEnDetalle.nombre}.`}
           onCerrar={() => setVerCodigo(null)}
         >
@@ -203,12 +217,12 @@ export function VisitantesPage() {
                 onClick={async () => {
                   await ejecutar(
                     (base) => revocarVisitante(base, visitanteEnDetalle.id),
-                    'Autorizacion revocada.',
+                    'Autorización revocada.',
                   )
                   setVerCodigo(null)
                 }}
               >
-                Revocar autorizacion
+                Revocar autorización
               </button>
             )}
           </div>
