@@ -3,6 +3,10 @@
 **Este es el documento que hay que leer primero al retomar el trabajo**, sea una persona
 nueva o una sesión de IA distinta.
 
+> Si en vez de retomar vienes a **entender o revisar la rama entera**, empieza por
+> [`13-resumen-de-la-rama.md`](./13-resumen-de-la-rama.md): es el corte transversal —qué hay
+> construido, qué se verificó contra la ley, qué está abierto— sin los 91 commits en orden.
+
 ---
 
 ## Estado actual
@@ -53,12 +57,11 @@ Backend, autenticación real, pagos reales, notificaciones push, apps nativas, p
 modo oscuro. De la portería existe el puesto (CU-P-01, CU-P-02) pero **no la minuta**:
 se valida el código del visitante, no se registra el ingreso.
 
-Y del núcleo declarado como alcance, lo que falta es **la mitad jurídica de la asamblea** —
-quórum, mayorías, poderes, acta—. Los documentos formales ya tienen criterio y camino
-([ADR-0006](./adr/0006-documentos-formales.md)): el paz y salvo se emite, se ve y se guarda
-como PDF desde el navegador. Lo que sí quedó de la asamblea: la citación, el orden del día, la
-votación por coeficiente (CU-R-13, CU-R-20) y los coeficientes visibles al copropietario
-(CU-R-24).
+Del núcleo declarado como alcance, **la mitad jurídica de la asamblea ya está construida**
+—quórum, mayorías, poderes y acta, los cuatro verificados contra la Ley 675 entre el 9 y el 10
+de septiembre—. Lo que falta ahí es de otra clase: el **PDF de verdad**, que espera al backend
+([ADR-0006](./adr/0006-documentos-formales.md), ADR-0008); los documentos se ven en pantalla y
+salen al imprimir, sin fingir una descarga.
 
 ### ⚠️ El demo v0.1 no es el producto
 
@@ -73,9 +76,15 @@ el levantamiento de requisitos. El 2026-08-26 el equipo declaró el alcance real
 | **Lo que el demo no resuelve y es el corazón del producto** | Asambleas completas (citación, transmisión, votación, poderes, acta) y documentos descargables |
 
 Lo que hace difícil el producto no es la cartera: es que **una asamblea produzca decisiones
-jurídicamente válidas**. Eso exige quórum verificable, poderes con tope legal, votación
-ponderada por coeficiente y un acta que resista revisión. Nada de eso está construido y
-buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
+jurídicamente válidas**. Eso exige quórum verificable, poderes, votación ponderada por
+coeficiente y un acta que resista revisión.
+
+> 🔄 **Este párrafo decía «nada de eso está construido». Dejó de ser cierto el 2026-09-10.**
+> Los cuatro están, y citando el artículo: quórum (RN-28, arts. 41 y 45), mayorías (RN-74,
+> arts. 45 y 46), poderes por dos puertas (RN-30, y la ley **no fija tope**), y el acta
+> armada con lo que exige el art. 47 (CU-A-20). De §3 bis quedan **dos** preguntas, las dos
+> del reglamento de esta copropiedad, no de derecho general. Ver
+> [`13-resumen-de-la-rama.md`](./13-resumen-de-la-rama.md) §4.
 
 ---
 

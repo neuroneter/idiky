@@ -21,6 +21,7 @@ aquí antes o junto con el código.
 | 10 | [Equipo y orquestación](./10-equipo-y-orquestacion.md) | **Cómo trabajamos Jeimy, Mary y Daniel en paralelo** | Al cambiar la forma de trabajo |
 | 11 | [Tablero de trabajo](./11-tablero-de-trabajo.md) | Tareas en curso, quién las tiene y en qué estado | Todos los días |
 | 12 | [Levantamiento pendiente](./12-levantamiento-pendiente.md) | **Preguntas abiertas del producto, por responder** | Hasta cerrarlo |
+| 13 | [Resumen de la rama](./13-resumen-de-la-rama.md) | **Corte transversal**: qué contiene la rama hoy, qué se verificó contra la ley y qué está abierto — para revisarla sin leer 91 commits | Es un snapshot fechado: se rehace, no se mantiene |
 | — | [ADR](./adr/) | Decisiones de arquitectura con su justificación | Al tomar una decisión relevante |
 
 > ⚠️ **Antes de construir funcionalidad nueva:** el demo v0.1 se hizo sobre supuestos, no
