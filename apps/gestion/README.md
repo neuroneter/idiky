@@ -75,6 +75,35 @@ La primera vez, el panel pide crear el administrador. **Ese usuario es solo de t
 | `.env.example` | Telemetría apagada y sin avisos comerciales en el panel | — |
 | — | Se quitó `@strapi/plugin-cloud` | Es para desplegar en Strapi Cloud, y no se usa |
 
+## La marca de IDIKY en el panel
+
+El panel no debe parecer de Strapi. Los colores, el logotipo y el ícono salen de la identidad
+que definió Mary para la PWA (`apps/pwa/src/estilos/tokens.css` y
+`apps/pwa/src/componentes/Logotipo.tsx`). **Los productos no comparten código: si la
+identidad cambia allá, se cambia aquí también.**
+
+| Qué | Dónde | Cómo |
+|---|---|---|
+| Ícono de la pestaña | `favicon.png` (raíz del proyecto) | Copia de `apps/pwa/public/icono-192.png`. Strapi lo sirve en `/favicon.ico` |
+| Logo del login | `src/admin/extensions/idiky-logotipo.svg` | La casa y la palabra «idiky», en azul con la puerta fucsia |
+| Logo del menú | `src/admin/extensions/idiky-icono.svg` | Copia de `apps/pwa/public/icono.svg` |
+| Colores del panel | `src/admin/app.tsx` · `theme` | Azul de marca en enlaces, foco y selección; violeta de acción en el botón principal; los fondos y bordes de la PWA |
+| Textos | `src/admin/app.tsx` · `translations` | «Bienvenido a IDIKY», «Ingresar»…, en tú como la PWA. **Español por defecto** |
+| Título de la pestaña | `src/admin/app.tsx` · `bootstrap` | «IDIKY Gestión» en vez de «Strapi Admin» y «… \| Strapi» |
+| Fondo del login | `src/admin/extensions/marca.css` | El degradado y la silueta de las torres de la puerta de la PWA, tarjeta redondeada y botón en píldora |
+
+**Lo que hay que revisar al subir de versión de Strapi.** Strapi solo deja configurar logos,
+colores y textos. El título de la pestaña y el fondo del login se logran observando la página
+(`bootstrap`) y con CSS que se apoya en la estructura del login, porque sus clases son
+generadas. Si una versión nueva cambia esa estructura, **el panel sigue funcionando, pero el
+login vuelve a verse de Strapi**: se revisa `marca.css`.
+
+**Si alguien sube logos desde el panel** (*Settings → Overview → Customization*), esos mandan
+sobre los del código. Para volver a los de IDIKY, se borran ahí.
+
+**Las imágenes SVG llevan comentarios XML**, y un comentario XML **no puede tener dos guiones
+seguidos**: el SVG quedaría inválido y el navegador no lo dibujaría. Ya pasó una vez.
+
 ## Lo que no se hace aquí
 
 - **No se activa el código Enterprise (`ee/`) de Strapi.** Lo que haga falta de ahí se construye
