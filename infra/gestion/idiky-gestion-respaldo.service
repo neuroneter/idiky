@@ -1,0 +1,8 @@
+# Respaldo de la base del sistema de gestion (T-37 · ADR-0012). Unidad de usuario de idiky;
+# la instala levantar.sh. La dispara idiky-gestion-respaldo.timer.
+[Unit]
+Description=Respaldo de la base del sistema de gestion de Idiky
+
+[Service]
+Type=oneshot
+ExecStart=/bin/sh %h/.local/bin/idiky-gestion-respaldo

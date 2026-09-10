@@ -1,0 +1,33 @@
+# Imagen de Strapi del sistema de gestion (T-37 · ADR-0012).
+# Contexto de construccion: la raiz del repositorio.
+#
+#   podman build -f infra/gestion/Containerfile -t idiky-gestion .
+#
+# Una sola etapa a proposito: las dependencias de Strapi pesan unos 700 MB y copiarlas a una
+# segunda etapa las duplicaria en un disco que comparte el otro servicio del servidor.
+# Compilar el panel pide memoria: levantar.sh le da 3 GB a esta construccion.
+FROM docker.io/library/node:24-alpine
+
+WORKDIR /opt/app
+ENV NODE_ENV=production \
+    STRAPI_TELEMETRY_DISABLED=true \
+    STRAPI_DISABLE_UPDATE_NOTIFICATION=true
+
+# Primero solo las dependencias: si el lockfile no cambia, esta capa se reutiliza.
+# --include=dev porque con NODE_ENV=production npm omitiria TypeScript, que la compilacion
+# necesita. La cache de npm se borra en la misma capa para que no ocupe disco.
+COPY apps/gestion/package.json apps/gestion/package-lock.json ./
+RUN npm ci --include=dev --no-audit --no-fund && npm cache clean --force
+
+COPY apps/gestion/ ./
+RUN NODE_OPTIONS=--max-old-space-size=2048 npm run build \
+ && mkdir -p public/uploads \
+ && chown node:node public/uploads
+
+COPY infra/gestion/arrancar.sh /usr/local/bin/idiky-arrancar
+
+# Strapi no corre como root dentro del contenedor. Solo escribe en public/uploads, que en el
+# servidor es un volumen.
+USER node
+EXPOSE 1337
+CMD ["sh", "/usr/local/bin/idiky-arrancar"]

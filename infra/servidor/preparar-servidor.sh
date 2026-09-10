@@ -50,9 +50,12 @@ done
 loginctl enable-linger "$USUARIO"
 
 # Todo lo del usuario (contenedores, construcciones, la red de usuario que recibe el trafico)
-# queda con techo: un nucleo de CPU y 3 GB. Si el entorno se satura -una construccion pesada,
-# trafico desde internet- choca contra su techo y no contra lo que ya corre en el servidor.
-systemctl set-property "user-$(id -u "$USUARIO").slice" CPUQuota=100% MemoryMax=3G
+# queda con techo: dos nucleos de CPU y 5 GB. Si el entorno se satura -una construccion
+# pesada, trafico desde internet- choca contra su techo y no contra lo que ya corre en el
+# servidor. Subio de 1 nucleo y 3 GB con el sistema de gestion (ADR-0012): Strapi pide 2 GB
+# minimo. Sigue siendo seguro: la unidad de LangFlow lo limita a 0,8 nucleos y 4 GB, y el
+# servidor tiene 4 nucleos y 15 GB.
+systemctl set-property "user-$(id -u "$USUARIO").slice" CPUQuota=200% MemoryMax=5G
 
 if [ -n "$LLAVE" ]; then
   CASA=$(getent passwd "$USUARIO" | cut -d: -f6)
