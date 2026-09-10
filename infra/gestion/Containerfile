@@ -10,8 +10,7 @@ FROM docker.io/library/node:24-alpine
 
 WORKDIR /opt/app
 ENV NODE_ENV=production \
-    STRAPI_TELEMETRY_DISABLED=true \
-    STRAPI_DISABLE_UPDATE_NOTIFICATION=true
+    STRAPI_TELEMETRY_DISABLED=true
 
 # Primero solo las dependencias: si el lockfile no cambia, esta capa se reutiliza.
 # --include=dev porque con NODE_ENV=production npm omitiria TypeScript, que la compilacion
@@ -31,3 +30,7 @@ COPY infra/gestion/arrancar.sh /usr/local/bin/idiky-arrancar
 USER node
 EXPOSE 1337
 CMD ["sh", "/usr/local/bin/idiky-arrancar"]
+
+# El commit publicado lo sirve el nginx del pod en /revision.txt; aqui queda como etiqueta.
+ARG REVISION=sin-revision
+LABEL org.opencontainers.image.revision=$REVISION

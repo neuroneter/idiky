@@ -16,6 +16,12 @@ const config = ({ env }: Core.Config.Shared.ConfigParams): Core.Config.Server =>
   webhooks: {
     populateRelations: env.bool('WEBHOOKS_POPULATE_RELATIONS', false),
   },
+  // Las versiones se actualizan con un commit que cambia package.json, no desde un aviso.
+  logger: {
+    updates: {
+      enabled: false,
+    },
+  },
 });
 
 export default config;
