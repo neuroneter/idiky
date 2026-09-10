@@ -74,6 +74,8 @@ levantar contable "$IDIKY_PUERTO_CONTABLE"
 esperar pwa "$IDIKY_PUERTO_PWA"
 esperar contable "$IDIKY_PUERTO_CONTABLE"
 
-# Borra solo lo que ya nadie usa (capas intermedias, la imagen anterior). Lo publicado queda.
-podman image prune --force >/dev/null
+# El disco del servidor es compartido y escaso: se borra toda imagen que no use un
+# contenedor en marcha, incluidos Node y las capas de construccion. Lo publicado queda; el
+# costo es volver a bajar node:22-alpine en el siguiente despliegue.
+podman image prune --all --force >/dev/null
 podman system df
