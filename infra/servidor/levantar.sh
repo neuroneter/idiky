@@ -25,6 +25,11 @@ IDIKY_PUERTO_PWA="${IDIKY_PUERTO_PWA:-8080}"
 IDIKY_PUERTO_CONTABLE="${IDIKY_PUERTO_CONTABLE:-8081}"
 UNIDADES="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 
+# Clave de acceso del entorno (clave-acceso.sh). Si la carpeta no existe, no se monta nada.
+ACCESO="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/nginx"
+MONTAJE=""
+[ ! -d "$ACCESO" ] || MONTAJE="--volume $ACCESO:/etc/nginx/idiky:ro"
+
 LOCAL="$IDIKY_HOST"
 [ "$LOCAL" != "0.0.0.0" ] || LOCAL=127.0.0.1
 
@@ -43,7 +48,8 @@ levantar() {
   echo "==> Levantando $nombre en $IDIKY_HOST:$2"
   systemctl --user stop "container-$nombre.service" 2>/dev/null || true
   podman rm --force --ignore "$nombre" >/dev/null
-  podman create --name "$nombre" --memory 256m --pids-limit 256 \
+  # shellcheck disable=SC2086
+  podman create --name "$nombre" --memory 256m --pids-limit 256 $MONTAJE \
     --publish "$IDIKY_HOST:$2:80" "localhost/$nombre:actual" >/dev/null
   mkdir -p "$UNIDADES"
   (cd "$UNIDADES" && podman generate systemd --new --files --name "$nombre" >/dev/null)
