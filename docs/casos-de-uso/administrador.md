@@ -322,8 +322,9 @@ día y **la modalidad manda**: el botón queda deshabilitado diciendo qué falta
 **Flujo principal**
 1. El administrador abre la asamblea y la **instala**. Ahí empieza a contar la asistencia.
 2. Los copropietarios marcan asistencia desde su app, diciendo **cómo**: en el salón o
-   conectados. En una mixta **se cuentan por separado**: si pesan igual para el quórum está
-   sin decidir (RN-28), y el acta va a necesitar el reparto de todos modos.
+   conectados. **Las dos formas pesan igual** (RN-75): suman al mismo coeficiente. El reparto
+   presencial/virtual se lleva aparte porque **el acta lo exige** (art. 47), no porque una
+   cuente menos.
 3. El administrador ve en vivo cuántas unidades hay y **cuánto coeficiente** reunido, repartido
    entre presenciales y conectadas.
 4. Al terminar, cierra la asamblea. **La asistencia y los votos quedan** — es de lo que sale el
@@ -342,8 +343,10 @@ día y **la modalidad manda**: el botón queda deshabilitado diciendo qué falta
 - RN-37: el coeficiente se copia al marcar.
 - RN-51: hace quórum el propietario. El arrendatario puede entrar a oír, y la pantalla se lo
   dice en vez de esconderle el botón.
-- RN-28: **el quórum sigue sin decidirse.** Idiky suma y reparte; **no afirma que haya
-  quórum**, y lo dice en pantalla.
+- RN-28: el quórum se afirma **citando el artículo** (Ley 675, arts. 41 y 45). Un «hay
+  quórum» sin decir con qué regla es un número que nadie puede comprobar.
+- RN-75: la asistencia virtual pesa igual que la presencial (Ley 675 art. 42, Decreto 398 de
+  2020), y la pantalla se lo dice a quien está conectado.
 
 **Estado en el demo:** ✅ — `/admin/asambleas`. Se instala, se ve quién va llegando con su
 coeficiente y se cierra.
@@ -494,9 +497,18 @@ alguien lo impugne.
   RN-37 (los coeficientes copiados son los que hacen que el acta valga), RN-28 y RN-74 (quórum
   y mayorías, que el acta cita por artículo).
 
-**Pendiente:** la **comisión verificadora** —si esta copropiedad designa una y con qué término—
-sigue sin definir; hoy el acta lleva el plazo legal supletorio de 20 días hábiles. Y el **PDF**
-espera al backend (ADR-0006): el acta se lee en pantalla y sale al imprimir, sin fingir descarga.
+**La comisión verificadora es opcional** (RN-76, Mary 2026-09-10: *«a veces hay revisión»*). El
+administrador marca, entre quienes asistieron, a quién designó la asamblea para revisar el acta;
+si no designó a nadie, no marca a nadie y el acta se aprueba directo. Con comisión, el acta **no
+se aprueba** hasta que todos revisen, cada revisión queda con su fecha y su observación en la
+hoja, y **editar el acta después deja las revisiones sin efecto** — se revisó otro texto.
+
+**Pendiente:** el **término** de la comisión, si el reglamento de esta copropiedad le fija uno
+propio; hoy el acta lleva el plazo legal supletorio de 20 días hábiles para todo. Que el
+miembro de la comisión **revise desde su propia app** —en vez de que el administrador registre
+su revisión— es la extensión natural, la misma forma de dos puertas que tiene el poder
+(CU-A-19 / CU-R-23). Y el **PDF** espera al backend (ADR-0006): el acta se lee en pantalla y
+sale al imprimir, sin fingir descarga.
 
 **Estado en el demo:** ✅ — `/admin/asambleas`, dentro de una asamblea cerrada.
 

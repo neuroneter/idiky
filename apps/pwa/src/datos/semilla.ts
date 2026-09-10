@@ -47,7 +47,7 @@ import { hoyISO, sumarDias, vencimientoDelPeriodo } from '../dominio/reglas'
 // 18 — el poder tambien se otorga desde la app, y ahi Idiky emite el documento.
 // 19 — quorum y mayorias segun la Ley 675 (arts. 41, 45 y 46), verificada.
 // 20 — el acta de la asamblea, con lo que exige el articulo 47.
-export const VERSION_ESQUEMA = 20
+export const VERSION_ESQUEMA = 21
 
 const COPROPIEDAD_ID = 'cop-1'
 

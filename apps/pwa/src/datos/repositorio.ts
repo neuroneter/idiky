@@ -1118,8 +1118,8 @@ export async function cambiarEstadoAsamblea(
 // Idiky tiene las cinco cosas, asi que el acta **no las copia: las lee**.
 //
 // Lo unico que se guarda aqui es lo que el sistema no puede saber —quien
-// presidio, quien fue secretario, y que se dijo— mas el estado, que es lo unico
-// que una persona podria cambiar despues.
+// presidio, quien fue secretario, que se dijo y quien la reviso— mas el estado,
+// que es lo unico que una persona podria cambiar despues.
 // ---------------------------------------------------------------------------
 
 export async function generarActa(
@@ -1145,6 +1145,10 @@ export async function generarActa(
     asambleaId: asamblea.id,
     desarrollo: '',
     estado: 'borrador',
+    // Vacia a proposito: la comision es opcional y **la designa la asamblea**,
+    // no la app (RN-76). Nace sin ella y el administrador la registra si la hubo.
+    verificadores: [],
+    verificaciones: [],
     // Se copia al generarla, como los plazos del debido proceso (RN-69): si
     // manana cambia el reglamento, esta acta conserva el termino que tuvo.
     limiteVerificacion: limiteVerificacionActa(asamblea.fechaHora),
@@ -1176,9 +1180,82 @@ export async function editarActa(
     )
   }
 
+  // Se compara antes de asignar: **guardar sin cambiar nada no es editar**, y
+  // si contara como edicion, un clic distraido en «Guardar borrador» tumbaria
+  // las revisiones ya hechas (RN-76).
+  const cambio =
+    (parametros.presidenteId !== undefined && parametros.presidenteId !== acta.presidenteId) ||
+    (parametros.secretarioId !== undefined && parametros.secretarioId !== acta.secretarioId) ||
+    (parametros.desarrollo !== undefined && parametros.desarrollo !== acta.desarrollo)
+
   if (parametros.presidenteId !== undefined) acta.presidenteId = parametros.presidenteId
   if (parametros.secretarioId !== undefined) acta.secretarioId = parametros.secretarioId
   if (parametros.desarrollo !== undefined) acta.desarrollo = parametros.desarrollo
+  if (cambio) acta.editadaEn = ahoraISO()
+  return persistir(bd, acta)
+}
+
+/**
+ * CU-A-20 — Registrar **quien revisa el acta**, si alguien la revisa (RN-76).
+ *
+ * Designar no es editar: cambiar quien revisa no cambia el texto revisado, asi
+ * que **no tumba las revisiones ya hechas**. Quitar a alguien de la comision
+ * tampoco borra lo que dejo escrito — su observacion sigue en el acta, que es
+ * de lo que se trata (RN-61).
+ */
+export async function designarComisionActa(
+  bdActual: BaseDatos,
+  parametros: { actaId: string; verificadores: string[] },
+): Promise<Resultado<Acta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const acta = bd.actas.find((a) => a.id === parametros.actaId)
+  if (!acta) throw new ErrorDeNegocio('Esa acta no existe.')
+  if (actaCongelada(acta)) {
+    throw new ErrorDeNegocio('Esa acta ya está aprobada: la comisión ya cumplió su función.')
+  }
+
+  const asistieron = new Set(
+    bd.asistencias.filter((a) => a.asambleaId === acta.asambleaId).map((a) => a.personaId),
+  )
+  for (const personaId of parametros.verificadores) {
+    if (!asistieron.has(personaId)) {
+      throw new ErrorDeNegocio('La comisión la integran quienes asistieron a la asamblea.')
+    }
+  }
+
+  acta.verificadores = [...new Set(parametros.verificadores)]
+  return persistir(bd, acta)
+}
+
+/**
+ * CU-A-20 — Un miembro de la comision deja constancia de que reviso (RN-76).
+ *
+ * Se **reemplaza** la revision anterior de esa misma persona en vez de
+ * acumularlas: lo que interesa es si esta conforme con el texto de hoy, y una
+ * lista de revisiones sucesivas del mismo nombre no dice mas, dice menos.
+ */
+export async function verificarActa(
+  bdActual: BaseDatos,
+  parametros: { actaId: string; personaId: string; observacion?: string },
+): Promise<Resultado<Acta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const acta = bd.actas.find((a) => a.id === parametros.actaId)
+  if (!acta) throw new ErrorDeNegocio('Esa acta no existe.')
+  if (actaCongelada(acta)) throw new ErrorDeNegocio('Esa acta ya estaba aprobada.')
+  if (!acta.verificadores.includes(parametros.personaId)) {
+    throw new ErrorDeNegocio('Esa persona no integra la comisión verificadora de esta acta.')
+  }
+
+  acta.verificaciones = [
+    ...acta.verificaciones.filter((v) => v.personaId !== parametros.personaId),
+    {
+      personaId: parametros.personaId,
+      verificadaEn: ahoraISO(),
+      observacion: parametros.observacion?.trim() || undefined,
+    },
+  ]
   return persistir(bd, acta)
 }
 
@@ -1253,6 +1330,11 @@ export async function crearActaAclaratoria(
     secretarioId: original.secretarioId,
     desarrollo: '',
     estado: 'borrador',
+    // La aclaratoria **hereda la comision** de la original: si aquella asamblea
+    // designo quien revisa sus actas, tambien revisa la que las corrige — que
+    // es donde mas falta hace. Las verificaciones no se heredan: son de un texto.
+    verificadores: [...original.verificadores],
+    verificaciones: [],
     limiteVerificacion: original.limiteVerificacion,
     aclaraActaId: original.id,
     creadaEn: ahoraISO(),

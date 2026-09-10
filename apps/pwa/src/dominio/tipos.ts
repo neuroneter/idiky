@@ -837,6 +837,19 @@ export interface Poder {
  * unidad, esta acta sigue diciendo con cuanto se conto. Lo que se congela es el
  * texto y el estado, que es lo unico que una persona podria cambiar.
  */
+/**
+ * Lo que deja un miembro de la comision al revisar el acta — CU-A-20.
+ *
+ * Guarda **la fecha**, y no por prolijidad: es lo que permite saber si la
+ * revision sigue valiendo cuando el acta se edito despues (`verificacionVigente`).
+ */
+export interface VerificacionActa {
+  personaId: string
+  verificadaEn: FechaHoraISO
+  /** Lo que anoto al revisar, si anoto algo. Queda en el acta. */
+  observacion?: string
+}
+
 export interface Acta {
   id: string
   asambleaId: string
@@ -850,6 +863,24 @@ export interface Acta {
   /** Lo que el sistema no puede saber: intervenciones, proposiciones, compromisos. */
   desarrollo: string
   estado: 'borrador' | 'aprobada'
+  /**
+   * La **comision verificadora**, si la hay — CU-A-20.
+   *
+   * «Dejala como una opcion para que el administrador seleccione, **a veces hay
+   * revision**» (Mary, 2026-09-10). No es un requisito de la Ley 675: el art. 47
+   * pide presidente y secretario y nada mas. La comision la designa la asamblea
+   * o la exige el reglamento, y por eso aqui es **una lista que puede estar
+   * vacia** en vez de un campo obligatorio.
+   *
+   * Vacia = no hay revision y el acta se aprueba directo, como siempre.
+   */
+  verificadores: string[]
+  verificaciones: VerificacionActa[]
+  /**
+   * Cuando se toco por ultima vez. Existe para una sola cosa: **una
+   * verificacion vale sobre el texto que se verifico** (ver `verificacionVigente`).
+   */
+  editadaEn?: FechaHoraISO
   /**
    * Hasta cuando hay para verificarla y ponerla a disposicion: el termino del
    * reglamento y, **en su defecto, veinte dias habiles** siguientes a la reunion

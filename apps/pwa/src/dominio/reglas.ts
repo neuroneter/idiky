@@ -8,6 +8,7 @@
 
 import type {
   Acta,
+  VerificacionActa,
   Asamblea,
   Asistencia,
   FormaAsistencia,
@@ -510,10 +511,10 @@ export const MODALIDADES: ReadonlyArray<{
   {
     id: 'mixta',
     texto: 'Mixta',
-    // No dice «las dos suman al mismo quorum»: **eso esta sin decidir** (RN-28,
-    // §3 bis) y la app no puede afirmarlo. Dice lo que si hace — contarlas por
-    // separado — que es lo que el acta va a necesitar cuando se decida.
-    detalle: 'Unos en el salón y otros conectados. Idiky lleva las dos cuentas por separado.',
+    // Ya se puede decir que suman al mismo quorum: lo respondio Mary el
+    // 2026-09-10 y ademas lo dice la ley (RN-75). Se siguen contando por
+    // separado porque el acta necesita el reparto, no porque pesen distinto.
+    detalle: 'Unos en el salón y otros conectados. Las dos formas pesan igual (RN-75).',
     exigeLugar: true,
     exigeEnlace: true,
   },
@@ -559,13 +560,23 @@ export function asistenciaDeUnidad(
 }
 
 /**
- * ADR-0007 — Lo que se puede decir de la asistencia **sin decidir el quorum**.
+ * RN-75 — **La forma de asistir no cambia lo que pesa la unidad.**
  *
- * Registrar quien asistio y sumar sus coeficientes no exige saber cuanto quorum
- * se necesita: son dos cosas distintas y solo la segunda esta sin decidir
- * (RN-28, §3 bis). Asi que esto suma y reparte por forma —que es lo que el acta
- * necesita en una mixta— y **deliberadamente no devuelve `hayQuorum`**: afirmarlo
- * con un umbral inventado seria peor que no decir nada.
+ * «La asistencia virtual pesa igual que la presencial» (Mary, 2026-09-10), y la
+ * ley dice lo mismo por dos lados. El art. 42 de la Ley 675 admite la reunion no
+ * presencial «de conformidad con **el quorum requerido para el respectivo
+ * caso**» —el mismo quorum, no uno propio— y el Decreto 398 de 2020, art. 1, lo
+ * deja escrito para las mixtas: «Las disposiciones legales y estatutarias sobre
+ * convocatoria, quorum y mayorias de las reuniones presenciales seran igualmente
+ * aplicables a las reuniones no presenciales… y a las reuniones mixtas».
+ *
+ * Por eso `coeficiente` es **una sola suma**: quien esta en el salon y quien
+ * esta conectado entran al mismo total. El reparto por forma se sigue llevando,
+ * pero **para el acta, no para el quorum** — el art. 47 exige decir quien
+ * asistio y como, y en una mixta eso es justamente lo que hay que poder mostrar.
+ *
+ * La distincion que si importa no es donde estaba la persona sino **si es
+ * propietario o apoderado** (RN-51, RN-30): esa si cambia si suma.
  */
 export function resumenAsistencia(
   asistencias: Asistencia[],
@@ -609,6 +620,9 @@ export function resumenAsistencia(
  * **la segunda sesiona con cualquier numero plural de propietarios, sea cual sea
  * el coeficiente**. Sin eso, una copropiedad donde la gente no va quedaria
  * paralizada para siempre.
+ *
+ * Lo que se cuenta es **la unidad**, este quien este y **este donde este**: la
+ * forma de asistir no cambia el peso (RN-75).
  */
 export function hayQuorum(
   asamblea: Asamblea,
@@ -723,7 +737,76 @@ export function faltaEnActa(acta: Acta): string[] {
   if (!acta.presidenteId) falta.push('quién presidió la asamblea')
   if (!acta.secretarioId) falta.push('quién actuó como secretario')
   if (acta.desarrollo.trim().length < 20) falta.push('el desarrollo de la reunión')
+  const pendientes = verificadoresPendientes(acta)
+  if (pendientes.length > 0) {
+    falta.push(
+      pendientes.length === 1
+        ? 'la revisión de un miembro de la comisión verificadora'
+        : `la revisión de ${pendientes.length} miembros de la comisión verificadora`,
+    )
+  }
   return falta
+}
+
+// ---------------------------------------------------------------------------
+// RN-76 — La comision verificadora del acta: **opcional**.
+//
+// «Dejala como una opcion para que el administrador seleccione, **a veces hay
+// revision**» (Mary, 2026-09-10). Y es exacto: la Ley 675 no la exige. El
+// art. 47 pide que el acta la firmen el presidente y el secretario y no
+// menciona ninguna comision — la designa la asamblea o la impone el reglamento,
+// asi que la app **no puede exigirla ni puede ignorarla**.
+//
+// De ahi la forma: una lista que puede estar vacia. Vacia, el acta se aprueba
+// como siempre; con gente, no se aprueba hasta que todos revisen. Sin ninguna
+// bandera aparte que se pueda desincronizar de los datos.
+// ---------------------------------------------------------------------------
+
+/** Si esta asamblea designo comision. Vacio es una respuesta, no un dato falta. */
+export function actaTieneComision(acta: Acta): boolean {
+  return acta.verificadores.length > 0
+}
+
+/**
+ * RN-76 — **Una revision vale sobre el texto que se reviso.**
+ *
+ * Si el acta se edita despues de que alguien la reviso, esa revision deja de
+ * valer: reviso otra cosa. Lo contrario permitiria recoger las firmas y despues
+ * cambiar el texto, que es precisamente el fraude que una comision existe para
+ * impedir.
+ *
+ * **No se borra nada** (RN-61): la revision queda con su fecha y se ve que
+ * quedo sin efecto. Que el administrador edito despues es, en si mismo, un dato
+ * del expediente.
+ */
+export function verificacionVigente(acta: Acta, verificacion: VerificacionActa): boolean {
+  return verificacion.verificadaEn >= (acta.editadaEn ?? acta.creadaEn)
+}
+
+/** Las revisiones que todavia valen sobre el texto de hoy. */
+export function verificacionesVigentes(acta: Acta): VerificacionActa[] {
+  return acta.verificaciones.filter((v) => verificacionVigente(acta, v))
+}
+
+/** Quienes de la comision no han revisado —o revisaron un texto ya cambiado. */
+export function verificadoresPendientes(acta: Acta): string[] {
+  const yaRevisaron = new Set(verificacionesVigentes(acta).map((v) => v.personaId))
+  return acta.verificadores.filter((personaId) => !yaRevisaron.has(personaId))
+}
+
+/** El acta paso la revision. **Sin comision, pasa sola**: no hay nada que pasar. */
+export function actaVerificada(acta: Acta): boolean {
+  return verificadoresPendientes(acta).length === 0
+}
+
+/**
+ * En que va el acta. **Se deriva, no se guarda**: un estado guardado que
+ * depende de otros campos es un estado que tarde o temprano los contradice.
+ */
+export function estadoActa(acta: Acta): 'borrador' | 'en_verificacion' | 'aprobada' {
+  if (acta.estado === 'aprobada') return 'aprobada'
+  if (actaTieneComision(acta) && !actaVerificada(acta)) return 'en_verificacion'
+  return 'borrador'
 }
 
 /**
@@ -801,11 +884,6 @@ export function unidadesRepresentadas(
  * poderes por apoderado. Lo puede fijar el **reglamento** de cada copropiedad
  * —la practica comun son tres o cuatro— y mientras este no lo haga, no hay nada
  * que comprobar.
- *
- * Lo que si se puede hacer, y se hace, es **poner el dato a la vista**: cuantas
- * unidades y cuanto coeficiente acumula cada apoderado, para que el
- * administrador lo juzgue con el reglamento en la mano. Ver
- * `acumuladoPorApoderado`.
  *
  * Lo que si se puede hacer, y se hace, es **poner el dato a la vista**: cuantas
  * unidades y cuanto coeficiente acumula cada apoderado, para que el

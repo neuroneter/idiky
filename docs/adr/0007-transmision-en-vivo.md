@@ -114,8 +114,11 @@ manejable de uno que no lo es.
 
 ## Lo que este ADR **no** decide
 
-- **El quórum**: cuánto se exige, si la asistencia virtual pesa igual que la presencial, y cómo
-  entran los poderes. Once preguntas abiertas en
-  [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 bis. Idiky **registra**
-  asistencia y **suma** coeficientes; **no afirma** que haya quórum mientras eso no se decida.
+- ~~**El quórum**~~ → **resuelto el 2026-09-10**, y por los dos lados. El umbral se verificó
+  contra la Ley 675 arts. 41 y 45 (RN-28) y el peso de la asistencia virtual quedó decidido:
+  **pesa igual que la presencial** (RN-75, Mary), que es además lo que dicen el art. 42 de la
+  Ley 675 y el art. 1.º del Decreto 398 de 2020. Idiky ya **afirma** el quórum, citando el
+  artículo. Lo que sigue abierto en
+  [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 bis es de este
+  reglamento, no de la ley.
 - **Si la grabación es soporte del acta** (CU-A-17 A2).

@@ -30,12 +30,14 @@ import type {
 import { formatearFecha, formatearFechaHora } from '../utilidades/formato'
 import { nombreCompleto } from '../datos/selectores'
 import {
+  actaTieneComision,
   contarVotacion,
   etiquetaUnidad,
   hayQuorum,
   mayoriaDelPunto,
   resultadoVotacion,
   resumenAsistencia,
+  verificacionVigente,
 } from '../dominio/reglas'
 
 function porcentaje(valor: number): string {
@@ -130,6 +132,19 @@ export function HojaActa({
           ? 'Tratándose de reunión de segunda convocatoria, la asamblea sesiona válidamente con cualquier número plural de propietarios (Ley 675 de 2001, artículo 41).'
           : `Se ${quorum ? 'verificó' : 'no verificó'} el quórum exigido por el artículo 45 de la Ley 675 de 2001: número plural de propietarios que representen más de la mitad de los coeficientes.`}
       </p>
+
+      {/* RN-75 — En una sesión que no fue solo presencial, el acta dice por qué
+          la asistencia remota cuenta igual. Es lo que se impugna. */}
+      {asamblea.modalidad !== 'presencial' && (
+        <p>
+          La asistencia registrada por medio virtual computa en las mismas condiciones que la
+          presencial, conforme al artículo 42 de la Ley 675 de 2001 —que admite la reunión no
+          presencial «de conformidad con el quórum requerido para el respectivo caso»— y al artículo
+          1.º del Decreto 398 de 2020, según el cual las disposiciones sobre convocatoria, quórum y
+          mayorías de las reuniones presenciales se aplican por igual a las no presenciales y a las
+          mixtas.
+        </p>
+      )}
 
       {/* **Sin quórum no hay decisiones válidas**, y el acta tiene que decirlo
           antes de listar nada. Un acta que constata que faltó quórum y a
@@ -248,6 +263,54 @@ export function HojaActa({
             .map((linea, i) => (
               <p key={i}>{linea}</p>
             ))}
+        </>
+      )}
+
+      {/* RN-76 — La comision, **solo si la hubo**. Un acta sin comision no dice
+          «sin comision»: dice lo que paso, y lo que paso es que la asamblea no
+          designo ninguna. Con comision, en cambio, tiene que constar quien
+          reviso y que anoto: es la razon de ser de la figura. */}
+      {actaTieneComision(acta) && (
+        <>
+          <h2>Comisión verificadora</h2>
+          <p>
+            La asamblea designó una comisión para revisar la presente acta, integrada por{' '}
+            {acta.verificadores
+              .map((id) => nombreCompleto(personaDe(id)))
+              .join(', ')
+              .replace(/, ([^,]*)$/, ' y $1')}
+            .
+          </p>
+          <table className="hoja-documento__tabla">
+            <thead>
+              <tr>
+                <th>Integrante</th>
+                <th>Revisó</th>
+                <th>Observación</th>
+              </tr>
+            </thead>
+            <tbody>
+              {acta.verificadores.map((id) => {
+                const verificacion = acta.verificaciones.find((v) => v.personaId === id)
+                const vigente = verificacion && verificacionVigente(acta, verificacion)
+                return (
+                  <tr key={id}>
+                    <td>{nombreCompleto(personaDe(id))}</td>
+                    <td>
+                      {!verificacion
+                        ? 'Pendiente'
+                        : vigente
+                          ? formatearFechaHora(verificacion.verificadaEn)
+                          : // No se oculta: que reviso y que el texto cambio
+                            // despues es un dato del acta, no un borron.
+                            `Revisó el ${formatearFecha(verificacion.verificadaEn.slice(0, 10))}; el texto se modificó después`}
+                    </td>
+                    <td>{verificacion?.observacion ?? '—'}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
         </>
       )}
 

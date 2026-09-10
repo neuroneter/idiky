@@ -15,7 +15,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 67 documentados: 34 ✅ en el demo, 11 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 74 (RN-01…RN-74; RN-41 retirada) |
+| **Reglas de negocio** | 76 (RN-01…RN-76; RN-41 retirada — 75 vigentes) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -83,6 +83,62 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-10 · Mary + IA (Claude) · Dos preguntas de §3 bis, respondidas (RN-75, RN-76)
+
+Mary respondió dos de las cuatro preguntas que quedaban abiertas del levantamiento, y las dos
+se pudieron cerrar el mismo día porque **ninguna pedía inventar nada**: una tenía norma detrás
+y la otra pedía justamente que la app no impusiera una.
+
+**«La asistencia virtual pesa igual que la presencial» (RN-75).** Se verificó contra la norma
+antes de tocar código, como con el quórum, y la norma dice lo mismo por dos lados: la
+**Ley 675 art. 42** admite la reunión no presencial *«de conformidad con el quórum requerido
+para el respectivo caso»* —el mismo quórum, no uno propio— y el **Decreto 398 de 2020, art. 1**
+lo escribe para las mixtas: las reglas de convocatoria, quórum y mayorías de las presenciales
+*«serán igualmente aplicables»*. Así que la suma de coeficientes es **una sola**. El reparto
+presencial/virtual se sigue llevando, pero por otra razón: **el acta lo exige** (art. 47). Al
+copropietario conectado la pantalla se lo dice —*«conectado cuentas igual que en el salón»*—
+porque es exactamente la duda de quien participa desde el sofá.
+
+**«La comisión verificadora déjala como una opción… a veces hay revisión» (RN-76).** Es la
+respuesta correcta y la Ley 675 la respalda por omisión: el art. 47 pide presidente y
+secretario y **no menciona ninguna comisión**. La designa la asamblea o la exige el
+reglamento, así que la app no puede ni imponerla ni ignorarla. Quedó como una lista que **puede
+estar vacía**: sin nadie marcado el acta se aprueba directo, como siempre; con gente, no se
+aprueba hasta que todos revisen.
+
+Lo que salió al construirla, y es la parte que valía la pena: **una revisión vale sobre el
+texto que se revisó**. Si el acta se edita después, esa revisión queda sin efecto. Lo contrario
+—recoger las firmas y cambiar el texto luego— es precisamente el fraude que una comisión existe
+para impedir. Y **no se borra nada** (RN-61): la revisión queda con su fecha y la hoja dice
+«revisó el tal día; el texto se modificó después». Guardar sin cambiar nada **no** cuenta como
+edición, o un clic distraído tumbaría el trabajo de la comisión.
+
+También se dice, sin impedirlo, cuando quien presidió o hizo de secretario **también revisa**:
+vacía la figura, pero lo decidió la asamblea al designar y ninguna norma lo prohíbe. Mismo
+criterio que el tope de poderes — Idiky pone el dato delante, no inventa la prohibición.
+
+**Dos textos que ya eran falsos y se corrigieron de paso.** La pantalla de poderes seguía
+diciendo *«falta el tope que fija la Ley 675»* cuando la revisión del día anterior había
+establecido que **la ley no fija ninguno** —lo puede fijar el reglamento—; y un comentario del
+panel de asistencia seguía diciendo que el umbral estaba sin decidir cuando ya se declaraba el
+quórum citando el artículo. Tres comprobaciones de Playwright afirmaban también lo viejo y se
+actualizaron.
+
+**Verificado con Playwright, 31 comprobaciones nuevas** (`comision`, `mixta`) más las siete
+suites anteriores en verde: que la comisión sea de verdad opcional; que designar bloquee la
+aprobación y diga por qué; que la observación entre en la hoja; que editar deje las revisiones
+sin efecto y que guardar sin cambios no; que la hoja muestre lo invalidado en vez de
+esconderlo; y que el acta de una sesión no presencial cite el art. 42 y el Decreto 398.
+
+**Lo que sigue:** de §3 bis quedan **dos** preguntas, las dos del reglamento de esta
+copropiedad: qué puntos somete a mayoría calificada, y si fija tope de poderes por apoderado.
+Apareció una tercera, más chica: si el reglamento le da a la comisión un término propio para
+revisar (hoy corre el supletorio de 20 días hábiles del art. 47). Y quedó anotada la extensión
+natural del CU-A-20: que el miembro de la comisión revise **desde su propia app**, la misma
+forma de dos puertas que ya tiene el poder.
+
+---
+
 ### 2026-09-10 · Mary + IA (Claude) · El acta, y lo que la norma ya había respondido (CU-A-20)
 
 Antes de escribir una línea, verifiqué el **artículo 47 de la Ley 675** — la costumbre que
@@ -139,6 +195,8 @@ estaba construido desde ayer.
 esta copropiedad —qué puntos exigen mayoría calificada según su reglamento, si fija tope de
 poderes, si designa comisión verificadora— más si la asistencia virtual pesa igual que la
 presencial. El módulo de asambleas, con eso, está completo hasta donde la ley alcanza.
+*(Las dos últimas quedaron respondidas al día siguiente — ver la entrada de arriba.)*
+
 
 ---
 
@@ -519,8 +577,6 @@ cartera queda con un solo hueco de respaldo: **el interés de mora** (RN-43), qu
 la respuesta de §3 quinquies.
 
 **Lo que sigue:** ADR-0007 (transmisión en vivo), sin bloqueos.
-
----
 
 ---
 

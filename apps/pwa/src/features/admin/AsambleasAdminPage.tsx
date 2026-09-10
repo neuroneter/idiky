@@ -28,8 +28,10 @@ import {
   aprobarActa,
   convocarAsamblea,
   crearActaAclaratoria,
+  designarComisionActa,
   editarActa,
   generarActa,
+  verificarActa,
   registrarPoder,
   revocarPoder,
 } from '../../datos/repositorio'
@@ -37,8 +39,11 @@ import {
   MODALIDADES,
   actaCongelada,
   actaDeAsamblea,
+  actaTieneComision,
+  estadoActa,
   acumuladoPorApoderado,
   faltaEnActa,
+  verificacionVigente,
   sumaCoeficientes,
   convocatoriaCompleta,
   definicionModalidad,
@@ -232,6 +237,20 @@ export function AsambleasAdminPage() {
             )
             if (nueva) setViendoActa(nueva.id)
           }}
+          alDesignar={async (verificadores) => {
+            await ejecutar(
+              (base) => designarComisionActa(base, { actaId: viendoActa, verificadores }),
+              verificadores.length === 0
+                ? 'Sin comisión verificadora: el acta se aprueba directo.'
+                : 'Comisión verificadora registrada.',
+            )
+          }}
+          alVerificar={async (personaId, observacion) => {
+            await ejecutar(
+              (base) => verificarActa(base, { actaId: viendoActa, personaId, observacion }),
+              'Revisión registrada en el acta.',
+            )
+          }}
         />
       )}
 
@@ -361,9 +380,11 @@ function DetalleAsamblea({
             propietario otorga desde su app aparecen solos.
           </p>
 
-          {/* El acumulado por apoderado, a la vista: el tope legal no lo tenemos
-              (RN-30, §3 bis), así que en vez de inventar un número se le pone el
-              dato delante a quien registra, para que juzgue con el reglamento. */}
+          {/* El acumulado por apoderado, a la vista: **la Ley 675 no fija tope**
+              (RN-30, revisado el 2026-09-10), y el del reglamento de esta
+              copropiedad no lo tenemos. En vez de inventar un número se le pone
+              el dato delante a quien registra, para que juzgue con el
+              reglamento en la mano. */}
           {acumulado.length > 0 && (
             <div className="lista lista--compacta" style={{ marginTop: 'var(--e2)' }}>
               {acumulado.map((linea) => {
@@ -444,10 +465,10 @@ function DetalleAsamblea({
 
           {acumulado.length > 0 && (
             <p className="acceso__nota" style={{ margin: 'var(--e3) 0' }}>
-              Falta el <strong>tope</strong> que fija la Ley 675: cuántas unidades puede acumular un
-              apoderado y hasta qué porcentaje. Mientras no esté, Idiky muestra el acumulado pero{' '}
-              <strong>no rechaza a nadie</strong> — el número de arriba es para juzgarlo con el
-              reglamento en la mano.
+              La <strong>Ley 675 no fija tope</strong> de poderes por apoderado; lo puede fijar el{' '}
+              <strong>reglamento</strong> de la copropiedad, y el de esta no está cargado. Por eso
+              Idiky muestra el acumulado pero <strong>no rechaza a nadie</strong>: el número de
+              arriba es para juzgarlo con el reglamento en la mano.
             </p>
           )}
         </>
@@ -457,9 +478,10 @@ function DetalleAsamblea({
         <>
           <div className="separador" />
           <span className="titulo-seccion">Quién asiste</span>
-          {/* Se suma y se reparte por forma —que es lo que el acta necesita en una
-              mixta— pero **no se declara quórum**: el umbral está sin decidir
-              (RN-28, §3 bis). */}
+          {/* Se suma **todo junto**: la forma de asistir no cambia el peso de la
+              unidad (RN-75, Ley 675 art. 42 y Decreto 398 de 2020). El reparto
+              presencial/virtual se lleva aparte porque el acta lo exige
+              (art. 47), no porque uno pese menos que el otro. */}
           <div className="lista lista--compacta">
             <div className="fila">
               <span className="subtitulo">Unidades</span>
@@ -555,10 +577,30 @@ function DetalleAsamblea({
             <div className="columna" style={{ gap: 'var(--e2)' }}>
               <div className="fila">
                 <span className="subtitulo">
-                  {acta.estado === 'aprobada' ? 'Aprobada y publicada' : 'Borrador'}
+                  {
+                    {
+                      aprobada: 'Aprobada y publicada',
+                      en_verificacion: 'En revisión de la comisión',
+                      borrador: 'Borrador',
+                    }[estadoActa(acta)]
+                  }
                 </span>
-                <span className={acta.estado === 'aprobada' ? 'chip chip--exito' : 'chip'}>
-                  {acta.estado === 'aprobada' ? 'Firme' : 'Sin aprobar'}
+                <span
+                  className={
+                    {
+                      aprobada: 'chip chip--exito',
+                      en_verificacion: 'chip chip--info',
+                      borrador: 'chip',
+                    }[estadoActa(acta)]
+                  }
+                >
+                  {
+                    {
+                      aprobada: 'Firme',
+                      en_verificacion: 'Con comisión',
+                      borrador: 'Sin aprobar',
+                    }[estadoActa(acta)]
+                  }
                 </span>
               </div>
               {acta.estado === 'borrador' && (
@@ -1123,6 +1165,8 @@ function VistaActa({
   alGuardar,
   alAprobar,
   alAclarar,
+  alDesignar,
+  alVerificar,
   alCerrar,
 }: {
   bd: ReturnType<typeof useDatos>['bd']
@@ -1135,6 +1179,8 @@ function VistaActa({
   }) => Promise<void>
   alAprobar: () => Promise<void>
   alAclarar: () => Promise<void>
+  alDesignar: (verificadores: string[]) => Promise<void>
+  alVerificar: (personaId: string, observacion?: string) => Promise<void>
   alCerrar: () => void
 }) {
   const acta = bd.actas.find((a) => a.id === actaId)
@@ -1142,6 +1188,7 @@ function VistaActa({
   const [presidenteId, setPresidenteId] = useState(acta?.presidenteId ?? '')
   const [secretarioId, setSecretarioId] = useState(acta?.secretarioId ?? '')
   const [desarrollo, setDesarrollo] = useState(acta?.desarrollo ?? '')
+  const [observaciones, setObservaciones] = useState<Record<string, string>>({})
 
   if (!acta || !asamblea) return null
 
@@ -1212,6 +1259,123 @@ function VistaActa({
               de cada punto— <strong>ya está</strong>: sale de lo registrado, no se transcribe.
             </span>
           </div>
+
+          {/* RN-76 — La comisión verificadora, **opcional**. «A veces hay
+              revisión» (Mary, 2026-09-10): la Ley 675 no la exige, así que la
+              app no la pide — la ofrece. Vacía es una respuesta válida y la
+              pantalla lo dice, en vez de dejar un campo en blanco que parece
+              un olvido. */}
+          <div className="separador" />
+          <div className="columna" style={{ gap: 'var(--e2)' }}>
+            <span className="titulo-seccion">Comisión verificadora (opcional)</span>
+            <span className="ayuda-campo">
+              Si la asamblea designó a alguien para revisar el acta, márcalo aquí y el acta no se
+              aprueba hasta que revise. Si no hubo revisión, no marques a nadie: se aprueba
+              directo. La Ley 675 no exige comisión (art. 47); la designa la asamblea o la pide
+              el reglamento.
+            </span>
+
+            <div className="lista lista--compacta">
+              {asistentes.map((persona) => {
+                const designado = acta.verificadores.includes(persona.id)
+                const verificacion = acta.verificaciones.find((v) => v.personaId === persona.id)
+                const vigente = verificacion && verificacionVigente(acta, verificacion)
+                return (
+                  <div key={persona.id} className="fila">
+                    <label className="fila" style={{ gap: 'var(--e2)', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={designado}
+                        disabled={cargando}
+                        onChange={() =>
+                          void alDesignar(
+                            designado
+                              ? acta.verificadores.filter((id) => id !== persona.id)
+                              : [...acta.verificadores, persona.id],
+                          )
+                        }
+                      />
+                      <span>{nombreCompleto(persona)}</span>
+                    </label>
+                    {designado && (
+                      <span
+                        className={
+                          vigente ? 'chip chip--exito' : verificacion ? 'chip chip--alerta' : 'chip'
+                        }
+                      >
+                        {vigente
+                          ? 'Revisó'
+                          : verificacion
+                            ? 'Revisó antes del último cambio'
+                            : 'Pendiente'}
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Registrar la revisión de quien falta. Va aquí y no en un modal
+                aparte porque revisar es leer la hoja que está justo abajo. */}
+            {acta.verificadores
+              .filter((id) => {
+                const v = acta.verificaciones.find((x) => x.personaId === id)
+                return !v || !verificacionVigente(acta, v)
+              })
+              .map((id) => (
+                <div key={id} className="campo">
+                  <label htmlFor={`obs-${id}`}>
+                    Revisión de {nombreCompleto(sel.persona(bd, id))}
+                  </label>
+                  <div className="fila" style={{ gap: 'var(--e2)' }}>
+                    <input
+                      id={`obs-${id}`}
+                      value={observaciones[id] ?? ''}
+                      onChange={(evento) =>
+                        setObservaciones({ ...observaciones, [id]: evento.target.value })
+                      }
+                      placeholder="Observación, si dejó alguna (opcional)"
+                    />
+                    <button
+                      className="boton"
+                      disabled={cargando}
+                      onClick={async () => {
+                        // Se guarda el texto primero: si no, se registraría la
+                        // revisión de una versión y se editaría después, que es
+                        // justo lo que RN-76 invalida.
+                        await alGuardar({ presidenteId, secretarioId, desarrollo })
+                        await alVerificar(id, observaciones[id])
+                      }}
+                    >
+                      Registrar revisión
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+            {/* Se **dice**, no se impide. Que quien redactó el acta también la
+                revise vacía la figura, pero eso lo decidió la asamblea al
+                designar, no la app: ninguna norma lo prohíbe y Idiky no está
+                para inventar prohibiciones (mismo criterio que el tope de
+                poderes, RN-30). Lo que sí puede hacer es que nadie lo pase por
+                alto sin darse cuenta. */}
+            {acta.verificadores.some((id) => id === presidenteId || id === secretarioId) && (
+              <p className="acceso__nota">
+                Quien presidió o actuó como secretario <strong>también revisa</strong>. La
+                comisión suele ser gente distinta de quien redactó el acta, que es de donde le
+                viene el valor. Idiky no lo impide —lo designa la asamblea— pero queda dicho.
+              </p>
+            )}
+
+            {actaTieneComision(acta) && (
+              <span className="ayuda-campo">
+                Si el acta se edita después de una revisión, esa revisión queda sin efecto y hay
+                que volver a pedirla: se revisó otro texto.
+              </span>
+            )}
+          </div>
+
+          <div className="separador" />
 
           <div className="grupo-botones">
             <button

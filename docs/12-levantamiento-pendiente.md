@@ -180,12 +180,19 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   (RN-51, CU-R-21).
 - **Mora y voto:** ¿el copropietario en mora puede votar? ¿Puede recibir poderes?
   *(Hoy la mora solo bloquea reservas — RN-08.)* → *(respuesta)*
-- **Asistencia:** ¿la asamblea es presencial, virtual o mixta? Si es mixta, ¿el quórum
-  suma las dos? → *(respuesta)*
+- ~~**Asistencia:**~~ → ✅ **Respondido (Mary, 2026-09-10):** *«la asistencia virtual pesa
+  igual que la presencial»*. Las tres modalidades existen (ADR-0007) y en la mixta **el quórum
+  suma las dos**: una sola cuenta. Verificado además contra la norma —Ley 675 art. 42 y
+  Decreto 398 de 2020 art. 1— que dicen lo mismo. Implementado: RN-75, y la app se lo dice a
+  quien está conectado.
 - **Transmisión:** ¿la transmisión debe quedar **grabada** como soporte del acta? Eso
   cambia el costo de almacenamiento y el proveedor. → *(respuesta)*
-- **Acta:** ¿quién la firma y cómo? ¿Necesita aprobación de una comisión verificadora
-  antes de publicarse? → *(respuesta)*
+- ~~**Acta — comisión verificadora:**~~ → ✅ **Respondido (Mary, 2026-09-10):** *«la comisión
+  verificadora o persona que revisa el acta déjala como una opción para que el administrador
+  seleccione, **a veces hay revisión**»*. Implementado como opcional (RN-76). La firma quedó
+  resuelta por la ley: presidente y secretario (art. 47).
+  **Queda una pregunta más chica:** si el reglamento le fija a la comisión un **término**
+  propio para revisar; hoy corre el supletorio de 20 días hábiles del art. 47 para todo.
 - **Acta:** ¿debe seguir un formato o plantilla específica de la copropiedad?
   → *(respuesta)*
 
@@ -382,6 +389,7 @@ el modelo de datos y varios casos de uso.**
 8. El país es Colombia: moneda COP, PQRS, paz y salvo y Ley 675 de 2001 como marco legal.
    *(Se deduce del demo; nadie lo ha confirmado.)*
 9. ~~El voto en asamblea se pondera por coeficiente~~ → **confirmado el 2026-08-26**, ya no
-   es supuesto. Que el **quórum** se mida en coeficientes sigue siendo supuesto (§3 bis).
+   es supuesto. Y el **quórum** en coeficientes tampoco: verificado contra la Ley 675 art. 45
+   el 2026-09-10 (RN-28).
 10. Los documentos formales (paz y salvo, acta, comprobante, estado de cuenta) se entregan
     en PDF descargable. **Supuesto — ver §3 ter y ADR-0006.**

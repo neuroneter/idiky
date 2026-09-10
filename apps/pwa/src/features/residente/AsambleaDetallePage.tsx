@@ -448,6 +448,14 @@ export function AsambleaDetallePage() {
             )}
           </div>
 
+          {/* RN-75 — Se dice, porque es la duda razonable de quien está
+              conectado: si desde el sofá cuenta igual. Cuenta igual. */}
+          {asamblea.modalidad !== 'presencial' && (
+            <span className="subtitulo">
+              Conectado cuentas igual que en el salón: tu unidad pesa lo mismo (Ley 675, art. 42).
+            </span>
+          )}
+
           {asamblea.enlaceTransmision && (
             <p className="acceso__nota" style={{ marginTop: 'var(--e3)' }}>
               Las votaciones se hacen <strong>aquí</strong>, no en la reunión. Vuelve a esta
