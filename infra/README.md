@@ -190,6 +190,7 @@ Las seis imágenes suman 1,3 GB; la mayor parte es Strapi.
 | `servidor/preparar-servidor.sh` | Servidor, con sudo, **una vez** | Instala Podman, crea `idiky`, le pone el techo y le autoriza una llave |
 | `servidor/levantar.sh` | Servidor, como `idiky` | Construye y (re)crea todo. **Aquí se registra cada servicio** |
 | `servidor/clave-acceso.sh` | Servidor, como `idiky` | Pone una clave al azar a la PWA y la contable |
+| `servidor/cargar-integraciones.sh` | Tu máquina | Sube las credenciales de Twilio (y luego Google y Microsoft) desde `.env.integraciones.local` al servidor |
 | `servidor/verificar-vecino.sh` | Servidor, como `idiky` | Foto de LangFlow antes y comparación después (§8) |
 | `desplegar.sh` | Tu máquina | Sube un commit y llama a `levantar.sh` |
 | `nuevo-servicio.md` | — | La receta para agregar un servicio |
@@ -326,6 +327,7 @@ poner:
 | `~idiky/.config/idiky/entorno` | `IDIKY_HOST=0.0.0.0` (abierto a internet) | A mano |
 | `~idiky/.config/idiky/nginx/acceso.conf` y `htpasswd` | La clave del entorno | `clave-acceso.sh` o el comando del §6 |
 | `~idiky/.config/idiky/secretos/gestion-*.env` | Secretos de Strapi y PostgreSQL (600) | `infra/gestion/secretos.sh` |
+| `~idiky/.config/idiky/secretos/integraciones.env` | Credenciales de Twilio Verify (600). **Todavía no las usa ningún servicio**: son para el backend de propiedades (ADR-0008), que las recibirá con `--env-file` | `servidor/cargar-integraciones.sh`, desde la máquina de quien tiene los valores |
 | `~idiky/datos/gestion/postgres/` | **La base de datos del sistema de gestión** | PostgreSQL, al primer arranque |
 | `~idiky/datos/gestion/uploads/` | Archivos subidos a Strapi | Strapi |
 | `~idiky/datos/respaldos/gestion/` | Los últimos 7 respaldos | `respaldo.sh` |
