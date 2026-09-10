@@ -832,3 +832,34 @@ app del residente (`src/componentes/Registro.tsx`).
 **Pendiente:** el eslabón de arriba —**el operador de Idiky, que crea a los administradores**—
 es un actor por encima de la copropiedad y no existe todavía en el demo. Está escrito en
 `CADENA_DE_REGISTRO` para que el modelo no lo olvide.
+
+---
+
+### CU-A-27
+## CU-A-27 — Conciliar abonos y administrar recibos de caja
+
+- **Actor principal:** Administrador
+- **Precondiciones:** Hay abonos informados por propietarios (CU-R-30) o pagos recibidos por fuera.
+- **Disparador:** Entró plata a la copropiedad y hay que registrarla donde corresponde.
+- **Resultado esperado:** El pago queda aplicado a las cuotas correctas y con su recibo de caja.
+
+**Flujo principal**
+1. En **Pagos**, la bandeja "Por conciliar" lista lo que los propietarios informaron, con el
+   texto en que cada uno explica a qué corresponde su abono.
+2. El administrador abre uno y ve el reparto sugerido por antigüedad (RN-06).
+3. **Ajusta el reparto** si lo que informó el propietario dice otra cosa: puede abonar
+   parcialmente a una cuota o repartir entre varias.
+4. Aplica. El sistema baja los saldos, emite el recibo de caja `RC-<NNNNN>` y lo muestra.
+
+**Flujos alternativos**
+- A1. El pago llegó por fuera y nadie lo informó → "Registrar pago", eligiendo unidad y valor.
+- A2. Lo repartido supera lo recibido → el sistema lo impide.
+- A3. Sobra dinero después de cubrir todas las cuotas → queda como saldo a favor de la unidad (RN-76).
+- A4. El pago fue un error o el banco lo devolvió → se anula con motivo; el saldo vuelve a las
+  cuotas y el recibo **queda en el libro marcado como anulado** (RN-78).
+
+**Reglas de negocio**
+- RN-06 (imputación por antigüedad), RN-75 (abono parcial), RN-76 (reparto y saldo a favor),
+  RN-77 (consecutivo del recibo), RN-78 (anulación con traza), RN-79 (lo reportado espera).
+
+**Estado en el demo:** ✅ — `src/features/admin/PagosPage.tsx`.

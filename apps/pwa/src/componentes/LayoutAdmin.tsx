@@ -23,6 +23,7 @@ const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta
   // entradas: parametrizar no es sancionar (RN-49, RN-69).
   { ruta: '/admin/sanciones', texto: 'Procesos', icono: 'certificado' },
   { ruta: '/admin/asambleas', texto: 'Asambleas', icono: 'asambleas' },
+  { ruta: '/admin/pagos', texto: 'Pagos', icono: 'pagos' },
   { ruta: '/admin/reservas', texto: 'Reservas', icono: 'reservas' },
   { ruta: '/admin/pqrs', texto: 'PQRS', icono: 'pqrs' },
   { ruta: '/admin/comunicados', texto: 'Comunicados', icono: 'comunicados' },
@@ -37,6 +38,7 @@ const TITULOS: Record<string, string> = {
   '/admin/multas': 'Catálogo de multas',
   '/admin/sanciones': 'Procesos sancionatorios',
   '/admin/asambleas': 'Asambleas',
+  '/admin/pagos': 'Pagos y recibos de caja',
   '/admin/reservas': 'Reservas por aprobar',
   '/admin/pqrs': 'Bandeja de PQRS',
   '/admin/comunicados': 'Comunicados',

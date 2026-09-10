@@ -18,6 +18,7 @@ import { ProcesosPage } from './features/residente/ProcesosPage'
 import { PersonasPage } from './features/residente/PersonasPage'
 import { CuentaPage } from './features/residente/CuentaPage'
 import { PagoPage } from './features/residente/PagoPage'
+import { InformarAbonoPage } from './features/residente/InformarAbonoPage'
 import { ReservasPage } from './features/residente/ReservasPage'
 import { PqrsPage } from './features/residente/PqrsPage'
 import { ComunicadosPage } from './features/residente/ComunicadosPage'
@@ -34,6 +35,7 @@ import { CarteraPage } from './features/admin/CarteraPage'
 import { CatalogoMultasPage } from './features/admin/CatalogoMultasPage'
 import { SancionesPage } from './features/admin/SancionesPage'
 import { AsambleasAdminPage } from './features/admin/AsambleasAdminPage'
+import { PagosPage } from './features/admin/PagosPage'
 import { ReservasAdminPage } from './features/admin/ReservasAdminPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
@@ -81,6 +83,7 @@ export function App() {
         <Route index element={<InicioPage />} />
         <Route path="cuenta" element={<CuentaPage />} />
         <Route path="cuenta/pagar" element={<PagoPage />} />
+        <Route path="cuenta/informar" element={<InformarAbonoPage />} />
         {/* Solicitudes: reservar, radicar una PQRS y pedir el paz y salvo viven
             bajo un mismo icono (Mary, 2026-08-27). Cada una conserva su ruta
             propia para poder enlazarla desde el inicio y para que "atras"
@@ -121,6 +124,7 @@ export function App() {
         <Route path="multas" element={<CatalogoMultasPage />} />
         <Route path="sanciones" element={<SancionesPage />} />
         <Route path="asambleas" element={<AsambleasAdminPage />} />
+        <Route path="pagos" element={<PagosPage />} />
         <Route path="reservas" element={<ReservasAdminPage />} />
         <Route path="pqrs" element={<PqrsAdminPage />} />
         <Route path="comunicados" element={<ComunicadosAdminPage />} />

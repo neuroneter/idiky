@@ -66,17 +66,172 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 | `periodo` | `AAAA-MM` | |
 | `tipo` | `'ordinaria' \| 'extraordinaria' \| 'interes' \| 'sancion'` | |
 | `concepto` | string | Texto visible |
-| `valor` | number | Moneda menor: **pesos enteros, sin decimales** |
+| `valor` | number | Lo facturado. **Pesos enteros, sin decimales.** No cambia nunca |
+| `saldo` | number | Lo que falta por pagar. Nace igual a `valor` y baja con cada abono (RN-75) |
 | `fechaVencimiento` | fecha ISO | RN-23 |
-| `estado` | `'pendiente' \| 'pagada' \| 'vencida'` | RN-04 |
-| `pagoId` | string? | Presente cuando `estado = 'pagada'` |
+| `estado` | `'pendiente' \| 'abonada' \| 'pagada' \| 'vencida'` | RN-04, RN-75 |
 | `origen` | `'reglamento' \| 'asamblea'` \| ausente | **Solo la ordinaria puede ir sin respaldo.** En la extraordinaria es siempre `'asamblea'` (RN-46) |
 | `actaId` | string? | El acta que la aprobó |
 | `referencia` | string? | Número y fecha del acta, o el artículo del reglamento |
 | `justificacion` | string? | **Por qué se cobra y con qué acta**, citando su fecha. Obligatoria cuando hay respaldo (RN-47) |
 
-### Pago
-`id`, `unidadId`, `cuotaIds[]`, `valor`, `medio` (`'pse' \| 'tarjeta' \| 'transferencia' \| 'efectivo' \| 'otro'`), `referencia`, `fecha`, `comprobante` (consecutivo, RN-07).
+> `vencida` no se guarda: se deriva de la fecha con `estadoRealCuota()`. Y **una cuota
+> vencida con abonos se sigue reportando vencida** — RN-04 manda sobre RN-75, porque para
+> la mora lo que cuenta es que todavía debe.
+
+### Pago (recibo de caja)
+Un pago **es** el recibo de caja: la constancia de que el dinero entró. Por eso no se
+borra, se anula (RN-78).
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `unidadId` | string | La deuda es de la unidad, no de la persona |
+| `valor` | number | Lo efectivamente recibido |
+| `medio` | `'pse' \| 'tarjeta' \| 'transferencia' \| 'efectivo' \| 'otro'` | |
+| `referencia` | string | Consignación, comprobante del banco |
+| `estado` | `'reportado' \| 'aplicado' \| 'anulado'` | RN-78, RN-79 |
+| `origen` | `'residente' \| 'administracion'` | Quién lo originó |
+| `conceptoInformado` | string? | **Lo que el propietario dice que está pagando** (CU-R-30) |
+| `cuotasInformadas` | string[]? | Cuotas que el propietario señala |
+| `recibo` | string? | `RC-<NNNNN>`; se asigna al aplicar (RN-77) |
+| `imputaciones` | `{cuotaId, valor}[]` | Cómo se repartió entre cuotas (RN-76) |
+| `saldoAFavor` | number | Lo que no se imputó a ninguna cuota |
+| `motivoAnulacion` | string? | Obligatorio al anular (RN-78) |
+
+> `conceptoInformado` es el campo que sostiene todo el módulo: es la diferencia entre
+> aplicar el abono donde el sistema supone y aplicarlo donde el propietario quiso.
+
+### Gasto — solo en `apps/contable/`
+
+La PWA no tiene gastos: es el lado que solo existe en la aplicación contable, y sin él no
+hay estado de resultados.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `fecha` | fecha ISO | **Fecha de causación**, no de pago (RN-81) |
+| `concepto` | string | Texto visible |
+| `categoria` | `'Vigilancia' \| 'Aseo' \| 'Servicios publicos' \| 'Mantenimiento' \| 'Administracion' \| 'Seguros' \| 'Reparaciones' \| 'Otros'` | Agrupa el estado de resultados |
+| `valor` | number | Pesos enteros |
+| `proveedor` | string | A quién se le paga |
+| `estado` | `'por_pagar' \| 'pagado' \| 'anulado'` | RN-81 |
+| `fechaPago` | fecha ISO? | Presente cuando `estado = 'pagado'` |
+| `motivoAnulacion` | string? | Obligatorio al anular; el registro no se borra |
+
+### Cuenta del PUC — solo en `apps/contable/`
+
+El plan de cuentas **es un dato editable**, no una constante del código. Vive en la base y se
+edita desde la pantalla "Plan de cuentas".
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `codigo` | string | Numérico. El largo define el nivel (ver abajo) |
+| `nombre` | string | |
+| `movimiento` | boolean | `true` = **transaccional**, recibe asientos. `false` = título: agrupa y suma |
+| `activa` | boolean | Las cuentas no se borran, se desactivan (RN-86) |
+
+**Los cinco niveles.** Cada uno agrega dos dígitos al del padre, y la jerarquía se lee del
+código, no de un campo aparte:
+
+| Nivel | Dígitos | Ejemplo |
+|---|---|---|
+| Clase | 1 | `1` Activo |
+| Grupo | 2 | `11` Disponible |
+| Cuenta | 4 | `1105` Caja |
+| Subcuenta | 6 | `110505` Caja general |
+| Auxiliar | 8 | `11050501` Caja general sede norte |
+
+**Los códigos de cuatro dígitos siguen el PUC colombiano (Decreto 2650).** Los de seis son
+auxiliares propios de la copropiedad — el PUC deja ese nivel al criterio de cada entidad.
+Una copropiedad es una ESAL, así que el grupo 41 de ingresos operacionales se adapta a sus
+conceptos propios (cuotas de administración, extraordinarias, intereses) en vez de usar los
+del PUC de comerciantes, que van por sector económico.
+
+> ⚠️ Los códigos son la adaptación convencional del PUC para propiedad horizontal.
+> **Antes de usarlos en contabilidad real, el contador de la copropiedad debe revisarlos.**
+> Todo es editable justamente para eso.
+
+### Parámetros contables — solo en `apps/contable/`
+
+Conectan cada tipo de documento con su cuenta: `caja`, `anticipos`, `porPagar`,
+`excedentes`, `cartera` por tipo de cuota, `ingreso` por tipo de cuota, `gasto` por categoría.
+
+Cambiar un parámetro afecta a los documentos **futuros**. Los ya registrados conservan su
+cuenta, porque cada documento la guarda (RN-85) — así la contabilidad de un mes cerrado no se
+mueve cuando alguien reconfigura el plan.
+
+### Proveedor — solo en `apps/contable/`
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `nit`, `dv` | string, number | El DV se calcula con el **algoritmo de la DIAN** (RN-90) |
+| `razonSocial`, `nombreComercial` | string | |
+| `tipoPersona` | `'juridica' \| 'natural'` | |
+| `responsableIva` | boolean | |
+| `direccion`, `ciudad`, `telefono`, `email` | string | |
+| `cuentaGasto` | string | Cuenta del PUC contra la que se causa lo que factura |
+| `tarifaRetefuente` | number | En porcentaje |
+| `tarifaReteIca` | number | **Por mil**, no por ciento |
+
+> **Sobre consultar la DIAN:** no existe una API pública y gratuita para consultar un NIT y
+> traer la razón social, y esta aplicación además abre desde un archivo local sin servidor
+> (ADR-0010). Por eso el proveedor se crea y vive en el directorio propio de la copropiedad.
+> La consulta está aislada en `Idiky.proveedores.consultarNit`: el día que haya backend, es la
+> única función que cambia.
+
+### Egreso (comprobante de egreso) — solo en `apps/contable/`
+
+**La plata que sale.** No confundir con el recibo de caja, que es la que entra.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `numero` | string | `CE-<NNNNN>`, consecutivo propio |
+| `proveedorId`, `proveedorNit`, `proveedorNombre` | | El beneficiario queda en el documento |
+| `gastoIds` | string[] | Los gastos causados que cancela |
+| `valorBruto` | number | Suma de esos gastos |
+| `retefuente`, `reteica` | number | Retenciones practicadas (RN-91) |
+| `valorNeto` | number | `bruto − retefuente − reteica`: lo que sale de caja |
+| `cuentaCaja`, `cuentaPorPagar`, `cuentaRetefuente`, `cuentaReteica` | string | Guardadas en el documento (RN-85) |
+| `estado` | `'registrado' \| 'anulado'` | Anular devuelve los gastos a `por_pagar` |
+
+### Tipo de comprobante — solo en `apps/contable/`
+
+**Es lo que le quita la contabilidad de encima al administrador.** Cada tipo trae su asiento
+ya definido, así que él elige el tipo y pone el valor: no tiene que saber que los intereses
+de mora van contra la `4115`.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `codigo` | string | Prefijo de su consecutivo: `NI-00001`, `NP-00001` |
+| `nombre`, `descripcion` | string | Lo que ve el administrador al elegir |
+| `sistema` | boolean | Si `true`, lo genera el módulo y no se registra a mano (RN-89) |
+| `pideUnidad` | boolean | Si el comprobante va contra un propietario |
+| `consecutivo` | number | **Propio de cada tipo**, como en cualquier libro contable |
+| `lineas` | `{cuenta?, parametro?, lado, porcentaje, concepto, usaUnidad}[]` | El asiento |
+
+Una línea trae `cuenta` fija o apunta a un `parametro`. Lo segundo permite que "Recibo de
+caja" siga siendo correcto aunque se cambie la cuenta de bancos.
+
+Los tipos `sistema` (`CC` causación de cuotas, `RC` recibo de caja, `CG` causación de gasto,
+`CE` comprobante de egreso) **no se registran a mano** — los genera el módulo — pero se
+muestran en pantalla con sus cuentas: saber contra qué mueve un recibo de caja es lo que
+hace auditable el módulo.
+
+### Comprobante de ajuste — solo en `apps/contable/`
+
+Un movimiento contable que **no es un pago ni un recaudo**: causar intereses de mora,
+provisionar cartera, reclasificar una cuenta, trasladar excedentes al fondo de imprevistos.
+
+| Campo | Tipo | Notas |
+|---|---|---|
+| `numero` | string | `CA-<NNNNN>`, consecutivo, sin reúso |
+| `fecha` | fecha ISO | Fecha del asiento |
+| `concepto` | string | Título visible |
+| `detalle` | string | **Por qué** se hace el ajuste; es lo que lee quien audite |
+| `estado` | `'registrado' \| 'anulado'` | RN-84 |
+| `lineas` | `{cuenta, unidadId?, debe, haber, descripcion}[]` | El asiento. Debe cuadrar (RN-83) |
+
+`unidadId` solo tiene sentido en la cuenta de cartera: es lo que hace que el ajuste aparezca
+en el extracto de ese propietario y en su saldo.
 
 ### ZonaComun
 | Campo | Tipo | Notas |
@@ -475,11 +630,11 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 |---|---|---|
 | RN-01 | Todo dato pertenece a una copropiedad; nunca se mezclan copropiedades. | `datos/repositorio.ts` |
 | RN-02 | El rol efectivo del usuario se resuelve por la unidad activa. | `estado/SesionContext.tsx` |
-| RN-03 | El saldo de una unidad = suma de cuotas `pendiente` + `vencida`. | `dominio/reglas.ts` |
-| RN-04 | Una cuota es `vencida` si su vencimiento es anterior a hoy y no está pagada. | `dominio/reglas.ts` |
+| RN-03 | El saldo de una unidad = suma del `saldo` de todas sus cuotas. | `dominio/reglas.ts` |
+| RN-04 | Una cuota es `vencida` si su vencimiento es anterior a hoy y aún tiene saldo. | `dominio/reglas.ts` |
 | RN-05 | Las cuotas extraordinarias se prorratean por coeficiente. | `dominio/reglas.ts` |
 | RN-06 | Un pago se imputa primero a la deuda más antigua. | `dominio/reglas.ts` |
-| RN-07 | Todo pago genera un comprobante con consecutivo único. | `datos/repositorio.ts` |
+| RN-07 | Todo pago aplicado genera un recibo de caja con consecutivo único. | `datos/repositorio.ts` |
 | RN-08 | Una unidad en mora no puede reservar zonas comunes. | `dominio/reglas.ts` |
 | RN-09 | No puede haber dos reservas activas de la misma zona en la misma franja. | `dominio/reglas.ts` |
 | RN-10 | La reserva exige la anticipación mínima de la zona. | `dominio/reglas.ts` |
@@ -712,10 +867,56 @@ todas.
 > propia copia—, pero **es exactamente la clase de comprobación que no puede quedarse en el
 > cliente** cuando haya backend: allí el servidor vuelve a verificar rol y copropiedad, sin
 > confiar en que la petición venga de la consola. Queda en T-16.
+| RN-75 | Un abono parcial baja el `saldo` de la cuota sin marcarla pagada: queda `abonada`. | `dominio/reglas.ts` |
+| RN-76 | Todo pago aplicado se reparte entre cuotas; lo que sobra queda como saldo a favor. | `dominio/reglas.ts` |
+| RN-77 | Recibo de caja: `RC-<NNNNN>`, consecutivo, asignado al aplicar y sin reúso. | `dominio/reglas.ts` |
+| RN-78 | Un recibo no se borra: se anula con motivo y el saldo vuelve a las cuotas. | `datos/repositorio.ts` |
+| RN-79 | Un abono informado por el propietario no afecta la cartera hasta que se aplica. | `datos/repositorio.ts` |
+| RN-80 | Los estados financieros se preparan **por causación, no por caja**: una cuota es ingreso en su mes aunque se pague después. | `contable/js/contabilidad.js` |
+| RN-81 | Un gasto se causa en su fecha y se paga después; entre los dos momentos es cuenta por pagar. | `contable/js/contabilidad.js` |
+| RN-82 | Activo = Pasivo + Patrimonio. Si no cuadra, **se muestra el descuadre**, no se oculta. | `contable/js/contabilidad.js` |
+| RN-83 | Un comprobante de ajuste solo se registra si **el debe es igual al haber**. | `contable/js/contabilidad.js` |
+| RN-84 | Un comprobante no se borra: se anula, deja de contar en los estados y su número queda quemado. | `contable/js/repositorio.js` |
+| RN-85 | **Todo documento guarda la cuenta del PUC con la que se registró.** Cambiar un parámetro no reescribe los documentos anteriores. | `contable/js/repositorio.js` |
+| RN-86 | Una cuenta del plan no se borra: se desactiva, y no puede desactivarse si un parámetro la usa. | `contable/js/repositorio.js` |
+| RN-87 | Abrirle una subcuenta a una cuenta transaccional la convierte en título: el movimiento baja al nivel nuevo. | `contable/js/repositorio.js` |
+| RN-88 | Cada tipo de comprobante lleva **su propio consecutivo**; el número nunca se repite entre tipos ni dentro de uno. | `contable/js/repositorio.js` |
+| RN-89 | Un tipo `sistema` no se registra a mano: solo lo genera el módulo que le corresponde. | `contable/js/repositorio.js` |
+| RN-90 | El dígito de verificación del NIT se calcula con el algoritmo de la DIAN; un NIT con DV equivocado se rechaza. | `contable/js/proveedores.js` |
+| RN-91 | Causar un gasto no es pagarlo. Se paga emitiendo un **comprobante de egreso**, que retiene lo que corresponda; lo retenido queda como pasivo, no como menor pago. | `contable/js/repositorio.js` |
+
+### El motor contable: todo es un asiento
+
+`apps/contable/` lleva **partida doble** sobre un plan de cuentas corto
+(`js/plan-de-cuentas.js`). Hay dos fuentes de asientos y se suman en el mismo sitio:
+
+**Automáticos** — se derivan de los documentos, nadie los escribe. Las cuentas salen del
+propio documento, no del parámetro vigente (RN-85):
+
+| Hecho | Débito | Crédito |
+|---|---|---|
+| Se causa una cuota | `cuota.cuentaCartera` (`1305xx`) | `cuota.cuentaIngreso` (`41xx`) |
+| Se aplica un pago | `pago.cuentaCaja` (`1110xx`) | la cuenta de cada imputación + el excedente a `pago.cuentaAnticipos` (`2805xx`) |
+| Se anula un recibo | lo contrario, con la fecha de la anulación | |
+| Se causa un gasto | `gasto.cuenta` (`51xx`) | `gasto.cuentaPorPagar` (`2335`) |
+| Se paga a un proveedor | `egreso.cuentaPorPagar` (valor **bruto**) | retenciones `2365` / `2368` + `egreso.cuentaCaja` (valor **neto**) |
+
+**Manuales** — los comprobantes de ajuste, que el administrador escribe cuando hay que mover
+la contabilidad sin que entre ni salga plata.
+
+Como **todo asiento tiene debe = haber**, el estado de situación financiera cuadra por
+construcción, vengan los asientos de donde vengan (RN-82). Convención de signo: el saldo de
+una cuenta es siempre `debe − haber`; activo y gasto quedan positivos, pasivo, patrimonio e
+ingreso negativos y se muestran cambiados de signo. Una cuenta correctora como la provisión
+de cartera `1399` cae sola en negativo dentro del activo, sin necesitar un caso especial.
+
+Los estados se presentan en **dos niveles**: la cuenta de cuatro dígitos con su total y sus
+auxiliares debajo. En una copropiedad ese detalle es lo que quiere ver la asamblea —
+"Servicios" no dice nada, "Vigilancia $7.600.000" sí.
 
 ## 4. Convenciones de datos
 
 - **Fechas:** siempre ISO 8601 (`AAAA-MM-DD` o completa). Nunca formatos locales en el dato.
 - **Dinero:** enteros en pesos, sin decimales. El formato se aplica solo al mostrar.
-- **Identificadores:** cadenas legibles con prefijo (`uni-`, `cuo-`, `res-`, `pqr-`).
+- **Identificadores:** cadenas legibles con prefijo (`uni-`, `cuo-`, `res-`, `pqr-`, `pag-`).
 - **Nunca borrar:** los registros se anulan o cierran, no se eliminan (trazabilidad, O3).

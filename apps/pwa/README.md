@@ -16,6 +16,16 @@ npm run dev      # http://localhost:5173
 | `npm run build` | Verifica tipos y compila a `dist/` |
 | `npm run preview` | Sirve `dist/` (aquí sí se activa el service worker) |
 | `npm run typecheck` | Solo verificación de tipos |
+| `npm run empaquetar` | Genera `dist/idiky-demo.html`: **el demo entero en un solo archivo** |
+
+### Mostrar el demo a alguien que no tiene Node
+
+`npm run empaquetar` deja un único `dist/idiky-demo.html` con el CSS y el JS
+adentro. Ese archivo se abre **con doble clic** — sin Node, sin npm, sin servidor —
+y se puede mandar por correo o WhatsApp. Es la forma de que el equipo vea el demo
+sin instalar nada.
+
+Solo quien compila necesita Node. Quien mira, no.
 
 ## Herramientas
 
@@ -50,9 +60,9 @@ acceso eliges:
 
 | Perfil | Para probar |
 |---|---|
-| **María Camila Restrepo** — Torre 1, 402 | Residente al día: pagar, reservar, PQRS, visitantes |
-| **Andrés Felipe Gómez** — Torre 2, 901 | Residente en mora: reservas bloqueadas (RN-08) |
-| **Olga Lucía Henao** | Consola de administración completa |
+| **María Camila Restrepo** — Torre 1, 402 | Residente al día: pagar, informar abonos, reservar, PQRS, visitantes. Tiene una cuota **abonada a medias** |
+| **Andrés Felipe Gómez** — Torre 2, 901 | Residente en mora: reservas bloqueadas (RN-08) y un abono informado sin conciliar |
+| **Olga Lucía Henao** | Consola de administración completa. En **Pagos** arrancan dos abonos esperando conciliación |
 
 Los datos se guardan en `localStorage`. El botón **"Reiniciar demo"** (en la pantalla de
 acceso y en la consola) devuelve todo a su estado inicial.

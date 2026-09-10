@@ -127,7 +127,13 @@ export interface Residencia {
 // Cartera
 // ---------------------------------------------------------------------------
 export type TipoCuota = 'ordinaria' | 'extraordinaria' | 'interes' | 'sancion'
-export type EstadoCuota = 'pendiente' | 'pagada' | 'vencida'
+
+/**
+ * Estado de una cuota. `abonada` es el estado intermedio: ya recibio pagos
+ * parciales pero todavia queda saldo por cubrir (RN-75).
+ * `vencida` no se almacena: se deriva de la fecha con `estadoRealCuota`.
+ */
+export type EstadoCuota = 'pendiente' | 'abonada' | 'pagada' | 'vencida'
 
 export interface Cuota {
   id: string
@@ -135,10 +141,12 @@ export interface Cuota {
   periodo: Periodo
   tipo: TipoCuota
   concepto: string
+  /** Valor facturado. No cambia nunca. */
   valor: Dinero
+  /** Lo que falta por pagar. Nace igual a `valor` y baja con cada abono (RN-75). */
+  saldo: Dinero
   fechaVencimiento: FechaISO
   estado: EstadoCuota
-  pagoId?: string
   /**
    * Que autoriza el cobro (RN-45).
    *
@@ -172,17 +180,56 @@ export interface Cuota {
  */
 export type MedioPago = 'pse' | 'tarjeta' | 'bre_b' | 'transferencia' | 'efectivo' | 'otro'
 
+/**
+ * Ciclo de vida de un pago:
+ *  - `reportado`: el propietario informo el abono, la administracion aun no lo
+ *    aplica. No afecta la cartera (RN-79).
+ *  - `aplicado`: imputado a las cuotas y con recibo de caja emitido.
+ *  - `anulado`: se revirtio; el saldo volvio a las cuotas (RN-78).
+ */
+export type EstadoPago = 'reportado' | 'aplicado' | 'anulado'
+
+/** Quien origina el pago: lo reporta el propietario o lo registra la administracion. */
+export type OrigenPago = 'residente' | 'administracion'
+
+/** Parte del valor de un pago aplicada a una cuota concreta (RN-76). */
+export interface Imputacion {
+  cuotaId: string
+  valor: Dinero
+}
+
+/**
+ * Un pago es tambien el recibo de caja de la copropiedad: es la constancia de
+ * que el dinero entro. Por eso no se borra nunca, se anula (RN-78).
+ */
 export interface Pago {
   id: string
   unidadId: string
-  cuotaIds: string[]
   valor: Dinero
   medio: MedioPago
   referencia: string
   fecha: FechaHoraISO
-  /** Consecutivo del comprobante (RN-07). */
-  comprobante: string
+  estado: EstadoPago
+  origen: OrigenPago
+
+  /** Lo que el propietario informa que esta pagando (CU-R-30). */
+  conceptoInformado?: string
+  /** Cuotas a las que el propietario dice que corresponde su abono (CU-R-30). */
+  cuotasInformadas?: string[]
+  /** Persona que reporto el abono, cuando el origen es el residente. */
+  reportadoPor?: string
+
+  /** Consecutivo del recibo de caja; se asigna al aplicar el pago (RN-77). */
+  recibo?: string
+  /** Como quedo repartido el valor entre las cuotas (RN-76). */
+  imputaciones: Imputacion[]
+  /** Parte del valor que no se imputo a ninguna cuota: queda a favor (RN-76). */
+  saldoAFavor: Dinero
+
+  fechaAplicacion?: FechaHoraISO
   registradoPor: string
+  motivoAnulacion?: string
+  fechaAnulacion?: FechaHoraISO
 }
 
 // ---------------------------------------------------------------------------
@@ -1013,9 +1060,10 @@ export interface BaseDatos {
   consecutivos: {
     pqrs: number
     sancion: number
-    comprobante: number
     pazYSalvo: number
     poder: number
     acta: number
+    /** Consecutivo del recibo de caja (RN-77). */
+    recibo: number
   }
 }

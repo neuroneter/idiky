@@ -16,6 +16,7 @@ import type {
   Documento,
   Correspondencia,
   Cuota,
+  Pago,
   Persona,
   Pqrs,
   RegistroPersona,
@@ -200,7 +201,7 @@ export function visitantesDeUnidad(bd: BaseDatos, unidadId?: string): Visitante[
     .sort((a, b) => b.creadoEn.localeCompare(a.creadoEn))
 }
 
-export function pagoPorId(bd: BaseDatos, pagoId?: string) {
+export function pagoPorId(bd: BaseDatos, pagoId?: string): Pago | undefined {
   if (!pagoId) return undefined
   return bd.pagos.find((p) => p.id === pagoId)
 }
@@ -288,4 +289,39 @@ export function visitantePorCodigo(bd: BaseDatos, codigo: string): Visitante | u
 /** Lo que un turno le hereda al siguiente: lo que llego y nadie ha recogido. */
 export function correspondenciaPendiente(bd: BaseDatos, copropiedadId: string): Correspondencia[] {
   return correspondenciaDeCopropiedad(bd, copropiedadId).filter((c) => c.estado === 'en_porteria')
+}
+
+/** Pagos de una unidad, del mas reciente al mas antiguo. */
+export function pagosDeUnidad(bd: BaseDatos, unidadId?: string): Pago[] {
+  if (!unidadId) return []
+  return bd.pagos.filter((p) => p.unidadId === unidadId).sort(porFechaDescendente)
+}
+
+export function pagosDeCopropiedad(bd: BaseDatos, copropiedadId: string): Pago[] {
+  const ids = new Set(unidadesDe(bd, copropiedadId).map((u) => u.id))
+  return bd.pagos.filter((p) => ids.has(p.unidadId)).sort(porFechaDescendente)
+}
+
+/** CU-A-27 — Abonos informados por propietarios que esperan conciliacion (RN-79). */
+export function abonosReportados(bd: BaseDatos, copropiedadId: string): Pago[] {
+  return pagosDeCopropiedad(bd, copropiedadId)
+    .filter((p) => p.estado === 'reportado')
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+}
+
+/** Recibos de caja ya emitidos, anulados incluidos: el libro no se filtra. */
+export function recibosEmitidos(bd: BaseDatos, copropiedadId: string): Pago[] {
+  return pagosDeCopropiedad(bd, copropiedadId).filter((p) => p.estado !== 'reportado')
+}
+
+/** Pagos aplicados que abonaron a una cuota concreta. */
+export function pagosDeCuota(bd: BaseDatos, cuotaId: string): Pago[] {
+  return bd.pagos
+    .filter((p) => p.estado === 'aplicado')
+    .filter((p) => p.imputaciones.some((linea) => linea.cuotaId === cuotaId))
+    .sort(porFechaDescendente)
+}
+
+function porFechaDescendente(a: Pago, b: Pago): number {
+  return b.fecha.localeCompare(a.fecha)
 }

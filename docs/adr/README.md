@@ -14,10 +14,15 @@ persona o IA — tenga que reconstruir el razonamiento más adelante.
 | [0007](./0007-transmision-en-vivo.md) | **La transmisión la pone un tercero, no Idiky**: se enlaza la reunión que la copropiedad ya hace por Zoom o Meet. Lo insustituible es la asistencia ponderada, no el video | Aceptada |
 | 0008 | **Stack de backend** | ⬜ Pendiente de escribir |
 | [0009](./0009-soportes-fotograficos.md) | **Soportes fotográficos** del registro de personas: se capturan con HTML de siempre, se reducen y se guardan en el navegador. Lo difícil no es la foto, es el dato | Aceptada |
+| [0010](./0010-stack-aplicacion-contable.md) | **La aplicación contable se construye sin compilación**: HTML, CSS y JS que se abren con doble clic, porque quien la desarrolla no puede instalar nada | Aceptada |
 
 Queda **uno** pendiente, ADR-0008 (backend), del alcance declarado el 2026-08-26
 ([`../12-levantamiento-pendiente.md` §0](../12-levantamiento-pendiente.md)). Recuerden la regla
 del [`CLAUDE.md`](../../CLAUDE.md): no se agregan dependencias sin ADR.
+
+> **Nota de integración (2026-09-10).** El ADR de la aplicación contable nació como 0006 en la
+> rama de Jeimy, al mismo tiempo que el 0006 de documentos formales en la rama de Mary. Al
+> integrar se le asignó el 0010; el 0008 sigue reservado para el backend.
 
 Vale la pena notar que **ADR-0007 terminó decidiendo que no hace falta ninguna dependencia**:
 enlazar una reunión de Zoom o Meet es un enlace, no un SDK. La decisión que parecía la más cara

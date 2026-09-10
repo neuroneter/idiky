@@ -72,6 +72,16 @@ apps/pwa/
 | Todo acceso a datos pasa por `useDatos()` (que usa el repositorio). | Un solo punto de cambio hacia el backend. |
 | Cada pantalla declara en un comentario el/los `CU-` que implementa. | Trazabilidad documentación ↔ código. |
 
+## 3.1 Los dos productos del repositorio
+
+| Carpeta | Producto | Stack | Responsable |
+|---|---|---|---|
+| `apps/pwa/` | App del residente + consola web | React + TypeScript + Vite ([ADR-0001](./adr/0001-stack-tecnologico.md)) | Mary |
+| `apps/contable/` | Aplicación contable de escritorio | HTML + CSS + JS sin compilar ([ADR-0010](./adr/0010-stack-aplicacion-contable.md)) | Jeimy |
+
+No comparten código. Comparten **las reglas del dominio**, traducidas a los dos lenguajes —
+ver [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md) §2.1.
+
 ## 4. Rutas de la aplicación
 
 | Ruta | Pantalla | CU |
@@ -82,6 +92,7 @@ apps/pwa/
 | `/app` | Inicio residente | CU-R-02 |
 | `/app/cuenta` | Estado de cuenta | CU-R-03 |
 | `/app/cuenta/pagar` | Pago | CU-R-04 |
+| `/app/cuenta/informar` | Informar un abono ya consignado | CU-R-30 |
 | `/app/solicitudes` | Redirige a reservas | — |
 | `/app/solicitudes/reservas` | Zonas comunes y reservas | CU-R-05, CU-R-06 |
 | `/app/solicitudes/pqrs` | PQRS | CU-R-07, CU-R-08 |
@@ -98,7 +109,8 @@ apps/pwa/
 | `/admin` | Tablero | CU-A-01 |
 | `/admin/registros` | Registro de personas | CU-A-26 |
 | `/admin/unidades` | Unidades y residentes | CU-A-02 |
-| `/admin/cartera` | Cartera, pagos y generación | CU-A-03, CU-A-04, CU-A-05 |
+| `/admin/cartera` | Cartera: estados de cuenta y generación de cuotas | CU-A-03, CU-A-05 |
+| `/admin/pagos` | Pagos: conciliación de abonos y recibos de caja | CU-A-04, CU-A-27 |
 | `/admin/multas` | Catálogo de multas (parametrizar) | CU-A-22 |
 | `/admin/sanciones` | Procesos sancionatorios (imponer y resolver) | CU-A-23 |
 | `/admin/asambleas` | Convocar, instalar y llevar la asistencia | CU-A-12, CU-A-17 |

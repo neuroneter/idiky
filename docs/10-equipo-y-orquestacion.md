@@ -1,7 +1,13 @@
 # 10 — Equipo y orquestación del trabajo
 
-Somos **tres personas trabajando en paralelo** sobre el mismo repositorio: **Jeimy**, **Mary**
-y **Daniel**. Este documento define cómo nos repartimos el trabajo sin pisarnos.
+Somos **tres personas trabajando en paralelo**: **Jeimy**, **Mary** y **Daniel**. Este
+documento define cómo nos repartimos el trabajo sin pisarnos.
+
+> ⚠️ **No es un solo producto.** Mary construye la **aplicación web/móvil** (la PWA de este
+> repositorio). Jeimy construye la **aplicación contable, que es de escritorio** y es un
+> programa aparte. Las dos van a **intercambiar información** en algún momento, pero no
+> comparten pantallas ni código de interfaz. Lo que se comparte es el **dominio**: qué es una
+> cuota, qué es un abono, cómo se numera un recibo de caja.
 
 > Regla base: **el conflicto se evita por diseño, no por suerte.** Cada quien es dueño de
 > unos archivos; los archivos compartidos tienen un protocolo especial.
@@ -13,15 +19,34 @@ y **Daniel**. Este documento define cómo nos repartimos el trabajo sin pisarnos
 Cada módulo tiene **un responsable**. Puedes leer todo el repositorio, pero **solo modificas
 tu zona** salvo acuerdo explícito.
 
-| Zona | Archivos | Responsable propuesto |
+| Zona | Archivos | Responsable |
 |---|---|---|
-| **A. App del residente** | `apps/pwa/src/features/residente/**` | Jeimy |
+| **A. App del residente** | `apps/pwa/src/features/residente/**` | Mary |
 | **B. Consola de administración** | `apps/pwa/src/features/admin/**` | Mary |
 | **C. Núcleo, datos y documentación** | `apps/pwa/src/{dominio,datos,estado}/**`, `docs/**` | Daniel |
 | **D. Diseño y componentes** | `apps/pwa/src/{componentes,estilos}/**` | Rotativo (ver §3) |
+| **E. Aplicación contable** | `apps/contable/**` | Jeimy |
 
-> Esta asignación es una **propuesta inicial**. Ajústenla en la reunión de arranque y
-> actualicen esta tabla en el mismo commit en que lo decidan.
+### 1.1 La aplicación contable
+
+Vive en [`apps/contable/`](../apps/contable/README.md) y se construye **sin compilación**:
+HTML, CSS y JavaScript planos, que se abren con doble clic. La razón está en
+[ADR-0010](./adr/0010-stack-aplicacion-contable.md), y no es de gusto técnico: quien la
+desarrolla no puede instalar nada en su computador, así que cualquier stack con paso de
+compilación la dejaría sin poder trabajar.
+
+**Zona propia, sin protocolo compartido.** Como no comparte archivos con la PWA, Jeimy puede
+trabajar ahí sin coordinar con nadie. La única excepción está en §2.1.
+
+Queda una decisión pendiente: **qué información se intercambia y en qué dirección.** Hoy los
+abonos informados por los residentes vienen sembrados en `apps/contable/js/datos.js`. Ese es
+el punto exacto por donde las dos aplicaciones se van a conectar.
+
+> **Lo que ya está listo para compartirse:** las reglas de cartera y pagos —
+> RN-03 a RN-07 y RN-75 a RN-79 en [`05-modelo-de-datos.md`](./05-modelo-de-datos.md) —
+> están escritas como definiciones del dominio, no como código de pantalla. Sirven igual
+> en la app de escritorio, sea cual sea el lenguaje: son el contrato entre las dos
+> aplicaciones.
 
 ## 2. Archivos compartidos — alto riesgo de conflicto
 
@@ -36,6 +61,17 @@ Estos archivos los toca todo el mundo, así que tienen reglas propias:
 | `src/estilos/tokens.css` | **Solo lo cambia quien tenga la zona D.** Nadie más toca los tokens. |
 | `docs/09-estado-del-proyecto.md` | Cada quien **agrega su entrada al principio**; no edites las entradas de otros. |
 | `docs/04-casos-de-uso.md` | Solo cambias la fila de **tu** caso de uso. |
+
+### 2.1 Las reglas del dominio están en dos idiomas
+
+`apps/pwa/src/dominio/reglas.ts` y `apps/contable/js/dominio.js` implementan **las mismas
+reglas** (`RN-xx`) en TypeScript y en JavaScript. Es duplicación deliberada: son productos
+distintos y no hay compilación que los una.
+
+**Regla:** una `RN-xx` que cambia en una, cambia en la otra **en el mismo día**, y las dos
+personas lo hablan antes. La definición que manda es la de
+[`05-modelo-de-datos.md`](./05-modelo-de-datos.md); los dos archivos son traducciones de ese
+documento, no fuentes de verdad independientes.
 
 **Si dos personas necesitan el mismo archivo el mismo día:** háblenlo antes de empezar y
 decidan quién va primero. Es más barato esperar 20 minutos que resolver un conflicto.
@@ -85,6 +121,17 @@ revisar y de integrar.
   persona).
 - **El PR se revisa entre pares**: Jeimy revisa a Mary, Mary revisa a Daniel, Daniel revisa a
   Jeimy (o como acuerden). Nadie integra su propio PR sin al menos una lectura ajena.
+- **Hay un responsable de integración** (el dueño del repositorio), que es quien mezcla las
+  ramas en la base común y resuelve los conflictos de los archivos compartidos. La primera
+  integración se hizo el 2026-09-10 (ver la bitácora): las ramas de Mary y de Jeimy quedaron
+  juntas en `claude/idiky-work-review-ugp3xj`, y **`main` debe crearse desde ahí** — hoy no
+  existe, aunque este documento la nombre.
+- **Los identificadores se reservan, no se inventan.** `RN-xx`, `CU-X-NN`, `T-xx` y `ADR-NNNN`
+  siguen desde el máximo de la rama integrada. Si dos personas van a numerar en paralelo, cada
+  una toma un rango (p. ej. Mary RN-92…99, Jeimy RN-100…110) y lo anota en el tablero. Las dos
+  ramas numeraron por separado y chocaron en RN-26…30, CU-R-18, CU-A-18, T-10…19 y ADR-0006;
+  se resolvió corriendo la numeración de la contable a RN-75…91, T-20…32, CU-R-30, CU-A-27 y
+  ADR-0010.
 
 ### Formato de commit
 

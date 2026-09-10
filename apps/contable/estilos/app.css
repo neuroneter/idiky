@@ -1,0 +1,1208 @@
+/* ===========================================================================
+   Idiky Contable — hoja de estilos unica.
+   No hay preprocesador ni compilacion: se edita y se recarga el navegador.
+
+   Todo el color y el espaciado salen de las variables de abajo. Si quieres
+   cambiar el aspecto de la aplicacion, cambia las variables, no las reglas.
+   =========================================================================== */
+
+:root {
+  /* --------------------------------------------------------------------
+     Color
+
+     Azul oscuro y fucsia, con un reparto deliberado de papeles:
+
+       AZUL   es la estructura — la barra lateral, los encabezados de los
+              estados financieros, los titulos de grupo. Es el color que
+              sostiene la pantalla y el que se imprime.
+       FUCSIA es la accion — el boton principal, el modulo activo, el foco
+              del teclado, y la cita de lo que escribio el propietario.
+              Aparece poco, y por eso se ve.
+
+     El fucsia NO se usa como color de estado. Vencido es rojo, y rojo y
+     fucsia son vecinos: puestos uno al lado del otro en la misma columna
+     de una tabla se confundirian. Separandolos por funcion, nunca coinciden.
+
+     Los contrastes de esta paleta estan medidos contra WCAG AA.
+     -------------------------------------------------------------------- */
+  --marca: #152046;
+  --marca-suave: #e7eaf4;
+
+  --acento: #b51f88;
+  --acento-clara: #94186f;
+  --acento-suave: #fbe9f4;
+
+  /* Neutros con sesgo azul, para que acompanen al azul de marca en vez de
+     pelearse con el. Un gris puro se veria sucio al lado. */
+  --fondo: #eef0f6;
+  --superficie: #ffffff;
+  --superficie-alterna: #f6f7fb;
+  --borde: #dfe3ee;
+  --borde-fuerte: #c5cbdd;
+
+  --tinta: #141830;
+  --tinta-suave: #5b6180;
+  --tinta-tenue: #6c7392;
+
+  /* Colores de estado. Son semanticos, no decorativos: no cuentan como
+     acento y no se usan para nada que no sea el estado de la plata. */
+  --deuda: #c0271d;
+  --deuda-suave: #fceae8;
+  --deuda-borde: #f0c2bd;
+  --exito: #1a6b4f;
+  --exito-suave: #e4f2ec;
+  --espera: #87640a;
+  --espera-suave: #fbf2dd;
+  --espera-borde: #ecd9a8;
+
+  /* Tipografia — del sistema, a proposito: la aplicacion se abre desde el
+     disco y puede estar sin internet, asi que no depende de ninguna fuente
+     que haya que descargar. */
+  --fuente: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --fuente-cifras: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+  --texto-xs: 0.75rem;
+  --texto-sm: 0.8125rem;
+  --texto-base: 0.9375rem;
+  --texto-lg: 1.125rem;
+  --texto-xl: 1.5rem;
+
+  --e1: 4px;
+  --e2: 8px;
+  --e3: 12px;
+  --e4: 16px;
+  --e5: 24px;
+  --e6: 32px;
+
+  --radio-sm: 4px;
+  --radio: 8px;
+  --sombra: 0 1px 2px rgba(20, 24, 48, 0.06), 0 1px 3px rgba(20, 24, 48, 0.04);
+  --sombra-modal: 0 12px 40px rgba(20, 24, 48, 0.26);
+
+  --ancho-lateral: 216px;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  font-size: var(--texto-base);
+  line-height: 1.5;
+  color: var(--tinta);
+  background: var(--fondo);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p, figure, blockquote { margin: 0; }
+
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+   Estructura: barra lateral fija + area de trabajo
+   --------------------------------------------------------------------------- */
+
+.aplicacion {
+  display: grid;
+  grid-template-columns: var(--ancho-lateral) 1fr;
+  height: 100%;
+}
+
+.lateral {
+  background: var(--marca);
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: var(--e5) var(--e3);
+  gap: var(--e5);
+}
+
+.lateral__marca {
+  padding: 0 var(--e2);
+}
+
+.lateral__nombre {
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.lateral__producto {
+  display: block;
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.62);
+  margin-top: var(--e1);
+}
+
+.lateral__copropiedad {
+  padding: 0 var(--e2);
+  font-size: var(--texto-sm);
+  color: rgba(255, 255, 255, 0.82);
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+  padding-top: var(--e3);
+}
+
+.lateral__copropiedad span {
+  display: block;
+  font-size: var(--texto-xs);
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: var(--e1);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+}
+
+.nav__enlace {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  font: inherit;
+  font-size: var(--texto-sm);
+  text-align: left;
+  padding: var(--e2) var(--e3);
+  border-radius: var(--radio-sm);
+  cursor: pointer;
+}
+
+.nav__enlace:hover { background: rgba(255, 255, 255, 0.08); color: #ffffff; }
+
+.nav__enlace {
+  border-left: 3px solid transparent;
+}
+
+.nav__enlace.activo {
+  background: rgba(255, 255, 255, 0.12);
+  border-left-color: var(--acento);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.lateral__pie {
+  margin-top: auto;
+  padding: 0 var(--e2);
+  font-size: var(--texto-xs);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.lateral__pie strong {
+  display: block;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.area {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e5) var(--e6) var(--e4);
+  background: var(--superficie);
+  border-bottom: 1px solid var(--borde);
+}
+
+.cabecera__titulo {
+  font-size: var(--texto-xl);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.cabecera__subtitulo {
+  color: var(--tinta-suave);
+  font-size: var(--texto-sm);
+  margin-top: var(--e1);
+}
+
+.contenido {
+  padding: var(--e5) var(--e6) var(--e6);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e4);
+}
+
+/* ---------------------------------------------------------------------------
+   Indicadores y tarjetas
+   --------------------------------------------------------------------------- */
+
+.rejilla-indicadores {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: var(--e3);
+}
+
+.rejilla-indicadores--dos { grid-template-columns: repeat(2, 1fr); }
+
+.tarjeta {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: var(--e4);
+  box-shadow: var(--sombra);
+}
+
+.tarjeta--plana { box-shadow: none; background: var(--superficie-alterna); }
+.tarjeta--tabla { padding: 0; overflow: hidden; }
+
+.indicador { display: flex; flex-direction: column; gap: var(--e1); }
+
+.indicador__etiqueta {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tinta-tenue);
+  font-weight: 600;
+}
+
+.indicador__valor {
+  font-family: var(--fuente-cifras);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--texto-xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.indicador__valor--deuda { color: var(--deuda); }
+
+/* ---------------------------------------------------------------------------
+   Tablas — el corazon de una aplicacion contable
+   --------------------------------------------------------------------------- */
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-sm);
+}
+
+.tabla th {
+  text-align: left;
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--tinta-tenue);
+  font-weight: 600;
+  padding: var(--e3) var(--e4);
+  border-bottom: 1px solid var(--borde);
+  background: var(--superficie-alterna);
+  white-space: nowrap;
+}
+
+.tabla td {
+  padding: var(--e3) var(--e4);
+  border-bottom: 1px solid var(--borde);
+  vertical-align: middle;
+}
+
+.tabla tbody tr:last-child td { border-bottom: 0; }
+.tabla tbody tr:hover { background: var(--superficie-alterna); }
+
+.tabla td span.sub {
+  display: block;
+  color: var(--tinta-tenue);
+  font-size: var(--texto-xs);
+  margin-top: 1px;
+}
+
+.derecha { text-align: right; }
+
+.sub { color: var(--tinta-suave); font-size: var(--texto-sm); }
+
+/* Cifras: ancho fijo por digito para que las columnas de dinero se alineen. */
+.cifra {
+  font-family: var(--fuente-cifras);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.cifra--deuda { color: var(--deuda); font-weight: 600; }
+.cifra--cero { color: var(--tinta-tenue); }
+.cifra--grande { font-size: var(--texto-lg); font-weight: 600; }
+
+.fila--anulada td { color: var(--tinta-tenue); }
+.fila--anulada td:first-child { text-decoration: line-through; }
+
+/* ---------------------------------------------------------------------------
+   Botones y filtros
+   --------------------------------------------------------------------------- */
+
+.boton {
+  appearance: none;
+  font: inherit;
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  padding: var(--e2) var(--e4);
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--borde-fuerte);
+  background: var(--superficie);
+  color: var(--tinta);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.boton:hover { background: var(--superficie-alterna); border-color: var(--tinta-tenue); }
+
+.boton--principal {
+  background: var(--acento);
+  border-color: var(--acento);
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.boton--principal:hover { background: var(--acento-clara); border-color: var(--acento-clara); }
+
+.boton--peligro { color: var(--deuda); border-color: var(--deuda-borde); }
+.boton--peligro:hover { background: var(--deuda-suave); border-color: var(--deuda); }
+
+.boton--pequeno { padding: var(--e1) var(--e3); font-size: var(--texto-xs); }
+
+.boton--icono {
+  border: 0;
+  background: transparent;
+  padding: var(--e1) var(--e2);
+  font-size: var(--texto-base);
+  color: var(--tinta-suave);
+  line-height: 1;
+}
+
+.boton--icono:hover { background: var(--superficie-alterna); color: var(--tinta); }
+
+.barra-acciones {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  flex-wrap: wrap;
+}
+
+.filtros { display: flex; gap: var(--e1); }
+
+.filtro {
+  appearance: none;
+  font: inherit;
+  font-size: var(--texto-sm);
+  padding: var(--e2) var(--e3);
+  border: 1px solid transparent;
+  border-radius: var(--radio-sm);
+  background: transparent;
+  color: var(--tinta-suave);
+  cursor: pointer;
+}
+
+.filtro:hover { background: var(--marca-suave); color: var(--marca); }
+
+.filtro[aria-pressed="true"] {
+  background: var(--superficie);
+  border-color: var(--borde-fuerte);
+  color: var(--tinta);
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+   Estados y avisos
+   --------------------------------------------------------------------------- */
+
+.chip {
+  display: inline-block;
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  padding: 2px var(--e2);
+  border-radius: var(--radio-sm);
+  background: var(--superficie-alterna);
+  color: var(--tinta-suave);
+  white-space: nowrap;
+}
+
+.chip--exito { background: var(--exito-suave); color: var(--exito); }
+.chip--error { background: var(--deuda-suave); color: var(--deuda); }
+.chip--alerta { background: var(--espera-suave); color: var(--espera); }
+.chip--info { background: var(--marca-suave); color: var(--marca); }
+
+.nota {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e3) var(--e4);
+  background: var(--espera-suave);
+  border: 1px solid var(--espera-borde);
+  border-radius: var(--radio);
+}
+
+.nota span.sub { display: block; color: var(--tinta-suave); }
+.nota--anulado { background: var(--deuda-suave); border-color: var(--deuda-borde); }
+
+#avisos {
+  position: fixed;
+  bottom: var(--e5);
+  right: var(--e5);
+  z-index: 80;
+}
+
+.aviso {
+  padding: var(--e3) var(--e4);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-modal);
+  font-size: var(--texto-sm);
+  font-weight: 500;
+  max-width: 380px;
+  background: var(--tinta);
+  color: #ffffff;
+}
+
+.aviso--exito { background: var(--exito); }
+.aviso--error { background: var(--deuda); }
+
+.vacio {
+  padding: var(--e6);
+  text-align: center;
+  color: var(--tinta-suave);
+  background: var(--superficie);
+  border: 1px dashed var(--borde-fuerte);
+  border-radius: var(--radio);
+  font-size: var(--texto-sm);
+}
+
+.vacio__titulo { font-weight: 600; color: var(--tinta); margin-bottom: var(--e1); }
+
+/* ---------------------------------------------------------------------------
+   Cita del propietario — lo que escribio, tal cual
+   --------------------------------------------------------------------------- */
+
+.cita {
+  margin: var(--e3) 0 0;
+  padding: var(--e3) var(--e4);
+  border-left: 3px solid var(--acento);
+  background: var(--acento-suave);
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+}
+
+.cita__etiqueta {
+  display: block;
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--acento-clara);
+  font-weight: 700;
+  margin-bottom: var(--e1);
+}
+
+.cita p { font-size: var(--texto-sm); }
+
+/* ---------------------------------------------------------------------------
+   Abonos por conciliar
+   --------------------------------------------------------------------------- */
+
+.lista-abonos { display: flex; flex-direction: column; gap: var(--e3); }
+
+.abono__cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e4);
+}
+
+.abono__titulo { display: flex; align-items: center; gap: var(--e2); }
+.abono__titulo strong { font-size: var(--texto-base); }
+
+.abono__cabecera span.sub { display: block; margin-top: var(--e1); font-size: var(--texto-xs); }
+
+.abono__acciones { display: flex; gap: var(--e2); margin-top: var(--e4); }
+
+/* ---------------------------------------------------------------------------
+   Formularios
+   --------------------------------------------------------------------------- */
+
+.campo { display: block; margin-bottom: var(--e4); }
+
+.campo__etiqueta {
+  display: block;
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  margin-bottom: var(--e1);
+}
+
+.campo__ayuda {
+  display: block;
+  font-size: var(--texto-xs);
+  color: var(--tinta-suave);
+  margin-top: var(--e1);
+}
+
+.campo__ayuda--error { color: var(--deuda); font-weight: 600; }
+
+input, select, textarea {
+  width: 100%;
+  font: inherit;
+  font-size: var(--texto-sm);
+  padding: var(--e2) var(--e3);
+  border: 1px solid var(--borde-fuerte);
+  border-radius: var(--radio-sm);
+  background: var(--superficie);
+  color: var(--tinta);
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: var(--acento);
+  outline: 2px solid var(--acento-suave);
+  outline-offset: 0;
+}
+
+textarea { resize: vertical; }
+
+input[type="number"], .entrada-cifra {
+  font-family: var(--fuente-cifras);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.entrada-cifra { width: 130px; }
+
+.fila-campos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e3);
+}
+
+.busqueda { max-width: 340px; }
+
+/* ---------------------------------------------------------------------------
+   Reparto del pago entre cuotas
+   --------------------------------------------------------------------------- */
+
+.reparto {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: var(--e4);
+  background: var(--superficie-alterna);
+}
+
+.reparto__cabecera {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  margin-bottom: var(--e3);
+}
+
+.reparto__lista { background: var(--superficie); border-radius: var(--radio-sm); overflow: hidden; }
+
+.tabla--reparto td { padding: var(--e2) var(--e3); }
+.tabla--reparto th { padding: var(--e2) var(--e3); }
+
+.reparto__resumen { margin-top: var(--e3); }
+
+.reparto__linea {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e1) 0;
+  font-size: var(--texto-sm);
+  color: var(--tinta-suave);
+}
+
+.titulo-seccion {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tinta-tenue);
+  font-weight: 700;
+  margin: var(--e4) 0 var(--e2);
+  display: block;
+}
+
+.resumen-pago {
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  overflow: hidden;
+}
+
+.resumen-pago__linea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e2) var(--e4);
+  font-size: var(--texto-sm);
+  border-bottom: 1px solid var(--borde);
+}
+
+.resumen-pago__linea:last-child { border-bottom: 0; }
+.resumen-pago__linea > span:first-child { color: var(--tinta-suave); }
+
+.previsualizacion__caja {
+  max-height: 220px;
+  overflow-y: auto;
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+}
+
+/* ---------------------------------------------------------------------------
+   Dialogo modal
+   --------------------------------------------------------------------------- */
+
+.fondo-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 27, 26, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--e5);
+  z-index: 70;
+}
+
+.modal {
+  background: var(--superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-modal);
+  width: 100%;
+  max-width: 640px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal__cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e4);
+  padding: var(--e4) var(--e5);
+  border-bottom: 1px solid var(--borde);
+}
+
+.modal__titulo { font-size: var(--texto-lg); font-weight: 650; }
+.modal__descripcion { font-size: var(--texto-sm); color: var(--tinta-suave); margin-top: var(--e1); }
+
+.modal__cuerpo { padding: var(--e5); overflow-y: auto; }
+
+.modal__pie {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--e2);
+  padding: var(--e3) var(--e5);
+  border-top: 1px solid var(--borde);
+  background: var(--superficie-alterna);
+}
+
+/* ---------------------------------------------------------------------------
+   Pantallas angostas — un portatil pequeno sigue siendo un computador
+   --------------------------------------------------------------------------- */
+
+@media (max-width: 860px) {
+  .aplicacion { grid-template-columns: 1fr; height: auto; }
+  .lateral { flex-direction: row; align-items: center; gap: var(--e4); padding: var(--e3) var(--e4); }
+  .lateral__copropiedad, .lateral__pie { display: none; }
+  .nav { flex-direction: row; }
+  .area { overflow: visible; }
+  .cabecera, .contenido { padding-left: var(--e4); padding-right: var(--e4); }
+  .fila-campos { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+/* ===========================================================================
+   Reportes y documentos contables
+   =========================================================================== */
+
+.controles-reporte {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--e3);
+  flex-wrap: wrap;
+  padding: var(--e4);
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+}
+
+.controles-reporte .campo { margin-bottom: 0; }
+.controles-reporte .campo:nth-child(3) { min-width: 320px; flex: 1; }
+.controles-reporte .campo__ayuda { max-width: 280px; margin-bottom: var(--e2); }
+
+.grupo-acciones { display: flex; gap: var(--e2); }
+
+/* El documento imita una hoja: es lo que se imprime y lo que se archiva. */
+.documento {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio);
+  padding: var(--e6);
+  box-shadow: var(--sombra);
+}
+
+.documento__encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e5);
+  padding-bottom: var(--e4);
+  border-bottom: 2px solid var(--marca);
+  margin-bottom: var(--e4);
+}
+
+.documento__titulo {
+  font-size: var(--texto-xl);
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.documento__subtitulo { color: var(--tinta-suave); font-size: var(--texto-sm); margin-top: var(--e1); }
+
+.documento__emisor {
+  text-align: right;
+  font-size: var(--texto-xs);
+  color: var(--tinta-suave);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.documento__emisor strong { color: var(--tinta); font-size: var(--texto-sm); }
+
+.documento__cliente {
+  display: flex;
+  gap: var(--e6);
+  flex-wrap: wrap;
+  padding: var(--e3) var(--e4);
+  background: var(--superficie-alterna);
+  border-radius: var(--radio-sm);
+  margin-bottom: var(--e4);
+}
+
+.etiqueta-dato {
+  display: block;
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--tinta-tenue);
+  font-weight: 600;
+}
+
+.documento__nota {
+  font-size: var(--texto-xs);
+  color: var(--tinta-suave);
+  margin: var(--e3) 0;
+  max-width: 78ch;
+}
+
+.documento__cuadre {
+  margin-top: var(--e4);
+  padding: var(--e2) var(--e3);
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  background: var(--exito-suave);
+  color: var(--exito);
+  display: inline-block;
+}
+
+.documento__cuadre--error { background: var(--deuda-suave); color: var(--deuda); }
+
+.tabla--documento { margin-top: var(--e2); }
+.tabla--documento tbody tr:hover { background: transparent; }
+
+.tabla--documento tfoot td {
+  border-top: 2px solid var(--tinta);
+  border-bottom: 0;
+  font-weight: 700;
+  padding-top: var(--e3);
+}
+
+.fila--apertura td { background: var(--superficie-alterna); color: var(--tinta-suave); font-style: italic; }
+
+/* Estados financieros: dos columnas, concepto y valor. */
+.tabla--estado { table-layout: fixed; }
+.tabla--estado td:first-child { width: auto; }
+.tabla--estado td:last-child { width: 30%; }
+
+.fila--grupo td {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--marca);
+  background: var(--marca-suave);
+  padding-top: var(--e2);
+  padding-bottom: var(--e2);
+}
+
+.celda-sangrada { padding-left: var(--e5) !important; }
+
+.fila--subtotal td {
+  font-weight: 650;
+  border-top: 1px solid var(--borde-fuerte);
+}
+
+.fila--resultado td {
+  font-size: var(--texto-base);
+  font-weight: 700;
+}
+
+.columnas-estado {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e5);
+  align-items: start;
+}
+
+.campo--casilla {
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  margin-bottom: var(--e2);
+}
+
+.campo--casilla .casilla { width: auto; margin: 0; }
+
+@media (max-width: 1100px) {
+  .columnas-estado { grid-template-columns: 1fr; }
+}
+
+/* ---------------------------------------------------------------------------
+   Impresion — se imprime el documento, nada mas.
+   Desde el dialogo del navegador tambien se guarda como PDF.
+   --------------------------------------------------------------------------- */
+
+@media print {
+  @page { margin: 14mm; }
+
+  body { background: #ffffff; }
+
+  .lateral,
+  .cabecera,
+  .no-imprimir,
+  #avisos,
+  .fondo-modal { display: none !important; }
+
+  .aplicacion { display: block; height: auto; }
+  .area { overflow: visible; }
+  .contenido { padding: 0; overflow: visible; gap: 0; }
+
+  .documento {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .tabla { font-size: 10pt; }
+  .tabla th { background: #f2f3f7 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .fila--grupo td { background: #e7eaf4 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+  /* Que una fila no quede partida entre dos hojas. */
+  tr, .documento__encabezado, .documento__cliente { break-inside: avoid; }
+  thead { display: table-header-group; }
+
+  .columnas-estado { grid-template-columns: 1fr 1fr; gap: 10mm; }
+}
+
+/* ===========================================================================
+   Comprobantes de ajuste
+   =========================================================================== */
+
+.nota--info {
+  background: var(--marca-suave);
+  border-color: var(--borde-fuerte);
+}
+
+.tarjeta--anulada { opacity: 0.72; }
+
+.tabla--asiento { margin-top: var(--e3); }
+.tabla--asiento td { padding: var(--e2) var(--e3); }
+.tabla--asiento th { padding: var(--e2) var(--e3); }
+.tabla--asiento tbody tr:hover { background: transparent; }
+
+/* Editor del asiento: cuenta, lado, valor y la unidad cuando aplica. */
+.asiento-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+
+.asiento-linea {
+  display: grid;
+  grid-template-columns: 1fr 110px 140px 32px;
+  gap: var(--e2);
+  align-items: center;
+  padding: var(--e2);
+  background: var(--superficie-alterna);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+}
+
+.asiento-linea select,
+.asiento-linea input { margin: 0; }
+
+/* La unidad ocupa su propia fila debajo, porque solo aparece a veces. */
+.asiento-linea__unidad {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+}
+
+.asiento-linea__unidad .campo__ayuda { margin: 0; white-space: nowrap; }
+
+@media (max-width: 720px) {
+  .asiento-linea { grid-template-columns: 1fr 1fr; }
+  .asiento-linea__cuenta { grid-column: 1 / -1; }
+}
+
+/* ===========================================================================
+   Plan de cuentas
+   =========================================================================== */
+
+/* La jerarquia del PUC se lee por la sangria del codigo, como en un balance. */
+.tabla--plan td { padding: var(--e2) var(--e4); }
+.tabla--plan .nivel-clase { font-weight: 700; }
+.tabla--plan .nivel-grupo { padding-left: var(--e4); font-weight: 650; }
+.tabla--plan .nivel-cuenta { padding-left: var(--e5); }
+.tabla--plan .nivel-auxiliar { padding-left: var(--e6); color: var(--tinta-suave); }
+
+.fila--titulo-cuenta { background: var(--superficie-alterna); }
+.fila--titulo-cuenta td { font-weight: 600; }
+
+.celda-titulo { text-transform: uppercase; letter-spacing: 0.04em; font-size: var(--texto-xs); }
+
+.lista-parametros {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  margin-top: var(--e2);
+}
+
+.fila-parametro {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: var(--e3);
+  align-items: center;
+}
+
+.fila-parametro__etiqueta {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+
+.fila-parametro select { margin: 0; }
+
+@media (max-width: 780px) {
+  .fila-parametro { grid-template-columns: 1fr; gap: var(--e1); }
+}
+
+/* El codigo del PUC acompana al nombre en los estados, en tono menor. */
+.codigo-puc {
+  font-family: var(--fuente-cifras);
+  font-size: var(--texto-xs);
+  color: var(--tinta-tenue);
+  margin-left: var(--e2);
+}
+
+.fila--cuenta td { font-weight: 600; }
+.fila--auxiliar td { color: var(--tinta-suave); }
+.celda-auxiliar { padding-left: var(--e6) !important; }
+
+/* ---------------------------------------------------------------------------
+   Alta de cuenta por niveles
+   --------------------------------------------------------------------------- */
+
+.etiqueta-nivel {
+  text-transform: uppercase;
+  font-size: var(--texto-xs);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+}
+
+.cascada {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+  padding: var(--e3);
+  background: var(--superficie-alterna);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+}
+
+.cascada__fila {
+  display: grid;
+  grid-template-columns: 96px 1fr;
+  gap: var(--e3);
+  align-items: center;
+}
+
+.cascada__nivel {
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  text-align: right;
+  color: var(--tinta-suave);
+}
+
+.cascada__fila--nueva .cascada__nivel { color: var(--acento); }
+
+.cascada__fila select { margin: 0; }
+
+/* El prefijo del padre se ve pero no se escribe: solo se teclea el segmento. */
+.cascada__codigo {
+  display: flex;
+  align-items: center;
+  gap: var(--e1);
+}
+
+.cascada__prefijo {
+  font-family: var(--fuente-cifras);
+  font-size: var(--texto-sm);
+  padding: var(--e2) var(--e3);
+  background: var(--borde);
+  border-radius: var(--radio-sm) 0 0 var(--radio-sm);
+  color: var(--tinta-suave);
+}
+
+.entrada-segmento {
+  width: 72px;
+  text-align: center;
+  font-family: var(--fuente-cifras);
+  letter-spacing: 0.08em;
+}
+
+.cascada__resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: var(--e3) 0;
+  padding: var(--e3);
+  border-left: 3px solid var(--acento);
+  background: var(--acento-suave);
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+}
+
+.cascada__etiqueta {
+  font-size: var(--texto-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--acento-clara);
+}
+
+.cascada__valor {
+  font-family: var(--fuente-cifras);
+  font-size: var(--texto-lg);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.cascada__valor--incompleto { color: var(--tinta-tenue); }
+
+.tabla--plan .nivel-subcuenta { padding-left: var(--e6); color: var(--tinta-suave); }
+.tabla--plan .nivel-auxiliar { padding-left: calc(var(--e6) + var(--e4)); color: var(--tinta-tenue); }
+
+/* El asiento que se va a registrar, en vista previa antes de guardar. */
+.asiento-previo {
+  margin-top: var(--e4);
+  padding: var(--e3);
+  border-left: 3px solid var(--acento);
+  background: var(--acento-suave);
+  border-radius: 0 var(--radio-sm) var(--radio-sm) 0;
+}
+
+.asiento-previo .tabla { background: var(--superficie); border-radius: var(--radio-sm); }
+.asiento-previo .campo__ayuda { margin-top: var(--e2); }
+
+/* ===========================================================================
+   Pagos a proveedores
+   =========================================================================== */
+
+.resultados-busqueda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+  margin-bottom: var(--e4);
+}
+
+.resultado {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-align: left;
+  padding: var(--e2) var(--e3);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+  background: var(--superficie);
+  font: inherit;
+  cursor: pointer;
+}
+
+.resultado:hover { background: var(--acento-suave); border-color: var(--acento); }
+
+.resultado-vacio {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--e3);
+  padding: var(--e3);
+  background: var(--espera-suave);
+  border: 1px solid var(--espera-borde);
+  border-radius: var(--radio-sm);
+  font-size: var(--texto-sm);
+}
+
+/* La ficha del proveedor: lo que el directorio trae al elegirlo. */
+.ficha-proveedor {
+  padding: var(--e3) var(--e4);
+  background: var(--superficie-alterna);
+  border: 1px solid var(--borde);
+  border-radius: var(--radio-sm);
+  margin-bottom: var(--e4);
+}
+
+.ficha-proveedor__cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--e3);
+}
+
+.ficha-proveedor__cabecera .sub { display: block; }
+
+.ficha-proveedor__datos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--e5);
+  margin-top: var(--e3);
+  padding-top: var(--e3);
+  border-top: 1px solid var(--borde);
+  font-size: var(--texto-sm);
+}
+
+.fila-seleccion {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  cursor: pointer;
+}
+
+.fila-seleccion .casilla { width: auto; margin: 0; }
+.fila-seleccion .columna { flex: 1; }
+
+.fila-seleccion .columna .sub { display: block; }

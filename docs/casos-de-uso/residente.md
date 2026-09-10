@@ -975,3 +975,31 @@ administración.
 > no basta por sí sola (§3 bis). Por eso la de papel no se quita.
 
 **Estado en el demo:** ✅ — `/app/asambleas/:id`, en la asamblea en curso.
+
+---
+
+### CU-R-30
+## CU-R-30 — Informar un abono ya consignado
+
+- **Actor principal:** Propietario o residente
+- **Precondiciones:** Ya pagó por fuera de la app (banco, efectivo en portería).
+- **Disparador:** Quiere que la administración sepa que ese dinero es suyo **y a qué lo quiere aplicar**.
+- **Resultado esperado:** El abono queda informado y a la espera de conciliación; el propietario ve su estado.
+
+**Flujo principal**
+1. Desde su estado de cuenta elige "Ya pagué por fuera: informar abono".
+2. Indica cuánto abonó, cómo pagó y el número de consignación.
+3. **Escribe a qué corresponde el abono** y, si quiere, señala cuotas concretas.
+4. Envía. El pago queda `reportado` y aparece en su cuenta como *Por conciliar*.
+5. La administración lo concilia (CU-A-27) y emite el recibo de caja.
+
+**Flujos alternativos**
+- A1. La unidad no tiene cuotas pendientes → el abono quedará como saldo a favor.
+- A2. La administración determina que el pago no corresponde → lo descarta con motivo (RN-78).
+
+**Reglas de negocio**
+- RN-79: lo informado **no baja el saldo** hasta que la administración lo aplica. El propietario
+  informa, no decide: es la administración la que verifica que el dinero entró.
+- RN-75, RN-76: el abono puede ser parcial y repartirse entre varias cuotas.
+
+**Estado en el demo:** ✅ — `src/features/residente/InformarAbonoPage.tsx`.

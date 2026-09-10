@@ -13,10 +13,21 @@ Estado actual: **Demo funcional v0.1 (PWA)** — datos simulados, sin backend re
 | Ruta | Contenido |
 |---|---|
 | [`docs/`](./docs/README.md) | **Toda la documentación del proyecto.** Empieza siempre aquí. |
-| [`apps/pwa/`](./apps/pwa/README.md) | Demo PWA (React + TypeScript + Vite). Contiene la app de Residente y la Consola de Administración. |
+| [`apps/pwa/`](./apps/pwa/README.md) | Demo PWA (React + TypeScript + Vite). App del Residente y Consola de Administración. |
+| [`apps/contable/`](./apps/contable/README.md) | Aplicación contable del administrador: cartera, pagos y recibos de caja. HTML plano, **se abre con doble clic**. |
 | [`CLAUDE.md`](./CLAUDE.md) | Instrucciones de contexto para agentes de IA que trabajen en el repo. |
 
-## 2. Arranque rápido del demo
+> Son **dos productos distintos** que comparten las reglas del dominio, no el código.
+> La PWA la construye Mary; la contable, Jeimy. Ver [`docs/10`](./docs/10-equipo-y-orquestacion.md).
+
+## 2. Arranque rápido
+
+### La aplicación contable — no necesita instalar nada
+
+Abre [`apps/contable/index.html`](./apps/contable/) con doble clic. Eso es todo: sin Node,
+sin servidor, sin conexión.
+
+### El demo PWA
 
 ```bash
 cd apps/pwa
@@ -38,6 +49,16 @@ Para generar la versión instalable:
 ```bash
 npm run build && npm run preview
 ```
+
+### ¿Solo quieres ver el demo, sin instalar nada?
+
+```bash
+cd apps/pwa && npm run empaquetar
+```
+
+Deja `dist/idiky-demo.html`: **el demo completo en un archivo**, que se abre con
+doble clic en cualquier navegador. No necesita Node ni servidor, así que es lo que
+se le manda a quien vaya a mirarlo y no vaya a programar.
 
 ## 3. Documentación esencial
 
