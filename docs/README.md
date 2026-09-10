@@ -21,6 +21,7 @@ aquí antes o junto con el código.
 | 10 | [Equipo y orquestación](./10-equipo-y-orquestacion.md) | **Cómo trabajamos Jeimy, Mary y Daniel en paralelo** | Al cambiar la forma de trabajo |
 | 11 | [Tablero de trabajo](./11-tablero-de-trabajo.md) | Tareas en curso, quién las tiene y en qué estado | Todos los días |
 | 12 | [Levantamiento pendiente](./12-levantamiento-pendiente.md) | **Preguntas abiertas del producto, por responder** | Hasta cerrarlo |
+| 13 | [BOB: cómo entra una copropiedad](./13-bob-copropiedades-y-contratos.md) | Planes y contrato, perfiles raíz, ficha, jerarquía e ingreso a BLOKY | Mientras dure el refinamiento (T-39) |
 | — | [ADR](./adr/) | Decisiones de arquitectura con su justificación | Al tomar una decisión relevante |
 
 > ⚠️ **Antes de construir funcionalidad nueva:** el demo v0.1 se hizo sobre supuestos, no

@@ -149,10 +149,23 @@ entenderá»*. El dominio y HTTPS siguen pendientes (T-35).
   (`infra/servidor/cargar-integraciones.sh`) y **un SMS de prueba salió desde allá**; todavía
   no las usa ningún servicio.
 
-**Pendiente de responder:** quién pide el cambio del Delegado; si el cobro por unidad usa las del
-contrato o las cargadas, y si los precios incluyen IVA; si el plan dura 12 meses y se renueva
-solo; qué perfiles crea cada rol (ajusta RN-63); y si oficinas, consultorios y bodegas cuentan
-como comerciales.
+**Y en la misma sesión se respondieron las cinco preguntas que quedaban**, y todo quedó reunido
+en [`13-bob-copropiedades-y-contratos.md`](./13-bob-copropiedades-y-contratos.md):
+
+- **El cambio del Delegado se pide a `operaciones@idiky.com`**: como es el superusuario de
+  BLOKY, no hay quién lo pida desde adentro.
+- **Se cobra por las unidades del contrato.** Si el contrato fija un rango y el plan lo
+  restringe, **BLOKY no deja cargar unidades facturables por encima del máximo**.
+- **Todo plan dura 12 meses**, y el primer mes se **prorratea con meses de 30 días**.
+- **El Administrador crea en BLOKY todos los perfiles internos**; el Delegado tiene lo mismo, más
+  la solicitud de cambio o bloqueo del Administrador.
+- **Oficinas y consultorios se cobran; bodegas, parqueaderos y zonas comunes no.**
+
+**Dos de esas respuestas chocan con reglas que ya existen**, y quedaron como pendientes en vez de
+darse por hechas: si «lo mismo que el Administrador» alcanza los actos que el repo reserva al
+administrador (RN-49, el debido proceso de CU-A-23), y si «todos los perfiles internos» quita al
+propietario el registro de las personas de su unidad, que Mary ya construyó (CU-R-27, RN-63).
+Siguen abiertos también el IVA, la renovación y los bordes del prorrateo.
 
 **Dos cuidados con Twilio:** el servicio de Verify se llama «OKMor» y así firma los SMS, así que
 conviene uno llamado IDIKY; y el Auth Token pasó por la conversación al quedar en la plantilla,

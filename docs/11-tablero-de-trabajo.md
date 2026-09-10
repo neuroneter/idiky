@@ -45,6 +45,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-35 | **Despliegue de infraestructura**: entorno, dominio y pipeline para publicar la PWA y la contable. **El entorno de desarrollo ya existe** (2026-09-10, [ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)); abierto al equipo con clave, por HTTP. Faltan HTTPS y dominio, y el pipeline | Responsable de integración | 🔨 En curso |
 | T-37 | **BOB, el back office de IDIKY** (la administración de la empresa, no de las copropiedades): Strapi 5 + PostgreSQL 17 en `apps/gestion/` ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md)). **Instalado en el entorno el 2026-09-10**: pod en 8082 abierto al equipo, superadministrador creado, respaldo diario y **el panel con la marca de IDIKY**. Faltan el responsable, las primeras entidades y el disco de datos | Por definir | 🔨 En curso |
 | T-38 | **Módulo de auditoría del sistema de gestión**: quién cambió qué, cuándo y cómo estaba antes. Strapi Community no lo trae; se construye (ADR-0012) | Por definir | 📋 Por hacer |
+| T-39 | **Refinar cómo entra una copropiedad a BOB**: planes y contrato, perfiles raíz (Administrador y Delegado), ficha, ubicación, jerarquía e ingreso a BLOKY ([`13-bob-copropiedades-y-contratos.md`](./13-bob-copropiedades-y-contratos.md)). Faltan dos choques con reglas existentes, IVA, renovación y bordes del prorrateo | Responsable de integración | 🔨 En curso |
 
 ## Hecho
 
