@@ -363,6 +363,8 @@ Cada una ya costó tiempo una vez:
 | `/mnt` en Azure | Es un disco temporal: se borra al apagar la VM | Nada que deba persistir va ahí |
 | Disco | Unos 4,9 GB libres en `/`, compartidos con la base de datos de LangFlow | `levantar.sh` no construye con menos de 3 GB; `podman image prune --all` tras cada despliegue |
 | Reinicio del servidor | No probado con Idiky instalado | Hacerlo en una ventana acordada, con `verificar-vecino.sh` antes y después |
+| Pestaña de BOB abierta durante un despliegue | Al ir a otra pantalla sale *«This screen couldn't be loaded · error loading dynamically imported module …/admin/ListPage-xxxx.js»*. Cada compilación le pone otro nombre a sus archivos, la pestaña pide los de la versión anterior y Strapi responde con su página HTML en vez de un 404 | **Recargar la página** (el botón del aviso o `Cmd + Shift + R`). No es un fallo del servidor: la página del panel se sirve sin caché, así que al recargar toma la versión nueva |
+| Comprobar una lista de archivos desde zsh | `for n in $lista` no separa por líneas en zsh: recorre toda la lista como un solo nombre y da resultados falsos | `while IFS= read -r n; do …; done < archivo` |
 
 ## 11. Deshacer todo
 
