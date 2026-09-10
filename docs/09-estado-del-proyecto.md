@@ -19,7 +19,7 @@ nueva o una sesión de IA distinta.
 | **Casos de uso** | 69 documentados: 36 ✅ en el demo, 11 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
 | **Reglas de negocio** | 91 (RN-01…RN-91; RN-41 retirada). RN-75 a RN-91 vienen de la contable |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
-| **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Se ven por túnel SSH ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
+| **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
 ### Lo que funciona hoy
@@ -117,7 +117,7 @@ servicios que lo consultan»*.
 | **Motor** | Podman 3.4 **sin root**, el de Ubuntu 22.04. Se descartaron Docker (daemon root que reescribe `iptables` en un servidor ajeno) y el LXD que ya estaba instalado (no deja una receta reproducible en el repositorio) |
 | **Aislamiento** | Un usuario propio, `idiky`, que no puede leer los archivos de LangFlow. La red va en espacio de usuario: no toca `iptables` |
 | **Contenedores** | `idiky-pwa` compila con `npm run build` y sirve con nginx. `idiky-contable` **copia la carpeta tal cual**, así que ADR-0010 queda intacto: sigue abriéndose con doble clic |
-| **Publicación** | Solo en `127.0.0.1:8080` y `127.0.0.1:8081`. Se entra por túnel SSH |
+| **Publicación** | Primero solo en `127.0.0.1`, por túnel SSH. **Al final del día, abierto al equipo con clave** (ver abajo) |
 | **Despliegue** | `infra/desplegar.sh` sube **un commit** con `git archive` y reconstruye en unos 30 s. `/revision.txt` dice qué está publicado |
 
 **Cómo se comprobó que LangFlow no cambió.** No bastaba con decir que Idiky no toca nginx:
@@ -157,10 +157,33 @@ solo cambió en los contadores del agente de Azure. Cómo deshacerlo todo está 
   habilitados con *linger* y deberían volver solos; la primera vez que el servidor se reinicie,
   hay que mirarlo.
 
+**Y en la misma sesión, abierto al equipo con clave.** En Azure se agregó la regla `Dev`
+(prioridad 340, TCP 8080 y 8081), y **tuvo que quedar abierta a cualquier origen**: Mary y
+Jeimy no tienen IP fija. Con la red abierta, la protección tiene que estar en otro sitio, y se
+puso **antes** de escuchar hacia afuera:
+
+- **Una clave de acceso en los dos nginx** (`clave-acceso.sh`). Sin clave, todo responde 401
+  salvo `/salud`, `/revision.txt` y el manifest. El responsable la aprobó: *«si me gusta lo de
+  la clave para llegar al demo»*. **No es la autenticación de la app**, que sigue como dice
+  ADR-0004: es la puerta del entorno. La clave no está en el repositorio.
+- **Un techo de un núcleo y 3 GB para todo el usuario `idiky`**, puesto por systemd. Sin root,
+  Podman no puede limitar la CPU, y el tráfico que llegue a 8080 y 8081 lo atienden procesos de
+  `idiky`. Si el entorno se satura, choca contra su techo y no contra LangFlow.
+- **El despliegue se vigiló a sí mismo:** si al abrir el demo hubiera respondido sin clave, lo
+  volvía a cerrar en el acto. Respondió 401.
+
+**Verificado desde internet:**
+- Sin clave y con clave equivocada, las dos apps responden 401. Con la correcta, 200, y
+  también sus archivos.
+- nginx arranca aunque la carpeta de la clave no esté montada.
+- LangFlow, otra vez **idéntico a la línea base**.
+
 **Qué sigue**
 
-1. Dar acceso a Mary y a Jeimy: su llave pública en el usuario `idiky` (ver `infra/README.md`).
-2. Decidir si el entorno se abre a la red: dominio, HTTPS y regla en Azure (resto de T-35).
+1. Compartir el usuario y la clave con Mary y Jeimy por un canal privado. Las llaves SSH solo
+   hacen falta para desplegar.
+2. HTTPS y dominio (resto de T-35). Sin eso la clave viaja sin cifrar y la PWA no tiene
+   *service worker* ni huella. No se hará por el nginx de LangFlow.
 3. El pipeline: desplegar al integrar en `main`, en vez de a mano.
 
 ---

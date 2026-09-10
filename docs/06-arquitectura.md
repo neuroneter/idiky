@@ -156,8 +156,8 @@ Desde el 2026-09-10 los dos productos se publican en contenedores, cada uno en e
 
 ```
 servidor compartido ─ usuario idiky (Podman sin root)
-├── idiky-pwa       nginx + apps/pwa compilada   → 127.0.0.1:8080
-└── idiky-contable  nginx + apps/contable tal cual → 127.0.0.1:8081
+├── idiky-pwa       nginx + apps/pwa compilada     → :8080, con clave
+└── idiky-contable  nginx + apps/contable tal cual → :8081, con clave
 ```
 
 Los contenedores **solo publican lo que ya existe**: no agregan compilación a la contable ni
