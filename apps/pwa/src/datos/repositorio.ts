@@ -94,7 +94,7 @@ export async function reiniciar(): Promise<BaseDatos> {
 }
 
 // ---------------------------------------------------------------------------
-// CU-R-04 / CU-R-18 / CU-A-04 / CU-A-18 — Pagos y recibos de caja
+// CU-R-04 / CU-R-30 / CU-A-04 / CU-A-27 — Pagos y recibos de caja
 // ---------------------------------------------------------------------------
 
 /** Cuotas de una unidad, para validar e imputar contra ellas. */
@@ -104,7 +104,7 @@ function cuotasDe(bd: BaseDatos, unidadId: string): Cuota[] {
 
 /**
  * Aplica el reparto sobre las cuotas: baja el saldo y ajusta el estado.
- * Con `signo` -1 revierte, que es lo que hace la anulacion (RN-29).
+ * Con `signo` -1 revierte, que es lo que hace la anulacion (RN-78).
  */
 function moverSaldos(bd: BaseDatos, imputaciones: Imputacion[], signo: 1 | -1): void {
   for (const linea of imputaciones) {
@@ -115,7 +115,7 @@ function moverSaldos(bd: BaseDatos, imputaciones: Imputacion[], signo: 1 | -1): 
   }
 }
 
-/** Toma el siguiente numero de recibo de caja y avanza el consecutivo (RN-28). */
+/** Toma el siguiente numero de recibo de caja y avanza el consecutivo (RN-77). */
 function emitirRecibo(bd: BaseDatos): string {
   const consecutivo = bd.consecutivos.recibo
   bd.consecutivos.recibo = consecutivo + 1
@@ -140,10 +140,10 @@ export interface ParametrosPago {
 }
 
 /**
- * CU-R-18 — El propietario informa un abono que ya consigno.
+ * CU-R-30 — El propietario informa un abono que ya consigno.
  *
  * El pago nace `reportado`: queda a la espera de que la administracion lo
- * concilie. No toca la cartera hasta ese momento (RN-30), justamente porque
+ * concilie. No toca la cartera hasta ese momento (RN-79), justamente porque
  * lo que el propietario informa todavia no esta verificado.
  */
 export async function reportarAbono(
@@ -195,7 +195,7 @@ export async function reportarAbono(
  * CU-A-04 / CU-R-04 — Registra un pago que ya se recibio y lo aplica de una vez.
  *
  * Es el camino del pago en linea del residente y el del pago manual que la
- * administracion digita. Emite recibo de caja en el mismo acto (RN-28).
+ * administracion digita. Emite recibo de caja en el mismo acto (RN-77).
  */
 export async function registrarPago(
   bdActual: BaseDatos,
@@ -232,7 +232,7 @@ export async function registrarPago(
 }
 
 /**
- * CU-A-18 — La administracion concilia un abono informado por el propietario.
+ * CU-A-27 — La administracion concilia un abono informado por el propietario.
  *
  * Aqui es donde el pago entra a la cartera: se reparte entre cuotas y se le
  * asigna el numero de recibo de caja. Si no se indica reparto, se aplica la
@@ -271,9 +271,9 @@ export async function aplicarPago(
 }
 
 /**
- * CU-A-18 — Anula un recibo de caja.
+ * CU-A-27 — Anula un recibo de caja.
  *
- * RN-29: no se borra el registro, se marca anulado con su motivo y el saldo
+ * RN-78: no se borra el registro, se marca anulado con su motivo y el saldo
  * vuelve a las cuotas. El numero de recibo queda quemado, no se reutiliza.
  */
 export async function anularPago(
@@ -357,7 +357,7 @@ export async function generarCuotas(
     tipo: parametros.tipo,
     concepto: parametros.concepto,
     valor: linea.valor,
-    // RN-26: nace debiendo todo su valor.
+    // RN-75: nace debiendo todo su valor.
     saldo: linea.valor,
     // RN-23: vencimiento por defecto el dia 10 del periodo.
     fechaVencimiento: vencimientoDelPeriodo(parametros.periodo),

@@ -160,7 +160,7 @@ export function pagosDeCopropiedad(bd: BaseDatos, copropiedadId: string): Pago[]
   return bd.pagos.filter((p) => ids.has(p.unidadId)).sort(porFechaDescendente)
 }
 
-/** CU-A-18 — Abonos informados por propietarios que esperan conciliacion (RN-30). */
+/** CU-A-27 — Abonos informados por propietarios que esperan conciliacion (RN-79). */
 export function abonosReportados(bd: BaseDatos, copropiedadId: string): Pago[] {
   return pagosDeCopropiedad(bd, copropiedadId)
     .filter((p) => p.estado === 'reportado')

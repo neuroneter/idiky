@@ -72,7 +72,7 @@ export function diasEntre(desde: FechaISO, hasta: FechaISO): number {
 
 /**
  * RN-04 — Una cuota es `vencida` si su vencimiento ya paso y aun tiene saldo.
- * RN-26 — Si tiene abonos parciales pero todavia debe algo, esta `abonada`.
+ * RN-75 — Si tiene abonos parciales pero todavia debe algo, esta `abonada`.
  * El estado real siempre se deriva del saldo, nunca se lee del campo guardado.
  */
 export function estadoRealCuota(cuota: Cuota, hoy: FechaISO = hoyISO()): EstadoCuota {
@@ -131,7 +131,7 @@ export function cuotasPorAntiguedad(cuotas: Cuota[]): Cuota[] {
 
 /**
  * RN-06 — Un pago se imputa primero a la deuda mas antigua.
- * RN-27 — El abono puede cubrir una cuota solo en parte: se reparte hasta
+ * RN-76 — El abono puede cubrir una cuota solo en parte: se reparte hasta
  * agotar el valor recibido. Lo que sobra no se imputa y queda a favor.
  */
 export function imputarPago(cuotas: Cuota[], valor: number): Imputacion[] {
@@ -151,7 +151,7 @@ export function totalImputado(imputaciones: Imputacion[]): number {
   return imputaciones.reduce((total, linea) => total + linea.valor, 0)
 }
 
-/** RN-27 — Parte del pago que no quedo aplicada a ninguna cuota. */
+/** RN-76 — Parte del pago que no quedo aplicada a ninguna cuota. */
 export function saldoAFavorDelPago(valor: number, imputaciones: Imputacion[]): number {
   return Math.max(0, valor - totalImputado(imputaciones))
 }
@@ -192,17 +192,17 @@ export function validarImputacion(parametros: {
 // Recibos de caja
 // ---------------------------------------------------------------------------
 
-/** RN-28 — Numero de recibo de caja: consecutivo por copropiedad, sin reuso. */
+/** RN-77 — Numero de recibo de caja: consecutivo por copropiedad, sin reuso. */
 export function numeroRecibo(consecutivo: number): string {
   return `RC-${String(consecutivo).padStart(5, '0')}`
 }
 
-/** RN-29 — Solo se puede anular un recibo que este aplicado. */
+/** RN-78 — Solo se puede anular un recibo que este aplicado. */
 export function sePuedeAnular(pago: Pago): boolean {
   return pago.estado === 'aplicado'
 }
 
-/** RN-30 — Un abono informado por el propietario espera a que se aplique. */
+/** RN-79 — Un abono informado por el propietario espera a que se aplique. */
 export function esperaAplicacion(pago: Pago): boolean {
   return pago.estado === 'reportado'
 }

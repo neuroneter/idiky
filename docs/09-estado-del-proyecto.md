@@ -67,7 +67,7 @@ ENTRA**, y no existía el de la plata que SALE.
 - **Directorio de proveedores**, con NIT, razón social, tipo de persona, dirección, cuenta
   del PUC contra la que se causa lo que factura, y sus tarifas de retención.
 - **Un egreso retiene.** Baja la cuenta por pagar por el valor bruto y lo reparte entre lo
-  retenido —que queda como pasivo, porque es plata de la DIAN— y lo que sale de caja (RN-42).
+  retenido —que queda como pasivo, porque es plata de la DIAN— y lo que sale de caja (RN-91).
 - **Causar un gasto dejó de ser pagarlo.** Se le quitó la casilla "ya está pagado": un gasto
   nace por pagar, y se paga emitiendo el egreso. Eran dos hechos económicos distintos
   metidos en un solo formulario.
@@ -77,11 +77,11 @@ ENTRA**, y no existía el de la plata que SALE.
 Jeimy pidió buscar el proveedor en la base de la DIAN. Se le explicó que **no existe una API
 pública y gratuita** para eso —el RUT se consulta con autenticación y automatizarlo es un
 servicio de terceros de pago— y que además la aplicación abre desde un archivo local, sin
-servidor (ADR-0006). Ella respondió que por ahora bastaba con poder crear al proveedor, y así
+servidor (ADR-0010). Ella respondió que por ahora bastaba con poder crear al proveedor, y así
 quedó.
 
 Lo que sí es real: **el dígito de verificación se calcula con el algoritmo de la DIAN**,
-verificado contra cuatro NITs de dominio público (RN-41). De paso apareció que el NIT del
+verificado contra cuatro NITs de dominio público (RN-90). De paso apareció que el NIT del
 demo tenía mal el DV: `901.234.567-8` cuando le corresponde `-7`.
 
 La consulta quedó aislada en una sola función, `Idiky.proveedores.consultarNit`: el día que
@@ -97,10 +97,10 @@ gasto. El balance sigue cuadrando en todos los casos.
 **Qué sigue**
 
 1. Falta declarar y pagar las retenciones a la DIAN: hoy se acumulan en `2365` y `2368` y
-   nada las descarga (T-21).
+   nada las descarga (T-31).
 2. Los gastos de un mismo proveedor se pagan juntos, pero no se puede hacer un abono parcial
    a un gasto: o se paga completo o no se paga.
-3. Sigue pendiente que el contador valide los códigos del PUC (T-17).
+3. Sigue pendiente que el contador valide los códigos del PUC (T-27).
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Tipos de comprobante
 
@@ -118,7 +118,7 @@ que elegir cuenta por cuenta y cuadrar el débito contra el crédito a mano.
   genera el sistema (causación de cuotas, recibo de caja, causación de gasto, comprobante de
   egreso). Los del sistema no se registran a mano, pero **se muestran con sus cuentas**:
   saber contra qué mueve un recibo de caja es lo que hace auditable el módulo.
-- **Consecutivo propio por tipo** (RN-39): `NI-00001` los intereses, `NP-00001` las
+- **Consecutivo propio por tipo** (RN-88): `NI-00001` los intereses, `NP-00001` las
   provisiones. Como en cualquier libro contable.
 - **Gastos ya no pide la cuenta:** la categoría la decide, y la pantalla la informa.
 - **El comprobante libre queda como salida de emergencia**, con una nota que dice lo obvio:
@@ -142,9 +142,9 @@ registrar a mano un tipo del sistema.
 **Qué sigue**
 
 1. Los tipos se ven y se usan, pero todavía no se crean ni se editan desde la pantalla: hay
-   que agregar ese formulario para que el equipo defina los suyos sin tocar código (T-19).
-2. Sigue pendiente que el contador valide los códigos (T-17).
-3. Sigue pendiente el intercambio de información con la PWA (T-12).
+   que agregar ese formulario para que el equipo defina los suyos sin tocar código (T-29).
+2. Sigue pendiente que el contador valide los códigos (T-27).
+3. Sigue pendiente el intercambio de información con la PWA (T-22).
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Los cinco niveles del PUC
 
@@ -161,7 +161,7 @@ El plan de cuentas pasa a tener la jerarquía completa del PUC, explícita:
   prefijo del padre se muestra fijo. Así es imposible teclear un código huérfano, que antes
   el sistema tenía que rechazar después.
 - **La tabla muestra el nivel de cada cuenta** y se puede filtrar por nivel.
-- **Regla nueva (RN-38):** abrirle una subcuenta a una cuenta transaccional la convierte en
+- **Regla nueva (RN-87):** abrirle una subcuenta a una cuenta transaccional la convierte en
   título, porque el movimiento baja al nivel nuevo. Si un parámetro estaba usando esa cuenta,
   la operación se bloquea con el motivo: si no, los documentos nuevos irían a un título.
 
@@ -173,9 +173,9 @@ de prueba siguen cuadrando.
 
 **Qué sigue**
 
-1. Sigue pendiente que el contador valide los códigos (T-17).
+1. Sigue pendiente que el contador valide los códigos (T-27).
 2. Falta exportar el balance de prueba y el libro auxiliar a CSV.
-3. Sigue pendiente el intercambio de información con la PWA (T-12).
+3. Sigue pendiente el intercambio de información con la PWA (T-22).
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · PUC editable
 
@@ -191,7 +191,7 @@ se renombran y se desactivan desde la nueva pantalla **Plan de cuentas**, que ad
   copropiedad es una ESAL, el grupo 41 se adaptó a sus conceptos (cuotas de administración,
   extraordinarias, intereses) en vez de los del PUC de comerciantes, que van por sector.
 - **Parámetros:** qué cuenta usa cada documento, editable en la misma pantalla.
-- **Cada documento guarda su cuenta** (RN-36). Es la decisión de fondo: cambiar un parámetro
+- **Cada documento guarda su cuenta** (RN-85). Es la decisión de fondo: cambiar un parámetro
   afecta a los documentos futuros, no a los pasados, así que reconfigurar el plan **no mueve
   la contabilidad de un mes cerrado**.
 - Los estados pasaron a presentarse en **dos niveles**: la cuenta con su total y los
@@ -214,7 +214,7 @@ la advertencia en la propia pantalla.
 
 1. Que el contador valide el plan y ajuste lo que haga falta.
 2. Falta exportar el balance de prueba y el libro auxiliar a CSV; el motor ya los calcula.
-3. Sigue pendiente el intercambio de información con la PWA (T-12).
+3. Sigue pendiente el intercambio de información con la PWA (T-22).
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Ajustes y partida doble
 
@@ -245,10 +245,10 @@ cuentas, es Ajustes. Quedó escrito en la pantalla del módulo, porque es la con
 **Qué sigue**
 
 1. El plan de cuentas es corto y está fijo en el código. Si el equipo necesita el PUC real o
-   cuentas propias, hay que hacerlo editable (T-15).
+   cuentas propias, hay que hacerlo editable (T-25).
 2. Falta el libro auxiliar por cuenta en pantalla: el motor ya lo calcula
    (`auxiliarDeCuenta`), pero no hay reporte que lo muestre.
-3. Sigue pendiente el intercambio de información con la PWA (T-12).
+3. Sigue pendiente el intercambio de información con la PWA (T-22).
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Reportes y estados financieros
 
@@ -262,7 +262,7 @@ cuentas, es Ajustes. Quedó escrito en la pantalla del módulo, porque es la con
 - **Gastos.** No estaba en lo pedido, pero un estado de resultados sin egresos no es un
   estado de resultados: solo tendría la mitad de arriba. Se agregó lo mínimo — causar un
   gasto, marcarlo pagado, anularlo con motivo — para que los dos estados sean reales.
-- **Motor contable** (`js/contabilidad.js`): por causación, no por caja (RN-31 a RN-33).
+- **Motor contable** (`js/contabilidad.js`): por causación, no por caja (RN-80 a RN-82).
   Todo hecho económico mueve cuatro cuentas, y de ahí el balance **cuadra por construcción**.
 
 **Verificación** — el estado de situación financiera cuadra, y **sigue cuadrando** después
@@ -282,9 +282,9 @@ barra lateral y los controles, y deja el documento solo.
 **Qué sigue**
 
 1. Falta el resto de la contabilidad: proveedores como entidad, presupuesto anual contra
-   ejecución, y saldos de apertura para que caja sea un saldo real (T-13).
-2. Sigue pendiente definir el intercambio de información con la PWA (T-12).
-3. RN-31 a RN-33 son **solo de la contable**: la PWA no tiene gastos ni estados. No hay que
+   ejecución, y saldos de apertura para que caja sea un saldo real (T-23).
+2. Sigue pendiente definir el intercambio de información con la PWA (T-22).
+3. RN-80 a RN-82 son **solo de la contable**: la PWA no tiene gastos ni estados. No hay que
    duplicarlas allá.
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Aplicación contable
@@ -294,7 +294,7 @@ barra lateral y los controles, y deja el documento solo.
 Nace el segundo producto del repositorio: [`apps/contable/`](../apps/contable/README.md),
 la aplicación de cartera, pagos y recibos de caja del administrador.
 
-- **Sin compilación, a propósito** ([ADR-0006](./adr/0006-stack-aplicacion-contable.md)).
+- **Sin compilación, a propósito** ([ADR-0010](./adr/0010-stack-aplicacion-contable.md)).
   HTML, CSS y JavaScript planos: se abre con doble clic en `index.html`. No es una
   preferencia técnica — quien la desarrolla no puede instalar nada en su computador, y un
   stack que el equipo no puede ejecutar no es un stack.
@@ -319,10 +319,10 @@ entregable de Jeimy es este.
 
 **Qué sigue**
 
-1. **Definir qué información intercambian las dos aplicaciones y en qué dirección** (T-12).
+1. **Definir qué información intercambian las dos aplicaciones y en qué dirección** (T-22).
    Hoy los abonos informados vienen sembrados en `apps/contable/js/datos.js`; ese es el
    punto exacto por donde se van a conectar.
-2. **Decidir el alcance del resto de la contable** (T-13): egresos y gastos, proveedores,
+2. **Decidir el alcance del resto de la contable** (T-23): egresos y gastos, proveedores,
    plan de cuentas, balances. Lo entregado es cuentas por cobrar; el otro lado no existe.
 3. Ojo con las reglas duplicadas: una `RN-xx` que cambie hay que cambiarla en los dos
    productos el mismo día (§2.1 de `10-equipo-y-orquestacion.md`).
@@ -336,14 +336,14 @@ por qué*, pagos maneja *la plata que entra*.
 
 - **Abonos parciales.** El modelo era todo-o-nada: una cuota se pagaba completa o no se
   pagaba. Ahora `Cuota` tiene `saldo` además de `valor`, y `Pago` tiene `imputaciones[]`
-  con cuánto se aplicó a cada cuota (RN-26, RN-27).
+  con cuánto se aplicó a cada cuota (RN-75, RN-76).
 - **Recibo de caja.** El antiguo `comprobante` era un número suelto; ahora el pago **es**
   el recibo: consecutivo `RC-<NNNNN>` que se asigna al aplicarlo, y que se anula con motivo
-  en vez de borrarse (RN-28, RN-29).
-- **El propietario informa a qué corresponde su abono** (CU-R-18). Consigna por fuera,
+  en vez de borrarse (RN-77, RN-78).
+- **El propietario informa a qué corresponde su abono** (CU-R-30). Consigna por fuera,
   reporta desde su app con el concepto escrito por él, y el pago queda `reportado` sin
-  tocar la cartera hasta que la administración lo concilia (RN-30).
-- **Conciliación** (CU-A-18): el administrador ve lo que el propietario escribió, con el
+  tocar la cartera hasta que la administración lo concilia (RN-79).
+- **Conciliación** (CU-A-27): el administrador ve lo que el propietario escribió, con el
   reparto por antigüedad ya sugerido, y lo ajusta antes de aplicar.
 - De paso: `imputarPago` (RN-06) estaba definida y sin usar, y las pantallas reimplementaban
   el orden por su cuenta. Ahora la regla se usa de verdad. También se corrigió RN-22, que
@@ -375,7 +375,7 @@ seguir repartiendo tareas por zona.
 > contable de escritorio**, que es un programa aparte y todavía no tiene stack ni ubicación
 > definidos (ver [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md) §1.1).
 > Lo construido **sirve igual**: la consola necesitaba cartera y pagos. Pero no es el
-> entregable de Jeimy, y las reglas RN-26 a RN-30 son justamente la parte que las dos
+> entregable de Jeimy, y las reglas RN-75 a RN-79 son justamente la parte que las dos
 > aplicaciones van a compartir.
 
 **Qué sigue**

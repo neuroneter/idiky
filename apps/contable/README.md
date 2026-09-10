@@ -105,7 +105,7 @@ Cada proveedor lleva sus tarifas: retefuente en porcentaje, ReteICA por mil.
 **No existe una API pública y gratuita de la DIAN** para consultar un NIT y traer la razón
 social; el RUT se consulta en su portal con autenticación, y automatizarlo es un servicio de
 terceros de pago. Además esta aplicación abre desde un archivo local, sin servidor y sin
-conexión garantizada (ADR-0006).
+conexión garantizada (ADR-0010).
 
 Por eso el proveedor **se crea y vive en el directorio propio de la copropiedad**, que es lo
 que se necesita en el día a día: al de vigilancia se le paga todos los meses, no hay que
@@ -212,7 +212,7 @@ apps/contable/
    recorre las listas por su cuenta. El día que haya servidor, se cambia ese archivo y las
    pantallas no se tocan.
 
-El porqué de las tres está en [ADR-0006](../../docs/adr/0006-stack-aplicacion-contable.md).
+El porqué de las tres está en [ADR-0010](../../docs/adr/0010-stack-aplicacion-contable.md).
 
 **Una más, para los reportes:** el cálculo va en `contabilidad.js`, nunca en la pantalla.
 `vista-reportes.js` solo pinta lo que ese archivo devuelve. Así las cifras se pueden revisar

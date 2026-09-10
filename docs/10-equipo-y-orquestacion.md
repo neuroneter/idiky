@@ -31,7 +31,7 @@ tu zona** salvo acuerdo explícito.
 
 Vive en [`apps/contable/`](../apps/contable/README.md) y se construye **sin compilación**:
 HTML, CSS y JavaScript planos, que se abren con doble clic. La razón está en
-[ADR-0006](./adr/0006-stack-aplicacion-contable.md), y no es de gusto técnico: quien la
+[ADR-0010](./adr/0010-stack-aplicacion-contable.md), y no es de gusto técnico: quien la
 desarrolla no puede instalar nada en su computador, así que cualquier stack con paso de
 compilación la dejaría sin poder trabajar.
 
@@ -43,7 +43,7 @@ abonos informados por los residentes vienen sembrados en `apps/contable/js/datos
 el punto exacto por donde las dos aplicaciones se van a conectar.
 
 > **Lo que ya está listo para compartirse:** las reglas de cartera y pagos —
-> RN-03 a RN-07 y RN-26 a RN-30 en [`05-modelo-de-datos.md`](./05-modelo-de-datos.md) —
+> RN-03 a RN-07 y RN-75 a RN-79 en [`05-modelo-de-datos.md`](./05-modelo-de-datos.md) —
 > están escritas como definiciones del dominio, no como código de pantalla. Sirven igual
 > en la app de escritorio, sea cual sea el lenguaje: son el contrato entre las dos
 > aplicaciones.

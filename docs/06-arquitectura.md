@@ -77,7 +77,7 @@ apps/pwa/
 | Carpeta | Producto | Stack | Responsable |
 |---|---|---|---|
 | `apps/pwa/` | App del residente + consola web | React + TypeScript + Vite ([ADR-0001](./adr/0001-stack-tecnologico.md)) | Mary |
-| `apps/contable/` | Aplicación contable de escritorio | HTML + CSS + JS sin compilar ([ADR-0006](./adr/0006-stack-aplicacion-contable.md)) | Jeimy |
+| `apps/contable/` | Aplicación contable de escritorio | HTML + CSS + JS sin compilar ([ADR-0010](./adr/0010-stack-aplicacion-contable.md)) | Jeimy |
 
 No comparten código. Comparten **las reglas del dominio**, traducidas a los dos lenguajes —
 ver [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md) §2.1.
@@ -90,7 +90,7 @@ ver [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md) §2.1.
 | `/app` | Inicio residente | CU-R-02 |
 | `/app/cuenta` | Estado de cuenta | CU-R-03 |
 | `/app/cuenta/pagar` | Pago | CU-R-04 |
-| `/app/cuenta/informar` | Informar un abono ya consignado | CU-R-18 |
+| `/app/cuenta/informar` | Informar un abono ya consignado | CU-R-30 |
 | `/app/reservas` | Zonas comunes y reservas | CU-R-05, CU-R-06 |
 | `/app/pqrs` | PQRS | CU-R-07, CU-R-08 |
 | `/app/comunicados` | Cartelera | CU-R-09 |
@@ -99,7 +99,7 @@ ver [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md) §2.1.
 | `/admin` | Tablero | CU-A-01 |
 | `/admin/unidades` | Unidades y residentes | CU-A-02 |
 | `/admin/cartera` | Cartera: estados de cuenta y generación | CU-A-03, CU-A-05 |
-| `/admin/pagos` | Pagos: conciliación y recibos de caja | CU-A-04, CU-A-18 |
+| `/admin/pagos` | Pagos: conciliación y recibos de caja | CU-A-04, CU-A-27 |
 | `/admin/reservas` | Aprobación de reservas | CU-A-06 |
 | `/admin/pqrs` | Bandeja de PQRS | CU-A-07 |
 | `/admin/comunicados` | Publicación de comunicados | CU-A-08 |

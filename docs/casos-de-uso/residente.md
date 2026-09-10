@@ -265,8 +265,8 @@ localmente sin librerías externas (ver [ADR-0005](../adr/0005-codigo-qr-sin-dep
 
 ---
 
-### CU-R-18
-## CU-R-18 — Informar un abono ya consignado
+### CU-R-30
+## CU-R-30 — Informar un abono ya consignado
 
 - **Actor principal:** Propietario o residente
 - **Precondiciones:** Ya pagó por fuera de la app (banco, efectivo en portería).
@@ -278,15 +278,15 @@ localmente sin librerías externas (ver [ADR-0005](../adr/0005-codigo-qr-sin-dep
 2. Indica cuánto abonó, cómo pagó y el número de consignación.
 3. **Escribe a qué corresponde el abono** y, si quiere, señala cuotas concretas.
 4. Envía. El pago queda `reportado` y aparece en su cuenta como *Por conciliar*.
-5. La administración lo concilia (CU-A-18) y emite el recibo de caja.
+5. La administración lo concilia (CU-A-27) y emite el recibo de caja.
 
 **Flujos alternativos**
 - A1. La unidad no tiene cuotas pendientes → el abono quedará como saldo a favor.
-- A2. La administración determina que el pago no corresponde → lo descarta con motivo (RN-29).
+- A2. La administración determina que el pago no corresponde → lo descarta con motivo (RN-78).
 
 **Reglas de negocio**
-- RN-30: lo informado **no baja el saldo** hasta que la administración lo aplica. El propietario
+- RN-79: lo informado **no baja el saldo** hasta que la administración lo aplica. El propietario
   informa, no decide: es la administración la que verifica que el dinero entró.
-- RN-26, RN-27: el abono puede ser parcial y repartirse entre varias cuotas.
+- RN-75, RN-76: el abono puede ser parcial y repartirse entre varias cuotas.
 
 **Estado en el demo:** ✅ — `src/features/residente/InformarAbonoPage.tsx`.

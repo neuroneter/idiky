@@ -199,7 +199,7 @@ Idiky.datos = (function () {
     }
 
     // 2. Abono parcial sobre una cuota que aun no vence: es el unico caso en
-    //    que se ve el estado `abonada`, porque RN-04 manda sobre RN-26.
+    //    que se ve el estado `abonada`, porque RN-04 manda sobre RN-75.
     var proxima = buscarCuota('cuo-uni-torre1-402-' + d.periodoRelativo(1))
     if (proxima) {
       var adelanto = Math.round(proxima.valor * 0.5)
@@ -229,7 +229,7 @@ Idiky.datos = (function () {
 
     // 3. Abonos que los propietarios informaron y todavia nadie concilio.
     //    En el producto final estos llegan desde la app de los residentes;
-    //    aqui vienen sembrados para que la bandeja no arranque vacia (RN-30).
+    //    aqui vienen sembrados para que la bandeja no arranque vacia (RN-79).
     pagos.unshift(
       {
         id: 'pag-reportado-1',

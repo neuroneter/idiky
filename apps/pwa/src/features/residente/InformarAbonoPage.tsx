@@ -1,11 +1,11 @@
 /**
- * CU-R-18 — Informar un abono ya consignado.
- * Doc: docs/casos-de-uso/residente.md#cu-r-18
+ * CU-R-30 — Informar un abono ya consignado.
+ * Doc: docs/casos-de-uso/residente.md#cu-r-30
  *
  * El propietario consigno por fuera de la app (banco, efectivo en porteria) y
  * necesita decirle a la administracion que ese dinero es suyo y a que lo quiere
  * aplicar. El abono queda `reportado`: no toca la cartera hasta que la
- * administracion lo concilie (RN-30).
+ * administracion lo concilie (RN-79).
  */
 
 import { useState } from 'react'

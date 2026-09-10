@@ -21,29 +21,29 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | # | Tarea | Responsable sugerido | Estado |
 |---|---|---|---|
 | T-05 | Ajustar el modelo de datos al alcance real | Daniel | 📋 Por hacer |
-| T-06 | Decidir el stack de backend (ADR-0006) | Daniel | 📋 Por hacer |
+| T-06 | Decidir el stack de backend (ADR-0008) | Daniel | 📋 Por hacer |
 | T-07 | Documentar los casos de uso de asambleas (CU-R-13, CU-A-12) | Mary | 📋 Por hacer |
 | T-08 | Documentar el módulo de portería (minuta, validación de visitantes) | Jeimy | 📋 Por hacer |
 | T-09 | Definir la identidad visual real (colores, logo, tipografía) | Zona D | 📋 Por hacer |
-| T-12 | Definir qué información intercambian la PWA y la contable, y en qué dirección | Jeimy + Mary | 📋 Por hacer |
-| T-13 | Resto de la contable: proveedores, presupuesto anual, saldos de apertura de caja | Jeimy | 📋 Por hacer |
-| T-17 | **Que el contador de la copropiedad valide los códigos del PUC** | Jeimy | 📋 Por hacer |
-| T-19 | Crear y editar tipos de comprobante desde la pantalla (hoy solo se ven y se usan) | Jeimy | 📋 Por hacer |
-| T-21 | Declarar y pagar a la DIAN las retenciones acumuladas en 2365 y 2368 | Jeimy | 📋 Por hacer |
+| T-22 | Definir qué información intercambian la PWA y la contable, y en qué dirección | Jeimy + Mary | 📋 Por hacer |
+| T-23 | Resto de la contable: proveedores, presupuesto anual, saldos de apertura de caja | Jeimy | 📋 Por hacer |
+| T-27 | **Que el contador de la copropiedad valide los códigos del PUC** | Jeimy | 📋 Por hacer |
+| T-29 | Crear y editar tipos de comprobante desde la pantalla (hoy solo se ven y se usan) | Jeimy | 📋 Por hacer |
+| T-31 | Declarar y pagar a la DIAN las retenciones acumuladas en 2365 y 2368 | Jeimy | 📋 Por hacer |
 
 ## Hecho
 
 | # | Tarea | Estado |
 |---|---|---|
 | T-00 | Estructura del repositorio, documentación base y demo PWA v0.1 | ✅ Hecho |
-| T-10 | Módulos de cartera y pagos con abonos parciales y recibos de caja (CU-R-18, CU-A-18) | ✅ Hecho |
-| T-11 | Aplicación contable: cartera, pagos y recibos de caja sin compilación (ADR-0006) | ✅ Hecho |
-| T-14 | Contable: gastos, movimientos por cliente, estado de resultados y situación financiera | ✅ Hecho |
-| T-16 | Contable: partida doble, plan de cuentas y comprobantes de ajuste | ✅ Hecho |
-| T-15 | Contable: PUC colombiano editable, con la cuenta guardada en cada documento | ✅ Hecho |
-| T-18 | Contable: los cinco niveles del PUC y alta de cuentas en cascada | ✅ Hecho |
-| T-20 | Contable: tipos de comprobante con su asiento, para que el administrador no elija cuentas | ✅ Hecho |
-| T-22 | Contable: módulo de pagos a proveedores con egresos, retenciones y directorio | ✅ Hecho |
+| T-20 | Módulos de cartera y pagos con abonos parciales y recibos de caja (CU-R-30, CU-A-27) | ✅ Hecho |
+| T-21 | Aplicación contable: cartera, pagos y recibos de caja sin compilación (ADR-0010) | ✅ Hecho |
+| T-24 | Contable: gastos, movimientos por cliente, estado de resultados y situación financiera | ✅ Hecho |
+| T-26 | Contable: partida doble, plan de cuentas y comprobantes de ajuste | ✅ Hecho |
+| T-25 | Contable: PUC colombiano editable, con la cuenta guardada en cada documento | ✅ Hecho |
+| T-28 | Contable: los cinco niveles del PUC y alta de cuentas en cascada | ✅ Hecho |
+| T-30 | Contable: tipos de comprobante con su asiento, para que el administrador no elija cuentas | ✅ Hecho |
+| T-32 | Contable: módulo de pagos a proveedores con egresos, retenciones y directorio | ✅ Hecho |
 
 ---
 

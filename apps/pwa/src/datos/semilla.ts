@@ -298,7 +298,7 @@ function construirCartera(): {
   // -------------------------------------------------------------------------
 
   // 1. Un abono parcial ya aplicado: la extraordinaria de la unidad en mora
-  //    quedo a medias, para que se vea el estado `abonada` (RN-26).
+  //    quedo a medias, para que se vea el estado `abonada` (RN-75).
   const extraEnMora = cuotas.find((c) => c.id === 'cuo-uni-torre2-901-extra')
   if (extraEnMora) {
     const abono = Math.round(extraEnMora.valor * 0.4)
@@ -327,7 +327,7 @@ function construirCartera(): {
 
   // 2. Un abono parcial sobre una cuota que todavia no vence: es el unico caso
   //    en que se ve el estado `abonada`, porque una cuota vencida se sigue
-  //    reportando como vencida aunque tenga abonos (RN-04 manda sobre RN-26).
+  //    reportando como vencida aunque tenga abonos (RN-04 manda sobre RN-75).
   const proximaAlDia = cuotas.find(
     (c) => c.unidadId === 'uni-torre1-402' && c.periodo === periodoRelativo(1),
   )
@@ -357,7 +357,7 @@ function construirCartera(): {
   }
 
   // 3. Dos abonos informados por propietarios y todavia sin conciliar, para que
-  //    la bandeja del administrador no arranque vacia (RN-30).
+  //    la bandeja del administrador no arranque vacia (RN-79).
   pagos.unshift(
     {
       id: 'pag-reportado-1',

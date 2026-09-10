@@ -33,9 +33,9 @@ Estado: **demo v0.1**, sin backend, con datos simulados en los dos.
 | **Todo acceso a datos pasa por el repositorio** — `apps/pwa/src/datos/repositorio.ts` o `apps/contable/js/repositorio.js`. Ninguna pantalla toca la semilla ni `localStorage`. | Permite cambiar a backend real sin tocar la interfaz (ADR-0003). |
 | **Las reglas de negocio viven en `dominio/`** como funciones puras, numeradas `RN-xx`. Están **duplicadas a propósito** en los dos productos. | Una regla cambia en los dos el mismo día. La definición que manda es `docs/05-modelo-de-datos.md`. |
 | **En `apps/contable/`, la plata que ENTRA (Recaudos, recibo de caja) y la que SALE (Pagos, comprobante de egreso) son módulos y documentos distintos.** Causar un gasto no es pagarlo. | Tratarlos igual fue un error real que ya se corrigió una vez. |
-| **RN-31 a RN-37 son solo de la contable** (causación, estados financieros, comprobantes de ajuste y PUC): viven en `apps/contable/js/{contabilidad,puc,repositorio}.js` y no se duplican en la PWA. | La PWA no tiene gastos, ni estados financieros, ni partida doble. |
-| **En `apps/contable/`, todo documento guarda la cuenta del PUC con la que se registró** (RN-36). Nunca la deduzcas del parámetro vigente al calcular. | Cambiar un parámetro no debe reescribir la contabilidad de un mes cerrado. |
-| **En `apps/contable/`: nada de `import`/`export` ni `fetch` de archivos locales.** Scripts clásicos en el orden de `index.html`, datos dentro de un `.js`. | El navegador los bloquea al abrir el archivo desde el disco, y esa app **debe** abrirse con doble clic (ADR-0006). |
+| **RN-80 a RN-86 son solo de la contable** (causación, estados financieros, comprobantes de ajuste y PUC): viven en `apps/contable/js/{contabilidad,puc,repositorio}.js` y no se duplican en la PWA. | La PWA no tiene gastos, ni estados financieros, ni partida doble. |
+| **En `apps/contable/`, todo documento guarda la cuenta del PUC con la que se registró** (RN-85). Nunca la deduzcas del parámetro vigente al calcular. | Cambiar un parámetro no debe reescribir la contabilidad de un mes cerrado. |
+| **En `apps/contable/`: nada de `import`/`export` ni `fetch` de archivos locales.** Scripts clásicos en el orden de `index.html`, datos dentro de un `.js`. | El navegador los bloquea al abrir el archivo desde el disco, y esa app **debe** abrirse con doble clic (ADR-0010). |
 | **Cada pantalla declara en su encabezado el caso de uso que implementa.** | Trazabilidad código ↔ documentación. |
 | **Documentación en español**, nombres de dominio en español, sin tildes en identificadores. | Consistencia (ver `docs/08-convenciones.md`). |
 | **Al terminar, actualizar `docs/09-estado-del-proyecto.md`** y el estado del CU en el catálogo. | Es lo que evita perder contexto entre sesiones/IAs. |
@@ -70,5 +70,5 @@ Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.
   en el roadmap (fases 2 y 4) y hacerlo antes rompe el propósito del demo.
 - No introducir librerías de UI ni de estado global sin ADR.
 - No meterle compilación, npm ni dependencias a `apps/contable/`: rompe la única condición
-  que la hace utilizable por quien la desarrolla (ADR-0006).
+  que la hace utilizable por quien la desarrolla (ADR-0010).
 - No borrar registros de datos: se cierran o anulan (trazabilidad).
