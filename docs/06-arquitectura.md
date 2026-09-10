@@ -164,3 +164,6 @@ Los contenedores **solo publican lo que ya existe**: no agregan compilación a l
 dependencias a la PWA. El servidor lo comparte otro servicio que no puede verse afectado,
 así que **todo lo de Idiky vive dentro del usuario `idiky`** y no toca nginx, firewall ni
 puertos ajenos.
+
+Para agregar un servicio (una API, una base de datos, otra app): el contrato que debe cumplir
+y la receta paso a paso están en [`infra/nuevo-servicio.md`](../infra/nuevo-servicio.md).

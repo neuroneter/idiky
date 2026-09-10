@@ -66,6 +66,12 @@ Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.
 IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave>.pem infra/desplegar.sh   # publica el commit de HEAD
 ```
 
+**Si la tarea es crear o cambiar un servicio del entorno**, lee primero
+[`infra/README.md`](./infra/README.md) (cómo está armado, incluido lo que no está en git) y
+sigue [`infra/nuevo-servicio.md`](./infra/nuevo-servicio.md) (el contrato y la receta).
+Antes y después de tocar el servidor, `infra/servidor/verificar-vecino.sh` tiene que decir que
+LangFlow sigue igual.
+
 ## 5. Git
 
 - **`main` es la base de todo.** Se creó el 2026-09-10 a partir de la rama de integración

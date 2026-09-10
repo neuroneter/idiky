@@ -97,6 +97,41 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Cómo crear otro servicio, escrito para quien venga después (T-35)
+
+**El pedido:** *«documentemos como quedo todo en el repositorio indicando como esta configurado
+el contenedor para que si requiero crear otro servicios la IA pueda leer esto y entender como
+crear otro servicios»*.
+
+**Qué se escribió**
+
+| Archivo | Para qué |
+|---|---|
+| `infra/README.md` (reescrito) | **Cómo está armado**: del commit al contenedor, el camino de una petición, los techos de recursos, la unidad de systemd tal como quedó en el servidor, las imágenes, la clave, cómo operar, **lo que vive fuera de git** y las trampas que ya costaron tiempo |
+| `infra/nuevo-servicio.md` (nuevo) | **La receta**: la lista previa, el contrato de un servicio (puerto 80, `/salud`, `/revision.txt`, clave, imágenes con versión fija), los puertos libres (8082–8099), cómo registrarlo en `levantar.sh`, cómo verificarlo y qué documentar |
+| `infra/servidor/verificar-vecino.sh` (nuevo) | La verificación de LangFlow, que hasta hoy vivía fuera del repositorio |
+| `CLAUDE.md` §4 y `docs/06-arquitectura.md` §7 | Los punteros para que un agente llegue a lo anterior |
+
+**Dos decisiones que conviene conocer:**
+
+- **La verificación de LangFlow pasó a ser un script del repositorio, no una lista de pasos.**
+  Una lista se salta; un script que dice «sigue igual» o sale con error, no. Corre como `idiky`,
+  sin `sudo`, y no lleva la IP ni el dominio del servidor. Se probó en los dos sentidos: la foto
+  base de hoy **coincide con la de antes de instalar nada** (mismos PID, cero reinicios, mismos
+  códigos), y contra una foto alterada **detecta el cambio y sale con error**.
+- **Lo que no está resuelto quedó escrito como no resuelto.** Datos persistentes, contenedores
+  que se hablan entre sí, servicios que no son nginx y secretos tienen cada uno un camino
+  sugerido **marcado «sin probar»**, con la instrucción de que quien lo haga primero lo pruebe y
+  quite la marca. Un agente que lee «así se hace» sobre algo que nunca se hizo lo da por hecho.
+
+**El comando de la clave elegida se documentó probándolo.** Así se puso la clave actual. Se
+corrió tal como quedó escrito, con la misma clave, y las dos apps siguieron respondiendo 401 sin
+ella y 200 con ella.
+
+**Qué sigue:** lo mismo de la entrada anterior. HTTPS y dominio, y el pipeline.
+
+---
+
 ### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · El entorno de desarrollo, sin tocar al vecino (T-35, ADR-0011)
 
 **De dónde salió.** El pedido fue preparar la infraestructura de desarrollo «según lo acordado
