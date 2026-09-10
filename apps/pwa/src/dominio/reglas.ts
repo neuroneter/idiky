@@ -838,6 +838,51 @@ export function mayoriaDelPunto(punto: { mayoria?: MayoriaExigida }): MayoriaExi
   return punto.mayoria ?? 'simple'
 }
 
+/**
+ * RN-77 — **Hay decisiones que esta sesion no puede tomar, aunque se voten.**
+ *
+ * El paragrafo del articulo 46 es facil de pasar por alto y caro de pasar por
+ * alto: «Las decisiones previstas en este articulo **no podran tomarse en
+ * reuniones no presenciales**, ni en reuniones de segunda convocatoria, salvo
+ * que en este ultimo caso se obtenga la mayoria exigida por esta ley». Y el
+ * mismo articulo cierra: las decisiones adoptadas en contravencion suya son
+ * **absolutamente nulas**.
+ *
+ * O sea que no es una recomendacion ni un umbral mas alto: es una **puerta
+ * cerrada**. Una copropiedad puede reunirse por Zoom para todo (art. 42,
+ * RN-75), pero no para reformar el reglamento ni para aprobar la extraordinaria
+ * grande. Sin esto, Idiky abriria la votacion, sumaria los coeficientes y el
+ * acta reportaria «se APRUEBA» una decision que nace nula — que es el peor de
+ * los errores posibles en este modulo, porque nadie se entera hasta que alguien
+ * la impugna.
+ *
+ * **La segunda convocatoria no se bloquea**: la ley la admite si aun asi se
+ * obtiene el 70 %, y eso ya lo comprueba `resultadoVotacion`, que nunca relaja
+ * el umbral de la calificada.
+ *
+ * **La mixta se trata como no presencial, y es una deduccion, no una cita.** El
+ * art. 46 dice «no presenciales» y en 2001 no existia la mixta. Quien la trae al
+ * caso es el Decreto 398 de 2020, art. 1: «Las reglas relativas a las reuniones
+ * no presenciales seran igualmente aplicables a las reuniones mixtas». Se sigue
+ * el camino conservador —restringe, no habilita— y **queda anotado como pregunta
+ * para el abogado** (§3 bis): si se resolviera que la mixta con quorum presencial
+ * suficiente si puede, esto se afloja en una linea.
+ */
+export function decisionAdmisibleEnLaSesion(
+  asamblea: { modalidad: ModalidadAsamblea },
+  punto: { mayoria?: MayoriaExigida },
+): { admisible: boolean; motivo?: string } {
+  if (mayoriaDelPunto(punto) !== 'calificada') return { admisible: true }
+  if (asamblea.modalidad === 'presencial') return { admisible: true }
+  return {
+    admisible: false,
+    motivo:
+      'Las decisiones de mayoría calificada no pueden tomarse en reuniones no presenciales ' +
+      '(Ley 675 de 2001, artículo 46, parágrafo). Este punto tiene que llevarse a una sesión ' +
+      'presencial: lo que se decida aquí sería absolutamente nulo.',
+  }
+}
+
 /** Solo tiene sentido marcar asistencia mientras la asamblea esta instalada. */
 export function admiteAsistencia(asamblea: Asamblea): boolean {
   return asamblea.estado === 'instalada'

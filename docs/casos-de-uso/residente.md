@@ -396,18 +396,25 @@ administrador con su cédula y sus datos de contacto.
 - A2. Ya votó → ve su elección, sin opción de cambiarla (RN-34).
 - A3. Otorgó poder a otra persona → no puede votar esa unidad (RN-32).
 - A4. La unidad está en mora → **(?)** pendiente de definir si pierde el voto.
+- A5. El punto exige **mayoría calificada** y la asamblea no es presencial → **no se vota**.
+  Los botones quedan deshabilitados —no escondidos— con el motivo a la vista: el parágrafo del
+  art. 46 prohíbe tomar esas decisiones en reunión no presencial, y lo que se decidiera sería
+  absolutamente nulo (RN-77). El punto tiene que llevarse a una sesión presencial.
 
 **Reglas de negocio**
 - RN-27: el voto se pondera por coeficiente (confirmada por el equipo el 2026-08-26).
 - RN-29: un voto por unidad y por pregunta.
 - RN-32: quien otorgó poder no vota esa unidad directamente.
 - RN-34: una votación cerrada no se reabre.
+- RN-74: la mayoría que exige el punto, y sobre qué base se mide (arts. 45 y 46).
+- RN-77: qué decisiones **no puede tomar esta sesión**, sea cual sea el resultado.
 
-**Estado en el demo:** 🟡 — `src/features/residente/AsambleaDetallePage.tsx`. Se vota en las
-asambleas ordinarias y extraordinarias, un voto por unidad (RN-29), solo el propietario
-(RN-51), con el coeficiente copiado al votar (RN-37), y se muestra el conteo por coeficiente.
-**No dice si el punto quedó aprobado**: eso exige la mayoría y el quórum, que siguen sin
-definir (RN-28, T-10). Faltan también los poderes (CU-R-23) y la mora como causal (A4).
+**Estado en el demo:** ✅ — `src/features/residente/AsambleaDetallePage.tsx`. Se vota en las
+asambleas ordinarias y extraordinarias, un voto por unidad (RN-29), solo el propietario o su
+apoderado (RN-51, RN-30), con el coeficiente copiado al votar (RN-37). **Dice qué mayoría exige
+el punto antes de votar y si quedó aprobado**, citando el artículo (RN-74), y el quórum se
+verifica contra la Ley 675 (RN-28). Los poderes entraron con CU-R-23. Sigue abierta **la mora
+como causal** (A4), que es de §3 bis.
 
 ---
 

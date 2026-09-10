@@ -347,6 +347,9 @@ día y **la modalidad manda**: el botón queda deshabilitado diciendo qué falta
   quórum» sin decir con qué regla es un número que nadie puede comprobar.
 - RN-75: la asistencia virtual pesa igual que la presencial (Ley 675 art. 42, Decreto 398 de
   2020), y la pantalla se lo dice a quien está conectado.
+- RN-77: y aun así, **hay puntos que esta sesión no puede decidir**. Si un punto exige mayoría
+  calificada y la asamblea no es presencial, el orden del día lo advierte desde que se abre
+  (art. 46, parágrafo) — que es cuando todavía se puede llevar a una sesión presencial.
 
 **Estado en el demo:** ✅ — `/admin/asambleas`. Se instala, se ve quién va llegando con su
 coeficiente y se cierra.

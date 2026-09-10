@@ -151,8 +151,25 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   simple = «la mitad más uno de los coeficientes **representados en la sesión**». **Art. 46**:
   calificada = **70 % de los coeficientes que integran el edificio** —otra base—, y ninguna
   decisión puede exigir más, salvo la extinción de la propiedad horizontal. El art. 46 lista
-  qué exige calificada. Implementado (RN-74). **Queda por revisar con el reglamento** qué
-  puntos de *esta* copropiedad caen en esa lista.
+  qué exige calificada. Implementado (RN-74).
+  → ✅ **Respondido (Mary, 2026-09-10):** *«considero que se utiliza mayoría simple, no es
+  necesario mayoría calificada»*. Se toma como que **el reglamento de esta copropiedad no
+  agrega puntos** a la lista del art. 46: en la práctica casi todo va por simple, que es
+  también lo que hace la app por defecto. **La lista legal del art. 46 se queda**, porque no
+  es disponible: el mismo artículo dice que lo adoptado en contravención suya es
+  *absolutamente nulo*, y que las mayorías superiores que ponga un reglamento se tienen por
+  no escritas. Una copropiedad no puede rebajar el umbral, solo encontrarse con que casi
+  nunca le aplica.
+  **Y al verificar el art. 46 apareció algo que no teníamos:** su parágrafo prohíbe tomar
+  esas decisiones **en reuniones no presenciales**. Implementado (RN-77) — ver la pregunta
+  nueva abajo.
+- **Mayoría calificada en asamblea mixta *(pregunta nueva, 2026-09-10 — para el abogado)*:**
+  el parágrafo del art. 46 dice «reuniones no presenciales» y en 2001 no existía la mixta.
+  El Decreto 398 de 2020 art. 1 extiende a las mixtas «las reglas relativas a las reuniones
+  no presenciales», de donde se deduce que tampoco caben ahí. **Idiky toma el camino
+  conservador y las bloquea** (RN-77), pero es una deducción, no una cita.
+  ¿Una asamblea mixta con quórum presencial suficiente **sí** puede adoptar una decisión de
+  mayoría calificada? Si la respuesta es sí, se afloja en una línea. → *(respuesta)*
 - **Poderes — el tope:** → ✅ **Resuelto, y al revés de lo que suponíamos** (verificado el
   2026-09-10). **La Ley 675 no fija ningún tope.** Lo puede fijar el **reglamento** de cada
   copropiedad —la práctica común son tres o cuatro poderes por persona— y la jurisprudencia

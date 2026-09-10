@@ -42,7 +42,9 @@ import {
   actaTieneComision,
   estadoActa,
   acumuladoPorApoderado,
+  decisionAdmisibleEnLaSesion,
   faltaEnActa,
+  mayoriaDelPunto,
   verificacionVigente,
   sumaCoeficientes,
   convocatoriaCompleta,
@@ -356,12 +358,26 @@ function DetalleAsamblea({
       <div className="separador" />
       <span className="titulo-seccion">Orden del día</span>
       <ol className="lista lista--compacta" style={{ paddingLeft: 'var(--e4)' }}>
-        {asamblea.ordenDelDia.map((punto) => (
-          <li key={punto.id}>
-            <strong>{punto.titulo}</strong>
-            {punto.seVota && <span className="chip chip--marca">Se vota</span>}
-          </li>
-        ))}
+        {asamblea.ordenDelDia.map((punto) => {
+          // RN-77 — Aquí es donde el administrador puede todavía hacer algo:
+          // llevar el punto a una sesión presencial. Avisarlo el día de la
+          // votación ya es tarde, y avisarlo en el acta es tardísimo.
+          const admisible = decisionAdmisibleEnLaSesion(asamblea, punto)
+          return (
+            <li key={punto.id}>
+              <strong>{punto.titulo}</strong>
+              {punto.seVota && <span className="chip chip--marca">Se vota</span>}
+              {mayoriaDelPunto(punto) === 'calificada' && (
+                <span className="chip chip--alerta">Mayoría calificada</span>
+              )}
+              {!admisible.admisible && (
+                <p className="acceso__nota" style={{ marginTop: 'var(--e1)' }}>
+                  {admisible.motivo}
+                </p>
+              )}
+            </li>
+          )
+        })}
       </ol>
 
       {asamblea.estado !== 'cerrada' && asamblea.estado !== 'cancelada' && (

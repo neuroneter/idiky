@@ -28,6 +28,7 @@ import {
   contarVotacion,
   definicionModalidad,
   hayQuorum,
+  decisionAdmisibleEnLaSesion,
   mayoriaDelPunto,
   resultadoVotacion,
   sumaCoeficientes,
@@ -82,6 +83,7 @@ export function AsambleaDetallePage() {
     .residenciasDeUnidad(bd, sesion.unidadActivaId ?? '')
     .find((residencia) => residencia.personaId === sesion.personaId)?.rol
   const puedo = puedeVotar(miRol)
+  const modalidadSesion = asamblea.modalidad
   const definicion = definicionModalidad(asamblea.modalidad)
   const formas = formasDeAsistir(asamblea.modalidad)
   const miAsistencia = asistenciaDeUnidad(bd.asistencias, asamblea.id, sesion.unidadActivaId ?? '')
@@ -157,6 +159,11 @@ export function AsambleaDetallePage() {
       coeficienteEdificio: sumaCoeficientes(sel.unidadesDe(bd, sesion!.copropiedadId)),
     })
     const abierta = votacion.estado === 'abierta'
+    // RN-77 — Si la sesión no puede tomar esta decisión, no hay voto que emitir.
+    // Se pasa `{ modalidad }` y no `asamblea` porque esta es una declaración de
+    // función —hoisted— y TypeScript no arrastra aquí el estrechamiento del
+    // guard de arriba. Es lo que la regla necesita, además.
+    const admisible = decisionAdmisibleEnLaSesion({ modalidad: modalidadSesion }, punto)
 
     return (
       <>
@@ -182,15 +189,27 @@ export function AsambleaDetallePage() {
           </span>
         </div>
 
-        {votacion.estado === 'cerrada' && (
-          <p className={resultado.aprobada ? 'chip chip--exito' : 'chip chip--error'}>
-            {resultado.aprobada
-              ? `Aprobado: ${resultado.aprobada.texto}`
-              : 'No alcanzó la mayoría exigida'}
+        {/* RN-77 — **Antes que cualquier otra cosa.** Que la decisión no quepa
+            en esta reunión no es un detalle del reglamento: lo que se votara
+            aquí sería nulo, y quien va a votar tiene derecho a saberlo antes
+            de opinar, no después de que alguien impugne. */}
+        {!admisible.admisible && (
+          <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
+            {admisible.motivo}
           </p>
         )}
 
-        {votacion.estado === 'abierta' && resultado.aprobada && (
+        {votacion.estado === 'cerrada' && (
+          <p className={resultado.aprobada ? 'chip chip--exito' : 'chip chip--error'}>
+            {!admisible.admisible
+              ? 'Sin efecto: esta sesión no podía tomar esta decisión'
+              : resultado.aprobada
+                ? `Aprobado: ${resultado.aprobada.texto}`
+                : 'No alcanzó la mayoría exigida'}
+          </p>
+        )}
+
+        {votacion.estado === 'abierta' && resultado.aprobada && admisible.admisible && (
           <p className="subtitulo" style={{ marginBottom: 'var(--e3)' }}>
             Con los votos de ahora, <strong>{resultado.aprobada.texto}</strong> ya supera el
             umbral. El resultado se fija al cerrar la votación.
@@ -220,7 +239,7 @@ export function AsambleaDetallePage() {
               <button
                 key={opcion.id}
                 className="tarjeta tarjeta--accion"
-                disabled={cargando || representada}
+                disabled={cargando || representada || !admisible.admisible}
                 onClick={() => void votar(votacion, opcion.id)}
               >
                 <div className="fila">

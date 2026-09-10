@@ -14,8 +14,8 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 67 documentados: 34 ✅ en el demo, 11 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 76 (RN-01…RN-76; RN-41 retirada — 75 vigentes) |
+| **Casos de uso** | 67 documentados: 35 ✅ en el demo, 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
+| **Reglas de negocio** | 77 (RN-01…RN-77; RN-41 retirada — 76 vigentes) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -82,6 +82,59 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-10 · Mary + IA (Claude) · La mayoría calificada, y una puerta cerrada que no teníamos (RN-77)
+
+Mary respondió lo que faltaba de mayorías: *«considero que se utiliza mayoría simple, no es
+necesario mayoría calificada»*. Como respuesta al levantamiento es buena y cierra la pregunta:
+**el reglamento de esta copropiedad no agrega puntos** a la lista del art. 46, y en la práctica
+casi todo va por simple — que es además lo que la app hace por defecto.
+
+**Lo que no se puede hacer es tratarla como opcional**, y conviene dejarlo escrito. El art. 46
+cierra diciendo que lo adoptado en contravención suya es *absolutamente nulo*, y que las
+mayorías superiores que ponga un reglamento **se tienen por no escritas**. O sea que el umbral
+no está a disposición de nadie: una copropiedad no lo rebaja, solo se encuentra con que casi
+nunca le aplica. Por eso la lista legal se queda en el código (RN-74) aunque el reglamento no
+agregue nada.
+
+**Y al verificar el artículo apareció algo que no teníamos, que es lo que valió la pena.** Su
+parágrafo dice:
+
+> «Las decisiones previstas en este artículo **no podrán tomarse en reuniones no presenciales**,
+> ni en reuniones de segunda convocatoria, salvo que en este último caso se obtenga la mayoría
+> exigida por esta ley».
+
+No es un umbral más alto: es una **puerta cerrada**. Y el demo la estaba cruzando: su asamblea
+estrella es **mixta** y su punto 2 —la extraordinaria de $40.000.000 para la cubierta— exige
+mayoría calificada. Idiky abría la votación, sumaba coeficientes y el acta habría reportado
+«se APRUEBA» una decisión que nace nula. Es el peor error posible en este módulo, porque nadie
+se entera hasta que alguien impugna, y para entonces el acta firmada es la prueba en contra.
+
+Arreglado en RN-77, y en las tres capas: el orden del día se lo advierte al administrador
+**cuando todavía puede llevar el punto a una sesión presencial**; al copropietario los botones
+le quedan deshabilitados —no escondidos, como pidió Mary para los poderes— con el motivo a la
+vista; **el repositorio lo rechaza igual** aunque se le quite el `disabled` al botón (T-16, y
+está comprobado quitándoselo); y el acta deja la constancia del parágrafo en vez de reportar
+una aprobación.
+
+**Dos precisiones del alcance.** La segunda convocatoria **no** se bloquea: la ley la admite si
+aun así se obtiene el 70 %, y eso ya lo exigía `resultadoVotacion`. Y **la mixta se trata como
+no presencial por deducción, no por cita**: el art. 46 dice «no presenciales» y en 2001 no
+existía la mixta; quien la trae al caso es el Decreto 398 de 2020. Se tomó el camino
+conservador —restringe, no habilita— y quedó anotada como pregunta para el abogado: si una
+mixta con quórum presencial suficiente sí puede, se afloja en una línea.
+
+De paso, **CU-R-13 pasó a ✅**: su ficha seguía diciendo que faltaban la mayoría, el quórum y
+los poderes, y las tres cosas entraron entre ayer y hoy.
+
+**Verificado con Playwright, 14 comprobaciones nuevas** (`calificada`, `calificada2`), más las
+nueve suites anteriores en verde.
+
+**Lo que sigue:** de §3 bis queda **una** pregunta del reglamento —si fija tope de poderes por
+apoderado— más dos nuevas que salieron de construir: el término propio de la comisión
+verificadora, y la de la mixta para el abogado.
+
+---
 
 ### 2026-09-10 · Mary + IA (Claude) · Dos preguntas de §3 bis, respondidas (RN-75, RN-76)
 

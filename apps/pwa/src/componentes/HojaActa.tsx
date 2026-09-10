@@ -32,6 +32,7 @@ import { nombreCompleto } from '../datos/selectores'
 import {
   actaTieneComision,
   contarVotacion,
+  decisionAdmisibleEnLaSesion,
   etiquetaUnidad,
   hayQuorum,
   mayoriaDelPunto,
@@ -212,6 +213,11 @@ export function HojaActa({
         const votos = votosDe(votacion.id)
         const conteo = contarVotacion(votacion, votos)
         const mayoria = mayoriaDelPunto(punto)
+        // RN-77 — Art. 46, parágrafo: hay decisiones que esta sesión no podía
+        // tomar. El acta **tiene que decirlo**, y decirlo aquí: un acta que
+        // reporta «se APRUEBA» una decisión nula es la prueba escrita de la
+        // nulidad, y la firman el presidente y el secretario.
+        const admisible = decisionAdmisibleEnLaSesion(asamblea, punto)
         const resultado = resultadoVotacion({
           conteo,
           mayoria,
@@ -241,12 +247,25 @@ export function HojaActa({
               <strong>
                 {!quorum
                   ? 'la votación no produce efectos por falta de quórum'
-                  : resultado.aprobada
-                    ? `se APRUEBA: ${resultado.aprobada.texto}`
-                    : 'NO se alcanzó la mayoría exigida'}
+                  : !admisible.admisible
+                    ? 'la votación NO produce efectos'
+                    : resultado.aprobada
+                      ? `se APRUEBA: ${resultado.aprobada.texto}`
+                      : 'NO se alcanzó la mayoría exigida'}
               </strong>
               .
             </p>
+            {!admisible.admisible && (
+              <p>
+                Se deja constancia de que, conforme al{' '}
+                <strong>parágrafo del artículo 46 de la Ley 675 de 2001</strong>, las decisiones que
+                exigen mayoría calificada{' '}
+                <strong>no pueden tomarse en reuniones no presenciales</strong>. La votación
+                relacionada se consigna como constancia de lo actuado y{' '}
+                <strong>no produce efectos</strong>; el punto deberá someterse a una sesión
+                presencial.
+              </p>
+            )}
           </div>
         )
       })}

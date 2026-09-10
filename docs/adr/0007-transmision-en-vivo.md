@@ -90,6 +90,14 @@ decisión y no se puede tapar:
 conoce unidades ni coeficientes, y el quórum se mide en coeficientes (RN-28). Quien entra por
 el enlace **también tiene que marcar asistencia en Idiky**, y es esa la que cuenta.
 
+**Hay decisiones que la modalidad virtual no puede tomar, y eso este ADR no lo puede cambiar.**
+El parágrafo del artículo 46 prohíbe adoptar las decisiones de mayoría calificada **en reuniones
+no presenciales**, y lo adoptado en contravención es *absolutamente nulo*. Es el límite duro de
+«la asamblea puede ser virtual»: puede serlo para casi todo, no para reformar el reglamento ni
+para la extraordinaria grande. Idiky lo bloquea y lo dice (RN-77). Si esta copropiedad necesita
+decidir uno de esos puntos, **la sesión tiene que ser presencial** — y conviene saberlo al
+convocar, no el día de la votación.
+
 **La grabación** queda en Zoom o Meet, fuera de Idiky. El acta la cita; no la guarda. Si el
 equipo decide que la grabación es soporte del acta, hay que definir dónde vive y cuánto se
 conserva — sigue abierto (CU-A-17 A2).

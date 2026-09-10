@@ -71,6 +71,7 @@ import {
   faltaEnActa,
   limiteVerificacionActa,
   puedeGenerarActa,
+  decisionAdmisibleEnLaSesion,
   poderDeUnidad,
   residenciaVigente,
   definicionModalidad,
@@ -2043,6 +2044,17 @@ export async function emitirVoto(
   // RN-34: una votacion cerrada no recibe votos ni se reabre.
   if (!votacionRecibeVotos(votacion)) {
     throw new ErrorDeNegocio('La votacion no esta abierta.')
+  }
+
+  // RN-77 — Antes de mirar quien vota, **si esta sesion puede decidir esto**.
+  // Va primero porque no depende de quien sea: si la decision no cabe en esta
+  // reunion, no cabe para nadie, y recoger votos que nacen nulos es peor que no
+  // recogerlos (art. 46, paragrafo).
+  const asambleaDeLaVotacion = bd.asambleas.find((a) => a.id === votacion.asambleaId)
+  const puntoVotado = asambleaDeLaVotacion?.ordenDelDia.find((p) => p.id === votacion.puntoId)
+  if (asambleaDeLaVotacion && puntoVotado) {
+    const admisible = decisionAdmisibleEnLaSesion(asambleaDeLaVotacion, puntoVotado)
+    if (!admisible.admisible) throw new ErrorDeNegocio(admisible.motivo!)
   }
 
   const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
