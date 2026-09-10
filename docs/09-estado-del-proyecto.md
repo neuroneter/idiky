@@ -12,6 +12,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy). **Integrados en una sola rama el 2026-09-10** |
+| **Sistema de gestión de IDIKY** | En diseño: Strapi 5 + PostgreSQL 17 en `apps/gestion/` ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md)). Bloqueado por el disco en Azure, el techo de recursos, el responsable y las primeras entidades (T-37) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Cartera · Recaudos · Recibos de caja · Gastos · Pagos a proveedores · Ajustes · Plan de cuentas · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
@@ -96,6 +97,50 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Un tercer producto: el sistema de gestión de IDIKY (ADR-0012)
+
+**De dónde sale.** El responsable de integración planteó que, además del producto para las
+copropiedades, **la empresa necesita gestionar su propio negocio**: *«un sistema general que
+será quien desde la compañía IDIKI gestione el negocio; este no es para las propiedades»*. Y
+aclaró que la PWA y la contable desplegadas hoy **son el demo**, que Mary y Jeimy siguen
+trabajando; los servicios de desarrollo de verdad se irán creando a partir de aquí.
+
+**La decisión: Strapi 5 con PostgreSQL 17**, en `apps/gestion/`. Él propuso Strapi y
+PostgreSQL; antes de construir nada se comparó con **Directus**, que no conocía y que en lo
+técnico encajaba mejor en varios puntos (tablas SQL normales, auditoría incluida, sin
+compilar). **Se eligió Strapi por la licencia**: la de Directus cambió en mayo de 2026 y su uso
+gratuito depende de un umbral que se revisa cada año; la de Strapi es MIT. En sus palabras:
+*«si bien no trae la auditoría la podemos crear y se dejaría realizar este módulo; me gusta
+mucho Directus pero el tema de la licencia me preocupa un poco»*.
+
+**Lo que quedó escrito en [ADR-0012](./adr/0012-sistema-de-gestion-strapi.md):**
+
+- **Qué es y qué no.** No es contabilidad ni facturación DIAN, y **no es el backend del
+  producto** (ADR-0008 sigue pendiente). Se escribió explícito, porque un sistema con API y base
+  de datos tiende a volverse el backend de todo por acumulación.
+- **El modelo de datos se diseña en local y va a git.** El *Content-Type Builder* de Strapi solo
+  funciona en modo desarrollo; algo modelado dentro del contenedor del servidor se perdería en
+  el siguiente despliegue.
+- **El diseño del módulo de auditoría (T-38), verificado contra la documentación de Strapi 5**:
+  se engancha en el *Document Service* y no en los *lifecycle hooks*, que en v5 se disparan
+  varias veces por operación. Queda escrito lo que no cubre —cambios directos a la base y, por
+  ahora, GraphQL— y que sus registros no se editan ni se borran.
+- **Cinco condiciones para el entorno de desarrollo**, porque es el primer servicio con datos:
+  disco de datos propio en Azure, techo de `idiky` a 2 núcleos y 5 GB, *pod* con PostgreSQL sin
+  puerto hacia afuera, la clave del entorno solo sobre `/admin` y datos ficticios.
+
+**Identificadores:** ADR-0012, T-37 (el sistema) y T-38 (la auditoría), tomados después de
+comprobar los máximos en la rama.
+
+**Qué sigue** (T-37 está bloqueada por esto):
+
+1. **Agregar el disco de datos en Azure** (32 GB).
+2. **Autorizar el techo de `idiky` en 2 núcleos y 5 GB.**
+3. **Definir quién es responsable del sistema de gestión y cuáles son las primeras entidades**
+   (p. ej. copropiedades cliente, contratos, planes).
+
+---
 
 ### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Cómo crear otro servicio, escrito para quien venga después (T-35)
 

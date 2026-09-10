@@ -14,6 +14,7 @@ caro que puedes cometer aquí:
 |---|---|---|---|
 | `apps/pwa/` | App móvil del residente + consola web del administrador | React + TS + Vite | **Mary** |
 | `apps/contable/` | Aplicación contable: cartera, recaudos, gastos, pagos a proveedores, ajustes, PUC editable y estados financieros | HTML + CSS + JS **sin compilar** | **Jeimy** |
+| `apps/gestion/` *(en diseño)* | **Sistema de gestión de la empresa IDIKY**: clientes, contratos, planes. **No es de las copropiedades** ni es el backend del producto (ADR-0008) | Strapi 5 + PostgreSQL 17 ([ADR-0012](./docs/adr/0012-sistema-de-gestion-strapi.md)) | Por definir |
 
 No comparten código. Comparten **las reglas del dominio**, traducidas a los dos lenguajes.
 
