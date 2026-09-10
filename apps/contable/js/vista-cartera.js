@@ -50,7 +50,7 @@ Idiky.vistaCartera = (function () {
             ]),
             el('button', {
               clase: 'boton',
-              onClick: function () { Idiky.app.irA('pagos') },
+              onClick: function () { Idiky.app.irA('contabilidad:recaudos') },
             }, 'Ir a Pagos'),
           ])
         : null,

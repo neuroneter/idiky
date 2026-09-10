@@ -13,7 +13,7 @@ caro que puedes cometer aquí:
 | Producto | Qué es | Stack | Responsable |
 |---|---|---|---|
 | `apps/pwa/` | App móvil del residente + consola web del administrador | React + TS + Vite | **Mary** |
-| `apps/contable/` | Aplicación contable: cartera, recaudos, gastos, pagos a proveedores, ajustes, PUC editable y estados financieros | HTML + CSS + JS **sin compilar** | **Jeimy** |
+| `apps/contable/` | Aplicación contable: Cartera · Contabilidad (recaudos, pagos, ajustes, PUC) · Reportes | HTML + CSS + JS **sin compilar** | **Jeimy** |
 
 No comparten código. Comparten **las reglas del dominio**, traducidas a los dos lenguajes.
 
@@ -32,7 +32,8 @@ Estado: **demo v0.1**, sin backend, con datos simulados en los dos.
 | **Antes de escribir código, ubica en cuál de los dos productos estás.** Si la tarea es de cartera/contabilidad, casi seguro va en `apps/contable/`. | Ya pasó una vez: se construyó el módulo de Jeimy dentro del producto de Mary. |
 | **Todo acceso a datos pasa por el repositorio** — `apps/pwa/src/datos/repositorio.ts` o `apps/contable/js/repositorio.js`. Ninguna pantalla toca la semilla ni `localStorage`. | Permite cambiar a backend real sin tocar la interfaz (ADR-0003). |
 | **Las reglas de negocio viven en `dominio/`** como funciones puras, numeradas `RN-xx`. Están **duplicadas a propósito** en los dos productos. | Una regla cambia en los dos el mismo día. La definición que manda es `docs/05-modelo-de-datos.md`. |
-| **En `apps/contable/`, la plata que ENTRA (Recaudos, recibo de caja) y la que SALE (Pagos, comprobante de egreso) son módulos y documentos distintos.** Causar un gasto no es pagarlo. | Tratarlos igual fue un error real que ya se corrigió una vez. |
+| **En `apps/contable/`, la plata que ENTRA (Recaudos, recibo de caja) y la que SALE (Pagos, comprobante de egreso) son secciones y documentos distintos.** Causar un gasto no es pagarlo. | Tratarlos igual fue un error real que ya se corrigió una vez. |
+| **El menú tiene tres entradas: Cartera · Contabilidad · Reportes.** Las pantallas de registro son *secciones* dentro de Contabilidad (`vista-contabilidad.js`), no entradas del menú. | Se agrupan por la tarea, no por el tipo de documento. No vuelvas a abrirle una entrada propia a cada pantalla. |
 | **RN-31 a RN-37 son solo de la contable** (causación, estados financieros, comprobantes de ajuste y PUC): viven en `apps/contable/js/{contabilidad,puc,repositorio}.js` y no se duplican en la PWA. | La PWA no tiene gastos, ni estados financieros, ni partida doble. |
 | **En `apps/contable/`, todo documento guarda la cuenta del PUC con la que se registró** (RN-36). Nunca la deduzcas del parámetro vigente al calcular. | Cambiar un parámetro no debe reescribir la contabilidad de un mes cerrado. |
 | **En `apps/contable/`: nada de `import`/`export` ni `fetch` de archivos locales.** Scripts clásicos en el orden de `index.html`, datos dentro de un `.js`. | El navegador los bloquea al abrir el archivo desde el disco, y esa app **debe** abrirse con doble clic (ADR-0006). |

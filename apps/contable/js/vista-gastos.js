@@ -29,6 +29,75 @@ Idiky.vistaGastos = (function () {
     return ui.chip(def[0], def[1])
   }
 
+  /**
+   * La lista de gastos, sin los indicadores ni la barra de acciones: esos los
+   * pone el modulo de Pagos, que es donde vive ahora esta pantalla.
+   */
+  function pintarLista(contenedor, repintar) {
+    var todos = Idiky.repo.gastos()
+    var visibles = todos.filter(function (gasto) {
+      if (filtro === 'por-pagar') return gasto.estado === 'por_pagar'
+      if (filtro === 'pagados') return gasto.estado === 'pagado'
+      if (filtro === 'anulados') return gasto.estado === 'anulado'
+      return gasto.estado !== 'anulado'
+    })
+
+    ui.agregar(contenedor, [
+      el('div', 'barra-acciones', [
+        el('div', 'filtros', [
+          botonFiltro('todos', 'Vigentes', repintar),
+          botonFiltro('por-pagar', 'Por pagar', repintar),
+          botonFiltro('pagados', 'Pagados', repintar),
+          botonFiltro('anulados', 'Anulados', repintar),
+        ]),
+      ]),
+
+      visibles.length === 0
+        ? ui.vacio('No hay gastos en este filtro')
+        : el('div', 'tarjeta tarjeta--tabla', el('table', 'tabla', [
+            el('thead', null, el('tr', null, [
+              el('th', null, 'Fecha'),
+              el('th', null, 'Concepto'),
+              el('th', null, 'Cuenta PUC'),
+              el('th', null, 'Proveedor'),
+              el('th', 'derecha', 'Valor'),
+              el('th', null, 'Estado'),
+              el('th', null, ''),
+            ])),
+            el('tbody', null, visibles.map(function (gasto) {
+              return filaGasto(gasto, repintar)
+            })),
+          ])),
+    ])
+  }
+
+  function filaGasto(gasto, repintar) {
+    return el('tr', gasto.estado === 'anulado' ? 'fila--anulada' : null, [
+      el('td', 'sub', f.fechaCorta(gasto.fecha)),
+      el('td', null, [
+        el('strong', null, gasto.concepto),
+        gasto.estado === 'pagado'
+          ? el('span', 'sub', 'Pagado el ' + f.fechaCorta(gasto.fechaPago))
+          : null,
+      ]),
+      el('td', null, [
+        el('strong', 'cifra', gasto.cuenta || '—'),
+        el('span', 'sub', gasto.cuenta ? Idiky.repo.nombreDeCuenta(gasto.cuenta) : gasto.categoria),
+      ]),
+      el('td', 'sub', gasto.proveedor || '—'),
+      el('td', 'derecha cifra', f.dinero(gasto.valor)),
+      el('td', null, chipGasto(gasto.estado)),
+      el('td', 'derecha', gasto.estado === 'por_pagar'
+        ? el('button', {
+            clase: 'boton boton--pequeno boton--peligro',
+            onClick: function () { abrirAnulacion(gasto.id, repintar) },
+          }, 'Anular')
+        : gasto.egresoId
+          ? el('span', 'sub cifra', reciboDelGasto(gasto))
+          : null),
+    ])
+  }
+
   function pintar(contenedor, repintar) {
     var todos = Idiky.repo.gastos()
     var vigentes = todos.filter(function (g) { return g.estado !== 'anulado' })
@@ -60,7 +129,7 @@ Idiky.vistaGastos = (function () {
             ]),
             el('button', {
               clase: 'boton',
-              onClick: function () { Idiky.app.irA('egresos') },
+              onClick: function () { Idiky.app.irA('contabilidad:pagos') },
             }, 'Ir a Pagos'),
           ])
         : null,
@@ -110,7 +179,7 @@ Idiky.vistaGastos = (function () {
                   ? el('div', 'grupo-acciones', [
                       el('button', {
                         clase: 'boton boton--pequeno',
-                        onClick: function () { Idiky.app.irA('egresos') },
+                        onClick: function () { Idiky.app.irA('contabilidad:pagos') },
                         title: 'Un gasto se paga emitiendo un comprobante de egreso',
                       }, 'Pagar'),
                       el('button', {
@@ -277,5 +346,5 @@ Idiky.vistaGastos = (function () {
     })
   }
 
-  return { pintar: pintar }
+  return { pintar: pintar, pintarLista: pintarLista, abrirRegistro: abrirRegistro }
 })()

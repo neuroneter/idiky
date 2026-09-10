@@ -21,7 +21,7 @@ Idiky.vistaEgresos = (function () {
   var f = Idiky.formato
   var prov = Idiky.proveedores
 
-  var pestana = 'porPagar'
+  var pestana = 'gastos'
 
   var MEDIOS = [
     ['transferencia', 'Transferencia'],
@@ -46,26 +46,42 @@ Idiky.vistaEgresos = (function () {
         el('article', 'tarjeta', ui.indicador('Retenido a terceros', f.dinero(totalRetenido))),
       ]),
 
+      pestana === 'gastos'
+        ? el('div', 'nota nota--info', [
+            el('div', null, [
+              el('strong', null, 'Causar un gasto no es pagarlo'),
+              el('span', 'sub', 'Al causarlo queda debiendose. Se paga en "Cuentas por pagar", emitiendo el comprobante de egreso.'),
+            ]),
+          ])
+        : null,
+
       el('div', 'barra-acciones', [
         el('div', 'filtros', [
-          botonPestana('porPagar', 'Por pagar', repintar),
+          botonPestana('gastos', 'Gastos causados', repintar),
+          botonPestana('porPagar', 'Cuentas por pagar', repintar),
           botonPestana('egresos', 'Comprobantes de egreso', repintar),
           botonPestana('proveedores', 'Proveedores', repintar),
         ]),
-        el('div', 'grupo-acciones', [
-          el('button', {
-            clase: 'boton',
-            onClick: function () { abrirProveedor(null, repintar) },
-          }, 'Nuevo proveedor'),
-          el('button', {
-            clase: 'boton boton--principal',
-            onClick: function () { abrirPago(null, repintar) },
-          }, 'Registrar pago'),
-        ]),
+        pestana === 'gastos'
+          ? el('button', {
+              clase: 'boton boton--principal',
+              onClick: function () { Idiky.vistaGastos.abrirRegistro(repintar) },
+            }, 'Registrar gasto')
+          : el('div', 'grupo-acciones', [
+              el('button', {
+                clase: 'boton',
+                onClick: function () { abrirProveedor(null, repintar) },
+              }, 'Nuevo proveedor'),
+              el('button', {
+                clase: 'boton boton--principal',
+                onClick: function () { abrirPago(null, repintar) },
+              }, 'Registrar pago'),
+            ]),
       ]),
     ])
 
-    if (pestana === 'porPagar') pintarPorPagar(contenedor, saldos, repintar)
+    if (pestana === 'gastos') Idiky.vistaGastos.pintarLista(contenedor, repintar)
+    else if (pestana === 'porPagar') pintarPorPagar(contenedor, saldos, repintar)
     else if (pestana === 'egresos') pintarEgresos(contenedor, listaEgresos, repintar)
     else pintarProveedores(contenedor, repintar)
   }

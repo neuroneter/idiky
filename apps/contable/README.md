@@ -16,16 +16,26 @@ recargar. El botón **"Reiniciar demo"** devuelve todo a su estado inicial.
 
 ## Qué hace
 
+**Tres entradas en el menú**, agrupadas por lo que uno hace y no por el tipo de documento:
+
 | Módulo | Para qué |
 |---|---|
 | **Cartera** | Quién debe, cuánto y desde cuándo. Estado de cuenta por unidad y generación de las cuotas del periodo. |
-| **Recaudos** | La plata que **entra**: abonos que los propietarios informaron y hay que conciliar, y pagos que llegan por fuera. |
-| **Recibos de caja** | El libro de lo recaudado, con los anulados. |
-| **Gastos** | Lo que se le debe a los proveedores, causado. Un gasto nace **por pagar**. |
-| **Pagos** | La plata que **sale**: comprobantes de egreso a proveedores, con sus retenciones, y el directorio de proveedores. |
-| **Ajustes** | Comprobantes contables que mueven cuentas **sin que entre ni salga plata**: intereses de mora, provisiones, reclasificaciones, traslados al fondo de imprevistos. |
-| **Plan de cuentas** | El PUC de la copropiedad, editable. Los tipos de comprobante con su asiento, qué cuenta usa cada documento, y el balance de prueba. |
+| **Contabilidad** | El registro diario, en cuatro secciones (ver abajo). |
 | **Reportes** | Movimientos por cliente y fechas, estado de resultados y estado de situación financiera. Se imprimen (o se guardan como PDF) y se bajan en CSV. |
+
+### Las cuatro secciones de Contabilidad
+
+| Sección | Qué reúne |
+|---|---|
+| **Recaudos** | La plata que **entra**: los abonos por conciliar arriba y el **libro de recibos de caja** abajo, en la misma página. Primero lo que falta, después lo que ya se hizo. |
+| **Pagos** | La plata que **sale**, en el orden del ciclo: gastos causados → cuentas por pagar → comprobantes de egreso → proveedores. |
+| **Ajustes** | Comprobantes que mueven cuentas **sin que entre ni salga plata**: intereses de mora, provisiones, reclasificaciones, traslados al fondo de imprevistos. |
+| **Plan de cuentas** | El PUC editable, los tipos de comprobante con su asiento, qué cuenta usa cada documento, y el balance de prueba. |
+
+> Antes cada documento tenía su propia entrada: ocho en total. El administrador tenía que
+> saber en cuál estaba lo que buscaba. Ahora se agrupan por la tarea: conciliar un abono y
+> revisar su recibo es **un** trabajo, no dos ventanas.
 
 Lo que distingue a este módulo de una caja registradora: **el propietario dice a qué
 corresponde su abono, y eso se ve antes de aplicarlo.** El sistema sugiere el reparto por

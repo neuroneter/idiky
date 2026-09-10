@@ -12,7 +12,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy) |
-| **Contable** | Cartera · Recaudos · Recibos de caja · Gastos · Pagos a proveedores · Ajustes · Plan de cuentas · Reportes. Partida doble sobre un PUC colombiano editable |
+| **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
 | **Autenticación** | Simulada (selección de perfil, [ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso implementados** | 22 de 35 documentados (12 de residente, 10 de administrador) |
@@ -53,6 +53,47 @@ casos de uso cambien, se eliminen o aparezcan otros.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-10 · Sesión de IA (Claude), a pedido de Jeimy · Un solo módulo de Contabilidad
+
+**Qué se hizo**
+
+El menú pasó de **ocho entradas a tres**: Cartera · Contabilidad · Reportes.
+
+Cada documento tenía su propia ventana —recaudos, recibos de caja, gastos, pagos, ajustes,
+plan de cuentas— y el administrador tenía que saber en cuál estaba lo que buscaba. Ahora se
+agrupan por **lo que uno hace**, no por el tipo de documento:
+
+| Sección de Contabilidad | Qué reúne |
+|---|---|
+| **Recaudos** | Los abonos por conciliar arriba y el libro de recibos abajo, **en la misma página**. Conciliar un abono y revisar su recibo es un trabajo, no dos ventanas. |
+| **Pagos** | El ciclo completo de la plata que sale: gastos causados → cuentas por pagar → comprobantes de egreso → proveedores. |
+| **Ajustes** | Igual que antes. |
+| **Plan de cuentas** | Igual que antes. |
+
+Cartera y Reportes se quedaron fuera a propósito: son de **consultar**, no de registrar, y
+son lo que más se abre. Meterlas dentro las habría enterrado un nivel.
+
+**Un detalle que apareció al juntar:** en la sección de Pagos convivían una pestaña "Por
+pagar" y un filtro "Por pagar" de la lista de gastos, en la misma pantalla. La pestaña se
+renombró a **"Cuentas por pagar"**. También se quitó la fila de indicadores del libro de
+recibos, que repetía lo que ya dice la de arriba en la página combinada.
+
+**Verificación** — ocho suites en Chromium, todas pasan. La nueva comprueba que el menú
+quede en tres entradas, que Contabilidad agrupe las cuatro secciones, que en Recaudos se
+pueda conciliar un abono y ver su recibo aparecer en el libro de abajo sin cambiar de
+ventana, que en Pagos se registre un gasto y quede en cuentas por pagar, y que los enlaces
+que cruzan de un módulo a otro abran la sección correcta. Los estados siguen cuadrando.
+
+**Nota técnica:** `vista-contabilidad.js` no pinta nada por su cuenta — lleva la sección
+activa y le pasa el contenedor a la vista que corresponde. Cada pantalla sigue viviendo en su
+propio archivo, así que esto fue una reorganización del menú, no una reescritura.
+
+**Qué sigue**
+
+1. Declarar y pagar a la DIAN las retenciones acumuladas en `2365` y `2368` (T-21).
+2. Crear y editar tipos de comprobante desde la pantalla (T-19).
+3. Abono parcial a un gasto: hoy o se paga completo o no se paga.
 
 ### 2026-08-27 · Sesión de IA (Claude), a pedido de Jeimy · Pagos a proveedores
 

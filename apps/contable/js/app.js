@@ -16,18 +16,8 @@ Idiky.app = (function () {
   var MODULOS = [
     { id: 'cartera', texto: 'Cartera', titulo: 'Cartera',
       subtitulo: 'Quien debe, cuanto y desde cuando' },
-    { id: 'pagos', texto: 'Recaudos', titulo: 'Recaudos',
-      subtitulo: 'La plata que ENTRA: abonos por conciliar y pagos de copropietarios' },
-    { id: 'recibos', texto: 'Recibos de caja', titulo: 'Recibos de caja',
-      subtitulo: 'El libro de lo recaudado, con los anulados' },
-    { id: 'gastos', texto: 'Gastos', titulo: 'Gastos',
-      subtitulo: 'Lo que se le debe a los proveedores, causado' },
-    { id: 'egresos', texto: 'Pagos', titulo: 'Pagos a proveedores',
-      subtitulo: 'La plata que SALE: comprobantes de egreso y directorio de proveedores' },
-    { id: 'ajustes', texto: 'Ajustes', titulo: 'Comprobantes de ajuste',
-      subtitulo: 'Mover la contabilidad sin que entre ni salga plata' },
-    { id: 'plan', texto: 'Plan de cuentas', titulo: 'Plan de cuentas',
-      subtitulo: 'El PUC de la copropiedad y a que cuenta va cada documento' },
+    { id: 'contabilidad', texto: 'Contabilidad', titulo: 'Contabilidad',
+      subtitulo: 'El registro diario: recaudos, pagos, ajustes y el plan de cuentas' },
     { id: 'reportes', texto: 'Reportes', titulo: 'Reportes',
       subtitulo: 'Movimientos por cliente y estados financieros' },
   ]
@@ -38,9 +28,16 @@ Idiky.app = (function () {
     return MODULOS.filter(function (m) { return m.id === id })[0]
   }
 
+  /**
+   * `irA('contabilidad:pagos')` abre el modulo y ademas la seccion. Lo usan
+   * los enlaces que cruzan de un modulo a otro, como el de Cartera que manda
+   * a conciliar abonos.
+   */
   function irA(id) {
-    moduloActivo = id
-    pintar()
+    var partes = String(id).split(':')
+    moduloActivo = partes[0]
+    if (partes[1] && Idiky.vistaContabilidad) Idiky.vistaContabilidad.irA(partes[1], pintar)
+    else pintar()
   }
 
   /**
@@ -63,12 +60,7 @@ Idiky.app = (function () {
     var modulo = moduloActivo
 
     if (modulo === 'cartera') Idiky.vistaCartera.pintar(contenedor, pintar)
-    else if (modulo === 'pagos') Idiky.vistaPagos.pintar(contenedor, pintar)
-    else if (modulo === 'recibos') Idiky.vistaRecibos.pintar(contenedor, pintar)
-    else if (modulo === 'gastos') Idiky.vistaGastos.pintar(contenedor, pintar)
-    else if (modulo === 'egresos') Idiky.vistaEgresos.pintar(contenedor, pintar)
-    else if (modulo === 'ajustes') Idiky.vistaAjustes.pintar(contenedor, pintar)
-    else if (modulo === 'plan') Idiky.vistaPlan.pintar(contenedor, pintar)
+    else if (modulo === 'contabilidad') Idiky.vistaContabilidad.pintar(contenedor, pintar)
     else Idiky.vistaReportes.pintar(contenedor, pintar)
 
     if (opciones.mantenerFoco) {

@@ -44,6 +44,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-18 | Contable: los cinco niveles del PUC y alta de cuentas en cascada | ✅ Hecho |
 | T-20 | Contable: tipos de comprobante con su asiento, para que el administrador no elija cuentas | ✅ Hecho |
 | T-22 | Contable: módulo de pagos a proveedores con egresos, retenciones y directorio | ✅ Hecho |
+| T-23 | Contable: menú de ocho entradas a tres, agrupadas por tarea en un módulo de Contabilidad | ✅ Hecho |
 
 ---
 

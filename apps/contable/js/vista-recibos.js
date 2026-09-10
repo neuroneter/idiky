@@ -19,7 +19,13 @@ Idiky.vistaRecibos = (function () {
   var filtro = 'todos'
   var busqueda = ''
 
-  function pintar(contenedor, repintar) {
+  /**
+   * `opciones.sinIndicadores` lo usa la seccion de Recaudos: alli arriba ya
+   * estan el recaudo aplicado y los recibos emitidos, y repetirlos a media
+   * pagina solo hace ruido.
+   */
+  function pintar(contenedor, repintar, opciones) {
+    opciones = opciones || {}
     var todos = Idiky.repo.recibos()
 
     var visibles = todos.filter(function (pago) {
@@ -54,11 +60,13 @@ Idiky.vistaRecibos = (function () {
     })
 
     ui.agregar(contenedor, [
-      el('div', 'rejilla-indicadores', [
-        el('article', 'tarjeta', ui.indicador('Recibos en el libro', String(todos.length))),
-        el('article', 'tarjeta', ui.indicador('Total aplicado', f.dinero(totalAplicado))),
-        el('article', 'tarjeta', ui.indicador('Total anulado', f.dinero(totalAnulado), 'deuda')),
-      ]),
+      opciones.sinIndicadores
+        ? null
+        : el('div', 'rejilla-indicadores', [
+            el('article', 'tarjeta', ui.indicador('Recibos en el libro', String(todos.length))),
+            el('article', 'tarjeta', ui.indicador('Total aplicado', f.dinero(totalAplicado))),
+            el('article', 'tarjeta', ui.indicador('Total anulado', f.dinero(totalAnulado), 'deuda')),
+          ]),
 
       el('div', 'barra-acciones', [
         el('div', 'filtros', [

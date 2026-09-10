@@ -1206,3 +1206,57 @@ input[type="number"], .entrada-cifra {
 .fila-seleccion .columna { flex: 1; }
 
 .fila-seleccion .columna .sub { display: block; }
+
+/* ===========================================================================
+   Secciones dentro de un modulo
+   =========================================================================== */
+
+/* La navegacion de segundo nivel: se lee distinta de los filtros para que la
+   jerarquia quede clara — modulo arriba, seccion aqui, filtros abajo. */
+.secciones {
+  display: flex;
+  gap: var(--e4);
+  border-bottom: 1px solid var(--borde);
+  margin-bottom: var(--e1);
+}
+
+.seccion {
+  appearance: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  font: inherit;
+  font-size: var(--texto-base);
+  font-weight: 500;
+  color: var(--tinta-suave);
+  padding: var(--e2) 0 var(--e3);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.seccion:hover { color: var(--tinta); }
+
+.seccion.activa {
+  color: var(--acento-clara);
+  border-bottom-color: var(--acento);
+  font-weight: 650;
+}
+
+.secciones__ayuda {
+  font-size: var(--texto-sm);
+  color: var(--tinta-suave);
+  margin-bottom: var(--e2);
+}
+
+/* Separa el libro de recibos de la bandeja de conciliacion, en la misma pagina. */
+.titulo-seccion--separador {
+  margin-top: var(--e6);
+  padding-top: var(--e4);
+  border-top: 1px solid var(--borde);
+  font-size: var(--texto-sm);
+  color: var(--tinta);
+}
+
+@media (max-width: 720px) {
+  .secciones { overflow-x: auto; gap: var(--e3); }
+}
