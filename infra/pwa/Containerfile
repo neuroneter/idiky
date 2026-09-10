@@ -1,0 +1,21 @@
+# Imagen de la PWA (apps/pwa) para el entorno de desarrollo.
+# T-35 · ADR-0011. Contexto de construccion: la raiz del repositorio.
+#
+#   podman build -f infra/pwa/Containerfile -t idiky-pwa .
+
+# 1. Compila con el mismo comando que exige CLAUDE.md: `npm run build` (typecheck + vite).
+FROM docker.io/library/node:22-alpine AS construccion
+WORKDIR /pwa
+# Primero solo las dependencias: si el lockfile no cambia, esta capa se reutiliza.
+COPY apps/pwa/package.json apps/pwa/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY apps/pwa/ ./
+RUN npm run build
+
+# 2. Sirve lo compilado. Node no llega a la imagen final.
+FROM docker.io/library/nginx:1.28-alpine
+COPY infra/pwa/nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=construccion /pwa/dist/ /usr/share/nginx/html/
+# Al final, para no invalidar las capas de arriba en cada commit.
+ARG REVISION=sin-revision
+RUN echo "$REVISION" > /usr/share/nginx/html/revision.txt

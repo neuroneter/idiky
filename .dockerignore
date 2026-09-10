@@ -1,0 +1,5 @@
+# Lo que no viaja al construir las imagenes de infra/ (ADR-0011).
+# Podman y Docker leen este mismo archivo.
+.git
+**/node_modules
+**/dist
