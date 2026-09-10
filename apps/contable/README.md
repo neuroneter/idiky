@@ -14,6 +14,15 @@ moderno. Para trabajar en ella: editas un archivo, guardas, y recargas el navega
 Los datos se guardan en el navegador (`localStorage`), así que lo que hagas se conserva al
 recargar. El botón **"Reiniciar demo"** devuelve todo a su estado inicial.
 
+### Y para publicarla en el servidor
+
+Se copia la carpeta detrás de un servidor de archivos: no hay nada que construir. El único
+ajuste que importa es que el servidor mande `Cache-Control: no-cache` — los archivos no
+llevan hash en el nombre, y sin eso el navegador sigue usando el `js/` de ayer.
+
+El procedimiento completo, con qué revisar después y qué pasa con los datos de cada quien,
+está en [`docs/14-despliegue-de-la-contable.md`](../../docs/14-despliegue-de-la-contable.md).
+
 ## Qué hace
 
 **Tres entradas en el menú**, agrupadas por lo que uno hace y no por el tipo de documento:

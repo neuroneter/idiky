@@ -30,6 +30,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-17 | **Que el contador de la copropiedad valide los códigos del PUC** | Jeimy | 📋 Por hacer |
 | T-19 | Crear y editar tipos de comprobante desde la pantalla (hoy solo se ven y se usan) | Jeimy | 📋 Por hacer |
 | T-21 | Declarar y pagar a la DIAN las retenciones acumuladas en 2365 y 2368 | Jeimy | 📋 Por hacer |
+| T-25 | **Integrar en `main` la rama de Jeimy y la de infraestructura, y desplegar** | Jeimy + quien opere el servidor | 📋 Por hacer |
 
 ## Hecho
 
@@ -45,6 +46,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-20 | Contable: tipos de comprobante con su asiento, para que el administrador no elija cuentas | ✅ Hecho |
 | T-22 | Contable: módulo de pagos a proveedores con egresos, retenciones y directorio | ✅ Hecho |
 | T-23 | Contable: menú de ocho entradas a tres, agrupadas por tarea en un módulo de Contabilidad | ✅ Hecho |
+| T-24 | Contable: guía de despliegue en el servidor de desarrollo ([`14`](./14-despliegue-de-la-contable.md)) | ✅ Hecho |
 
 ---
 

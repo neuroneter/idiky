@@ -17,6 +17,7 @@ nueva o una sesión de IA distinta.
 | **Autenticación** | Simulada (selección de perfil, [ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso implementados** | 22 de 35 documentados (12 de residente, 10 de administrador) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
+| **Despliegue** | La contable se publica copiando la carpeta ([`14`](./14-despliegue-de-la-contable.md)). `infra/` está en la rama de infraestructura, no en `main` |
 
 ### Lo que funciona hoy
 
@@ -53,6 +54,53 @@ casos de uso cambien, se eliminen o aparezcan otros.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-10 · Sesión de IA (Claude), a pedido de Jeimy · Lista para desplegar
+
+**Qué se hizo**
+
+Documentar la contable para que alguien que no la escribió pueda **publicarla en el servidor
+de desarrollo** sin preguntar nada: [`14-despliegue-de-la-contable.md`](./14-despliegue-de-la-contable.md).
+
+Lo que quedó escrito, y por qué cada cosa:
+
+| Tema | Lo que hay que saber |
+|---|---|
+| Qué se publica | La carpeta `apps/contable/` **tal cual**. No hay construcción, y agregársela "ya que estamos publicando" rompe la única condición que la hace utilizable ([ADR-0006](./adr/0006-stack-aplicacion-contable.md)) |
+| Qué necesita el servidor | Servir archivos estáticos y mandar `Cache-Control: no-cache`. Nada más: no necesita reescritura de rutas ni CORS |
+| **La caché** | Los archivos no llevan hash en el nombre. Sin `no-cache`, después de desplegar la aplicación **abre, se ve bien y se comporta como la versión anterior** — un síntoma peor que un error |
+| Los datos | `localStorage`, clave `idiky.contable.bd`: cada quien tiene los suyos, desplegar no los toca, y lo hecho con doble clic no aparece al entrar por HTTP (son orígenes distintos) |
+| La semilla | Si cambia de forma, **subir `VERSION_ESQUEMA`** en `js/datos.js`, en el mismo commit: así cada navegador siembra de nuevo solo |
+| Qué revisar después | Seis puntos de cinco minutos. El que importa: estado de situación financiera con **descuadre 0** — si no lo está, algún `js/` no llegó o llegó viejo, y la consola dice cuál |
+
+**Un arreglo de despliegue.** Al servir la aplicación por HTTP, cada visita dejaba un `404`
+de `favicon.ico` en el registro del servidor: el navegador lo pide solo cuando la página no
+declara icono. Ahora `index.html` trae el icono **incrustado como SVG**, con los colores de
+marca: no es una petición más, y el registro queda limpio.
+
+**Verificación** — las ocho suites de Chromium siguen pasando. Además, servida bajo una
+subruta (`/idiky/contable/`) en un servidor HTTP de verdad: carga, concilia un abono, emite
+el recibo, los estados cuadran y **no pide ni un archivo que no exista**.
+
+**Lo que apareció al revisar las ramas, y hay que resolver antes de publicar**
+
+- `main` **ya integra la contable** (más el trabajo de Mary: asambleas, sanciones, app del
+  propietario). Al integrarla, las reglas de la contable se renumeraron para no chocar con
+  las de la PWA: **RN-26 a RN-30 son allá RN-75 a RN-79**, y RN-31 a RN-37 son RN-80 a RN-86.
+- La rama de Jeimy va por delante de esa integración en **el menú de tres entradas** y en
+  este documento.
+- **`infra/` no está en `main`**: vive en la rama de infraestructura, junto con ADR-0011
+  (entorno en contenedores) y ADR-0012 (BOB, el back office con Strapi). Ahí ya está previsto
+  el contenedor de la contable, con su `nginx.conf` y el `no-cache` puesto.
+
+O sea: **ninguna rama sola se puede desplegar completa hoy** (T-25). La de Jeimy no tiene
+`infra/`; `main` sí se puede desplegar, pero publica el menú anterior, el de ocho entradas.
+
+**Qué sigue**
+
+1. Integrar en `main` la rama de Jeimy y la de infraestructura, y desplegar (T-25).
+2. Declarar y pagar a la DIAN las retenciones acumuladas en `2365` y `2368` (T-21).
+3. Crear y editar tipos de comprobante desde la pantalla (T-19).
 
 ### 2026-09-10 · Sesión de IA (Claude), a pedido de Jeimy · Un solo módulo de Contabilidad
 
