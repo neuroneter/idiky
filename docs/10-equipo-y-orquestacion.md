@@ -124,8 +124,8 @@ revisar y de integrar.
 - **Hay un responsable de integración** (el dueño del repositorio), que es quien mezcla las
   ramas en la base común y resuelve los conflictos de los archivos compartidos. La primera
   integración se hizo el 2026-09-10 (ver la bitácora): las ramas de Mary y de Jeimy quedaron
-  juntas en `claude/idiky-work-review-ugp3xj`, y **`main` debe crearse desde ahí** — hoy no
-  existe, aunque este documento la nombre.
+  juntas en `claude/idiky-work-review-ugp3xj`, y **`main` se creó desde ahí** ese mismo día.
+  Antes no existía, aunque este documento ya la nombraba.
 - **Los identificadores se reservan, no se inventan.** `RN-xx`, `CU-X-NN`, `T-xx` y `ADR-NNNN`
   siguen desde el máximo de la rama integrada. Si dos personas van a numerar en paralelo, cada
   una toma un rango (p. ej. Mary RN-92…99, Jeimy RN-100…110) y lo anota en el tablero. Las dos

@@ -61,9 +61,10 @@ Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.
 
 ## 5. Git
 
-- **La rama integrada es la base de todo.** El 2026-09-10 se juntaron las ramas de Mary y de
-  Jeimy en `claude/idiky-work-review-ugp3xj`; de ahí debe nacer `main` (todavía no existe) y
-  de ahí sale cada rama nueva. No se sigue trabajando sobre las ramas viejas.
+- **`main` es la base de todo.** Se creó el 2026-09-10 a partir de la rama de integración
+  `claude/idiky-work-review-ugp3xj`, donde se juntaron las ramas de Mary y de Jeimy. Cada rama
+  nueva sale de `main`; nadie escribe directo en ella. No se sigue trabajando sobre las ramas
+  viejas.
 - Rama de trabajo asignada por sesión (p. ej. `claude/demo-copropiedad-app-*`).
 - Commits: `tipo(ámbito): descripción (CU-X-NN)` — ver `docs/08-convenciones.md`.
 - **Antes de crear un identificador nuevo** (`RN-xx`, `CU-X-NN`, `T-xx`, `ADR-NNNN`) busca el

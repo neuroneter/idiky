@@ -134,8 +134,9 @@ en este orden:
 
 - **Esta rama es la base de todo lo que sigue.** Las ramas originales de Mary y Jeimy quedan
   como historial; no se sigue trabajando en ellas. Cada nueva rama sale de la integrada.
-- **El repositorio no tiene rama `main`** aunque toda la documentación la nombra. El
-  responsable de integración debe crearla a partir de esta rama una vez la revise.
+- **`main` se creó a partir de esta rama** el mismo día, por decisión del responsable de
+  integración. Hasta entonces el repositorio no la tenía, aunque toda la documentación la
+  nombraba. Falta marcarla como rama por defecto en GitHub (Settings → Branches).
 - **Antes de inventar un identificador nuevo (RN, CU, T, ADR), mirar el máximo en la rama
   integrada.** Si dos personas van en paralelo, se reservan rangos y se anotan en el tablero.
   Fue lo que causó los choques que hoy tocó deshacer.
@@ -147,7 +148,7 @@ en este orden:
 
 **Qué sigue**
 
-1. El responsable de integración revisa esta rama y crea `main` desde ella.
+1. El responsable de integración marca `main` como rama por defecto en GitHub y avisa al equipo.
 2. Mary y Jeimy recorren el demo integrado y validan la cartera sobre el modelo de saldo
    (T-33): paz y salvo, sanciones y abonos parciales en la misma unidad.
 3. Despliegue de infraestructura (T-35) y, con él, el ADR-0008 del backend.
