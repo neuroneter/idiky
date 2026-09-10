@@ -12,7 +12,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy). **Integrados en una sola rama el 2026-09-10** |
-| **Sistema de gestión de IDIKY** | En diseño: Strapi 5 + PostgreSQL 17 en `apps/gestion/` ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md)). Bloqueado por el disco en Azure, el techo de recursos, el responsable y las primeras entidades (T-37) |
+| **Sistema de gestión de IDIKY** | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Todavía sin entidades; faltan abrir 8082 en Azure, el responsable y el disco de datos (T-37) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Cartera · Recaudos · Recibos de caja · Gastos · Pagos a proveedores · Ajustes · Plan de cuentas · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
@@ -97,6 +97,61 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · El sistema de gestión, instalado (T-37)
+
+**El pedido:** *«subamos el tope de idiky y realicemos la instalación en el contenedor de la
+base de datos Postgres y los dos servicios»*.
+
+**Qué quedó en el entorno**
+
+- **Un pod, `idiky-gestion`**: nginx (el único con puerto, 8082), Strapi 5.53 sobre Node 24 y
+  PostgreSQL 17, hablándose por `localhost`. PostgreSQL y Strapi **no tienen puerto en el
+  servidor**.
+- **El techo de `idiky` subió a 2 núcleos y 5 GB.**
+- **`apps/gestion/`**, el proyecto Strapi en TypeScript, sin el plugin de Strapi Cloud. Apaga
+  el registro abierto de usuarios en cada arranque y confía en la IP que le pasa nginx.
+- **Secretos generados en el servidor**, fuera del repositorio; **respaldo diario** con
+  `pg_dump`; y **un freno de disco**: `levantar.sh` no construye nada con menos de 3 GB libres.
+
+**Lo que se comprobó, porque aquí nada se da por hecho**
+
+| | |
+|---|---|
+| **LangFlow** | 200 en todas las muestras durante la construcción (2–4 ms); `verificar-vecino.sh` sin cambios después del despliegue y después del redespliegue |
+| **Recursos** | `idiky` llegó a 4,6 GB construyendo, dentro de su techo; en reposo Strapi usa 137 MB y PostgreSQL 92 MB. Disco: de 6,2 a 4,9 GB libres |
+| **Nadie se adelanta** | El superadministrador se creó antes de abrir el puerto, y un segundo registro de administrador se rechaza |
+| **Por HTTP** | El login funciona: la cookie de sesión de Strapi no exige HTTPS |
+| **Cerrado** | La API pública responde 403; el registro abierto está apagado en la base y nginx lo bloquea |
+| **Persistencia** | Los datos sobreviven a reiniciar el pod (vuelve en 7 s) y a un redespliegue que lo recrea |
+| **Respaldo** | Íntegro, con las 41 tablas y el administrador |
+
+**Dos cosas que salieron distinto de lo escrito, y quedaron corregidas en ADR-0012**
+
+- **La clave del entorno no va delante de Strapi.** Yo había escrito que protegería `/admin`, y
+  era un error: el panel de Strapi manda su propio token en la cabecera `Authorization`, la
+  misma de la clave. La puerta es el login de Strapi.
+- **Se instaló sin el disco de datos de Azure**, que sigue sin agregarse. En su lugar, el freno
+  de 3 GB. Antes de cargar datos reales, el disco propio sigue siendo necesario.
+
+**Tres hallazgos que quedaron en «Trampas conocidas» (`infra/README.md` §10):** `du` dice que la
+base pesa 4 KB porque `idiky` no puede leerla por fuera (`podman unshare du` dice 50 MB); con
+`NODE_ENV=production`, `npm ci` omite TypeScript y la compilación falla; y los errores
+`relation … does not exist` de PostgreSQL en el primer arranque son Strapi creando su esquema.
+
+**La receta se actualizó con lo probado.** `infra/nuevo-servicio.md` §5 ya no dice «sin
+probar» sobre pods, volúmenes, secretos, orden de arranque, servicios que no son nginx ni
+tareas programadas: el sistema de gestión es el ejemplo a copiar.
+
+**Qué sigue**
+
+1. **Agregar 8082 a la regla `Dev` de Azure** y comprobar desde internet que Strapi ve la IP
+   real de quien llega.
+2. **El responsable del sistema y sus primeras entidades.** Se modelan en local y van a git.
+3. **El disco de datos de Azure** y **sacar los respaldos del servidor**, antes de datos reales.
+4. **El módulo de auditoría** (T-38).
+
+---
 
 ### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Un tercer producto: el sistema de gestión de IDIKY (ADR-0012)
 

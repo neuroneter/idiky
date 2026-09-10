@@ -156,8 +156,9 @@ Desde el 2026-09-10 los dos productos se publican en contenedores, cada uno en e
 
 ```
 servidor compartido ─ usuario idiky (Podman sin root)
-├── idiky-pwa       nginx + apps/pwa compilada     → :8080, con clave
-└── idiky-contable  nginx + apps/contable tal cual → :8081, con clave
+├── idiky-pwa       nginx + apps/pwa compilada          → :8080, con clave
+├── idiky-contable  nginx + apps/contable tal cual      → :8081, con clave
+└── idiky-gestion   pod: nginx + Strapi + PostgreSQL 17 → :8082, login de Strapi (ADR-0012)
 ```
 
 Los contenedores **solo publican lo que ya existe**: no agregan compilación a la contable ni

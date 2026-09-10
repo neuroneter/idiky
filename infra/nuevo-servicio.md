@@ -17,9 +17,11 @@ secciones 2, 4 y 6 aplican igual.
       `CLAUDE.md` no permite dependencias sin ADR.
 - [ ] **¿Se tiene que ver desde internet**, o solo lo usan otros servicios? Decide el puerto y
       cómo se publica (§3 y §5).
-- [ ] **¿Guarda datos?** Hoy no hay nada persistente y ese camino no está probado (§5).
-- [ ] **¿Cabe?** Todo `idiky` comparte **1 núcleo y 3 GB**; cada contenedor tiene 256 MB y
-      construir usa hasta 2 GB. En `/` quedan unos 6 GB, compartidos con LangFlow.
+- [ ] **¿Guarda datos, tiene varias piezas o no es nginx?** Ya hay un ejemplo probado: el
+      sistema de gestión (§5). Cópialo.
+- [ ] **¿Cabe?** Todo `idiky` comparte **2 núcleos y 5 GB**; construyendo Strapi llegó a 4,6 GB.
+      En `/` quedan unos 4,9 GB, compartidos con LangFlow, y `levantar.sh` no construye con
+      menos de 3 GB libres.
 - [ ] **Toma la foto de LangFlow** antes de tocar el servidor:
       `ssh idiky@<ip> 'sh -s -- --base' < infra/servidor/verificar-vecino.sh`
 
@@ -50,7 +52,8 @@ despliega sin la clave.
 | 22, 80, 443, 8443, 7860 | **De LangFlow y del servidor. Prohibidos.** |
 | 8080 | `idiky-pwa` |
 | 8081 | `idiky-contable` |
-| **8082 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
+| 8082 | Pod `idiky-gestion` (sistema de gestión) |
+| **8083 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
 
 - **Para que se vea desde internet** hay que agregar el puerto a la regla `Dev` del grupo de
   seguridad de red en Azure (hoy dice `8080,8081`). Eso lo hace el **responsable de
@@ -179,28 +182,50 @@ anteriores ya quedaron detenidos.
 - [ ] Si trae tecnología nueva: su ADR, y la fila en `docs/adr/README.md`.
 - [ ] La bitácora (`docs/09-estado-del-proyecto.md`) y el tablero (`docs/11-tablero-de-trabajo.md`).
 
-## 5. Lo que el entorno todavía no resuelve
+## 5. Un servicio con datos, varias piezas o que no es nginx: copia el sistema de gestión
 
-Nada de esto está construido ni probado. Es el camino sugerido para no romper lo que hay;
-**el primero que lo haga debe probarlo, dejarlo escrito aquí y quitar el «sin probar»**.
+**Probado el 2026-09-10** con `infra/gestion/` (Strapi + PostgreSQL). Es el ejemplo a copiar:
+
+| Necesidad | Cómo quedó resuelto | Dónde verlo |
+|---|---|---|
+| **Varias piezas que se hablan** (API ↔ base de datos) | Un **pod**: sus contenedores comparten red y se alcanzan por `127.0.0.1`. Solo el pod publica puerto | `levantar_gestion()` en `levantar.sh` |
+| **Un servicio que no es nginx** | Un nginx dentro del pod es el único con puerto: responde `/salud` y `/revision.txt` y reenvía al servicio. El contrato del §2 se cumple igual | `infra/gestion/nginx.conf`, `proxy.Containerfile` |
+| **Una base de datos sin puerto hacia afuera** | Dentro del pod, sin `--publish`. Comprobado: 5432 no aparece en el servidor | `levantar_gestion()` |
+| **Datos que persisten** | `--volume` a `$IDIKY_DATOS/<servicio>/` (hoy `~/datos`), **nunca en `/mnt`**. Si el proceso no corre como root, `podman unshare chown <uid>:<gid> <carpeta>`. Comprobado: sobreviven a reiniciar el pod y a un redespliegue que lo recrea | `levantar_gestion()` |
+| **Secretos** | Un script que los genera **una vez** en `~/.config/idiky/secretos/` (600) y **nunca los sobrescribe**; `--env-file` en `levantar.sh`, que se detiene antes de tocar nada si faltan | `infra/gestion/secretos.sh` |
+| **Orden de arranque** | El servicio espera a su base (conexión TCP) antes de arrancar; sin eso systemd lo reinicia en bucle y se rinde | `infra/gestion/arrancar.sh` |
+| **Su propia ruta de salud** | Además de `/salud` del nginx, `esperar <nombre> <puerto> /_health 240` | Final de `levantar.sh` |
+| **Una construcción pesada** | `construir <nombre> <archivo> 3g`; y una sola etapa si las dependencias pesan (no se duplican en disco) | `infra/gestion/Containerfile` |
+| **Un servicio con su propio login** | **Sin** la clave del entorno si usa la cabecera `Authorization` (tokens): `auth_basic` lo rompería. Su login es la puerta, y el primer administrador se crea **antes** de abrir el puerto en Azure | ADR-0012 |
+| **Tareas programadas** | Temporizador de systemd del usuario, instalado por `levantar.sh`; nunca el cron del sistema | `infra/gestion/respaldo.sh` y `idiky-gestion-respaldo.{service,timer}` |
+| **Ver la IP real de quien llega** | Pod con `--network slirp4netns:port_handler=slirp4netns` | `levantar_gestion()`. **Falta comprobarlo desde internet** |
+
+**Cómo se registra en `levantar.sh`:** su construcción con su archivo y su memoria, una función
+`levantar_<servicio>()` a imagen de `levantar_gestion()`, la comprobación de sus secretos
+**antes** de construir nada, y su `esperar`. Las unidades de un pod son
+`pod-<pod>.service` (la que se habilita) y `container-<contenedor>.service` (atadas al pod).
+
+## 6. Lo que todavía no está resuelto
+
+**El primero que lo haga debe probarlo, dejarlo escrito aquí y quitar el «sin probar»**.
 
 | Necesidad | Hoy | Camino sugerido *(sin probar)* |
 |---|---|---|
-| **Un servicio que no es nginx** (p. ej. una API) | `levantar.sh` supone el puerto 80, `/salud` y `/revision.txt`, y la clave es de nginx | La API responde ella misma `/salud` y `/revision.txt` en el 80 del contenedor. **Sin nginx delante no hay clave**: no se agrega a la regla de Azure hasta resolver su acceso |
-| **Datos persistentes** (base de datos, archivos subidos) | Los contenedores usan `--rm`: no guardan nada | `--volume` a una carpeta dentro de `/home/idiky`, **nunca en `/mnt`**. Si el proceso del contenedor no corre como root, la carpeta se entrega con `podman unshare chown <uid>:<gid> <carpeta>`. Cuidado con el disco. Requiere ADR-0008 |
-| **Que dos contenedores se hablen** (API ↔ base de datos) | Cada contenedor tiene su propia red y no se ven por nombre | Un *pod* de Podman (`podman pod create`): sus contenedores comparten `localhost`. Podman 3.4 genera las unidades del pod con `podman generate systemd --new --files --name <pod>`. Exige cambiar `levantar.sh` |
-| **Un servicio que no debe salir del servidor** | `IDIKY_HOST` es uno solo para todos | Que `levantar()` reciba el host por servicio y ese se publique en `127.0.0.1`, o meterlo en un pod sin `--publish` |
-| **Secretos** (claves de API, contraseña de una base de datos) | Solo existe la clave del entorno | Un archivo en `~idiky/.config/idiky/` con permisos 600, pasado con `--env-file` desde `levantar.sh`. Nunca en el repositorio, en el `Containerfile` ni en la línea de comandos |
+| **Un servicio que no debe salir del servidor, sin pod** | `IDIKY_HOST` es uno solo para todos | Que `levantar()` reciba el host por servicio, o meterlo en un pod sin `--publish` (esto último ya funciona: PostgreSQL) |
+| **Respaldos fuera del servidor** | Quedan en el mismo disco: protegen de un error, no de perder la VM | Copiarlos a un almacenamiento de Azure u otro sitio |
+| **Un disco propio para los datos** | En el disco compartido, con el freno de 3 GB | Disco de datos de Azure montado para `idiky`, y `IDIKY_DATOS` apuntando ahí (ADR-0012) |
 | **HTTPS y dominio** | Pendiente (resto de T-35) | **No por el nginx de LangFlow**: 80 y 443 son suyos. Certificado por validación DNS, o una VM propia (ADR-0011) |
 | **Compose** | Podman 3.4 no lo trae | No hace falta con pocos servicios. Si llega a hacer falta, ADR |
-| **Limitar la CPU de un contenedor** | Sin root no se puede | El techo es por usuario: 1 núcleo y 3 GB para todo `idiky`. Si no alcanza, se discute subirlo, **sin quitárselo a LangFlow** |
-| **Tareas programadas** | — | Temporizadores de systemd del usuario (`systemctl --user`), nunca el cron del sistema |
+| **Limitar la CPU de un contenedor** | Sin root no se puede | El techo es por usuario: 2 núcleos y 5 GB para todo `idiky`. Si no alcanza, se discute subirlo, **sin quitárselo a LangFlow** |
+| **Reinicio del servidor** | Probado reiniciar el pod, no la VM | En una ventana acordada, con `verificar-vecino.sh` antes y después |
 
-## 6. Si algo sale mal
+## 7. Si algo sale mal
 
 | Síntoma | Qué mirar |
 |---|---|
-| El despliegue dice `no respondio en ...` | `ssh idiky@<ip> 'systemctl --user status container-idiky-<nombre> --no-pager; podman logs --tail 50 idiky-<nombre>'` |
+| El despliegue dice `no respondio en ...` | `ssh idiky@<ip> 'systemctl --user status container-idiky-<nombre> --no-pager; podman logs --tail 50 idiky-<nombre>'`. Si es un pod: `pod-idiky-<nombre>` y los registros de cada contenedor del pod |
+| Faltan secretos | `levantar.sh` se detiene antes de tocar nada; se crean con el script de secretos del servicio |
+| No construye por disco | `levantar.sh` exige 3 GB libres. Revisar `df -h /` y `podman system df`; **nunca** borrar nada fuera de `/home/idiky` |
 | Falla la construcción | Lo publicado sigue en pie. El error sale en la salida de `desplegar.sh` |
 | `verificar-vecino.sh` dice que algo cambió | **Revertir primero**: `git revert` del commit y desplegar de nuevo, o detener el servicio nuevo (`systemctl --user disable --now container-idiky-<nombre>`). Investigar después |
 | Responde 200 sin clave | Falta el `include` o el servicio no es nginx: **quitarlo de la regla de Azure** hasta arreglarlo |

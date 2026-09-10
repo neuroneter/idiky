@@ -115,9 +115,11 @@ Es **el primer servicio con datos que se guardan**, así que resuelve lo que
 3. **Strapi y PostgreSQL en un *pod***, con **PostgreSQL sin puerto hacia afuera**; volúmenes
    en el disco nuevo; secretos (`APP_KEYS`, `JWT_SECRET`, la contraseña de la base) fuera del
    repositorio; y **copia diaria con `pg_dump`**.
-4. **Puerto 8082.** La clave del entorno protege `/admin`, pero **no puede ir delante de la
-   API**: la clave y los tokens de Strapi usan la misma cabecera `Authorization`. La API se
-   protege con los permisos y tokens de Strapi.
+4. **Puerto 8082, sin la clave del entorno.** Aquí se había escrito que la clave protegería
+   `/admin` y solo no podía ir delante de la API. **Era un error**: el panel de Strapi también
+   manda su propio token en la cabecera `Authorization`, la misma que usa la clave, así que la
+   clave rompería el panel entero. **La puerta es el login de Strapi**, y el superadministrador
+   se crea antes de abrir el puerto en Azure (ver la revisión, abajo).
 5. **Datos ficticios.** El entorno es HTTP, con clave compartida, en un servidor que no es de
    IDIKY. Los clientes y contratos reales van en producción, con HTTPS y copias de seguridad.
 
@@ -127,6 +129,58 @@ pantallas, sin costo de licencia y sin depender de condiciones comerciales.
 **Lo que se vuelve difícil:** la auditoría y el historial se construyen y se mantienen; los
 reportes con SQL directo son incómodos por la estructura interna de Strapi; y compilar el
 panel pide recursos que el servidor compartido apenas tiene.
+
+## Revisión — 2026-09-10: instalado en el entorno de desarrollo
+
+El mismo día, con la autorización del responsable de integración (*«subamos el tope de idiky
+y realicemos la instalación en el contenedor de la base de datos Postgres y los dos servicios»*).
+
+**Cómo quedó**
+
+| | |
+|---|---|
+| **Pod `idiky-gestion`** | nginx (el único con puerto, 8082) + Strapi 5.53 sobre Node 24 + PostgreSQL 17, hablándose por `localhost` |
+| **Puertos en el servidor** | Solo 8082. **5432 y 1337 no aparecen**: comprobado con `ss` |
+| **Imagen de Strapi** | Una sola etapa: con dos, sus ~700 MB de dependencias quedarían duplicados en disco. Corre sin root (usuario `node`) |
+| **Techo de `idiky`** | Subió a 2 núcleos y 5 GB |
+| **Secretos** | Generados una vez en el servidor (`infra/gestion/secretos.sh`), con permisos 600, fuera del repositorio |
+| **Respaldo** | `pg_dump` diario a las 08:30 UTC; se guardan 7 |
+
+**Lo que se midió**
+
+| | |
+|---|---|
+| **Despliegue completo** | Unos 3 minutos. `npm ci` tarda 29 s y compilar el panel, 32 s |
+| **Memoria de `idiky`** | Pico de 4,6 GB al construir, dentro de su techo de 5 GB. En reposo: Strapi 137 MB, PostgreSQL 92 MB |
+| **LangFlow durante la construcción** | 200 en todas las muestras, entre 2 y 4 ms; `verificar-vecino.sh`, sin cambios |
+| **Disco** | De 6,2 GB libres a 4,9 GB. Las seis imágenes del entorno suman 1,3 GB |
+| **Arranque** | Strapi responde `/_health` 10 s después de crearse el pod; tras reiniciar el pod, 7 s |
+
+**Lo que se comprobó**
+
+- **Nadie más puede registrarse como administrador**: el superadministrador se creó por la API
+  de primer uso antes de abrir el puerto, y un segundo intento responde 400.
+- **El login funciona por HTTP**: la cookie de sesión de Strapi no lleva la marca `secure`.
+- **La API pública responde 403** sin token.
+- **El registro abierto de usuarios está apagado** en la base (`allow_register: false`), y nginx
+  responde 403 en esa ruta.
+- **Los datos sobreviven** a reiniciar el pod y a un redespliegue completo, que lo borra y lo
+  recrea.
+- **El respaldo es íntegro**: contiene las 41 tablas y el administrador.
+
+**Lo que se hizo distinto de lo previsto**
+
+- **Sin el disco de datos de Azure** (condición 1). Se instaló en el disco compartido con un
+  freno: `levantar.sh` **no construye nada con menos de 3 GB libres**, y lo publicado sigue en
+  pie. El disco propio sigue siendo necesario antes de cargar datos reales.
+- **La clave del entorno no va delante de Strapi** (condición 4, corregida arriba).
+
+**Lo que falta**
+
+- **Abrir 8082 en la regla `Dev` de Azure** y comprobar desde internet que Strapi ve la IP real
+  de quien llega (`port_handler=slirp4netns`). El límite de intentos de login depende de eso.
+- **Sacar los respaldos del servidor**: hoy protegen de un error, no de perder la VM.
+- **El responsable y las primeras entidades**, y después **el módulo de auditoría** (T-38).
 
 ## Fuentes
 

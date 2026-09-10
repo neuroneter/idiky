@@ -12,6 +12,20 @@ backend del producto** (ADR-0008, pendiente).
 | **Tareas** | T-37 (el sistema) · T-38 (el módulo de auditoría) |
 | **Dónde corre** | En el entorno de desarrollo, en el pod `idiky-gestion`, puerto 8082 ([`infra/README.md`](../../infra/README.md)) |
 
+## En el entorno de desarrollo
+
+Instalado el 2026-09-10.
+
+| | |
+|---|---|
+| **Panel** | `http://<ip>:8082/admin`, **cuando el puerto 8082 esté en la regla `Dev` de Azure**. Mientras tanto, por túnel: `ssh -N -L 8082:127.0.0.1:8082 idiky@<ip>` y `http://localhost:8082/admin` |
+| **Acceso** | El login de Strapi. **No** lleva la clave del entorno (ADR-0012) |
+| **Superadministrador** | `admin@idiky.local`, creado el 2026-09-10 antes de abrir nada. Su clave la tiene el responsable de integración; **no está en el repositorio ni se comparte** |
+| **Usuarios del equipo** | Los crea un administrador en el panel: *Settings → Administration panel → Users*. Cada persona con el suyo |
+| **Datos** | PostgreSQL 17 dentro del pod, sin puerto hacia afuera. **Solo datos ficticios** |
+| **Respaldo** | Diario a las 08:30 UTC; se guardan 7, en el mismo servidor |
+| **Desplegar** | `infra/desplegar.sh`, como el resto |
+
 ## La regla que más importa: el modelo se diseña en local
 
 El *Content-Type Builder* de Strapi —donde se crean las colecciones y sus campos— **solo
@@ -57,6 +71,7 @@ La primera vez, el panel pide crear el administrador. **Ese usuario es solo de t
 |---|---|---|
 | `src/index.ts` · `bootstrap` | Apaga en cada arranque el registro abierto de usuarios finales | Este sistema lo usa el equipo, que entra por el panel. El nginx del pod también bloquea la ruta |
 | `config/server.ts` · `proxy.koa` | Confía en `X-Forwarded-For` cuando `IS_PROXIED=true` | Detrás de nginx, sin esto el límite de intentos de login bloquearía a todos a la vez |
+| `config/server.ts` · `logger.updates` | Sin avisos de versión nueva | Las versiones se suben con un commit que cambia `package.json` |
 | `.env.example` | Telemetría apagada y sin avisos comerciales en el panel | — |
 | — | Se quitó `@strapi/plugin-cloud` | Es para desplegar en Strapi Cloud, y no se usa |
 

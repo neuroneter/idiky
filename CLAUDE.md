@@ -14,7 +14,7 @@ caro que puedes cometer aquí:
 |---|---|---|---|
 | `apps/pwa/` | App móvil del residente + consola web del administrador | React + TS + Vite | **Mary** |
 | `apps/contable/` | Aplicación contable: cartera, recaudos, gastos, pagos a proveedores, ajustes, PUC editable y estados financieros | HTML + CSS + JS **sin compilar** | **Jeimy** |
-| `apps/gestion/` *(en diseño)* | **Sistema de gestión de la empresa IDIKY**: clientes, contratos, planes. **No es de las copropiedades** ni es el backend del producto (ADR-0008) | Strapi 5 + PostgreSQL 17 ([ADR-0012](./docs/adr/0012-sistema-de-gestion-strapi.md)) | Por definir |
+| `apps/gestion/` *(en construcción)* | **Sistema de gestión de la empresa IDIKY**: clientes, contratos, planes. **No es de las copropiedades** ni es el backend del producto (ADR-0008) | Strapi 5 + PostgreSQL 17 ([ADR-0012](./docs/adr/0012-sistema-de-gestion-strapi.md)) | Por definir |
 
 No comparten código. Comparten **las reglas del dominio**, traducidas a los dos lenguajes.
 
@@ -66,6 +66,10 @@ Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.
 ```bash
 IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave>.pem infra/desplegar.sh   # publica el commit de HEAD
 ```
+
+**`apps/gestion/`** (Strapi): ver [`apps/gestion/README.md`](./apps/gestion/README.md). **El modelo de
+datos se diseña en local con `npm run develop` y va a git**; en el servidor Strapi corre en modo
+producción y lo creado ahí se pierde.
 
 **Si la tarea es crear o cambiar un servicio del entorno**, lee primero
 [`infra/README.md`](./infra/README.md) (cómo está armado, incluido lo que no está en git) y
