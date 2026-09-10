@@ -16,7 +16,7 @@ persona o IA — tenga que reconstruir el razonamiento más adelante.
 | [0009](./0009-soportes-fotograficos.md) | **Soportes fotográficos** del registro de personas: se capturan con HTML de siempre, se reducen y se guardan en el navegador. Lo difícil no es la foto, es el dato | Aceptada |
 | [0010](./0010-stack-aplicacion-contable.md) | **La aplicación contable se construye sin compilación**: HTML, CSS y JS que se abren con doble clic, porque quien la desarrolla no puede instalar nada | Aceptada |
 | [0011](./0011-entorno-de-desarrollo-en-contenedores.md) | **Entorno de desarrollo en contenedores**: Podman sin root, un contenedor por producto y un usuario propio, en un servidor compartido cuyo otro servicio no puede verse afectado | Aceptada |
-| [0012](./0012-sistema-de-gestion-strapi.md) | **Sistema de gestión de IDIKY**: Strapi 5 (MIT) con PostgreSQL 17. Se prefirió a Directus por la licencia; la auditoría, que Strapi Community no trae, se construye como módulo propio | Aceptada |
+| [0012](./0012-sistema-de-gestion-strapi.md) | **BOB, el back office de IDIKY**: Strapi 5 (MIT) con PostgreSQL 17. Se prefirió a Directus por la licencia; la auditoría, que Strapi Community no trae, se construye como módulo propio | Aceptada |
 
 Queda **uno** pendiente, ADR-0008 (backend), del alcance declarado el 2026-08-26
 ([`../12-levantamiento-pendiente.md` §0](../12-levantamiento-pendiente.md)). Recuerden la regla

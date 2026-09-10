@@ -12,7 +12,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy). **Integrados en una sola rama el 2026-09-10** |
-| **Sistema de gestión de IDIKY** | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Todavía sin entidades; faltan el responsable y el disco de datos (T-37) |
+| **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Todavía sin entidades; faltan el responsable y el disco de datos (T-37) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Cartera · Recaudos · Recibos de caja · Gastos · Pagos a proveedores · Ajustes · Plan de cuentas · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
@@ -97,6 +97,63 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) con el responsable de integración · BOB, BLOKY y ALICE, y lo que BOB tiene que saber de una copropiedad
+
+**Los nombres.** Al hablar de «el administrador de IDIKY» y «el administrador de propiedades»
+la conversación se enredó: eran dos sistemas con casi el mismo nombre, y llegó a parecer que
+Strapi usaría Twilio. El responsable propuso bautizarlos, y quedaron así:
+
+| | Qué es | Quién entra y cómo |
+|---|---|---|
+| **BOB** | El *back office* de IDIKY (Strapi, `apps/gestion`) | El equipo de IDIKY, con el login de Strapi. **No usa Twilio** |
+| **BLOKY** | El sistema de las copropiedades (por construir; backend en ADR-0008) | Administrador, Delegado y los perfiles que ellos creen: **un código por SMS o por correo, o Google o Microsoft** |
+| **ALICE** | La app del propietario y residente (hoy, el demo de `apps/pwa`) | Propietarios y residentes |
+
+Se descartó «NIDO» para BLOKY (el responsable quería algo que aludiera a las unidades) y
+«BLOCK» tal cual, porque en programación es una palabra corriente y confunde las búsquedas.
+**BLOKY** sale de «bloque» y de la terminación de IDIKY. La página web será **IDIKY**, y todo
+se presenta como aplicaciones de IDIKY.
+
+**Lo que se decidió sobre cómo entra una copropiedad a BOB** (refinamiento en curso):
+
+- **Planes**: nombre, condiciones y modalidad **por unidad** o **valor fijo**. **Servicios
+  adicionales** (asesoría financiera, legal…) con valor mensual y **12 meses** de duración. El
+  precio **se copia al contratar**, como en el resto del proyecto (RN-37, RN-85).
+- **Se cobra solo por unidades residenciales o comerciales.** Parqueaderos, depósitos y zonas
+  comunes no cuentan, siguiendo el criterio de la Ley 675 (art. 53).
+- **BOB crea solo dos perfiles por copropiedad: el Administrador y el Delegado.** «Delegado»
+  porque la Ley 675 **no crea la figura de presidente del consejo**, y el consejo solo es
+  obligatorio en comerciales y mixtas de más de 30 bienes privados: la copropiedad lleva un check
+  «tiene consejo de administración», y con él el Delegado es el presidente del consejo; sin él,
+  lo nombra la asamblea (verificado en la norma).
+- **El Delegado puede pedir desde BLOKY el retiro o bloqueo del Administrador**, pero **el nuevo
+  lo crea IDIKY en BOB**. Al construir esa solicitud debe cumplir la ley: el administrador lo
+  remueve la asamblea, o el consejo si existe (art. 50), así que va con el acta.
+- **Un administrador puede tener varias copropiedades**, y en pocos casos ser además propietario
+  o residente: la persona existe una vez y tiene asignaciones por copropiedad.
+- **BOB guarda la ficha y el resumen** (cuántos bienes de cada tipo, para cotizar y cobrar);
+  **el árbol completo hasta la unidad nace en la implementación y es de BLOKY**.
+- **Ubicación**: dirección, geolocalización, **DIVIPOLA de 8 dígitos** (departamento, municipio,
+  centro poblado), estrato (1 a 6, solo uso residencial) y fotos.
+- **Jerarquía propuesta**: agrupaciones de cualquier profundidad (etapa, torre, bloque, manzana,
+  piso…) con tipos que son datos, y bienes con su **naturaleza**: un parqueadero puede ser bien
+  privado con coeficiente o bien común de uso exclusivo sin él (art. 22).
+- **Ingreso a BLOKY**: **un solo código por intento**, por el canal que la persona elija, para
+  no pagar dos envíos. Las credenciales de Twilio Verify ya están en el servidor
+  (`infra/servidor/cargar-integraciones.sh`) y **un SMS de prueba salió desde allá**; todavía
+  no las usa ningún servicio.
+
+**Pendiente de responder:** quién pide el cambio del Delegado; si el cobro por unidad usa las del
+contrato o las cargadas, y si los precios incluyen IVA; si el plan dura 12 meses y se renueva
+solo; qué perfiles crea cada rol (ajusta RN-63); y si oficinas, consultorios y bodegas cuentan
+como comerciales.
+
+**Dos cuidados con Twilio:** el servicio de Verify se llama «OKMor» y así firma los SMS, así que
+conviene uno llamado IDIKY; y el Auth Token pasó por la conversación al quedar en la plantilla,
+así que conviene regenerarlo (o pasar a una API Key) y volver a subirlo.
+
+---
 
 ### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · El panel de Strapi con la marca de IDIKY (T-37)
 

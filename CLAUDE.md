@@ -14,7 +14,19 @@ caro que puedes cometer aquí:
 |---|---|---|---|
 | `apps/pwa/` | App móvil del residente + consola web del administrador | React + TS + Vite | **Mary** |
 | `apps/contable/` | Aplicación contable: cartera, recaudos, gastos, pagos a proveedores, ajustes, PUC editable y estados financieros | HTML + CSS + JS **sin compilar** | **Jeimy** |
-| `apps/gestion/` *(en construcción)* | **Sistema de gestión de la empresa IDIKY**: clientes, contratos, planes. **No es de las copropiedades** ni es el backend del producto (ADR-0008) | Strapi 5 + PostgreSQL 17 ([ADR-0012](./docs/adr/0012-sistema-de-gestion-strapi.md)) | Por definir |
+| `apps/gestion/` *(en construcción)* | **BOB**, el *back office* de la empresa IDIKY: clientes, planes, contratos; crea al Administrador y al Delegado de cada copropiedad. **No es de las copropiedades** | Strapi 5 + PostgreSQL 17 ([ADR-0012](./docs/adr/0012-sistema-de-gestion-strapi.md)) | Por definir |
+
+**Las aplicaciones de IDIKY tienen nombre** (2026-09-10). Úsalos al hablar y al escribir, para no
+confundir sistemas que se parecen:
+
+| Nombre | Qué es | Quién entra y cómo | Dónde está |
+|---|---|---|---|
+| **BOB** | El *back office* de IDIKY | El equipo de IDIKY, con el login de Strapi. **No usa Twilio** | `apps/gestion/` |
+| **BLOKY** | El sistema de las copropiedades: estructura y unidades, propietarios, cartera, asambleas | Administrador, Delegado y los perfiles que ellos creen: código por SMS o correo (Twilio Verify), Google o Microsoft | Por construir (backend: ADR-0008). Su precursor es la consola del administrador del demo, en `apps/pwa/` |
+| **ALICE** | La app del propietario y residente | Propietarios y residentes | Hoy, el demo de `apps/pwa/` |
+
+La contable de Jeimy conserva su nombre. La página web pública será **IDIKY**, y todo se presenta
+como aplicaciones de IDIKY.
 
 No comparten código. Comparten **las reglas del dominio**, traducidas a los dos lenguajes.
 

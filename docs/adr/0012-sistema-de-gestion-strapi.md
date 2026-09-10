@@ -3,6 +3,9 @@
 - **Estado:** Aceptada
 - **Fecha:** 2026-09-10
 - **Tareas:** T-37 (el sistema), T-38 (el módulo de auditoría)
+- **Nombre:** desde el 2026-09-10 este sistema se llama **BOB**, el *back office* de IDIKY. Las
+  otras aplicaciones son **BLOKY** (las copropiedades) y **ALICE** (el propietario y residente);
+  ver el glosario
 
 ## Contexto
 

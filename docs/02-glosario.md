@@ -3,6 +3,21 @@
 Vocabulario común para código, documentación e interfaz. **Los nombres de las entidades en
 el código usan estos términos en español** (ver [convenciones](./08-convenciones.md)).
 
+## Las aplicaciones de IDIKY
+
+Nombradas el 2026-09-10 para no confundir sistemas que se parecen. **La página web pública es
+IDIKY**, y todo se presenta como aplicaciones de IDIKY.
+
+| Nombre | Qué es | Quién entra | Cómo entra | Dónde está |
+|---|---|---|---|---|
+| **BOB** | El *back office* de la empresa IDIKY: clientes, planes, servicios adicionales, contratos, y el alta del Administrador y el Delegado de cada copropiedad | El equipo de IDIKY (el *operador*) | El login de Strapi. **No usa Twilio** | `apps/gestion/` (ADR-0012) |
+| **BLOKY** | El sistema de las copropiedades: estructura y unidades, propietarios, cartera, asambleas. Su nombre sale de «bloque» y de la terminación de IDIKY | El Administrador, el Delegado y los perfiles que ellos creen | Un código por SMS o por correo (Twilio Verify), o Google o Microsoft con el correo registrado | Por construir (backend: ADR-0008). Su precursor es la consola del administrador del demo, en `apps/pwa/` |
+| **ALICE** | La app del propietario y residente | Propietarios y residentes | La que defina el equipo; hoy, el demo con documento y clave | Hoy, el demo de `apps/pwa/` |
+
+La aplicación contable de Jeimy (`apps/contable/`) conserva su nombre.
+
+## Términos
+
 | Término | Definición | Nombre en código |
 |---|---|---|
 | **Propiedad Horizontal (PH)** | Régimen jurídico donde coexisten bienes privados y bienes comunes bajo un reglamento. | — |
@@ -47,6 +62,8 @@ el código usan estos términos en español** (ver [convenciones](./08-convencio
 | **Acta** | Documento que registra lo ocurrido y lo decidido en la asamblea. Aprobada, no se edita. | `Acta` |
 | **Acta aclaratoria** | Acta nueva que corrige una anterior sin modificarla. | `Acta.actaAclaratoriaDe` |
 | **Comisión verificadora** | Copropietarios elegidos en la asamblea para revisar y aprobar el acta. | *(pendiente de definir)* |
-| **Consejo de administración** | Órgano elegido que supervisa al administrador. | rol `consejo` |
+| **Consejo de administración** | Órgano elegido que supervisa al administrador. **Solo es obligatorio** en copropiedades comerciales o mixtas de más de 30 bienes privados, sin contar parqueaderos ni depósitos; en las residenciales es opcional (Ley 675, art. 53). Tiene 3 o más miembros, en número impar. **La ley no crea la figura de presidente**: la pone cada reglamento. | rol `consejo` |
+| **Delegado** | Uno de los **dos perfiles que BOB crea** en cada copropiedad (el otro es el Administrador). Si la copropiedad **tiene consejo de administración**, el Delegado es su presidente; si no, lo nombra la asamblea. Puede pedir desde BLOKY el retiro o bloqueo del Administrador, con el acta del órgano que lo decidió (Ley 675, art. 50), pero **el nuevo Administrador lo crea IDIKY en BOB** (2026-09-10) | *(por definir en BOB y BLOKY)* |
+| **Operador de IDIKY** | El equipo de IDIKY trabajando en BOB. Está por encima de cualquier copropiedad y crea sus dos perfiles raíz ([actores y roles](./03-actores-y-roles.md)) | — |
 | **Revisor fiscal** | Órgano de control contable de la copropiedad. | rol `revisor` (fase 2) |
-| **Administrador** | Representante legal que ejecuta la operación de la copropiedad. | rol `admin` |
+| **Administrador** | Representante legal que ejecuta la operación de la copropiedad. Lo elige y lo remueve la asamblea, o el consejo si existe, y **puede ser una empresa** (Ley 675, arts. 50-51). **Una misma persona o empresa puede administrar varias copropiedades**, y en pocos casos ser además propietaria o residente (2026-09-10). Lo crea IDIKY en BOB. | rol `admin` |

@@ -1,8 +1,10 @@
-# apps/gestion — Sistema de gestión de IDIKY
+# apps/gestion — BOB, el back office de IDIKY
 
-El sistema con el que **la empresa IDIKY administra su propio negocio**: clientes, contratos,
-planes. **No es para las copropiedades** (esas usan `apps/pwa` y `apps/contable`) y **no es el
-backend del producto** (ADR-0008, pendiente).
+**BOB** es la aplicación con la que **la empresa IDIKY administra su propio negocio**: clientes,
+planes, contratos, y el alta del Administrador y el Delegado de cada copropiedad. **No es para
+las copropiedades**: esas usan **BLOKY** (el sistema de las copropiedades, por construir) y
+**ALICE** (la app del propietario y residente). Tampoco es el backend de BLOKY (ADR-0008,
+pendiente). Los nombres están en el glosario (`docs/02-glosario.md`).
 
 | | |
 |---|---|

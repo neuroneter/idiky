@@ -2,6 +2,8 @@
 # Sube al servidor las credenciales de integraciones (Twilio Verify; Google y Microsoft cuando
 # existan), fuera del repositorio. T-35 · ADR-0011.
 #
+# Son de BLOKY, el sistema de las copropiedades. BOB (Strapi) no las usa: tiene su propio login.
+#
 # Corre en la maquina de quien tiene los valores:
 #
 #   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave>.pem infra/servidor/cargar-integraciones.sh

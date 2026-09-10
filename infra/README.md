@@ -12,7 +12,7 @@ que **no puede verse afectado**. Las decisiones y sus porqués están en
 |---|---|---|---|---|---|
 | PWA | `infra/pwa/` | contenedor `idiky-pwa` | `8080` | Clave del entorno | Compila `apps/pwa` con `npm run build` y la sirve con nginx. **Demo** |
 | Contable | `infra/contable/` | contenedor `idiky-contable` | `8081` | Clave del entorno | Copia `apps/contable` **tal cual** (ADR-0010) y la sirve con nginx. **Demo** |
-| Gestión | `infra/gestion/` | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082` | **Login de Strapi** | El sistema con el que IDIKY administra su negocio (`apps/gestion`, ADR-0012) |
+| **BOB** | `infra/gestion/` | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082` | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`apps/gestion`, ADR-0012) |
 
 ## 1. La regla del servidor
 
@@ -190,7 +190,7 @@ Las seis imágenes suman 1,3 GB; la mayor parte es Strapi.
 | `servidor/preparar-servidor.sh` | Servidor, con sudo, **una vez** | Instala Podman, crea `idiky`, le pone el techo y le autoriza una llave |
 | `servidor/levantar.sh` | Servidor, como `idiky` | Construye y (re)crea todo. **Aquí se registra cada servicio** |
 | `servidor/clave-acceso.sh` | Servidor, como `idiky` | Pone una clave al azar a la PWA y la contable |
-| `servidor/cargar-integraciones.sh` | Tu máquina | Sube las credenciales de Twilio (y luego Google y Microsoft) desde `.env.integraciones.local` al servidor |
+| `servidor/cargar-integraciones.sh` | Tu máquina | Sube las credenciales de BLOKY (Twilio; luego Google y Microsoft) desde `.env.integraciones.local` al servidor |
 | `servidor/verificar-vecino.sh` | Servidor, como `idiky` | Foto de LangFlow antes y comparación después (§8) |
 | `desplegar.sh` | Tu máquina | Sube un commit y llama a `levantar.sh` |
 | `nuevo-servicio.md` | — | La receta para agregar un servicio |
@@ -327,7 +327,7 @@ poner:
 | `~idiky/.config/idiky/entorno` | `IDIKY_HOST=0.0.0.0` (abierto a internet) | A mano |
 | `~idiky/.config/idiky/nginx/acceso.conf` y `htpasswd` | La clave del entorno | `clave-acceso.sh` o el comando del §6 |
 | `~idiky/.config/idiky/secretos/gestion-*.env` | Secretos de Strapi y PostgreSQL (600) | `infra/gestion/secretos.sh` |
-| `~idiky/.config/idiky/secretos/integraciones.env` | Credenciales de Twilio Verify (600). **Todavía no las usa ningún servicio**: son para el backend de propiedades (ADR-0008), que las recibirá con `--env-file` | `servidor/cargar-integraciones.sh`, desde la máquina de quien tiene los valores |
+| `~idiky/.config/idiky/secretos/integraciones.env` | Credenciales de Twilio Verify (600). **Todavía no las usa ningún servicio**: son para **BLOKY**, el sistema de las copropiedades (ADR-0008), que las recibirá con `--env-file`. **BOB no las usa** | `servidor/cargar-integraciones.sh`, desde la máquina de quien tiene los valores |
 | `~idiky/datos/gestion/postgres/` | **La base de datos del sistema de gestión** | PostgreSQL, al primer arranque |
 | `~idiky/datos/gestion/uploads/` | Archivos subidos a Strapi | Strapi |
 | `~idiky/datos/respaldos/gestion/` | Los últimos 7 respaldos | `respaldo.sh` |
