@@ -104,6 +104,12 @@ sobre los del código. Para volver a los de IDIKY, se borran ahí.
 **Las imágenes SVG llevan comentarios XML**, y un comentario XML **no puede tener dos guiones
 seguidos**: el SVG quedaría inválido y el navegador no lo dibujaría. Ya pasó una vez.
 
+**El CSS del panel no se importa como hoja de estilos.** Con `import './algo.css'` la
+compilación lo saca a un archivo aparte, pero el HTML que arma Strapi solo carga su
+JavaScript y **nunca enlaza esa hoja**: el CSS existe en `dist/` y el navegador no lo ve. Se
+importa como texto (`import css from './algo.css?raw'`) y `app.tsx` lo inyecta en un
+`<style>` al arrancar. También pasó una vez.
+
 ## Lo que no se hace aquí
 
 - **No se activa el código Enterprise (`ee/`) de Strapi.** Lo que haga falta de ahí se construye

@@ -14,7 +14,10 @@ import type { StrapiApp } from '@strapi/strapi/admin';
 
 import logotipo from './extensions/idiky-logotipo.svg';
 import icono from './extensions/idiky-icono.svg';
-import './extensions/marca.css';
+// Como texto y no como `import './extensions/marca.css'`: la compilacion sacaria el CSS a una
+// hoja aparte, y el HTML que arma Strapi solo carga su JavaScript, nunca esa hoja. Ya paso:
+// el CSS existia en dist/ y el navegador jamas lo vio. Por eso se inyecta en `bootstrap`.
+import marcaCss from './extensions/marca.css?raw';
 
 const NOMBRE = 'IDIKY Gestión';
 
@@ -95,6 +98,13 @@ export default {
   },
 
   bootstrap(_app: StrapiApp) {
+    if (!document.getElementById('idiky-marca')) {
+      const estilo = document.createElement('style');
+      estilo.id = 'idiky-marca';
+      estilo.textContent = marcaCss;
+      document.head.appendChild(estilo);
+    }
+
     const actualizar = () => {
       marcarTitulo();
       marcarAcceso();
