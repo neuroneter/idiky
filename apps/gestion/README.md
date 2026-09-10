@@ -18,9 +18,9 @@ Instalado el 2026-09-10.
 
 | | |
 |---|---|
-| **Panel** | `http://<ip>:8082/admin`, **cuando el puerto 8082 esté en la regla `Dev` de Azure**. Mientras tanto, por túnel: `ssh -N -L 8082:127.0.0.1:8082 idiky@<ip>` y `http://localhost:8082/admin` |
+| **Panel** | `http://<ip>:8082/admin`. El puerto está en la regla `Dev` de Azure desde el 2026-09-10 |
 | **Acceso** | El login de Strapi. **No** lleva la clave del entorno (ADR-0012) |
-| **Superadministrador** | `admin@idiky.local`, creado el 2026-09-10 antes de abrir nada. Su clave la tiene el responsable de integración; **no está en el repositorio ni se comparte** |
+| **Superadministrador** | Creado el 2026-09-10 como `admin@idiky.local`, antes de abrir el puerto; el responsable de integración lo cambió por sus datos. **No se comparte**: cada persona entra con su usuario |
 | **Usuarios del equipo** | Los crea un administrador en el panel: *Settings → Administration panel → Users*. Cada persona con el suyo |
 | **Datos** | PostgreSQL 17 dentro del pod, sin puerto hacia afuera. **Solo datos ficticios** |
 | **Respaldo** | Diario a las 08:30 UTC; se guardan 7, en el mismo servidor |

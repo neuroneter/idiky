@@ -12,7 +12,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy). **Integrados en una sola rama el 2026-09-10** |
-| **Sistema de gestión de IDIKY** | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Todavía sin entidades; faltan abrir 8082 en Azure, el responsable y el disco de datos (T-37) |
+| **Sistema de gestión de IDIKY** | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Todavía sin entidades; faltan el responsable y el disco de datos (T-37) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Cartera · Recaudos · Recibos de caja · Gastos · Pagos a proveedores · Ajustes · Plan de cuentas · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
@@ -97,6 +97,56 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · El panel de Strapi con la marca de IDIKY (T-37)
+
+**El pedido:** con el puerto 8082 ya abierto y el superadministrador cambiado por sus datos, el
+responsable pidió *«que este login parezca de IDIKY no de Strapi, lo mismo con el ícono tanto
+de la página de inicio como de la pestaña del explorador»*, revisando los estilos de Mary. Al
+ver el primer resultado agregó: *«poner el mismo fondo que usa Mary en la página de acceso de
+la PWA»*.
+
+**Qué quedó.** Todo sale de la identidad de Mary (`tokens.css`, `Logotipo.tsx`, la puerta de la
+PWA); los productos no comparten código, así que se copió y se dejó dicho de dónde viene:
+
+| | |
+|---|---|
+| **Pestaña** | El ícono de la PWA (`favicon.png`) y el título «IDIKY Gestión» en vez de «Strapi Admin» |
+| **Login** | El logotipo (la casa con la puerta fucsia y «idiky»), «Bienvenido a IDIKY», «Ingresar»; el degradado y las torres de la puerta de la PWA, la tarjeta redondeada y el botón violeta en píldora |
+| **Menú** | El ícono de la PWA como logo, y «IDIKY · Sistema de gestión» |
+| **Todo el panel** | Los colores de Mary con sus papeles: azul en enlaces, foco y selección; violeta en el botón principal; los fondos y bordes de la PWA. Español por defecto, en tú, sin recorridos ni avisos de pago de Strapi |
+
+**Lo que no se pudo igualar:** en la PWA el logotipo va en blanco **encima** de la tarjeta; en
+Strapi va **dentro**, porque ese lugar lo decide su código y no los estilos.
+
+**Verificado con Chrome sin ventana**, con perfil limpio: el título de la pestaña, los textos en
+español, que el favicon servido es byte a byte el de IDIKY, y capturas del login antes y
+después. LangFlow, sin cambios. **El celular no quedó verificado**: Chrome en macOS no deja
+achicar la ventana por debajo de unos 500 px, y la captura sale cortada también sin los
+estilos.
+
+**Dos trampas, y las dos costaron un despliegue** (quedaron en `apps/gestion/README.md`):
+
+- **El logotipo no se dibujaba.** Su comentario XML decía `--color-marca`, y un comentario XML no
+  puede llevar dos guiones seguidos: el SVG era inválido. Se vio en una vista previa local antes
+  de desplegar.
+- **El fondo no aparecía, aunque el CSS estaba en la compilación.** Con `import './marca.css'`
+  Strapi saca el CSS a una hoja aparte que su HTML nunca enlaza. Ahora se importa como texto
+  (`?raw`) y el panel lo inyecta al arrancar.
+
+**Hay que saberlo al subir de versión de Strapi:** logos, colores y textos son configuración
+oficial; el título de la pestaña y el fondo del login se apoyan en la estructura de la página.
+Si una versión nueva la cambia, el panel sigue funcionando pero el login vuelve a verse de
+Strapi, y se revisa `src/admin/extensions/marca.css`.
+
+**De paso se cerraron dos pendientes:** 8082 está en la regla `Dev` de Azure, y nginx registra
+la IP pública real de quien llega, así que el límite de intentos de login de Strapi cuenta por
+persona.
+
+**Qué sigue:** el responsable del sistema y sus primeras entidades; el disco de datos y sacar
+los respaldos del servidor antes de datos reales; el módulo de auditoría (T-38).
+
+---
 
 ### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · El sistema de gestión, instalado (T-37)
 

@@ -56,8 +56,8 @@ despliega sin la clave.
 | **8083 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
 
 - **Para que se vea desde internet** hay que agregar el puerto a la regla `Dev` del grupo de
-  seguridad de red en Azure (hoy dice `8080,8081`). Eso lo hace el **responsable de
-  integración** en el portal, en *Intervalos de puertos de destino*: `8080,8081,8082`. Sin ese
+  seguridad de red en Azure (hoy dice `8080,8081,8082`). Eso lo hace el **responsable de
+  integración** en el portal, en *Intervalos de puertos de destino*: `8080,8081,8082,8083`. Sin ese
   paso el puerto no llega desde internet.
 - **Aunque no esté en la regla, escucha en todas las interfaces** mientras
   `IDIKY_HOST=0.0.0.0`, y la red virtual de Azure sí llega. Un servicio que no debe salir del
@@ -65,7 +65,7 @@ despliega sin la clave.
 
 ## 4. Receta: un servicio web nuevo
 
-Ejemplo con `<nombre>` = `docs` y puerto `8082`. Cambia los dos por los tuyos.
+Ejemplo con `<nombre>` = `docs` y puerto `8083`. Cambia los dos por los tuyos.
 
 ### 4.1 La imagen
 
@@ -134,7 +134,7 @@ Cuatro líneas, **cada una en su bloque**, y su puerto en el comentario de cabec
 
 ```sh
 # Arriba, con los otros puertos:
-IDIKY_PUERTO_DOCS="${IDIKY_PUERTO_DOCS:-8082}"
+IDIKY_PUERTO_DOCS="${IDIKY_PUERTO_DOCS:-8083}"
 
 # Abajo, respetando el orden: TODO se construye antes de detener nada.
 construir pwa
@@ -160,13 +160,13 @@ anteriores ya quedaron detenidos.
 4. **Foto de LangFlow**, si no la tomaste en el §1:
    `ssh idiky@<ip> 'sh -s -- --base' < infra/servidor/verificar-vecino.sh`
 5. **Desplegar:** `IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave>.pem infra/desplegar.sh`.
-   Debe terminar con `idiky-docs responde en 0.0.0.0:8082 con la revision <commit>`.
+   Debe terminar con `idiky-docs responde en 0.0.0.0:8083 con la revision <commit>`.
 6. **Comprobar el servicio** desde el servidor (o desde fuera, si ya está en la regla de
    Azure):
 
    ```bash
-   ssh idiky@<ip> 'curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8082/'   # 401: pide clave
-   ssh idiky@<ip> 'curl -s http://127.0.0.1:8082/revision.txt'                       # el commit
+   ssh idiky@<ip> 'curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8083/'   # 401: pide clave
+   ssh idiky@<ip> 'curl -s http://127.0.0.1:8083/revision.txt'                       # el commit
    ```
 7. **Comprobar LangFlow:** `ssh idiky@<ip> 'sh -s' < infra/servidor/verificar-vecino.sh` tiene
    que decir **«sigue igual»**. Si no, se revierte primero y se investiga después.
@@ -198,7 +198,7 @@ anteriores ya quedaron detenidos.
 | **Una construcción pesada** | `construir <nombre> <archivo> 3g`; y una sola etapa si las dependencias pesan (no se duplican en disco) | `infra/gestion/Containerfile` |
 | **Un servicio con su propio login** | **Sin** la clave del entorno si usa la cabecera `Authorization` (tokens): `auth_basic` lo rompería. Su login es la puerta, y el primer administrador se crea **antes** de abrir el puerto en Azure | ADR-0012 |
 | **Tareas programadas** | Temporizador de systemd del usuario, instalado por `levantar.sh`; nunca el cron del sistema | `infra/gestion/respaldo.sh` y `idiky-gestion-respaldo.{service,timer}` |
-| **Ver la IP real de quien llega** | Pod con `--network slirp4netns:port_handler=slirp4netns` | `levantar_gestion()`. **Falta comprobarlo desde internet** |
+| **Ver la IP real de quien llega** | Pod con `--network slirp4netns:port_handler=slirp4netns` | `levantar_gestion()`. Comprobado: nginx registra la IP pública de quien llega |
 
 **Cómo se registra en `levantar.sh`:** su construcción con su archivo y su memoria, una función
 `levantar_<servicio>()` a imagen de `levantar_gestion()`, la comprobación de sus secretos

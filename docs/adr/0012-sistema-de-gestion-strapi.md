@@ -177,8 +177,9 @@ y realicemos la instalación en el contenedor de la base de datos Postgres y los
 
 **Lo que falta**
 
-- **Abrir 8082 en la regla `Dev` de Azure** y comprobar desde internet que Strapi ve la IP real
-  de quien llega (`port_handler=slirp4netns`). El límite de intentos de login depende de eso.
+- ~~Abrir 8082 en la regla `Dev` de Azure y comprobar que Strapi ve la IP real de quien llega.~~
+  **Hecho el mismo día**: la regla incluye 8082, y nginx registra la IP pública de quien llega,
+  así que el límite de intentos de login cuenta por persona.
 - **Sacar los respaldos del servidor**: hoy protegen de un error, no de perder la VM.
 - **El responsable y las primeras entidades**, y después **el módulo de auditoría** (T-38).
 

@@ -60,7 +60,7 @@ infra/desplegar.sh
 
 ```
 Navegador
-  └─▶ Azure NSG, regla "Dev" (prioridad 340 · TCP 8080,8081 · cualquier origen)
+  └─▶ Azure NSG, regla "Dev" (prioridad 340 · TCP 8080,8081,8082 · cualquier origen)
       └─▶ VM :8080   (escucha en todas las interfaces porque IDIKY_HOST=0.0.0.0)
           └─▶ rootlessport + slirp4netns   procesos de idiky: la red va en espacio de
               │                            usuario y no toca iptables
@@ -70,8 +70,8 @@ Navegador
 ```
 
 Los puertos que no están en la regla `Dev` **no llegan desde internet** (comprobado: se quedan
-sin respuesta). **Hoy la regla no incluye 8082**: el sistema de gestión solo se alcanza por
-túnel hasta que se agregue. Los puertos sí llegan desde la red virtual de Azure (regla por
+sin respuesta). 8082 se agregó a la regla el 2026-09-10, y **nginx registra la IP pública real
+de quien llega** (comprobado). Los puertos sí llegan desde la red virtual de Azure (regla por
 defecto `AllowVnetInBound`), así que un puerto que escucha en `0.0.0.0` no está oculto del
 todo.
 
@@ -219,9 +219,10 @@ es la clave**.
 - **Es HTTP, no HTTPS.** La clave viaja sin cifrar, y el navegador apaga el *service worker* y
   la huella, que exigen contexto seguro.
 
-**Gestión**, con el login de Strapi: `http://<ip>:8082/admin`, **cuando el puerto esté en la
-regla `Dev`**. Mientras tanto, y para cualquier cosa que exija contexto seguro, **por túnel**
-(`localhost` sí cuenta como seguro):
+**Gestión**, con el login de Strapi: `http://<ip>:8082/admin`.
+
+Para cualquier cosa que exija contexto seguro, **por túnel** (`localhost` sí cuenta como
+seguro):
 
 ```bash
 ssh -i ~/.ssh/<llave>.pem -N -L 8080:127.0.0.1:8080 -L 8081:127.0.0.1:8081 -L 8082:127.0.0.1:8082 idiky@<ip>
@@ -328,7 +329,7 @@ poner:
 | `~idiky/datos/gestion/postgres/` | **La base de datos del sistema de gestión** | PostgreSQL, al primer arranque |
 | `~idiky/datos/gestion/uploads/` | Archivos subidos a Strapi | Strapi |
 | `~idiky/datos/respaldos/gestion/` | Los últimos 7 respaldos | `respaldo.sh` |
-| El usuario `admin@idiky.local` de Strapi | El superadministrador, creado el 2026-09-10. Su clave la tiene el responsable de integración | La API de primer uso de Strapi |
+| El superadministrador de Strapi | Creado el 2026-09-10 como `admin@idiky.local` antes de abrir el puerto; el responsable de integración lo cambió por sus datos | La API de primer uso de Strapi |
 | `~idiky/.config/idiky/vecino-base.txt` | La última foto de LangFlow | `verificar-vecino.sh --base` |
 | `~idiky/.config/systemd/user/*.service`, `*.timer` | Las unidades | `levantar.sh`. **No se editan a mano** |
 | `~idiky/.local/bin/idiky-gestion-respaldo` | Copia del script de respaldo | `levantar.sh` |
@@ -336,7 +337,7 @@ poner:
 | `~idiky/fuente/` | Copia del commit publicado | `desplegar.sh` |
 | `~idiky/.ssh/authorized_keys` | Llaves de quienes despliegan | `preparar-servidor.sh` |
 | `/etc/systemd/system.control/user-1001.slice.d/` | El techo de CPU y memoria | `preparar-servidor.sh` |
-| El grupo de seguridad de red de la VM, regla `Dev` | Prioridad 340 · TCP 8080,8081 · origen cualquiera | El responsable, en el portal de Azure |
+| El grupo de seguridad de red de la VM, regla `Dev` | Prioridad 340 · TCP 8080,8081,8082 · origen cualquiera | El responsable, en el portal de Azure |
 
 ## 10. Trampas conocidas
 
