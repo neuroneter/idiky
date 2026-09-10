@@ -91,7 +91,7 @@ identidad cambia allá, se cambia aquí también.**
 | Logo del menú | `src/admin/extensions/idiky-icono.svg` | Copia de `apps/pwa/public/icono.svg` |
 | Colores del panel | `src/admin/app.tsx` · `theme` | Azul de marca en enlaces, foco y selección; violeta de acción en el botón principal; los fondos y bordes de la PWA |
 | Textos | `src/admin/app.tsx` · `translations` | «Bienvenido a IDIKY», «Ingresar»…, en tú como la PWA. **Español por defecto** |
-| Título de la pestaña | `src/admin/app.tsx` · `bootstrap` | «IDIKY Gestión» en vez de «Strapi Admin» y «… \| Strapi» |
+| Título de la pestaña | `src/admin/app.tsx` · `bootstrap` | «BOB» en vez de «Strapi Admin», y «… \| BOB» en vez de «… \| Strapi». En el menú, «BOB · IDIKY». Se publicará en `bob.idiky.com` |
 | Fondo del login | `src/admin/extensions/marca.css` | El degradado y la silueta de las torres de la puerta de la PWA, tarjeta redondeada y botón en píldora |
 
 **Lo que hay que revisar al subir de versión de Strapi.** Strapi solo deja configurar logos,

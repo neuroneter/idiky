@@ -19,7 +19,8 @@ import icono from './extensions/idiky-icono.svg';
 // el CSS existia en dist/ y el navegador jamas lo vio. Por eso se inyecta en `bootstrap`.
 import marcaCss from './extensions/marca.css?raw';
 
-const NOMBRE = 'IDIKY Gestión';
+// BOB, el back office de IDIKY (docs/02-glosario.md). Se publicara en bob.idiky.com.
+const NOMBRE = 'BOB';
 
 // Espanol por defecto. Strapi lee el idioma de localStorage al crear su estado, y este
 // modulo se carga antes. Si la persona ya eligio otro idioma, se respeta.
@@ -34,26 +35,26 @@ try {
 // En tu, como la PWA.
 const textosEs = {
   'Auth.form.welcome.title': 'Bienvenido a IDIKY',
-  'Auth.form.welcome.subtitle': 'Sistema de gestión · ingresa con tu cuenta',
+  'Auth.form.welcome.subtitle': 'BOB · ingresa con tu cuenta',
   'Auth.form.email.label': 'Correo electrónico',
   'Auth.form.email.placeholder': 'nombre@empresa.com',
   'Auth.form.rememberMe.label': 'Recordarme',
   'Auth.form.button.login': 'Ingresar',
   'Auth.link.forgot-password': '¿Olvidaste tu contraseña?',
-  'app.components.LeftMenu.navbrand.title': 'IDIKY',
-  'app.components.LeftMenu.navbrand.workplace': 'Sistema de gestión',
+  'app.components.LeftMenu.navbrand.title': 'BOB',
+  'app.components.LeftMenu.navbrand.workplace': 'IDIKY',
   'app.components.LeftMenu.logo.alt': 'Logo de IDIKY',
-  'HomePage.header.subtitle': 'Bienvenido al sistema de gestión de IDIKY',
+  'HomePage.header.subtitle': 'Bienvenido a BOB',
 };
 
 // El ingles es el idioma de respaldo de Strapi: aunque alguien lo escoja, la marca es IDIKY.
 const textosEn = {
   'Auth.form.welcome.title': 'Welcome to IDIKY',
-  'Auth.form.welcome.subtitle': 'Management system · log in to your account',
-  'app.components.LeftMenu.navbrand.title': 'IDIKY',
-  'app.components.LeftMenu.navbrand.workplace': 'Management system',
+  'Auth.form.welcome.subtitle': 'BOB · log in to your account',
+  'app.components.LeftMenu.navbrand.title': 'BOB',
+  'app.components.LeftMenu.navbrand.workplace': 'IDIKY',
   'app.components.LeftMenu.logo.alt': 'IDIKY logo',
-  'HomePage.header.subtitle': "Welcome to IDIKY's management system",
+  'HomePage.header.subtitle': 'Welcome to BOB',
 };
 
 export default {
@@ -121,7 +122,7 @@ export default {
   },
 };
 
-/** «Strapi Admin» y «Pagina | Strapi» pasan a decir IDIKY. */
+/** «Strapi Admin» y «Pagina | Strapi» pasan a decir BOB. */
 function marcarTitulo() {
   const actual = document.title;
   const nuevo = actual === 'Strapi Admin' ? NOMBRE : actual.replace(/\| Strapi$/, `| ${NOMBRE}`);

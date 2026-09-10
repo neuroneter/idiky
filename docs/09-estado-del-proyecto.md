@@ -115,6 +115,11 @@ Se descartó «NIDO» para BLOKY (el responsable quería algo que aludiera a las
 **BLOKY** sale de «bloque» y de la terminación de IDIKY. La página web será **IDIKY**, y todo
 se presenta como aplicaciones de IDIKY.
 
+**El panel de Strapi pasó a llamarse BOB**: la pestaña dice «BOB», el menú «BOB · IDIKY» y el
+login «BOB · ingresa con tu cuenta» (antes, «IDIKY Gestión» y «Sistema de gestión»). Se
+publicará en **`bob.idiky.com`**; en palabras del responsable, *«funcionalmente el usuario ya lo
+entenderá»*. El dominio y HTTPS siguen pendientes (T-35).
+
 **Lo que se decidió sobre cómo entra una copropiedad a BOB** (refinamiento en curso):
 
 - **Planes**: nombre, condiciones y modalidad **por unidad** o **valor fijo**. **Servicios
