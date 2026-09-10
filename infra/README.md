@@ -10,7 +10,9 @@ que **no puede verse afectado**. La decisión y sus porqués están en
 | `apps/contable/` | `idiky-contable` | `127.0.0.1:8081` |
 
 Los dos corren con **Podman sin root**, bajo el usuario `idiky`, como servicios de systemd de
-ese usuario. Vuelven a arrancar solos si el servidor se reinicia.
+ese usuario, habilitados con *linger* para arrancar con el servidor. **Eso no se ha probado
+con un reinicio real**, porque reiniciar el servidor afecta al otro servicio: la primera vez
+que pase, hay que comprobar que volvieron.
 
 ## Regla del servidor
 

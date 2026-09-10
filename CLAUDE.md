@@ -59,6 +59,13 @@ npm run empaquetar # deja dist/idiky-demo.html: el demo en un solo archivo
 
 Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.
 
+**`infra/`** — entorno de desarrollo en contenedores ([ADR-0011](./docs/adr/0011-entorno-de-desarrollo-en-contenedores.md),
+[`infra/README.md`](./infra/README.md)):
+
+```bash
+IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave>.pem infra/desplegar.sh   # publica el commit de HEAD
+```
+
 ## 5. Git
 
 - **`main` es la base de todo.** Se creó el 2026-09-10 a partir de la rama de integración
@@ -77,6 +84,9 @@ Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.
 - No implementar autenticación real, pagos reales ni backend en la fase 1: ese alcance está
   en el roadmap (fases 2 y 4) y hacerlo antes rompe el propósito del demo.
 - No introducir librerías de UI ni de estado global sin ADR.
+- No tocar nada del servidor de desarrollo fuera del usuario `idiky`: lo comparte otro
+  servicio (LangFlow) cuyos consumidores dependen de sus puertos 80, 443, 8443 y 7860 y de
+  sus rutas. Nada de nginx, firewall ni `sudo` para Idiky sin discutirlo antes (ADR-0011).
 - No meterle compilación, npm ni dependencias a `apps/contable/`: rompe la única condición
   que la hace utilizable por quien la desarrolla (ADR-0010).
 - No borrar registros de datos: se cierran o anulan (trazabilidad).

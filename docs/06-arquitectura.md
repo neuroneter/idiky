@@ -147,3 +147,20 @@ Diseño previsto para no bloquear decisiones hoy:
 
 La elección concreta de tecnología del backend se documentará en un ADR cuando se tome.
 **No está decidida.**
+
+## 7. Entorno de desarrollo
+
+Desde el 2026-09-10 los dos productos se publican en contenedores, cada uno en el suyo
+([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), carpeta
+[`infra/`](../infra/README.md)):
+
+```
+servidor compartido ─ usuario idiky (Podman sin root)
+├── idiky-pwa       nginx + apps/pwa compilada   → 127.0.0.1:8080
+└── idiky-contable  nginx + apps/contable tal cual → 127.0.0.1:8081
+```
+
+Los contenedores **solo publican lo que ya existe**: no agregan compilación a la contable ni
+dependencias a la PWA. El servidor lo comparte otro servicio que no puede verse afectado,
+así que **todo lo de Idiky vive dentro del usuario `idiky`** y no toca nginx, firewall ni
+puertos ajenos.

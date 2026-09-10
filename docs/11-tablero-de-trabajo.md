@@ -42,7 +42,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-31 | Declarar y pagar a la DIAN las retenciones acumuladas en 2365 y 2368 | Jeimy | 📋 Por hacer |
 | T-33 | **Validar la cartera integrada en la PWA**: paz y salvo, sanciones y abonos parciales sobre el modelo de `saldo` por cuota (RN-75 a RN-79) | Mary + Jeimy | 📋 Por hacer |
 | T-34 | Unificar las dos herramientas de empaquetado del demo (`empaquetar-demo.py` y `empaquetar.mjs`) en una sola | Zona D | 📋 Por hacer |
-| T-35 | **Despliegue de infraestructura**: entorno, dominio y pipeline para publicar la PWA y la contable | Responsable de integración | 📋 Por hacer |
+| T-35 | **Despliegue de infraestructura**: entorno, dominio y pipeline para publicar la PWA y la contable. **El entorno de desarrollo ya existe** (2026-09-10, [ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)); faltan HTTPS y dominio, abrirlo a la red y el pipeline | Responsable de integración | 🔨 En curso |
 
 ## Hecho
 

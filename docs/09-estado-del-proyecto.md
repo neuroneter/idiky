@@ -19,6 +19,7 @@ nueva o una sesión de IA distinta.
 | **Casos de uso** | 69 documentados: 36 ✅ en el demo, 11 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
 | **Reglas de negocio** | 91 (RN-01…RN-91; RN-41 retirada). RN-75 a RN-91 vienen de la contable |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
+| **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Se ven por túnel SSH ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
 ### Lo que funciona hoy
@@ -95,6 +96,74 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · El entorno de desarrollo, sin tocar al vecino (T-35, ADR-0011)
+
+**De dónde salió.** El pedido fue preparar la infraestructura de desarrollo «según lo acordado
+en la bitácora del 2026-09-10». **La bitácora no tenía ese acuerdo**: solo nombraba T-35 como
+siguiente paso. La decisión se tomó en esta sesión, con el responsable de integración, y quedó
+escrita en [ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md) para que no vuelva a
+pasar.
+
+**La restricción que manda todo.** El único servidor disponible es una VM compartida donde
+corre LangFlow, de otro proyecto, con servicios que lo consultan. En palabras del responsable:
+*«hay que garantizar que langflow siga funcionando en los puertos y rutas que usa ya que hay
+servicios que lo consultan»*.
+
+**Qué se construyó**
+
+| | |
+|---|---|
+| **Motor** | Podman 3.4 **sin root**, el de Ubuntu 22.04. Se descartaron Docker (daemon root que reescribe `iptables` en un servidor ajeno) y el LXD que ya estaba instalado (no deja una receta reproducible en el repositorio) |
+| **Aislamiento** | Un usuario propio, `idiky`, que no puede leer los archivos de LangFlow. La red va en espacio de usuario: no toca `iptables` |
+| **Contenedores** | `idiky-pwa` compila con `npm run build` y sirve con nginx. `idiky-contable` **copia la carpeta tal cual**, así que ADR-0010 queda intacto: sigue abriéndose con doble clic |
+| **Publicación** | Solo en `127.0.0.1:8080` y `127.0.0.1:8081`. Se entra por túnel SSH |
+| **Despliegue** | `infra/desplegar.sh` sube **un commit** con `git archive` y reconstruye en unos 30 s. `/revision.txt` dice qué está publicado |
+
+**Cómo se comprobó que LangFlow no cambió.** No bastaba con decir que Idiky no toca nginx:
+
+- **Se tomó una línea base antes de instalar nada**: estado y PID de los servicios, qué
+  proceso escucha en cada puerto, y el código de respuesta de 12 rutas desde dentro del
+  servidor —con el nombre del sitio— y 6 desde internet. Se repitió después de cada cambio y
+  **salió idéntica todas las veces**.
+- **Durante la primera construcción se midió `/health` cada 6 s**: 48 de 48 respuestas 200,
+  entre 2 y 4 ms.
+- **No se ejecutaron flujos reales** para probar, porque tendrían efectos. Se revisó el log de
+  nginx.
+- **Dos alarmas, con su explicación**, porque así hay que buscarlas la próxima vez: los
+  `OPTIONS` sin `POST` eran del propio verificador (`curl`), y los seis errores 500 en la hora
+  del cambio eran de un endpoint de LangFlow que **ya fallaba igual el 2 de septiembre**: el
+  servicio externo que consulta tiene un certificado inválido.
+
+**Lo que el paquete hizo por su cuenta, y se deshizo.** Ubuntu habilita solos la API de Podman
+como root, el auto-update, el arranque de contenedores root y la API para todos los usuarios.
+Idiky no usa nada de eso, así que `preparar-servidor.sh` lo apaga.
+
+**La huella en el servidor:** 11 paquetes nuevos, sin actualizar ninguno de los existentes; el
+usuario `idiky` con *linger*; unos 200 MB de disco. `iptables` no cambió: el ruleset de nft
+solo cambió en los contadores del agente de Azure. Cómo deshacerlo todo está en
+[`infra/README.md`](../infra/README.md).
+
+**Lo que hay que saber a partir de ahora**
+
+- **Todo lo de Idiky vive dentro del usuario `idiky`.** Quedó como regla en `CLAUDE.md` §6.
+- **Abrirlo a la red no es cambiar un número.** Sobre `http://<ip>` el navegador apaga el
+  *service worker* y la huella, que exigen contexto seguro. Hace falta HTTPS, y no por el nginx
+  de LangFlow.
+- **Sin backend no hace falta Compose.** Cuando ADR-0008 traiga una base de datos se revisa
+  ADR-0011: el disco es escaso, y los datos nunca van en `/mnt`, que en Azure se borra al
+  apagar la VM.
+- **El reinicio del servidor no se probó**, porque tumbaría a LangFlow. Los servicios están
+  habilitados con *linger* y deberían volver solos; la primera vez que el servidor se reinicie,
+  hay que mirarlo.
+
+**Qué sigue**
+
+1. Dar acceso a Mary y a Jeimy: su llave pública en el usuario `idiky` (ver `infra/README.md`).
+2. Decidir si el entorno se abre a la red: dominio, HTTPS y regla en Azure (resto de T-35).
+3. El pipeline: desplegar al integrar en `main`, en vez de a mano.
+
+---
 
 ### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Las dos ramas en una
 
