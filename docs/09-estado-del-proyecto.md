@@ -98,6 +98,56 @@ buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · BOB ya crea copropiedades, perfiles raíz, planes y contratos (T-37, T-39)
+
+**El pedido:** *«generemos los ajustes ahora en BOB para que podamos ver un poco cómo se crean
+estos perfiles, la creación de los planes, etc., lo que pertenece a BOB»*.
+
+**Qué quedó en BOB.** Ocho tipos de contenido —tipo de bien, plan, servicio adicional,
+copropiedad, persona, asignación, contratación y solicitud— y dos componentes, ubicación y bien
+por tipo. Todo sale de [`13-bob-copropiedades-y-contratos.md`](./13-bob-copropiedades-y-contratos.md)
+y el detalle está en `apps/gestion/README.md`.
+
+**Las reglas viven en el servidor**, en un middleware del Document Service, no en los
+formularios. Se cumplen igual si el registro llega por el panel, por la API o por otro código:
+
+- **El dígito de verificación del NIT** se comprueba con el algoritmo de la DIAN.
+- **Las unidades que se cobran se calculan** del resumen de bienes: parqueaderos, depósitos y
+  bodegas no suman.
+- **Un solo Administrador y un solo Delegado vigentes por copropiedad**, que no pueden ser la misma
+  persona. El soporte del Delegado depende del check de consejo, y solo el Administrador puede
+  ser una empresa.
+- **Lo firmado se copia al contratar y no se edita**: subir la tarifa del plan no cambia una
+  contratación. Se calculan el total, el prorrateo con meses de 30 días y la fecha de fin.
+- **El cambio de Delegado solo entra por `operaciones@idiky.com`.**
+- **Nada se borra.**
+
+**Cómo se probó antes de tocar el servidor.** Strapi se levantó en local sobre una base SQLite
+desechable, con `better-sqlite3` instalado sin guardarlo en el proyecto, y un script recorrió las
+reglas: **52 de 52 comprobaciones**, cada una aceptando lo válido y rechazando lo inválido con su
+mensaje. El script quedó en `apps/gestion/scripts/probar-bob.mjs` para repetirlo al cambiar una
+regla. La prueba encontró un error de tipos antes del despliegue, no después.
+
+**Verificado en el servidor:** Strapi respondió en 5 s; están las diez tablas nuevas; los nueve
+tipos de bien quedaron sembrados (se cobran apartamento, casa, local, oficina y consultorio); las
+etiquetas en español y las columnas quedaron guardadas en el panel; la API pública de los tipos
+nuevos responde 403; y LangFlow sigue igual a la foto base.
+
+**Decisiones de implementación que quedaron escritas en docs/13 §8:** los 12 meses cuentan desde
+el día del contrato; el prorrateo usa la convención comercial (el 1 es mes completo y el 31 cuenta
+como 30); una contratación solo edita su estado, sus notas y el contrato firmado; y el lote quedó
+sin cobro mientras se decide.
+
+**Las etiquetas del panel están en código** (`src/bob/panel.ts`) y se aplican en cada arranque:
+lo que se cambie desde el panel vuelve a lo que dice el código.
+
+**Qué sigue:** que el equipo cree en BOB una copropiedad de prueba con sus dos perfiles raíz, un
+plan y una contratación, y diga qué sobra o falta; resolver lo abierto de docs/13 §7 (los dos
+choques con reglas existentes, IVA, renovación, bordes del prorrateo); y el módulo de auditoría
+(T-38).
+
+---
+
 ### 2026-09-10 · Integración · Sesión de IA (Claude) con el responsable de integración · BOB, BLOKY y ALICE, y lo que BOB tiene que saber de una copropiedad
 
 **Los nombres.** Al hablar de «el administrador de IDIKY» y «el administrador de propiedades»

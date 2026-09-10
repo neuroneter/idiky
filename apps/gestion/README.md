@@ -77,6 +77,57 @@ La primera vez, el panel pide crear el administrador. **Ese usuario es solo de t
 | `.env.example` | Telemetría apagada y sin avisos comerciales en el panel | — |
 | — | Se quitó `@strapi/plugin-cloud` | Es para desplegar en Strapi Cloud, y no se usa |
 
+## Qué hay en BOB
+
+Lo que el refinamiento decidió que pertenece a BOB
+([`docs/13-bob-copropiedades-y-contratos.md`](../../docs/13-bob-copropiedades-y-contratos.md)).
+Construido el 2026-09-10.
+
+| Tipo de contenido | Qué guarda |
+|---|---|
+| **Tipo de bien** | Catálogo de tipos de bien con **«se cobra»**. Arranca con apartamento, casa, local, oficina y consultorio (se cobran), y bodega, depósito, parqueadero y lote (no se cobran; el lote, por definir) |
+| **Plan** | Nombre, condiciones, modalidad (`por_unidad` o `valor_fijo`), valor mensual, si restringe unidades y si está activo. Dura 12 meses |
+| **Servicio adicional** | Nombre, descripción, valor mensual y si está activo. Dura 12 meses |
+| **Copropiedad** | La ficha: NIT y dígito de verificación, tipo, uso, check de consejo de administración, estado, estrato, ubicación (componente con DIVIPOLA y geolocalización), resumen de bienes (componente repetible), unidades que se cobran, fotos y soportes |
+| **Persona** | Quien ocupa un perfil raíz: nombre, documento, celular y correo. Existe una sola vez |
+| **Asignación** | Una persona como **Administrador** o **Delegado** de una copropiedad, con su periodo, su estado, su soporte y, si aplica, la empresa administradora |
+| **Contratación** | Un plan o un servicio adicional contratado. Guarda lo firmado y lo calculado |
+| **Solicitud** | Pedidos de cambio o bloqueo de los perfiles raíz, con canal, soporte y resolución |
+
+**Las reglas viven en el servidor** (`src/bob/middlewares.ts`), en un *middleware* del Document
+Service. Se cumplen igual si el registro llega desde el panel, desde la API o desde otro código:
+
+| Dónde | Regla |
+|---|---|
+| Copropiedad | El **dígito de verificación del NIT** se comprueba con el algoritmo de la DIAN. El estrato no va en uso comercial. En Colombia la ubicación exige el **DIVIPOLA de 8 dígitos**. Las **unidades que se cobran se calculan** del resumen de bienes, y un tipo de bien va una sola vez |
+| Persona | El celular se guarda en formato internacional (un celular colombiano de 10 dígitos recibe el `+57`). No se repite el mismo documento |
+| Asignación | **Un solo Administrador y un solo Delegado vigentes por copropiedad.** El Administrador y el Delegado no son la misma persona. El soporte del Delegado va con el check de consejo (acta del consejo o acta de la asamblea). Solo el Administrador puede ser una empresa. Una asignación finalizada lleva fecha de fin |
+| Contratación | **Lo firmado se copia al contratar y no se edita**: si el plan cambia después, la contratación conserva su precio y sus condiciones. Se calculan el valor mensual total, el **prorrateo del primer mes con meses de 30 días** y la fecha de fin. Un plan que restringe unidades exige el máximo. No se contrata un plan inactivo |
+| Solicitud | **El cambio de Delegado solo entra por `operaciones@idiky.com`.** Aprobar o rechazar exige la resolución |
+| Todos | **Nada se borra**: se desactiva, se finaliza o se cancela |
+
+Las reglas puras (dígito de verificación, celular, prorrateo, fecha de fin) están aparte, en
+`src/bob/reglas.ts`, sin Strapi. **Las etiquetas, ayudas y columnas del panel** se definen en
+`src/bob/panel.ts` y se aplican en cada arranque: si se cambian desde el panel, el siguiente
+arranque las devuelve a lo que dice el código. Ahí también se siembran los tipos de bien.
+
+**Lo que BOB no hace:** crear los perfiles internos de la copropiedad ni el árbol hasta la
+unidad. Eso es de BLOKY.
+
+### Probarlo
+
+`scripts/probar-bob.mjs` levanta Strapi en tu máquina sobre una base SQLite desechable, recorre
+las reglas (lo válido se acepta, lo inválido se rechaza con su mensaje) y borra la base al
+terminar. No toca PostgreSQL ni el servidor:
+
+```bash
+cd apps/gestion
+npm i --no-save better-sqlite3     # una vez; no cambia package.json ni el lockfile
+node scripts/probar-bob.mjs        # 52 comprobaciones; sale con 1 si algo falla
+```
+
+**Al cambiar una regla, se corre antes de desplegar.**
+
 ## La marca de IDIKY en el panel
 
 El panel no debe parecer de Strapi. Los colores, el logotipo y el ícono salen de la identidad

@@ -127,6 +127,26 @@ Propuesta, para cualquier tipo de copropiedad:
 7. **¿Un lote** (condominios campestres) se cobra?
 8. **Una copropiedad suspendida:** ¿qué conserva en BLOKY y en ALICE?
 
+## 8. Lo construido en BOB (2026-09-10)
+
+Todo lo de los §2, §3 y §5 que pertenece a BOB ya existe en Strapi: tipos de bien, planes,
+servicios adicionales, copropiedades (con ubicación y resumen de bienes), personas,
+asignaciones de Administrador y Delegado, contrataciones y solicitudes. **Las reglas de este
+documento se cumplen en el servidor**, no solo en los formularios. El detalle, los archivos y
+cómo probarlo están en [`apps/gestion/README.md`](../apps/gestion/README.md#qué-hay-en-bob).
+
+Decisiones de implementación que conviene conocer:
+
+- **Los 12 meses cuentan desde el día del contrato**, y la fecha de fin es el día anterior al
+  mismo día un año después. Si se decide que empiezan después del mes prorrateado (§7), se
+  cambia en un solo sitio (`src/bob/reglas.ts`).
+- **El prorrateo usa la convención comercial de 30 días**: empezar el 1 es el mes completo, y un
+  31 cuenta como 30 (un día).
+- **Una contratación solo admite editar su estado, sus notas y el contrato firmado.** Ampliar
+  unidades se hace hoy con una contratación nueva, mientras se decide cómo se amplía (§7).
+- **El lote quedó sin cobro** mientras se decide (§7).
+- **BOB no hace lo de BLOKY**: ni el árbol hasta la unidad ni los perfiles internos.
+
 ## Fuentes
 
 - [Ley 675 de 2001 — Régimen de Propiedad Horizontal (Alcaldía de Bogotá, Sisjur)](https://www.alcaldiabogota.gov.co/sisjur/normas/Norma1.jsp?i=4162)
