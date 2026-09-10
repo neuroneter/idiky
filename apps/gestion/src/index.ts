@@ -1,17 +1,25 @@
 import type { Core } from '@strapi/strapi';
 
-// Sistema de gestion de IDIKY (T-37 · ADR-0012).
+import { registrarReglasDeBob } from './bob/middlewares';
+import { configurarPanel, sembrarCatalogos } from './bob/panel';
+
+// BOB, el back office de IDIKY (T-37 · ADR-0012 · docs/13-bob-copropiedades-y-contratos.md).
 export default {
   /**
-   * Antes de que la aplicacion arranque. Aqui ira el middleware de auditoria (T-38).
+   * Antes de que la aplicacion arranque. Aqui se registran las reglas de BOB, y aqui ira el
+   * middleware de auditoria (T-38).
    */
-  register(/* { strapi }: { strapi: Core.Strapi } */) {},
+  register({ strapi }: { strapi: Core.Strapi }) {
+    registrarReglasDeBob(strapi);
+  },
 
   /**
    * Antes de empezar a atender peticiones.
    */
   async bootstrap({ strapi }: { strapi: Core.Strapi }) {
     await cerrarRegistroPublico(strapi);
+    await sembrarCatalogos(strapi);
+    await configurarPanel(strapi);
   },
 };
 

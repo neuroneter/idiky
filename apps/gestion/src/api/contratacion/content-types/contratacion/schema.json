@@ -1,0 +1,104 @@
+{
+  "kind": "collectionType",
+  "collectionName": "contrataciones",
+  "info": {
+    "singularName": "contratacion",
+    "pluralName": "contrataciones",
+    "displayName": "Contratación",
+    "description": "Un plan o servicio adicional contratado por una copropiedad. Lo firmado se copia y no se edita (docs/13 §2)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "titulo": {
+      "type": "string"
+    },
+    "copropiedad": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::copropiedad.copropiedad",
+      "inversedBy": "contrataciones"
+    },
+    "tipo": {
+      "type": "enumeration",
+      "enum": ["plan", "servicio_adicional"],
+      "required": true,
+      "default": "plan"
+    },
+    "plan": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::plan.plan",
+      "inversedBy": "contrataciones"
+    },
+    "servicioAdicional": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::servicio-adicional.servicio-adicional",
+      "inversedBy": "contrataciones"
+    },
+    "estado": {
+      "type": "enumeration",
+      "enum": ["vigente", "terminada", "cancelada"],
+      "required": true,
+      "default": "vigente"
+    },
+    "fechaInicio": {
+      "type": "date",
+      "required": true
+    },
+    "fechaFin": {
+      "type": "date"
+    },
+    "unidadesContratadas": {
+      "type": "integer",
+      "min": 0
+    },
+    "unidadesMinimo": {
+      "type": "integer",
+      "min": 0
+    },
+    "unidadesMaximo": {
+      "type": "integer",
+      "min": 0
+    },
+    "nombreContratado": {
+      "type": "string"
+    },
+    "condicionesContratadas": {
+      "type": "richtext"
+    },
+    "modalidadContratada": {
+      "type": "enumeration",
+      "enum": ["por_unidad", "valor_fijo"]
+    },
+    "valorMensualContratado": {
+      "type": "decimal",
+      "min": 0
+    },
+    "restringeUnidadesContratado": {
+      "type": "boolean"
+    },
+    "valorMensualTotal": {
+      "type": "decimal",
+      "min": 0
+    },
+    "diasPrimerMes": {
+      "type": "integer",
+      "min": 0
+    },
+    "valorPrimerMes": {
+      "type": "decimal",
+      "min": 0
+    },
+    "contratoFirmado": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["files", "images"]
+    },
+    "notas": {
+      "type": "text"
+    }
+  }
+}

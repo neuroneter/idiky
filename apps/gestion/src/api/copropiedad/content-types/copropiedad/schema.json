@@ -1,0 +1,115 @@
+{
+  "kind": "collectionType",
+  "collectionName": "copropiedades",
+  "info": {
+    "singularName": "copropiedad",
+    "pluralName": "copropiedades",
+    "displayName": "Copropiedad",
+    "description": "La ficha de cada copropiedad cliente de IDIKY (docs/13 §5)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "nombre": {
+      "type": "string",
+      "required": true
+    },
+    "nit": {
+      "type": "string",
+      "required": true,
+      "unique": true,
+      "regex": "^\\d{6,10}$"
+    },
+    "digitoVerificacion": {
+      "type": "string",
+      "required": true,
+      "regex": "^\\d$"
+    },
+    "tipo": {
+      "type": "enumeration",
+      "enum": ["edificio", "conjunto"],
+      "required": true,
+      "default": "conjunto"
+    },
+    "uso": {
+      "type": "enumeration",
+      "enum": ["residencial", "comercial", "mixto"],
+      "required": true,
+      "default": "residencial"
+    },
+    "tieneConsejoAdministracion": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "estado": {
+      "type": "enumeration",
+      "enum": ["prospecto", "en_implementacion", "activa", "suspendida", "retirada"],
+      "required": true,
+      "default": "prospecto"
+    },
+    "estrato": {
+      "type": "integer",
+      "min": 1,
+      "max": 6
+    },
+    "ubicacion": {
+      "type": "component",
+      "repeatable": false,
+      "component": "bob.ubicacion",
+      "required": true
+    },
+    "resumenDeBienes": {
+      "type": "component",
+      "repeatable": true,
+      "component": "bob.bien-por-tipo"
+    },
+    "unidadesFacturables": {
+      "type": "integer",
+      "min": 0,
+      "default": 0
+    },
+    "fotoPrincipal": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["images"]
+    },
+    "fotos": {
+      "type": "media",
+      "multiple": true,
+      "allowedTypes": ["images"]
+    },
+    "certificadoExistencia": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["files", "images"]
+    },
+    "escrituraReglamento": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["files", "images"]
+    },
+    "notas": {
+      "type": "text"
+    },
+    "asignaciones": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::asignacion.asignacion",
+      "mappedBy": "copropiedad"
+    },
+    "contrataciones": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::contratacion.contratacion",
+      "mappedBy": "copropiedad"
+    },
+    "solicitudes": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::solicitud.solicitud",
+      "mappedBy": "copropiedad"
+    }
+  }
+}

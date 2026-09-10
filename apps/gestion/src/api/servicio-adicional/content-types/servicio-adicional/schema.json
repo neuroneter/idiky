@@ -1,0 +1,46 @@
+{
+  "kind": "collectionType",
+  "collectionName": "servicios_adicionales",
+  "info": {
+    "singularName": "servicio-adicional",
+    "pluralName": "servicios-adicionales",
+    "displayName": "Servicio adicional",
+    "description": "Servicios que una copropiedad puede tomar además del plan: asesoría financiera, legal… (docs/13 §2)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "nombre": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "descripcion": {
+      "type": "richtext"
+    },
+    "valorMensual": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "duracionMeses": {
+      "type": "integer",
+      "required": true,
+      "default": 12,
+      "min": 12,
+      "max": 12
+    },
+    "activo": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "contrataciones": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::contratacion.contratacion",
+      "mappedBy": "servicioAdicional"
+    }
+  }
+}
