@@ -92,6 +92,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-17 · Mary + IA (Claude) · Las preguntas para el abogado, consolidadas
+
+Mary preguntó qué debe revisar el abogado sobre datos personales. Quedaron **siete puntos** en
+[`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md) §3 sexies, ordenados por
+peso: el rostro como dato biométrico, el plazo de conservación de las fotos y el consentimiento
+del apoderado son los tres que **bloquean producción**; el texto de la política, el
+almacenamiento, quién ve qué (RN-67) y la marca «No obligatorio» (RN-80) se resuelven con
+texto o configuración. Se agregó la fila de RN-80 a la tabla. Sin cambios de código.
+
+**Lo que sigue:** enviarle la lista al abogado y volcar sus respuestas en la tabla de §3 sexies.
+
+---
+
 ### 2026-09-17 · Mary + IA (Claude) · La marca «No obligatorio»: el administrador exime de las fotos (RN-80)
 
 El equipo pidió, *«revisando con el equipo y la experiencia»*, una opción para el administrador:

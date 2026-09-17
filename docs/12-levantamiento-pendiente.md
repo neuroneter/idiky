@@ -352,8 +352,33 @@ Lo que hay que decidir antes de que esto salga a un servidor:
 | Al **inhabilitar** a la persona, ¿la foto se borra? | RN-61 dice que nada se borra; un dato personal sí puede tener que borrarse | **Resuelto en principio (Mary, 2026-09-07)**: *«me refería a conservar el registro; la documentación se debe guardar el tiempo que la normatividad lo permita»*, y *«si el registro se habilita nuevamente y ya no tenemos los documentos se solicitan nuevamente»*. El registro queda, las fotos tienen plazo, y rehabilitar es volver a registrar. **Falta el plazo concreto que fija la norma y el proceso que borra las fotos al cumplirse** |
 | ¿**Dónde** se almacena? | Un servidor con las cédulas de un conjunto entero es un objetivo, no un archivo | *(pendiente)* |
 | **El poder de asamblea también es un documento personal** (2026-09-10) | Lleva nombre, documento de identidad y firma de alguien que **no es residente** y con quien la copropiedad no tiene ninguna otra relación. Las cuatro preguntas de arriba le aplican igual, y una más: **¿el apoderado autorizó el tratamiento de sus datos?** Hoy no se le pide nada — lo trae el administrador, no él (RN-66) | *(pendiente)* |
+| **La marca «No obligatorio»** (2026-09-17) | El administrador puede eximir a una persona de adjuntar la foto y el documento (RN-80). ¿Eximir genera una obligación distinta —identificar de otra forma a quien entra— o no? | *(pendiente)* |
 
 Detalle técnico y lo ya decidido: [ADR-0009](./adr/0009-soportes-fotograficos.md).
+
+### Lo que debe revisar el abogado — consolidado (2026-09-17)
+
+Marco: **Ley 1581 de 2012** (habeas data) y su decreto reglamentario. Siete puntos, en orden
+de lo que más pesa. Los tres primeros **bloquean producción**; los demás se resuelven ajustando
+texto o configuración.
+
+1. **La foto del rostro como dato biométrico.** Si es dato sensible, el titular no está obligado
+   a autorizarlo y hay que decírselo en la política. Hoy el texto no lo dice.
+2. **El plazo de conservación de las fotos.** Mary decidió que las fotos tienen plazo y el
+   registro no. Falta el plazo concreto por caso —arrendatario que se fue, residente temporal de
+   dos meses— para construir el proceso que las borra al cumplirse.
+3. **El apoderado del poder.** Nombre, documento y firma de alguien que no es residente. Hoy no se
+   le pide autorización: el documento lo sube el administrador (CU-A-19) o el propietario
+   (CU-R-30). ¿Hace falta su consentimiento y cómo se recoge cuando no usa la app?
+4. **El texto de la autorización** (`apps/pwa/src/dominio/consentimiento.ts`, RN-66). Es un
+   borrador nuestro: confirmar que cumple informada, expresa y registrada, y que el responsable
+   del tratamiento es la copropiedad y no Idiky.
+5. **Dónde se almacenan.** Qué exige la norma sobre ubicación, cifrado y transferencia a terceros,
+   incluido un proveedor de nube fuera de Colombia.
+6. **Quién las ve y la constancia** (RN-67). Administración y quien registró; portería solo el
+   rostro; cada apertura deja rastro. Confirmar que basta.
+7. **La marca «No obligatorio»** (RN-80). Si eximir de la foto obliga a identificar de otra forma a
+   quien entra.
 
 ## 4. Usuarios y roles
 
