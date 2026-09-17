@@ -19,7 +19,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 68 documentados: 36 ✅ en el demo, 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 79 (RN-01…RN-79; RN-41 retirada — 78 vigentes) |
+| **Reglas de negocio** | 80 (RN-01…RN-80; RN-41 retirada — 79 vigentes) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -91,6 +91,44 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-17 · Mary + IA (Claude) · La marca «No obligatorio»: el administrador exime de las fotos (RN-80)
+
+El equipo pidió, *«revisando con el equipo y la experiencia»*, una opción para el administrador:
+**una marca «No obligatorio»** para que quien no quiera adjuntar la foto ni el documento no lo
+haga, y entre *«con la contraseña que le asigna Idiky cuando el administrador o propietario lo
+crea»*.
+
+**Es una excepción a RN-57, y se construyó como excepción, no como interruptor.** Tres límites:
+la pone **solo el administrador** —al crear el registro, con una casilla, o después desde el
+detalle—; se pone **sobre un registro concreto**, no sobre la copropiedad, porque un ajuste
+general dejaría RN-57 sin efecto de un clic; y **queda escrito quién la puso y cuándo**. Con la
+marca el registro no espera nada de la persona: pasa directo a «falta autorizar», quien lo creó
+lo autoriza sin fotos, y la marca se ve en la tabla y en el detalle —también en la app del
+propietario, que autoriza los suyos sabiendo que el administrador eximió a esa persona—. Se
+quita mientras el registro está en curso; sin fotos, vuelve a esperarlas.
+
+**«La contraseña que le asigna Idiky» ya existía: es el código de registro.** Hasta hoy servía
+solo para adjuntar (RN-58). Ahora, con el registro autorizado, **también activa la cuenta**: la
+pantalla de activación lo acepta en lugar del código de un solo uso, y el detalle del registro
+marcado lo muestra como lo que es —la clave para entrar—. Sigue sin autenticar nada de verdad
+(ADR-0004); lo que cambia es que la persona sin fotos tiene un camino completo hasta adentro.
+
+**Al visitante no le aplica**, y se dice: ya no lleva fotos desde RN-57. El equipo lo nombró en
+la lista y por eso queda anotado, no porque haya que hacer nada.
+
+**Verificado.** 15 comprobaciones directas sobre el repositorio (esbuild + node: nace por
+autorizar con la marca, se autoriza sin fotos, el código activa solo autorizado, marcar y quitar
+mueven el estado, con fotos quitar no retrocede, decidido no se marca, visitante no aplica) y
+18 con Playwright: el administrador crea con la casilla y autoriza, la persona activa su cuenta
+con el código de registro y entra, y un registro que esperaba fotos se marca y se desmarca.
+`npm run build` y la ortografía en verde.
+
+**Lo que sigue:** con dos reglas nuevas en el mismo día sobre quién ve qué documento (RN-79 y
+RN-80), la revisión del abogado sobre datos personales (§4 del levantamiento) es lo que más
+pesa.
+
+---
 
 ### 2026-09-17 · Mary + IA (Claude) · La tercera puerta del poder: el propietario envía la foto (CU-R-30, RN-79)
 

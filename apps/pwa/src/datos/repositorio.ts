@@ -86,6 +86,7 @@ import {
   rolDeCategoria,
   soloUnDia,
   soportesCompletos,
+  registroEnCurso,
   sumarDias,
   vecesSancionada,
   vencimientoDelPeriodo,
@@ -1892,6 +1893,8 @@ export async function crearRegistroPersona(
     vigenciaDesde?: string
     vigenciaHasta?: string
     placa?: string
+    /** La marca «No obligatorio», si quien crea es el administrador (RN-80). */
+    soportesNoObligatorios?: boolean
   },
 ): Promise<Resultado<RegistroPersona>> {
   await esperar()
@@ -1929,14 +1932,21 @@ export async function crearRegistroPersona(
   }
 
   const ahora = ahoraISO()
+  const { soportesNoObligatorios, ...datos } = parametros
   const registro: RegistroPersona = {
     id: nuevoId('reg'),
-    ...parametros,
+    ...datos,
     codigo: nuevoCodigoRegistro(),
     estado: 'esperando_soportes',
     creadoEn: ahora,
   }
   bd.registros.unshift(registro)
+
+  // RN-80: con la marca, no hay soportes que esperar. Queda quien la puso.
+  if (soportesNoObligatorios && exigeSoportes(registro.categoria)) {
+    registro.soportesNoObligatorios = { marcadoPor: registro.creadoPor, marcadoEn: ahora }
+    registro.estado = 'esperando_autorizacion'
+  }
 
   // RN-57: al visitante no se le piden soportes, asi que su registro no espera
   // nada de nadie — se resuelve aqui mismo y sale con su codigo.
@@ -1975,6 +1985,40 @@ function crearVisitanteDeRegistro(bd: BaseDatos, registro: RegistroPersona): Vis
   }
   bd.visitantes.unshift(visitante)
   return visitante
+}
+
+/**
+ * RN-80 — El administrador pone o quita la marca «No obligatorio».
+ *
+ * Ponerla mueve el registro a la autorizacion —ya no espera nada de la
+ * persona—; quitarla lo devuelve a esperar las fotos si todavia no las trajo.
+ * Solo mientras el registro esta en curso: decidido, ya no hay nada que eximir.
+ */
+export async function marcarSoportesNoObligatorios(
+  bdActual: BaseDatos,
+  parametros: { registroId: string; marcadoPor: string; marcar: boolean },
+): Promise<Resultado<RegistroPersona>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const registro = bd.registros.find((r) => r.id === parametros.registroId)
+  if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  if (!exigeSoportes(registro.categoria)) {
+    throw new ErrorDeNegocio('A un visitante no se le piden soportes: no hay nada que eximir.')
+  }
+  if (!registroEnCurso(registro)) {
+    throw new ErrorDeNegocio('Ese registro ya está decidido: la marca solo se pone mientras está en curso.')
+  }
+
+  if (parametros.marcar) {
+    registro.soportesNoObligatorios = { marcadoPor: parametros.marcadoPor, marcadoEn: ahoraISO() }
+    if (registro.estado === 'esperando_soportes') registro.estado = 'esperando_autorizacion'
+  } else {
+    delete registro.soportesNoObligatorios
+    if (registro.estado === 'esperando_autorizacion' && !soportesCompletos(registro)) {
+      registro.estado = 'esperando_soportes'
+    }
+  }
+  return persistir(bd, registro)
 }
 
 /**
@@ -2036,6 +2080,7 @@ export async function autorizarRegistro(
   if (!puedeAutorizar(registro, parametros.personaId)) {
     throw new ErrorDeNegocio('Solo quien creó el registro puede autorizarlo.')
   }
+  // RN-57, salvo la marca del administrador (RN-80).
   if (!soportesCompletos(registro)) {
     throw new ErrorDeNegocio('Faltan los soportes: no se puede autorizar sin las dos fotos.')
   }

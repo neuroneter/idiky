@@ -1554,10 +1554,63 @@ export function exigeSoportes(categoria: CategoriaRegistro): boolean {
   return categoria !== 'visitante'
 }
 
-/** Un registro no pasa de la espera de soportes sin las dos fotos (RN-57). */
+// ---------------------------------------------------------------------------
+// RN-80 — La marca «No obligatorio»: el administrador exime de los soportes.
+//
+// «Una opcion para el administrador que le permita colocarle una marca para que
+// un propietario, arrendatario o visitante que no quiera adjuntar la foto y/o
+// el documento no lo haga» (equipo, 2026-09-17). Es una excepcion a RN-57, y
+// por eso tiene tres limites: la pone **el administrador**, se pone **sobre un
+// registro concreto** —no sobre la copropiedad, que dejaria RN-57 sin efecto— y
+// **queda escrito quien la puso**. Al visitante no le hace falta: ya no lleva
+// fotos (RN-57).
+//
+// Con la marca, el registro no tiene nada que esperar de la persona: pasa a la
+// autorizacion de quien lo creo, y la persona **entra con el codigo que Idiky
+// le asigno al crearla** — es la clave que dijo el equipo.
+// ---------------------------------------------------------------------------
+
+/** Si a este registro se le pueden eximir los soportes: solo a quien los debe. */
+export function admiteMarcaNoObligatorio(registro: RegistroPersona): boolean {
+  return exigeSoportes(registro.categoria) && registroEnCurso(registro)
+}
+
+/** Este registro lleva la marca y por eso no trae fotos. */
+export function sinSoportesPorMarca(registro: RegistroPersona): boolean {
+  return exigeSoportes(registro.categoria) && !!registro.soportesNoObligatorios
+}
+
+/**
+ * Un registro no pasa de la espera de soportes sin las dos fotos (RN-57) —
+ * salvo que el administrador lo haya marcado como no obligatorio (RN-80).
+ */
 export function soportesCompletos(registro: RegistroPersona): boolean {
   if (!exigeSoportes(registro.categoria)) return true
+  if (registro.soportesNoObligatorios) return true
   return !!registro.fotoDocumento && !!registro.fotoPersona
+}
+
+/**
+ * RN-80 — El codigo del registro sirve para activar la cuenta.
+ *
+ * Es «la contrasena que le asigna Idiky cuando el administrador o propietario
+ * lo crea» (equipo, 2026-09-17). Vale el de un registro **autorizado** de ese
+ * documento: antes de autorizarlo no hay cuenta que activar.
+ */
+export function codigoDeRegistroValido(
+  registros: RegistroPersona[],
+  documento: string,
+  codigo: string,
+): boolean {
+  const limpio = (valor: string) => valor.replace(/[\s.,-]/g, '').toUpperCase()
+  const buscado = codigo.trim().toUpperCase()
+  if (!buscado) return false
+  return registros.some(
+    (registro) =>
+      registro.estado === 'autorizado' &&
+      limpio(registro.documento) === limpio(documento) &&
+      registro.codigo.toUpperCase() === buscado,
+  )
 }
 
 /**

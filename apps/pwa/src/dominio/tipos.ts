@@ -577,8 +577,23 @@ export interface RegistroPersona {
    * nunca: es donde la constancia sobrevive a las fotos, que si tienen plazo.
    */
   consentimiento?: { version: string; aceptadoEn: FechaHoraISO }
-  /** Lo que la persona escribe para abrir su registro y adjuntar (RN-58). */
+  /**
+   * Lo que la persona escribe para abrir su registro y adjuntar (RN-58) — y, con
+   * la marca de abajo, para **activar su cuenta** (RN-80): es la clave que Idiky
+   * le asigno cuando la crearon.
+   */
   codigo: string
+  /**
+   * La marca **«No obligatorio»** — RN-80.
+   *
+   * La pone el administrador (equipo, 2026-09-17) sobre un registro concreto
+   * para que esa persona no tenga que adjuntar la foto ni el documento. Con
+   * ella el registro no espera soportes: pasa directo a la autorizacion de
+   * quien lo creo, y la persona entra con el codigo que Idiky le asigno.
+   * Queda quien la puso y cuando, porque aliviar el requisito es una decision
+   * que alguien tomo y el expediente tiene que decir quien.
+   */
+  soportesNoObligatorios?: { marcadoPor: string; marcadoEn: FechaHoraISO }
   estado: EstadoRegistro
   creadoEn: FechaHoraISO
   soportesEn?: FechaHoraISO

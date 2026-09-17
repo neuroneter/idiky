@@ -847,6 +847,12 @@ propietario dejaría de saber quién vive en su unidad.
    hecha visible.
 3. Toca **Registrar propietario**, escoge la unidad y llena los datos.
 4. El resto es igual que CU-R-27: la persona adjunta, el administrador autoriza.
+5. **Si la persona no quiere adjuntar** la foto ni el documento, el administrador marca el
+   registro como **«No obligatorio»** (RN-80, equipo 2026-09-17) —en el formulario al crearlo, o
+   después desde el detalle—. El registro pasa directo a autorizar, se autoriza sin fotos, y la
+   persona **entra con el código que Idiky le asignó** al crearla. La marca vale también para
+   los registros que crean los propietarios: el administrador la pone, el propietario autoriza.
+   Queda escrito quién la puso y cuándo.
 
 **Flujos alternativos**
 - A1. Un registro de otra unidad → lo ve, pero **no lo autoriza**: eso es de su propietario

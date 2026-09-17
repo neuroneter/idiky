@@ -84,6 +84,10 @@ atajo de perfiles sigue disponible, plegado debajo.
 - RN-53: no se crea la cuenta aquí, se activa.
 - RN-54: el código prueba la identidad en este dispositivo.
 
+> **El código de registro también activa la cuenta** (RN-80): quien fue registrado con la marca
+> «No obligatorio» no adjuntó nada y no tiene otro código; el que Idiky le asignó al crearlo es su
+> clave para entrar. Vale solo con el registro ya autorizado.
+
 **Estado en el demo:** 🟡 — `src/features/auth/ActivarPage.tsx`. El trámite completo, sin
 guardar contraseñas y con el código a la vista.
 
@@ -814,6 +818,11 @@ sin saber que se tomó a conciencia: **tener dos formas de meter gente a la unid
 con soportes y otra sin ellos**, y la que no los pide se vuelve la que todo el mundo usa. Si
 algún día se hace más liviano, que sea porque el equipo decidió bajar el requisito —no porque
 alguien encontró el camino corto.
+
+> **La marca «No obligatorio»** (RN-80, equipo 2026-09-17): si la persona no quiere adjuntar la
+> foto ni el documento, **el administrador** —no el propietario— marca el registro y este pasa
+> directo a «falta autorizar». El propietario lo ve marcado, con quién lo eximió, y autoriza sin
+> fotos. La persona entra con el código que Idiky le asignó.
 
 **Estado en el demo:** ✅ — `src/features/residente/PersonasPage.tsx`, con el trámite en
 `src/componentes/Registro.tsx` (compartido con la consola del administrador: dos formularios
