@@ -23,8 +23,8 @@ se hace otro corte o se borra. Lo que sí se actualiza en cada sesión es la bit
 | **Commits** | 91 hasta el corte (26–28 de agosto; 7–10 de septiembre) |
 | **Código** | 68 archivos TypeScript/TSX · ~19.600 líneas |
 | **Documentación** | ~7.100 líneas en `docs/` |
-| **Casos de uso** | 67 documentados: **35 ✅** · 10 🟡 · 21 ⬜ · 1 ⛔ retirado |
-| **Reglas de negocio** | RN-01…RN-78, con RN-41 retirada → **77 vigentes** |
+| **Casos de uso** | 68 documentados: **36 ✅** · 10 🟡 · 21 ⬜ · 1 ⛔ retirado |
+| **Reglas de negocio** | RN-01…RN-79, con RN-41 retirada → **78 vigentes** |
 | **ADR** | 8 escritos y aceptados; falta ADR-0008 (backend) |
 | **Dependencias de producción** | React, React DOM, React Router. **Nada más** |
 

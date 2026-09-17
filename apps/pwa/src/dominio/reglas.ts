@@ -974,9 +974,71 @@ export function admiteAsistencia(asamblea: Asamblea): boolean {
 // Poderes — RN-29, RN-30 · CU-A-19
 // ---------------------------------------------------------------------------
 
-/** Un poder deja de representar cuando se revoca. **No se borra** (RN-61). */
+// ---------------------------------------------------------------------------
+// RN-79 — El poder que el propietario envia en foto **no vale hasta que la
+// administracion lo valide**.
+//
+// «Que el propietario lo envie adjuntando una foto del documento» (Mary,
+// 2026-09-17). Es la tercera puerta, y se distingue de las otras dos en quien
+// vio el papel: en CU-A-19 lo tuvo el administrador en la mano, en CU-R-23 no
+// hay papel porque respalda la sesion. Aqui el papel lo vio el propietario, y
+// lo que hace valido un poder en papel es que **la administracion** lo vea.
+// Mientras tanto la unidad no esta representada: vota su propietario, como si
+// el poder no existiera. Un rechazo lleva motivo y no se borra (RN-61).
+// ---------------------------------------------------------------------------
+
+/** Enviado desde la app y todavia sin mirar por la administracion. */
+export function poderEsperandoValidacion(poder: Poder): boolean {
+  return poder.validacion?.estado === 'esperando'
+}
+
+export function poderRechazado(poder: Poder): boolean {
+  return poder.validacion?.estado === 'rechazado'
+}
+
+/**
+ * Un poder representa cuando no esta revocado **y esta validado** (RN-79). Los
+ * que no llevan `validacion` lo estan por construccion. **No se borra** (RN-61).
+ */
 export function poderVigente(poder: Poder): boolean {
-  return !poder.revocadoEn
+  return !poder.revocadoEn && !poderEsperandoValidacion(poder) && !poderRechazado(poder)
+}
+
+/**
+ * Vigente **o esperando**: lo que ocupa el lugar de representante de la unidad.
+ * Un poder por validar no representa, pero si impide dar otro mientras tanto —
+ * si no, el propietario podria dejar dos en cola y la administracion validar
+ * los dos.
+ */
+export function poderEnCurso(poder: Poder): boolean {
+  return !poder.revocadoEn && !poderRechazado(poder)
+}
+
+/** El poder en curso de la unidad (vigente o por validar), si lo hay. */
+export function poderEnCursoDeUnidad(
+  poderes: Poder[],
+  asambleaId: string,
+  unidadId: string,
+): Poder | undefined {
+  return poderes.find(
+    (poder) => poder.asambleaId === asambleaId && poder.unidadId === unidadId && poderEnCurso(poder),
+  )
+}
+
+/**
+ * El ultimo poder que la administracion rechazo a esta unidad, **si no hay
+ * otro en curso**: es lo que el propietario necesita ver para corregir y
+ * volver a enviar. Con uno en curso, el rechazo anterior ya es historia.
+ */
+export function ultimoPoderRechazadoDeUnidad(
+  poderes: Poder[],
+  asambleaId: string,
+  unidadId: string,
+): Poder | undefined {
+  if (poderEnCursoDeUnidad(poderes, asambleaId, unidadId)) return undefined
+  return poderes
+    .filter((p) => p.asambleaId === asambleaId && p.unidadId === unidadId && poderRechazado(p))
+    .sort((a, b) => b.registradoEn.localeCompare(a.registradoEn))[0]
 }
 
 /** Los poderes vigentes de una asamblea. */

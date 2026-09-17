@@ -50,6 +50,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-27 | **Registrar y dar de baja a las personas de mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-27) |
 | CU-R-28 | **Adjuntar mis documentos a un registro** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-28) |
 | CU-R-29 | **Ver un proceso sancionatorio y defenderme** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-29) |
+| CU-R-30 | **Enviar el poder firmado en foto** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-30) |
 
 ## 2. Administrador — consola web
 
@@ -73,7 +74,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-16 | Exportar informes (cartera, PQRS) | 2 | ⬜ Pendiente | — |
 | CU-A-17 | **Instalar la asamblea y llevar la asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-17) |
 | CU-A-18 | **Habilitar, abrir y cerrar una votación** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-18) |
-| CU-A-19 | **Registrar un poder en papel y dar de alta a quien lo ejerce** | 1 | 🟡 Parcial (registra y muestra el acumulado; **no aplica el tope**, RN-30) | [ver](./casos-de-uso/administrador.md#cu-a-19) |
+| CU-A-19 | **Registrar un poder en papel y dar de alta a quien lo ejerce** | 1 | 🟡 Parcial (registra, valida el que llega en foto y muestra el acumulado; **no aplica el tope**, RN-30) | [ver](./casos-de-uso/administrador.md#cu-a-19) |
 | CU-A-20 | **Levantar el acta de la asamblea** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-20) |
 | CU-A-21 | **Administrar los coeficientes de las unidades** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-21) |
 | CU-A-22 | **Administrar el catálogo de multas** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-22) |

@@ -420,6 +420,11 @@ coeficiente y se cierra.
 - A3. Revocar → el poder **no se borra**, queda con su fecha de revocación (RN-61). Si votó
   antes de revocarse, hay que poder explicarlo.
 - A4. La asamblea ya cerró → no admite poderes nuevos.
+- A5. **Llegó en foto desde la app del propietario** (CU-R-30) → aparece **«Por validar»** en la
+  lista, con aviso y número arriba. Se abre, se lee la hoja y se mira la foto, y se **valida** o
+  se **rechaza con motivo** (RN-79). Hasta validarlo, la unidad la vota su propietario. Si
+  entre el envío y la validación llegó otro poder por la puerta de papel, se rechaza validar
+  este: una unidad, un representante.
 
 **Lo que el sistema NO comprueba, y lo dice en pantalla**
 - **El tope** de unidades y coeficientes que un apoderado puede acumular (RN-30). La cifra la
@@ -436,7 +441,10 @@ coeficiente y se cierra.
 
 > **Hay una segunda puerta, y es del propietario:** puede otorgarlo **desde su app** sin papel
 > (CU-R-23). Lo que cambia es qué lo respalda —su autenticación en vez de una firma— y quién lo
-> da de alta. El administrador ve los dos en la misma lista, marcados por origen.
+> da de alta. **Y una tercera** (Mary, 2026-09-17): el propietario **envía la foto del papel
+> firmado** desde su app (CU-R-30), y ahí sí hace falta que la administración lo valide, porque
+> el papel lo vio él y no ella (RN-79). El administrador ve los tres en la misma lista, marcados
+> por origen y estado.
 
 **Estado en el demo:** ✅ — `/admin/asambleas`, dentro de cada asamblea, sección **Poderes**.
 Cada uno se **abre y se lee**: la misma hoja que ve el propietario, y debajo **la foto del papel**

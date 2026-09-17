@@ -76,6 +76,8 @@ import {
   puedeGenerarActa,
   decisionAdmisibleEnLaSesion,
   poderDeUnidad,
+  poderEnCursoDeUnidad,
+  poderEsperandoValidacion,
   residenciaVigente,
   definicionModalidad,
   formasDeAsistir,
@@ -1435,10 +1437,14 @@ function prepararPoder(
     throw new ErrorDeNegocio('No hace falta un poder para votar por su propia unidad.')
   }
 
-  // Una unidad, un representante (RN-28, RN-29).
-  if (poderDeUnidad(bd.poderes, parametros.asambleaId, parametros.unidadId)) {
+  // Una unidad, un representante (RN-28, RN-29). Cuenta tambien el que esta
+  // **por validar** (RN-79): dos en cola serian dos representantes en potencia.
+  const enCurso = poderEnCursoDeUnidad(bd.poderes, parametros.asambleaId, parametros.unidadId)
+  if (enCurso) {
     throw new ErrorDeNegocio(
-      'Esa unidad ya tiene un poder vigente en esta asamblea. Hay que revocarlo antes de dar otro.',
+      poderEsperandoValidacion(enCurso)
+        ? 'Esa unidad ya envió un poder que la administración todavía no ha validado. Hay que retirarlo antes de dar otro.'
+        : 'Esa unidad ya tiene un poder vigente en esta asamblea. Hay que revocarlo antes de dar otro.',
     )
   }
 
@@ -1601,6 +1607,131 @@ export async function otorgarPoder(
     registradoEn: ahoraISO(),
   }
   bd.poderes.push(poder)
+  return persistir(bd, poder)
+}
+
+/**
+ * CU-R-30 — El propietario **envia la foto del poder firmado** desde su app.
+ *
+ * La tercera puerta (Mary, 2026-09-17: que lo envie *«adjuntando una foto del
+ * documento»*). Se parece a las otras dos y se distingue de ambas en un punto:
+ * **quien vio el papel**. Por eso nace `esperando`: lo que hace valido un poder
+ * en papel es que la administracion lo vea, y aqui todavia no lo vio (RN-79).
+ * Mientras tanto la unidad **no esta representada** y vota su propietario.
+ *
+ * Solo el propietario de la sesion puede enviarlo (RN-51), como en CU-R-23, y
+ * sin foto no hay nada que enviar, como en CU-A-19. Foto, no PDF: es lo que
+ * el telefono ya sabe hacer y no bloquea nada (ADR-0009).
+ */
+export async function enviarPoderEnPapel(
+  bdActual: BaseDatos,
+  parametros: {
+    asambleaId: string
+    unidadId: string
+    otorgadoPor: string
+    nombresApoderado: string
+    apellidosApoderado: string
+    documentoApoderado: string
+    telefonoApoderado?: string
+    imagen: string
+  },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  if (!parametros.imagen) {
+    throw new ErrorDeNegocio('Falta la foto del poder firmado: sin ella no hay nada que enviar.')
+  }
+
+  const { unidad, apoderado } = prepararPoder(bd, {
+    ...parametros,
+    exigirPropietario: parametros.otorgadoPor,
+  })
+
+  const poder: Poder = {
+    id: nuevoId('pod'),
+    asambleaId: parametros.asambleaId,
+    unidadId: unidad.id,
+    otorgadoPor: parametros.otorgadoPor,
+    apoderadoId: apoderado.id,
+    origen: 'papel',
+    soporte: { imagen: parametros.imagen, adjuntadoEn: ahoraISO() },
+    registradoPor: parametros.otorgadoPor,
+    registradoEn: ahoraISO(),
+    validacion: { estado: 'esperando' },
+  }
+  bd.poderes.push(poder)
+  return persistir(bd, poder)
+}
+
+/**
+ * CU-A-19 — La administracion **valida** el poder que llego en foto (RN-79).
+ *
+ * Es el momento en que el poder empieza a representar. Se vuelve a comprobar
+ * que la unidad no tenga otro vigente: entre el envio y la validacion pudo
+ * llegar uno en papel por la puerta de siempre.
+ */
+export async function validarPoder(
+  bdActual: BaseDatos,
+  parametros: { poderId: string; decididoPor: string },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const poder = bd.poderes.find((p) => p.id === parametros.poderId)
+  if (!poder) throw new ErrorDeNegocio('Ese poder no existe.')
+  if (!poderEsperandoValidacion(poder)) {
+    throw new ErrorDeNegocio('Ese poder no está esperando validación.')
+  }
+  if (poder.revocadoEn) throw new ErrorDeNegocio('El propietario retiró ese poder.')
+
+  const asamblea = bd.asambleas.find((a) => a.id === poder.asambleaId)
+  if (!asamblea || asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') {
+    throw new ErrorDeNegocio('Esa asamblea ya terminó: no admite poderes nuevos.')
+  }
+  const otro = poderDeUnidad(bd.poderes, poder.asambleaId, poder.unidadId)
+  if (otro && otro.id !== poder.id) {
+    throw new ErrorDeNegocio(
+      'Esa unidad ya tiene otro poder vigente en esta asamblea. Hay que revocarlo antes de validar este.',
+    )
+  }
+
+  poder.validacion = {
+    estado: 'validado',
+    decididoPor: parametros.decididoPor,
+    decididoEn: ahoraISO(),
+  }
+  return persistir(bd, poder)
+}
+
+/**
+ * CU-A-19 — La administracion **rechaza** el poder que llego en foto (RN-79).
+ *
+ * **Con motivo, siempre**: el propietario tiene que saber que corregir para
+ * volver a enviarlo —la foto no se lee, falta la firma, no es su unidad— y el
+ * expediente tiene que decir por que no valio. No se borra (RN-61).
+ */
+export async function rechazarPoder(
+  bdActual: BaseDatos,
+  parametros: { poderId: string; decididoPor: string; motivo: string },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const poder = bd.poderes.find((p) => p.id === parametros.poderId)
+  if (!poder) throw new ErrorDeNegocio('Ese poder no existe.')
+  if (!poderEsperandoValidacion(poder)) {
+    throw new ErrorDeNegocio('Ese poder no está esperando validación.')
+  }
+  const motivo = parametros.motivo.trim()
+  if (motivo.length < 5) {
+    throw new ErrorDeNegocio('Un poder no se rechaza sin decir por qué: escribe el motivo.')
+  }
+
+  poder.validacion = {
+    estado: 'rechazado',
+    decididoPor: parametros.decididoPor,
+    decididoEn: ahoraISO(),
+    motivo,
+  }
   return persistir(bd, poder)
 }
 

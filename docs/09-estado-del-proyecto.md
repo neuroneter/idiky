@@ -18,8 +18,8 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 67 documentados: 35 ✅ en el demo, 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 78 (RN-01…RN-78; RN-41 retirada — 77 vigentes) |
+| **Casos de uso** | 68 documentados: 36 ✅ en el demo, 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
+| **Reglas de negocio** | 79 (RN-01…RN-79; RN-41 retirada — 78 vigentes) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -91,6 +91,43 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-17 · Mary + IA (Claude) · La tercera puerta del poder: el propietario envía la foto (CU-R-30, RN-79)
+
+Mary preguntó cómo llega el poder —*«lo genera el propietario desde la app o lo envía»*— y al
+oír que el de papel solo lo registraba la administración, pidió la tercera puerta: que el
+propietario **lo envíe él, «adjuntando una foto del documento»**. **Con foto y no con PDF, a
+propósito**: es lo que el teléfono ya sabe hacer (ADR-0009) y no deja bloqueantes; recibir
+archivos sigue esperando al backend.
+
+**Lo que la distingue de las otras dos puertas es quién vio el papel.** En CU-A-19 lo tuvo el
+administrador en la mano; en CU-R-23 no hay papel, respalda la sesión. Aquí lo vio el
+propietario, y lo que hace válido un poder en papel es que la administración lo vea. De ahí
+RN-79: el poder nace **«por validar»** y **mientras espera no representa** —la unidad la vota
+su propietario como si el poder no existiera, y los botones de votar siguen habilitados—. Sí
+**ocupa el lugar**: no se admite otro poder para esa unidad hasta retirarlo, o habría dos
+representantes en cola. La administración lo ve arriba, con número, lo abre con la hoja y la
+foto delante y lo **valida** o lo **rechaza con motivo**; el rechazo se conserva (RN-61) y el
+propietario lo lee tal cual, para corregir y reenviar. Al validar se vuelve a comprobar que no
+llegó otro por la puerta de papel entre el envío y la decisión.
+
+**Un formulario para las dos puertas del propietario.** Los datos del apoderado son los mismos;
+cambia lo que se pide —la foto, primero, como en la puerta del administrador— y lo que se dice:
+que no vale hasta que lo validen. La hoja del poder lo lleva escrito en el pie: pendiente,
+validado o rechazado por la administración.
+
+**Verificado.** 22 comprobaciones directas sobre el repositorio (esbuild + node: sin foto no se
+envía, solo el propietario, esperando no representa pero ocupa el lugar, rechazo sin motivo no
+vale, el rechazado libera el lugar y se conserva, validar dos veces no, retirado no se valida,
+carrera con un poder en papel) y 25 con Playwright recorriendo las dos caras: envío, rechazo
+con motivo, motivo a la vista del propietario, reenvío, validación y unidad representada.
+`npm run build` y la ortografía en verde.
+
+**Lo que sigue:** la pregunta de §4 sobre el apoderado como titular de datos pesa más ahora,
+porque sus datos y su firma los sube el propietario desde su teléfono. Y notificar al
+propietario del rechazo por fuera de la app (SMS o WhatsApp) va con T-18.
+
+---
 
 ### 2026-09-17 · Mary + IA (Claude) · La comisión tiene plazo, y lo pone el administrador (RN-78)
 

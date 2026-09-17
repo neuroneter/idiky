@@ -780,6 +780,25 @@ export interface Asistencia {
  */
 export type OrigenPoder = 'papel' | 'app'
 
+/**
+ * La validacion de un poder que **llego por la app pero en papel** — CU-R-30.
+ *
+ * Existe para la tercera puerta: el propietario fotografia el poder firmado y
+ * lo envia desde su app. Ahi el papel lo vio el propietario, no la
+ * administracion, y **es la administracion quien tiene que verlo** antes de
+ * que ese poder represente a la unidad (RN-79). Los otros dos caminos no llevan
+ * esto: en ellos darlo de alta ya es validarlo.
+ *
+ * Un rechazo lleva **motivo** siempre, y no se borra (RN-61): el propietario
+ * tiene que saber que corregir, y el expediente que se rechazo y por que.
+ */
+export interface ValidacionPoder {
+  estado: 'esperando' | 'validado' | 'rechazado'
+  decididoPor?: string
+  decididoEn?: FechaHoraISO
+  motivo?: string
+}
+
 export interface Poder {
   id: string
   asambleaId: string
@@ -813,6 +832,12 @@ export interface Poder {
    */
   registradoPor: string
   registradoEn: FechaHoraISO
+  /**
+   * Solo cuando el propietario **envio la foto del papel desde su app**
+   * (CU-R-30). Ausente = validado por construccion: lo dio de alta quien tenia
+   * la potestad. Presente = pasa por la administracion (RN-79).
+   */
+  validacion?: ValidacionPoder
   /** Cuando se revoco. Presente = ya no representa (RN-61). */
   revocadoEn?: FechaHoraISO
 }

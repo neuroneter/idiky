@@ -982,3 +982,58 @@ administración.
 > no basta por sí sola (§3 bis). Por eso la de papel no se quita.
 
 **Estado en el demo:** ✅ — `/app/asambleas/:id`, en la asamblea en curso.
+
+---
+
+### CU-R-30
+## CU-R-30 — Enviar el poder firmado en foto
+
+- **Actor principal:** Propietario
+- **Precondiciones:** Hay una asamblea convocada o instalada, su unidad no tiene poder en curso
+  y ya firmó el poder en papel.
+- **Disparador:** No puede asistir y no quiere —o no puede— llevar el papel a la administración.
+- **Resultado esperado:** La administración recibe la foto del poder firmado, lo valida y, desde
+  ese momento, el apoderado vota por su unidad.
+
+> **La tercera puerta** (Mary, 2026-09-17: que el propietario lo envíe *«adjuntando una foto
+> del documento»*). **Con foto y no con PDF, a propósito**: es lo que el teléfono ya sabe hacer,
+> no exige nada nuevo (ADR-0009) y no deja bloqueantes. Un PDF adjunto espera al backend, como
+> todo lo que se recibe como archivo.
+
+**Flujo principal**
+1. En la asamblea, junto a «Dar poder», toca **«Enviar el poder firmado»**.
+2. **Lo primero es la foto** del documento completo, legible y con la firma — como en la puerta
+   del administrador (CU-A-19): es lo que hace válido el poder.
+3. Escribe el nombre y el documento de quien lo va a representar; si no está en Idiky se le crea
+   el usuario temporal de asamblea (RN-30, RN-61).
+4. Queda **enviado, por validar**. La pantalla lo dice y dice lo que vale hoy: **nada aún**.
+   Mientras la administración no lo valide, **vota el propietario** (RN-79). La hoja y la foto se
+   pueden abrir para ver exactamente lo que se envió.
+5. La administración lo valida (CU-A-19) → la unidad queda representada, igual que con cualquier
+   poder en papel.
+
+**Flujos alternativos**
+- A1. La administración lo **rechaza** → el propietario ve el **motivo** en la misma tarjeta y
+  puede corregir y enviar otro. El rechazado no se borra (RN-61).
+- A2. Cambia de opinión antes de la validación → **retira** el poder. Queda como retirado.
+- A3. Su unidad ya tiene un poder en curso —vigente o por validar— → no se ofrece enviar otro.
+  **Una unidad, un representante** (RN-28, RN-29), y eso incluye al que espera.
+- A4. Es arrendatario → no puede: no cede un voto que no tiene (RN-51).
+
+**Decisiones de interfaz**
+- **Un solo formulario para las dos puertas del propietario.** Los datos del apoderado son los
+  mismos; lo que cambia es qué se le pide (la foto) y qué se le dice (que no vale hasta que lo
+  validen).
+- **«Por validar» no es «con poder».** La tarjeta usa otro color y otro texto, y los botones de
+  votar **siguen habilitados**: hasta que la administración lo vea, es como si el poder no
+  existiera, y decir lo contrario dejaría a la persona sin votar por un papel que nadie ha mirado.
+- **El motivo del rechazo se muestra tal cual lo escribió la administración.** Es lo que hay que
+  corregir; parafrasearlo lo estropea.
+
+**Reglas de negocio**
+- RN-79 (no vale hasta que la administración lo valide; el rechazo lleva motivo), RN-30, RN-51,
+  RN-28 y RN-29 (una unidad, un representante, contando el que espera), RN-61 (retirado o
+  rechazado, no se borra).
+
+**Estado en el demo:** ✅ — `/app/asambleas/:id`, en la asamblea en curso, botón «Enviar el
+poder firmado». La validación vive en `/admin/asambleas`, sección **Poderes** (CU-A-19).

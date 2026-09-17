@@ -34,6 +34,8 @@ import {
   verificarActa,
   registrarPoder,
   revocarPoder,
+  validarPoder,
+  rechazarPoder,
 } from '../../datos/repositorio'
 import {
   MODALIDADES,
@@ -59,6 +61,8 @@ import {
   hayQuorum,
   ordenAsamblea,
   poderVigente,
+  poderEsperandoValidacion,
+  poderRechazado,
   resumenAsistencia,
 } from '../../dominio/reglas'
 import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
@@ -216,7 +220,26 @@ export function AsambleasAdminPage() {
       )}
 
       {viendoPoder && (
-        <VistaPoder bd={bd} poderId={viendoPoder} alCerrar={() => setViendoPoder(null)} />
+        <VistaPoder
+          bd={bd}
+          poderId={viendoPoder}
+          cargando={cargando}
+          alCerrar={() => setViendoPoder(null)}
+          alValidar={async () => {
+            await ejecutar(
+              (base) => validarPoder(base, { poderId: viendoPoder, decididoPor: sesion.personaId }),
+              'Poder validado. Desde ahora el apoderado vota por esa unidad.',
+            )
+          }}
+          alRechazar={async (motivo) => {
+            const hecho = await ejecutar(
+              (base) =>
+                rechazarPoder(base, { poderId: viendoPoder, decididoPor: sesion.personaId, motivo }),
+              'Poder rechazado. El propietario verá el motivo y podrá enviar otro.',
+            )
+            if (hecho) setViendoPoder(null)
+          }}
+        />
       )}
 
       {viendoActa && (
@@ -314,6 +337,7 @@ function DetalleAsamblea({
   const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
   const poderes = sel.poderesDeAsambleaTodos(bd, asamblea.id)
   const vigentes = poderes.filter(poderVigente)
+  const porValidar = poderes.filter((p) => !p.revocadoEn && poderEsperandoValidacion(p))
   const copropiedad = sel.copropiedad(bd, asamblea.copropiedadId)
   const quorumMinimo = copropiedad?.quorumMinimo ?? 50
   const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
@@ -399,8 +423,22 @@ function DetalleAsamblea({
           <p className="subtitulo">
             La asamblea es de propietarios; el poder es lo que deja entrar a quien no lo es
             (RN-30). Aquí se registran los que llegan <strong>en papel</strong>; los que el
-            propietario otorga desde su app aparecen solos.
+            propietario otorga desde su app aparecen solos, y los que <strong>envía en foto</strong>{' '}
+            esperan aquí a que alguien los mire (RN-79).
           </p>
+          {/* CU-R-30 — Lo que espera, arriba y con número: un poder por validar
+              el día de la asamblea es una unidad que no sabe quién la vota. */}
+          {porValidar.length > 0 && (
+            <p className="acceso__nota">
+              <strong>
+                {porValidar.length === 1
+                  ? 'Hay un poder por validar'
+                  : `Hay ${porValidar.length} poderes por validar`}
+              </strong>
+              : llegaron en foto desde la app del propietario. Hasta que se validen, esas
+              unidades las vota su propietario.
+            </p>
+          )}
 
           {/* El acumulado por apoderado, a la vista: **la Ley 675 no fija tope**
               (RN-30, revisado el 2026-09-10), y el del reglamento de esta
@@ -444,7 +482,13 @@ function DetalleAsamblea({
                         </td>
                         <td>
                           {poder.revocadoEn ? (
-                            <span className="chip">Revocado</span>
+                            <span className="chip">
+                              {poder.validacion ? 'Retirado' : 'Revocado'}
+                            </span>
+                          ) : poderEsperandoValidacion(poder) ? (
+                            <span className="chip chip--alerta">Por validar</span>
+                          ) : poderRechazado(poder) ? (
+                            <span className="chip">Rechazado</span>
                           ) : (
                             <span className="chip chip--exito">Vigente</span>
                           )}
@@ -452,7 +496,11 @@ function DetalleAsamblea({
                               papel firmado, o la sesión del propietario— y por
                               tanto qué mirar si alguien lo impugna. */}
                           <div className="subtitulo">
-                            {poder.origen === 'papel' ? 'En papel' : 'Otorgado en la app'}
+                            {poder.validacion
+                              ? 'En papel, enviado en foto por el propietario'
+                              : poder.origen === 'papel'
+                                ? 'En papel'
+                                : 'Otorgado en la app'}
                           </div>
                         </td>
                         <td>
@@ -466,7 +514,10 @@ function DetalleAsamblea({
                             >
                               Ver
                             </button>
-                            {!poder.revocadoEn && (
+                            {/* El que espera no se revoca: se valida o se
+                                rechaza, desde su vista. El rechazado ya no
+                                hay nada que revocarle. */}
+                            {poderVigente(poder) && (
                               <button
                                 className="boton boton--pequeno"
                                 disabled={cargando}
@@ -1109,14 +1160,26 @@ function FormularioPoder({
 function VistaPoder({
   bd,
   poderId,
+  cargando,
   alCerrar,
+  alValidar,
+  alRechazar,
 }: {
   bd: ReturnType<typeof useDatos>['bd']
   poderId: string
+  cargando: boolean
   alCerrar: () => void
+  alValidar: () => Promise<void>
+  alRechazar: (motivo: string) => Promise<void>
 }) {
+  const [motivo, setMotivo] = useState('')
+  const [rechazando, setRechazando] = useState(false)
   const poder = bd.poderes.find((p) => p.id === poderId)
   if (!poder) return null
+  const esperando = !poder.revocadoEn && poderEsperandoValidacion(poder)
+  const quienDecidio = poder.validacion?.decididoPor
+    ? sel.persona(bd, poder.validacion.decididoPor)
+    : undefined
 
   const unidad = sel.unidad(bd, poder.unidadId)
   const documento = poder.documentoId
@@ -1131,8 +1194,81 @@ function VistaPoder({
     >
       {poder.revocadoEn && (
         <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
-          Este poder está <strong>revocado</strong>. Se conserva porque, si votó antes de
-          revocarse, hay que poder explicarlo (RN-61).
+          Este poder está <strong>{poder.validacion ? 'retirado' : 'revocado'}</strong>. Se
+          conserva porque, si votó antes de revocarse, hay que poder explicarlo (RN-61).
+        </p>
+      )}
+
+      {/* RN-79 — Lo que espera se decide aquí, con la hoja y la foto a la vista:
+          validar es decir «vi el papel», y no se puede decir sin verlo. */}
+      {esperando && (
+        <div className="columna" style={{ gap: 'var(--e2)', marginBottom: 'var(--e3)' }}>
+          <p className="acceso__nota">
+            El propietario <strong>envió este poder en foto</strong> desde su app. No vale hasta
+            que lo valides: revisa que el documento esté completo, legible y firmado, y que sea
+            de su unidad. Mientras tanto, esa unidad la vota su propietario.
+          </p>
+          {!rechazando ? (
+            <div className="grupo-botones">
+              <button
+                className="boton boton--primario"
+                disabled={cargando}
+                onClick={() => void alValidar()}
+              >
+                Validar el poder
+              </button>
+              <button className="boton" disabled={cargando} onClick={() => setRechazando(true)}>
+                Rechazar
+              </button>
+            </div>
+          ) : (
+            <div className="campo">
+              <label htmlFor="motivo-rechazo-poder">Motivo del rechazo</label>
+              <input
+                id="motivo-rechazo-poder"
+                value={motivo}
+                onChange={(evento) => setMotivo(evento.target.value)}
+                placeholder="Qué falta o qué está mal: es lo que el propietario va a corregir"
+              />
+              <span className="ayuda-campo">
+                El propietario lo lee tal cual. Un poder no se rechaza sin decir por qué.
+              </span>
+              <div className="grupo-botones">
+                <button
+                  className="boton boton--peligro"
+                  disabled={cargando || motivo.trim().length < 5}
+                  onClick={() => void alRechazar(motivo)}
+                >
+                  Rechazar el poder
+                </button>
+                <button className="boton" disabled={cargando} onClick={() => setRechazando(false)}>
+                  Volver
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {poder.validacion?.estado === 'rechazado' && (
+        <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
+          <strong>Rechazado</strong>
+          {quienDecidio ? ` por ${nombreCompleto(quienDecidio)}` : ''}
+          {poder.validacion.decididoEn
+            ? ` el ${formatearFecha(poder.validacion.decididoEn.slice(0, 10))}`
+            : ''}
+          : «{poder.validacion.motivo}». Se conserva con su motivo (RN-61).
+        </p>
+      )}
+
+      {poder.validacion?.estado === 'validado' && (
+        <p className="subtitulo" style={{ marginBottom: 'var(--e3)' }}>
+          Enviado en foto por el propietario y <strong>validado</strong>
+          {quienDecidio ? ` por ${nombreCompleto(quienDecidio)}` : ''}
+          {poder.validacion.decididoEn
+            ? ` el ${formatearFecha(poder.validacion.decididoEn.slice(0, 10))}`
+            : ''}
+          .
         </p>
       )}
 
@@ -1153,7 +1289,9 @@ function VistaPoder({
           <div className="separador" />
           <span className="titulo-seccion">El documento firmado</span>
           <p className="subtitulo">
-            Es lo que respalda este poder: llegó en papel y la administración lo adjuntó.
+            {poder.validacion
+              ? 'Es lo que respalda este poder: el propietario lo firmó y envió la foto desde su app.'
+              : 'Es lo que respalda este poder: llegó en papel y la administración lo adjuntó.'}
           </p>
           <img
             src={poder.soporte.imagen}
