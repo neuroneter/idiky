@@ -887,6 +887,20 @@ export interface Acta {
    * (art. 47). Se copia al generarla, como los plazos del debido proceso (RN-69).
    */
   limiteVerificacion: FechaISO
+  /**
+   * Hasta cuando tiene la comision para revisar — RN-78.
+   *
+   * «Para la revision del acta debe existir un plazo maximo que lo define el
+   * administrador» (Mary, 2026-09-17). Lo fija el administrador al designar la
+   * comision, por acta y no por reglamento, y **no puede pasar de
+   * `limiteVerificacion`**: el acta tiene que estar a disposicion dentro del
+   * termino del art. 47, con o sin revision. Vencido, las revisiones que
+   * faltan dejan de esperar; el acta deja constancia de quien no reviso.
+   *
+   * Solo tiene sentido con `verificadores`; sin comision no hay a quien
+   * ponerle plazo.
+   */
+  limiteComision?: FechaISO
   /** El documento con su consecutivo, cuando se aprueba (RN-36, ADR-0006). */
   documentoId?: string
   /**

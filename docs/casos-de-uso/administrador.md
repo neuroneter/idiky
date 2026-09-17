@@ -498,7 +498,7 @@ alguien lo impugne.
 **Reglas de negocio**
 - RN-35 (se construye de los datos; aprobada no se edita), RN-36 (consecutivo y código),
   RN-37 (los coeficientes copiados son los que hacen que el acta valga), RN-28 y RN-74 (quórum
-  y mayorías, que el acta cita por artículo).
+  y mayorías, que el acta cita por artículo), RN-76 y RN-78 (la comisión, opcional y con plazo).
 
 **La comisión verificadora es opcional** (RN-76, Mary 2026-09-10: *«a veces hay revisión»*). El
 administrador marca, entre quienes asistieron, a quién designó la asamblea para revisar el acta;
@@ -506,12 +506,18 @@ si no designó a nadie, no marca a nadie y el acta se aprueba directo. Con comis
 se aprueba** hasta que todos revisen, cada revisión queda con su fecha y su observación en la
 hoja, y **editar el acta después deja las revisiones sin efecto** — se revisó otro texto.
 
-**Pendiente:** el **término** de la comisión, si el reglamento de esta copropiedad le fija uno
-propio; hoy el acta lleva el plazo legal supletorio de 20 días hábiles para todo. Que el
-miembro de la comisión **revise desde su propia app** —en vez de que el administrador registre
-su revisión— es la extensión natural, la misma forma de dos puertas que tiene el poder
-(CU-A-19 / CU-R-23). Y el **PDF** espera al backend (ADR-0006): el acta se lee en pantalla y
-sale al imprimir, sin fingir descarga.
+**Y la comisión tiene un plazo máximo, que fija el administrador** (RN-78, Mary 2026-09-17:
+*«para la revisión del acta debe existir un plazo máximo que lo define el administrador»*). Al
+marcar a alguien aparece el campo **«Plazo máximo para revisar»**; sin él no se aprueba, y no
+puede pasar del término del art. 47 para poner el acta a disposición —el campo lo sugiere y el
+repositorio lo exige—. Mientras corre, el acta espera a todos. Vencido, **se puede aprobar sin
+las revisiones que falten** y ya no se registran revisiones tardías: la hoja dice quién no
+revisó dentro del plazo y hasta cuándo lo tuvo.
+
+**Pendiente:** que el miembro de la comisión **revise desde su propia app** —en vez de que el
+administrador registre su revisión— es la extensión natural, la misma forma de dos puertas que
+tiene el poder (CU-A-19 / CU-R-23). Y el **PDF** espera al backend (ADR-0006): el acta se lee en
+pantalla y sale al imprimir, sin fingir descarga.
 
 **Estado en el demo:** ✅ — `/admin/asambleas`, dentro de una asamblea cerrada.
 

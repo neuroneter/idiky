@@ -732,12 +732,17 @@ export function limiteVerificacionActa(fechaAsamblea: string): FechaISO {
  * sin decir por que obliga a adivinar, y aqui lo que falta son cosas concretas
  * y distintas entre si.
  */
-export function faltaEnActa(acta: Acta): string[] {
+export function faltaEnActa(acta: Acta, hoy: FechaISO = hoyISO()): string[] {
   const falta: string[] = []
   if (!acta.presidenteId) falta.push('quién presidió la asamblea')
   if (!acta.secretarioId) falta.push('quién actuó como secretario')
   if (acta.desarrollo.trim().length < 20) falta.push('el desarrollo de la reunión')
-  const pendientes = verificadoresPendientes(acta)
+  // RN-78 — Con comision, el plazo no es opcional: sin el, la revision no
+  // termina nunca y el acta tampoco.
+  if (actaTieneComision(acta) && !acta.limiteComision) {
+    falta.push('el plazo máximo de la comisión verificadora')
+  }
+  const pendientes = verificadoresQueBloquean(acta, hoy)
   if (pendientes.length > 0) {
     falta.push(
       pendientes.length === 1
@@ -794,18 +799,95 @@ export function verificadoresPendientes(acta: Acta): string[] {
   return acta.verificadores.filter((personaId) => !yaRevisaron.has(personaId))
 }
 
-/** El acta paso la revision. **Sin comision, pasa sola**: no hay nada que pasar. */
-export function actaVerificada(acta: Acta): boolean {
-  return verificadoresPendientes(acta).length === 0
+// ---------------------------------------------------------------------------
+// RN-78 — La comision tiene un plazo maximo, y lo fija el administrador.
+//
+// «Para la revision del acta debe existir un plazo maximo que lo define el
+// administrador» (Mary, 2026-09-17). Sin plazo, un solo miembro que no revise
+// deja el acta en borrador para siempre, y con ella las decisiones de la
+// asamblea. El plazo es lo que impide que la comision —que existe para
+// garantizar el acta— termine bloqueandola.
+//
+// Dos cosas fijas alrededor de lo que el administrador decide:
+// - **No puede pasar del termino del art. 47** (`limiteVerificacion`): el acta
+//   tiene que estar a disposicion en esos veinte dias habiles, con o sin
+//   revision. Un plazo de comision mas largo obligaria al administrador a
+//   incumplir la ley para respetarlo.
+// - **Vencido, no se borra nada** (RN-61): quien no reviso queda en el acta
+//   como «no reviso dentro del plazo». La comision fue designada por la
+//   asamblea y el acta tiene que decir que paso con ella.
+// ---------------------------------------------------------------------------
+
+/**
+ * Por que no sirve una fecha como plazo de la comision, o `null` si sirve.
+ *
+ * Devuelve el motivo y no un booleano por lo mismo que `faltaEnActa`: el
+ * formulario lo muestra tal cual, y el repositorio lo lanza tal cual.
+ */
+export function motivoPlazoComisionInvalido(
+  acta: Pick<Acta, 'limiteVerificacion'>,
+  limiteComision: FechaISO,
+  hoy: FechaISO = hoyISO(),
+): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(limiteComision)) return 'El plazo tiene que ser una fecha.'
+  if (limiteComision < hoy) return 'El plazo de la comisión no puede estar en el pasado.'
+  // El tope legal solo se aplica mientras existe: si el termino del art. 47 ya
+  // paso, el acta ya va tarde y acortar mas a la comision no lo remedia.
+  const tope = topePlazoComision(acta, hoy)
+  if (tope && limiteComision > tope) {
+    return 'El plazo de la comisión no puede pasar del término para poner el acta a disposición (Ley 675, art. 47).'
+  }
+  return null
+}
+
+/**
+ * Hasta donde puede llegar el plazo de la comision: el termino del art. 47,
+ * **mientras no haya pasado**. Pasado, no hay tope (`undefined`) — ver arriba.
+ */
+export function topePlazoComision(
+  acta: Pick<Acta, 'limiteVerificacion'>,
+  hoy: FechaISO = hoyISO(),
+): FechaISO | undefined {
+  return acta.limiteVerificacion >= hoy ? acta.limiteVerificacion : undefined
+}
+
+/** La comision ya no tiene tiempo: hubo plazo y `hoy` lo pasó. */
+export function comisionVencida(acta: Acta, hoy: FechaISO = hoyISO()): boolean {
+  return actaTieneComision(acta) && !!acta.limiteComision && hoy > acta.limiteComision
+}
+
+/**
+ * Quienes de la comision todavia **detienen** la aprobacion: los pendientes,
+ * mientras el plazo corre. Vencido el plazo, nadie — la espera termino.
+ */
+export function verificadoresQueBloquean(acta: Acta, hoy: FechaISO = hoyISO()): string[] {
+  return comisionVencida(acta, hoy) ? [] : verificadoresPendientes(acta)
+}
+
+/** Quienes no revisaron **y ya no pueden**: lo que el acta deja escrito. */
+export function verificadoresFueraDePlazo(acta: Acta, hoy: FechaISO = hoyISO()): string[] {
+  return comisionVencida(acta, hoy) ? verificadoresPendientes(acta) : []
+}
+
+/**
+ * El acta paso la revision. **Sin comision, pasa sola**: no hay nada que pasar.
+ * **Con el plazo vencido, tambien** (RN-78): lo que quedo sin revisar consta,
+ * pero ya no detiene el acta.
+ */
+export function actaVerificada(acta: Acta, hoy: FechaISO = hoyISO()): boolean {
+  return verificadoresQueBloquean(acta, hoy).length === 0
 }
 
 /**
  * En que va el acta. **Se deriva, no se guarda**: un estado guardado que
  * depende de otros campos es un estado que tarde o temprano los contradice.
  */
-export function estadoActa(acta: Acta): 'borrador' | 'en_verificacion' | 'aprobada' {
+export function estadoActa(
+  acta: Acta,
+  hoy: FechaISO = hoyISO(),
+): 'borrador' | 'en_verificacion' | 'aprobada' {
   if (acta.estado === 'aprobada') return 'aprobada'
-  if (actaTieneComision(acta) && !actaVerificada(acta)) return 'en_verificacion'
+  if (actaTieneComision(acta) && !actaVerificada(acta, hoy)) return 'en_verificacion'
   return 'borrador'
 }
 

@@ -40,7 +40,12 @@ import {
   actaCongelada,
   actaDeAsamblea,
   actaTieneComision,
+  comisionVencida,
   estadoActa,
+  hoyISO,
+  motivoPlazoComisionInvalido,
+  topePlazoComision,
+  verificadoresFueraDePlazo,
   acumuladoPorApoderado,
   decisionAdmisibleEnLaSesion,
   faltaEnActa,
@@ -239,9 +244,10 @@ export function AsambleasAdminPage() {
             )
             if (nueva) setViendoActa(nueva.id)
           }}
-          alDesignar={async (verificadores) => {
+          alDesignar={async (verificadores, limiteComision) => {
             await ejecutar(
-              (base) => designarComisionActa(base, { actaId: viendoActa, verificadores }),
+              (base) =>
+                designarComisionActa(base, { actaId: viendoActa, verificadores, limiteComision }),
               verificadores.length === 0
                 ? 'Sin comisión verificadora: el acta se aprueba directo.'
                 : 'Comisión verificadora registrada.',
@@ -1195,7 +1201,7 @@ function VistaActa({
   }) => Promise<void>
   alAprobar: () => Promise<void>
   alAclarar: () => Promise<void>
-  alDesignar: (verificadores: string[]) => Promise<void>
+  alDesignar: (verificadores: string[], limiteComision?: string) => Promise<void>
   alVerificar: (personaId: string, observacion?: string) => Promise<void>
   alCerrar: () => void
 }) {
@@ -1205,17 +1211,31 @@ function VistaActa({
   const [secretarioId, setSecretarioId] = useState(acta?.secretarioId ?? '')
   const [desarrollo, setDesarrollo] = useState(acta?.desarrollo ?? '')
   const [observaciones, setObservaciones] = useState<Record<string, string>>({})
+  const [plazoComision, setPlazoComision] = useState(acta?.limiteComision ?? '')
 
   if (!acta || !asamblea) return null
 
   const congelada = actaCongelada(acta)
+  const hoy = hoyISO()
+  // RN-78 — El plazo se guarda al salir del campo, y antes se dice si no
+  // sirve: el repositorio lo rechazaria igual, pero el motivo se lee mejor
+  // junto al campo que en un aviso. Solo se juzga **lo que se esta
+  // cambiando**: el plazo ya guardado que quedo atras no es un error del
+  // formulario, es un plazo vencido, y eso se dice aparte.
+  const motivoPlazo =
+    plazoComision && plazoComision !== acta.limiteComision
+      ? motivoPlazoComisionInvalido(acta, plazoComision, hoy)
+      : null
+  const vencida = comisionVencida(acta, hoy)
+  const topePlazo = topePlazoComision(acta, hoy)
+  const fueraDePlazo = new Set(verificadoresFueraDePlazo(acta, hoy))
   // Quienes pueden firmar: los que estuvieron. Ofrecer toda la copropiedad
   // dejaría firmar como presidente a alguien que no fue.
   const asistentes = sel
     .asistenciasDeAsamblea(bd, asamblea.id)
     .map((asistencia) => sel.persona(bd, asistencia.personaId))
     .filter((persona): persona is NonNullable<typeof persona> => !!persona)
-  const falta = faltaEnActa({ ...acta, presidenteId, secretarioId, desarrollo })
+  const falta = faltaEnActa({ ...acta, presidenteId, secretarioId, desarrollo }, hoy)
 
   return (
     <Modal
@@ -1316,14 +1336,20 @@ function VistaActa({
                     {designado && (
                       <span
                         className={
-                          vigente ? 'chip chip--exito' : verificacion ? 'chip chip--alerta' : 'chip'
+                          vigente
+                            ? 'chip chip--exito'
+                            : verificacion || fueraDePlazo.has(persona.id)
+                              ? 'chip chip--alerta'
+                              : 'chip'
                         }
                       >
                         {vigente
                           ? 'Revisó'
                           : verificacion
                             ? 'Revisó antes del último cambio'
-                            : 'Pendiente'}
+                            : fueraDePlazo.has(persona.id)
+                              ? 'No revisó en el plazo'
+                              : 'Pendiente'}
                       </span>
                     )}
                   </div>
@@ -1331,9 +1357,43 @@ function VistaActa({
               })}
             </div>
 
+            {/* RN-78 — El plazo máximo lo fija el administrador (Mary,
+                2026-09-17), pero dentro del término del art. 47: el `max` del
+                campo lo sugiere y el repositorio lo exige. */}
+            {actaTieneComision(acta) && (
+              <div className="campo">
+                <label htmlFor="plazo-comision">Plazo máximo para revisar</label>
+                <input
+                  id="plazo-comision"
+                  type="date"
+                  value={plazoComision}
+                  min={hoy}
+                  max={topePlazo}
+                  disabled={cargando}
+                  onChange={(evento) => setPlazoComision(evento.target.value)}
+                  onBlur={() => {
+                    if (plazoComision && !motivoPlazo && plazoComision !== acta.limiteComision) {
+                      void alDesignar(acta.verificadores, plazoComision)
+                    }
+                  }}
+                />
+                <span className="ayuda-campo">
+                  {motivoPlazo ??
+                    (vencida
+                      ? `Venció el ${formatearFecha(acta.limiteComision!)}. Las revisiones que faltan ya no detienen el acta, y así queda escrito en la hoja.`
+                      : topePlazo
+                        ? `Hasta ese día el acta espera a la comisión; después se puede aprobar sin las revisiones que falten. No puede pasar del ${formatearFecha(topePlazo)}, el término para ponerla a disposición (Ley 675, art. 47).`
+                        : `Hasta ese día el acta espera a la comisión; después se puede aprobar sin las revisiones que falten. El término legal para ponerla a disposición (${formatearFecha(acta.limiteVerificacion)}, Ley 675, art. 47) ya pasó: el acta va tarde con o sin revisión.`)}
+                </span>
+              </div>
+            )}
+
             {/* Registrar la revisión de quien falta. Va aquí y no en un modal
-                aparte porque revisar es leer la hoja que está justo abajo. */}
-            {acta.verificadores
+                aparte porque revisar es leer la hoja que está justo abajo.
+                Con el plazo vencido no se ofrece: el repositorio la rechazaría
+                (RN-78), y un formulario que solo sirve para fallar es peor que
+                ninguno. */}
+            {!vencida && acta.verificadores
               .filter((id) => {
                 const v = acta.verificaciones.find((x) => x.personaId === id)
                 return !v || !verificacionVigente(acta, v)

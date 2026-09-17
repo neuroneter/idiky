@@ -24,7 +24,7 @@ se hace otro corte o se borra. Lo que sí se actualiza en cada sesión es la bit
 | **Código** | 68 archivos TypeScript/TSX · ~19.600 líneas |
 | **Documentación** | ~7.100 líneas en `docs/` |
 | **Casos de uso** | 67 documentados: **35 ✅** · 10 🟡 · 21 ⬜ · 1 ⛔ retirado |
-| **Reglas de negocio** | RN-01…RN-77, con RN-41 retirada → **76 vigentes** |
+| **Reglas de negocio** | RN-01…RN-78, con RN-41 retirada → **77 vigentes** |
 | **ADR** | 8 escritos y aceptados; falta ADR-0008 (backend) |
 | **Dependencias de producción** | React, React DOM, React Router. **Nada más** |
 
@@ -135,7 +135,8 @@ Y **dos veces la norma dijo que no hay nada que buscar**, que es un resultado di
 - **La Ley 675 no fija tope de poderes** por apoderado. Lo puede fijar el reglamento. Mientras
   no lo haga, Idiky **muestra el acumulado y no rechaza a nadie** (RN-30).
 - **La Ley 675 no exige comisión verificadora** del acta: el art. 47 pide presidente y
-  secretario y nada más. Por eso la comisión es **opcional** (RN-76).
+  secretario y nada más. Por eso la comisión es **opcional** (RN-76), y cuando la hay tiene un
+  **plazo máximo que fija el administrador**, nunca más allá del término del art. 47 (RN-78).
 
 > **El criterio, dicho en una línea:** la app **suma y registra** (aritmética) y **afirma
 > umbrales solo cuando tiene el artículo** (derecho). Antes de verificar, decía «no puedo
@@ -177,8 +178,9 @@ Detalle completo en [`12-levantamiento-pendiente.md`](./12-levantamiento-pendien
 **Del reglamento de la copropiedad** — las responde Mary con el documento a la mano:
 
 1. ¿Fija **tope de poderes** por apoderado? (§3 bis)
-2. ¿Le da a la **comisión verificadora** un término propio para revisar? Hoy corre el
-   supletorio de 20 días hábiles del art. 47.
+2. ~~¿Le da a la **comisión verificadora** un término propio para revisar?~~ → **Respondida
+   (Mary, 2026-09-17):** el plazo máximo lo fija el administrador, por acta y dentro del
+   término del art. 47 (RN-78).
 
 **Para el abogado** — una sola, y salió de construir:
 

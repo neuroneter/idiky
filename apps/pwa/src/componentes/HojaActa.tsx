@@ -39,6 +39,8 @@ import {
   resultadoVotacion,
   resumenAsistencia,
   verificacionVigente,
+  verificadoresFueraDePlazo,
+  hoyISO,
 } from '../dominio/reglas'
 
 function porcentaje(valor: number): string {
@@ -82,6 +84,11 @@ export function HojaActa({
   const resumen = resumenAsistencia(asistencias, asamblea.id)
   const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
   const deLaAsamblea = asistencias.filter((a) => a.asambleaId === asamblea.id)
+  // RN-78 — Aprobada, la hoja congela lo que paso: quien no reviso a tiempo se
+  // mide contra el dia de la aprobacion, no contra hoy.
+  const fueraDePlazo = new Set(
+    verificadoresFueraDePlazo(acta, acta.aprobadaEn?.slice(0, 10) ?? hoyISO()),
+  )
 
   return (
     <article className="hoja-documento">
@@ -298,7 +305,11 @@ export function HojaActa({
               .map((id) => nombreCompleto(personaDe(id)))
               .join(', ')
               .replace(/, ([^,]*)$/, ' y $1')}
-            .
+            {/* RN-78 — El plazo consta en el acta: es lo que explica, si hace
+                falta, por que se aprobo sin alguna revision. */}
+            {acta.limiteComision
+              ? `, con plazo para revisarla hasta el ${formatearFecha(acta.limiteComision)}.`
+              : '.'}
           </p>
           <table className="hoja-documento__tabla">
             <thead>
@@ -317,7 +328,11 @@ export function HojaActa({
                     <td>{nombreCompleto(personaDe(id))}</td>
                     <td>
                       {!verificacion
-                        ? 'Pendiente'
+                        ? // RN-78 — Vencido el plazo, «pendiente» seria mentir:
+                          // ya no va a revisar. Se dice lo que paso.
+                          fueraDePlazo.has(id)
+                          ? `No revisó dentro del plazo (venció el ${formatearFecha(acta.limiteComision!)})`
+                          : 'Pendiente'
                         : vigente
                           ? formatearFechaHora(verificacion.verificadaEn)
                           : // No se oculta: que reviso y que el texto cambio

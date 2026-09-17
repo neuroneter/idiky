@@ -35,6 +35,7 @@ import type {
   Correspondencia,
   Cuota,
   Documento,
+  FechaISO,
   MedioPago,
   MotivoMensaje,
   Pago,
@@ -70,6 +71,8 @@ import {
   convocatoriaCompleta,
   faltaEnActa,
   limiteVerificacionActa,
+  comisionVencida,
+  motivoPlazoComisionInvalido,
   puedeGenerarActa,
   decisionAdmisibleEnLaSesion,
   poderDeUnidad,
@@ -1197,16 +1200,20 @@ export async function editarActa(
 }
 
 /**
- * CU-A-20 — Registrar **quien revisa el acta**, si alguien la revisa (RN-76).
+ * CU-A-20 — Registrar **quien revisa el acta**, si alguien la revisa (RN-76),
+ * y **hasta cuando** (RN-78).
  *
  * Designar no es editar: cambiar quien revisa no cambia el texto revisado, asi
  * que **no tumba las revisiones ya hechas**. Quitar a alguien de la comision
  * tampoco borra lo que dejo escrito — su observacion sigue en el acta, que es
  * de lo que se trata (RN-61).
+ *
+ * El plazo lo fija el administrador, pero **dentro del termino legal**: la
+ * comprobacion vive aqui y no solo en el `max` del campo de fecha (T-16).
  */
 export async function designarComisionActa(
   bdActual: BaseDatos,
-  parametros: { actaId: string; verificadores: string[] },
+  parametros: { actaId: string; verificadores: string[]; limiteComision?: FechaISO },
 ): Promise<Resultado<Acta>> {
   await esperar()
   const bd = clonar(bdActual)
@@ -1214,6 +1221,13 @@ export async function designarComisionActa(
   if (!acta) throw new ErrorDeNegocio('Esa acta no existe.')
   if (actaCongelada(acta)) {
     throw new ErrorDeNegocio('Esa acta ya está aprobada: la comisión ya cumplió su función.')
+  }
+  // Solo se valida el plazo que **cambia**: uno ya registrado que quedo en el
+  // pasado no impide seguir marcando gente — impide, por diseno, que revisen.
+  if (parametros.limiteComision !== undefined && parametros.limiteComision !== acta.limiteComision) {
+    const motivo = motivoPlazoComisionInvalido(acta, parametros.limiteComision)
+    if (motivo) throw new ErrorDeNegocio(motivo)
+    acta.limiteComision = parametros.limiteComision
   }
 
   const asistieron = new Set(
@@ -1247,6 +1261,13 @@ export async function verificarActa(
   if (actaCongelada(acta)) throw new ErrorDeNegocio('Esa acta ya estaba aprobada.')
   if (!acta.verificadores.includes(parametros.personaId)) {
     throw new ErrorDeNegocio('Esa persona no integra la comisión verificadora de esta acta.')
+  }
+  // RN-78 — Un plazo maximo que admite revisiones despues no es maximo. La
+  // revision tardia no se registra; el acta dice quien no reviso a tiempo.
+  if (comisionVencida(acta)) {
+    throw new ErrorDeNegocio(
+      `El plazo de la comisión venció el ${formatearFecha(acta.limiteComision!)}: el acta ya no espera esa revisión.`,
+    )
   }
 
   acta.verificaciones = [

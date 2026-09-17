@@ -208,8 +208,11 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   verificadora o persona que revisa el acta déjala como una opción para que el administrador
   seleccione, **a veces hay revisión**»*. Implementado como opcional (RN-76). La firma quedó
   resuelta por la ley: presidente y secretario (art. 47).
-  **Queda una pregunta más chica:** si el reglamento le fija a la comisión un **término**
-  propio para revisar; hoy corre el supletorio de 20 días hábiles del art. 47 para todo.
+  ~~**Queda una pregunta más chica:** si el reglamento le fija a la comisión un **término**
+  propio para revisar.~~ → ✅ **Respondido (Mary, 2026-09-17):** *«para la revisión del acta
+  debe existir un plazo máximo que lo define el administrador»*. No lo fija el reglamento: lo
+  fija el administrador **por acta**, al designar la comisión, y nunca más allá del término del
+  art. 47. Vencido, el acta se aprueba sin las revisiones que falten y lo deja escrito (RN-78).
 - **Acta:** ¿debe seguir un formato o plantilla específica de la copropiedad?
   → *(respuesta)*
 

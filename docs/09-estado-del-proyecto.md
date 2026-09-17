@@ -19,7 +19,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 67 documentados: 35 ✅ en el demo, 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 77 (RN-01…RN-77; RN-41 retirada — 76 vigentes) |
+| **Reglas de negocio** | 78 (RN-01…RN-78; RN-41 retirada — 77 vigentes) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -91,6 +91,45 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-17 · Mary + IA (Claude) · La comisión tiene plazo, y lo pone el administrador (RN-78)
+
+Mary cerró la pregunta chica que había dejado RN-76: *«para la revisión del acta debe existir
+un plazo máximo que lo define el administrador»*. No es del reglamento: es **por acta**, y lo
+escribe el administrador al marcar a la comisión. Y hacía falta, porque la comisión opcional
+tal como quedó tenía un agujero: **un solo miembro que no revisara dejaba el acta en borrador
+para siempre**, y con ella las decisiones de la asamblea. Una figura que existe para garantizar
+el acta no puede ser la que la bloquee.
+
+**Lo que el administrador decide y lo que no.** Decide la fecha. Alrededor hay dos cosas fijas:
+**no puede pasar del término del art. 47** —el acta tiene que estar a disposición en esos veinte
+días hábiles con o sin revisión, y un plazo de comisión más largo obligaría a incumplir la ley
+para respetarlo— y **con comisión el plazo es obligatorio**: sin él, no se aprueba. Si el
+término legal ya pasó cuando se designa la comisión (la asamblea cerrada de la semilla, por
+ejemplo), el tope deja de aplicarse: el acta ya va tarde y acortar más a la comisión no lo
+remedia; la pantalla lo dice en vez de dejar un campo sin fecha posible.
+
+**Vencido el plazo, la espera termina y no se borra nada.** Las revisiones que faltan dejan de
+detener el acta, **ya no se registran** —un plazo máximo que admite revisiones después no es
+máximo— y la hoja dice quién no revisó dentro del plazo y hasta cuándo lo tuvo (RN-61). El
+estado derivado vuelve a `borrador`, no se queda en `en_verificacion`. Todo se exige en el
+repositorio, no solo en el `max` del campo (T-16).
+
+**Un error que salió de la prueba y no del razonamiento.** Con el plazo vencido, el campo
+mostraba «no puede estar en el pasado» —estaba juzgando el plazo ya guardado como si el
+administrador lo estuviera escribiendo—. Ahora solo se valida lo que cambia; lo vencido se
+dice aparte, como lo que es.
+
+**Verificado.** 15 comprobaciones directas sobre el repositorio (esbuild + node: rechaza el
+pasado, rechaza más allá del art. 47, rechaza la revisión tardía, aprueba con el plazo vencido
+y conserva al verificador) y 23 con Playwright sobre la pantalla del administrador y la hoja.
+`npm run build` y la ortografía en verde.
+
+**Lo que sigue:** de §3 bis quedan dos preguntas —el tope de poderes del reglamento y la mixta
+para el abogado— y la del apoderado como titular de datos (§4). Que el miembro de la comisión
+revise **desde su propia app** sigue siendo la extensión natural de CU-A-20.
+
+---
 
 ### 2026-09-10 · Mary + IA (Claude) · La mayoría calificada, y una puerta cerrada que no teníamos (RN-77)
 
