@@ -34,6 +34,12 @@ Estado: **demo v0.1**, sin backend, con datos simulados en los dos.
 
 ## 2. Lo primero que debes hacer en una sesión nueva
 
+0. **Mirar el aviso de inicio de sesión sobre la rama** (lo genera `.claude/hooks/revisar-rama.sh`).
+   Si dice que la rama está atrasada, **antes de cualquier otra cosa** dile a la persona, con
+   palabras sencillas y sin jerga, que hay que traer los cambios nuevos, y ofrécete a ejecutar
+   `git pull` (o `git merge origin/main`, según el aviso). Mary y Jeimy no son ingenieras: no
+   les expliques git, resuélvelo con ellas. Si aparecen conflictos, no los resuelvas a ciegas:
+   detente y pídeles que le avisen al responsable de integración (Daniel).
 1. Leer [`docs/09-estado-del-proyecto.md`](./docs/09-estado-del-proyecto.md) — la bitácora dice dónde quedó todo.
 2. Leer el caso de uso a implementar en [`docs/04-casos-de-uso.md`](./docs/04-casos-de-uso.md).
 3. Leer [`docs/06-arquitectura.md`](./docs/06-arquitectura.md) — dónde va cada cosa.

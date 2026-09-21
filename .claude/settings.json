@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/.claude/hooks/revisar-rama.sh\"",
+            "timeout": 30,
+            "statusMessage": "Idiky: revisando si tu rama está al día…"
+          }
+        ]
+      }
+    ]
+  }
+}
