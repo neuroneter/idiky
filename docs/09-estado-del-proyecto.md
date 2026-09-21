@@ -16,7 +16,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | `apps/pwa/` (Mary, la maqueta de ALICE y de la consola), `apps/contable/` (Jeimy), `apps/gestion/` (BOB) y, desde el 2026-09-21, **`apps/bloky/` + `apps/bloky-api/` (BLOKY Dev, el producto real, ADR-0013)** |
-| **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Todavía sin entidades; faltan el responsable y el disco de datos (T-37) |
+| **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. El demo y la contable siguen con datos simulados en el navegador. |
@@ -107,6 +107,34 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-21 · Datos de prueba en BOB · Sesión de IA (Claude) a pedido del responsable de integración · Tres copropiedades sembradas
+
+**Qué se hizo:** se corrió `apps/gestion/scripts/sembrar-pruebas.mjs` (T-75, commit `5d41eca`)
+dentro del contenedor `idiky-gestion-strapi` del servidor de desarrollo, contra el PostgreSQL de
+BOB. Se eligió la opción de **datos ficticios**: la Administradora de la copropiedad activa es
+una persona inventada, con un celular que no existe, así que ningún SMS sale de verdad. Todo se
+creó a la primera (exit 0); el contenedor se mantuvo en ~190 MB de los 1,5 GB de tope.
+
+**Qué quedó en BOB** (verificado por la API con el token de solo lectura y visible en
+`/admin` → Content Manager → Copropiedad):
+
+| Copropiedad | Estado | Perfiles raíz vigentes |
+|---|---|---|
+| Conjunto Residencial Altos del Bosque (Bogotá) | activa | Administradora Olga Lucía Henao (CC 1000000001) · Delegada María Camila Restrepo (CC 1000000002) |
+| Edificio Torres del Parque (Medellín, con consejo) | en_implementacion | Administrador Jorge Enrique Valencia (CC 1000000003, empresa Administra Bien SAS) · Delegada Sandra Milena Ortiz (CE 1000000004) |
+| Conjunto Mirador de la Sabana (Chía) | suspendida | Administrador Andrés Felipe Gómez (CC 1000000005) |
+
+Además: cinco personas, el plan «Básico por unidad» y una contratación vigente de Altos del
+Bosque. Los NIT, documentos y celulares son inventados (rangos 1000000001-5 / 3000000001-5).
+
+**Para probar el ingreso a BLOKY (CU-B-01):** CC 1000000001 y CE 1000000004 deben entrar;
+CC 1000000005 no debe entrar (copropiedad suspendida, RN-162). El código por SMS se ve en el
+registro de la API mientras el entorno lo simule.
+
+**Qué sigue:** el script es idempotente; si hace falta cambiar la Administradora de Altos del
+Bosque por una persona real (para recibir el SMS), se vuelve a correr con las variables
+`PRUEBA_*` y los datos reales quedan solo en BOB, nunca en el repositorio.
 
 ### 2026-09-21 · Incidente: BOB caído · Sesión de IA (Claude) a pedido del responsable de integración · No estaba caído
 
