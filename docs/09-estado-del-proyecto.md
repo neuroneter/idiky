@@ -108,6 +108,27 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Los tres canales del ingreso funcionan: SMS, Google y Microsoft (CU-B-01 completo)
+
+**Qué se hizo:** Daniel registró la aplicación en Microsoft Entra (pantalla por pantalla, con
+la guía): registro `BLOKY` para «todos los usuarios de cuentas Microsoft» (lo que deja entrar a
+Hotmail y Outlook), las dos direcciones de retorno y un secreto a 24 meses. Se cargaron
+`MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` y `MICROSOFT_TENANT_ID=common` en
+`bloky-api.env` (copia previa `bloky-api.env.antes-microsoft`) y se reinició el pod. Con un
+Hotmail como correo de la persona de prueba María Camila Restrepo (CC 1000000002), **entró a
+BLOKY con Microsoft** desde `https://bloky-dev.idiky.com`. Antes, en la misma sesión, había
+entrado con Google (Olga, CC 1000000001) y por SMS.
+
+**Estado de CU-B-01:** completo en el entorno de desarrollo, con los tres canales probados con
+cuentas reales y la regla RN-167 (solo el proveedor del correo). Google sigue «en pruebas» en
+su consola: solo entran los correos de la lista de usuarios de prueba, hasta que se publique.
+
+**Pendientes de higiene, no urgentes:**
+- **Regenerar los dos secretos** (Google y Microsoft) y reemplazarlos en `bloky-api.env`:
+  durante el registro pasaron por el chat de la sesión de IA. Un minuto en cada consola.
+- Borrar en Cloudflare el túnel que se creó por error (no es `idiky-dev`), si aún existe.
+- El secreto de Microsoft vence en septiembre de 2028: anotado en T-76.
+
 ### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Entrar con Google funciona; solo se ofrece el proveedor del correo (RN-167)
 
 **Qué pasó:** con el dominio y HTTPS listos, Daniel registró la aplicación en Google Cloud
