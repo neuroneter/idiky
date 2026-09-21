@@ -171,13 +171,16 @@ levantar_bloky() {
 # El tunel de Cloudflare (ADR-0014): un contenedor sin puertos publicados que solo sale hacia
 # Cloudflare. Lo unico que se publica, y solo en 127.0.0.1, es /ready de sus metricas, para que
 # `esperar` sepa que se conecto. El nombre publico y a que puerto del servidor apunta se
-# definen en el panel de Cloudflare, no aqui.
+# definen en el panel de Cloudflare, no aqui: `http://10.0.2.2:8083`. Probado el 2026-09-21:
+# 10.0.2.2 solo llega al servidor con allow_host_loopback=true; sin eso, «Network unreachable».
+# La IP privada de la VM (hostname -I) llega con cualquier red y sirve de alternativa.
 levantar_tunel() {
   nombre="idiky-tunel"
   echo "==> Levantando $nombre (sin puertos; /ready en 127.0.0.1:$1)"
   systemctl --user stop "container-$nombre.service" 2>/dev/null || true
   podman rm --force --ignore "$nombre" >/dev/null
   podman create --name "$nombre" --memory 128m --pids-limit 128 \
+    --network slirp4netns:allow_host_loopback=true \
     --env-file "$SECRETOS/tunel.env" \
     --publish "127.0.0.1:$1:2000" "localhost/$nombre:actual" >/dev/null
   mkdir -p "$UNIDADES"

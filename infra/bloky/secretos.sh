@@ -57,7 +57,8 @@ BLOKY_JWT_SECRET=$(azar)
 BLOKY_HORAS_SESION=12
 BLOKY_URL_PUBLICA=http://CAMBIAR-POR-LA-IP-O-DOMINIO:8083
 # BOB corre en otro pod del mismo servidor y publica el 8082 en el host. Desde dentro de un
-# pod con slirp4netns, el host es 10.0.2.2. Si no responde, usar la IP privada de la VM.
+# pod con slirp4netns, 10.0.2.2 solo responde con allow_host_loopback=true (probado 2026-09-21):
+# por eso aqui va la IP privada de la VM (hostname -I), que llega con cualquier red.
 BOB_URL=http://10.0.2.2:8082
 BOB_API_TOKEN=CAMBIAR-POR-EL-TOKEN-DE-SOLO-LECTURA-DE-BOB
 EOF2
