@@ -22,6 +22,7 @@ import { SiluetaTorres } from '../../componentes/SiluetaTorres'
 // Dos pasos, no tres: escribir el codigo del SMS es parte de la autenticacion, no un paso
 // aparte (responsable de integracion, 2026-09-21).
 const PASOS = ['Documento', 'Autenticación']
+const MODULOS = ['Estructura y unidades', 'Propietarios', 'Cartera', 'Asambleas']
 
 export function Puerta({ children, titulo, paso }: { children: ReactNode; titulo?: string; paso: 1 | 2 }) {
   return (
@@ -29,12 +30,18 @@ export function Puerta({ children, titulo, paso }: { children: ReactNode; titulo
       <aside className="puerta__marca">
         <ControlTamanoTexto className="puerta__tamano" />
         <div className="puerta__marca-contenido">
-          <Logotipo inverso tamano="var(--texto-3xl)" />
-          <p className="puerta__lema">
-            <strong>BLOKY</strong> · el sistema de tu copropiedad
-          </p>
+          {/* BLOKY es la aplicacion y manda; idiky firma abajo, en pequeno. No es un h1: el
+              unico h1 de la pantalla es el titulo del paso, en el formulario. */}
+          <p className="puerta__producto">BLOKY</p>
+          <p className="puerta__lema">El sistema de tu copropiedad</p>
           <p className="puerta__frase">
             Estructura y unidades, propietarios, cartera y asambleas de tu conjunto, en un solo lugar.
+          </p>
+          <ul className="puerta__modulos" aria-label="Lo que incluye">
+            {MODULOS.map((m) => <li key={m}>{m}</li>)}
+          </ul>
+          <p className="puerta__firma">
+            Una aplicación de <Logotipo inverso tamano="1.15em" />
           </p>
         </div>
         <SiluetaTorres className="puerta__siluetas" />

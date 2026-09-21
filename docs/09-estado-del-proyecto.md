@@ -120,6 +120,11 @@ marcas que cada proveedor permite en su botón de ingreso y el SMS en el azul de
 imágenes descargadas ni dependencias: no dependen de la red y escalan con la letra. La opción
 pasa a fila (icono · texto · flecha), con foco visible.
 
+**El panel de marca, rehecho** (Daniel: «falta algo»): BLOKY grande como nombre de la aplicación,
+«El sistema de tu copropiedad» debajo, la frase de valor, los cuatro módulos como etiquetas y
+«Una aplicación de idiky» como firma pequeña; siluetas más grandes. En el celular solo el nombre,
+el lema y la firma.
+
 **Dos pasos en vez de tres** (Daniel): «Documento» y «Autenticación». El «Código» del SMS no
 era un paso aparte, es parte de autenticarse; con Google, Microsoft o Yahoo ni siquiera existe.
 
