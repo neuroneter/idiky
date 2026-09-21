@@ -7,8 +7,8 @@
 #
 #   REVISION=abc1234 IDIKY_SERVICIOS="pwa contable" sh infra/servidor/levantar.sh
 #
-# IDIKY_SERVICIOS dice cuales se publican (pwa, contable, gestion, bloky); los demas no se tocan.
-# Sin la variable se publican los cuatro.
+# IDIKY_SERVICIOS dice cuales se publican (pwa, contable, gestion, bloky, tunel); los demas no se
+# tocan. Sin la variable se publican los cuatro de siempre (el tunel solo si se nombra).
 #
 # Configuracion opcional, fuera del repositorio, en ~/.config/idiky/entorno:
 #   IDIKY_HOST=127.0.0.1         # 0.0.0.0 para publicar hacia la red
@@ -16,6 +16,7 @@
 #   IDIKY_PUERTO_CONTABLE=8081
 #   IDIKY_PUERTO_GESTION=8082
 #   IDIKY_PUERTO_BLOKY=8083
+#   IDIKY_PUERTO_TUNEL=8084      # solo /ready del tunel, y solo en 127.0.0.1 (ADR-0014)
 #   IDIKY_DATOS=$HOME/datos      # lo que persiste: PostgreSQL, archivos subidos, respaldos
 #   IDIKY_MINIMO_DISCO_MB=3000   # con menos espacio libre no se construye nada
 set -eu
@@ -33,6 +34,7 @@ IDIKY_PUERTO_PWA="${IDIKY_PUERTO_PWA:-8080}"
 IDIKY_PUERTO_CONTABLE="${IDIKY_PUERTO_CONTABLE:-8081}"
 IDIKY_PUERTO_GESTION="${IDIKY_PUERTO_GESTION:-8082}"
 IDIKY_PUERTO_BLOKY="${IDIKY_PUERTO_BLOKY:-8083}"
+IDIKY_PUERTO_TUNEL="${IDIKY_PUERTO_TUNEL:-8084}"
 IDIKY_DATOS="${IDIKY_DATOS:-$HOME/datos}"
 IDIKY_MINIMO_DISCO_MB="${IDIKY_MINIMO_DISCO_MB:-3000}"
 UNIDADES="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
@@ -40,8 +42,8 @@ SECRETOS="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/secretos"
 
 for servicio in $IDIKY_SERVICIOS; do
   case "$servicio" in
-    pwa | contable | gestion | bloky) ;;
-    *) echo "Servicio desconocido: $servicio. Son pwa, contable, gestion y bloky." >&2; exit 2 ;;
+    pwa | contable | gestion | bloky | tunel) ;;
+    *) echo "Servicio desconocido: $servicio. Son pwa, contable, gestion, bloky y tunel." >&2; exit 2 ;;
   esac
 done
 incluye() {
@@ -166,6 +168,25 @@ levantar_bloky() {
   systemctl --user enable --now "pod-$pod.service"
 }
 
+# El tunel de Cloudflare (ADR-0014): un contenedor sin puertos publicados que solo sale hacia
+# Cloudflare. Lo unico que se publica, y solo en 127.0.0.1, es /ready de sus metricas, para que
+# `esperar` sepa que se conecto. El nombre publico y a que puerto del servidor apunta se
+# definen en el panel de Cloudflare, no aqui.
+levantar_tunel() {
+  nombre="idiky-tunel"
+  echo "==> Levantando $nombre (sin puertos; /ready en 127.0.0.1:$1)"
+  systemctl --user stop "container-$nombre.service" 2>/dev/null || true
+  podman rm --force --ignore "$nombre" >/dev/null
+  podman create --name "$nombre" --memory 128m --pids-limit 128 \
+    --env-file "$SECRETOS/tunel.env" \
+    --publish "127.0.0.1:$1:2000" "localhost/$nombre:actual" >/dev/null
+  mkdir -p "$UNIDADES"
+  (cd "$UNIDADES" && podman generate systemd --new --files --name "$nombre" >/dev/null)
+  podman rm "$nombre" >/dev/null
+  systemctl --user daemon-reload
+  systemctl --user enable --now "container-$nombre.service"
+}
+
 # Respaldo diario de la base (infra/gestion/respaldo.sh). Se copia fuera de la carpeta del
 # despliegue porque esa carpeta se reemplaza en cada despliegue.
 instalar_respaldo_gestion() {
@@ -213,6 +234,10 @@ if incluye bloky && grep -q 'CAMBIAR-POR' "$SECRETOS/bloky-api.env"; then
   echo "Los secretos de BLOKY tienen valores sin completar (CAMBIAR-POR...): editar $SECRETOS/bloky-api.env" >&2
   exit 1
 fi
+if incluye tunel && [ ! -f "$SECRETOS/tunel.env" ]; then
+  echo "Falta el token del tunel. Se crea una vez: printf '%s\\n' 'EL-TOKEN' | ssh idiky@<ip> 'sh -s' < infra/tunel/secretos.sh" >&2
+  exit 1
+fi
 
 # Se construye (y se descarga) todo antes de detener nada: si algo falla, sigue en pie lo anterior.
 if incluye pwa; then construir pwa; fi
@@ -228,6 +253,7 @@ if incluye bloky; then
   construir bloky-app bloky/app.Containerfile
   podman pull --quiet docker.io/library/postgres:17-alpine >/dev/null
 fi
+if incluye tunel; then construir tunel tunel/Containerfile 512m; fi
 
 if incluye pwa; then levantar pwa "$IDIKY_PUERTO_PWA"; fi
 if incluye contable; then levantar contable "$IDIKY_PUERTO_CONTABLE"; fi
@@ -236,6 +262,7 @@ if incluye gestion; then
   instalar_respaldo_gestion
 fi
 if incluye bloky; then levantar_bloky "$IDIKY_PUERTO_BLOKY"; fi
+if incluye tunel; then levantar_tunel "$IDIKY_PUERTO_TUNEL"; fi
 
 if incluye pwa; then esperar pwa "$IDIKY_PUERTO_PWA"; fi
 if incluye contable; then esperar contable "$IDIKY_PUERTO_CONTABLE"; fi
@@ -248,6 +275,10 @@ if incluye bloky; then
   esperar bloky "$IDIKY_PUERTO_BLOKY"
   # La API espera a PostgreSQL y aplica sus migraciones la primera vez.
   esperar bloky "$IDIKY_PUERTO_BLOKY" /api/salud 120
+fi
+if incluye tunel; then
+  # /ready responde 200 cuando hay al menos una conexion viva con Cloudflare.
+  esperar tunel "$IDIKY_PUERTO_TUNEL" /ready 60
 fi
 
 # El disco del servidor es compartido y escaso: se borra toda imagen que no use un
