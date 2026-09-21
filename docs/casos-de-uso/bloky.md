@@ -27,7 +27,9 @@ creen. BLOKY no crea a nadie por su cuenta.
 2. BLOKY busca a la persona en BOB y comprueba que hoy tenga al menos una copropiedad a la que
    pueda entrar (RN-161, RN-162). Le muestra su nombre y **por dónde puede confirmar que es ella**:
    - **Código por SMS** al celular registrado, con la pista «••• 4567» (RN-163).
-   - **Google** o **Microsoft**, con la cuenta registrada, pista «o•••@gmail.com» (RN-164).
+   - **Google** o **Microsoft**, con la cuenta registrada, pista «o•••@gmail.com» (RN-164). Se
+     ofrece **solo el que corresponde al correo**: Gmail → Google; Hotmail, Outlook, Live o MSN →
+     Microsoft; otro dominio → solo SMS (RN-167).
    Un solo código por intento, por el canal que elija ([docs/13 §4](../13-bob-copropiedades-y-contratos.md)).
 3. **Por SMS:** recibe un código de seis números, válido diez minutos, y lo escribe.
    **Por Google o Microsoft:** el navegador va al proveedor, la persona elige su cuenta y vuelve.
@@ -47,7 +49,7 @@ creen. BLOKY no crea a nadie por su cuenta.
 - A6. Cierra la sesión → la sesión queda revocada (RN-165); la cookie ya no sirve.
 
 **Reglas de negocio**
-- RN-160 a RN-166, en [`05-modelo-de-datos.md`](../05-modelo-de-datos.md).
+- RN-160 a RN-167, en [`05-modelo-de-datos.md`](../05-modelo-de-datos.md).
 
 **Lo que queda abierto**
 - El perfil de portería y los perfiles internos que crean el Administrador y el Delegado entran

@@ -8,6 +8,7 @@
 import { createServer } from 'node:http'
 import { construirApp } from '../src/servidor.js'
 import { cargarConfig } from '../src/config.js'
+import { proveedorDelCorreo } from '../src/dominio/reglas.js'
 
 const HOY = new Date().toISOString().slice(0, 10)
 const personas: Record<string, unknown> = {
@@ -20,6 +21,8 @@ const personas: Record<string, unknown> = {
     asig('administrador', 'vigente', 'prospecto', 'Prospecto SA', 'cop-3'),
   ]),
   '1003': persona('1003', 'Sin Celular', '', 'sin@ejemplo.com', [asig('administrador', 'vigente', 'activa', 'Altos', 'cop-1')]),
+  '1004': persona('1004', 'Con Gmail', '3001112233', 'alguien@gmail.com', [asig('administrador', 'vigente', 'activa', 'Altos', 'cop-1')]),
+  '1005': persona('1005', 'Con Hotmail', '3001112244', 'alguien@hotmail.com', [asig('administrador', 'vigente', 'activa', 'Altos', 'cop-1')]),
 }
 function persona(doc: string, nombre: string, celular: string, correo: string, asignaciones: unknown[]) {
   return { documentId: `per-${doc}`, nombre, tipoDocumento: 'CC', numeroDocumento: doc, celular, correo, asignaciones }
@@ -92,6 +95,20 @@ await paso('RN-166: cinco codigos malos bloquean el documento', async () => {
   let ultimo = 0
   for (let i = 0; i < 6; i++) ultimo = (await post('/api/acceso/verificar-codigo', { numeroDocumento: '1001', codigo: '111111' })).statusCode
   return ultimo === 429 || `ultimo estado ${ultimo}`
+})
+await paso('RN-167: el proveedor sale del dominio del correo', async () => {
+  const casos: Array<[string, string | undefined]> = [
+    ['a@gmail.com', 'google'], ['A@Googlemail.com', 'google'], ['b@hotmail.com', 'microsoft'], ['b@outlook.es', 'microsoft'],
+    ['b@live.com.mx', 'microsoft'], ['c@msn.com', 'microsoft'], ['d@yahoo.com', undefined], ['e@empresa.com.co', undefined], ['sin-arroba', undefined],
+  ]
+  const malos = casos.filter(([c, esperado]) => proveedorDelCorreo(c) !== esperado)
+  return malos.length === 0 || `fallan: ${malos.map(([c]) => c).join(', ')}`
+})
+await paso('RN-167: con Gmail se ofrece solo google; con Hotmail solo microsoft; con otro dominio ninguno', async () => {
+  const tipos = async (doc: string) => ((await post('/api/acceso/identificar', { numeroDocumento: doc })).json() as { canales: Array<{ tipo: string }> }).canales.map((c) => c.tipo).join(',')
+  // En esta prueba no hay proveedores configurados: lo que se comprueba es que nunca aparezca uno ajeno.
+  const [gmail, hotmail, otro] = await Promise.all([tipos('1004'), tipos('1005'), tipos('1001')])
+  return (gmail === 'sms' && hotmail === 'sms' && otro === 'sms') || `gmail=${gmail} hotmail=${hotmail} otro=${otro}`
 })
 await paso('google sin configurar → 409', async () =>
   (await app.inject({ method: 'GET', url: '/api/acceso/google?tipo=CC&documento=1001' })).statusCode === 409)

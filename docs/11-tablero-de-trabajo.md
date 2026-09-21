@@ -17,7 +17,7 @@ quien numera dentro de su rango** y, al agotarlo, pide el siguiente aquí. Los m
 |---|---|---|---|---|
 | Mary (ALICE / PWA) | RN-98 … RN-129 | CU-R-32 … CU-R-49 · CU-A-28 … CU-A-39 | T-45 … T-59 | Se piden al integrador |
 | Jeimy (contable) | RN-130 … RN-159 | CU-A-40 … CU-A-49 | T-60 … T-74 | Se piden al integrador |
-| Integración (infra, BOB, BLOKY) | RN-160 … RN-189 (usadas: RN-160…166) | CU-S-10 … CU-S-29 · CU-P-04 … CU-P-09 · **CU-B-01 … CU-B-49** (BLOKY, usado: CU-B-01) | T-75 … T-89 (usados: T-75, T-76) | ADR-0013 en adelante (usados: 0013, 0014) |
+| Integración (infra, BOB, BLOKY) | RN-160 … RN-189 (usadas: RN-160…167) | CU-S-10 … CU-S-29 · CU-P-04 … CU-P-09 · **CU-B-01 … CU-B-49** (BLOKY, usado: CU-B-01) | T-75 … T-89 (usados: T-75, T-76) | ADR-0013 en adelante (usados: 0013, 0014) |
 
 ## Ahora — antes de seguir construyendo
 
