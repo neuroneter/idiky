@@ -238,7 +238,7 @@ if incluye bloky && grep -q 'CAMBIAR-POR' "$SECRETOS/bloky-api.env"; then
   exit 1
 fi
 if incluye tunel && [ ! -f "$SECRETOS/tunel.env" ]; then
-  echo "Falta el token del tunel. Se crea una vez: printf '%s\\n' 'EL-TOKEN' | ssh idiky@<ip> 'sh -s' < infra/tunel/secretos.sh" >&2
+  echo "Falta el token del tunel. Se crea una vez con infra/tunel/secretos.sh (ver su encabezado: el script se copia y el token va por stdin)" >&2
   exit 1
 fi
 
