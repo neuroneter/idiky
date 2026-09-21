@@ -59,9 +59,9 @@ creen. BLOKY no crea a nadie por su cuenta.
 
 **Estado en BLOKY Dev:** ✅ — `apps/bloky/src/features/acceso/` y `apps/bloky-api/src/acceso/`.
 Probado el flujo por SMS contra un BOB simulado (`apps/bloky-api/pruebas/humo.ts`) y, el
-2026-09-21, la identificación contra el BOB real en el servidor de desarrollo (bitácora). Google y
-Microsoft están construidos y sin credenciales: se activan al registrar las aplicaciones y
-solo funcionan con HTTPS (ADR-0008).
+2026-09-21, la identificación contra el BOB real en el servidor de desarrollo (bitácora). **Google y
+Microsoft probados con cuentas reales el 2026-09-21** en `https://bloky-dev.idiky.com`
+(ADR-0014); Google sigue «en pruebas» en su consola, solo para los usuarios de prueba.
 La puerta **se adapta al aparato** (2026-09-21): hoja pegada abajo en el celular, tarjeta en la
 tableta y dos paneles en el computador; muestra los tres pasos y trae el control del tamaño de la
 letra (CU-R-26).
