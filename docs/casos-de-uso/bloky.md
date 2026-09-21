@@ -63,5 +63,5 @@ Probado el flujo por SMS contra un BOB simulado (`apps/bloky-api/pruebas/humo.ts
 Microsoft probados con cuentas reales el 2026-09-21** en `https://bloky-dev.idiky.com`
 (ADR-0014); Google sigue «en pruebas» en su consola, solo para los usuarios de prueba.
 La puerta **se adapta al aparato** (2026-09-21): hoja pegada abajo en el celular, tarjeta en la
-tableta y dos paneles en el computador; muestra los tres pasos y trae el control del tamaño de la
-letra (CU-R-26).
+tableta y dos paneles en el computador; muestra los dos pasos (Documento · Autenticación) y trae
+el control del tamaño de la letra (CU-R-26).

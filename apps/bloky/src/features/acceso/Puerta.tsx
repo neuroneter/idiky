@@ -10,7 +10,7 @@
  *     que dice qué es BLOKY y las siluetas de la copropiedad; a la derecha, el formulario
  *     sobre blanco, sin tarjeta.
  *
- * En los tres: los pasos del ingreso (Documento · Cómo entras · Código), el control del tamaño
+ * En los tres: los pasos del ingreso (Documento · Autenticación), el control del tamaño
  * de la letra (CU-R-26) y, discreto, el aviso de entorno. Todo con los tokens de ALICE: la
  * identidad es una. La forma la decide `base.css`, no este archivo.
  */
@@ -19,9 +19,11 @@ import { ControlTamanoTexto } from '../../componentes/ControlTamanoTexto'
 import { Logotipo } from '../../componentes/Logotipo'
 import { SiluetaTorres } from '../../componentes/SiluetaTorres'
 
-const PASOS = ['Documento', 'Cómo entras', 'Código']
+// Dos pasos, no tres: escribir el codigo del SMS es parte de la autenticacion, no un paso
+// aparte (responsable de integracion, 2026-09-21).
+const PASOS = ['Documento', 'Autenticación']
 
-export function Puerta({ children, titulo, paso }: { children: ReactNode; titulo?: string; paso: 1 | 2 | 3 }) {
+export function Puerta({ children, titulo, paso }: { children: ReactNode; titulo?: string; paso: 1 | 2 }) {
   return (
     <div className="puerta">
       <aside className="puerta__marca">
@@ -42,7 +44,7 @@ export function Puerta({ children, titulo, paso }: { children: ReactNode; titulo
         <div className="puerta__formulario">
           <ol className="pasos" aria-label="Pasos del ingreso">
             {PASOS.map((nombre, i) => {
-              const numero = (i + 1) as 1 | 2 | 3
+              const numero = (i + 1) as 1 | 2
               const clase = numero === paso ? 'activo' : numero < paso ? 'hecho' : ''
               return (
                 <li key={nombre} className={clase} aria-current={numero === paso ? 'step' : undefined}>
