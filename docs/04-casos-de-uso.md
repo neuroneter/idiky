@@ -107,7 +107,7 @@ con datos reales.
 
 | ID | Caso de uso | Fase | Estado | Detalle |
 |---|---|---|---|---|
-| CU-B-01 | **Ingresar a BLOKY** (documento + código SMS al celular de BOB, o Google/Microsoft con el correo de BOB) | 1 | ✅ BLOKY (SMS probado en local y en el servidor contra el BOB real, 2026-09-21; Google y Microsoft construidos, a la espera de credenciales y HTTPS) | [ver](./casos-de-uso/bloky.md#cu-b-01) |
+| CU-B-01 | **Ingresar a BLOKY** (documento + código SMS al celular de BOB, o Google/Microsoft con el correo de BOB) | 1 | ✅ BLOKY (SMS, Google y Microsoft probados con cuentas reales en `https://bloky-dev.idiky.com`, 2026-09-21) | [ver](./casos-de-uso/bloky.md#cu-b-01) |
 
 ## 3. Sistema — procesos automáticos
 
