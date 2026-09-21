@@ -54,7 +54,8 @@ despliega sin la clave.
 | 8081 | `idiky-contable` |
 | 8082 | Pod `idiky-gestion` (sistema de gestión) |
 | 8083 | Pod `idiky-bloky` (BLOKY Dev: app + API + PostgreSQL) |
-| **8084 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
+| 8084 | `idiky-tunel`, solo `/ready` y solo en `127.0.0.1` (ADR-0014). El túnel no publica nada hacia internet |
+| **8085 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
 
 - **Para que se vea desde internet** hay que agregar el puerto a la regla `Dev` del grupo de
   seguridad de red en Azure (hoy dice `8080,8081,8082`). Eso lo hace el **responsable de

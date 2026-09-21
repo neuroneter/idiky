@@ -17,6 +17,7 @@ que **no puede verse afectado**. Las decisiones y sus porqués están en
 | Contable | `infra/contable/` | contenedor `idiky-contable` | `8081` | Clave del entorno | Copia `apps/contable` **tal cual** (ADR-0010) y la sirve con nginx. **Demo** |
 | **BOB** | `infra/gestion/` | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082` | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`apps/gestion`, ADR-0012) |
 | **BLOKY Dev** | `infra/bloky/` | **pod** `idiky-bloky`: nginx + API de BLOKY + PostgreSQL | `8083` | Clave del entorno, y luego **el ingreso de BLOKY** (código SMS, Google o Microsoft, con lo registrado en BOB) | El sistema de las copropiedades, construido de cero (`apps/bloky`, `apps/bloky-api`; ADR-0008, ADR-0013) |
+| **Túnel** | `infra/tunel/` | contenedor `idiky-tunel` (`cloudflared`) | ninguno hacia internet; `/ready` en `127.0.0.1:8084` | — | Publica BLOKY Dev en `https://bloky-dev.idiky.com` con certificado de Cloudflare, sin abrir puertos ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)). Su token: `infra/tunel/secretos.sh` |
 
 ## 1. La regla del servidor
 
@@ -399,7 +400,7 @@ sus respaldos**: sácalos antes si hacen falta. Se corre con un usuario con sudo
 ```bash
 sudo -u idiky XDG_RUNTIME_DIR=/run/user/$(id -u idiky) \
   systemctl --user disable --now container-idiky-pwa container-idiky-contable \
-  pod-idiky-gestion idiky-gestion-respaldo.timer
+  pod-idiky-gestion pod-idiky-bloky container-idiky-tunel idiky-gestion-respaldo.timer
 sudo loginctl disable-linger idiky
 sudo rm -rf /etc/systemd/system.control/user-$(id -u idiky).slice.d && sudo systemctl daemon-reload
 sudo pkill -u idiky; sudo userdel -r idiky

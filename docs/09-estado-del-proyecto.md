@@ -108,6 +108,44 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-21 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Camino a Google y Microsoft: HTTPS con túnel de Cloudflare (T-76, ADR-0014)
+
+**Qué pasó:** al probar el ingreso a BLOKY en el servidor con los datos de prueba, la puerta solo
+ofrece «Código por SMS». El responsable de integración quiere que la persona pueda entrar también
+con su cuenta de Gmail o de Hotmail/Outlook (no un código al correo). Ese ingreso **ya está
+construido** (CU-B-01, ADR-0008) y se enciende solo con las credenciales de las dos aplicaciones;
+lo que lo tiene apagado es que Google y Microsoft **exigen `https://`** para devolver a la
+persona, y BLOKY Dev vive en `http://20.55.251.120:8083`.
+
+**Restricciones:** los puertos 80 y 443 son de LangFlow; no se puede configurar nada dentro de
+Azure (la suscripción no es del equipo); sí se puede configurar `idiky.com`, que está en GoDaddy
+apuntando a otra máquina (la página web).
+
+**Qué se decidió y se dejó listo** ([ADR-0014](./adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)):
+
+- **Un túnel de Cloudflare** como servicio nuevo del entorno, `infra/tunel/` (`cloudflared`
+  con versión fija, sin puertos hacia internet, token en `~/.config/idiky/secretos/tunel.env`).
+  Publica BLOKY Dev en **`https://bloky-dev.idiky.com`** sin abrir puertos, sin Azure y sin
+  depender de la IP. Registrado en `levantar.sh` y `desplegar.sh` (`infra/desplegar.sh
+  origin/main tunel`, solo el responsable de integración); su salud es `/ready` en
+  `127.0.0.1:8084`. **Todavía no está desplegado**: falta el token.
+- **La guía para registrar las aplicaciones** en Google Cloud y Microsoft Entra:
+  `infra/bloky/credenciales-google-microsoft.md`. Microsoft se registra para «cualquier
+  organización y cuentas personales», que es lo que deja entrar a Hotmail y Outlook.com.
+
+**Qué sigue, y quién:**
+
+1. Daniel: crear la cuenta de Cloudflare, agregar `idiky.com`, **revisar que queden la web y el
+   correo (MX, TXT)** y cambiar los servidores de nombres en GoDaddy.
+2. Daniel: cuando Cloudflare diga «activo», crear el túnel `idiky-dev` (Zero Trust → Networks →
+   Tunnels), agregar el nombre público `bloky-dev.idiky.com` → HTTP `10.0.2.2:8083`, y pasar el
+   token por canal privado.
+3. Daniel: registrar las aplicaciones con la guía y pasar los cuatro valores por canal privado.
+   Con ellos se prueba el flujo completo **en local** (`http://localhost:5173`) sin esperar el
+   dominio.
+4. Integración: `secretos.sh` del túnel, desplegar `tunel`, poner `BLOKY_URL_PUBLICA=https://bloky-dev.idiky.com`
+   y las credenciales en `bloky-api.env`, redesplegar `bloky`, probar los tres canales.
+
 ### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) a pedido del responsable de integración · La puerta se adapta al aparato (CU-B-01, CU-R-26)
 
 **Por qué:** al probar el ingreso en el servidor, la puerta era una tarjeta centrada sobre el

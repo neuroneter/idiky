@@ -12,6 +12,7 @@ demás ni el servidor que compartimos. Si vas a **crear** un servicio nuevo, la 
 | `contable` | **La maqueta de Jeimy**: la aplicación contable | Jeimy | `origin/main` | 8081 |
 | `gestion` | **BOB**, el *back office* de IDIKY (Strapi + PostgreSQL) | **Solo el responsable de integración** | `origin/main`, **y nada más** | 8082 |
 | `bloky` | **BLOKY Dev**: el sistema de las copropiedades, construido de cero (app + API + PostgreSQL) | **El responsable de integración** | `origin/main` | 8083 |
+| `tunel` | **El túnel de Cloudflare** que publica BLOKY Dev en `https://bloky-dev.idiky.com` ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)) | **Solo el responsable de integración** | `origin/main` | ninguno hacia internet (`/ready` en 127.0.0.1:8084) |
 
 > **Las maquetas no son los espacios de desarrollo.** BLOKY (el sistema de las copropiedades)
 > y ALICE (la app del propietario y residente) **todavía no tienen espacio**. Cuando se creen,

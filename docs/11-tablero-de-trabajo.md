@@ -17,7 +17,7 @@ quien numera dentro de su rango** y, al agotarlo, pide el siguiente aquí. Los m
 |---|---|---|---|---|
 | Mary (ALICE / PWA) | RN-98 … RN-129 | CU-R-32 … CU-R-49 · CU-A-28 … CU-A-39 | T-45 … T-59 | Se piden al integrador |
 | Jeimy (contable) | RN-130 … RN-159 | CU-A-40 … CU-A-49 | T-60 … T-74 | Se piden al integrador |
-| Integración (infra, BOB, BLOKY) | RN-160 … RN-189 (usadas: RN-160…166) | CU-S-10 … CU-S-29 · CU-P-04 … CU-P-09 · **CU-B-01 … CU-B-49** (BLOKY, usado: CU-B-01) | T-75 … T-89 (usado: T-75) | ADR-0013 en adelante (usado: 0013) |
+| Integración (infra, BOB, BLOKY) | RN-160 … RN-189 (usadas: RN-160…166) | CU-S-10 … CU-S-29 · CU-P-04 … CU-P-09 · **CU-B-01 … CU-B-49** (BLOKY, usado: CU-B-01) | T-75 … T-89 (usados: T-75, T-76) | ADR-0013 en adelante (usados: 0013, 0014) |
 
 ## Ahora — antes de seguir construyendo
 
@@ -37,6 +37,7 @@ quien numera dentro de su rango** y, al agotarlo, pide el siguiente aquí. Los m
 | T-18 | **Cómo se envía el código de un solo uso** (SMS, WhatsApp o correo) y con qué proveedor | Daniel | 📋 Por hacer | Sale del flujo de acceso decidido el 2026-08-28 (RN-54). Tiene costo por mensaje y afecta el ADR de backend |
 | T-19 | **Consola de portería** (CU-P-01, CU-P-02) | Jeimy | 🟡 A medias | Construida el 2026-08-28: turno, visitantes y correspondencia. **Falta la minuta**, que espera las respuestas de T-08 |
 | T-75 | **BLOKY Dev, primer módulo: el ingreso** (CU-B-01). App `apps/bloky/` + API `apps/bloky-api/` + pod `idiky-bloky` (8083). Construido y probado en local, y **desplegado y probado en el servidor contra el BOB real** el 2026-09-21 (commit `dfc061e`; ver la bitácora de ese día) | Responsable de integración | ✅ Hecho (2026-09-21) | Pendiente aparte: regenerar el token «bloky-api» en BOB (se compartió por chat) y redesplegar `bloky`. Google y Microsoft esperan credenciales y HTTPS (ADR-0008) |
+| T-76 | **HTTPS y dominio para BLOKY Dev** (`https://bloky-dev.idiky.com`) con un túnel de Cloudflare ([ADR-0014](./adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)); es lo que enciende el ingreso con Google y Microsoft (CU-B-01). Receta lista en `infra/tunel/`. **Pendiente:** pasar el DNS de idiky.com a Cloudflare (Daniel), crear el túnel y su token, registrar las aplicaciones con `infra/bloky/credenciales-google-microsoft.md`, desplegar `tunel` y cambiar `BLOKY_URL_PUBLICA` | Responsable de integración | 🔨 En curso | Sin acceso a Azure: todo se resuelve en GoDaddy y Cloudflare |
 | T-43 | **Mary trae `main` a su rama** (`git merge origin/main` en `claude/repository-review-c0p1wd`) y verifica asambleas y registros sobre la semilla 22 | Mary | 📋 Por hacer | Su rama sigue viva; lo que hay que evitar es que avance sin el `main` del 2026-09-21 adentro |
 | T-42 | **Dónde viven las suites de Playwright** | Daniel | 📋 Por hacer | Once suites recorren el navegador de verdad (asambleas, poderes, quórum, acta, comisión, mayoría calificada) pero **están fuera del repositorio**, en el directorio de la sesión. Hay que decidir dónde van y con qué runner, o se pierden |
 | T-16 | Saldar las tres deudas de arquitectura | Daniel (zona C) | 📋 Por hacer | Validar las reglas en el repositorio y no solo en la UI —**empezando por RN-49: `generarCuotas()` no comprueba quién la llama**— · usar `imputarPago()` en vez de reimplementarlo · RN-22 debe filtrar por copropiedad |
