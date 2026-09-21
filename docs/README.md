@@ -13,6 +13,7 @@ aquí antes o junto con el código.
 | 04 | [Catálogo de casos de uso](./04-casos-de-uso.md) | Índice maestro de CU con estado | En cada iteración |
 | 04a | [CU — Residente](./casos-de-uso/residente.md) | Detalle de los CU de la app móvil | En cada iteración |
 | 04b | [CU — Administrador](./casos-de-uso/administrador.md) | Detalle de los CU de la consola | En cada iteración |
+| 04c | [CU — BLOKY](./casos-de-uso/bloky.md) | Los CU propios del sistema real de las copropiedades (ámbito `B`) | En cada módulo de BLOKY Dev |
 | 05 | [Modelo de datos](./05-modelo-de-datos.md) | Entidades, relaciones y tipos | Al agregar entidades |
 | 06 | [Arquitectura](./06-arquitectura.md) | Estructura del código y decisiones técnicas | Al cambiar estructura |
 | 07 | [Roadmap](./07-roadmap.md) | Fases, entregables y criterios de salida | Al cerrar una fase |

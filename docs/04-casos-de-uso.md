@@ -4,7 +4,8 @@ Este es el **índice maestro funcional**. Cada caso de uso tiene un identificado
 que se usa en commits, ramas, issues y comentarios de código.
 
 **Nomenclatura:** `CU-<ÁMBITO>-<NN>` donde el ámbito es `R` (residente), `A` (administrador),
-`P` (portería) o `S` (sistema).
+`P` (portería), `S` (sistema) o `B` (BLOKY, el sistema real de las copropiedades: solo los casos
+de uso que no existen en el demo, ADR-0013).
 
 **Estados:** `✅ Demo` implementado en el demo v0.1 · `🟡 Parcial` implementado a medias ·
 `⬜ Pendiente` documentado pero no implementado.
@@ -96,6 +97,17 @@ minuta del turno. Detalle en [`casos-de-uso/porteria.md`](./casos-de-uso/porteri
 | CU-P-01 | **Registrar y entregar correspondencia** | 2 | 🟡 Parcial (falta la minuta) | [ver](./casos-de-uso/porteria.md#cu-p-01) |
 | CU-P-02 | **Validar el código de un visitante** | 2 | 🟡 Parcial (valida; no registra el ingreso) | [ver](./casos-de-uso/porteria.md#cu-p-02) |
 | CU-P-03 | **Reconocer a quien vive aquí** | 1 | ✅ Demo | [ver](./casos-de-uso/porteria.md#cu-p-03) |
+
+## 4. BLOKY — el sistema de las copropiedades (producto real)
+
+Ámbito nuevo (2026-09-21, [ADR-0013](./adr/0013-bloky-dev-separada-del-demo.md)). BLOKY Dev
+se construye aparte del demo; aquí van solo sus casos de uso propios. Detalle en
+[`casos-de-uso/bloky.md`](./casos-de-uso/bloky.md). Estado `✅ BLOKY` = funciona en BLOKY Dev
+con datos reales.
+
+| ID | Caso de uso | Fase | Estado | Detalle |
+|---|---|---|---|---|
+| CU-B-01 | **Ingresar a BLOKY** (documento + código SMS al celular de BOB, o Google/Microsoft con el correo de BOB) | 1 | ✅ BLOKY (SMS probado; Google y Microsoft construidos, a la espera de credenciales y HTTPS) | [ver](./casos-de-uso/bloky.md#cu-b-01) |
 
 ## 3. Sistema — procesos automáticos
 

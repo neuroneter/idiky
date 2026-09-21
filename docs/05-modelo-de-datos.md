@@ -933,3 +933,29 @@ auxiliares debajo. En una copropiedad ese detalle es lo que quiere ver la asambl
 - **Dinero:** enteros en pesos, sin decimales. El formato se aplica solo al mostrar.
 - **Identificadores:** cadenas legibles con prefijo (`uni-`, `cuo-`, `res-`, `pqr-`, `pag-`).
 - **Nunca borrar:** los registros se anulan o cierran, no se eliminan (trazabilidad, O3).
+
+---
+
+## Reglas del ingreso a BLOKY (CU-B-01) — rango de la integración
+
+Definidas el 2026-09-21 con el primer módulo de BLOKY Dev ([ADR-0008](./adr/0008-backend-de-bloky.md)).
+Viven en `apps/bloky-api/src/dominio/reglas.ts` como funciones puras.
+
+| ID | Regla | Dónde se implementa |
+|---|---|---|
+| RN-160 | **La identidad viene de BOB.** La persona, su celular, su correo y sus asignaciones por copropiedad se leen en BOB con un token de solo lectura; BLOKY nunca los escribe. | `bloky-api/src/bob/cliente.ts` |
+| RN-161 | **Solo entra quien tiene en BOB una asignación vigente** como Administrador o Delegado: estado `vigente`, que ya empezó (`desde` ≤ hoy) y no ha terminado (`hasta` vacío o ≥ hoy). | `reglas.ts` (`asignacionVigente`) |
+| RN-162 | **La copropiedad tiene que estar activa o en implementación.** Prospecto, suspendida o retirada no dan acceso. Qué conserva una suspendida sigue abierto (docs/13 §7.8). | `reglas.ts` (`copropiedadAdmiteIngreso`) |
+| RN-163 | **El código de un solo uso va al celular registrado en BOB**, nunca a un número que la persona escriba. Se normaliza a E.164; un celular colombiano son diez dígitos que empiezan por 3. | `reglas.ts` (`celularParaCodigo`) |
+| RN-164 | **Con Google o Microsoft, el correo que el proveedor verificó debe ser el mismo de BOB**, comparado sin mayúsculas ni espacios. Si no coincide, no se entra y no se revela el correo correcto. | `reglas.ts` (`correoCoincide`) |
+| RN-165 | **La sesión vence a las doce horas** y se puede cerrar antes; cerrarla la **revoca** (no se borra: queda con su fecha de revocación). | `bloky-api/src/acceso/sesion.ts` |
+| RN-166 | **Cinco códigos equivocados en quince minutos bloquean el documento quince minutos.** Los intentos quedan registrados con su resultado. | `reglas.ts` (`documentoBloqueado`) |
+
+### Lo que BLOKY guarda por su cuenta para el ingreso
+
+| Entidad | Campos | Notas |
+|---|---|---|
+| `Sesion` | `id`, `personaId` (de BOB), `nombre`, `tipoDocumento`, `numeroDocumento`, `canal` (`sms` \| `google` \| `microsoft`), `copropiedades[]` (id, nombre, rol), `creadaEn`, `venceEn`, `revocadaEn?` | La cookie solo lleva el `id` firmado (JWT); la app nunca ve el token |
+| `IntentoIngreso` | `tipoDocumento`, `numeroDocumento`, `canal`, `resultado`, `ip?`, `fecha` | Registro para RN-166 y para auditoría; no se borra |
+| `EstadoOauth` | `estado`, `proveedor`, documento, `nonce`, `creadoEn` | La ida y vuelta con Google o Microsoft; se consume una sola vez y caduca a los diez minutos |
+

@@ -15,14 +15,14 @@ nueva o una sesión de IA distinta.
 |---|---|
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
-| **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy). **Integrados en una sola rama el 2026-09-10** |
+| **Productos** | `apps/pwa/` (Mary, la maqueta de ALICE y de la consola), `apps/contable/` (Jeimy), `apps/gestion/` (BOB) y, desde el 2026-09-21, **`apps/bloky/` + `apps/bloky-api/` (BLOKY Dev, el producto real, ADR-0013)** |
 | **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Todavía sin entidades; faltan el responsable y el disco de datos (T-37) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
-| **Backend** | No existe. Datos simulados en el navegador, en los dos. |
+| **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 70 documentados: 38 ✅ en el demo, 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 97 (RN-01…RN-97; RN-41 retirada). RN-75 a RN-91 vienen de la contable; RN-92 a RN-97, de las asambleas y registros de Mary (renumeradas el 2026-09-21) |
+| **Casos de uso** | 71 documentados: 38 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
+| **Reglas de negocio** | 97 del demo (RN-01…RN-97; RN-41 retirada) + 7 de BLOKY (RN-160…RN-166). RN-75 a RN-91 vienen de la contable; RN-92 a RN-97, de las asambleas y registros de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -710,6 +710,68 @@ en este orden:
    (T-33): paz y salvo, sanciones y abonos parciales en la misma unidad.
 3. Despliegue de infraestructura (T-35) y, con él, el ADR-0008 del backend.
 4. T-17: definir qué intercambian la PWA y la contable; hoy la contable siembra los abonos.
+### 2026-09-21 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · BLOKY Dev nace con su puerta (CU-B-01)
+
+**El pedido:** *«definir la primera parte de BLOKY… dejar el BLOKY demo que ya tenemos y crear
+BLOKY Dev, basada en los casos de uso del demo, sin afectar la demo ni traernos todo, solo lo
+que vayamos desarrollando. El primer módulo es el ingreso: la copropiedad ya tiene que existir en
+BOB y existir el Administrador y el Delegado, o como mínimo uno de los dos».*
+
+**Tres decisiones, tomadas con el responsable de integración:**
+
+1. **El backend de BLOKY es una API propia** ([ADR-0008](./adr/0008-backend-de-bloky.md), el que
+   llevaba pendiente desde agosto): Node 22 + TypeScript + Fastify con PostgreSQL, en su propio
+   pod. **Lee BOB con un token de solo lectura y nunca lo escribe.** Se descartó meter el ingreso
+   dentro de Strapi: BLOKY entero (cartera, asambleas, residentes) habría terminado viviendo dentro
+   del back office de la empresa.
+2. **BLOKY Dev se construye aparte del demo, módulo por módulo** ([ADR-0013](./adr/0013-bloky-dev-separada-del-demo.md)):
+   `apps/bloky/` (React + Vite) y `apps/bloky-api/`. Del demo se traen los casos de uso, las reglas,
+   `tokens.css` y el logotipo; **no** las pantallas ni la semilla. El demo no se toca.
+3. **Cómo se entra** (decisión del responsable de integración): la persona escoge **código por
+   SMS al celular registrado en BOB**, o **Google/Microsoft con el correo registrado en BOB**. No
+   hay contraseña. El código por correo de Twilio salió: el correo entra por el proveedor.
+
+**Qué se construyó** (CU-B-01, [`casos-de-uso/bloky.md`](./casos-de-uso/bloky.md)):
+
+| Pieza | Dónde | Qué hace |
+|---|---|---|
+| Reglas | `apps/bloky-api/src/dominio/reglas.ts` | RN-160 a RN-166: identidad en BOB, asignación vigente, copropiedad activa o en implementación, código al celular de BOB, correo del proveedor igual al de BOB, sesión de 12 h revocable, cinco intentos |
+| Cliente de BOB | `apps/bloky-api/src/bob/cliente.ts` | Lee `personas` con sus asignaciones y copropiedad por la API REST de Strapi 5 |
+| Ingreso | `apps/bloky-api/src/acceso/` | Twilio Verify por REST (o simulado en desarrollo), OpenID Connect con Google y Microsoft verificando el `id_token` con las llaves del proveedor, sesión en cookie httpOnly con JWT |
+| Datos propios | `apps/bloky-api/src/datos/` | Repositorio con dos adaptadores (memoria y PostgreSQL) y migraciones SQL que se aplican al arrancar: `sesion`, `intento_ingreso`, `estado_oauth` |
+| La app | `apps/bloky/src/features/acceso/` e `inicio/` | Documento → ¿por dónde? → código → adentro, con la o las copropiedades y el rol. El interior está vacío a propósito |
+| Servicio | `infra/bloky/`, `levantar.sh`, `desplegar.sh` | Pod `idiky-bloky` en el **8083**: nginx (app + `/api`), API y PostgreSQL. Secretos con `infra/bloky/secretos.sh` |
+
+**Verificación:** `npm run probar` en la API recorre el caso de uso completo contra un BOB de
+mentira: 12 comprobaciones (404, 403, 409, pistas, código simulado, código malo, sesión y cookie,
+salir, bloqueo al quinto intento, Google sin configurar). `npm run build` pasa en las dos apps.
+El flujo por SMS también se recorrió en Chromium con la app de verdad.
+
+**Lo que no se pudo hacer desde esta sesión: desplegar.** El entorno remoto de Claude Code no
+tiene salida al servidor (ya estaba comprobado el día 10). Queda para hacerlo desde la Mac del
+responsable de integración, en este orden:
+
+1. En BOB, crear un **token de API de solo lectura** (Configuración → API Tokens).
+2. `ssh idiky@<ip> 'sh -s' < infra/bloky/secretos.sh` y completar en
+   `~/.config/idiky/secretos/bloky-api.env`: `BOB_API_TOKEN`, `BLOKY_URL_PUBLICA=http://<ip>:8083`
+   y, si no venían de `integraciones.env`, las `TWILIO_*`.
+3. Agregar el **8083** a la regla `Dev` del grupo de seguridad de Azure.
+4. `IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main bloky`,
+   con `verificar-vecino.sh` antes y después.
+5. Comprobar que la API alcanza BOB desde dentro del pod (`BOB_URL=http://10.0.2.2:8082`, el host
+   de slirp4netns; si no responde, la IP privada de la VM).
+
+**Lo que queda abierto**
+
+- **Google y Microsoft exigen HTTPS** para volver a BLOKY: en `http://<ip>:8083` solo funciona el
+  SMS. Darle dominio y certificado a BLOKY es tema del entorno (ADR-0011 §6). En local
+  (`http://localhost:5173`) sí se pueden probar con las aplicaciones registradas.
+- Los perfiles internos (portería y los que creen el Administrador y el Delegado) entrarán por la
+  misma puerta cuando existan en BOB o en BLOKY (docs/13 §3.5).
+- `tokens.css` está copiado: un cambio de identidad en el demo hay que copiarlo a BLOKY.
+
+---
+
 ### 2026-09-21 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Infraestructura y Mary entran a `main`
 
 **Qué se hizo**

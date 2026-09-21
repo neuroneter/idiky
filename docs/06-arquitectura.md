@@ -136,17 +136,26 @@ Cuando se necesite cámara, notificaciones push o biometría, se hará detrás d
 propia (`servicios/plataforma.ts`) con dos implementaciones. Ver
 [ADR-0002](./adr/0002-estrategia-multiplataforma.md).
 
-## 6. Backend (fase 2, aún no existe)
+## 6. Backend
 
-Diseño previsto para no bloquear decisiones hoy:
+**Decidido el 2026-09-21** ([ADR-0008](./adr/0008-backend-de-bloky.md)): BLOKY tiene su propia
+API en `apps/bloky-api/` (Node 22 + TypeScript + Fastify) con PostgreSQL. **Lee BOB y no lo
+escribe**: la copropiedad y sus perfiles raíz nacen en BOB (ADR-0012).
 
-- API REST `/{copropiedadId}/...` con autenticación por token.
-- Multi-tenant por `copropiedadId` en todas las consultas (RN-01).
-- Los tipos de `dominio/tipos.ts` se comparten como paquete `packages/dominio`.
-- El adaptador `datos/adaptadorApi.ts` implementa la misma interfaz que el local.
+```
+apps/bloky/          la app (React + Vite)      ──/api──▶  apps/bloky-api/  ──token solo lectura──▶  BOB (Strapi)
+                                                            │
+                                                            └── PostgreSQL `bloky`: lo propio de BLOKY
+```
 
-La elección concreta de tecnología del backend se documentará en un ADR cuando se tome.
-**No está decidida.**
+- La app solo habla con la API por `src/datos/api.ts` (ADR-0003). La sesión es una cookie
+  httpOnly.
+- Multi-tenant por `copropiedadId` (RN-01): el `id` es el `documentId` de la copropiedad en BOB.
+- Las reglas de negocio de BLOKY viven en `apps/bloky-api/src/dominio/reglas.ts`, puras y
+  numeradas (RN-160 en adelante). El paquete compartido `packages/dominio` se creará cuando haya
+  dos consumidores del mismo código.
+- BLOKY Dev se construye **aparte del demo**, módulo por módulo ([ADR-0013](./adr/0013-bloky-dev-separada-del-demo.md)).
+  El demo sigue con su adaptador local; no se convierte en BLOKY.
 
 ## 7. Entorno de desarrollo
 
@@ -158,7 +167,9 @@ Desde el 2026-09-10 los dos productos se publican en contenedores, cada uno en e
 servidor compartido ─ usuario idiky (Podman sin root)
 ├── idiky-pwa       nginx + apps/pwa compilada          → :8080, con clave
 ├── idiky-contable  nginx + apps/contable tal cual      → :8081, con clave
-└── idiky-gestion   pod: nginx + Strapi + PostgreSQL 17 → :8082, login de Strapi (ADR-0012)
+├── idiky-gestion   pod: nginx + Strapi + PostgreSQL 17 → :8082, login de Strapi (ADR-0012)
+└── idiky-bloky     pod: nginx + API de BLOKY + PostgreSQL 17 → :8083, ingreso de BLOKY (ADR-0008, ADR-0013)
+                    la API lee BOB (:8082) con un token de solo lectura
 ```
 
 Los contenedores **solo publican lo que ya existe**: no agregan compilación a la contable ni

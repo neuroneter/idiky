@@ -16,6 +16,7 @@ que **no puede verse afectado**. Las decisiones y sus porqués están en
 | PWA | `infra/pwa/` | contenedor `idiky-pwa` | `8080` | Clave del entorno | Compila `apps/pwa` con `npm run build` y la sirve con nginx. **Demo** |
 | Contable | `infra/contable/` | contenedor `idiky-contable` | `8081` | Clave del entorno | Copia `apps/contable` **tal cual** (ADR-0010) y la sirve con nginx. **Demo** |
 | **BOB** | `infra/gestion/` | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082` | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`apps/gestion`, ADR-0012) |
+| **BLOKY Dev** | `infra/bloky/` | **pod** `idiky-bloky`: nginx + API de BLOKY + PostgreSQL | `8083` | Clave del entorno, y luego **el ingreso de BLOKY** (código SMS, Google o Microsoft, con lo registrado en BOB) | El sistema de las copropiedades, construido de cero (`apps/bloky`, `apps/bloky-api`; ADR-0008, ADR-0013) |
 
 ## 1. La regla del servidor
 

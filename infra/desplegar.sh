@@ -5,15 +5,16 @@
 #   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main pwa
 #   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main contable
 #   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main gestion
+#   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main bloky
 #   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main todo
 #
-# Servicios: pwa (8080), contable (8081) y gestion (8082, BOB). Los que no se nombran siguen
+# Servicios: pwa (8080), contable (8081), gestion (8082, BOB) y bloky (8083). Los que no se nombran siguen
 # como estaban. La direccion del servidor no va en el repositorio a proposito.
 set -eu
 
 : "${IDIKY_SERVIDOR:?Falta el destino, p. ej. IDIKY_SERVIDOR=idiky@203.0.113.10}"
 if [ $# -lt 2 ]; then
-  echo "Uso: infra/desplegar.sh <rama-o-commit> <pwa|contable|gestion|todo> [otro servicio...]" >&2
+  echo "Uso: infra/desplegar.sh <rama-o-commit> <pwa|contable|gestion|bloky|todo> [otro servicio...]" >&2
   exit 2
 fi
 REF="$1"
@@ -22,12 +23,12 @@ shift
 SERVICIOS=""
 for servicio in "$@"; do
   case "$servicio" in
-    pwa | contable | gestion)
+    pwa | contable | gestion | bloky)
       case " $SERVICIOS " in *" $servicio "*) ;; *) SERVICIOS="$SERVICIOS $servicio" ;; esac
       ;;
-    todo) SERVICIOS=" pwa contable gestion" ;;
+    todo) SERVICIOS=" pwa contable gestion bloky" ;;
     *)
-      echo "Servicio desconocido: $servicio. Son pwa, contable, gestion o todo." >&2
+      echo "Servicio desconocido: $servicio. Son pwa, contable, gestion, bloky o todo." >&2
       exit 2
       ;;
   esac

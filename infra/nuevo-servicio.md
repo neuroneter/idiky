@@ -53,11 +53,12 @@ despliega sin la clave.
 | 8080 | `idiky-pwa` |
 | 8081 | `idiky-contable` |
 | 8082 | Pod `idiky-gestion` (sistema de gestión) |
-| **8083 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
+| 8083 | Pod `idiky-bloky` (BLOKY Dev: app + API + PostgreSQL) |
+| **8084 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
 
 - **Para que se vea desde internet** hay que agregar el puerto a la regla `Dev` del grupo de
   seguridad de red en Azure (hoy dice `8080,8081,8082`). Eso lo hace el **responsable de
-  integración** en el portal, en *Intervalos de puertos de destino*: `8080,8081,8082,8083`. Sin ese
+  integración** en el portal, en *Intervalos de puertos de destino*: `8080,8081,8082,8083,8084`. Sin ese
   paso el puerto no llega desde internet.
 - **Aunque no esté en la regla, escucha en todas las interfaces** mientras
   `IDIKY_HOST=0.0.0.0`, y la red virtual de Azure sí llega. Un servicio que no debe salir del
@@ -65,7 +66,7 @@ despliega sin la clave.
 
 ## 4. Receta: un servicio web nuevo
 
-Ejemplo con `<nombre>` = `docs` y puerto `8083`. Cambia los dos por los tuyos.
+Ejemplo con `<nombre>` = `docs` y puerto `8084`. Cambia los dos por los tuyos.
 
 ### 4.1 La imagen
 
@@ -135,7 +136,7 @@ solo se toque cuando se nombra al desplegar:
 
 ```sh
 # Arriba, con los otros puertos:
-IDIKY_PUERTO_DOCS="${IDIKY_PUERTO_DOCS:-8083}"
+IDIKY_PUERTO_DOCS="${IDIKY_PUERTO_DOCS:-8084}"
 
 # En la validacion de IDIKY_SERVICIOS: pwa | contable | gestion | docs
 
@@ -164,13 +165,13 @@ antes de recrearlo, y piensa desde qué ramas es seguro desplegarlo.
 4. **Foto de LangFlow**, si no la tomaste en el §1:
    `ssh idiky@<ip> 'sh -s -- --base' < infra/servidor/verificar-vecino.sh`
 5. **Desplegar solo el servicio nuevo:** `IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh HEAD docs`.
-   Debe terminar con `idiky-docs responde en 0.0.0.0:8083 con la revision <commit>`.
+   Debe terminar con `idiky-docs responde en 0.0.0.0:8084 con la revision <commit>`.
 6. **Comprobar el servicio** desde el servidor (o desde fuera, si ya está en la regla de
    Azure):
 
    ```bash
-   ssh idiky@<ip> 'curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8083/'   # 401: pide clave
-   ssh idiky@<ip> 'curl -s http://127.0.0.1:8083/revision.txt'                       # el commit
+   ssh idiky@<ip> 'curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8084/'   # 401: pide clave
+   ssh idiky@<ip> 'curl -s http://127.0.0.1:8084/revision.txt'                       # el commit
    ```
 7. **Comprobar LangFlow:** `ssh idiky@<ip> 'sh -s' < infra/servidor/verificar-vecino.sh` tiene
    que decir **«sigue igual»**. Si no, se revierte primero y se investiga después.

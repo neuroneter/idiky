@@ -11,6 +11,7 @@ demás ni el servidor que compartimos. Si vas a **crear** un servicio nuevo, la 
 | `pwa` | **La maqueta de Mary**: la PWA (app del propietario y consola del administrador) | Mary | `origin/main` | 8080 |
 | `contable` | **La maqueta de Jeimy**: la aplicación contable | Jeimy | `origin/main` | 8081 |
 | `gestion` | **BOB**, el *back office* de IDIKY (Strapi + PostgreSQL) | **Solo el responsable de integración** | `origin/main`, **y nada más** | 8082 |
+| `bloky` | **BLOKY Dev**: el sistema de las copropiedades, construido de cero (app + API + PostgreSQL) | **El responsable de integración** | `origin/main` | 8083 |
 
 > **Las maquetas no son los espacios de desarrollo.** BLOKY (el sistema de las copropiedades)
 > y ALICE (la app del propietario y residente) **todavía no tienen espacio**. Cuando se creen,

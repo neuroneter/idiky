@@ -15,6 +15,7 @@ caro que puedes cometer aquí:
 | `apps/pwa/` | App móvil del residente + consola web del administrador | React + TS + Vite | **Mary** |
 | `apps/contable/` | Aplicación contable: Cartera · Contabilidad (recaudos, pagos, ajustes, PUC) · Reportes | HTML + CSS + JS **sin compilar** | **Jeimy** |
 | `apps/gestion/` *(en construcción)* | **BOB**, el *back office* de la empresa IDIKY: clientes, planes, contratos; crea al Administrador y al Delegado de cada copropiedad. **No es de las copropiedades** | Strapi 5 + PostgreSQL 17 ([ADR-0012](./docs/adr/0012-sistema-de-gestion-strapi.md)) | Por definir |
+| `apps/bloky/` + `apps/bloky-api/` *(en construcción)* | **BLOKY Dev**, el sistema real de las copropiedades, construido de cero módulo por módulo **sin tocar el demo** ([ADR-0013](./docs/adr/0013-bloky-dev-separada-del-demo.md)). Hoy: el ingreso (CU-B-01) | React + Vite; API Node 22 + Fastify + PostgreSQL ([ADR-0008](./docs/adr/0008-backend-de-bloky.md)) | Responsable de integración |
 
 **Las aplicaciones de IDIKY tienen nombre** (2026-09-10). Úsalos al hablar y al escribir, para no
 confundir sistemas que se parecen:
@@ -22,7 +23,7 @@ confundir sistemas que se parecen:
 | Nombre | Qué es | Quién entra y cómo | Dónde está |
 |---|---|---|---|
 | **BOB** | El *back office* de IDIKY | El equipo de IDIKY, con el login de Strapi. **No usa Twilio** | `apps/gestion/` |
-| **BLOKY** | El sistema de las copropiedades: estructura y unidades, propietarios, cartera, asambleas | Administrador, Delegado y los perfiles que ellos creen: código por SMS o correo (Twilio Verify), Google o Microsoft | Por construir (backend: ADR-0008). Su precursor es la consola del administrador del demo, en `apps/pwa/` |
+| **BLOKY** | El sistema de las copropiedades: estructura y unidades, propietarios, cartera, asambleas | Administrador, Delegado y los perfiles que ellos creen: **código por SMS al celular de BOB, o Google/Microsoft con el correo de BOB** | **En construcción en `apps/bloky/` + `apps/bloky-api/`** (ADR-0008, ADR-0013). Su precursor es la consola del administrador del demo, en `apps/pwa/`, que sigue siendo la maqueta |
 | **ALICE** | La app del propietario y residente | Propietarios y residentes | Hoy, el demo de `apps/pwa/` |
 
 La contable de Jeimy conserva su nombre. La página web pública será **IDIKY**, y todo se presenta
@@ -79,6 +80,12 @@ npm run empaquetar # deja dist/idiky-demo.html: el demo en un solo archivo
 
 Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.
 
+**`apps/bloky/` y `apps/bloky-api/`** (BLOKY Dev): ver sus README. La API corre con `npm run dev`
+y, sin variables, simula el SMS y guarda en memoria; la app con `npm run dev` manda `/api` al 3000.
+`npm run probar` en la API recorre CU-B-01 contra un BOB de mentira. **Antes de dar por terminado
+un cambio: `npm run build` en las dos.** Las reglas nuevas de BLOKY van en
+`apps/bloky-api/src/dominio/reglas.ts`, numeradas desde RN-160 (rango de la integración).
+
 **`infra/`** — entorno de desarrollo en contenedores ([ADR-0011](./docs/adr/0011-entorno-de-desarrollo-en-contenedores.md),
 [`infra/README.md`](./infra/README.md)):
 
@@ -87,9 +94,10 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/m
 ```
 
 **Si te piden desplegar**, sigue [`infra/guia-de-despliegue.md`](./infra/guia-de-despliegue.md) al
-pie de la letra: **solo el servicio de quien lo pide** (`pwa` Mary, `contable` Jeimy), **solo
-desde `origin/main`**, y `infra/servidor/verificar-vecino.sh` antes y después. Lo que Mary y Jeimy
-despliegan hoy son **maquetas**; BLOKY y ALICE todavía no tienen espacio de desarrollo.
+pie de la letra: **solo el servicio de quien lo pide** (`pwa` Mary, `contable` Jeimy, `bloky` y
+`gestion` el responsable de integración), **solo desde `origin/main`**, y
+`infra/servidor/verificar-vecino.sh` antes y después. Lo que Mary y Jeimy despliegan hoy son
+**maquetas**; BLOKY Dev es el producto real y vive en el 8083.
 
 **`apps/gestion/`** (Strapi): ver [`apps/gestion/README.md`](./apps/gestion/README.md). **El modelo de
 datos se diseña en local con `npm run develop` y va a git**; en el servidor Strapi corre en modo

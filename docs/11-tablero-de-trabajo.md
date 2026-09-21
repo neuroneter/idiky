@@ -17,7 +17,7 @@ quien numera dentro de su rango** y, al agotarlo, pide el siguiente aquí. Los m
 |---|---|---|---|---|
 | Mary (ALICE / PWA) | RN-98 … RN-129 | CU-R-32 … CU-R-49 · CU-A-28 … CU-A-39 | T-45 … T-59 | Se piden al integrador |
 | Jeimy (contable) | RN-130 … RN-159 | CU-A-40 … CU-A-49 | T-60 … T-74 | Se piden al integrador |
-| Integración (infra, BOB, BLOKY) | RN-160 … RN-189 | CU-S-10 … CU-S-29 · CU-P-04 … CU-P-09 | T-75 … T-89 | ADR-0013 en adelante |
+| Integración (infra, BOB, BLOKY) | RN-160 … RN-189 (usadas: RN-160…166) | CU-S-10 … CU-S-29 · CU-P-04 … CU-P-09 · **CU-B-01 … CU-B-49** (BLOKY, usado: CU-B-01) | T-75 … T-89 (usado: T-75) | ADR-0013 en adelante (usado: 0013) |
 
 ## Ahora — antes de seguir construyendo
 
@@ -36,6 +36,7 @@ quien numera dentro de su rango** y, al agotarlo, pide el siguiente aquí. Los m
 | T-17 | **Definir qué se intercambia con la app contable de Jeimy** | Mary + Jeimy | 📋 Por hacer | La destinación específica de una extraordinaria (RN-48) es dato contable: lo recaudado tiene que poder cruzarse con lo gastado en esa destinación |
 | T-18 | **Cómo se envía el código de un solo uso** (SMS, WhatsApp o correo) y con qué proveedor | Daniel | 📋 Por hacer | Sale del flujo de acceso decidido el 2026-08-28 (RN-54). Tiene costo por mensaje y afecta el ADR de backend |
 | T-19 | **Consola de portería** (CU-P-01, CU-P-02) | Jeimy | 🟡 A medias | Construida el 2026-08-28: turno, visitantes y correspondencia. **Falta la minuta**, que espera las respuestas de T-08 |
+| T-75 | **BLOKY Dev, primer módulo: el ingreso** (CU-B-01). App `apps/bloky/` + API `apps/bloky-api/` + pod `idiky-bloky` (8083). Construido y probado en local el 2026-09-21. **Pendiente en el servidor:** crear el token de solo lectura en BOB, correr `infra/bloky/secretos.sh`, completar `bloky-api.env`, abrir el 8083 en la regla `Dev` de Azure y desplegar | Responsable de integración | 🔨 En curso | Google y Microsoft esperan credenciales y HTTPS (ADR-0008) |
 | T-43 | **Mary trae `main` a su rama** (`git merge origin/main` en `claude/repository-review-c0p1wd`) y verifica asambleas y registros sobre la semilla 22 | Mary | 📋 Por hacer | Su rama sigue viva; lo que hay que evitar es que avance sin el `main` del 2026-09-21 adentro |
 | T-42 | **Dónde viven las suites de Playwright** | Daniel | 📋 Por hacer | Once suites recorren el navegador de verdad (asambleas, poderes, quórum, acta, comisión, mayoría calificada) pero **están fuera del repositorio**, en el directorio de la sesión. Hay que decidir dónde van y con qué runner, o se pierden |
 | T-16 | Saldar las tres deudas de arquitectura | Daniel (zona C) | 📋 Por hacer | Validar las reglas en el repositorio y no solo en la UI —**empezando por RN-49: `generarCuotas()` no comprueba quién la llama**— · usar `imputarPago()` en vez de reimplementarlo · RN-22 debe filtrar por copropiedad |
@@ -45,7 +46,7 @@ quien numera dentro de su rango** y, al agotarlo, pide el siguiente aquí. Los m
 | # | Tarea | Responsable sugerido | Estado |
 |---|---|---|---|
 | T-05 | Ajustar el modelo de datos al alcance real | Daniel | 📋 Por hacer |
-| T-06 | Decidir el stack de backend (ADR-0008) | Daniel | 📋 Por hacer |
+| T-06 | ~~Decidir el stack de backend (ADR-0008)~~ | Daniel | ✅ Hecho (2026-09-21) — API propia de BLOKY, ver T-75 |
 | T-07 | Documentar los casos de uso de asambleas — **hecho, ver CU-R-13, CU-R-20…24 y CU-A-12, CU-A-17…21** | Mary | ✅ Hecho |
 | T-08 | Documentar el módulo de portería (minuta, validación de visitantes) | Jeimy | 🔨 En curso |
 | T-09 | Definir la identidad visual real (colores, logo, tipografía) | Zona D | ✅ Hecho |

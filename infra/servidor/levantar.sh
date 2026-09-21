@@ -7,14 +7,15 @@
 #
 #   REVISION=abc1234 IDIKY_SERVICIOS="pwa contable" sh infra/servidor/levantar.sh
 #
-# IDIKY_SERVICIOS dice cuales se publican (pwa, contable, gestion); los demas no se tocan.
-# Sin la variable se publican los tres.
+# IDIKY_SERVICIOS dice cuales se publican (pwa, contable, gestion, bloky); los demas no se tocan.
+# Sin la variable se publican los cuatro.
 #
 # Configuracion opcional, fuera del repositorio, en ~/.config/idiky/entorno:
 #   IDIKY_HOST=127.0.0.1         # 0.0.0.0 para publicar hacia la red
 #   IDIKY_PUERTO_PWA=8080
 #   IDIKY_PUERTO_CONTABLE=8081
 #   IDIKY_PUERTO_GESTION=8082
+#   IDIKY_PUERTO_BLOKY=8083
 #   IDIKY_DATOS=$HOME/datos      # lo que persiste: PostgreSQL, archivos subidos, respaldos
 #   IDIKY_MINIMO_DISCO_MB=3000   # con menos espacio libre no se construye nada
 set -eu
@@ -26,11 +27,12 @@ CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/entorno"
 [ ! -f "$CONFIG" ] || . "$CONFIG"
 
 REVISION="${REVISION:-sin-revision}"
-IDIKY_SERVICIOS="${IDIKY_SERVICIOS:-pwa contable gestion}"
+IDIKY_SERVICIOS="${IDIKY_SERVICIOS:-pwa contable gestion bloky}"
 IDIKY_HOST="${IDIKY_HOST:-127.0.0.1}"
 IDIKY_PUERTO_PWA="${IDIKY_PUERTO_PWA:-8080}"
 IDIKY_PUERTO_CONTABLE="${IDIKY_PUERTO_CONTABLE:-8081}"
 IDIKY_PUERTO_GESTION="${IDIKY_PUERTO_GESTION:-8082}"
+IDIKY_PUERTO_BLOKY="${IDIKY_PUERTO_BLOKY:-8083}"
 IDIKY_DATOS="${IDIKY_DATOS:-$HOME/datos}"
 IDIKY_MINIMO_DISCO_MB="${IDIKY_MINIMO_DISCO_MB:-3000}"
 UNIDADES="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
@@ -38,8 +40,8 @@ SECRETOS="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/secretos"
 
 for servicio in $IDIKY_SERVICIOS; do
   case "$servicio" in
-    pwa | contable | gestion) ;;
-    *) echo "Servicio desconocido: $servicio. Son pwa, contable y gestion." >&2; exit 2 ;;
+    pwa | contable | gestion | bloky) ;;
+    *) echo "Servicio desconocido: $servicio. Son pwa, contable, gestion y bloky." >&2; exit 2 ;;
   esac
 done
 incluye() {
@@ -136,6 +138,34 @@ levantar_gestion() {
   systemctl --user enable --now "pod-$pod.service"
 }
 
+# BLOKY es un pod como el de BOB: nginx (sirve la app y reenvia /api), la API de BLOKY y su
+# PostgreSQL, que no publica puerto (ADR-0008, ADR-0013). La API lee BOB por la red del host.
+levantar_bloky() {
+  pod="idiky-bloky"
+  echo "==> Levantando el pod $pod en $IDIKY_HOST:$1"
+  mkdir -p "$IDIKY_DATOS/bloky/postgres"
+  chmod 700 "$IDIKY_DATOS" "$IDIKY_DATOS/bloky"
+  systemctl --user stop "pod-$pod.service" 2>/dev/null || true
+  podman pod rm --force --ignore "$pod" >/dev/null
+  podman pod create --name "$pod" --network slirp4netns:port_handler=slirp4netns \
+    --publish "$IDIKY_HOST:$1:80" >/dev/null
+  podman create --pod "$pod" --name "$pod-postgres" --memory 384m --pids-limit 256 \
+    --env-file "$SECRETOS/bloky-postgres.env" \
+    --volume "$IDIKY_DATOS/bloky/postgres:/var/lib/postgresql/data" \
+    docker.io/library/postgres:17-alpine >/dev/null
+  podman create --pod "$pod" --name "$pod-api" --memory 384m --pids-limit 256 \
+    --env-file "$SECRETOS/bloky-api.env" \
+    "localhost/idiky-bloky-api:actual" >/dev/null
+  # shellcheck disable=SC2086
+  podman create --pod "$pod" --name "$pod-app" --memory 64m --pids-limit 64 $MONTAJE \
+    "localhost/idiky-bloky-app:actual" >/dev/null
+  mkdir -p "$UNIDADES"
+  (cd "$UNIDADES" && podman generate systemd --new --files --name "$pod" >/dev/null)
+  podman pod rm --force "$pod" >/dev/null
+  systemctl --user daemon-reload
+  systemctl --user enable --now "pod-$pod.service"
+}
+
 # Respaldo diario de la base (infra/gestion/respaldo.sh). Se copia fuera de la carpeta del
 # despliegue porque esa carpeta se reemplaza en cada despliegue.
 instalar_respaldo_gestion() {
@@ -175,6 +205,15 @@ if incluye gestion && { [ ! -f "$SECRETOS/gestion-postgres.env" ] || [ ! -f "$SE
   exit 1
 fi
 
+if incluye bloky && { [ ! -f "$SECRETOS/bloky-postgres.env" ] || [ ! -f "$SECRETOS/bloky-api.env" ]; }; then
+  echo "Faltan los secretos de BLOKY. Se crean una vez: ssh idiky@<ip> 'sh -s' < infra/bloky/secretos.sh" >&2
+  exit 1
+fi
+if incluye bloky && grep -q 'CAMBIAR-POR' "$SECRETOS/bloky-api.env"; then
+  echo "Los secretos de BLOKY tienen valores sin completar (CAMBIAR-POR...): editar $SECRETOS/bloky-api.env" >&2
+  exit 1
+fi
+
 # Se construye (y se descarga) todo antes de detener nada: si algo falla, sigue en pie lo anterior.
 if incluye pwa; then construir pwa; fi
 if incluye contable; then construir contable; fi
@@ -184,6 +223,11 @@ if incluye gestion; then
   podman pull --quiet docker.io/library/postgres:17-alpine >/dev/null
   respaldar_gestion
 fi
+if incluye bloky; then
+  construir bloky-api bloky/api.Containerfile
+  construir bloky-app bloky/app.Containerfile
+  podman pull --quiet docker.io/library/postgres:17-alpine >/dev/null
+fi
 
 if incluye pwa; then levantar pwa "$IDIKY_PUERTO_PWA"; fi
 if incluye contable; then levantar contable "$IDIKY_PUERTO_CONTABLE"; fi
@@ -191,6 +235,7 @@ if incluye gestion; then
   levantar_gestion "$IDIKY_PUERTO_GESTION"
   instalar_respaldo_gestion
 fi
+if incluye bloky; then levantar_bloky "$IDIKY_PUERTO_BLOKY"; fi
 
 if incluye pwa; then esperar pwa "$IDIKY_PUERTO_PWA"; fi
 if incluye contable; then esperar contable "$IDIKY_PUERTO_CONTABLE"; fi
@@ -199,6 +244,11 @@ if incluye gestion; then
   # Strapi tarda en arrancar, y la primera vez crea todas sus tablas.
   esperar gestion "$IDIKY_PUERTO_GESTION" /_health 240
 fi
+if incluye bloky; then
+  esperar bloky "$IDIKY_PUERTO_BLOKY"
+  # La API espera a PostgreSQL y aplica sus migraciones la primera vez.
+  esperar bloky "$IDIKY_PUERTO_BLOKY" /api/salud 120
+fi
 
 # El disco del servidor es compartido y escaso: se borra toda imagen que no use un
 # contenedor en marcha, incluidos Node y las capas de construccion. Lo publicado queda; el
@@ -206,7 +256,7 @@ fi
 podman image prune --all --force >/dev/null
 
 echo "==> Lo que queda publicado (cada servicio con su revision)"
-for par in "pwa:$IDIKY_PUERTO_PWA" "contable:$IDIKY_PUERTO_CONTABLE" "gestion:$IDIKY_PUERTO_GESTION"; do
+for par in "pwa:$IDIKY_PUERTO_PWA" "contable:$IDIKY_PUERTO_CONTABLE" "gestion:$IDIKY_PUERTO_GESTION" "bloky:$IDIKY_PUERTO_BLOKY"; do
   printf '    %-9s %s\n' "${par%%:*}" "$(curl -fsS --max-time 3 "http://$LOCAL:${par#*:}/revision.txt" 2>/dev/null || echo 'no responde')"
 done
 df -h "$HOME" | tail -1

@@ -1,0 +1,111 @@
+/*
+ * Estilos base de BLOKY (ADR-0013). Los tokens son los mismos de ALICE (tokens.css, copiado
+ * tal cual): la identidad es una. Aqui solo lo que BLOKY usa hoy; crece con cada modulo.
+ */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  font-size: var(--texto-base);
+  line-height: 1.5;
+  color: var(--color-texto);
+  background: var(--color-fondo);
+}
+h1, h2, h3 { margin: 0; line-height: 1.25; }
+h1 { font-size: var(--texto-xl); }
+h2 { font-size: var(--texto-lg); }
+p { margin: 0; }
+button, input, select { font: inherit; color: inherit; }
+a { color: var(--color-marca); }
+
+.pila { display: flex; flex-direction: column; gap: var(--e3); }
+.fila { display: flex; align-items: center; justify-content: space-between; gap: var(--e3); }
+.subtitulo { color: var(--color-texto-suave); font-size: var(--texto-sm); }
+.numerico { font-variant-numeric: tabular-nums; letter-spacing: 0.08em; }
+.pantalla-centrada { min-height: 100dvh; display: grid; place-items: center; }
+
+/* ---------------------------------------------------------------- Tarjetas */
+.tarjeta {
+  background: var(--color-superficie);
+  border-radius: var(--radio);
+  box-shadow: var(--sombra-1);
+  padding: var(--e4);
+}
+.tarjeta--plana { box-shadow: none; border: 1px solid var(--color-borde); }
+
+/* ---------------------------------------------------------------- Campos */
+.campo { display: flex; flex-direction: column; gap: var(--e1); }
+.campo > label { font-size: var(--texto-sm); font-weight: 600; color: var(--color-texto-suave); }
+.campo input, .campo select {
+  width: 100%;
+  padding: var(--e3) var(--e4);
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie);
+  min-height: 48px;
+}
+.campo input:focus, .campo select:focus {
+  outline: 2px solid var(--color-marca);
+  outline-offset: 1px;
+  border-color: var(--color-marca);
+}
+.campo-numeros { font-size: var(--texto-lg); letter-spacing: 0.12em; font-variant-numeric: tabular-nums; }
+
+/* ---------------------------------------------------------------- Botones */
+.boton {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--e2);
+  min-height: 48px; padding: var(--e2) var(--e4);
+  border: 1px solid var(--color-borde-fuerte); border-radius: var(--radio-sm);
+  background: var(--color-superficie); cursor: pointer; font-weight: 600;
+}
+.boton:disabled { opacity: 0.55; cursor: not-allowed; }
+.boton--bloque { width: 100%; }
+.boton--pequeno { min-height: 36px; padding: var(--e1) var(--e3); font-size: var(--texto-sm); }
+.boton--primario { background: var(--color-acento); border-color: var(--color-acento); color: var(--color-texto-inverso); }
+.boton--primario:hover:not(:disabled) { background: var(--color-acento-fuerte); }
+.boton--fantasma { background: transparent; border-color: transparent; color: var(--color-marca); }
+.boton--salida { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.4); color: var(--color-texto-inverso); }
+
+/* Una opcion grande para elegir el canal: se toca con el pulgar. */
+.opcion {
+  display: flex; flex-direction: column; align-items: flex-start; gap: var(--e1);
+  width: 100%; padding: var(--e4);
+  border: 1px solid var(--color-borde); border-radius: var(--radio);
+  background: var(--color-superficie-2); text-align: left; cursor: pointer;
+}
+.opcion:hover:not(:disabled) { border-color: var(--color-marca); background: var(--color-marca-suave); }
+.opcion:disabled { opacity: 0.6; cursor: wait; }
+
+/* ---------------------------------------------------------------- Avisos y chips */
+.aviso { padding: var(--e3) var(--e4); border-radius: var(--radio-sm); font-size: var(--texto-sm); }
+.aviso--error { background: var(--color-error-suave); color: var(--color-error); }
+.aviso--info { background: var(--color-info-suave); color: var(--color-info); }
+.chip {
+  display: inline-flex; align-items: center; padding: 2px var(--e3);
+  border-radius: var(--radio-completo); font-size: var(--texto-xs); font-weight: 600; white-space: nowrap;
+}
+.chip--marca { background: var(--color-marca-suave); color: var(--color-marca); }
+.chip--acento { background: var(--color-acento-suave); color: var(--color-acento); }
+
+/* ---------------------------------------------------------------- La puerta */
+.puerta {
+  min-height: 100dvh; padding: var(--e6) var(--e4);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--e5);
+  background: var(--degradado-marca);
+}
+.puerta__marca { text-align: center; color: var(--color-texto-inverso); }
+.puerta__lema { margin-top: var(--e2); opacity: 0.9; }
+.puerta__tarjeta { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: var(--e4); }
+.puerta__titulo { font-size: var(--texto-xl); }
+.puerta__pie { color: var(--color-texto-inverso); opacity: 0.75; font-size: var(--texto-xs); text-align: center; }
+
+/* ---------------------------------------------------------------- El interior */
+.consola { min-height: 100dvh; display: flex; flex-direction: column; }
+.consola__barra {
+  display: flex; align-items: center; gap: var(--e3); padding: var(--e3) var(--e4);
+  background: var(--degradado-marca-vertical); color: var(--color-texto-inverso);
+}
+.consola__producto { font-weight: 700; letter-spacing: 0.08em; opacity: 0.85; }
+.consola__persona { margin-left: auto; font-size: var(--texto-sm); }
+.consola__contenido { padding: var(--e5) var(--e4); max-width: 720px; width: 100%; margin: 0 auto; }
