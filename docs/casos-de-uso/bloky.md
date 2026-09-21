@@ -56,6 +56,7 @@ creen. BLOKY no crea a nadie por su cuenta.
   propietario; BLOKY no las usa.
 
 **Estado en BLOKY Dev:** ✅ — `apps/bloky/src/features/acceso/` y `apps/bloky-api/src/acceso/`.
-Probado el flujo por SMS contra un BOB simulado (`apps/bloky-api/pruebas/humo.ts`). Google y
+Probado el flujo por SMS contra un BOB simulado (`apps/bloky-api/pruebas/humo.ts`) y, el
+2026-09-21, la identificación contra el BOB real en el servidor de desarrollo (bitácora). Google y
 Microsoft están construidos y sin credenciales: se activan al registrar las aplicaciones y
 solo funcionan con HTTPS (ADR-0008).

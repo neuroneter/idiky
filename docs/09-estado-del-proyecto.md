@@ -19,9 +19,9 @@ nueva o una sesión de IA distinta.
 | **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
-| **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. El demo y la contable siguen con datos simulados en el navegador. |
+| **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 71 documentados: 38 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
+| **Casos de uso** | 71 documentados: 38 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01, probado en el servidor el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
 | **Reglas de negocio** | 97 del demo (RN-01…RN-97; RN-41 retirada) + 7 de BLOKY (RN-160…RN-166). RN-75 a RN-91 vienen de la contable; RN-92 a RN-97, de las asambleas y registros de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
@@ -107,6 +107,47 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-21 · BLOKY Dev desplegado y probado · Sesión de IA (Claude) a pedido del responsable de integración · T-75 cerrada
+
+**Qué se hizo:** se probó el ingreso a BLOKY (CU-B-01) en el servidor de desarrollo, contra el
+BOB real y con las tres copropiedades de prueba sembradas esa misma tarde. Commit desplegado:
+`dfc061e` (`/revision.txt`); el `205919c` que vino después solo toca documentación. El pod
+`idiky-bloky` tiene sus tres contenedores arriba y `/api/salud` dice `ok`, entorno `produccion`,
+canal `sms`. El 8083 responde desde afuera (Azure ya lo deja pasar).
+
+**Qué respondió cada prueba** (por la API del pod, desde el contenedor de nginx):
+
+| Prueba | Esperado | Respondió |
+|---|---|---|
+| Identificar CC 1000000001 (Olga Lucía Henao) | 200, rol `administrador`, canal `sms` con pista | 200 · «Conjunto Residencial Altos del Bosque» · `administrador` · pista `••• 0001` ✅ |
+| Identificar CE 1000000004 (Sandra Milena Ortiz) | 200, rol `delegado` | 200 · «Edificio Torres del Parque» · `delegado` · pista `••• 0004` ✅ |
+| Identificar CC 1000000005 (copropiedad suspendida, RN-162) | 403 `sin_acceso` | 403 `sin_acceso` ✅ |
+| Identificar CC 999 (no existe) | 404 `no_registrado` | 404 `no_registrado` ✅ |
+| Enviar código por SMS a CC 1000000001 | Falla: el celular es ficticio y el entorno es `produccion` | 500 `interno`; en el registro, «Twilio Verify respondio 403 al enviar el codigo». **Esperado**, no se insistió |
+| `GET /api/sesion` sin cookie | 401 | 401 `sin_sesion` ✅ |
+| nginx sin la clave del entorno: `/`, `/ingreso`, `/api/acceso/identificar` | 401 | 401 en los tres ✅ (la puerta del entorno sigue puesta; `/salud`, `/revision.txt` y `/api/salud` pasan sin clave, como está previsto) |
+
+El tramo que en el servidor no se puede recorrer con un celular inventado —código correcto,
+cookie `bloky_sesion` httpOnly, `GET /api/sesion` con cookie, `POST /api/salir` y el bloqueo
+al quinto error (RN-166)— se recorrió en la Mac con `npm run probar` sobre el mismo commit,
+contra un BOB simulado: **todo pasó**. `verificar-vecino.sh` después de las pruebas: LangFlow
+sigue igual.
+
+**Lo que no se hizo:** las pruebas por nginx **con** la clave del entorno. La clave no está en
+claro en ningún sitio (solo su hash en `htpasswd`, README de infra §6), así que se probó la API
+por dentro del pod y, por fuera, solo que nginx la exige. El recorrido en el navegador
+(`/ingreso`) queda para cuando alguien con la clave lo abra.
+
+**Qué sigue:**
+- **Regenerar el token «bloky-api» en BOB** (Configuración → API Tokens): el actual se compartió
+  por chat. Al cambiarlo, actualizar `BOB_API_TOKEN` en `~/.config/idiky/secretos/bloky-api.env`
+  del servidor y redesplegar solo `bloky` (`infra/desplegar.sh origin/main bloky`).
+- Para recibir el SMS de verdad, volver a correr `sembrar-pruebas.mjs` con las variables
+  `PRUEBA_*` y un celular real (los datos reales quedan solo en BOB).
+- Sugerencia menor para la API: cuando Twilio rechaza el envío, el registro guarda solo el
+  código HTTP; guardar también el cuerpo de la respuesta ahorraría un viaje al panel de Twilio.
+- Google y Microsoft siguen a la espera de credenciales y HTTPS (ADR-0008).
 
 ### 2026-09-21 · Datos de prueba en BOB · Sesión de IA (Claude) a pedido del responsable de integración · Tres copropiedades sembradas
 
