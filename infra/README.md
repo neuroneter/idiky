@@ -15,7 +15,7 @@ que **no puede verse afectado**. Las decisiones y sus porqués están en
 |---|---|---|---|---|---|
 | PWA | `infra/pwa/` | contenedor `idiky-pwa` | `8080` | Clave del entorno | Compila `apps/pwa` con `npm run build` y la sirve con nginx. **Demo** |
 | Contable | `infra/contable/` | contenedor `idiky-contable` | `8081` | Clave del entorno | Copia `apps/contable` **tal cual** (ADR-0010) y la sirve con nginx. **Demo** |
-| **BOB** | `infra/gestion/` | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082` | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`apps/gestion`, ADR-0012) |
+| **BOB** | `infra/gestion/` | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082`, y por nombre **`https://bob-dev.idiky.com`** (ruta del mismo túnel, ADR-0014) | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`apps/gestion`, ADR-0012) |
 | **BLOKY Dev** | `infra/bloky/` | **pod** `idiky-bloky`: nginx + API de BLOKY + PostgreSQL | `8083`, y por nombre **`https://bloky-dev.idiky.com`** (túnel, ADR-0014). El ingreso solo funciona por el nombre | Clave del entorno, y luego **el ingreso de BLOKY** (código SMS, Google o Microsoft, con lo registrado en BOB) | El sistema de las copropiedades, construido de cero (`apps/bloky`, `apps/bloky-api`; ADR-0008, ADR-0013) |
 | **Túnel** | `infra/tunel/` | contenedor `idiky-tunel` (`cloudflared`) | ninguno hacia internet; `/ready` en `127.0.0.1:8084` | — | Publica BLOKY Dev en `https://bloky-dev.idiky.com` con certificado de Cloudflare, sin abrir puertos ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)). Su token: `infra/tunel/secretos.sh` |
 

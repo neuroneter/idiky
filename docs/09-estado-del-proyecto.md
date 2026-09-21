@@ -16,7 +16,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | `apps/pwa/` (Mary, la maqueta de ALICE y de la consola), `apps/contable/` (Jeimy), `apps/gestion/` (BOB) y, desde el 2026-09-21, **`apps/bloky/` + `apps/bloky-api/` (BLOKY Dev, el producto real, ADR-0013)** |
-| **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) |
+| **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 y **`https://bob-dev.idiky.com`** (ADR-0014) ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
@@ -133,10 +133,15 @@ coeficiente y un acta que resista revisión.
    `Secure`: **el ingreso solo funciona por el nombre**, no por `http://20.55.251.120:8083`
    (esa dirección sigue sirviendo la página, pero la sesión no se guarda).
 
+6. **BOB también por nombre:** ruta `bob-dev.idiky.com` → `http://10.0.2.2:8082` en el mismo
+   túnel (Daniel). Sin tocar el servidor: Strapi no tiene grabada su dirección y el nginx del pod
+   pasa el `Host`. Comprobado: `/admin` 200 con sus recursos relativos, `/_health` 204, la API
+   sin token 403. BLOKY sigue hablando con BOB por dentro (`10.0.0.4:8082`).
+
 **Qué sigue:** registrar las aplicaciones de Google y Microsoft
 (`infra/bloky/credenciales-google-microsoft.md`), cargar los cuatro valores en `bloky-api.env`,
-reiniciar el pod y probar los tres canales. Después, dar nombre también a BOB, la PWA y la
-contable con rutas más en el mismo túnel (sin desplegar nada).
+reiniciar el pod y probar los tres canales. La PWA y la contable pueden tener nombre igual,
+con una ruta más cada una, cuando Mary y Jeimy lo pidan.
 
 ### 2026-09-21 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Camino a Google y Microsoft: HTTPS con túnel de Cloudflare (T-76, ADR-0014)
 
