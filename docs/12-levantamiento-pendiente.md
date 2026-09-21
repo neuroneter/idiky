@@ -161,13 +161,13 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   no escritas. Una copropiedad no puede rebajar el umbral, solo encontrarse con que casi
   nunca le aplica.
   **Y al verificar el art. 46 apareció algo que no teníamos:** su parágrafo prohíbe tomar
-  esas decisiones **en reuniones no presenciales**. Implementado (RN-77) — ver la pregunta
+  esas decisiones **en reuniones no presenciales**. Implementado (RN-94) — ver la pregunta
   nueva abajo.
 - **Mayoría calificada en asamblea mixta *(pregunta nueva, 2026-09-10 — para el abogado)*:**
   el parágrafo del art. 46 dice «reuniones no presenciales» y en 2001 no existía la mixta.
   El Decreto 398 de 2020 art. 1 extiende a las mixtas «las reglas relativas a las reuniones
   no presenciales», de donde se deduce que tampoco caben ahí. **Idiky toma el camino
-  conservador y las bloquea** (RN-77), pero es una deducción, no una cita.
+  conservador y las bloquea** (RN-94), pero es una deducción, no una cita.
   ¿Una asamblea mixta con quórum presencial suficiente **sí** puede adoptar una decisión de
   mayoría calificada? Si la respuesta es sí, se afloja en una línea. → *(respuesta)*
 - **Poderes — el tope:** → ✅ **Resuelto, y al revés de lo que suponíamos** (verificado el
@@ -200,19 +200,19 @@ reglamento de la copropiedad y la Ley 675 de 2001.
 - ~~**Asistencia:**~~ → ✅ **Respondido (Mary, 2026-09-10):** *«la asistencia virtual pesa
   igual que la presencial»*. Las tres modalidades existen (ADR-0007) y en la mixta **el quórum
   suma las dos**: una sola cuenta. Verificado además contra la norma —Ley 675 art. 42 y
-  Decreto 398 de 2020 art. 1— que dicen lo mismo. Implementado: RN-75, y la app se lo dice a
+  Decreto 398 de 2020 art. 1— que dicen lo mismo. Implementado: RN-92, y la app se lo dice a
   quien está conectado.
 - **Transmisión:** ¿la transmisión debe quedar **grabada** como soporte del acta? Eso
   cambia el costo de almacenamiento y el proveedor. → *(respuesta)*
 - ~~**Acta — comisión verificadora:**~~ → ✅ **Respondido (Mary, 2026-09-10):** *«la comisión
   verificadora o persona que revisa el acta déjala como una opción para que el administrador
-  seleccione, **a veces hay revisión**»*. Implementado como opcional (RN-76). La firma quedó
+  seleccione, **a veces hay revisión**»*. Implementado como opcional (RN-93). La firma quedó
   resuelta por la ley: presidente y secretario (art. 47).
   ~~**Queda una pregunta más chica:** si el reglamento le fija a la comisión un **término**
   propio para revisar.~~ → ✅ **Respondido (Mary, 2026-09-17):** *«para la revisión del acta
   debe existir un plazo máximo que lo define el administrador»*. No lo fija el reglamento: lo
   fija el administrador **por acta**, al designar la comisión, y nunca más allá del término del
-  art. 47. Vencido, el acta se aprueba sin las revisiones que falten y lo deja escrito (RN-78).
+  art. 47. Vencido, el acta se aprueba sin las revisiones que falten y lo deja escrito (RN-95).
 - **Acta:** ¿debe seguir un formato o plantilla específica de la copropiedad?
   → *(respuesta)*
 
@@ -352,7 +352,7 @@ Lo que hay que decidir antes de que esto salga a un servidor:
 | Al **inhabilitar** a la persona, ¿la foto se borra? | RN-61 dice que nada se borra; un dato personal sí puede tener que borrarse | **Resuelto en principio (Mary, 2026-09-07)**: *«me refería a conservar el registro; la documentación se debe guardar el tiempo que la normatividad lo permita»*, y *«si el registro se habilita nuevamente y ya no tenemos los documentos se solicitan nuevamente»*. El registro queda, las fotos tienen plazo, y rehabilitar es volver a registrar. **Falta el plazo concreto que fija la norma y el proceso que borra las fotos al cumplirse** |
 | ¿**Dónde** se almacena? | Un servidor con las cédulas de un conjunto entero es un objetivo, no un archivo | *(pendiente)* |
 | **El poder de asamblea también es un documento personal** (2026-09-10) | Lleva nombre, documento de identidad y firma de alguien que **no es residente** y con quien la copropiedad no tiene ninguna otra relación. Las cuatro preguntas de arriba le aplican igual, y una más: **¿el apoderado autorizó el tratamiento de sus datos?** Hoy no se le pide nada — lo trae el administrador, no él (RN-66) | *(pendiente)* |
-| **La marca «No obligatorio»** (2026-09-17) | El administrador puede eximir a una persona de adjuntar la foto y el documento (RN-80). ¿Eximir genera una obligación distinta —identificar de otra forma a quien entra— o no? | *(pendiente)* |
+| **La marca «No obligatorio»** (2026-09-17) | El administrador puede eximir a una persona de adjuntar la foto y el documento (RN-97). ¿Eximir genera una obligación distinta —identificar de otra forma a quien entra— o no? | *(pendiente)* |
 
 Detalle técnico y lo ya decidido: [ADR-0009](./adr/0009-soportes-fotograficos.md).
 
@@ -369,7 +369,7 @@ texto o configuración.
    dos meses— para construir el proceso que las borra al cumplirse.
 3. **El apoderado del poder.** Nombre, documento y firma de alguien que no es residente. Hoy no se
    le pide autorización: el documento lo sube el administrador (CU-A-19) o el propietario
-   (CU-R-30). ¿Hace falta su consentimiento y cómo se recoge cuando no usa la app?
+   (CU-R-31). ¿Hace falta su consentimiento y cómo se recoge cuando no usa la app?
 4. **El texto de la autorización** (`apps/pwa/src/dominio/consentimiento.ts`, RN-66). Es un
    borrador nuestro: confirmar que cumple informada, expresa y registrada, y que el responsable
    del tratamiento es la copropiedad y no Idiky.
@@ -377,7 +377,7 @@ texto o configuración.
    incluido un proveedor de nube fuera de Colombia.
 6. **Quién las ve y la constancia** (RN-67). Administración y quien registró; portería solo el
    rostro; cada apertura deja rastro. Confirmar que basta.
-7. **La marca «No obligatorio»** (RN-80). Si eximir de la foto obliga a identificar de otra forma a
+7. **La marca «No obligatorio»** (RN-97). Si eximir de la foto obliga a identificar de otra forma a
    quien entra.
 
 ## 4. Usuarios y roles

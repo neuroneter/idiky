@@ -105,8 +105,8 @@ export function HojaPoder({
             con Idiky
           </>
         ) : poder.validacion ? (
-          // CU-R-30 — La tercera puerta se lee en el papel: quien lo recibe
-          // tiene que saber si la administración ya lo vio (RN-79).
+          // CU-R-31 — La tercera puerta se lee en el papel: quien lo recibe
+          // tiene que saber si la administración ya lo vio (RN-96).
           <>
             Poder suscrito fuera de la aplicación y enviado en foto por su propietario el{' '}
             {formatearFecha(emitido)} ·{' '}

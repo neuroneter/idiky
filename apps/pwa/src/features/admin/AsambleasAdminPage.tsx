@@ -389,7 +389,7 @@ function DetalleAsamblea({
       <span className="titulo-seccion">Orden del día</span>
       <ol className="lista lista--compacta" style={{ paddingLeft: 'var(--e4)' }}>
         {asamblea.ordenDelDia.map((punto) => {
-          // RN-77 — Aquí es donde el administrador puede todavía hacer algo:
+          // RN-94 — Aquí es donde el administrador puede todavía hacer algo:
           // llevar el punto a una sesión presencial. Avisarlo el día de la
           // votación ya es tarde, y avisarlo en el acta es tardísimo.
           const admisible = decisionAdmisibleEnLaSesion(asamblea, punto)
@@ -424,9 +424,9 @@ function DetalleAsamblea({
             La asamblea es de propietarios; el poder es lo que deja entrar a quien no lo es
             (RN-30). Aquí se registran los que llegan <strong>en papel</strong>; los que el
             propietario otorga desde su app aparecen solos, y los que <strong>envía en foto</strong>{' '}
-            esperan aquí a que alguien los mire (RN-79).
+            esperan aquí a que alguien los mire (RN-96).
           </p>
-          {/* CU-R-30 — Lo que espera, arriba y con número: un poder por validar
+          {/* CU-R-31 — Lo que espera, arriba y con número: un poder por validar
               el día de la asamblea es una unidad que no sabe quién la vota. */}
           {porValidar.length > 0 && (
             <p className="acceso__nota">
@@ -552,7 +552,7 @@ function DetalleAsamblea({
           <div className="separador" />
           <span className="titulo-seccion">Quién asiste</span>
           {/* Se suma **todo junto**: la forma de asistir no cambia el peso de la
-              unidad (RN-75, Ley 675 art. 42 y Decreto 398 de 2020). El reparto
+              unidad (RN-92, Ley 675 art. 42 y Decreto 398 de 2020). El reparto
               presencial/virtual se lleva aparte porque el acta lo exige
               (art. 47), no porque uno pese menos que el otro. */}
           <div className="lista lista--compacta">
@@ -1199,7 +1199,7 @@ function VistaPoder({
         </p>
       )}
 
-      {/* RN-79 — Lo que espera se decide aquí, con la hoja y la foto a la vista:
+      {/* RN-96 — Lo que espera se decide aquí, con la hoja y la foto a la vista:
           validar es decir «vi el papel», y no se puede decir sin verlo. */}
       {esperando && (
         <div className="columna" style={{ gap: 'var(--e2)', marginBottom: 'var(--e3)' }}>
@@ -1355,7 +1355,7 @@ function VistaActa({
 
   const congelada = actaCongelada(acta)
   const hoy = hoyISO()
-  // RN-78 — El plazo se guarda al salir del campo, y antes se dice si no
+  // RN-95 — El plazo se guarda al salir del campo, y antes se dice si no
   // sirve: el repositorio lo rechazaria igual, pero el motivo se lee mejor
   // junto al campo que en un aviso. Solo se juzga **lo que se esta
   // cambiando**: el plazo ya guardado que quedo atras no es un error del
@@ -1434,7 +1434,7 @@ function VistaActa({
             </span>
           </div>
 
-          {/* RN-76 — La comisión verificadora, **opcional**. «A veces hay
+          {/* RN-93 — La comisión verificadora, **opcional**. «A veces hay
               revisión» (Mary, 2026-09-10): la Ley 675 no la exige, así que la
               app no la pide — la ofrece. Vacía es una respuesta válida y la
               pantalla lo dice, en vez de dejar un campo en blanco que parece
@@ -1495,7 +1495,7 @@ function VistaActa({
               })}
             </div>
 
-            {/* RN-78 — El plazo máximo lo fija el administrador (Mary,
+            {/* RN-95 — El plazo máximo lo fija el administrador (Mary,
                 2026-09-17), pero dentro del término del art. 47: el `max` del
                 campo lo sugiere y el repositorio lo exige. */}
             {actaTieneComision(acta) && (
@@ -1529,7 +1529,7 @@ function VistaActa({
             {/* Registrar la revisión de quien falta. Va aquí y no en un modal
                 aparte porque revisar es leer la hoja que está justo abajo.
                 Con el plazo vencido no se ofrece: el repositorio la rechazaría
-                (RN-78), y un formulario que solo sirve para fallar es peor que
+                (RN-95), y un formulario que solo sirve para fallar es peor que
                 ninguno. */}
             {!vencida && acta.verificadores
               .filter((id) => {
@@ -1556,7 +1556,7 @@ function VistaActa({
                       onClick={async () => {
                         // Se guarda el texto primero: si no, se registraría la
                         // revisión de una versión y se editaría después, que es
-                        // justo lo que RN-76 invalida.
+                        // justo lo que RN-93 invalida.
                         await alGuardar({ presidenteId, secretarioId, desarrollo })
                         await alVerificar(id, observaciones[id])
                       }}

@@ -231,7 +231,7 @@ export function RegistrosPage() {
           puedoAutorizar={puedeAutorizar(enDetalle, sesion.personaId)}
           esMio={enDetalle.creadoPor === sesion.personaId}
           alCerrar={() => setViendo(null)}
-          // RN-80: solo aquí, porque solo el administrador exime.
+          // RN-97: solo aquí, porque solo el administrador exime.
           alMarcarNoObligatorio={async (marcar) => {
             await ejecutar(
               (base) =>

@@ -95,7 +95,7 @@ export interface DatosRegistro {
   reside?: boolean
   /** Solo cuando quien registra puede escoger unidad (el administrador). */
   unidadId?: string
-  /** La marca «No obligatorio», solo desde la consola del administrador (RN-80). */
+  /** La marca «No obligatorio», solo desde la consola del administrador (RN-97). */
   soportesNoObligatorios?: boolean
 }
 
@@ -117,7 +117,7 @@ export function FormularioRegistro({
   /** Solo la consola del administrador: ahí hay que decir a qué unidad entra. */
   unidades?: Unidad[]
   categoriaInicial?: CategoriaRegistro
-  /** Solo el administrador puede eximir de los soportes (RN-80). */
+  /** Solo el administrador puede eximir de los soportes (RN-97). */
   permitirNoObligatorio?: boolean
   alCrear: (datos: DatosRegistro) => Promise<void>
   alCerrar: () => void
@@ -401,7 +401,7 @@ export function FormularioRegistro({
 
         {error && <p className="acceso__error">{error}</p>}
 
-        {/* RN-80 — La marca «No obligatorio», solo en la consola del
+        {/* RN-97 — La marca «No obligatorio», solo en la consola del
             administrador. Se dice lo que implica: la persona no adjunta nada y
             entra con el código que Idiky le asigna; el registro sigue teniendo
             que autorizarse. Va junto al botón porque es lo último que se decide. */}
@@ -419,7 +419,7 @@ export function FormularioRegistro({
             </label>
             <span className="ayuda-campo">
               El registro pasa directo a autorizar y la persona entra con el código que Idiky le
-              asigna. Queda escrito que lo eximió la administración (RN-80).
+              asigna. Queda escrito que lo eximió la administración (RN-97).
             </span>
           </div>
         )}
@@ -467,7 +467,7 @@ export function DetalleRegistro({
   alAutorizar: () => Promise<void>
   alRechazar: (motivo: string, anular: boolean) => Promise<void>
   alCerrar: () => void
-  /** Solo la consola del administrador: poner o quitar la marca (RN-80). */
+  /** Solo la consola del administrador: poner o quitar la marca (RN-97). */
   alMarcarNoObligatorio?: (marcar: boolean) => Promise<void>
 }) {
   const [motivo, setMotivo] = useState('')
@@ -503,7 +503,7 @@ export function DetalleRegistro({
         )}
       </div>
 
-      {/* RN-80 — La marca, a la vista de todos y editable solo por el
+      {/* RN-97 — La marca, a la vista de todos y editable solo por el
           administrador. Quien autoriza tiene que saber que va a autorizar sin
           fotos y quién decidió eso. */}
       {(marcado || (alMarcarNoObligatorio && admiteMarcaNoObligatorio(registro))) && (
@@ -528,7 +528,7 @@ export function DetalleRegistro({
         </>
       )}
 
-      {/* Con la marca, el código ya no es para adjuntar: es para entrar (RN-80). */}
+      {/* Con la marca, el código ya no es para adjuntar: es para entrar (RN-97). */}
       {marcado && registro.estado !== 'rechazado' && registro.estado !== 'anulado' && (
         <>
           <div className="separador" />

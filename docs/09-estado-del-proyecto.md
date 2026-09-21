@@ -4,7 +4,7 @@
 nueva o una sesión de IA distinta.
 
 > Si en vez de retomar vienes a **entender o revisar la rama entera**, empieza por
-> [`13-resumen-de-la-rama.md`](./13-resumen-de-la-rama.md): es el corte transversal —qué hay
+> [`15-resumen-de-la-rama-de-mary.md`](./15-resumen-de-la-rama-de-mary.md): es el corte transversal —qué hay
 > construido, qué se verificó contra la ley, qué está abierto— sin los 91 commits en orden.
 
 ---
@@ -19,7 +19,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | No existe. Datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 68 documentados: 36 ✅ en el demo, 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 80 (RN-01…RN-80; RN-41 retirada — 79 vigentes) |
+| **Reglas de negocio** | 80 (RN-01…RN-97; RN-41 retirada — 79 vigentes) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 
@@ -84,7 +84,7 @@ coeficiente y un acta que resista revisión.
 > arts. 45 y 46), poderes por dos puertas (RN-30, y la ley **no fija tope**), y el acta
 > armada con lo que exige el art. 47 (CU-A-20). De §3 bis quedan **dos** preguntas, las dos
 > del reglamento de esta copropiedad, no de derecho general. Ver
-> [`13-resumen-de-la-rama.md`](./13-resumen-de-la-rama.md) §4.
+> [`15-resumen-de-la-rama-de-mary.md`](./15-resumen-de-la-rama-de-mary.md) §4.
 
 ---
 
@@ -98,14 +98,14 @@ Mary preguntó qué debe revisar el abogado sobre datos personales. Quedaron **s
 [`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md) §3 sexies, ordenados por
 peso: el rostro como dato biométrico, el plazo de conservación de las fotos y el consentimiento
 del apoderado son los tres que **bloquean producción**; el texto de la política, el
-almacenamiento, quién ve qué (RN-67) y la marca «No obligatorio» (RN-80) se resuelven con
-texto o configuración. Se agregó la fila de RN-80 a la tabla. Sin cambios de código.
+almacenamiento, quién ve qué (RN-67) y la marca «No obligatorio» (RN-97) se resuelven con
+texto o configuración. Se agregó la fila de RN-97 a la tabla. Sin cambios de código.
 
 **Lo que sigue:** enviarle la lista al abogado y volcar sus respuestas en la tabla de §3 sexies.
 
 ---
 
-### 2026-09-17 · Mary + IA (Claude) · La marca «No obligatorio»: el administrador exime de las fotos (RN-80)
+### 2026-09-17 · Mary + IA (Claude) · La marca «No obligatorio»: el administrador exime de las fotos (RN-97)
 
 El equipo pidió, *«revisando con el equipo y la experiencia»*, una opción para el administrador:
 **una marca «No obligatorio»** para que quien no quiera adjuntar la foto ni el documento no lo
@@ -137,13 +137,13 @@ mueven el estado, con fotos quitar no retrocede, decidido no se marca, visitante
 con el código de registro y entra, y un registro que esperaba fotos se marca y se desmarca.
 `npm run build` y la ortografía en verde.
 
-**Lo que sigue:** con dos reglas nuevas en el mismo día sobre quién ve qué documento (RN-79 y
-RN-80), la revisión del abogado sobre datos personales (§4 del levantamiento) es lo que más
+**Lo que sigue:** con dos reglas nuevas en el mismo día sobre quién ve qué documento (RN-96 y
+RN-97), la revisión del abogado sobre datos personales (§4 del levantamiento) es lo que más
 pesa.
 
 ---
 
-### 2026-09-17 · Mary + IA (Claude) · La tercera puerta del poder: el propietario envía la foto (CU-R-30, RN-79)
+### 2026-09-17 · Mary + IA (Claude) · La tercera puerta del poder: el propietario envía la foto (CU-R-31, RN-96)
 
 Mary preguntó cómo llega el poder —*«lo genera el propietario desde la app o lo envía»*— y al
 oír que el de papel solo lo registraba la administración, pidió la tercera puerta: que el
@@ -154,7 +154,7 @@ archivos sigue esperando al backend.
 **Lo que la distingue de las otras dos puertas es quién vio el papel.** En CU-A-19 lo tuvo el
 administrador en la mano; en CU-R-23 no hay papel, respalda la sesión. Aquí lo vio el
 propietario, y lo que hace válido un poder en papel es que la administración lo vea. De ahí
-RN-79: el poder nace **«por validar»** y **mientras espera no representa** —la unidad la vota
+RN-96: el poder nace **«por validar»** y **mientras espera no representa** —la unidad la vota
 su propietario como si el poder no existiera, y los botones de votar siguen habilitados—. Sí
 **ocupa el lugar**: no se admite otro poder para esa unidad hasta retirarlo, o habría dos
 representantes en cola. La administración lo ve arriba, con número, lo abre con la hoja y la
@@ -180,9 +180,9 @@ propietario del rechazo por fuera de la app (SMS o WhatsApp) va con T-18.
 
 ---
 
-### 2026-09-17 · Mary + IA (Claude) · La comisión tiene plazo, y lo pone el administrador (RN-78)
+### 2026-09-17 · Mary + IA (Claude) · La comisión tiene plazo, y lo pone el administrador (RN-95)
 
-Mary cerró la pregunta chica que había dejado RN-76: *«para la revisión del acta debe existir
+Mary cerró la pregunta chica que había dejado RN-93: *«para la revisión del acta debe existir
 un plazo máximo que lo define el administrador»*. No es del reglamento: es **por acta**, y lo
 escribe el administrador al marcar a la comisión. Y hacía falta, porque la comisión opcional
 tal como quedó tenía un agujero: **un solo miembro que no revisara dejaba el acta en borrador
@@ -219,7 +219,7 @@ revise **desde su propia app** sigue siendo la extensión natural de CU-A-20.
 
 ---
 
-### 2026-09-10 · Mary + IA (Claude) · La mayoría calificada, y una puerta cerrada que no teníamos (RN-77)
+### 2026-09-10 · Mary + IA (Claude) · La mayoría calificada, y una puerta cerrada que no teníamos (RN-94)
 
 Mary respondió lo que faltaba de mayorías: *«considero que se utiliza mayoría simple, no es
 necesario mayoría calificada»*. Como respuesta al levantamiento es buena y cierra la pregunta:
@@ -246,7 +246,7 @@ mayoría calificada. Idiky abría la votación, sumaba coeficientes y el acta ha
 «se APRUEBA» una decisión que nace nula. Es el peor error posible en este módulo, porque nadie
 se entera hasta que alguien impugna, y para entonces el acta firmada es la prueba en contra.
 
-Arreglado en RN-77, y en las tres capas: el orden del día se lo advierte al administrador
+Arreglado en RN-94, y en las tres capas: el orden del día se lo advierte al administrador
 **cuando todavía puede llevar el punto a una sesión presencial**; al copropietario los botones
 le quedan deshabilitados —no escondidos, como pidió Mary para los poderes— con el motivo a la
 vista; **el repositorio lo rechaza igual** aunque se le quite el `disabled` al botón (T-16, y
@@ -272,13 +272,13 @@ verificadora, y la de la mixta para el abogado.
 
 ---
 
-### 2026-09-10 · Mary + IA (Claude) · Dos preguntas de §3 bis, respondidas (RN-75, RN-76)
+### 2026-09-10 · Mary + IA (Claude) · Dos preguntas de §3 bis, respondidas (RN-92, RN-93)
 
 Mary respondió dos de las cuatro preguntas que quedaban abiertas del levantamiento, y las dos
 se pudieron cerrar el mismo día porque **ninguna pedía inventar nada**: una tenía norma detrás
 y la otra pedía justamente que la app no impusiera una.
 
-**«La asistencia virtual pesa igual que la presencial» (RN-75).** Se verificó contra la norma
+**«La asistencia virtual pesa igual que la presencial» (RN-92).** Se verificó contra la norma
 antes de tocar código, como con el quórum, y la norma dice lo mismo por dos lados: la
 **Ley 675 art. 42** admite la reunión no presencial *«de conformidad con el quórum requerido
 para el respectivo caso»* —el mismo quórum, no uno propio— y el **Decreto 398 de 2020, art. 1**
@@ -288,7 +288,7 @@ presencial/virtual se sigue llevando, pero por otra razón: **el acta lo exige**
 copropietario conectado la pantalla se lo dice —*«conectado cuentas igual que en el salón»*—
 porque es exactamente la duda de quien participa desde el sofá.
 
-**«La comisión verificadora déjala como una opción… a veces hay revisión» (RN-76).** Es la
+**«La comisión verificadora déjala como una opción… a veces hay revisión» (RN-93).** Es la
 respuesta correcta y la Ley 675 la respalda por omisión: el art. 47 pide presidente y
 secretario y **no menciona ninguna comisión**. La designa la asamblea o la exige el
 reglamento, así que la app no puede ni imponerla ni ignorarla. Quedó como una lista que **puede

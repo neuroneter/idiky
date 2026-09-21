@@ -1,4 +1,4 @@
-# 13 — Resumen de la rama
+# 15 — Resumen de la rama de Mary (ALICE)
 
 **Corte:** rama `claude/repository-review-c0p1wd`, commit `e315cbf`, 2026-09-10.
 
@@ -24,7 +24,7 @@ se hace otro corte o se borra. Lo que sí se actualiza en cada sesión es la bit
 | **Código** | 68 archivos TypeScript/TSX · ~19.600 líneas |
 | **Documentación** | ~7.100 líneas en `docs/` |
 | **Casos de uso** | 68 documentados: **36 ✅** · 10 🟡 · 21 ⬜ · 1 ⛔ retirado |
-| **Reglas de negocio** | RN-01…RN-80, con RN-41 retirada → **79 vigentes** |
+| **Reglas de negocio** | RN-01…RN-97, con RN-41 retirada → **79 vigentes** |
 | **ADR** | 8 escritos y aceptados; falta ADR-0008 (backend) |
 | **Dependencias de producción** | React, React DOM, React Router. **Nada más** |
 
@@ -122,12 +122,12 @@ sin leer el artículo**.
 | Norma | Qué dice | Dónde vive |
 |---|---|---|
 | **Art. 41** | Si la primera convocatoria no pudo sesionar, la segunda sesiona con **cualquier número plural**, sea cual sea el coeficiente | RN-28 |
-| **Art. 42** | La reunión no presencial vale **«de conformidad con el quórum requerido para el respectivo caso»** — el mismo quórum, no uno propio | RN-75 |
+| **Art. 42** | La reunión no presencial vale **«de conformidad con el quórum requerido para el respectivo caso»** — el mismo quórum, no uno propio | RN-92 |
 | **Art. 45** | Quórum: **número plural de propietarios** *y* **más de la mitad** de los coeficientes. Son dos condiciones, y se **supera** la mitad, no se alcanza | RN-28 |
 | **Art. 46** | Mayoría calificada: **70 % de los coeficientes del edificio** —otra base—. Lo adoptado en contravención es **absolutamente nulo**, y las mayorías superiores de un reglamento se tienen por no escritas | RN-74 |
-| **Art. 46, parágrafo** | Esas decisiones **no pueden tomarse en reunión no presencial**, ni en segunda convocatoria salvo que aun así se obtenga el 70 % | RN-77 |
+| **Art. 46, parágrafo** | Esas decisiones **no pueden tomarse en reunión no presencial**, ni en segunda convocatoria salvo que aun así se obtenga el 70 % | RN-94 |
 | **Art. 47** | El acta: qué debe indicar, quién la firma, y **20 días hábiles** para verificarla y ponerla a disposición | RN-35, CU-A-20 |
-| **Decreto 398 de 2020, art. 1** | Las reglas de convocatoria, quórum y mayorías de las presenciales **se aplican igual** a las no presenciales **y a las mixtas** | RN-75, RN-77 |
+| **Decreto 398 de 2020, art. 1** | Las reglas de convocatoria, quórum y mayorías de las presenciales **se aplican igual** a las no presenciales **y a las mixtas** | RN-92, RN-94 |
 
 Y **dos veces la norma dijo que no hay nada que buscar**, que es un resultado distinto de
 «falta el dato»:
@@ -135,8 +135,8 @@ Y **dos veces la norma dijo que no hay nada que buscar**, que es un resultado di
 - **La Ley 675 no fija tope de poderes** por apoderado. Lo puede fijar el reglamento. Mientras
   no lo haga, Idiky **muestra el acumulado y no rechaza a nadie** (RN-30).
 - **La Ley 675 no exige comisión verificadora** del acta: el art. 47 pide presidente y
-  secretario y nada más. Por eso la comisión es **opcional** (RN-76), y cuando la hay tiene un
-  **plazo máximo que fija el administrador**, nunca más allá del término del art. 47 (RN-78).
+  secretario y nada más. Por eso la comisión es **opcional** (RN-93), y cuando la hay tiene un
+  **plazo máximo que fija el administrador**, nunca más allá del término del art. 47 (RN-95).
 
 > **El criterio, dicho en una línea:** la app **suma y registra** (aritmética) y **afirma
 > umbrales solo cuando tiene el artículo** (derecho). Antes de verificar, decía «no puedo
@@ -154,8 +154,8 @@ que quedaron corregidos **a la vista**, no borrados:
 | «El tope de poderes lo fija la Ley 675 y no lo tenemos» | **La ley no fija ninguno.** Era una afirmación mía, sin verificar | RN-30 |
 | «Las cuotas adicionales son una figura aparte» | Mary se retractó el mismo día: **son la extraordinaria**. CU-A-24 se retiró y RN-41 con ella | RN-73 |
 | El acta reportaba puntos «aprobados» aunque constatara que faltó quórum | Se contradecía a sí misma. Ahora dice que la asamblea **no quedó habilitada** | RN-35 |
-| La extraordinaria de la cubierta se podía votar en la asamblea mixta | **No se puede**: exige mayoría calificada, y el parágrafo del art. 46 lo prohíbe. Habría producido un acta que prueba su propia nulidad | RN-77 |
-| «Las dos formas de asistir suman al mismo quórum» (escrito antes de preguntarlo) | Se quitó por no estar respaldado; se volvió a poner **el día que Mary lo respondió y la norma lo confirmó** | RN-75 |
+| La extraordinaria de la cubierta se podía votar en la asamblea mixta | **No se puede**: exige mayoría calificada, y el parágrafo del art. 46 lo prohíbe. Habría producido un acta que prueba su propia nulidad | RN-94 |
+| «Las dos formas de asistir suman al mismo quórum» (escrito antes de preguntarlo) | Se quitó por no estar respaldado; se volvió a poner **el día que Mary lo respondió y la norma lo confirmó** | RN-92 |
 
 ---
 
@@ -180,7 +180,7 @@ Detalle completo en [`12-levantamiento-pendiente.md`](./12-levantamiento-pendien
 1. ¿Fija **tope de poderes** por apoderado? (§3 bis)
 2. ~~¿Le da a la **comisión verificadora** un término propio para revisar?~~ → **Respondida
    (Mary, 2026-09-17):** el plazo máximo lo fija el administrador, por acta y dentro del
-   término del art. 47 (RN-78).
+   término del art. 47 (RN-95).
 
 **Para el abogado** — una sola, y salió de construir:
 

@@ -512,9 +512,9 @@ export const MODALIDADES: ReadonlyArray<{
     id: 'mixta',
     texto: 'Mixta',
     // Ya se puede decir que suman al mismo quorum: lo respondio Mary el
-    // 2026-09-10 y ademas lo dice la ley (RN-75). Se siguen contando por
+    // 2026-09-10 y ademas lo dice la ley (RN-92). Se siguen contando por
     // separado porque el acta necesita el reparto, no porque pesen distinto.
-    detalle: 'Unos en el salón y otros conectados. Las dos formas pesan igual (RN-75).',
+    detalle: 'Unos en el salón y otros conectados. Las dos formas pesan igual (RN-92).',
     exigeLugar: true,
     exigeEnlace: true,
   },
@@ -560,7 +560,7 @@ export function asistenciaDeUnidad(
 }
 
 /**
- * RN-75 — **La forma de asistir no cambia lo que pesa la unidad.**
+ * RN-92 — **La forma de asistir no cambia lo que pesa la unidad.**
  *
  * «La asistencia virtual pesa igual que la presencial» (Mary, 2026-09-10), y la
  * ley dice lo mismo por dos lados. El art. 42 de la Ley 675 admite la reunion no
@@ -622,7 +622,7 @@ export function resumenAsistencia(
  * paralizada para siempre.
  *
  * Lo que se cuenta es **la unidad**, este quien este y **este donde este**: la
- * forma de asistir no cambia el peso (RN-75).
+ * forma de asistir no cambia el peso (RN-92).
  */
 export function hayQuorum(
   asamblea: Asamblea,
@@ -737,7 +737,7 @@ export function faltaEnActa(acta: Acta, hoy: FechaISO = hoyISO()): string[] {
   if (!acta.presidenteId) falta.push('quién presidió la asamblea')
   if (!acta.secretarioId) falta.push('quién actuó como secretario')
   if (acta.desarrollo.trim().length < 20) falta.push('el desarrollo de la reunión')
-  // RN-78 — Con comision, el plazo no es opcional: sin el, la revision no
+  // RN-95 — Con comision, el plazo no es opcional: sin el, la revision no
   // termina nunca y el acta tampoco.
   if (actaTieneComision(acta) && !acta.limiteComision) {
     falta.push('el plazo máximo de la comisión verificadora')
@@ -754,7 +754,7 @@ export function faltaEnActa(acta: Acta, hoy: FechaISO = hoyISO()): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// RN-76 — La comision verificadora del acta: **opcional**.
+// RN-93 — La comision verificadora del acta: **opcional**.
 //
 // «Dejala como una opcion para que el administrador seleccione, **a veces hay
 // revision**» (Mary, 2026-09-10). Y es exacto: la Ley 675 no la exige. El
@@ -773,7 +773,7 @@ export function actaTieneComision(acta: Acta): boolean {
 }
 
 /**
- * RN-76 — **Una revision vale sobre el texto que se reviso.**
+ * RN-93 — **Una revision vale sobre el texto que se reviso.**
  *
  * Si el acta se edita despues de que alguien la reviso, esa revision deja de
  * valer: reviso otra cosa. Lo contrario permitiria recoger las firmas y despues
@@ -800,7 +800,7 @@ export function verificadoresPendientes(acta: Acta): string[] {
 }
 
 // ---------------------------------------------------------------------------
-// RN-78 — La comision tiene un plazo maximo, y lo fija el administrador.
+// RN-95 — La comision tiene un plazo maximo, y lo fija el administrador.
 //
 // «Para la revision del acta debe existir un plazo maximo que lo define el
 // administrador» (Mary, 2026-09-17). Sin plazo, un solo miembro que no revise
@@ -871,7 +871,7 @@ export function verificadoresFueraDePlazo(acta: Acta, hoy: FechaISO = hoyISO()):
 
 /**
  * El acta paso la revision. **Sin comision, pasa sola**: no hay nada que pasar.
- * **Con el plazo vencido, tambien** (RN-78): lo que quedo sin revisar consta,
+ * **Con el plazo vencido, tambien** (RN-95): lo que quedo sin revisar consta,
  * pero ya no detiene el acta.
  */
 export function actaVerificada(acta: Acta, hoy: FechaISO = hoyISO()): boolean {
@@ -921,7 +921,7 @@ export function mayoriaDelPunto(punto: { mayoria?: MayoriaExigida }): MayoriaExi
 }
 
 /**
- * RN-77 — **Hay decisiones que esta sesion no puede tomar, aunque se voten.**
+ * RN-94 — **Hay decisiones que esta sesion no puede tomar, aunque se voten.**
  *
  * El paragrafo del articulo 46 es facil de pasar por alto y caro de pasar por
  * alto: «Las decisiones previstas en este articulo **no podran tomarse en
@@ -932,7 +932,7 @@ export function mayoriaDelPunto(punto: { mayoria?: MayoriaExigida }): MayoriaExi
  *
  * O sea que no es una recomendacion ni un umbral mas alto: es una **puerta
  * cerrada**. Una copropiedad puede reunirse por Zoom para todo (art. 42,
- * RN-75), pero no para reformar el reglamento ni para aprobar la extraordinaria
+ * RN-92), pero no para reformar el reglamento ni para aprobar la extraordinaria
  * grande. Sin esto, Idiky abriria la votacion, sumaria los coeficientes y el
  * acta reportaria «se APRUEBA» una decision que nace nula — que es el peor de
  * los errores posibles en este modulo, porque nadie se entera hasta que alguien
@@ -975,7 +975,7 @@ export function admiteAsistencia(asamblea: Asamblea): boolean {
 // ---------------------------------------------------------------------------
 
 // ---------------------------------------------------------------------------
-// RN-79 — El poder que el propietario envia en foto **no vale hasta que la
+// RN-96 — El poder que el propietario envia en foto **no vale hasta que la
 // administracion lo valide**.
 //
 // «Que el propietario lo envie adjuntando una foto del documento» (Mary,
@@ -997,7 +997,7 @@ export function poderRechazado(poder: Poder): boolean {
 }
 
 /**
- * Un poder representa cuando no esta revocado **y esta validado** (RN-79). Los
+ * Un poder representa cuando no esta revocado **y esta validado** (RN-96). Los
  * que no llevan `validacion` lo estan por construccion. **No se borra** (RN-61).
  */
 export function poderVigente(poder: Poder): boolean {
@@ -1555,7 +1555,7 @@ export function exigeSoportes(categoria: CategoriaRegistro): boolean {
 }
 
 // ---------------------------------------------------------------------------
-// RN-80 — La marca «No obligatorio»: el administrador exime de los soportes.
+// RN-97 — La marca «No obligatorio»: el administrador exime de los soportes.
 //
 // «Una opcion para el administrador que le permita colocarle una marca para que
 // un propietario, arrendatario o visitante que no quiera adjuntar la foto y/o
@@ -1582,7 +1582,7 @@ export function sinSoportesPorMarca(registro: RegistroPersona): boolean {
 
 /**
  * Un registro no pasa de la espera de soportes sin las dos fotos (RN-57) —
- * salvo que el administrador lo haya marcado como no obligatorio (RN-80).
+ * salvo que el administrador lo haya marcado como no obligatorio (RN-97).
  */
 export function soportesCompletos(registro: RegistroPersona): boolean {
   if (!exigeSoportes(registro.categoria)) return true
@@ -1591,7 +1591,7 @@ export function soportesCompletos(registro: RegistroPersona): boolean {
 }
 
 /**
- * RN-80 — El codigo del registro sirve para activar la cuenta.
+ * RN-97 — El codigo del registro sirve para activar la cuenta.
  *
  * Es «la contrasena que le asigna Idiky cuando el administrador o propietario
  * lo crea» (equipo, 2026-09-17). Vale el de un registro **autorizado** de ese

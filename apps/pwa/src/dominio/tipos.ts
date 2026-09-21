@@ -579,12 +579,12 @@ export interface RegistroPersona {
   consentimiento?: { version: string; aceptadoEn: FechaHoraISO }
   /**
    * Lo que la persona escribe para abrir su registro y adjuntar (RN-58) — y, con
-   * la marca de abajo, para **activar su cuenta** (RN-80): es la clave que Idiky
+   * la marca de abajo, para **activar su cuenta** (RN-97): es la clave que Idiky
    * le asigno cuando la crearon.
    */
   codigo: string
   /**
-   * La marca **«No obligatorio»** — RN-80.
+   * La marca **«No obligatorio»** — RN-97.
    *
    * La pone el administrador (equipo, 2026-09-17) sobre un registro concreto
    * para que esa persona no tenga que adjuntar la foto ni el documento. Con
@@ -796,12 +796,12 @@ export interface Asistencia {
 export type OrigenPoder = 'papel' | 'app'
 
 /**
- * La validacion de un poder que **llego por la app pero en papel** — CU-R-30.
+ * La validacion de un poder que **llego por la app pero en papel** — CU-R-31.
  *
  * Existe para la tercera puerta: el propietario fotografia el poder firmado y
  * lo envia desde su app. Ahi el papel lo vio el propietario, no la
  * administracion, y **es la administracion quien tiene que verlo** antes de
- * que ese poder represente a la unidad (RN-79). Los otros dos caminos no llevan
+ * que ese poder represente a la unidad (RN-96). Los otros dos caminos no llevan
  * esto: en ellos darlo de alta ya es validarlo.
  *
  * Un rechazo lleva **motivo** siempre, y no se borra (RN-61): el propietario
@@ -849,8 +849,8 @@ export interface Poder {
   registradoEn: FechaHoraISO
   /**
    * Solo cuando el propietario **envio la foto del papel desde su app**
-   * (CU-R-30). Ausente = validado por construccion: lo dio de alta quien tenia
-   * la potestad. Presente = pasa por la administracion (RN-79).
+   * (CU-R-31). Ausente = validado por construccion: lo dio de alta quien tenia
+   * la potestad. Presente = pasa por la administracion (RN-96).
    */
   validacion?: ValidacionPoder
   /** Cuando se revoco. Presente = ya no representa (RN-61). */
@@ -928,7 +928,7 @@ export interface Acta {
    */
   limiteVerificacion: FechaISO
   /**
-   * Hasta cuando tiene la comision para revisar — RN-78.
+   * Hasta cuando tiene la comision para revisar — RN-95.
    *
    * «Para la revision del acta debe existir un plazo maximo que lo define el
    * administrador» (Mary, 2026-09-17). Lo fija el administrador al designar la

@@ -69,7 +69,7 @@ export function AsambleaDetallePage() {
   const { sesion } = useSesion()
   const { asambleaId } = useParams()
   // `null` cerrado; `'app'` lo otorga aqui (CU-R-23); `'foto'` envia el papel
-  // firmado (CU-R-30). Un solo formulario, dos respaldos distintos.
+  // firmado (CU-R-31). Un solo formulario, dos respaldos distintos.
   const [dandoPoder, setDandoPoder] = useState<null | 'app' | 'foto'>(null)
   const [viendoHoja, setViendoHoja] = useState(false)
   const [viendoActa, setViendoActa] = useState(false)
@@ -108,7 +108,7 @@ export function AsambleaDetallePage() {
   const documentoActa = actaAprobada?.documentoId
     ? bd.documentos.find((d) => d.id === actaAprobada.documentoId)
     : undefined
-  // En curso: vigente **o por validar** (RN-79). El que espera no representa
+  // En curso: vigente **o por validar** (RN-96). El que espera no representa
   // todavia, pero ocupa el lugar: no se ofrece dar otro mientras tanto.
   const miPoder = poderEnCursoDeUnidad(bd.poderes, asamblea.id, sesion.unidadActivaId ?? '')
   const miPoderEsperando = !!miPoder && poderEsperandoValidacion(miPoder)
@@ -168,7 +168,7 @@ export function AsambleaDetallePage() {
     // Si la unidad está representada, el voto es del apoderado (RN-30). Mostrar
     // los botones y rechazarlos después es peor que no mostrarlos: la persona
     // cree que votó. El repositorio lo rechaza igual (T-16).
-    // Por validar no cuenta (RN-79): hasta que la administracion lo vea, vota
+    // Por validar no cuenta (RN-96): hasta que la administracion lo vea, vota
     // el propietario como si el poder no existiera.
     const representada =
       !!miPoder && poderVigente(miPoder) && miPoder.apoderadoId !== sesion!.personaId
@@ -182,7 +182,7 @@ export function AsambleaDetallePage() {
       coeficienteEdificio: sumaCoeficientes(sel.unidadesDe(bd, sesion!.copropiedadId)),
     })
     const abierta = votacion.estado === 'abierta'
-    // RN-77 — Si la sesión no puede tomar esta decisión, no hay voto que emitir.
+    // RN-94 — Si la sesión no puede tomar esta decisión, no hay voto que emitir.
     // Se pasa `{ modalidad }` y no `asamblea` porque esta es una declaración de
     // función —hoisted— y TypeScript no arrastra aquí el estrechamiento del
     // guard de arriba. Es lo que la regla necesita, además.
@@ -212,7 +212,7 @@ export function AsambleaDetallePage() {
           </span>
         </div>
 
-        {/* RN-77 — **Antes que cualquier otra cosa.** Que la decisión no quepa
+        {/* RN-94 — **Antes que cualquier otra cosa.** Que la decisión no quepa
             en esta reunión no es un detalle del reglamento: lo que se votara
             aquí sería nulo, y quien va a votar tiene derecho a saberlo antes
             de opinar, no después de que alguien impugne. */}
@@ -490,7 +490,7 @@ export function AsambleaDetallePage() {
             )}
           </div>
 
-          {/* RN-75 — Se dice, porque es la duda razonable de quien está
+          {/* RN-92 — Se dice, porque es la duda razonable de quien está
               conectado: si desde el sofá cuenta igual. Cuenta igual. */}
           {asamblea.modalidad !== 'presencial' && (
             <span className="subtitulo">
@@ -513,7 +513,7 @@ export function AsambleaDetallePage() {
       {puedo && !!unidad && asamblea.estado !== 'cerrada' && asamblea.estado !== 'cancelada' && (
         <div className="tarjeta">
           {miPoder && miPoderEsperando ? (
-            /* CU-R-30 — Enviado en foto y todavia sin validar (RN-79). Se dice
+            /* CU-R-31 — Enviado en foto y todavia sin validar (RN-96). Se dice
                lo que vale hoy —nada aun— y quien lo destraba. */
             <div className="columna" style={{ gap: 'var(--e2)' }}>
               <div className="fila">
@@ -581,7 +581,7 @@ export function AsambleaDetallePage() {
                 Puedes dar poder a alguien para que vote por tu unidad. No tiene que vivir aquí
                 ni ser copropietario.
               </span>
-              {/* CU-R-30 — El rechazo se muestra con su motivo: es lo que hay
+              {/* CU-R-31 — El rechazo se muestra con su motivo: es lo que hay
                   que corregir para volver a enviarlo. No se borra (RN-61). */}
               {poderRechazado && (
                 <p className="acceso__nota">
@@ -758,8 +758,8 @@ export function AsambleaDetallePage() {
  */
 /**
  * Un formulario, dos respaldos. En modo `app` el poder lo respalda la sesion
- * (CU-R-23); en modo `foto`, el papel firmado que se adjunta (CU-R-30) y que la
- * administracion tiene que validar (RN-79). Los datos del apoderado son los
+ * (CU-R-23); en modo `foto`, el papel firmado que se adjunta (CU-R-31) y que la
+ * administracion tiene que validar (RN-96). Los datos del apoderado son los
  * mismos: lo que cambia es que se le pide a la persona y que se le dice.
  */
 function FormularioDarPoder({

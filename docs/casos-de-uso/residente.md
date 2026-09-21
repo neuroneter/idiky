@@ -84,7 +84,7 @@ atajo de perfiles sigue disponible, plegado debajo.
 - RN-53: no se crea la cuenta aquí, se activa.
 - RN-54: el código prueba la identidad en este dispositivo.
 
-> **El código de registro también activa la cuenta** (RN-80): quien fue registrado con la marca
+> **El código de registro también activa la cuenta** (RN-97): quien fue registrado con la marca
 > «No obligatorio» no adjuntó nada y no tiene otro código; el que Idiky le asignó al crearlo es su
 > clave para entrar. Vale solo con el registro ya autorizado.
 
@@ -403,7 +403,7 @@ administrador con su cédula y sus datos de contacto.
 - A5. El punto exige **mayoría calificada** y la asamblea no es presencial → **no se vota**.
   Los botones quedan deshabilitados —no escondidos— con el motivo a la vista: el parágrafo del
   art. 46 prohíbe tomar esas decisiones en reunión no presencial, y lo que se decidiera sería
-  absolutamente nulo (RN-77). El punto tiene que llevarse a una sesión presencial.
+  absolutamente nulo (RN-94). El punto tiene que llevarse a una sesión presencial.
 
 **Reglas de negocio**
 - RN-27: el voto se pondera por coeficiente (confirmada por el equipo el 2026-08-26).
@@ -411,7 +411,7 @@ administrador con su cédula y sus datos de contacto.
 - RN-32: quien otorgó poder no vota esa unidad directamente.
 - RN-34: una votación cerrada no se reabre.
 - RN-74: la mayoría que exige el punto, y sobre qué base se mide (arts. 45 y 46).
-- RN-77: qué decisiones **no puede tomar esta sesión**, sea cual sea el resultado.
+- RN-94: qué decisiones **no puede tomar esta sesión**, sea cual sea el resultado.
 
 **Estado en el demo:** ✅ — `src/features/residente/AsambleaDetallePage.tsx`. Se vota en las
 asambleas ordinarias y extraordinarias, un voto por unidad (RN-29), solo el propietario o su
@@ -819,7 +819,7 @@ con soportes y otra sin ellos**, y la que no los pide se vuelve la que todo el m
 algún día se hace más liviano, que sea porque el equipo decidió bajar el requisito —no porque
 alguien encontró el camino corto.
 
-> **La marca «No obligatorio»** (RN-80, equipo 2026-09-17): si la persona no quiere adjuntar la
+> **La marca «No obligatorio»** (RN-97, equipo 2026-09-17): si la persona no quiere adjuntar la
 > foto ni el documento, **el administrador** —no el propietario— marca el registro y este pasa
 > directo a «falta autorizar». El propietario lo ve marcado, con quién lo eximió, y autoriza sin
 > fotos. La persona entra con el código que Idiky le asignó.
@@ -994,8 +994,8 @@ administración.
 
 ---
 
-### CU-R-30
-## CU-R-30 — Enviar el poder firmado en foto
+### CU-R-31
+## CU-R-31 — Enviar el poder firmado en foto
 
 - **Actor principal:** Propietario
 - **Precondiciones:** Hay una asamblea convocada o instalada, su unidad no tiene poder en curso
@@ -1016,7 +1016,7 @@ administración.
 3. Escribe el nombre y el documento de quien lo va a representar; si no está en Idiky se le crea
    el usuario temporal de asamblea (RN-30, RN-61).
 4. Queda **enviado, por validar**. La pantalla lo dice y dice lo que vale hoy: **nada aún**.
-   Mientras la administración no lo valide, **vota el propietario** (RN-79). La hoja y la foto se
+   Mientras la administración no lo valide, **vota el propietario** (RN-96). La hoja y la foto se
    pueden abrir para ver exactamente lo que se envió.
 5. La administración lo valida (CU-A-19) → la unidad queda representada, igual que con cualquier
    poder en papel.
@@ -1040,7 +1040,7 @@ administración.
   corregir; parafrasearlo lo estropea.
 
 **Reglas de negocio**
-- RN-79 (no vale hasta que la administración lo valide; el rechazo lleva motivo), RN-30, RN-51,
+- RN-96 (no vale hasta que la administración lo valide; el rechazo lleva motivo), RN-30, RN-51,
   RN-28 y RN-29 (una unidad, un representante, contando el que espera), RN-61 (retirado o
   rechazado, no se borra).
 

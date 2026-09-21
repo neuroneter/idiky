@@ -95,7 +95,7 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
   function confirmar(evento: React.FormEvent) {
     evento.preventDefault()
     setError(null)
-    // RN-80: tambien sirve el codigo de registro —la clave que Idiky le asigno
+    // RN-97: tambien sirve el codigo de registro —la clave que Idiky le asigno
     // cuando la crearon—, que es lo que tiene quien no adjunto nada.
     const deRegistro =
       !!persona && codigoDeRegistroValido(bd.registros, persona.documento, codigo)
@@ -215,7 +215,7 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
             <p className="acceso__nota" style={{ marginTop: 'var(--e4)' }}>
               <strong>Demo:</strong> tu código es <strong className="numerico">{esperado}</strong>.
               En la versión real llega por mensaje y no se ve aquí. También sirve el{' '}
-              <strong>código de registro</strong> que te dio quien te registró (RN-80).
+              <strong>código de registro</strong> que te dio quien te registró (RN-97).
             </p>
           </form>
         )}

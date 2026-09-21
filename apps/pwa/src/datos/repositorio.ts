@@ -1153,7 +1153,7 @@ export async function generarActa(
     desarrollo: '',
     estado: 'borrador',
     // Vacia a proposito: la comision es opcional y **la designa la asamblea**,
-    // no la app (RN-76). Nace sin ella y el administrador la registra si la hubo.
+    // no la app (RN-93). Nace sin ella y el administrador la registra si la hubo.
     verificadores: [],
     verificaciones: [],
     // Se copia al generarla, como los plazos del debido proceso (RN-69): si
@@ -1189,7 +1189,7 @@ export async function editarActa(
 
   // Se compara antes de asignar: **guardar sin cambiar nada no es editar**, y
   // si contara como edicion, un clic distraido en «Guardar borrador» tumbaria
-  // las revisiones ya hechas (RN-76).
+  // las revisiones ya hechas (RN-93).
   const cambio =
     (parametros.presidenteId !== undefined && parametros.presidenteId !== acta.presidenteId) ||
     (parametros.secretarioId !== undefined && parametros.secretarioId !== acta.secretarioId) ||
@@ -1203,8 +1203,8 @@ export async function editarActa(
 }
 
 /**
- * CU-A-20 — Registrar **quien revisa el acta**, si alguien la revisa (RN-76),
- * y **hasta cuando** (RN-78).
+ * CU-A-20 — Registrar **quien revisa el acta**, si alguien la revisa (RN-93),
+ * y **hasta cuando** (RN-95).
  *
  * Designar no es editar: cambiar quien revisa no cambia el texto revisado, asi
  * que **no tumba las revisiones ya hechas**. Quitar a alguien de la comision
@@ -1247,7 +1247,7 @@ export async function designarComisionActa(
 }
 
 /**
- * CU-A-20 — Un miembro de la comision deja constancia de que reviso (RN-76).
+ * CU-A-20 — Un miembro de la comision deja constancia de que reviso (RN-93).
  *
  * Se **reemplaza** la revision anterior de esa misma persona en vez de
  * acumularlas: lo que interesa es si esta conforme con el texto de hoy, y una
@@ -1265,7 +1265,7 @@ export async function verificarActa(
   if (!acta.verificadores.includes(parametros.personaId)) {
     throw new ErrorDeNegocio('Esa persona no integra la comisión verificadora de esta acta.')
   }
-  // RN-78 — Un plazo maximo que admite revisiones despues no es maximo. La
+  // RN-95 — Un plazo maximo que admite revisiones despues no es maximo. La
   // revision tardia no se registra; el acta dice quien no reviso a tiempo.
   if (comisionVencida(acta)) {
     throw new ErrorDeNegocio(
@@ -1439,7 +1439,7 @@ function prepararPoder(
   }
 
   // Una unidad, un representante (RN-28, RN-29). Cuenta tambien el que esta
-  // **por validar** (RN-79): dos en cola serian dos representantes en potencia.
+  // **por validar** (RN-96): dos en cola serian dos representantes en potencia.
   const enCurso = poderEnCursoDeUnidad(bd.poderes, parametros.asambleaId, parametros.unidadId)
   if (enCurso) {
     throw new ErrorDeNegocio(
@@ -1612,12 +1612,12 @@ export async function otorgarPoder(
 }
 
 /**
- * CU-R-30 — El propietario **envia la foto del poder firmado** desde su app.
+ * CU-R-31 — El propietario **envia la foto del poder firmado** desde su app.
  *
  * La tercera puerta (Mary, 2026-09-17: que lo envie *«adjuntando una foto del
  * documento»*). Se parece a las otras dos y se distingue de ambas en un punto:
  * **quien vio el papel**. Por eso nace `esperando`: lo que hace valido un poder
- * en papel es que la administracion lo vea, y aqui todavia no lo vio (RN-79).
+ * en papel es que la administracion lo vea, y aqui todavia no lo vio (RN-96).
  * Mientras tanto la unidad **no esta representada** y vota su propietario.
  *
  * Solo el propietario de la sesion puede enviarlo (RN-51), como en CU-R-23, y
@@ -1666,7 +1666,7 @@ export async function enviarPoderEnPapel(
 }
 
 /**
- * CU-A-19 — La administracion **valida** el poder que llego en foto (RN-79).
+ * CU-A-19 — La administracion **valida** el poder que llego en foto (RN-96).
  *
  * Es el momento en que el poder empieza a representar. Se vuelve a comprobar
  * que la unidad no tenga otro vigente: entre el envio y la validacion pudo
@@ -1705,7 +1705,7 @@ export async function validarPoder(
 }
 
 /**
- * CU-A-19 — La administracion **rechaza** el poder que llego en foto (RN-79).
+ * CU-A-19 — La administracion **rechaza** el poder que llego en foto (RN-96).
  *
  * **Con motivo, siempre**: el propietario tiene que saber que corregir para
  * volver a enviarlo —la foto no se lee, falta la firma, no es su unidad— y el
@@ -1893,7 +1893,7 @@ export async function crearRegistroPersona(
     vigenciaDesde?: string
     vigenciaHasta?: string
     placa?: string
-    /** La marca «No obligatorio», si quien crea es el administrador (RN-80). */
+    /** La marca «No obligatorio», si quien crea es el administrador (RN-97). */
     soportesNoObligatorios?: boolean
   },
 ): Promise<Resultado<RegistroPersona>> {
@@ -1942,7 +1942,7 @@ export async function crearRegistroPersona(
   }
   bd.registros.unshift(registro)
 
-  // RN-80: con la marca, no hay soportes que esperar. Queda quien la puso.
+  // RN-97: con la marca, no hay soportes que esperar. Queda quien la puso.
   if (soportesNoObligatorios && exigeSoportes(registro.categoria)) {
     registro.soportesNoObligatorios = { marcadoPor: registro.creadoPor, marcadoEn: ahora }
     registro.estado = 'esperando_autorizacion'
@@ -1988,7 +1988,7 @@ function crearVisitanteDeRegistro(bd: BaseDatos, registro: RegistroPersona): Vis
 }
 
 /**
- * RN-80 — El administrador pone o quita la marca «No obligatorio».
+ * RN-97 — El administrador pone o quita la marca «No obligatorio».
  *
  * Ponerla mueve el registro a la autorizacion —ya no espera nada de la
  * persona—; quitarla lo devuelve a esperar las fotos si todavia no las trajo.
@@ -2080,7 +2080,7 @@ export async function autorizarRegistro(
   if (!puedeAutorizar(registro, parametros.personaId)) {
     throw new ErrorDeNegocio('Solo quien creó el registro puede autorizarlo.')
   }
-  // RN-57, salvo la marca del administrador (RN-80).
+  // RN-57, salvo la marca del administrador (RN-97).
   if (!soportesCompletos(registro)) {
     throw new ErrorDeNegocio('Faltan los soportes: no se puede autorizar sin las dos fotos.')
   }
@@ -2243,7 +2243,7 @@ export async function emitirVoto(
     throw new ErrorDeNegocio('La votacion no esta abierta.')
   }
 
-  // RN-77 — Antes de mirar quien vota, **si esta sesion puede decidir esto**.
+  // RN-94 — Antes de mirar quien vota, **si esta sesion puede decidir esto**.
   // Va primero porque no depende de quien sea: si la decision no cabe en esta
   // reunion, no cabe para nadie, y recoger votos que nacen nulos es peor que no
   // recogerlos (art. 46, paragrafo).

@@ -84,7 +84,7 @@ export function HojaActa({
   const resumen = resumenAsistencia(asistencias, asamblea.id)
   const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
   const deLaAsamblea = asistencias.filter((a) => a.asambleaId === asamblea.id)
-  // RN-78 — Aprobada, la hoja congela lo que paso: quien no reviso a tiempo se
+  // RN-95 — Aprobada, la hoja congela lo que paso: quien no reviso a tiempo se
   // mide contra el dia de la aprobacion, no contra hoy.
   const fueraDePlazo = new Set(
     verificadoresFueraDePlazo(acta, acta.aprobadaEn?.slice(0, 10) ?? hoyISO()),
@@ -141,7 +141,7 @@ export function HojaActa({
           : `Se ${quorum ? 'verificó' : 'no verificó'} el quórum exigido por el artículo 45 de la Ley 675 de 2001: número plural de propietarios que representen más de la mitad de los coeficientes.`}
       </p>
 
-      {/* RN-75 — En una sesión que no fue solo presencial, el acta dice por qué
+      {/* RN-92 — En una sesión que no fue solo presencial, el acta dice por qué
           la asistencia remota cuenta igual. Es lo que se impugna. */}
       {asamblea.modalidad !== 'presencial' && (
         <p>
@@ -220,7 +220,7 @@ export function HojaActa({
         const votos = votosDe(votacion.id)
         const conteo = contarVotacion(votacion, votos)
         const mayoria = mayoriaDelPunto(punto)
-        // RN-77 — Art. 46, parágrafo: hay decisiones que esta sesión no podía
+        // RN-94 — Art. 46, parágrafo: hay decisiones que esta sesión no podía
         // tomar. El acta **tiene que decirlo**, y decirlo aquí: un acta que
         // reporta «se APRUEBA» una decisión nula es la prueba escrita de la
         // nulidad, y la firman el presidente y el secretario.
@@ -292,7 +292,7 @@ export function HojaActa({
         </>
       )}
 
-      {/* RN-76 — La comision, **solo si la hubo**. Un acta sin comision no dice
+      {/* RN-93 — La comision, **solo si la hubo**. Un acta sin comision no dice
           «sin comision»: dice lo que paso, y lo que paso es que la asamblea no
           designo ninguna. Con comision, en cambio, tiene que constar quien
           reviso y que anoto: es la razon de ser de la figura. */}
@@ -305,7 +305,7 @@ export function HojaActa({
               .map((id) => nombreCompleto(personaDe(id)))
               .join(', ')
               .replace(/, ([^,]*)$/, ' y $1')}
-            {/* RN-78 — El plazo consta en el acta: es lo que explica, si hace
+            {/* RN-95 — El plazo consta en el acta: es lo que explica, si hace
                 falta, por que se aprobo sin alguna revision. */}
             {acta.limiteComision
               ? `, con plazo para revisarla hasta el ${formatearFecha(acta.limiteComision)}.`
@@ -328,7 +328,7 @@ export function HojaActa({
                     <td>{nombreCompleto(personaDe(id))}</td>
                     <td>
                       {!verificacion
-                        ? // RN-78 — Vencido el plazo, «pendiente» seria mentir:
+                        ? // RN-95 — Vencido el plazo, «pendiente» seria mentir:
                           // ya no va a revisar. Se dice lo que paso.
                           fueraDePlazo.has(id)
                           ? `No revisó dentro del plazo (venció el ${formatearFecha(acta.limiteComision!)})`

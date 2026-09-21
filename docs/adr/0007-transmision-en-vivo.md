@@ -94,7 +94,7 @@ el enlace **también tiene que marcar asistencia en Idiky**, y es esa la que cue
 El parágrafo del artículo 46 prohíbe adoptar las decisiones de mayoría calificada **en reuniones
 no presenciales**, y lo adoptado en contravención es *absolutamente nulo*. Es el límite duro de
 «la asamblea puede ser virtual»: puede serlo para casi todo, no para reformar el reglamento ni
-para la extraordinaria grande. Idiky lo bloquea y lo dice (RN-77). Si esta copropiedad necesita
+para la extraordinaria grande. Idiky lo bloquea y lo dice (RN-94). Si esta copropiedad necesita
 decidir uno de esos puntos, **la sesión tiene que ser presencial** — y conviene saberlo al
 convocar, no el día de la votación.
 
@@ -124,7 +124,7 @@ manejable de uno que no lo es.
 
 - ~~**El quórum**~~ → **resuelto el 2026-09-10**, y por los dos lados. El umbral se verificó
   contra la Ley 675 arts. 41 y 45 (RN-28) y el peso de la asistencia virtual quedó decidido:
-  **pesa igual que la presencial** (RN-75, Mary), que es además lo que dicen el art. 42 de la
+  **pesa igual que la presencial** (RN-92, Mary), que es además lo que dicen el art. 42 de la
   Ley 675 y el art. 1.º del Decreto 398 de 2020. Idiky ya **afirma** el quórum, citando el
   artículo. Lo que sigue abierto en
   [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 bis es de este
