@@ -90,6 +90,14 @@ decisión y no se puede tapar:
 conoce unidades ni coeficientes, y el quórum se mide en coeficientes (RN-28). Quien entra por
 el enlace **también tiene que marcar asistencia en Idiky**, y es esa la que cuenta.
 
+**Hay decisiones que la modalidad virtual no puede tomar, y eso este ADR no lo puede cambiar.**
+El parágrafo del artículo 46 prohíbe adoptar las decisiones de mayoría calificada **en reuniones
+no presenciales**, y lo adoptado en contravención es *absolutamente nulo*. Es el límite duro de
+«la asamblea puede ser virtual»: puede serlo para casi todo, no para reformar el reglamento ni
+para la extraordinaria grande. Idiky lo bloquea y lo dice (RN-94). Si esta copropiedad necesita
+decidir uno de esos puntos, **la sesión tiene que ser presencial** — y conviene saberlo al
+convocar, no el día de la votación.
+
 **La grabación** queda en Zoom o Meet, fuera de Idiky. El acta la cita; no la guarda. Si el
 equipo decide que la grabación es soporte del acta, hay que definir dónde vive y cuánto se
 conserva — sigue abierto (CU-A-17 A2).
@@ -114,8 +122,11 @@ manejable de uno que no lo es.
 
 ## Lo que este ADR **no** decide
 
-- **El quórum**: cuánto se exige, si la asistencia virtual pesa igual que la presencial, y cómo
-  entran los poderes. Once preguntas abiertas en
-  [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 bis. Idiky **registra**
-  asistencia y **suma** coeficientes; **no afirma** que haya quórum mientras eso no se decida.
+- ~~**El quórum**~~ → **resuelto el 2026-09-10**, y por los dos lados. El umbral se verificó
+  contra la Ley 675 arts. 41 y 45 (RN-28) y el peso de la asistencia virtual quedó decidido:
+  **pesa igual que la presencial** (RN-92, Mary), que es además lo que dicen el art. 42 de la
+  Ley 675 y el art. 1.º del Decreto 398 de 2020. Idiky ya **afirma** el quórum, citando el
+  artículo. Lo que sigue abierto en
+  [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 bis es de este
+  reglamento, no de la ley.
 - **Si la grabación es soporte del acta** (CU-A-17 A2).

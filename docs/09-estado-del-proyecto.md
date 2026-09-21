@@ -3,6 +3,10 @@
 **Este es el documento que hay que leer primero al retomar el trabajo**, sea una persona
 nueva o una sesión de IA distinta.
 
+> Si en vez de retomar vienes a **entender o revisar la rama entera**, empieza por
+> [`15-resumen-de-la-rama-de-mary.md`](./15-resumen-de-la-rama-de-mary.md): es el corte transversal —qué hay
+> construido, qué se verificó contra la ley, qué está abierto— sin los 91 commits en orden.
+
 ---
 
 ## Estado actual
@@ -17,8 +21,8 @@ nueva o una sesión de IA distinta.
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 69 documentados: 36 ✅ en el demo, 11 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 91 (RN-01…RN-91; RN-41 retirada). RN-75 a RN-91 vienen de la contable |
+| **Casos de uso** | 70 documentados: 38 ✅ en el demo, 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
+| **Reglas de negocio** | 97 (RN-01…RN-97; RN-41 retirada). RN-75 a RN-91 vienen de la contable; RN-92 a RN-97, de las asambleas y registros de Mary (renumeradas el 2026-09-21) |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -69,12 +73,11 @@ intereses de mora, informes exportables, modo oscuro. De la portería existe el 
 el ingreso. Y **las dos aplicaciones todavía no intercambian información**: los abonos que la
 contable muestra vienen sembrados (T-17).
 
-Y del núcleo declarado como alcance, lo que falta es **la mitad jurídica de la asamblea** —
-quórum, mayorías, poderes, acta—. Los documentos formales ya tienen criterio y camino
-([ADR-0006](./adr/0006-documentos-formales.md)): el paz y salvo se emite, se ve y se guarda
-como PDF desde el navegador. Lo que sí quedó de la asamblea: la citación, el orden del día, la
-votación por coeficiente (CU-R-13, CU-R-20) y los coeficientes visibles al copropietario
-(CU-R-24).
+Del núcleo declarado como alcance, **la mitad jurídica de la asamblea ya está construida**
+—quórum, mayorías, poderes y acta, los cuatro verificados contra la Ley 675 entre el 9 y el 10
+de septiembre—. Lo que falta ahí es de otra clase: el **PDF de verdad**, que espera al backend
+([ADR-0006](./adr/0006-documentos-formales.md), ADR-0008); los documentos se ven en pantalla y
+salen al imprimir, sin fingir una descarga.
 
 ### ⚠️ El demo v0.1 no es el producto
 
@@ -89,9 +92,15 @@ el levantamiento de requisitos. El 2026-08-26 el equipo declaró el alcance real
 | **Lo que el demo no resuelve y es el corazón del producto** | Asambleas completas (citación, transmisión, votación, poderes, acta) y documentos descargables |
 
 Lo que hace difícil el producto no es la cartera: es que **una asamblea produzca decisiones
-jurídicamente válidas**. Eso exige quórum verificable, poderes con tope legal, votación
-ponderada por coeficiente y un acta que resista revisión. Nada de eso está construido y
-buena parte **ni siquiera está definida** (ver §3 bis del levantamiento).
+jurídicamente válidas**. Eso exige quórum verificable, poderes, votación ponderada por
+coeficiente y un acta que resista revisión.
+
+> 🔄 **Este párrafo decía «nada de eso está construido». Dejó de ser cierto el 2026-09-10.**
+> Los cuatro están, y citando el artículo: quórum (RN-28, arts. 41 y 45), mayorías (RN-74,
+> arts. 45 y 46), poderes por dos puertas (RN-30, y la ley **no fija tope**), y el acta
+> armada con lo que exige el art. 47 (CU-A-20). De §3 bis quedan **dos** preguntas, las dos
+> del reglamento de esta copropiedad, no de derecho general. Ver
+> [`15-resumen-de-la-rama-de-mary.md`](./15-resumen-de-la-rama-de-mary.md) §4.
 
 ---
 
@@ -701,6 +710,285 @@ en este orden:
    (T-33): paz y salvo, sanciones y abonos parciales en la misma unidad.
 3. Despliegue de infraestructura (T-35) y, con él, el ADR-0008 del backend.
 4. T-17: definir qué intercambian la PWA y la contable; hoy la contable siembra los abonos.
+### 2026-09-21 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Infraestructura y Mary entran a `main`
+
+**Qué se hizo**
+
+Once días después de la primera integración, `main` había avanzado solo por un lado (Jeimy trajo
+`main` a su rama y la adelantó) y dos ramas se habían quedado fuera:
+
+1. **La rama de infraestructura** (`claude/infra-podman-1wkn5z`, 23 commits del 2026-09-10):
+   `infra/` con un contenedor por producto bajo Podman sin root (ADR-0011), **BOB** en
+   `apps/gestion/` con Strapi 5 y PostgreSQL 17 (ADR-0012), la guía de despliegue por servicio y
+   los nombres BOB, BLOKY y ALICE. Entró con conflictos solo en `CLAUDE.md`, esta bitácora, el
+   tablero y el índice de docs; se conservaron las dos versiones.
+2. **La rama de Mary** (`claude/repository-review-c0p1wd`, 7 commits del 10 al 17): asistencia
+   virtual y comisión verificadora, mayoría calificada, el poder enviado en foto y la marca
+   «No obligatorio» en el registro. **Siguió sobre su base anterior a la integración**, así que
+   volvió a numerar en paralelo y chocó con `main`: sus RN-75…80 eran ya las reglas de pagos de
+   la contable, y su CU-R-30 era «informar un abono». Se renumeró en un commit propio antes de
+   mezclar, igual que con Jeimy el día 10: **RN-75…80 → RN-92…97**, **CU-R-30 → CU-R-31**, su
+   tarea T-20 → **T-42**, y su resumen de rama pasa de `docs/13` a
+   [`docs/15`](./15-resumen-de-la-rama-de-mary.md) porque el 13 ya lo usa BOB.
+   Conflictos en la semilla y cuatro documentos, resueltos conservando ambos lados.
+3. `VERSION_ESQUEMA` sube a **22**: Mary y la integración habían llamado 21 a cambios distintos.
+4. `npm run build`, `revisar-ortografia.py` y la prueba de humo en Chromium pasan.
+
+**Estado del catálogo tras el recuento:** 70 casos de uso (38 ✅, 10 🟡, 21 ⬜, 1 ⛔) y 97 reglas
+(RN-41 retirada).
+
+**Lo que hay que saber a partir de ahora**
+
+- **Las dos ramas viejas quedan cerradas**: `claude/repository-review-c0p1wd` (Mary) y
+  `claude/infra-podman-1wkn5z`. Mary retoma **desde `main`** con una rama nueva (T-43). Jeimy ya
+  lo hizo así el día 10 y por eso su trabajo entró sin fricción.
+- **Cada quien tiene un rango de identificadores reservado** (tabla en el
+  [tablero](./11-tablero-de-trabajo.md) §0). Es lo único que evita una tercera renumeración.
+- `infra/` está en `main`: la PWA, la contable y BOB se publican con
+  [`infra/guia-de-despliegue.md`](../infra/guia-de-despliegue.md).
+
+**Qué sigue**
+
+1. Mary crea su rama desde `main` y valida que sus pantallas de asambleas y registros se ven
+   igual sobre la semilla 22 (T-43).
+2. T-33: validar la cartera integrada (paz y salvo, sanciones, abonos) en el demo publicado.
+3. ADR-0008, el backend de BLOKY: ya hay entorno donde ponerlo.
+
+---
+
+### 2026-09-17 · Mary + IA (Claude) · Las preguntas para el abogado, consolidadas
+
+Mary preguntó qué debe revisar el abogado sobre datos personales. Quedaron **siete puntos** en
+[`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md) §3 sexies, ordenados por
+peso: el rostro como dato biométrico, el plazo de conservación de las fotos y el consentimiento
+del apoderado son los tres que **bloquean producción**; el texto de la política, el
+almacenamiento, quién ve qué (RN-67) y la marca «No obligatorio» (RN-97) se resuelven con
+texto o configuración. Se agregó la fila de RN-97 a la tabla. Sin cambios de código.
+
+**Lo que sigue:** enviarle la lista al abogado y volcar sus respuestas en la tabla de §3 sexies.
+
+---
+
+### 2026-09-17 · Mary + IA (Claude) · La marca «No obligatorio»: el administrador exime de las fotos (RN-97)
+
+El equipo pidió, *«revisando con el equipo y la experiencia»*, una opción para el administrador:
+**una marca «No obligatorio»** para que quien no quiera adjuntar la foto ni el documento no lo
+haga, y entre *«con la contraseña que le asigna Idiky cuando el administrador o propietario lo
+crea»*.
+
+**Es una excepción a RN-57, y se construyó como excepción, no como interruptor.** Tres límites:
+la pone **solo el administrador** —al crear el registro, con una casilla, o después desde el
+detalle—; se pone **sobre un registro concreto**, no sobre la copropiedad, porque un ajuste
+general dejaría RN-57 sin efecto de un clic; y **queda escrito quién la puso y cuándo**. Con la
+marca el registro no espera nada de la persona: pasa directo a «falta autorizar», quien lo creó
+lo autoriza sin fotos, y la marca se ve en la tabla y en el detalle —también en la app del
+propietario, que autoriza los suyos sabiendo que el administrador eximió a esa persona—. Se
+quita mientras el registro está en curso; sin fotos, vuelve a esperarlas.
+
+**«La contraseña que le asigna Idiky» ya existía: es el código de registro.** Hasta hoy servía
+solo para adjuntar (RN-58). Ahora, con el registro autorizado, **también activa la cuenta**: la
+pantalla de activación lo acepta en lugar del código de un solo uso, y el detalle del registro
+marcado lo muestra como lo que es —la clave para entrar—. Sigue sin autenticar nada de verdad
+(ADR-0004); lo que cambia es que la persona sin fotos tiene un camino completo hasta adentro.
+
+**Al visitante no le aplica**, y se dice: ya no lleva fotos desde RN-57. El equipo lo nombró en
+la lista y por eso queda anotado, no porque haya que hacer nada.
+
+**Verificado.** 15 comprobaciones directas sobre el repositorio (esbuild + node: nace por
+autorizar con la marca, se autoriza sin fotos, el código activa solo autorizado, marcar y quitar
+mueven el estado, con fotos quitar no retrocede, decidido no se marca, visitante no aplica) y
+18 con Playwright: el administrador crea con la casilla y autoriza, la persona activa su cuenta
+con el código de registro y entra, y un registro que esperaba fotos se marca y se desmarca.
+`npm run build` y la ortografía en verde.
+
+**Lo que sigue:** con dos reglas nuevas en el mismo día sobre quién ve qué documento (RN-96 y
+RN-97), la revisión del abogado sobre datos personales (§4 del levantamiento) es lo que más
+pesa.
+
+---
+
+### 2026-09-17 · Mary + IA (Claude) · La tercera puerta del poder: el propietario envía la foto (CU-R-31, RN-96)
+
+Mary preguntó cómo llega el poder —*«lo genera el propietario desde la app o lo envía»*— y al
+oír que el de papel solo lo registraba la administración, pidió la tercera puerta: que el
+propietario **lo envíe él, «adjuntando una foto del documento»**. **Con foto y no con PDF, a
+propósito**: es lo que el teléfono ya sabe hacer (ADR-0009) y no deja bloqueantes; recibir
+archivos sigue esperando al backend.
+
+**Lo que la distingue de las otras dos puertas es quién vio el papel.** En CU-A-19 lo tuvo el
+administrador en la mano; en CU-R-23 no hay papel, respalda la sesión. Aquí lo vio el
+propietario, y lo que hace válido un poder en papel es que la administración lo vea. De ahí
+RN-96: el poder nace **«por validar»** y **mientras espera no representa** —la unidad la vota
+su propietario como si el poder no existiera, y los botones de votar siguen habilitados—. Sí
+**ocupa el lugar**: no se admite otro poder para esa unidad hasta retirarlo, o habría dos
+representantes en cola. La administración lo ve arriba, con número, lo abre con la hoja y la
+foto delante y lo **valida** o lo **rechaza con motivo**; el rechazo se conserva (RN-61) y el
+propietario lo lee tal cual, para corregir y reenviar. Al validar se vuelve a comprobar que no
+llegó otro por la puerta de papel entre el envío y la decisión.
+
+**Un formulario para las dos puertas del propietario.** Los datos del apoderado son los mismos;
+cambia lo que se pide —la foto, primero, como en la puerta del administrador— y lo que se dice:
+que no vale hasta que lo validen. La hoja del poder lo lleva escrito en el pie: pendiente,
+validado o rechazado por la administración.
+
+**Verificado.** 22 comprobaciones directas sobre el repositorio (esbuild + node: sin foto no se
+envía, solo el propietario, esperando no representa pero ocupa el lugar, rechazo sin motivo no
+vale, el rechazado libera el lugar y se conserva, validar dos veces no, retirado no se valida,
+carrera con un poder en papel) y 25 con Playwright recorriendo las dos caras: envío, rechazo
+con motivo, motivo a la vista del propietario, reenvío, validación y unidad representada.
+`npm run build` y la ortografía en verde.
+
+**Lo que sigue:** la pregunta de §4 sobre el apoderado como titular de datos pesa más ahora,
+porque sus datos y su firma los sube el propietario desde su teléfono. Y notificar al
+propietario del rechazo por fuera de la app (SMS o WhatsApp) va con T-18.
+
+---
+
+### 2026-09-17 · Mary + IA (Claude) · La comisión tiene plazo, y lo pone el administrador (RN-95)
+
+Mary cerró la pregunta chica que había dejado RN-93: *«para la revisión del acta debe existir
+un plazo máximo que lo define el administrador»*. No es del reglamento: es **por acta**, y lo
+escribe el administrador al marcar a la comisión. Y hacía falta, porque la comisión opcional
+tal como quedó tenía un agujero: **un solo miembro que no revisara dejaba el acta en borrador
+para siempre**, y con ella las decisiones de la asamblea. Una figura que existe para garantizar
+el acta no puede ser la que la bloquee.
+
+**Lo que el administrador decide y lo que no.** Decide la fecha. Alrededor hay dos cosas fijas:
+**no puede pasar del término del art. 47** —el acta tiene que estar a disposición en esos veinte
+días hábiles con o sin revisión, y un plazo de comisión más largo obligaría a incumplir la ley
+para respetarlo— y **con comisión el plazo es obligatorio**: sin él, no se aprueba. Si el
+término legal ya pasó cuando se designa la comisión (la asamblea cerrada de la semilla, por
+ejemplo), el tope deja de aplicarse: el acta ya va tarde y acortar más a la comisión no lo
+remedia; la pantalla lo dice en vez de dejar un campo sin fecha posible.
+
+**Vencido el plazo, la espera termina y no se borra nada.** Las revisiones que faltan dejan de
+detener el acta, **ya no se registran** —un plazo máximo que admite revisiones después no es
+máximo— y la hoja dice quién no revisó dentro del plazo y hasta cuándo lo tuvo (RN-61). El
+estado derivado vuelve a `borrador`, no se queda en `en_verificacion`. Todo se exige en el
+repositorio, no solo en el `max` del campo (T-16).
+
+**Un error que salió de la prueba y no del razonamiento.** Con el plazo vencido, el campo
+mostraba «no puede estar en el pasado» —estaba juzgando el plazo ya guardado como si el
+administrador lo estuviera escribiendo—. Ahora solo se valida lo que cambia; lo vencido se
+dice aparte, como lo que es.
+
+**Verificado.** 15 comprobaciones directas sobre el repositorio (esbuild + node: rechaza el
+pasado, rechaza más allá del art. 47, rechaza la revisión tardía, aprueba con el plazo vencido
+y conserva al verificador) y 23 con Playwright sobre la pantalla del administrador y la hoja.
+`npm run build` y la ortografía en verde.
+
+**Lo que sigue:** de §3 bis quedan dos preguntas —el tope de poderes del reglamento y la mixta
+para el abogado— y la del apoderado como titular de datos (§4). Que el miembro de la comisión
+revise **desde su propia app** sigue siendo la extensión natural de CU-A-20.
+
+---
+
+### 2026-09-10 · Mary + IA (Claude) · La mayoría calificada, y una puerta cerrada que no teníamos (RN-94)
+
+Mary respondió lo que faltaba de mayorías: *«considero que se utiliza mayoría simple, no es
+necesario mayoría calificada»*. Como respuesta al levantamiento es buena y cierra la pregunta:
+**el reglamento de esta copropiedad no agrega puntos** a la lista del art. 46, y en la práctica
+casi todo va por simple — que es además lo que la app hace por defecto.
+
+**Lo que no se puede hacer es tratarla como opcional**, y conviene dejarlo escrito. El art. 46
+cierra diciendo que lo adoptado en contravención suya es *absolutamente nulo*, y que las
+mayorías superiores que ponga un reglamento **se tienen por no escritas**. O sea que el umbral
+no está a disposición de nadie: una copropiedad no lo rebaja, solo se encuentra con que casi
+nunca le aplica. Por eso la lista legal se queda en el código (RN-74) aunque el reglamento no
+agregue nada.
+
+**Y al verificar el artículo apareció algo que no teníamos, que es lo que valió la pena.** Su
+parágrafo dice:
+
+> «Las decisiones previstas en este artículo **no podrán tomarse en reuniones no presenciales**,
+> ni en reuniones de segunda convocatoria, salvo que en este último caso se obtenga la mayoría
+> exigida por esta ley».
+
+No es un umbral más alto: es una **puerta cerrada**. Y el demo la estaba cruzando: su asamblea
+estrella es **mixta** y su punto 2 —la extraordinaria de $40.000.000 para la cubierta— exige
+mayoría calificada. Idiky abría la votación, sumaba coeficientes y el acta habría reportado
+«se APRUEBA» una decisión que nace nula. Es el peor error posible en este módulo, porque nadie
+se entera hasta que alguien impugna, y para entonces el acta firmada es la prueba en contra.
+
+Arreglado en RN-94, y en las tres capas: el orden del día se lo advierte al administrador
+**cuando todavía puede llevar el punto a una sesión presencial**; al copropietario los botones
+le quedan deshabilitados —no escondidos, como pidió Mary para los poderes— con el motivo a la
+vista; **el repositorio lo rechaza igual** aunque se le quite el `disabled` al botón (T-16, y
+está comprobado quitándoselo); y el acta deja la constancia del parágrafo en vez de reportar
+una aprobación.
+
+**Dos precisiones del alcance.** La segunda convocatoria **no** se bloquea: la ley la admite si
+aun así se obtiene el 70 %, y eso ya lo exigía `resultadoVotacion`. Y **la mixta se trata como
+no presencial por deducción, no por cita**: el art. 46 dice «no presenciales» y en 2001 no
+existía la mixta; quien la trae al caso es el Decreto 398 de 2020. Se tomó el camino
+conservador —restringe, no habilita— y quedó anotada como pregunta para el abogado: si una
+mixta con quórum presencial suficiente sí puede, se afloja en una línea.
+
+De paso, **CU-R-13 pasó a ✅**: su ficha seguía diciendo que faltaban la mayoría, el quórum y
+los poderes, y las tres cosas entraron entre ayer y hoy.
+
+**Verificado con Playwright, 14 comprobaciones nuevas** (`calificada`, `calificada2`), más las
+nueve suites anteriores en verde.
+
+**Lo que sigue:** de §3 bis queda **una** pregunta del reglamento —si fija tope de poderes por
+apoderado— más dos nuevas que salieron de construir: el término propio de la comisión
+verificadora, y la de la mixta para el abogado.
+
+---
+
+### 2026-09-10 · Mary + IA (Claude) · Dos preguntas de §3 bis, respondidas (RN-92, RN-93)
+
+Mary respondió dos de las cuatro preguntas que quedaban abiertas del levantamiento, y las dos
+se pudieron cerrar el mismo día porque **ninguna pedía inventar nada**: una tenía norma detrás
+y la otra pedía justamente que la app no impusiera una.
+
+**«La asistencia virtual pesa igual que la presencial» (RN-92).** Se verificó contra la norma
+antes de tocar código, como con el quórum, y la norma dice lo mismo por dos lados: la
+**Ley 675 art. 42** admite la reunión no presencial *«de conformidad con el quórum requerido
+para el respectivo caso»* —el mismo quórum, no uno propio— y el **Decreto 398 de 2020, art. 1**
+lo escribe para las mixtas: las reglas de convocatoria, quórum y mayorías de las presenciales
+*«serán igualmente aplicables»*. Así que la suma de coeficientes es **una sola**. El reparto
+presencial/virtual se sigue llevando, pero por otra razón: **el acta lo exige** (art. 47). Al
+copropietario conectado la pantalla se lo dice —*«conectado cuentas igual que en el salón»*—
+porque es exactamente la duda de quien participa desde el sofá.
+
+**«La comisión verificadora déjala como una opción… a veces hay revisión» (RN-93).** Es la
+respuesta correcta y la Ley 675 la respalda por omisión: el art. 47 pide presidente y
+secretario y **no menciona ninguna comisión**. La designa la asamblea o la exige el
+reglamento, así que la app no puede ni imponerla ni ignorarla. Quedó como una lista que **puede
+estar vacía**: sin nadie marcado el acta se aprueba directo, como siempre; con gente, no se
+aprueba hasta que todos revisen.
+
+Lo que salió al construirla, y es la parte que valía la pena: **una revisión vale sobre el
+texto que se revisó**. Si el acta se edita después, esa revisión queda sin efecto. Lo contrario
+—recoger las firmas y cambiar el texto luego— es precisamente el fraude que una comisión existe
+para impedir. Y **no se borra nada** (RN-61): la revisión queda con su fecha y la hoja dice
+«revisó el tal día; el texto se modificó después». Guardar sin cambiar nada **no** cuenta como
+edición, o un clic distraído tumbaría el trabajo de la comisión.
+
+También se dice, sin impedirlo, cuando quien presidió o hizo de secretario **también revisa**:
+vacía la figura, pero lo decidió la asamblea al designar y ninguna norma lo prohíbe. Mismo
+criterio que el tope de poderes — Idiky pone el dato delante, no inventa la prohibición.
+
+**Dos textos que ya eran falsos y se corrigieron de paso.** La pantalla de poderes seguía
+diciendo *«falta el tope que fija la Ley 675»* cuando la revisión del día anterior había
+establecido que **la ley no fija ninguno** —lo puede fijar el reglamento—; y un comentario del
+panel de asistencia seguía diciendo que el umbral estaba sin decidir cuando ya se declaraba el
+quórum citando el artículo. Tres comprobaciones de Playwright afirmaban también lo viejo y se
+actualizaron.
+
+**Verificado con Playwright, 31 comprobaciones nuevas** (`comision`, `mixta`) más las siete
+suites anteriores en verde: que la comisión sea de verdad opcional; que designar bloquee la
+aprobación y diga por qué; que la observación entre en la hoja; que editar deje las revisiones
+sin efecto y que guardar sin cambios no; que la hoja muestre lo invalidado en vez de
+esconderlo; y que el acta de una sesión no presencial cite el art. 42 y el Decreto 398.
+
+**Lo que sigue:** de §3 bis quedan **dos** preguntas, las dos del reglamento de esta
+copropiedad: qué puntos somete a mayoría calificada, y si fija tope de poderes por apoderado.
+Apareció una tercera, más chica: si el reglamento le da a la comisión un término propio para
+revisar (hoy corre el supletorio de 20 días hábiles del art. 47). Y quedó anotada la extensión
+natural del CU-A-20: que el miembro de la comisión revise **desde su propia app**, la misma
+forma de dos puertas que ya tiene el poder.
 
 ---
 
@@ -760,6 +1048,8 @@ estaba construido desde ayer.
 esta copropiedad —qué puntos exigen mayoría calificada según su reglamento, si fija tope de
 poderes, si designa comisión verificadora— más si la asistencia virtual pesa igual que la
 presencial. El módulo de asambleas, con eso, está completo hasta donde la ley alcanza.
+*(Las dos últimas quedaron respondidas al día siguiente — ver la entrada de arriba.)*
+
 
 ---
 

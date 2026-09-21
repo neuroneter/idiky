@@ -624,8 +624,23 @@ export interface RegistroPersona {
    * nunca: es donde la constancia sobrevive a las fotos, que si tienen plazo.
    */
   consentimiento?: { version: string; aceptadoEn: FechaHoraISO }
-  /** Lo que la persona escribe para abrir su registro y adjuntar (RN-58). */
+  /**
+   * Lo que la persona escribe para abrir su registro y adjuntar (RN-58) — y, con
+   * la marca de abajo, para **activar su cuenta** (RN-97): es la clave que Idiky
+   * le asigno cuando la crearon.
+   */
   codigo: string
+  /**
+   * La marca **«No obligatorio»** — RN-97.
+   *
+   * La pone el administrador (equipo, 2026-09-17) sobre un registro concreto
+   * para que esa persona no tenga que adjuntar la foto ni el documento. Con
+   * ella el registro no espera soportes: pasa directo a la autorizacion de
+   * quien lo creo, y la persona entra con el codigo que Idiky le asigno.
+   * Queda quien la puso y cuando, porque aliviar el requisito es una decision
+   * que alguien tomo y el expediente tiene que decir quien.
+   */
+  soportesNoObligatorios?: { marcadoPor: string; marcadoEn: FechaHoraISO }
   estado: EstadoRegistro
   creadoEn: FechaHoraISO
   soportesEn?: FechaHoraISO
@@ -827,6 +842,25 @@ export interface Asistencia {
  */
 export type OrigenPoder = 'papel' | 'app'
 
+/**
+ * La validacion de un poder que **llego por la app pero en papel** — CU-R-31.
+ *
+ * Existe para la tercera puerta: el propietario fotografia el poder firmado y
+ * lo envia desde su app. Ahi el papel lo vio el propietario, no la
+ * administracion, y **es la administracion quien tiene que verlo** antes de
+ * que ese poder represente a la unidad (RN-96). Los otros dos caminos no llevan
+ * esto: en ellos darlo de alta ya es validarlo.
+ *
+ * Un rechazo lleva **motivo** siempre, y no se borra (RN-61): el propietario
+ * tiene que saber que corregir, y el expediente que se rechazo y por que.
+ */
+export interface ValidacionPoder {
+  estado: 'esperando' | 'validado' | 'rechazado'
+  decididoPor?: string
+  decididoEn?: FechaHoraISO
+  motivo?: string
+}
+
 export interface Poder {
   id: string
   asambleaId: string
@@ -860,6 +894,12 @@ export interface Poder {
    */
   registradoPor: string
   registradoEn: FechaHoraISO
+  /**
+   * Solo cuando el propietario **envio la foto del papel desde su app**
+   * (CU-R-31). Ausente = validado por construccion: lo dio de alta quien tenia
+   * la potestad. Presente = pasa por la administracion (RN-96).
+   */
+  validacion?: ValidacionPoder
   /** Cuando se revoco. Presente = ya no representa (RN-61). */
   revocadoEn?: FechaHoraISO
 }
@@ -884,6 +924,19 @@ export interface Poder {
  * unidad, esta acta sigue diciendo con cuanto se conto. Lo que se congela es el
  * texto y el estado, que es lo unico que una persona podria cambiar.
  */
+/**
+ * Lo que deja un miembro de la comision al revisar el acta — CU-A-20.
+ *
+ * Guarda **la fecha**, y no por prolijidad: es lo que permite saber si la
+ * revision sigue valiendo cuando el acta se edito despues (`verificacionVigente`).
+ */
+export interface VerificacionActa {
+  personaId: string
+  verificadaEn: FechaHoraISO
+  /** Lo que anoto al revisar, si anoto algo. Queda en el acta. */
+  observacion?: string
+}
+
 export interface Acta {
   id: string
   asambleaId: string
@@ -898,11 +951,43 @@ export interface Acta {
   desarrollo: string
   estado: 'borrador' | 'aprobada'
   /**
+   * La **comision verificadora**, si la hay — CU-A-20.
+   *
+   * «Dejala como una opcion para que el administrador seleccione, **a veces hay
+   * revision**» (Mary, 2026-09-10). No es un requisito de la Ley 675: el art. 47
+   * pide presidente y secretario y nada mas. La comision la designa la asamblea
+   * o la exige el reglamento, y por eso aqui es **una lista que puede estar
+   * vacia** en vez de un campo obligatorio.
+   *
+   * Vacia = no hay revision y el acta se aprueba directo, como siempre.
+   */
+  verificadores: string[]
+  verificaciones: VerificacionActa[]
+  /**
+   * Cuando se toco por ultima vez. Existe para una sola cosa: **una
+   * verificacion vale sobre el texto que se verifico** (ver `verificacionVigente`).
+   */
+  editadaEn?: FechaHoraISO
+  /**
    * Hasta cuando hay para verificarla y ponerla a disposicion: el termino del
    * reglamento y, **en su defecto, veinte dias habiles** siguientes a la reunion
    * (art. 47). Se copia al generarla, como los plazos del debido proceso (RN-69).
    */
   limiteVerificacion: FechaISO
+  /**
+   * Hasta cuando tiene la comision para revisar — RN-95.
+   *
+   * «Para la revision del acta debe existir un plazo maximo que lo define el
+   * administrador» (Mary, 2026-09-17). Lo fija el administrador al designar la
+   * comision, por acta y no por reglamento, y **no puede pasar de
+   * `limiteVerificacion`**: el acta tiene que estar a disposicion dentro del
+   * termino del art. 47, con o sin revision. Vencido, las revisiones que
+   * faltan dejan de esperar; el acta deja constancia de quien no reviso.
+   *
+   * Solo tiene sentido con `verificadores`; sin comision no hay a quien
+   * ponerle plazo.
+   */
+  limiteComision?: FechaISO
   /** El documento con su consecutivo, cuando se aprueba (RN-36, ADR-0006). */
   documentoId?: string
   /**

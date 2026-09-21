@@ -26,7 +26,7 @@ import {
   recordarDispositivo,
   recordarUltimaPersona,
 } from '../../estado/acceso'
-import { rutaInicial } from '../../dominio/reglas'
+import { codigoDeRegistroValido, rutaInicial } from '../../dominio/reglas'
 import { biometria } from '../../servicios/plataforma'
 import { Logotipo } from '../../componentes/Logotipo'
 import { SiluetaTorres } from '../../componentes/SiluetaTorres'
@@ -95,7 +95,11 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
   function confirmar(evento: React.FormEvent) {
     evento.preventDefault()
     setError(null)
-    if (codigo.trim() !== esperado) {
+    // RN-97: tambien sirve el codigo de registro —la clave que Idiky le asigno
+    // cuando la crearon—, que es lo que tiene quien no adjunto nada.
+    const deRegistro =
+      !!persona && codigoDeRegistroValido(bd.registros, persona.documento, codigo)
+    if (codigo.trim() !== esperado && !deRegistro) {
       setError('Ese código no coincide. Revísalo y vuelve a intentar.')
       return
     }
@@ -198,7 +202,6 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
               <input
                 id="codigo"
                 className="campo-numeros"
-                inputMode="numeric"
                 autoComplete="one-time-code"
                 value={codigo}
                 onChange={(evento) => setCodigo(evento.target.value)}
@@ -211,7 +214,8 @@ export function ActivarPage({ modo }: { modo: 'activar' | 'recuperar' }) {
             </button>
             <p className="acceso__nota" style={{ marginTop: 'var(--e4)' }}>
               <strong>Demo:</strong> tu código es <strong className="numerico">{esperado}</strong>.
-              En la versión real llega por mensaje y no se ve aquí.
+              En la versión real llega por mensaje y no se ve aquí. También sirve el{' '}
+              <strong>código de registro</strong> que te dio quien te registró (RN-97).
             </p>
           </form>
         )}

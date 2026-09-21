@@ -104,6 +104,19 @@ export function HojaPoder({
             otorgado desde la aplicación por su propietario el {formatearFecha(emitido)} · generado
             con Idiky
           </>
+        ) : poder.validacion ? (
+          // CU-R-31 — La tercera puerta se lee en el papel: quien lo recibe
+          // tiene que saber si la administración ya lo vio (RN-96).
+          <>
+            Poder suscrito fuera de la aplicación y enviado en foto por su propietario el{' '}
+            {formatearFecha(emitido)} ·{' '}
+            {poder.validacion.estado === 'validado'
+              ? 'validado por la administración'
+              : poder.validacion.estado === 'rechazado'
+                ? 'rechazado por la administración'
+                : 'pendiente de validación por la administración'}{' '}
+            · el documento firmado reposa como soporte · Idiky
+          </>
         ) : (
           <>
             Poder suscrito fuera de la aplicación y registrado por la administración el{' '}

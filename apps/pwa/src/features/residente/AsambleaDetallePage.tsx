@@ -19,7 +19,13 @@ import { useSesion } from '../../estado/SesionContext'
 import { useParams } from 'react-router-dom'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { emitirVoto, marcarAsistencia, otorgarPoder, revocarPoder } from '../../datos/repositorio'
+import {
+  emitirVoto,
+  enviarPoderEnPapel,
+  marcarAsistencia,
+  otorgarPoder,
+  revocarPoder,
+} from '../../datos/repositorio'
 import {
   admiteAsistencia,
   asistenciaDeUnidad,
@@ -28,13 +34,17 @@ import {
   contarVotacion,
   definicionModalidad,
   hayQuorum,
+  decisionAdmisibleEnLaSesion,
   mayoriaDelPunto,
   resultadoVotacion,
   sumaCoeficientes,
   etiquetaUnidad,
   formasDeAsistir,
   pesoDelVoto,
-  poderDeUnidad,
+  poderEnCursoDeUnidad,
+  poderEsperandoValidacion,
+  poderVigente,
+  ultimoPoderRechazadoDeUnidad,
   puedeVotar,
   resumenAsistencia,
   yaVoto,
@@ -46,6 +56,7 @@ import { Icono } from '../../componentes/Icono'
 import { ChipAsamblea } from '../../componentes/Etiquetas'
 import { Modal } from '../../componentes/Modal'
 import { HojaPoder } from '../../componentes/HojaPoder'
+import { CapturaFoto } from '../../componentes/CapturaFoto'
 import { HojaActa } from '../../componentes/HojaActa'
 import type { FormaAsistencia, PuntoOrdenDelDia, Votacion } from '../../dominio/tipos'
 
@@ -57,7 +68,9 @@ export function AsambleaDetallePage() {
   const { bd, ejecutar, cargando } = useDatos()
   const { sesion } = useSesion()
   const { asambleaId } = useParams()
-  const [dandoPoder, setDandoPoder] = useState(false)
+  // `null` cerrado; `'app'` lo otorga aqui (CU-R-23); `'foto'` envia el papel
+  // firmado (CU-R-31). Un solo formulario, dos respaldos distintos.
+  const [dandoPoder, setDandoPoder] = useState<null | 'app' | 'foto'>(null)
   const [viendoHoja, setViendoHoja] = useState(false)
   const [viendoActa, setViendoActa] = useState(false)
   if (!sesion) return null
@@ -82,6 +95,7 @@ export function AsambleaDetallePage() {
     .residenciasDeUnidad(bd, sesion.unidadActivaId ?? '')
     .find((residencia) => residencia.personaId === sesion.personaId)?.rol
   const puedo = puedeVotar(miRol)
+  const modalidadSesion = asamblea.modalidad
   const definicion = definicionModalidad(asamblea.modalidad)
   const formas = formasDeAsistir(asamblea.modalidad)
   const miAsistencia = asistenciaDeUnidad(bd.asistencias, asamblea.id, sesion.unidadActivaId ?? '')
@@ -94,7 +108,15 @@ export function AsambleaDetallePage() {
   const documentoActa = actaAprobada?.documentoId
     ? bd.documentos.find((d) => d.id === actaAprobada.documentoId)
     : undefined
-  const miPoder = poderDeUnidad(bd.poderes, asamblea.id, sesion.unidadActivaId ?? '')
+  // En curso: vigente **o por validar** (RN-96). El que espera no representa
+  // todavia, pero ocupa el lugar: no se ofrece dar otro mientras tanto.
+  const miPoder = poderEnCursoDeUnidad(bd.poderes, asamblea.id, sesion.unidadActivaId ?? '')
+  const miPoderEsperando = !!miPoder && poderEsperandoValidacion(miPoder)
+  const poderRechazado = ultimoPoderRechazadoDeUnidad(
+    bd.poderes,
+    asamblea.id,
+    sesion.unidadActivaId ?? '',
+  )
   const apoderado = miPoder ? sel.persona(bd, miPoder.apoderadoId) : undefined
   const documentoPoder = miPoder?.documentoId
     ? bd.documentos.find((d) => d.id === miPoder.documentoId)
@@ -146,7 +168,10 @@ export function AsambleaDetallePage() {
     // Si la unidad está representada, el voto es del apoderado (RN-30). Mostrar
     // los botones y rechazarlos después es peor que no mostrarlos: la persona
     // cree que votó. El repositorio lo rechaza igual (T-16).
-    const representada = !!miPoder && miPoder.apoderadoId !== sesion!.personaId
+    // Por validar no cuenta (RN-96): hasta que la administracion lo vea, vota
+    // el propietario como si el poder no existiera.
+    const representada =
+      !!miPoder && poderVigente(miPoder) && miPoder.apoderadoId !== sesion!.personaId
     const conteo = contarVotacion(votacion, votos)
     // El resultado se calcula sobre la base que exige la ley: lo representado
     // para la simple, el edificio entero para la calificada (arts. 45 y 46).
@@ -157,6 +182,11 @@ export function AsambleaDetallePage() {
       coeficienteEdificio: sumaCoeficientes(sel.unidadesDe(bd, sesion!.copropiedadId)),
     })
     const abierta = votacion.estado === 'abierta'
+    // RN-94 — Si la sesión no puede tomar esta decisión, no hay voto que emitir.
+    // Se pasa `{ modalidad }` y no `asamblea` porque esta es una declaración de
+    // función —hoisted— y TypeScript no arrastra aquí el estrechamiento del
+    // guard de arriba. Es lo que la regla necesita, además.
+    const admisible = decisionAdmisibleEnLaSesion({ modalidad: modalidadSesion }, punto)
 
     return (
       <>
@@ -182,15 +212,27 @@ export function AsambleaDetallePage() {
           </span>
         </div>
 
-        {votacion.estado === 'cerrada' && (
-          <p className={resultado.aprobada ? 'chip chip--exito' : 'chip chip--error'}>
-            {resultado.aprobada
-              ? `Aprobado: ${resultado.aprobada.texto}`
-              : 'No alcanzó la mayoría exigida'}
+        {/* RN-94 — **Antes que cualquier otra cosa.** Que la decisión no quepa
+            en esta reunión no es un detalle del reglamento: lo que se votara
+            aquí sería nulo, y quien va a votar tiene derecho a saberlo antes
+            de opinar, no después de que alguien impugne. */}
+        {!admisible.admisible && (
+          <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
+            {admisible.motivo}
           </p>
         )}
 
-        {votacion.estado === 'abierta' && resultado.aprobada && (
+        {votacion.estado === 'cerrada' && (
+          <p className={resultado.aprobada ? 'chip chip--exito' : 'chip chip--error'}>
+            {!admisible.admisible
+              ? 'Sin efecto: esta sesión no podía tomar esta decisión'
+              : resultado.aprobada
+                ? `Aprobado: ${resultado.aprobada.texto}`
+                : 'No alcanzó la mayoría exigida'}
+          </p>
+        )}
+
+        {votacion.estado === 'abierta' && resultado.aprobada && admisible.admisible && (
           <p className="subtitulo" style={{ marginBottom: 'var(--e3)' }}>
             Con los votos de ahora, <strong>{resultado.aprobada.texto}</strong> ya supera el
             umbral. El resultado se fija al cerrar la votación.
@@ -220,7 +262,7 @@ export function AsambleaDetallePage() {
               <button
                 key={opcion.id}
                 className="tarjeta tarjeta--accion"
-                disabled={cargando || representada}
+                disabled={cargando || representada || !admisible.admisible}
                 onClick={() => void votar(votacion, opcion.id)}
               >
                 <div className="fila">
@@ -448,6 +490,14 @@ export function AsambleaDetallePage() {
             )}
           </div>
 
+          {/* RN-92 — Se dice, porque es la duda razonable de quien está
+              conectado: si desde el sofá cuenta igual. Cuenta igual. */}
+          {asamblea.modalidad !== 'presencial' && (
+            <span className="subtitulo">
+              Conectado cuentas igual que en el salón: tu unidad pesa lo mismo (Ley 675, art. 42).
+            </span>
+          )}
+
           {asamblea.enlaceTransmision && (
             <p className="acceso__nota" style={{ marginTop: 'var(--e3)' }}>
               Las votaciones se hacen <strong>aquí</strong>, no en la reunión. Vuelve a esta
@@ -462,7 +512,37 @@ export function AsambleaDetallePage() {
           toma antes de leer los puntos, no después. */}
       {puedo && !!unidad && asamblea.estado !== 'cerrada' && asamblea.estado !== 'cancelada' && (
         <div className="tarjeta">
-          {miPoder ? (
+          {miPoder && miPoderEsperando ? (
+            /* CU-R-31 — Enviado en foto y todavia sin validar (RN-96). Se dice
+               lo que vale hoy —nada aun— y quien lo destraba. */
+            <div className="columna" style={{ gap: 'var(--e2)' }}>
+              <div className="fila">
+                <strong>Poder enviado, por validar</strong>
+                <span className="chip chip--info">Por validar</span>
+              </div>
+              <span className="subtitulo">
+                La administración tiene que ver la foto del poder firmado antes de que{' '}
+                {apoderado ? nombreCompleto(apoderado) : 'tu apoderado'} pueda votar por{' '}
+                {etiquetaUnidad(unidad)}. <strong>Mientras tanto votas tú.</strong>
+              </span>
+              <button className="boton boton--primario" onClick={() => setViendoHoja(!viendoHoja)}>
+                <Icono nombre={viendoHoja ? 'cerrar' : 'buscar'} tamano={16} />
+                {viendoHoja ? 'Ocultar el poder' : 'Ver lo que enviaste'}
+              </button>
+              <button
+                className="boton"
+                disabled={cargando}
+                onClick={() =>
+                  void ejecutar(
+                    (base) => revocarPoder(base, { poderId: miPoder!.id }),
+                    'Poder retirado. Puedes enviar otro.',
+                  )
+                }
+              >
+                Retirar el poder
+              </button>
+            </div>
+          ) : miPoder ? (
             <div className="columna" style={{ gap: 'var(--e2)' }}>
               <div className="fila">
                 <strong>Tu unidad la representa alguien más</strong>
@@ -501,9 +581,28 @@ export function AsambleaDetallePage() {
                 Puedes dar poder a alguien para que vote por tu unidad. No tiene que vivir aquí
                 ni ser copropietario.
               </span>
-              <button className="boton boton--primario" onClick={() => setDandoPoder(true)}>
-                Dar poder
-              </button>
+              {/* CU-R-31 — El rechazo se muestra con su motivo: es lo que hay
+                  que corregir para volver a enviarlo. No se borra (RN-61). */}
+              {poderRechazado && (
+                <p className="acceso__nota">
+                  La administración <strong>no validó</strong> el poder que enviaste
+                  {poderRechazado.validacion?.motivo
+                    ? `: «${poderRechazado.validacion.motivo}»`
+                    : ''}
+                  . Puedes corregirlo y enviarlo de nuevo.
+                </p>
+              )}
+              <div className="grupo-botones">
+                <button className="boton boton--primario" onClick={() => setDandoPoder('app')}>
+                  Dar poder
+                </button>
+                {/* La tercera puerta (Mary, 2026-09-17): el papel firmado, en
+                    foto, sin llevarlo a la administración. */}
+                <button className="boton" onClick={() => setDandoPoder('foto')}>
+                  <Icono nombre="camara" tamano={16} />
+                  Enviar el poder firmado
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -522,25 +621,46 @@ export function AsambleaDetallePage() {
             otorgante={sel.persona(bd, miPoder.otorgadoPor)}
             apoderado={apoderado}
           />
+          {/* La foto que se envio, debajo de la hoja: es lo que la administracion
+              va a mirar, y quien la mando tiene que poder verla igual. */}
+          {viendoHoja && miPoder.soporte && (
+            <img
+              src={miPoder.soporte.imagen}
+              alt="Poder firmado"
+              style={{
+                width: '100%',
+                borderRadius: 'var(--radio-sm)',
+                border: '1px solid var(--color-borde)',
+                marginTop: 'var(--e2)',
+              }}
+            />
+          )}
         </div>
       )}
 
       {dandoPoder && unidad && (
         <FormularioDarPoder
+          modo={dandoPoder}
           unidad={etiquetaUnidad(unidad)}
-          alCerrar={() => setDandoPoder(false)}
-          alOtorgar={async (datos) => {
-            const hecho = await ejecutar(
-              (base) =>
-                otorgarPoder(base, {
-                  asambleaId: asamblea!.id,
-                  unidadId: unidad.id,
-                  otorgadoPor: sesion!.personaId,
-                  ...datos,
-                }),
-              'Poder otorgado. Quien lo recibe ya puede votar por tu unidad.',
-            )
-            if (hecho) setDandoPoder(false)
+          alCerrar={() => setDandoPoder(null)}
+          alOtorgar={async ({ imagen, ...datos }) => {
+            const comunes = {
+              asambleaId: asamblea!.id,
+              unidadId: unidad.id,
+              otorgadoPor: sesion!.personaId,
+              ...datos,
+            }
+            const hecho =
+              dandoPoder === 'foto'
+                ? await ejecutar(
+                    (base) => enviarPoderEnPapel(base, { ...comunes, imagen: imagen ?? '' }),
+                    'Poder enviado. La administración lo valida y te avisamos; mientras tanto votas tú.',
+                  )
+                : await ejecutar(
+                    (base) => otorgarPoder(base, comunes),
+                    'Poder otorgado. Quien lo recibe ya puede votar por tu unidad.',
+                  )
+            if (hecho) setDandoPoder(null)
           }}
         />
       )}
@@ -636,17 +756,26 @@ export function AsambleaDetallePage() {
  * aquí lo que respalda el poder es que **quien lo otorga está autenticado** —es
  * su voto y lo está cediendo él—. Idiky emite el documento y le da su número.
  */
+/**
+ * Un formulario, dos respaldos. En modo `app` el poder lo respalda la sesion
+ * (CU-R-23); en modo `foto`, el papel firmado que se adjunta (CU-R-31) y que la
+ * administracion tiene que validar (RN-96). Los datos del apoderado son los
+ * mismos: lo que cambia es que se le pide a la persona y que se le dice.
+ */
 function FormularioDarPoder({
+  modo,
   unidad,
   alOtorgar,
   alCerrar,
 }: {
+  modo: 'app' | 'foto'
   unidad: string
   alOtorgar: (datos: {
     nombresApoderado: string
     apellidosApoderado: string
     documentoApoderado: string
     telefonoApoderado?: string
+    imagen?: string
   }) => Promise<void>
   alCerrar: () => void
 }) {
@@ -654,11 +783,13 @@ function FormularioDarPoder({
   const [apellidos, setApellidos] = useState('')
   const [documento, setDocumento] = useState('')
   const [telefono, setTelefono] = useState('')
+  const [imagen, setImagen] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const conFoto = modo === 'foto'
 
   return (
     <Modal
-      titulo="Dar poder"
+      titulo={conFoto ? 'Enviar el poder firmado' : 'Dar poder'}
       descripcion={`Alguien más votará por ${unidad} en esta asamblea.`}
       onCerrar={alCerrar}
     >
@@ -666,6 +797,10 @@ function FormularioDarPoder({
         onSubmit={(evento) => {
           evento.preventDefault()
           setError(null)
+          if (conFoto && !imagen) {
+            setError('Falta la foto del poder firmado: es lo que la administración va a validar.')
+            return
+          }
           if (nombres.trim().length < 2 || apellidos.trim().length < 2) {
             setError('Escribe el nombre completo de quien va a representarte.')
             return
@@ -679,9 +814,22 @@ function FormularioDarPoder({
             apellidosApoderado: apellidos.trim(),
             documentoApoderado: documento.trim(),
             telefonoApoderado: telefono.trim() || undefined,
+            imagen: conFoto ? (imagen ?? undefined) : undefined,
           })
         }}
       >
+        {/* La foto va primero, como en la puerta del administrador (CU-A-19):
+            es lo que hace válido el poder, y pedirla al final invita a
+            escribir de memoria y buscar el papel después. */}
+        {conFoto && (
+          <CapturaFoto
+            etiqueta="Foto del poder firmado"
+            ayuda="El documento completo y legible, con la firma. Es lo que la administración va a mirar."
+            valor={imagen}
+            alCambiar={setImagen}
+          />
+        )}
+
         <div className="fila-campos">
           <div className="campo">
             <label htmlFor="nombres-poder">Nombres</label>
@@ -727,15 +875,23 @@ function FormularioDarPoder({
 
         {/* Se dice qué respalda el poder, porque es lo que la persona se está
             preguntando: «¿y esto vale?». Y se dice lo que todavía no hay. */}
-        <p className="acceso__nota">
-          El poder queda a tu nombre y con su número, porque lo estás otorgando tú desde tu
-          cuenta. <strong>La descarga en PDF llega con la versión real</strong> (ADR-0006).
-        </p>
+        {conFoto ? (
+          <p className="acceso__nota">
+            El poder <strong>no vale hasta que la administración lo valide</strong>: tiene que
+            ver la foto, como si le hubieras llevado el papel. Mientras tanto votas tú. Si lo
+            rechaza, verás el motivo aquí y podrás enviarlo de nuevo.
+          </p>
+        ) : (
+          <p className="acceso__nota">
+            El poder queda a tu nombre y con su número, porque lo estás otorgando tú desde tu
+            cuenta. <strong>La descarga en PDF llega con la versión real</strong> (ADR-0006).
+          </p>
+        )}
 
         {error && <p className="acceso__error">{error}</p>}
 
         <button className="boton boton--primario boton--bloque" type="submit">
-          Dar el poder
+          {conFoto ? 'Enviar a la administración' : 'Dar el poder'}
         </button>
       </form>
     </Modal>

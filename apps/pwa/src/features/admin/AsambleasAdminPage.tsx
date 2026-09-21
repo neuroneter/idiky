@@ -28,17 +28,31 @@ import {
   aprobarActa,
   convocarAsamblea,
   crearActaAclaratoria,
+  designarComisionActa,
   editarActa,
   generarActa,
+  verificarActa,
   registrarPoder,
   revocarPoder,
+  validarPoder,
+  rechazarPoder,
 } from '../../datos/repositorio'
 import {
   MODALIDADES,
   actaCongelada,
   actaDeAsamblea,
+  actaTieneComision,
+  comisionVencida,
+  estadoActa,
+  hoyISO,
+  motivoPlazoComisionInvalido,
+  topePlazoComision,
+  verificadoresFueraDePlazo,
   acumuladoPorApoderado,
+  decisionAdmisibleEnLaSesion,
   faltaEnActa,
+  mayoriaDelPunto,
+  verificacionVigente,
   sumaCoeficientes,
   convocatoriaCompleta,
   definicionModalidad,
@@ -47,6 +61,8 @@ import {
   hayQuorum,
   ordenAsamblea,
   poderVigente,
+  poderEsperandoValidacion,
+  poderRechazado,
   resumenAsistencia,
 } from '../../dominio/reglas'
 import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
@@ -204,7 +220,26 @@ export function AsambleasAdminPage() {
       )}
 
       {viendoPoder && (
-        <VistaPoder bd={bd} poderId={viendoPoder} alCerrar={() => setViendoPoder(null)} />
+        <VistaPoder
+          bd={bd}
+          poderId={viendoPoder}
+          cargando={cargando}
+          alCerrar={() => setViendoPoder(null)}
+          alValidar={async () => {
+            await ejecutar(
+              (base) => validarPoder(base, { poderId: viendoPoder, decididoPor: sesion.personaId }),
+              'Poder validado. Desde ahora el apoderado vota por esa unidad.',
+            )
+          }}
+          alRechazar={async (motivo) => {
+            const hecho = await ejecutar(
+              (base) =>
+                rechazarPoder(base, { poderId: viendoPoder, decididoPor: sesion.personaId, motivo }),
+              'Poder rechazado. El propietario verá el motivo y podrá enviar otro.',
+            )
+            if (hecho) setViendoPoder(null)
+          }}
+        />
       )}
 
       {viendoActa && (
@@ -231,6 +266,21 @@ export function AsambleasAdminPage() {
               'Acta aclaratoria creada. La original no se toca.',
             )
             if (nueva) setViendoActa(nueva.id)
+          }}
+          alDesignar={async (verificadores, limiteComision) => {
+            await ejecutar(
+              (base) =>
+                designarComisionActa(base, { actaId: viendoActa, verificadores, limiteComision }),
+              verificadores.length === 0
+                ? 'Sin comisión verificadora: el acta se aprueba directo.'
+                : 'Comisión verificadora registrada.',
+            )
+          }}
+          alVerificar={async (personaId, observacion) => {
+            await ejecutar(
+              (base) => verificarActa(base, { actaId: viendoActa, personaId, observacion }),
+              'Revisión registrada en el acta.',
+            )
           }}
         />
       )}
@@ -287,6 +337,7 @@ function DetalleAsamblea({
   const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
   const poderes = sel.poderesDeAsambleaTodos(bd, asamblea.id)
   const vigentes = poderes.filter(poderVigente)
+  const porValidar = poderes.filter((p) => !p.revocadoEn && poderEsperandoValidacion(p))
   const copropiedad = sel.copropiedad(bd, asamblea.copropiedadId)
   const quorumMinimo = copropiedad?.quorumMinimo ?? 50
   const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
@@ -337,12 +388,26 @@ function DetalleAsamblea({
       <div className="separador" />
       <span className="titulo-seccion">Orden del día</span>
       <ol className="lista lista--compacta" style={{ paddingLeft: 'var(--e4)' }}>
-        {asamblea.ordenDelDia.map((punto) => (
-          <li key={punto.id}>
-            <strong>{punto.titulo}</strong>
-            {punto.seVota && <span className="chip chip--marca">Se vota</span>}
-          </li>
-        ))}
+        {asamblea.ordenDelDia.map((punto) => {
+          // RN-94 — Aquí es donde el administrador puede todavía hacer algo:
+          // llevar el punto a una sesión presencial. Avisarlo el día de la
+          // votación ya es tarde, y avisarlo en el acta es tardísimo.
+          const admisible = decisionAdmisibleEnLaSesion(asamblea, punto)
+          return (
+            <li key={punto.id}>
+              <strong>{punto.titulo}</strong>
+              {punto.seVota && <span className="chip chip--marca">Se vota</span>}
+              {mayoriaDelPunto(punto) === 'calificada' && (
+                <span className="chip chip--alerta">Mayoría calificada</span>
+              )}
+              {!admisible.admisible && (
+                <p className="acceso__nota" style={{ marginTop: 'var(--e1)' }}>
+                  {admisible.motivo}
+                </p>
+              )}
+            </li>
+          )
+        })}
       </ol>
 
       {asamblea.estado !== 'cerrada' && asamblea.estado !== 'cancelada' && (
@@ -358,12 +423,28 @@ function DetalleAsamblea({
           <p className="subtitulo">
             La asamblea es de propietarios; el poder es lo que deja entrar a quien no lo es
             (RN-30). Aquí se registran los que llegan <strong>en papel</strong>; los que el
-            propietario otorga desde su app aparecen solos.
+            propietario otorga desde su app aparecen solos, y los que <strong>envía en foto</strong>{' '}
+            esperan aquí a que alguien los mire (RN-96).
           </p>
+          {/* CU-R-31 — Lo que espera, arriba y con número: un poder por validar
+              el día de la asamblea es una unidad que no sabe quién la vota. */}
+          {porValidar.length > 0 && (
+            <p className="acceso__nota">
+              <strong>
+                {porValidar.length === 1
+                  ? 'Hay un poder por validar'
+                  : `Hay ${porValidar.length} poderes por validar`}
+              </strong>
+              : llegaron en foto desde la app del propietario. Hasta que se validen, esas
+              unidades las vota su propietario.
+            </p>
+          )}
 
-          {/* El acumulado por apoderado, a la vista: el tope legal no lo tenemos
-              (RN-30, §3 bis), así que en vez de inventar un número se le pone el
-              dato delante a quien registra, para que juzgue con el reglamento. */}
+          {/* El acumulado por apoderado, a la vista: **la Ley 675 no fija tope**
+              (RN-30, revisado el 2026-09-10), y el del reglamento de esta
+              copropiedad no lo tenemos. En vez de inventar un número se le pone
+              el dato delante a quien registra, para que juzgue con el
+              reglamento en la mano. */}
           {acumulado.length > 0 && (
             <div className="lista lista--compacta" style={{ marginTop: 'var(--e2)' }}>
               {acumulado.map((linea) => {
@@ -401,7 +482,13 @@ function DetalleAsamblea({
                         </td>
                         <td>
                           {poder.revocadoEn ? (
-                            <span className="chip">Revocado</span>
+                            <span className="chip">
+                              {poder.validacion ? 'Retirado' : 'Revocado'}
+                            </span>
+                          ) : poderEsperandoValidacion(poder) ? (
+                            <span className="chip chip--alerta">Por validar</span>
+                          ) : poderRechazado(poder) ? (
+                            <span className="chip">Rechazado</span>
                           ) : (
                             <span className="chip chip--exito">Vigente</span>
                           )}
@@ -409,7 +496,11 @@ function DetalleAsamblea({
                               papel firmado, o la sesión del propietario— y por
                               tanto qué mirar si alguien lo impugna. */}
                           <div className="subtitulo">
-                            {poder.origen === 'papel' ? 'En papel' : 'Otorgado en la app'}
+                            {poder.validacion
+                              ? 'En papel, enviado en foto por el propietario'
+                              : poder.origen === 'papel'
+                                ? 'En papel'
+                                : 'Otorgado en la app'}
                           </div>
                         </td>
                         <td>
@@ -423,7 +514,10 @@ function DetalleAsamblea({
                             >
                               Ver
                             </button>
-                            {!poder.revocadoEn && (
+                            {/* El que espera no se revoca: se valida o se
+                                rechaza, desde su vista. El rechazado ya no
+                                hay nada que revocarle. */}
+                            {poderVigente(poder) && (
                               <button
                                 className="boton boton--pequeno"
                                 disabled={cargando}
@@ -444,10 +538,10 @@ function DetalleAsamblea({
 
           {acumulado.length > 0 && (
             <p className="acceso__nota" style={{ margin: 'var(--e3) 0' }}>
-              Falta el <strong>tope</strong> que fija la Ley 675: cuántas unidades puede acumular un
-              apoderado y hasta qué porcentaje. Mientras no esté, Idiky muestra el acumulado pero{' '}
-              <strong>no rechaza a nadie</strong> — el número de arriba es para juzgarlo con el
-              reglamento en la mano.
+              La <strong>Ley 675 no fija tope</strong> de poderes por apoderado; lo puede fijar el{' '}
+              <strong>reglamento</strong> de la copropiedad, y el de esta no está cargado. Por eso
+              Idiky muestra el acumulado pero <strong>no rechaza a nadie</strong>: el número de
+              arriba es para juzgarlo con el reglamento en la mano.
             </p>
           )}
         </>
@@ -457,9 +551,10 @@ function DetalleAsamblea({
         <>
           <div className="separador" />
           <span className="titulo-seccion">Quién asiste</span>
-          {/* Se suma y se reparte por forma —que es lo que el acta necesita en una
-              mixta— pero **no se declara quórum**: el umbral está sin decidir
-              (RN-28, §3 bis). */}
+          {/* Se suma **todo junto**: la forma de asistir no cambia el peso de la
+              unidad (RN-92, Ley 675 art. 42 y Decreto 398 de 2020). El reparto
+              presencial/virtual se lleva aparte porque el acta lo exige
+              (art. 47), no porque uno pese menos que el otro. */}
           <div className="lista lista--compacta">
             <div className="fila">
               <span className="subtitulo">Unidades</span>
@@ -555,10 +650,30 @@ function DetalleAsamblea({
             <div className="columna" style={{ gap: 'var(--e2)' }}>
               <div className="fila">
                 <span className="subtitulo">
-                  {acta.estado === 'aprobada' ? 'Aprobada y publicada' : 'Borrador'}
+                  {
+                    {
+                      aprobada: 'Aprobada y publicada',
+                      en_verificacion: 'En revisión de la comisión',
+                      borrador: 'Borrador',
+                    }[estadoActa(acta)]
+                  }
                 </span>
-                <span className={acta.estado === 'aprobada' ? 'chip chip--exito' : 'chip'}>
-                  {acta.estado === 'aprobada' ? 'Firme' : 'Sin aprobar'}
+                <span
+                  className={
+                    {
+                      aprobada: 'chip chip--exito',
+                      en_verificacion: 'chip chip--info',
+                      borrador: 'chip',
+                    }[estadoActa(acta)]
+                  }
+                >
+                  {
+                    {
+                      aprobada: 'Firme',
+                      en_verificacion: 'Con comisión',
+                      borrador: 'Sin aprobar',
+                    }[estadoActa(acta)]
+                  }
                 </span>
               </div>
               {acta.estado === 'borrador' && (
@@ -1045,14 +1160,26 @@ function FormularioPoder({
 function VistaPoder({
   bd,
   poderId,
+  cargando,
   alCerrar,
+  alValidar,
+  alRechazar,
 }: {
   bd: ReturnType<typeof useDatos>['bd']
   poderId: string
+  cargando: boolean
   alCerrar: () => void
+  alValidar: () => Promise<void>
+  alRechazar: (motivo: string) => Promise<void>
 }) {
+  const [motivo, setMotivo] = useState('')
+  const [rechazando, setRechazando] = useState(false)
   const poder = bd.poderes.find((p) => p.id === poderId)
   if (!poder) return null
+  const esperando = !poder.revocadoEn && poderEsperandoValidacion(poder)
+  const quienDecidio = poder.validacion?.decididoPor
+    ? sel.persona(bd, poder.validacion.decididoPor)
+    : undefined
 
   const unidad = sel.unidad(bd, poder.unidadId)
   const documento = poder.documentoId
@@ -1067,8 +1194,81 @@ function VistaPoder({
     >
       {poder.revocadoEn && (
         <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
-          Este poder está <strong>revocado</strong>. Se conserva porque, si votó antes de
-          revocarse, hay que poder explicarlo (RN-61).
+          Este poder está <strong>{poder.validacion ? 'retirado' : 'revocado'}</strong>. Se
+          conserva porque, si votó antes de revocarse, hay que poder explicarlo (RN-61).
+        </p>
+      )}
+
+      {/* RN-96 — Lo que espera se decide aquí, con la hoja y la foto a la vista:
+          validar es decir «vi el papel», y no se puede decir sin verlo. */}
+      {esperando && (
+        <div className="columna" style={{ gap: 'var(--e2)', marginBottom: 'var(--e3)' }}>
+          <p className="acceso__nota">
+            El propietario <strong>envió este poder en foto</strong> desde su app. No vale hasta
+            que lo valides: revisa que el documento esté completo, legible y firmado, y que sea
+            de su unidad. Mientras tanto, esa unidad la vota su propietario.
+          </p>
+          {!rechazando ? (
+            <div className="grupo-botones">
+              <button
+                className="boton boton--primario"
+                disabled={cargando}
+                onClick={() => void alValidar()}
+              >
+                Validar el poder
+              </button>
+              <button className="boton" disabled={cargando} onClick={() => setRechazando(true)}>
+                Rechazar
+              </button>
+            </div>
+          ) : (
+            <div className="campo">
+              <label htmlFor="motivo-rechazo-poder">Motivo del rechazo</label>
+              <input
+                id="motivo-rechazo-poder"
+                value={motivo}
+                onChange={(evento) => setMotivo(evento.target.value)}
+                placeholder="Qué falta o qué está mal: es lo que el propietario va a corregir"
+              />
+              <span className="ayuda-campo">
+                El propietario lo lee tal cual. Un poder no se rechaza sin decir por qué.
+              </span>
+              <div className="grupo-botones">
+                <button
+                  className="boton boton--peligro"
+                  disabled={cargando || motivo.trim().length < 5}
+                  onClick={() => void alRechazar(motivo)}
+                >
+                  Rechazar el poder
+                </button>
+                <button className="boton" disabled={cargando} onClick={() => setRechazando(false)}>
+                  Volver
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {poder.validacion?.estado === 'rechazado' && (
+        <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
+          <strong>Rechazado</strong>
+          {quienDecidio ? ` por ${nombreCompleto(quienDecidio)}` : ''}
+          {poder.validacion.decididoEn
+            ? ` el ${formatearFecha(poder.validacion.decididoEn.slice(0, 10))}`
+            : ''}
+          : «{poder.validacion.motivo}». Se conserva con su motivo (RN-61).
+        </p>
+      )}
+
+      {poder.validacion?.estado === 'validado' && (
+        <p className="subtitulo" style={{ marginBottom: 'var(--e3)' }}>
+          Enviado en foto por el propietario y <strong>validado</strong>
+          {quienDecidio ? ` por ${nombreCompleto(quienDecidio)}` : ''}
+          {poder.validacion.decididoEn
+            ? ` el ${formatearFecha(poder.validacion.decididoEn.slice(0, 10))}`
+            : ''}
+          .
         </p>
       )}
 
@@ -1089,7 +1289,9 @@ function VistaPoder({
           <div className="separador" />
           <span className="titulo-seccion">El documento firmado</span>
           <p className="subtitulo">
-            Es lo que respalda este poder: llegó en papel y la administración lo adjuntó.
+            {poder.validacion
+              ? 'Es lo que respalda este poder: el propietario lo firmó y envió la foto desde su app.'
+              : 'Es lo que respalda este poder: llegó en papel y la administración lo adjuntó.'}
           </p>
           <img
             src={poder.soporte.imagen}
@@ -1123,6 +1325,8 @@ function VistaActa({
   alGuardar,
   alAprobar,
   alAclarar,
+  alDesignar,
+  alVerificar,
   alCerrar,
 }: {
   bd: ReturnType<typeof useDatos>['bd']
@@ -1135,6 +1339,8 @@ function VistaActa({
   }) => Promise<void>
   alAprobar: () => Promise<void>
   alAclarar: () => Promise<void>
+  alDesignar: (verificadores: string[], limiteComision?: string) => Promise<void>
+  alVerificar: (personaId: string, observacion?: string) => Promise<void>
   alCerrar: () => void
 }) {
   const acta = bd.actas.find((a) => a.id === actaId)
@@ -1142,17 +1348,32 @@ function VistaActa({
   const [presidenteId, setPresidenteId] = useState(acta?.presidenteId ?? '')
   const [secretarioId, setSecretarioId] = useState(acta?.secretarioId ?? '')
   const [desarrollo, setDesarrollo] = useState(acta?.desarrollo ?? '')
+  const [observaciones, setObservaciones] = useState<Record<string, string>>({})
+  const [plazoComision, setPlazoComision] = useState(acta?.limiteComision ?? '')
 
   if (!acta || !asamblea) return null
 
   const congelada = actaCongelada(acta)
+  const hoy = hoyISO()
+  // RN-95 — El plazo se guarda al salir del campo, y antes se dice si no
+  // sirve: el repositorio lo rechazaria igual, pero el motivo se lee mejor
+  // junto al campo que en un aviso. Solo se juzga **lo que se esta
+  // cambiando**: el plazo ya guardado que quedo atras no es un error del
+  // formulario, es un plazo vencido, y eso se dice aparte.
+  const motivoPlazo =
+    plazoComision && plazoComision !== acta.limiteComision
+      ? motivoPlazoComisionInvalido(acta, plazoComision, hoy)
+      : null
+  const vencida = comisionVencida(acta, hoy)
+  const topePlazo = topePlazoComision(acta, hoy)
+  const fueraDePlazo = new Set(verificadoresFueraDePlazo(acta, hoy))
   // Quienes pueden firmar: los que estuvieron. Ofrecer toda la copropiedad
   // dejaría firmar como presidente a alguien que no fue.
   const asistentes = sel
     .asistenciasDeAsamblea(bd, asamblea.id)
     .map((asistencia) => sel.persona(bd, asistencia.personaId))
     .filter((persona): persona is NonNullable<typeof persona> => !!persona)
-  const falta = faltaEnActa({ ...acta, presidenteId, secretarioId, desarrollo })
+  const falta = faltaEnActa({ ...acta, presidenteId, secretarioId, desarrollo }, hoy)
 
   return (
     <Modal
@@ -1212,6 +1433,163 @@ function VistaActa({
               de cada punto— <strong>ya está</strong>: sale de lo registrado, no se transcribe.
             </span>
           </div>
+
+          {/* RN-93 — La comisión verificadora, **opcional**. «A veces hay
+              revisión» (Mary, 2026-09-10): la Ley 675 no la exige, así que la
+              app no la pide — la ofrece. Vacía es una respuesta válida y la
+              pantalla lo dice, en vez de dejar un campo en blanco que parece
+              un olvido. */}
+          <div className="separador" />
+          <div className="columna" style={{ gap: 'var(--e2)' }}>
+            <span className="titulo-seccion">Comisión verificadora (opcional)</span>
+            <span className="ayuda-campo">
+              Si la asamblea designó a alguien para revisar el acta, márcalo aquí y el acta no se
+              aprueba hasta que revise. Si no hubo revisión, no marques a nadie: se aprueba
+              directo. La Ley 675 no exige comisión (art. 47); la designa la asamblea o la pide
+              el reglamento.
+            </span>
+
+            <div className="lista lista--compacta">
+              {asistentes.map((persona) => {
+                const designado = acta.verificadores.includes(persona.id)
+                const verificacion = acta.verificaciones.find((v) => v.personaId === persona.id)
+                const vigente = verificacion && verificacionVigente(acta, verificacion)
+                return (
+                  <div key={persona.id} className="fila">
+                    <label className="fila" style={{ gap: 'var(--e2)', cursor: 'pointer' }}>
+                      <input
+                        type="checkbox"
+                        checked={designado}
+                        disabled={cargando}
+                        onChange={() =>
+                          void alDesignar(
+                            designado
+                              ? acta.verificadores.filter((id) => id !== persona.id)
+                              : [...acta.verificadores, persona.id],
+                          )
+                        }
+                      />
+                      <span>{nombreCompleto(persona)}</span>
+                    </label>
+                    {designado && (
+                      <span
+                        className={
+                          vigente
+                            ? 'chip chip--exito'
+                            : verificacion || fueraDePlazo.has(persona.id)
+                              ? 'chip chip--alerta'
+                              : 'chip'
+                        }
+                      >
+                        {vigente
+                          ? 'Revisó'
+                          : verificacion
+                            ? 'Revisó antes del último cambio'
+                            : fueraDePlazo.has(persona.id)
+                              ? 'No revisó en el plazo'
+                              : 'Pendiente'}
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* RN-95 — El plazo máximo lo fija el administrador (Mary,
+                2026-09-17), pero dentro del término del art. 47: el `max` del
+                campo lo sugiere y el repositorio lo exige. */}
+            {actaTieneComision(acta) && (
+              <div className="campo">
+                <label htmlFor="plazo-comision">Plazo máximo para revisar</label>
+                <input
+                  id="plazo-comision"
+                  type="date"
+                  value={plazoComision}
+                  min={hoy}
+                  max={topePlazo}
+                  disabled={cargando}
+                  onChange={(evento) => setPlazoComision(evento.target.value)}
+                  onBlur={() => {
+                    if (plazoComision && !motivoPlazo && plazoComision !== acta.limiteComision) {
+                      void alDesignar(acta.verificadores, plazoComision)
+                    }
+                  }}
+                />
+                <span className="ayuda-campo">
+                  {motivoPlazo ??
+                    (vencida
+                      ? `Venció el ${formatearFecha(acta.limiteComision!)}. Las revisiones que faltan ya no detienen el acta, y así queda escrito en la hoja.`
+                      : topePlazo
+                        ? `Hasta ese día el acta espera a la comisión; después se puede aprobar sin las revisiones que falten. No puede pasar del ${formatearFecha(topePlazo)}, el término para ponerla a disposición (Ley 675, art. 47).`
+                        : `Hasta ese día el acta espera a la comisión; después se puede aprobar sin las revisiones que falten. El término legal para ponerla a disposición (${formatearFecha(acta.limiteVerificacion)}, Ley 675, art. 47) ya pasó: el acta va tarde con o sin revisión.`)}
+                </span>
+              </div>
+            )}
+
+            {/* Registrar la revisión de quien falta. Va aquí y no en un modal
+                aparte porque revisar es leer la hoja que está justo abajo.
+                Con el plazo vencido no se ofrece: el repositorio la rechazaría
+                (RN-95), y un formulario que solo sirve para fallar es peor que
+                ninguno. */}
+            {!vencida && acta.verificadores
+              .filter((id) => {
+                const v = acta.verificaciones.find((x) => x.personaId === id)
+                return !v || !verificacionVigente(acta, v)
+              })
+              .map((id) => (
+                <div key={id} className="campo">
+                  <label htmlFor={`obs-${id}`}>
+                    Revisión de {nombreCompleto(sel.persona(bd, id))}
+                  </label>
+                  <div className="fila" style={{ gap: 'var(--e2)' }}>
+                    <input
+                      id={`obs-${id}`}
+                      value={observaciones[id] ?? ''}
+                      onChange={(evento) =>
+                        setObservaciones({ ...observaciones, [id]: evento.target.value })
+                      }
+                      placeholder="Observación, si dejó alguna (opcional)"
+                    />
+                    <button
+                      className="boton"
+                      disabled={cargando}
+                      onClick={async () => {
+                        // Se guarda el texto primero: si no, se registraría la
+                        // revisión de una versión y se editaría después, que es
+                        // justo lo que RN-93 invalida.
+                        await alGuardar({ presidenteId, secretarioId, desarrollo })
+                        await alVerificar(id, observaciones[id])
+                      }}
+                    >
+                      Registrar revisión
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+            {/* Se **dice**, no se impide. Que quien redactó el acta también la
+                revise vacía la figura, pero eso lo decidió la asamblea al
+                designar, no la app: ninguna norma lo prohíbe y Idiky no está
+                para inventar prohibiciones (mismo criterio que el tope de
+                poderes, RN-30). Lo que sí puede hacer es que nadie lo pase por
+                alto sin darse cuenta. */}
+            {acta.verificadores.some((id) => id === presidenteId || id === secretarioId) && (
+              <p className="acceso__nota">
+                Quien presidió o actuó como secretario <strong>también revisa</strong>. La
+                comisión suele ser gente distinta de quien redactó el acta, que es de donde le
+                viene el valor. Idiky no lo impide —lo designa la asamblea— pero queda dicho.
+              </p>
+            )}
+
+            {actaTieneComision(acta) && (
+              <span className="ayuda-campo">
+                Si el acta se edita después de una revisión, esa revisión queda sin efecto y hay
+                que volver a pedirla: se revisó otro texto.
+              </span>
+            )}
+          </div>
+
+          <div className="separador" />
 
           <div className="grupo-botones">
             <button

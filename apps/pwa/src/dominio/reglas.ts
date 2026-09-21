@@ -8,6 +8,7 @@
 
 import type {
   Acta,
+  VerificacionActa,
   Asamblea,
   Asistencia,
   FormaAsistencia,
@@ -590,10 +591,10 @@ export const MODALIDADES: ReadonlyArray<{
   {
     id: 'mixta',
     texto: 'Mixta',
-    // No dice «las dos suman al mismo quorum»: **eso esta sin decidir** (RN-28,
-    // §3 bis) y la app no puede afirmarlo. Dice lo que si hace — contarlas por
-    // separado — que es lo que el acta va a necesitar cuando se decida.
-    detalle: 'Unos en el salón y otros conectados. Idiky lleva las dos cuentas por separado.',
+    // Ya se puede decir que suman al mismo quorum: lo respondio Mary el
+    // 2026-09-10 y ademas lo dice la ley (RN-92). Se siguen contando por
+    // separado porque el acta necesita el reparto, no porque pesen distinto.
+    detalle: 'Unos en el salón y otros conectados. Las dos formas pesan igual (RN-92).',
     exigeLugar: true,
     exigeEnlace: true,
   },
@@ -639,13 +640,23 @@ export function asistenciaDeUnidad(
 }
 
 /**
- * ADR-0007 — Lo que se puede decir de la asistencia **sin decidir el quorum**.
+ * RN-92 — **La forma de asistir no cambia lo que pesa la unidad.**
  *
- * Registrar quien asistio y sumar sus coeficientes no exige saber cuanto quorum
- * se necesita: son dos cosas distintas y solo la segunda esta sin decidir
- * (RN-28, §3 bis). Asi que esto suma y reparte por forma —que es lo que el acta
- * necesita en una mixta— y **deliberadamente no devuelve `hayQuorum`**: afirmarlo
- * con un umbral inventado seria peor que no decir nada.
+ * «La asistencia virtual pesa igual que la presencial» (Mary, 2026-09-10), y la
+ * ley dice lo mismo por dos lados. El art. 42 de la Ley 675 admite la reunion no
+ * presencial «de conformidad con **el quorum requerido para el respectivo
+ * caso**» —el mismo quorum, no uno propio— y el Decreto 398 de 2020, art. 1, lo
+ * deja escrito para las mixtas: «Las disposiciones legales y estatutarias sobre
+ * convocatoria, quorum y mayorias de las reuniones presenciales seran igualmente
+ * aplicables a las reuniones no presenciales… y a las reuniones mixtas».
+ *
+ * Por eso `coeficiente` es **una sola suma**: quien esta en el salon y quien
+ * esta conectado entran al mismo total. El reparto por forma se sigue llevando,
+ * pero **para el acta, no para el quorum** — el art. 47 exige decir quien
+ * asistio y como, y en una mixta eso es justamente lo que hay que poder mostrar.
+ *
+ * La distincion que si importa no es donde estaba la persona sino **si es
+ * propietario o apoderado** (RN-51, RN-30): esa si cambia si suma.
  */
 export function resumenAsistencia(
   asistencias: Asistencia[],
@@ -689,6 +700,9 @@ export function resumenAsistencia(
  * **la segunda sesiona con cualquier numero plural de propietarios, sea cual sea
  * el coeficiente**. Sin eso, una copropiedad donde la gente no va quedaria
  * paralizada para siempre.
+ *
+ * Lo que se cuenta es **la unidad**, este quien este y **este donde este**: la
+ * forma de asistir no cambia el peso (RN-92).
  */
 export function hayQuorum(
   asamblea: Asamblea,
@@ -798,12 +812,163 @@ export function limiteVerificacionActa(fechaAsamblea: string): FechaISO {
  * sin decir por que obliga a adivinar, y aqui lo que falta son cosas concretas
  * y distintas entre si.
  */
-export function faltaEnActa(acta: Acta): string[] {
+export function faltaEnActa(acta: Acta, hoy: FechaISO = hoyISO()): string[] {
   const falta: string[] = []
   if (!acta.presidenteId) falta.push('quién presidió la asamblea')
   if (!acta.secretarioId) falta.push('quién actuó como secretario')
   if (acta.desarrollo.trim().length < 20) falta.push('el desarrollo de la reunión')
+  // RN-95 — Con comision, el plazo no es opcional: sin el, la revision no
+  // termina nunca y el acta tampoco.
+  if (actaTieneComision(acta) && !acta.limiteComision) {
+    falta.push('el plazo máximo de la comisión verificadora')
+  }
+  const pendientes = verificadoresQueBloquean(acta, hoy)
+  if (pendientes.length > 0) {
+    falta.push(
+      pendientes.length === 1
+        ? 'la revisión de un miembro de la comisión verificadora'
+        : `la revisión de ${pendientes.length} miembros de la comisión verificadora`,
+    )
+  }
   return falta
+}
+
+// ---------------------------------------------------------------------------
+// RN-93 — La comision verificadora del acta: **opcional**.
+//
+// «Dejala como una opcion para que el administrador seleccione, **a veces hay
+// revision**» (Mary, 2026-09-10). Y es exacto: la Ley 675 no la exige. El
+// art. 47 pide que el acta la firmen el presidente y el secretario y no
+// menciona ninguna comision — la designa la asamblea o la impone el reglamento,
+// asi que la app **no puede exigirla ni puede ignorarla**.
+//
+// De ahi la forma: una lista que puede estar vacia. Vacia, el acta se aprueba
+// como siempre; con gente, no se aprueba hasta que todos revisen. Sin ninguna
+// bandera aparte que se pueda desincronizar de los datos.
+// ---------------------------------------------------------------------------
+
+/** Si esta asamblea designo comision. Vacio es una respuesta, no un dato falta. */
+export function actaTieneComision(acta: Acta): boolean {
+  return acta.verificadores.length > 0
+}
+
+/**
+ * RN-93 — **Una revision vale sobre el texto que se reviso.**
+ *
+ * Si el acta se edita despues de que alguien la reviso, esa revision deja de
+ * valer: reviso otra cosa. Lo contrario permitiria recoger las firmas y despues
+ * cambiar el texto, que es precisamente el fraude que una comision existe para
+ * impedir.
+ *
+ * **No se borra nada** (RN-61): la revision queda con su fecha y se ve que
+ * quedo sin efecto. Que el administrador edito despues es, en si mismo, un dato
+ * del expediente.
+ */
+export function verificacionVigente(acta: Acta, verificacion: VerificacionActa): boolean {
+  return verificacion.verificadaEn >= (acta.editadaEn ?? acta.creadaEn)
+}
+
+/** Las revisiones que todavia valen sobre el texto de hoy. */
+export function verificacionesVigentes(acta: Acta): VerificacionActa[] {
+  return acta.verificaciones.filter((v) => verificacionVigente(acta, v))
+}
+
+/** Quienes de la comision no han revisado —o revisaron un texto ya cambiado. */
+export function verificadoresPendientes(acta: Acta): string[] {
+  const yaRevisaron = new Set(verificacionesVigentes(acta).map((v) => v.personaId))
+  return acta.verificadores.filter((personaId) => !yaRevisaron.has(personaId))
+}
+
+// ---------------------------------------------------------------------------
+// RN-95 — La comision tiene un plazo maximo, y lo fija el administrador.
+//
+// «Para la revision del acta debe existir un plazo maximo que lo define el
+// administrador» (Mary, 2026-09-17). Sin plazo, un solo miembro que no revise
+// deja el acta en borrador para siempre, y con ella las decisiones de la
+// asamblea. El plazo es lo que impide que la comision —que existe para
+// garantizar el acta— termine bloqueandola.
+//
+// Dos cosas fijas alrededor de lo que el administrador decide:
+// - **No puede pasar del termino del art. 47** (`limiteVerificacion`): el acta
+//   tiene que estar a disposicion en esos veinte dias habiles, con o sin
+//   revision. Un plazo de comision mas largo obligaria al administrador a
+//   incumplir la ley para respetarlo.
+// - **Vencido, no se borra nada** (RN-61): quien no reviso queda en el acta
+//   como «no reviso dentro del plazo». La comision fue designada por la
+//   asamblea y el acta tiene que decir que paso con ella.
+// ---------------------------------------------------------------------------
+
+/**
+ * Por que no sirve una fecha como plazo de la comision, o `null` si sirve.
+ *
+ * Devuelve el motivo y no un booleano por lo mismo que `faltaEnActa`: el
+ * formulario lo muestra tal cual, y el repositorio lo lanza tal cual.
+ */
+export function motivoPlazoComisionInvalido(
+  acta: Pick<Acta, 'limiteVerificacion'>,
+  limiteComision: FechaISO,
+  hoy: FechaISO = hoyISO(),
+): string | null {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(limiteComision)) return 'El plazo tiene que ser una fecha.'
+  if (limiteComision < hoy) return 'El plazo de la comisión no puede estar en el pasado.'
+  // El tope legal solo se aplica mientras existe: si el termino del art. 47 ya
+  // paso, el acta ya va tarde y acortar mas a la comision no lo remedia.
+  const tope = topePlazoComision(acta, hoy)
+  if (tope && limiteComision > tope) {
+    return 'El plazo de la comisión no puede pasar del término para poner el acta a disposición (Ley 675, art. 47).'
+  }
+  return null
+}
+
+/**
+ * Hasta donde puede llegar el plazo de la comision: el termino del art. 47,
+ * **mientras no haya pasado**. Pasado, no hay tope (`undefined`) — ver arriba.
+ */
+export function topePlazoComision(
+  acta: Pick<Acta, 'limiteVerificacion'>,
+  hoy: FechaISO = hoyISO(),
+): FechaISO | undefined {
+  return acta.limiteVerificacion >= hoy ? acta.limiteVerificacion : undefined
+}
+
+/** La comision ya no tiene tiempo: hubo plazo y `hoy` lo pasó. */
+export function comisionVencida(acta: Acta, hoy: FechaISO = hoyISO()): boolean {
+  return actaTieneComision(acta) && !!acta.limiteComision && hoy > acta.limiteComision
+}
+
+/**
+ * Quienes de la comision todavia **detienen** la aprobacion: los pendientes,
+ * mientras el plazo corre. Vencido el plazo, nadie — la espera termino.
+ */
+export function verificadoresQueBloquean(acta: Acta, hoy: FechaISO = hoyISO()): string[] {
+  return comisionVencida(acta, hoy) ? [] : verificadoresPendientes(acta)
+}
+
+/** Quienes no revisaron **y ya no pueden**: lo que el acta deja escrito. */
+export function verificadoresFueraDePlazo(acta: Acta, hoy: FechaISO = hoyISO()): string[] {
+  return comisionVencida(acta, hoy) ? verificadoresPendientes(acta) : []
+}
+
+/**
+ * El acta paso la revision. **Sin comision, pasa sola**: no hay nada que pasar.
+ * **Con el plazo vencido, tambien** (RN-95): lo que quedo sin revisar consta,
+ * pero ya no detiene el acta.
+ */
+export function actaVerificada(acta: Acta, hoy: FechaISO = hoyISO()): boolean {
+  return verificadoresQueBloquean(acta, hoy).length === 0
+}
+
+/**
+ * En que va el acta. **Se deriva, no se guarda**: un estado guardado que
+ * depende de otros campos es un estado que tarde o temprano los contradice.
+ */
+export function estadoActa(
+  acta: Acta,
+  hoy: FechaISO = hoyISO(),
+): 'borrador' | 'en_verificacion' | 'aprobada' {
+  if (acta.estado === 'aprobada') return 'aprobada'
+  if (actaTieneComision(acta) && !actaVerificada(acta, hoy)) return 'en_verificacion'
+  return 'borrador'
 }
 
 /**
@@ -835,6 +1000,51 @@ export function mayoriaDelPunto(punto: { mayoria?: MayoriaExigida }): MayoriaExi
   return punto.mayoria ?? 'simple'
 }
 
+/**
+ * RN-94 — **Hay decisiones que esta sesion no puede tomar, aunque se voten.**
+ *
+ * El paragrafo del articulo 46 es facil de pasar por alto y caro de pasar por
+ * alto: «Las decisiones previstas en este articulo **no podran tomarse en
+ * reuniones no presenciales**, ni en reuniones de segunda convocatoria, salvo
+ * que en este ultimo caso se obtenga la mayoria exigida por esta ley». Y el
+ * mismo articulo cierra: las decisiones adoptadas en contravencion suya son
+ * **absolutamente nulas**.
+ *
+ * O sea que no es una recomendacion ni un umbral mas alto: es una **puerta
+ * cerrada**. Una copropiedad puede reunirse por Zoom para todo (art. 42,
+ * RN-92), pero no para reformar el reglamento ni para aprobar la extraordinaria
+ * grande. Sin esto, Idiky abriria la votacion, sumaria los coeficientes y el
+ * acta reportaria «se APRUEBA» una decision que nace nula — que es el peor de
+ * los errores posibles en este modulo, porque nadie se entera hasta que alguien
+ * la impugna.
+ *
+ * **La segunda convocatoria no se bloquea**: la ley la admite si aun asi se
+ * obtiene el 70 %, y eso ya lo comprueba `resultadoVotacion`, que nunca relaja
+ * el umbral de la calificada.
+ *
+ * **La mixta se trata como no presencial, y es una deduccion, no una cita.** El
+ * art. 46 dice «no presenciales» y en 2001 no existia la mixta. Quien la trae al
+ * caso es el Decreto 398 de 2020, art. 1: «Las reglas relativas a las reuniones
+ * no presenciales seran igualmente aplicables a las reuniones mixtas». Se sigue
+ * el camino conservador —restringe, no habilita— y **queda anotado como pregunta
+ * para el abogado** (§3 bis): si se resolviera que la mixta con quorum presencial
+ * suficiente si puede, esto se afloja en una linea.
+ */
+export function decisionAdmisibleEnLaSesion(
+  asamblea: { modalidad: ModalidadAsamblea },
+  punto: { mayoria?: MayoriaExigida },
+): { admisible: boolean; motivo?: string } {
+  if (mayoriaDelPunto(punto) !== 'calificada') return { admisible: true }
+  if (asamblea.modalidad === 'presencial') return { admisible: true }
+  return {
+    admisible: false,
+    motivo:
+      'Las decisiones de mayoría calificada no pueden tomarse en reuniones no presenciales ' +
+      '(Ley 675 de 2001, artículo 46, parágrafo). Este punto tiene que llevarse a una sesión ' +
+      'presencial: lo que se decida aquí sería absolutamente nulo.',
+  }
+}
+
 /** Solo tiene sentido marcar asistencia mientras la asamblea esta instalada. */
 export function admiteAsistencia(asamblea: Asamblea): boolean {
   return asamblea.estado === 'instalada'
@@ -844,9 +1054,71 @@ export function admiteAsistencia(asamblea: Asamblea): boolean {
 // Poderes — RN-29, RN-30 · CU-A-19
 // ---------------------------------------------------------------------------
 
-/** Un poder deja de representar cuando se revoca. **No se borra** (RN-61). */
+// ---------------------------------------------------------------------------
+// RN-96 — El poder que el propietario envia en foto **no vale hasta que la
+// administracion lo valide**.
+//
+// «Que el propietario lo envie adjuntando una foto del documento» (Mary,
+// 2026-09-17). Es la tercera puerta, y se distingue de las otras dos en quien
+// vio el papel: en CU-A-19 lo tuvo el administrador en la mano, en CU-R-23 no
+// hay papel porque respalda la sesion. Aqui el papel lo vio el propietario, y
+// lo que hace valido un poder en papel es que **la administracion** lo vea.
+// Mientras tanto la unidad no esta representada: vota su propietario, como si
+// el poder no existiera. Un rechazo lleva motivo y no se borra (RN-61).
+// ---------------------------------------------------------------------------
+
+/** Enviado desde la app y todavia sin mirar por la administracion. */
+export function poderEsperandoValidacion(poder: Poder): boolean {
+  return poder.validacion?.estado === 'esperando'
+}
+
+export function poderRechazado(poder: Poder): boolean {
+  return poder.validacion?.estado === 'rechazado'
+}
+
+/**
+ * Un poder representa cuando no esta revocado **y esta validado** (RN-96). Los
+ * que no llevan `validacion` lo estan por construccion. **No se borra** (RN-61).
+ */
 export function poderVigente(poder: Poder): boolean {
-  return !poder.revocadoEn
+  return !poder.revocadoEn && !poderEsperandoValidacion(poder) && !poderRechazado(poder)
+}
+
+/**
+ * Vigente **o esperando**: lo que ocupa el lugar de representante de la unidad.
+ * Un poder por validar no representa, pero si impide dar otro mientras tanto —
+ * si no, el propietario podria dejar dos en cola y la administracion validar
+ * los dos.
+ */
+export function poderEnCurso(poder: Poder): boolean {
+  return !poder.revocadoEn && !poderRechazado(poder)
+}
+
+/** El poder en curso de la unidad (vigente o por validar), si lo hay. */
+export function poderEnCursoDeUnidad(
+  poderes: Poder[],
+  asambleaId: string,
+  unidadId: string,
+): Poder | undefined {
+  return poderes.find(
+    (poder) => poder.asambleaId === asambleaId && poder.unidadId === unidadId && poderEnCurso(poder),
+  )
+}
+
+/**
+ * El ultimo poder que la administracion rechazo a esta unidad, **si no hay
+ * otro en curso**: es lo que el propietario necesita ver para corregir y
+ * volver a enviar. Con uno en curso, el rechazo anterior ya es historia.
+ */
+export function ultimoPoderRechazadoDeUnidad(
+  poderes: Poder[],
+  asambleaId: string,
+  unidadId: string,
+): Poder | undefined {
+  if (poderEnCursoDeUnidad(poderes, asambleaId, unidadId)) return undefined
+  return poderes
+    .filter((p) => p.asambleaId === asambleaId && p.unidadId === unidadId && poderRechazado(p))
+    .sort((a, b) => b.registradoEn.localeCompare(a.registradoEn))[0]
 }
 
 /** Los poderes vigentes de una asamblea. */
@@ -881,11 +1153,6 @@ export function unidadesRepresentadas(
  * poderes por apoderado. Lo puede fijar el **reglamento** de cada copropiedad
  * —la practica comun son tres o cuatro— y mientras este no lo haga, no hay nada
  * que comprobar.
- *
- * Lo que si se puede hacer, y se hace, es **poner el dato a la vista**: cuantas
- * unidades y cuanto coeficiente acumula cada apoderado, para que el
- * administrador lo juzgue con el reglamento en la mano. Ver
- * `acumuladoPorApoderado`.
  *
  * Lo que si se puede hacer, y se hace, es **poner el dato a la vista**: cuantas
  * unidades y cuanto coeficiente acumula cada apoderado, para que el
@@ -1367,10 +1634,63 @@ export function exigeSoportes(categoria: CategoriaRegistro): boolean {
   return categoria !== 'visitante'
 }
 
-/** Un registro no pasa de la espera de soportes sin las dos fotos (RN-57). */
+// ---------------------------------------------------------------------------
+// RN-97 — La marca «No obligatorio»: el administrador exime de los soportes.
+//
+// «Una opcion para el administrador que le permita colocarle una marca para que
+// un propietario, arrendatario o visitante que no quiera adjuntar la foto y/o
+// el documento no lo haga» (equipo, 2026-09-17). Es una excepcion a RN-57, y
+// por eso tiene tres limites: la pone **el administrador**, se pone **sobre un
+// registro concreto** —no sobre la copropiedad, que dejaria RN-57 sin efecto— y
+// **queda escrito quien la puso**. Al visitante no le hace falta: ya no lleva
+// fotos (RN-57).
+//
+// Con la marca, el registro no tiene nada que esperar de la persona: pasa a la
+// autorizacion de quien lo creo, y la persona **entra con el codigo que Idiky
+// le asigno al crearla** — es la clave que dijo el equipo.
+// ---------------------------------------------------------------------------
+
+/** Si a este registro se le pueden eximir los soportes: solo a quien los debe. */
+export function admiteMarcaNoObligatorio(registro: RegistroPersona): boolean {
+  return exigeSoportes(registro.categoria) && registroEnCurso(registro)
+}
+
+/** Este registro lleva la marca y por eso no trae fotos. */
+export function sinSoportesPorMarca(registro: RegistroPersona): boolean {
+  return exigeSoportes(registro.categoria) && !!registro.soportesNoObligatorios
+}
+
+/**
+ * Un registro no pasa de la espera de soportes sin las dos fotos (RN-57) —
+ * salvo que el administrador lo haya marcado como no obligatorio (RN-97).
+ */
 export function soportesCompletos(registro: RegistroPersona): boolean {
   if (!exigeSoportes(registro.categoria)) return true
+  if (registro.soportesNoObligatorios) return true
   return !!registro.fotoDocumento && !!registro.fotoPersona
+}
+
+/**
+ * RN-97 — El codigo del registro sirve para activar la cuenta.
+ *
+ * Es «la contrasena que le asigna Idiky cuando el administrador o propietario
+ * lo crea» (equipo, 2026-09-17). Vale el de un registro **autorizado** de ese
+ * documento: antes de autorizarlo no hay cuenta que activar.
+ */
+export function codigoDeRegistroValido(
+  registros: RegistroPersona[],
+  documento: string,
+  codigo: string,
+): boolean {
+  const limpio = (valor: string) => valor.replace(/[\s.,-]/g, '').toUpperCase()
+  const buscado = codigo.trim().toUpperCase()
+  if (!buscado) return false
+  return registros.some(
+    (registro) =>
+      registro.estado === 'autorizado' &&
+      limpio(registro.documento) === limpio(documento) &&
+      registro.codigo.toUpperCase() === buscado,
+  )
 }
 
 /**

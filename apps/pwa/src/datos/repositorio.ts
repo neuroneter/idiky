@@ -35,6 +35,7 @@ import type {
   Correspondencia,
   Cuota,
   Documento,
+  FechaISO,
   MedioPago,
   MotivoMensaje,
   Imputacion,
@@ -75,8 +76,13 @@ import {
   convocatoriaCompleta,
   faltaEnActa,
   limiteVerificacionActa,
+  comisionVencida,
+  motivoPlazoComisionInvalido,
   puedeGenerarActa,
+  decisionAdmisibleEnLaSesion,
   poderDeUnidad,
+  poderEnCursoDeUnidad,
+  poderEsperandoValidacion,
   residenciaVigente,
   definicionModalidad,
   formasDeAsistir,
@@ -85,6 +91,7 @@ import {
   rolDeCategoria,
   soloUnDia,
   soportesCompletos,
+  registroEnCurso,
   sumarDias,
   vecesSancionada,
   saldoAFavorDelPago,
@@ -1290,8 +1297,8 @@ export async function cambiarEstadoAsamblea(
 // Idiky tiene las cinco cosas, asi que el acta **no las copia: las lee**.
 //
 // Lo unico que se guarda aqui es lo que el sistema no puede saber —quien
-// presidio, quien fue secretario, y que se dijo— mas el estado, que es lo unico
-// que una persona podria cambiar despues.
+// presidio, quien fue secretario, que se dijo y quien la reviso— mas el estado,
+// que es lo unico que una persona podria cambiar despues.
 // ---------------------------------------------------------------------------
 
 export async function generarActa(
@@ -1317,6 +1324,10 @@ export async function generarActa(
     asambleaId: asamblea.id,
     desarrollo: '',
     estado: 'borrador',
+    // Vacia a proposito: la comision es opcional y **la designa la asamblea**,
+    // no la app (RN-93). Nace sin ella y el administrador la registra si la hubo.
+    verificadores: [],
+    verificaciones: [],
     // Se copia al generarla, como los plazos del debido proceso (RN-69): si
     // manana cambia el reglamento, esta acta conserva el termino que tuvo.
     limiteVerificacion: limiteVerificacionActa(asamblea.fechaHora),
@@ -1348,9 +1359,100 @@ export async function editarActa(
     )
   }
 
+  // Se compara antes de asignar: **guardar sin cambiar nada no es editar**, y
+  // si contara como edicion, un clic distraido en «Guardar borrador» tumbaria
+  // las revisiones ya hechas (RN-93).
+  const cambio =
+    (parametros.presidenteId !== undefined && parametros.presidenteId !== acta.presidenteId) ||
+    (parametros.secretarioId !== undefined && parametros.secretarioId !== acta.secretarioId) ||
+    (parametros.desarrollo !== undefined && parametros.desarrollo !== acta.desarrollo)
+
   if (parametros.presidenteId !== undefined) acta.presidenteId = parametros.presidenteId
   if (parametros.secretarioId !== undefined) acta.secretarioId = parametros.secretarioId
   if (parametros.desarrollo !== undefined) acta.desarrollo = parametros.desarrollo
+  if (cambio) acta.editadaEn = ahoraISO()
+  return persistir(bd, acta)
+}
+
+/**
+ * CU-A-20 — Registrar **quien revisa el acta**, si alguien la revisa (RN-93),
+ * y **hasta cuando** (RN-95).
+ *
+ * Designar no es editar: cambiar quien revisa no cambia el texto revisado, asi
+ * que **no tumba las revisiones ya hechas**. Quitar a alguien de la comision
+ * tampoco borra lo que dejo escrito — su observacion sigue en el acta, que es
+ * de lo que se trata (RN-61).
+ *
+ * El plazo lo fija el administrador, pero **dentro del termino legal**: la
+ * comprobacion vive aqui y no solo en el `max` del campo de fecha (T-16).
+ */
+export async function designarComisionActa(
+  bdActual: BaseDatos,
+  parametros: { actaId: string; verificadores: string[]; limiteComision?: FechaISO },
+): Promise<Resultado<Acta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const acta = bd.actas.find((a) => a.id === parametros.actaId)
+  if (!acta) throw new ErrorDeNegocio('Esa acta no existe.')
+  if (actaCongelada(acta)) {
+    throw new ErrorDeNegocio('Esa acta ya está aprobada: la comisión ya cumplió su función.')
+  }
+  // Solo se valida el plazo que **cambia**: uno ya registrado que quedo en el
+  // pasado no impide seguir marcando gente — impide, por diseno, que revisen.
+  if (parametros.limiteComision !== undefined && parametros.limiteComision !== acta.limiteComision) {
+    const motivo = motivoPlazoComisionInvalido(acta, parametros.limiteComision)
+    if (motivo) throw new ErrorDeNegocio(motivo)
+    acta.limiteComision = parametros.limiteComision
+  }
+
+  const asistieron = new Set(
+    bd.asistencias.filter((a) => a.asambleaId === acta.asambleaId).map((a) => a.personaId),
+  )
+  for (const personaId of parametros.verificadores) {
+    if (!asistieron.has(personaId)) {
+      throw new ErrorDeNegocio('La comisión la integran quienes asistieron a la asamblea.')
+    }
+  }
+
+  acta.verificadores = [...new Set(parametros.verificadores)]
+  return persistir(bd, acta)
+}
+
+/**
+ * CU-A-20 — Un miembro de la comision deja constancia de que reviso (RN-93).
+ *
+ * Se **reemplaza** la revision anterior de esa misma persona en vez de
+ * acumularlas: lo que interesa es si esta conforme con el texto de hoy, y una
+ * lista de revisiones sucesivas del mismo nombre no dice mas, dice menos.
+ */
+export async function verificarActa(
+  bdActual: BaseDatos,
+  parametros: { actaId: string; personaId: string; observacion?: string },
+): Promise<Resultado<Acta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const acta = bd.actas.find((a) => a.id === parametros.actaId)
+  if (!acta) throw new ErrorDeNegocio('Esa acta no existe.')
+  if (actaCongelada(acta)) throw new ErrorDeNegocio('Esa acta ya estaba aprobada.')
+  if (!acta.verificadores.includes(parametros.personaId)) {
+    throw new ErrorDeNegocio('Esa persona no integra la comisión verificadora de esta acta.')
+  }
+  // RN-95 — Un plazo maximo que admite revisiones despues no es maximo. La
+  // revision tardia no se registra; el acta dice quien no reviso a tiempo.
+  if (comisionVencida(acta)) {
+    throw new ErrorDeNegocio(
+      `El plazo de la comisión venció el ${formatearFecha(acta.limiteComision!)}: el acta ya no espera esa revisión.`,
+    )
+  }
+
+  acta.verificaciones = [
+    ...acta.verificaciones.filter((v) => v.personaId !== parametros.personaId),
+    {
+      personaId: parametros.personaId,
+      verificadaEn: ahoraISO(),
+      observacion: parametros.observacion?.trim() || undefined,
+    },
+  ]
   return persistir(bd, acta)
 }
 
@@ -1425,6 +1527,11 @@ export async function crearActaAclaratoria(
     secretarioId: original.secretarioId,
     desarrollo: '',
     estado: 'borrador',
+    // La aclaratoria **hereda la comision** de la original: si aquella asamblea
+    // designo quien revisa sus actas, tambien revisa la que las corrige — que
+    // es donde mas falta hace. Las verificaciones no se heredan: son de un texto.
+    verificadores: [...original.verificadores],
+    verificaciones: [],
     limiteVerificacion: original.limiteVerificacion,
     aclaraActaId: original.id,
     creadaEn: ahoraISO(),
@@ -1503,10 +1610,14 @@ function prepararPoder(
     throw new ErrorDeNegocio('No hace falta un poder para votar por su propia unidad.')
   }
 
-  // Una unidad, un representante (RN-28, RN-29).
-  if (poderDeUnidad(bd.poderes, parametros.asambleaId, parametros.unidadId)) {
+  // Una unidad, un representante (RN-28, RN-29). Cuenta tambien el que esta
+  // **por validar** (RN-96): dos en cola serian dos representantes en potencia.
+  const enCurso = poderEnCursoDeUnidad(bd.poderes, parametros.asambleaId, parametros.unidadId)
+  if (enCurso) {
     throw new ErrorDeNegocio(
-      'Esa unidad ya tiene un poder vigente en esta asamblea. Hay que revocarlo antes de dar otro.',
+      poderEsperandoValidacion(enCurso)
+        ? 'Esa unidad ya envió un poder que la administración todavía no ha validado. Hay que retirarlo antes de dar otro.'
+        : 'Esa unidad ya tiene un poder vigente en esta asamblea. Hay que revocarlo antes de dar otro.',
     )
   }
 
@@ -1672,6 +1783,131 @@ export async function otorgarPoder(
   return persistir(bd, poder)
 }
 
+/**
+ * CU-R-31 — El propietario **envia la foto del poder firmado** desde su app.
+ *
+ * La tercera puerta (Mary, 2026-09-17: que lo envie *«adjuntando una foto del
+ * documento»*). Se parece a las otras dos y se distingue de ambas en un punto:
+ * **quien vio el papel**. Por eso nace `esperando`: lo que hace valido un poder
+ * en papel es que la administracion lo vea, y aqui todavia no lo vio (RN-96).
+ * Mientras tanto la unidad **no esta representada** y vota su propietario.
+ *
+ * Solo el propietario de la sesion puede enviarlo (RN-51), como en CU-R-23, y
+ * sin foto no hay nada que enviar, como en CU-A-19. Foto, no PDF: es lo que
+ * el telefono ya sabe hacer y no bloquea nada (ADR-0009).
+ */
+export async function enviarPoderEnPapel(
+  bdActual: BaseDatos,
+  parametros: {
+    asambleaId: string
+    unidadId: string
+    otorgadoPor: string
+    nombresApoderado: string
+    apellidosApoderado: string
+    documentoApoderado: string
+    telefonoApoderado?: string
+    imagen: string
+  },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+
+  if (!parametros.imagen) {
+    throw new ErrorDeNegocio('Falta la foto del poder firmado: sin ella no hay nada que enviar.')
+  }
+
+  const { unidad, apoderado } = prepararPoder(bd, {
+    ...parametros,
+    exigirPropietario: parametros.otorgadoPor,
+  })
+
+  const poder: Poder = {
+    id: nuevoId('pod'),
+    asambleaId: parametros.asambleaId,
+    unidadId: unidad.id,
+    otorgadoPor: parametros.otorgadoPor,
+    apoderadoId: apoderado.id,
+    origen: 'papel',
+    soporte: { imagen: parametros.imagen, adjuntadoEn: ahoraISO() },
+    registradoPor: parametros.otorgadoPor,
+    registradoEn: ahoraISO(),
+    validacion: { estado: 'esperando' },
+  }
+  bd.poderes.push(poder)
+  return persistir(bd, poder)
+}
+
+/**
+ * CU-A-19 — La administracion **valida** el poder que llego en foto (RN-96).
+ *
+ * Es el momento en que el poder empieza a representar. Se vuelve a comprobar
+ * que la unidad no tenga otro vigente: entre el envio y la validacion pudo
+ * llegar uno en papel por la puerta de siempre.
+ */
+export async function validarPoder(
+  bdActual: BaseDatos,
+  parametros: { poderId: string; decididoPor: string },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const poder = bd.poderes.find((p) => p.id === parametros.poderId)
+  if (!poder) throw new ErrorDeNegocio('Ese poder no existe.')
+  if (!poderEsperandoValidacion(poder)) {
+    throw new ErrorDeNegocio('Ese poder no está esperando validación.')
+  }
+  if (poder.revocadoEn) throw new ErrorDeNegocio('El propietario retiró ese poder.')
+
+  const asamblea = bd.asambleas.find((a) => a.id === poder.asambleaId)
+  if (!asamblea || asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') {
+    throw new ErrorDeNegocio('Esa asamblea ya terminó: no admite poderes nuevos.')
+  }
+  const otro = poderDeUnidad(bd.poderes, poder.asambleaId, poder.unidadId)
+  if (otro && otro.id !== poder.id) {
+    throw new ErrorDeNegocio(
+      'Esa unidad ya tiene otro poder vigente en esta asamblea. Hay que revocarlo antes de validar este.',
+    )
+  }
+
+  poder.validacion = {
+    estado: 'validado',
+    decididoPor: parametros.decididoPor,
+    decididoEn: ahoraISO(),
+  }
+  return persistir(bd, poder)
+}
+
+/**
+ * CU-A-19 — La administracion **rechaza** el poder que llego en foto (RN-96).
+ *
+ * **Con motivo, siempre**: el propietario tiene que saber que corregir para
+ * volver a enviarlo —la foto no se lee, falta la firma, no es su unidad— y el
+ * expediente tiene que decir por que no valio. No se borra (RN-61).
+ */
+export async function rechazarPoder(
+  bdActual: BaseDatos,
+  parametros: { poderId: string; decididoPor: string; motivo: string },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const poder = bd.poderes.find((p) => p.id === parametros.poderId)
+  if (!poder) throw new ErrorDeNegocio('Ese poder no existe.')
+  if (!poderEsperandoValidacion(poder)) {
+    throw new ErrorDeNegocio('Ese poder no está esperando validación.')
+  }
+  const motivo = parametros.motivo.trim()
+  if (motivo.length < 5) {
+    throw new ErrorDeNegocio('Un poder no se rechaza sin decir por qué: escribe el motivo.')
+  }
+
+  poder.validacion = {
+    estado: 'rechazado',
+    decididoPor: parametros.decididoPor,
+    decididoEn: ahoraISO(),
+    motivo,
+  }
+  return persistir(bd, poder)
+}
+
 /** RN-61 — Un poder no se borra: se revoca, y queda en el expediente. */
 export async function revocarPoder(
   bdActual: BaseDatos,
@@ -1829,6 +2065,8 @@ export async function crearRegistroPersona(
     vigenciaDesde?: string
     vigenciaHasta?: string
     placa?: string
+    /** La marca «No obligatorio», si quien crea es el administrador (RN-97). */
+    soportesNoObligatorios?: boolean
   },
 ): Promise<Resultado<RegistroPersona>> {
   await esperar()
@@ -1866,14 +2104,21 @@ export async function crearRegistroPersona(
   }
 
   const ahora = ahoraISO()
+  const { soportesNoObligatorios, ...datos } = parametros
   const registro: RegistroPersona = {
     id: nuevoId('reg'),
-    ...parametros,
+    ...datos,
     codigo: nuevoCodigoRegistro(),
     estado: 'esperando_soportes',
     creadoEn: ahora,
   }
   bd.registros.unshift(registro)
+
+  // RN-97: con la marca, no hay soportes que esperar. Queda quien la puso.
+  if (soportesNoObligatorios && exigeSoportes(registro.categoria)) {
+    registro.soportesNoObligatorios = { marcadoPor: registro.creadoPor, marcadoEn: ahora }
+    registro.estado = 'esperando_autorizacion'
+  }
 
   // RN-57: al visitante no se le piden soportes, asi que su registro no espera
   // nada de nadie — se resuelve aqui mismo y sale con su codigo.
@@ -1912,6 +2157,40 @@ function crearVisitanteDeRegistro(bd: BaseDatos, registro: RegistroPersona): Vis
   }
   bd.visitantes.unshift(visitante)
   return visitante
+}
+
+/**
+ * RN-97 — El administrador pone o quita la marca «No obligatorio».
+ *
+ * Ponerla mueve el registro a la autorizacion —ya no espera nada de la
+ * persona—; quitarla lo devuelve a esperar las fotos si todavia no las trajo.
+ * Solo mientras el registro esta en curso: decidido, ya no hay nada que eximir.
+ */
+export async function marcarSoportesNoObligatorios(
+  bdActual: BaseDatos,
+  parametros: { registroId: string; marcadoPor: string; marcar: boolean },
+): Promise<Resultado<RegistroPersona>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const registro = bd.registros.find((r) => r.id === parametros.registroId)
+  if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  if (!exigeSoportes(registro.categoria)) {
+    throw new ErrorDeNegocio('A un visitante no se le piden soportes: no hay nada que eximir.')
+  }
+  if (!registroEnCurso(registro)) {
+    throw new ErrorDeNegocio('Ese registro ya está decidido: la marca solo se pone mientras está en curso.')
+  }
+
+  if (parametros.marcar) {
+    registro.soportesNoObligatorios = { marcadoPor: parametros.marcadoPor, marcadoEn: ahoraISO() }
+    if (registro.estado === 'esperando_soportes') registro.estado = 'esperando_autorizacion'
+  } else {
+    delete registro.soportesNoObligatorios
+    if (registro.estado === 'esperando_autorizacion' && !soportesCompletos(registro)) {
+      registro.estado = 'esperando_soportes'
+    }
+  }
+  return persistir(bd, registro)
 }
 
 /**
@@ -1973,6 +2252,7 @@ export async function autorizarRegistro(
   if (!puedeAutorizar(registro, parametros.personaId)) {
     throw new ErrorDeNegocio('Solo quien creó el registro puede autorizarlo.')
   }
+  // RN-57, salvo la marca del administrador (RN-97).
   if (!soportesCompletos(registro)) {
     throw new ErrorDeNegocio('Faltan los soportes: no se puede autorizar sin las dos fotos.')
   }
@@ -2133,6 +2413,17 @@ export async function emitirVoto(
   // RN-34: una votacion cerrada no recibe votos ni se reabre.
   if (!votacionRecibeVotos(votacion)) {
     throw new ErrorDeNegocio('La votacion no esta abierta.')
+  }
+
+  // RN-94 — Antes de mirar quien vota, **si esta sesion puede decidir esto**.
+  // Va primero porque no depende de quien sea: si la decision no cabe en esta
+  // reunion, no cabe para nadie, y recoger votos que nacen nulos es peor que no
+  // recogerlos (art. 46, paragrafo).
+  const asambleaDeLaVotacion = bd.asambleas.find((a) => a.id === votacion.asambleaId)
+  const puntoVotado = asambleaDeLaVotacion?.ordenDelDia.find((p) => p.id === votacion.puntoId)
+  if (asambleaDeLaVotacion && puntoVotado) {
+    const admisible = decisionAdmisibleEnLaSesion(asambleaDeLaVotacion, puntoVotado)
+    if (!admisible.admisible) throw new ErrorDeNegocio(admisible.motivo!)
   }
 
   const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)

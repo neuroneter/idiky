@@ -322,8 +322,9 @@ día y **la modalidad manda**: el botón queda deshabilitado diciendo qué falta
 **Flujo principal**
 1. El administrador abre la asamblea y la **instala**. Ahí empieza a contar la asistencia.
 2. Los copropietarios marcan asistencia desde su app, diciendo **cómo**: en el salón o
-   conectados. En una mixta **se cuentan por separado**: si pesan igual para el quórum está
-   sin decidir (RN-28), y el acta va a necesitar el reparto de todos modos.
+   conectados. **Las dos formas pesan igual** (RN-92): suman al mismo coeficiente. El reparto
+   presencial/virtual se lleva aparte porque **el acta lo exige** (art. 47), no porque una
+   cuente menos.
 3. El administrador ve en vivo cuántas unidades hay y **cuánto coeficiente** reunido, repartido
    entre presenciales y conectadas.
 4. Al terminar, cierra la asamblea. **La asistencia y los votos quedan** — es de lo que sale el
@@ -342,8 +343,13 @@ día y **la modalidad manda**: el botón queda deshabilitado diciendo qué falta
 - RN-37: el coeficiente se copia al marcar.
 - RN-51: hace quórum el propietario. El arrendatario puede entrar a oír, y la pantalla se lo
   dice en vez de esconderle el botón.
-- RN-28: **el quórum sigue sin decidirse.** Idiky suma y reparte; **no afirma que haya
-  quórum**, y lo dice en pantalla.
+- RN-28: el quórum se afirma **citando el artículo** (Ley 675, arts. 41 y 45). Un «hay
+  quórum» sin decir con qué regla es un número que nadie puede comprobar.
+- RN-92: la asistencia virtual pesa igual que la presencial (Ley 675 art. 42, Decreto 398 de
+  2020), y la pantalla se lo dice a quien está conectado.
+- RN-94: y aun así, **hay puntos que esta sesión no puede decidir**. Si un punto exige mayoría
+  calificada y la asamblea no es presencial, el orden del día lo advierte desde que se abre
+  (art. 46, parágrafo) — que es cuando todavía se puede llevar a una sesión presencial.
 
 **Estado en el demo:** ✅ — `/admin/asambleas`. Se instala, se ve quién va llegando con su
 coeficiente y se cierra.
@@ -414,6 +420,11 @@ coeficiente y se cierra.
 - A3. Revocar → el poder **no se borra**, queda con su fecha de revocación (RN-61). Si votó
   antes de revocarse, hay que poder explicarlo.
 - A4. La asamblea ya cerró → no admite poderes nuevos.
+- A5. **Llegó en foto desde la app del propietario** (CU-R-31) → aparece **«Por validar»** en la
+  lista, con aviso y número arriba. Se abre, se lee la hoja y se mira la foto, y se **valida** o
+  se **rechaza con motivo** (RN-96). Hasta validarlo, la unidad la vota su propietario. Si
+  entre el envío y la validación llegó otro poder por la puerta de papel, se rechaza validar
+  este: una unidad, un representante.
 
 **Lo que el sistema NO comprueba, y lo dice en pantalla**
 - **El tope** de unidades y coeficientes que un apoderado puede acumular (RN-30). La cifra la
@@ -430,7 +441,10 @@ coeficiente y se cierra.
 
 > **Hay una segunda puerta, y es del propietario:** puede otorgarlo **desde su app** sin papel
 > (CU-R-23). Lo que cambia es qué lo respalda —su autenticación en vez de una firma— y quién lo
-> da de alta. El administrador ve los dos en la misma lista, marcados por origen.
+> da de alta. **Y una tercera** (Mary, 2026-09-17): el propietario **envía la foto del papel
+> firmado** desde su app (CU-R-31), y ahí sí hace falta que la administración lo valide, porque
+> el papel lo vio él y no ella (RN-96). El administrador ve los tres en la misma lista, marcados
+> por origen y estado.
 
 **Estado en el demo:** ✅ — `/admin/asambleas`, dentro de cada asamblea, sección **Poderes**.
 Cada uno se **abre y se lee**: la misma hoja que ve el propietario, y debajo **la foto del papel**
@@ -492,11 +506,26 @@ alguien lo impugne.
 **Reglas de negocio**
 - RN-35 (se construye de los datos; aprobada no se edita), RN-36 (consecutivo y código),
   RN-37 (los coeficientes copiados son los que hacen que el acta valga), RN-28 y RN-74 (quórum
-  y mayorías, que el acta cita por artículo).
+  y mayorías, que el acta cita por artículo), RN-93 y RN-95 (la comisión, opcional y con plazo).
 
-**Pendiente:** la **comisión verificadora** —si esta copropiedad designa una y con qué término—
-sigue sin definir; hoy el acta lleva el plazo legal supletorio de 20 días hábiles. Y el **PDF**
-espera al backend (ADR-0006): el acta se lee en pantalla y sale al imprimir, sin fingir descarga.
+**La comisión verificadora es opcional** (RN-93, Mary 2026-09-10: *«a veces hay revisión»*). El
+administrador marca, entre quienes asistieron, a quién designó la asamblea para revisar el acta;
+si no designó a nadie, no marca a nadie y el acta se aprueba directo. Con comisión, el acta **no
+se aprueba** hasta que todos revisen, cada revisión queda con su fecha y su observación en la
+hoja, y **editar el acta después deja las revisiones sin efecto** — se revisó otro texto.
+
+**Y la comisión tiene un plazo máximo, que fija el administrador** (RN-95, Mary 2026-09-17:
+*«para la revisión del acta debe existir un plazo máximo que lo define el administrador»*). Al
+marcar a alguien aparece el campo **«Plazo máximo para revisar»**; sin él no se aprueba, y no
+puede pasar del término del art. 47 para poner el acta a disposición —el campo lo sugiere y el
+repositorio lo exige—. Mientras corre, el acta espera a todos. Vencido, **se puede aprobar sin
+las revisiones que falten** y ya no se registran revisiones tardías: la hoja dice quién no
+revisó dentro del plazo y hasta cuándo lo tuvo.
+
+**Pendiente:** que el miembro de la comisión **revise desde su propia app** —en vez de que el
+administrador registre su revisión— es la extensión natural, la misma forma de dos puertas que
+tiene el poder (CU-A-19 / CU-R-23). Y el **PDF** espera al backend (ADR-0006): el acta se lee en
+pantalla y sale al imprimir, sin fingir descarga.
 
 **Estado en el demo:** ✅ — `/admin/asambleas`, dentro de una asamblea cerrada.
 
@@ -818,6 +847,12 @@ propietario dejaría de saber quién vive en su unidad.
    hecha visible.
 3. Toca **Registrar propietario**, escoge la unidad y llena los datos.
 4. El resto es igual que CU-R-27: la persona adjunta, el administrador autoriza.
+5. **Si la persona no quiere adjuntar** la foto ni el documento, el administrador marca el
+   registro como **«No obligatorio»** (RN-97, equipo 2026-09-17) —en el formulario al crearlo, o
+   después desde el detalle—. El registro pasa directo a autorizar, se autoriza sin fotos, y la
+   persona **entra con el código que Idiky le asignó** al crearla. La marca vale también para
+   los registros que crean los propietarios: el administrador la pone, el propietario autoriza.
+   Queda escrito quién la puso y cuándo.
 
 **Flujos alternativos**
 - A1. Un registro de otra unidad → lo ve, pero **no lo autoriza**: eso es de su propietario

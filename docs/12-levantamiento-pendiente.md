@@ -151,8 +151,25 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   simple = «la mitad más uno de los coeficientes **representados en la sesión**». **Art. 46**:
   calificada = **70 % de los coeficientes que integran el edificio** —otra base—, y ninguna
   decisión puede exigir más, salvo la extinción de la propiedad horizontal. El art. 46 lista
-  qué exige calificada. Implementado (RN-74). **Queda por revisar con el reglamento** qué
-  puntos de *esta* copropiedad caen en esa lista.
+  qué exige calificada. Implementado (RN-74).
+  → ✅ **Respondido (Mary, 2026-09-10):** *«considero que se utiliza mayoría simple, no es
+  necesario mayoría calificada»*. Se toma como que **el reglamento de esta copropiedad no
+  agrega puntos** a la lista del art. 46: en la práctica casi todo va por simple, que es
+  también lo que hace la app por defecto. **La lista legal del art. 46 se queda**, porque no
+  es disponible: el mismo artículo dice que lo adoptado en contravención suya es
+  *absolutamente nulo*, y que las mayorías superiores que ponga un reglamento se tienen por
+  no escritas. Una copropiedad no puede rebajar el umbral, solo encontrarse con que casi
+  nunca le aplica.
+  **Y al verificar el art. 46 apareció algo que no teníamos:** su parágrafo prohíbe tomar
+  esas decisiones **en reuniones no presenciales**. Implementado (RN-94) — ver la pregunta
+  nueva abajo.
+- **Mayoría calificada en asamblea mixta *(pregunta nueva, 2026-09-10 — para el abogado)*:**
+  el parágrafo del art. 46 dice «reuniones no presenciales» y en 2001 no existía la mixta.
+  El Decreto 398 de 2020 art. 1 extiende a las mixtas «las reglas relativas a las reuniones
+  no presenciales», de donde se deduce que tampoco caben ahí. **Idiky toma el camino
+  conservador y las bloquea** (RN-94), pero es una deducción, no una cita.
+  ¿Una asamblea mixta con quórum presencial suficiente **sí** puede adoptar una decisión de
+  mayoría calificada? Si la respuesta es sí, se afloja en una línea. → *(respuesta)*
 - **Poderes — el tope:** → ✅ **Resuelto, y al revés de lo que suponíamos** (verificado el
   2026-09-10). **La Ley 675 no fija ningún tope.** Lo puede fijar el **reglamento** de cada
   copropiedad —la práctica común son tres o cuatro poderes por persona— y la jurisprudencia
@@ -180,12 +197,22 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   (RN-51, CU-R-21).
 - **Mora y voto:** ¿el copropietario en mora puede votar? ¿Puede recibir poderes?
   *(Hoy la mora solo bloquea reservas — RN-08.)* → *(respuesta)*
-- **Asistencia:** ¿la asamblea es presencial, virtual o mixta? Si es mixta, ¿el quórum
-  suma las dos? → *(respuesta)*
+- ~~**Asistencia:**~~ → ✅ **Respondido (Mary, 2026-09-10):** *«la asistencia virtual pesa
+  igual que la presencial»*. Las tres modalidades existen (ADR-0007) y en la mixta **el quórum
+  suma las dos**: una sola cuenta. Verificado además contra la norma —Ley 675 art. 42 y
+  Decreto 398 de 2020 art. 1— que dicen lo mismo. Implementado: RN-92, y la app se lo dice a
+  quien está conectado.
 - **Transmisión:** ¿la transmisión debe quedar **grabada** como soporte del acta? Eso
   cambia el costo de almacenamiento y el proveedor. → *(respuesta)*
-- **Acta:** ¿quién la firma y cómo? ¿Necesita aprobación de una comisión verificadora
-  antes de publicarse? → *(respuesta)*
+- ~~**Acta — comisión verificadora:**~~ → ✅ **Respondido (Mary, 2026-09-10):** *«la comisión
+  verificadora o persona que revisa el acta déjala como una opción para que el administrador
+  seleccione, **a veces hay revisión**»*. Implementado como opcional (RN-93). La firma quedó
+  resuelta por la ley: presidente y secretario (art. 47).
+  ~~**Queda una pregunta más chica:** si el reglamento le fija a la comisión un **término**
+  propio para revisar.~~ → ✅ **Respondido (Mary, 2026-09-17):** *«para la revisión del acta
+  debe existir un plazo máximo que lo define el administrador»*. No lo fija el reglamento: lo
+  fija el administrador **por acta**, al designar la comisión, y nunca más allá del término del
+  art. 47. Vencido, el acta se aprueba sin las revisiones que falten y lo deja escrito (RN-95).
 - **Acta:** ¿debe seguir un formato o plantilla específica de la copropiedad?
   → *(respuesta)*
 
@@ -325,8 +352,33 @@ Lo que hay que decidir antes de que esto salga a un servidor:
 | Al **inhabilitar** a la persona, ¿la foto se borra? | RN-61 dice que nada se borra; un dato personal sí puede tener que borrarse | **Resuelto en principio (Mary, 2026-09-07)**: *«me refería a conservar el registro; la documentación se debe guardar el tiempo que la normatividad lo permita»*, y *«si el registro se habilita nuevamente y ya no tenemos los documentos se solicitan nuevamente»*. El registro queda, las fotos tienen plazo, y rehabilitar es volver a registrar. **Falta el plazo concreto que fija la norma y el proceso que borra las fotos al cumplirse** |
 | ¿**Dónde** se almacena? | Un servidor con las cédulas de un conjunto entero es un objetivo, no un archivo | *(pendiente)* |
 | **El poder de asamblea también es un documento personal** (2026-09-10) | Lleva nombre, documento de identidad y firma de alguien que **no es residente** y con quien la copropiedad no tiene ninguna otra relación. Las cuatro preguntas de arriba le aplican igual, y una más: **¿el apoderado autorizó el tratamiento de sus datos?** Hoy no se le pide nada — lo trae el administrador, no él (RN-66) | *(pendiente)* |
+| **La marca «No obligatorio»** (2026-09-17) | El administrador puede eximir a una persona de adjuntar la foto y el documento (RN-97). ¿Eximir genera una obligación distinta —identificar de otra forma a quien entra— o no? | *(pendiente)* |
 
 Detalle técnico y lo ya decidido: [ADR-0009](./adr/0009-soportes-fotograficos.md).
+
+### Lo que debe revisar el abogado — consolidado (2026-09-17)
+
+Marco: **Ley 1581 de 2012** (habeas data) y su decreto reglamentario. Siete puntos, en orden
+de lo que más pesa. Los tres primeros **bloquean producción**; los demás se resuelven ajustando
+texto o configuración.
+
+1. **La foto del rostro como dato biométrico.** Si es dato sensible, el titular no está obligado
+   a autorizarlo y hay que decírselo en la política. Hoy el texto no lo dice.
+2. **El plazo de conservación de las fotos.** Mary decidió que las fotos tienen plazo y el
+   registro no. Falta el plazo concreto por caso —arrendatario que se fue, residente temporal de
+   dos meses— para construir el proceso que las borra al cumplirse.
+3. **El apoderado del poder.** Nombre, documento y firma de alguien que no es residente. Hoy no se
+   le pide autorización: el documento lo sube el administrador (CU-A-19) o el propietario
+   (CU-R-31). ¿Hace falta su consentimiento y cómo se recoge cuando no usa la app?
+4. **El texto de la autorización** (`apps/pwa/src/dominio/consentimiento.ts`, RN-66). Es un
+   borrador nuestro: confirmar que cumple informada, expresa y registrada, y que el responsable
+   del tratamiento es la copropiedad y no Idiky.
+5. **Dónde se almacenan.** Qué exige la norma sobre ubicación, cifrado y transferencia a terceros,
+   incluido un proveedor de nube fuera de Colombia.
+6. **Quién las ve y la constancia** (RN-67). Administración y quien registró; portería solo el
+   rostro; cada apertura deja rastro. Confirmar que basta.
+7. **La marca «No obligatorio»** (RN-97). Si eximir de la foto obliga a identificar de otra forma a
+   quien entra.
 
 ## 4. Usuarios y roles
 
@@ -382,6 +434,7 @@ el modelo de datos y varios casos de uso.**
 8. El país es Colombia: moneda COP, PQRS, paz y salvo y Ley 675 de 2001 como marco legal.
    *(Se deduce del demo; nadie lo ha confirmado.)*
 9. ~~El voto en asamblea se pondera por coeficiente~~ → **confirmado el 2026-08-26**, ya no
-   es supuesto. Que el **quórum** se mida en coeficientes sigue siendo supuesto (§3 bis).
+   es supuesto. Y el **quórum** en coeficientes tampoco: verificado contra la Ley 675 art. 45
+   el 2026-09-10 (RN-28).
 10. Los documentos formales (paz y salvo, acta, comprobante, estado de cuenta) se entregan
     en PDF descargable. **Supuesto — ver §3 ter y ADR-0006.**

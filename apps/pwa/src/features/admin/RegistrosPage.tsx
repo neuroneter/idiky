@@ -26,12 +26,14 @@ import {
   autorizarRegistro,
   cerrarRegistro,
   crearRegistroPersona,
+  marcarSoportesNoObligatorios,
   registrarAccesoSoportes,
 } from '../../datos/repositorio'
 import {
   etiquetaUnidad,
   puedeAutorizar,
   registroEnCurso,
+  sinSoportesPorMarca,
   verSoportesDejaConstancia,
 } from '../../dominio/reglas'
 import { formatearFechaHora } from '../../utilidades/formato'
@@ -139,6 +141,9 @@ export function RegistrosPage() {
                         <span className={ESTADOS[registro.estado].chip}>
                           {ESTADOS[registro.estado].texto}
                         </span>
+                        {sinSoportesPorMarca(registro) && (
+                          <div className="subtitulo">No obligatorio</div>
+                        )}
                       </td>
                       <td>
                         <button
@@ -168,6 +173,7 @@ export function RegistrosPage() {
         <FormularioRegistro
           categorias={['residente']}
           unidades={unidades}
+          permitirNoObligatorio
           alCerrar={() => setRegistrando(false)}
           alCrear={async (datos) => {
             const creado = await ejecutar(
@@ -186,8 +192,11 @@ export function RegistrosPage() {
                   telefono: datos.telefono,
                   vigenciaDesde: datos.vigenciaDesde,
                   vigenciaHasta: datos.vigenciaHasta,
+                  soportesNoObligatorios: datos.soportesNoObligatorios,
                 }),
-              'Registro creado. Ahora la persona adjunta sus fotos.',
+              datos.soportesNoObligatorios
+                ? 'Registro creado sin soportes obligatorios. Ya puedes autorizarlo.'
+                : 'Registro creado. Ahora la persona adjunta sus fotos.',
             )
             if (creado) {
               setRegistrando(false)
@@ -222,6 +231,20 @@ export function RegistrosPage() {
           puedoAutorizar={puedeAutorizar(enDetalle, sesion.personaId)}
           esMio={enDetalle.creadoPor === sesion.personaId}
           alCerrar={() => setViendo(null)}
+          // RN-97: solo aquí, porque solo el administrador exime.
+          alMarcarNoObligatorio={async (marcar) => {
+            await ejecutar(
+              (base) =>
+                marcarSoportesNoObligatorios(base, {
+                  registroId: enDetalle.id,
+                  marcadoPor: sesion.personaId,
+                  marcar,
+                }),
+              marcar
+                ? 'Marcado como «No obligatorio». Quien lo creó ya puede autorizarlo sin fotos.'
+                : 'Marca quitada. Vuelve a esperar los soportes si no los trajo.',
+            )
+          }}
           alAutorizar={async () => {
             const hecho = await ejecutar(
               (base) =>

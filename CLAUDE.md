@@ -103,10 +103,12 @@ LangFlow sigue igual.
   viejas.
 - Rama de trabajo asignada por sesión (p. ej. `claude/demo-copropiedad-app-*`).
 - Commits: `tipo(ámbito): descripción (CU-X-NN)` — ver `docs/08-convenciones.md`.
-- **Antes de crear un identificador nuevo** (`RN-xx`, `CU-X-NN`, `T-xx`, `ADR-NNNN`) busca el
-  máximo en la rama integrada y sigue desde ahí. Si dos personas trabajan en paralelo, cada
-  una reserva un rango y lo anota en `docs/11-tablero-de-trabajo.md`. Numerar por separado
-  ya costó una renumeración completa (ver la bitácora del 2026-09-10).
+- **Empieza siempre desde `main` actualizado**: `git fetch origin && git checkout -b <rama> origin/main`.
+  Retomar una rama vieja "porque ahí estaba mi trabajo" ya costó dos renumeraciones
+  (2026-09-10 y 2026-09-21).
+- **Los identificadores nuevos** (`RN-xx`, `CU-X-NN`, `T-xx`, `ADR-NNNN`) se toman **del rango
+  reservado a cada persona** en `docs/11-tablero-de-trabajo.md` §0, nunca del "siguiente
+  número que veo". Si el rango se agota, se pide otro al responsable de integración.
 
 ## 6. Qué NO hacer
 

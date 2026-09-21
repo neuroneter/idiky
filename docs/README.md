@@ -23,6 +23,7 @@ aquí antes o junto con el código.
 | 12 | [Levantamiento pendiente](./12-levantamiento-pendiente.md) | **Preguntas abiertas del producto, por responder** | Hasta cerrarlo |
 | 13 | [BOB: cómo entra una copropiedad](./13-bob-copropiedades-y-contratos.md) | Planes y contrato, perfiles raíz, ficha, jerarquía e ingreso a BLOKY | Mientras dure el refinamiento (T-39) |
 | 14 | [Desplegar la contable](./14-despliegue-de-la-contable.md) | Cómo se publica `apps/contable/` en el servidor de desarrollo | Al cambiar la forma de publicar |
+| 15 | [Resumen de la rama de Mary](./15-resumen-de-la-rama-de-mary.md) | **Corte transversal**: qué contiene la rama hoy, qué se verificó contra la ley y qué está abierto — para revisarla sin leer 91 commits | Es un snapshot fechado: se rehace, no se mantiene |
 | — | [ADR](./adr/) | Decisiones de arquitectura con su justificación | Al tomar una decisión relevante |
 
 > El **13** está reservado para el sistema de gestión (BOB), que llega desde la rama de

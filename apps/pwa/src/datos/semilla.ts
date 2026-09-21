@@ -49,7 +49,9 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 20 — el acta de la asamblea, con lo que exige el articulo 47.
 // 21 — integracion con la rama contable: la cuota lleva saldo, el pago lleva
 //      imputaciones y recibo de caja, y hay abonos por conciliar (RN-75 a RN-79).
-export const VERSION_ESQUEMA = 21
+// 22 — poderes enviados en foto por el propietario y marca «No obligatorio» en el
+//      registro (Mary, 2026-09-17; su rama tambien llamo 21 a ese cambio).
+export const VERSION_ESQUEMA = 22
 
 const COPROPIEDAD_ID = 'cop-1'
 

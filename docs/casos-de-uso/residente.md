@@ -84,6 +84,10 @@ atajo de perfiles sigue disponible, plegado debajo.
 - RN-53: no se crea la cuenta aquí, se activa.
 - RN-54: el código prueba la identidad en este dispositivo.
 
+> **El código de registro también activa la cuenta** (RN-97): quien fue registrado con la marca
+> «No obligatorio» no adjuntó nada y no tiene otro código; el que Idiky le asignó al crearlo es su
+> clave para entrar. Vale solo con el registro ya autorizado.
+
 **Estado en el demo:** 🟡 — `src/features/auth/ActivarPage.tsx`. El trámite completo, sin
 guardar contraseñas y con el código a la vista.
 
@@ -396,18 +400,25 @@ administrador con su cédula y sus datos de contacto.
 - A2. Ya votó → ve su elección, sin opción de cambiarla (RN-34).
 - A3. Otorgó poder a otra persona → no puede votar esa unidad (RN-32).
 - A4. La unidad está en mora → **(?)** pendiente de definir si pierde el voto.
+- A5. El punto exige **mayoría calificada** y la asamblea no es presencial → **no se vota**.
+  Los botones quedan deshabilitados —no escondidos— con el motivo a la vista: el parágrafo del
+  art. 46 prohíbe tomar esas decisiones en reunión no presencial, y lo que se decidiera sería
+  absolutamente nulo (RN-94). El punto tiene que llevarse a una sesión presencial.
 
 **Reglas de negocio**
 - RN-27: el voto se pondera por coeficiente (confirmada por el equipo el 2026-08-26).
 - RN-29: un voto por unidad y por pregunta.
 - RN-32: quien otorgó poder no vota esa unidad directamente.
 - RN-34: una votación cerrada no se reabre.
+- RN-74: la mayoría que exige el punto, y sobre qué base se mide (arts. 45 y 46).
+- RN-94: qué decisiones **no puede tomar esta sesión**, sea cual sea el resultado.
 
-**Estado en el demo:** 🟡 — `src/features/residente/AsambleaDetallePage.tsx`. Se vota en las
-asambleas ordinarias y extraordinarias, un voto por unidad (RN-29), solo el propietario
-(RN-51), con el coeficiente copiado al votar (RN-37), y se muestra el conteo por coeficiente.
-**No dice si el punto quedó aprobado**: eso exige la mayoría y el quórum, que siguen sin
-definir (RN-28, T-10). Faltan también los poderes (CU-R-23) y la mora como causal (A4).
+**Estado en el demo:** ✅ — `src/features/residente/AsambleaDetallePage.tsx`. Se vota en las
+asambleas ordinarias y extraordinarias, un voto por unidad (RN-29), solo el propietario o su
+apoderado (RN-51, RN-30), con el coeficiente copiado al votar (RN-37). **Dice qué mayoría exige
+el punto antes de votar y si quedó aprobado**, citando el artículo (RN-74), y el quórum se
+verifica contra la Ley 675 (RN-28). Los poderes entraron con CU-R-23. Sigue abierta **la mora
+como causal** (A4), que es de §3 bis.
 
 ---
 
@@ -808,6 +819,11 @@ con soportes y otra sin ellos**, y la que no los pide se vuelve la que todo el m
 algún día se hace más liviano, que sea porque el equipo decidió bajar el requisito —no porque
 alguien encontró el camino corto.
 
+> **La marca «No obligatorio»** (RN-97, equipo 2026-09-17): si la persona no quiere adjuntar la
+> foto ni el documento, **el administrador** —no el propietario— marca el registro y este pasa
+> directo a «falta autorizar». El propietario lo ve marcado, con quién lo eximió, y autoriza sin
+> fotos. La persona entra con el código que Idiky le asignó.
+
 **Estado en el demo:** ✅ — `src/features/residente/PersonasPage.tsx`, con el trámite en
 `src/componentes/Registro.tsx` (compartido con la consola del administrador: dos formularios
 distintos para lo mismo acaban pidiendo cosas distintas).
@@ -1003,3 +1019,55 @@ administración.
 - RN-75, RN-76: el abono puede ser parcial y repartirse entre varias cuotas.
 
 **Estado en el demo:** ✅ — `src/features/residente/InformarAbonoPage.tsx`.
+### CU-R-31
+## CU-R-31 — Enviar el poder firmado en foto
+
+- **Actor principal:** Propietario
+- **Precondiciones:** Hay una asamblea convocada o instalada, su unidad no tiene poder en curso
+  y ya firmó el poder en papel.
+- **Disparador:** No puede asistir y no quiere —o no puede— llevar el papel a la administración.
+- **Resultado esperado:** La administración recibe la foto del poder firmado, lo valida y, desde
+  ese momento, el apoderado vota por su unidad.
+
+> **La tercera puerta** (Mary, 2026-09-17: que el propietario lo envíe *«adjuntando una foto
+> del documento»*). **Con foto y no con PDF, a propósito**: es lo que el teléfono ya sabe hacer,
+> no exige nada nuevo (ADR-0009) y no deja bloqueantes. Un PDF adjunto espera al backend, como
+> todo lo que se recibe como archivo.
+
+**Flujo principal**
+1. En la asamblea, junto a «Dar poder», toca **«Enviar el poder firmado»**.
+2. **Lo primero es la foto** del documento completo, legible y con la firma — como en la puerta
+   del administrador (CU-A-19): es lo que hace válido el poder.
+3. Escribe el nombre y el documento de quien lo va a representar; si no está en Idiky se le crea
+   el usuario temporal de asamblea (RN-30, RN-61).
+4. Queda **enviado, por validar**. La pantalla lo dice y dice lo que vale hoy: **nada aún**.
+   Mientras la administración no lo valide, **vota el propietario** (RN-96). La hoja y la foto se
+   pueden abrir para ver exactamente lo que se envió.
+5. La administración lo valida (CU-A-19) → la unidad queda representada, igual que con cualquier
+   poder en papel.
+
+**Flujos alternativos**
+- A1. La administración lo **rechaza** → el propietario ve el **motivo** en la misma tarjeta y
+  puede corregir y enviar otro. El rechazado no se borra (RN-61).
+- A2. Cambia de opinión antes de la validación → **retira** el poder. Queda como retirado.
+- A3. Su unidad ya tiene un poder en curso —vigente o por validar— → no se ofrece enviar otro.
+  **Una unidad, un representante** (RN-28, RN-29), y eso incluye al que espera.
+- A4. Es arrendatario → no puede: no cede un voto que no tiene (RN-51).
+
+**Decisiones de interfaz**
+- **Un solo formulario para las dos puertas del propietario.** Los datos del apoderado son los
+  mismos; lo que cambia es qué se le pide (la foto) y qué se le dice (que no vale hasta que lo
+  validen).
+- **«Por validar» no es «con poder».** La tarjeta usa otro color y otro texto, y los botones de
+  votar **siguen habilitados**: hasta que la administración lo vea, es como si el poder no
+  existiera, y decir lo contrario dejaría a la persona sin votar por un papel que nadie ha mirado.
+- **El motivo del rechazo se muestra tal cual lo escribió la administración.** Es lo que hay que
+  corregir; parafrasearlo lo estropea.
+
+**Reglas de negocio**
+- RN-96 (no vale hasta que la administración lo valide; el rechazo lleva motivo), RN-30, RN-51,
+  RN-28 y RN-29 (una unidad, un representante, contando el que espera), RN-61 (retirado o
+  rechazado, no se borra).
+
+**Estado en el demo:** ✅ — `/app/asambleas/:id`, en la asamblea en curso, botón «Enviar el
+poder firmado». La validación vive en `/admin/asambleas`, sección **Poderes** (CU-A-19).

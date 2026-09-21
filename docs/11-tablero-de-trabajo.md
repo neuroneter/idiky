@@ -7,6 +7,18 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 
 ---
 
+## 0. Rangos de identificadores reservados
+
+Para no volver a renumerar (pasó el 2026-09-10 con Jeimy y el 2026-09-21 con Mary): **cada
+quien numera dentro de su rango** y, al agotarlo, pide el siguiente aquí. Los máximos hoy en
+`main`: RN-97, CU-R-31, CU-A-27, CU-P-03, T-44, ADR-0012.
+
+| Quién | Reglas (RN) | Casos de uso | Tareas (T) | ADR |
+|---|---|---|---|---|
+| Mary (ALICE / PWA) | RN-98 … RN-129 | CU-R-32 … CU-R-49 · CU-A-28 … CU-A-39 | T-45 … T-59 | Se piden al integrador |
+| Jeimy (contable) | RN-130 … RN-159 | CU-A-40 … CU-A-49 | T-60 … T-74 | Se piden al integrador |
+| Integración (infra, BOB, BLOKY) | RN-160 … RN-189 | CU-S-10 … CU-S-29 · CU-P-04 … CU-P-09 | T-75 … T-89 | ADR-0013 en adelante |
+
 ## Ahora — antes de seguir construyendo
 
 | # | Tarea | Responsable | Estado | Notas |
@@ -15,8 +27,8 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-02 | Validar/ajustar los casos de uso ya documentados | Los tres | 🔨 En curso | Catálogo actualizado con 12 CU nuevos. Falta que el equipo los revise |
 | T-03 | Confirmar la asignación de zonas del equipo | Los tres | 📋 Por hacer | Tabla §1 de [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md). **Mary indicó que trabajará en la app móvil**, hoy asignada a Jeimy |
 | T-04 | Recorrer el demo v0.1 y anotar observaciones | Los tres | 📋 Por hacer | Cada quien anota en la bitácora qué sobra, qué falta y qué está mal planteado |
-| T-10 | **Responder las preguntas de asamblea** (§3 bis) | Los tres | 📋 Por hacer | Quórum, mayorías, tope de poderes. La pantalla de asambleas ya vota y cuenta por coeficiente, pero **no puede decir si un punto se aprobó** hasta que esto se responda |
-| T-11 | **Confirmar el tope legal de poderes** (Ley 675 de 2001) | Los tres | 📋 Por hacer | Hay que leer el artículo y citarlo. **No se implementa RN-30 con una cifra supuesta** |
+| T-10 | **Responder las preguntas de asamblea** (§3 bis) | Los tres | 🟡 A medias (2026-09-10) | Quórum, mayorías, poderes y acta **están construidos y verificados** contra la Ley 675 (RN-28, RN-74, RN-30, RN-92, RN-94), y la pantalla ya dice si un punto se aprobó, citando el artículo. El término de la comisión quedó resuelto el 2026-09-17: lo fija el administrador (RN-95). Queda **una** del reglamento —el tope de poderes— y una para el abogado —la mixta con mayoría calificada— |
+| T-11 | ~~**Confirmar el tope legal de poderes** (Ley 675 de 2001)~~ | Los tres | ✅ Hecho (2026-09-10) | Se leyó el artículo, y el resultado fue **que no hay tope legal que citar**: la Ley 675 no fija ninguno. Lo puede fijar el reglamento. RN-30 muestra el acumulado por apoderado y **no rechaza a nadie** |
 | T-12 | **Decidir si visitantes, correspondencia y cartelera siguen** | Los tres | 📋 Por hacer | Están implementados pero nadie los mencionó en el alcance |
 | T-13 | **ADR-0006 — cómo se generan los PDF** | Daniel | ✅ Hecho | Escrito el 2026-08-28. Los cinco documentos quedan bloqueados por el backend (ADR-0008), no por la decisión |
 | T-14 | ~~ADR-0007 — proveedor de transmisión en vivo~~ | Daniel | ✅ Hecho (2026-09-10) | **No hay proveedor que elegir**: se enlaza Zoom/Meet. El costo por minuto desaparece; queda abierto si la grabación es soporte del acta |
@@ -24,6 +36,8 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 | T-17 | **Definir qué se intercambia con la app contable de Jeimy** | Mary + Jeimy | 📋 Por hacer | La destinación específica de una extraordinaria (RN-48) es dato contable: lo recaudado tiene que poder cruzarse con lo gastado en esa destinación |
 | T-18 | **Cómo se envía el código de un solo uso** (SMS, WhatsApp o correo) y con qué proveedor | Daniel | 📋 Por hacer | Sale del flujo de acceso decidido el 2026-08-28 (RN-54). Tiene costo por mensaje y afecta el ADR de backend |
 | T-19 | **Consola de portería** (CU-P-01, CU-P-02) | Jeimy | 🟡 A medias | Construida el 2026-08-28: turno, visitantes y correspondencia. **Falta la minuta**, que espera las respuestas de T-08 |
+| T-43 | **Mary retoma desde `main`**: rama nueva a partir de `main`, verificar asambleas y registros sobre la semilla 22, y no volver a tocar `claude/repository-review-c0p1wd` | Mary | 📋 Por hacer | Su rama vieja quedó integrada y cerrada el 2026-09-21 |
+| T-42 | **Dónde viven las suites de Playwright** | Daniel | 📋 Por hacer | Once suites recorren el navegador de verdad (asambleas, poderes, quórum, acta, comisión, mayoría calificada) pero **están fuera del repositorio**, en el directorio de la sesión. Hay que decidir dónde van y con qué runner, o se pierden |
 | T-16 | Saldar las tres deudas de arquitectura | Daniel (zona C) | 📋 Por hacer | Validar las reglas en el repositorio y no solo en la UI —**empezando por RN-49: `generarCuotas()` no comprueba quién la llama**— · usar `imputarPago()` en vez de reimplementarlo · RN-22 debe filtrar por copropiedad |
 
 ## Siguiente — cuando T-01 esté cerrado
@@ -53,6 +67,7 @@ Estados: `📋 Por hacer` · `🔨 En curso` · `👀 En revisión` · `✅ Hech
 |---|---|---|
 | T-00 | Estructura del repositorio, documentación base y demo PWA v0.1 | ✅ Hecho |
 | T-36 | **Integración de las ramas de Mary y Jeimy** en una sola, con la numeración unificada (2026-09-10) | ✅ Hecho |
+| T-44 | **Segunda integración** (2026-09-21): la infraestructura (Podman, BOB) y los 7 commits de Mary del 10 al 17 entran a `main`, con su numeración corrida a RN-92…97 y CU-R-31 | ✅ Hecho |
 | T-20 | Módulos de cartera y pagos con abonos parciales y recibos de caja (CU-R-30, CU-A-27) | ✅ Hecho |
 | T-21 | Aplicación contable: cartera, pagos y recibos de caja sin compilación (ADR-0010) | ✅ Hecho |
 | T-24 | Contable: gastos, movimientos por cliente, estado de resultados y situación financiera | ✅ Hecho |

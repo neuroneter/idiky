@@ -30,6 +30,8 @@ import {
   hoyISO,
   soloUnDia,
   sumarDias,
+  admiteMarcaNoObligatorio,
+  sinSoportesPorMarca,
 } from '../dominio/reglas'
 import { Modal } from './Modal'
 import { Icono } from './Icono'
@@ -93,6 +95,8 @@ export interface DatosRegistro {
   reside?: boolean
   /** Solo cuando quien registra puede escoger unidad (el administrador). */
   unidadId?: string
+  /** La marca «No obligatorio», solo desde la consola del administrador (RN-97). */
+  soportesNoObligatorios?: boolean
 }
 
 /**
@@ -105,6 +109,7 @@ export function FormularioRegistro({
   categorias,
   unidades,
   categoriaInicial,
+  permitirNoObligatorio = false,
   alCrear,
   alCerrar,
 }: {
@@ -112,9 +117,12 @@ export function FormularioRegistro({
   /** Solo la consola del administrador: ahí hay que decir a qué unidad entra. */
   unidades?: Unidad[]
   categoriaInicial?: CategoriaRegistro
+  /** Solo el administrador puede eximir de los soportes (RN-97). */
+  permitirNoObligatorio?: boolean
   alCrear: (datos: DatosRegistro) => Promise<void>
   alCerrar: () => void
 }) {
+  const [noObligatorio, setNoObligatorio] = useState(false)
   const [categoria, setCategoria] = useState<CategoriaRegistro>(
     categoriaInicial && categorias.includes(categoriaInicial) ? categoriaInicial : categorias[0],
   )
@@ -182,6 +190,7 @@ export function FormularioRegistro({
       vigenciaHasta: unDia ? desde : conVigencia ? hasta : undefined,
       placa: categoria === 'visitante' ? placa.trim() || undefined : undefined,
       ...(unidades ? { unidadId } : {}),
+      ...(permitirNoObligatorio && conSoportes ? { soportesNoObligatorios: noObligatorio } : {}),
     })
   }
 
@@ -392,6 +401,29 @@ export function FormularioRegistro({
 
         {error && <p className="acceso__error">{error}</p>}
 
+        {/* RN-97 — La marca «No obligatorio», solo en la consola del
+            administrador. Se dice lo que implica: la persona no adjunta nada y
+            entra con el código que Idiky le asigna; el registro sigue teniendo
+            que autorizarse. Va junto al botón porque es lo último que se decide. */}
+        {permitirNoObligatorio && conSoportes && (
+          <div className="campo">
+            <label className="fila" style={{ gap: 'var(--e2)', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={noObligatorio}
+                onChange={(evento) => setNoObligatorio(evento.target.checked)}
+              />
+              <span>
+                <strong>No obligatorio</strong>: no le pidas la foto ni el documento
+              </span>
+            </label>
+            <span className="ayuda-campo">
+              El registro pasa directo a autorizar y la persona entra con el código que Idiky le
+              asigna. Queda escrito que lo eximió la administración (RN-97).
+            </span>
+          </div>
+        )}
+
         <button className="boton boton--primario boton--bloque" type="submit">
           {conSoportes ? 'Crear el registro' : 'Autorizar la visita'}
         </button>
@@ -420,6 +452,7 @@ export function DetalleRegistro({
   alAutorizar,
   alRechazar,
   alCerrar,
+  alMarcarNoObligatorio,
 }: {
   registro: RegistroPersona
   /** El mensaje que se le mandó a la persona, si hubo (RN-64). */
@@ -434,9 +467,12 @@ export function DetalleRegistro({
   alAutorizar: () => Promise<void>
   alRechazar: (motivo: string, anular: boolean) => Promise<void>
   alCerrar: () => void
+  /** Solo la consola del administrador: poner o quitar la marca (RN-97). */
+  alMarcarNoObligatorio?: (marcar: boolean) => Promise<void>
 }) {
   const [motivo, setMotivo] = useState('')
   const [rechazando, setRechazando] = useState(false)
+  const marcado = sinSoportesPorMarca(registro)
 
   return (
     <Modal
@@ -459,7 +495,54 @@ export function DetalleRegistro({
           <span className="subtitulo">Estado</span>
           <span className={ESTADOS[registro.estado].chip}>{ESTADOS[registro.estado].texto}</span>
         </div>
+        {marcado && (
+          <div className="fila">
+            <span className="subtitulo">Soportes</span>
+            <span className="chip">No obligatorio</span>
+          </div>
+        )}
       </div>
+
+      {/* RN-97 — La marca, a la vista de todos y editable solo por el
+          administrador. Quien autoriza tiene que saber que va a autorizar sin
+          fotos y quién decidió eso. */}
+      {(marcado || (alMarcarNoObligatorio && admiteMarcaNoObligatorio(registro))) && (
+        <>
+          <div className="separador" />
+          <div className="columna" style={{ gap: 'var(--e2)' }}>
+            <strong>Soportes no obligatorios</strong>
+            <span className="subtitulo">
+              {marcado
+                ? `La administración eximió a esta persona de adjuntar la foto y el documento el ${formatearFechaHora(registro.soportesNoObligatorios!.marcadoEn)}. Se autoriza sin soportes y entra con su código.`
+                : 'Si esta persona no quiere adjuntar la foto ni el documento, márcala: el registro pasa directo a autorizar y entra con el código que Idiky le asignó.'}
+            </span>
+            {alMarcarNoObligatorio && admiteMarcaNoObligatorio(registro) && (
+              <button
+                className="boton"
+                onClick={() => void alMarcarNoObligatorio(!marcado)}
+              >
+                {marcado ? 'Quitar la marca «No obligatorio»' : 'Marcar como «No obligatorio»'}
+              </button>
+            )}
+          </div>
+        </>
+      )}
+
+      {/* Con la marca, el código ya no es para adjuntar: es para entrar (RN-97). */}
+      {marcado && registro.estado !== 'rechazado' && registro.estado !== 'anulado' && (
+        <>
+          <div className="separador" />
+          <div className="columna" style={{ gap: 'var(--e2)' }}>
+            <strong>Pásale este código</strong>
+            <span className="subtitulo">
+              Es la clave que Idiky le asignó: con su documento y este código{' '}
+              <strong>activa su cuenta</strong> en la pantalla de ingreso
+              {registro.estado === 'autorizado' ? '.' : ', en cuanto el registro quede autorizado.'}
+            </span>
+            <span className="codigo-registro numerico">{registro.codigo}</span>
+          </div>
+        </>
+      )}
 
       {/* Al visitante no se le piden soportes (RN-57), asi que su registro nace
           autorizado y no tiene codigo que dictarle a nadie: el codigo que
