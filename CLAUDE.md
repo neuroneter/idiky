@@ -14,6 +14,19 @@ caro que puedes cometer aquí:
 |---|---|---|---|
 | `apps/pwa/` | App móvil del residente + consola web del administrador | React + TS + Vite | **Mary** |
 | `apps/contable/` | Aplicación contable: Cartera · Contabilidad (recaudos, pagos, ajustes, PUC) · Reportes | HTML + CSS + JS **sin compilar** | **Jeimy** |
+| `apps/gestion/` *(en construcción)* | **BOB**, el *back office* de la empresa IDIKY: clientes, planes, contratos; crea al Administrador y al Delegado de cada copropiedad. **No es de las copropiedades** | Strapi 5 + PostgreSQL 17 ([ADR-0012](./docs/adr/0012-sistema-de-gestion-strapi.md)) | Por definir |
+
+**Las aplicaciones de IDIKY tienen nombre** (2026-09-10). Úsalos al hablar y al escribir, para no
+confundir sistemas que se parecen:
+
+| Nombre | Qué es | Quién entra y cómo | Dónde está |
+|---|---|---|---|
+| **BOB** | El *back office* de IDIKY | El equipo de IDIKY, con el login de Strapi. **No usa Twilio** | `apps/gestion/` |
+| **BLOKY** | El sistema de las copropiedades: estructura y unidades, propietarios, cartera, asambleas | Administrador, Delegado y los perfiles que ellos creen: código por SMS o correo (Twilio Verify), Google o Microsoft | Por construir (backend: ADR-0008). Su precursor es la consola del administrador del demo, en `apps/pwa/` |
+| **ALICE** | La app del propietario y residente | Propietarios y residentes | Hoy, el demo de `apps/pwa/` |
+
+La contable de Jeimy conserva su nombre. La página web pública será **IDIKY**, y todo se presenta
+como aplicaciones de IDIKY.
 
 No comparten código. Comparten **las reglas del dominio**, traducidas a los dos lenguajes.
 
@@ -60,6 +73,28 @@ npm run empaquetar # deja dist/idiky-demo.html: el demo en un solo archivo
 
 Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.
 
+**`infra/`** — entorno de desarrollo en contenedores ([ADR-0011](./docs/adr/0011-entorno-de-desarrollo-en-contenedores.md),
+[`infra/README.md`](./infra/README.md)):
+
+```bash
+IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main pwa   # solo el servicio que se nombra
+```
+
+**Si te piden desplegar**, sigue [`infra/guia-de-despliegue.md`](./infra/guia-de-despliegue.md) al
+pie de la letra: **solo el servicio de quien lo pide** (`pwa` Mary, `contable` Jeimy), **solo
+desde `origin/main`**, y `infra/servidor/verificar-vecino.sh` antes y después. Lo que Mary y Jeimy
+despliegan hoy son **maquetas**; BLOKY y ALICE todavía no tienen espacio de desarrollo.
+
+**`apps/gestion/`** (Strapi): ver [`apps/gestion/README.md`](./apps/gestion/README.md). **El modelo de
+datos se diseña en local con `npm run develop` y va a git**; en el servidor Strapi corre en modo
+producción y lo creado ahí se pierde.
+
+**Si la tarea es crear o cambiar un servicio del entorno**, lee primero
+[`infra/README.md`](./infra/README.md) (cómo está armado, incluido lo que no está en git) y
+sigue [`infra/nuevo-servicio.md`](./infra/nuevo-servicio.md) (el contrato y la receta).
+Antes y después de tocar el servidor, `infra/servidor/verificar-vecino.sh` tiene que decir que
+LangFlow sigue igual.
+
 ## 5. Git
 
 - **`main` es la base de todo.** Se creó el 2026-09-10 a partir de la rama de integración
@@ -78,6 +113,12 @@ Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.
 - No implementar autenticación real, pagos reales ni backend en la fase 1: ese alcance está
   en el roadmap (fases 2 y 4) y hacerlo antes rompe el propósito del demo.
 - No introducir librerías de UI ni de estado global sin ADR.
+- No tocar nada del servidor de desarrollo fuera del usuario `idiky`: lo comparte otro
+  servicio (LangFlow) cuyos consumidores dependen de sus puertos 80, 443, 8443 y 7860 y de
+  sus rutas. Nada de nginx, firewall ni `sudo` para Idiky sin discutirlo antes (ADR-0011).
+- No desplegar `gestion` (BOB) ni `todo` salvo que lo pida el responsable de integración, y
+  nunca desde algo que no esté en `main`: Strapi borra de la base las tablas y columnas que el
+  código con el que arranca no tenga.
 - No meterle compilación, npm ni dependencias a `apps/contable/`: rompe la única condición
   que la hace utilizable por quien la desarrolla (ADR-0010).
 - No borrar registros de datos: se cierran o anulan (trazabilidad).

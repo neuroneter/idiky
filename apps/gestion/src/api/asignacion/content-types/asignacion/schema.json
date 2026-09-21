@@ -1,0 +1,73 @@
+{
+  "kind": "collectionType",
+  "collectionName": "asignaciones",
+  "info": {
+    "singularName": "asignacion",
+    "pluralName": "asignaciones",
+    "displayName": "Asignación",
+    "description": "Una persona en un perfil raíz de una copropiedad: Administrador o Delegado (docs/13 §3)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "titulo": {
+      "type": "string"
+    },
+    "copropiedad": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::copropiedad.copropiedad",
+      "inversedBy": "asignaciones"
+    },
+    "persona": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::persona.persona",
+      "inversedBy": "asignaciones"
+    },
+    "rol": {
+      "type": "enumeration",
+      "enum": ["administrador", "delegado"],
+      "required": true,
+      "default": "administrador"
+    },
+    "estado": {
+      "type": "enumeration",
+      "enum": ["vigente", "finalizada", "bloqueada"],
+      "required": true,
+      "default": "vigente"
+    },
+    "desde": {
+      "type": "date",
+      "required": true
+    },
+    "hasta": {
+      "type": "date"
+    },
+    "esEmpresaAdministradora": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "empresaRazonSocial": {
+      "type": "string"
+    },
+    "empresaNit": {
+      "type": "string",
+      "regex": "^\\d{6,10}$"
+    },
+    "tipoSoporte": {
+      "type": "enumeration",
+      "enum": ["acta_asamblea", "acta_consejo", "certificado_alcaldia", "otro"]
+    },
+    "soporte": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["files", "images"]
+    },
+    "notas": {
+      "type": "text"
+    }
+  }
+}

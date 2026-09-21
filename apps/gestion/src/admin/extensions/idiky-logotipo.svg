@@ -1,0 +1,15 @@
+<!-- Logotipo de IDIKY para el login del sistema de gestion (T-37).
+     La casa es la misma geometria de apps/pwa/src/componentes/Logotipo.tsx y de
+     apps/pwa/public/icono.svg: si Mary cambia el logo alla, se cambia aqui tambien.
+     Azul #1d2e7a (color-marca) y puerta fucsia #c41e8c (color-marca-claro).
+     OJO: un comentario XML no puede llevar dos guiones seguidos; si los lleva, el SVG
+     queda invalido y el navegador no lo dibuja. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="24 32 422 118" width="422" height="118">
+  <g fill="none" stroke-width="13" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M48 132V76l48-32 48 32v56" stroke="#1d2e7a"/>
+    <path d="M78 132V98h36v34" stroke="#c41e8c"/>
+    <path d="M36 138h120" stroke="#1d2e7a"/>
+  </g>
+  <text x="188" y="129" fill="#1d2e7a" font-size="123" font-weight="720" letter-spacing="-5.5"
+        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif">idiky</text>
+</svg>

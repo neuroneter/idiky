@@ -1,0 +1,57 @@
+{
+  "kind": "collectionType",
+  "collectionName": "planes",
+  "info": {
+    "singularName": "plan",
+    "pluralName": "planes",
+    "displayName": "Plan",
+    "description": "Los planes que IDIKY ofrece a las copropiedades (docs/13 §2)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "nombre": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "condiciones": {
+      "type": "richtext"
+    },
+    "modalidad": {
+      "type": "enumeration",
+      "enum": ["por_unidad", "valor_fijo"],
+      "required": true,
+      "default": "valor_fijo"
+    },
+    "valorMensual": {
+      "type": "decimal",
+      "required": true,
+      "min": 0
+    },
+    "duracionMeses": {
+      "type": "integer",
+      "required": true,
+      "default": 12,
+      "min": 12,
+      "max": 12
+    },
+    "restringeUnidades": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "activo": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    },
+    "contrataciones": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::contratacion.contratacion",
+      "mappedBy": "plan"
+    }
+  }
+}

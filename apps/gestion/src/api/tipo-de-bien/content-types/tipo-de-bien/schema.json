@@ -1,0 +1,39 @@
+{
+  "kind": "collectionType",
+  "collectionName": "tipos_de_bien",
+  "info": {
+    "singularName": "tipo-de-bien",
+    "pluralName": "tipos-de-bien",
+    "displayName": "Tipo de bien",
+    "description": "Catálogo de tipos de bien y si se cobran por unidad (docs/13 §2)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "nombre": {
+      "type": "string",
+      "required": true,
+      "unique": true
+    },
+    "uso": {
+      "type": "enumeration",
+      "enum": ["residencial", "comercial", "otro"],
+      "required": true,
+      "default": "residencial"
+    },
+    "facturable": {
+      "type": "boolean",
+      "required": true,
+      "default": false
+    },
+    "descripcion": {
+      "type": "text"
+    },
+    "activo": {
+      "type": "boolean",
+      "required": true,
+      "default": true
+    }
+  }
+}

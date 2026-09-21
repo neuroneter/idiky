@@ -133,6 +133,20 @@ revisar y de integrar.
   se resolvió corriendo la numeración de la contable a RN-75…91, T-20…32, CU-R-30, CU-A-27 y
   ADR-0010.
 
+### Desplegar al entorno de desarrollo
+
+Lo integrado en `main` se publica en el servidor de desarrollo, **cada quien lo suyo**:
+
+| Quién | Qué despliega | Comando |
+|---|---|---|
+| Mary | Su **maqueta**: la PWA (puerto 8080) | `infra/desplegar.sh origin/main pwa` |
+| Jeimy | Su **maqueta**: la contable (puerto 8081) | `infra/desplegar.sh origin/main contable` |
+| Responsable de integración | BOB (puerto 8082) y cualquier servicio | `infra/desplegar.sh origin/main gestion` |
+
+BLOKY y ALICE todavía no tienen espacio de desarrollo. El paso a paso —llave SSH, verificar
+LangFlow antes y después, qué hacer si algo falla y cómo pedírselo a la IA— está en
+[`infra/guia-de-despliegue.md`](../infra/guia-de-despliegue.md).
+
 ### Formato de commit
 
 ```

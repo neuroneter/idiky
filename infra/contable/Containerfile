@@ -1,0 +1,12 @@
+# Imagen de la aplicacion contable (apps/contable) para el entorno de desarrollo.
+# T-35 · ADR-0011. Contexto de construccion: la raiz del repositorio.
+#
+#   podman build -f infra/contable/Containerfile -t idiky-contable .
+#
+# Copia la carpeta TAL CUAL: la contable no se compila (ADR-0010) y este archivo no le
+# agrega ningun paso. Sigue abriendose con doble clic; esto solo la publica.
+FROM docker.io/library/nginx:1.28-alpine
+COPY infra/contable/nginx.conf /etc/nginx/conf.d/default.conf
+COPY apps/contable/ /usr/share/nginx/html/
+ARG REVISION=sin-revision
+RUN echo "$REVISION" > /usr/share/nginx/html/revision.txt

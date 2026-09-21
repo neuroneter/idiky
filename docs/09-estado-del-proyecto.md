@@ -12,6 +12,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | Dos: `apps/pwa/` (Mary) y `apps/contable/` (Jeimy). **Integrados en una sola rama el 2026-09-10** |
+| **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Todavía sin entidades; faltan el responsable y el disco de datos (T-37) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | No existe. Datos simulados en el navegador, en los dos. |
@@ -19,6 +20,7 @@ nueva o una sesión de IA distinta.
 | **Casos de uso** | 69 documentados: 36 ✅ en el demo, 11 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
 | **Reglas de negocio** | 91 (RN-01…RN-91; RN-41 retirada). RN-75 a RN-91 vienen de la contable |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
+| **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 | **Despliegue** | La contable se publica copiando la carpeta ([`14`](./14-despliegue-de-la-contable.md)). `infra/` está en la rama de infraestructura, no en `main` |
 
@@ -186,6 +188,461 @@ propio archivo, así que esto fue una reorganización del menú, no una reescrit
 1. Declarar y pagar a la DIAN las retenciones acumuladas en `2365` y `2368` (T-31).
 2. Crear y editar tipos de comprobante desde la pantalla (T-29).
 3. Abono parcial a un gasto: hoy o se paga completo o no se paga.
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Cada quien despliega lo suyo desde main (T-35)
+
+**El pedido:** *«documenta todo para que tanto Mary como Yei puedan desde sus espacios de trabajo
+pedir cargar lo que llevan en main y desplegar directamente en el servidor»*. Con una precisión
+que ordena todo: *«lo que Yei y Mary están haciendo son mockups; no serán los espacios de
+desarrollo, estos no están creados todavía»*.
+
+**Antes de documentar hubo que arreglar el despliegue**, porque no era seguro que cada una lo
+usara sola:
+
+- **`desplegar.sh` publicaba los tres servicios a la vez.** Mary, al publicar su maqueta, habría
+  reconstruido BOB con lo que tuviera su rama.
+- **Y eso podía borrar datos.** Se verificó en el código de Strapi: su comparación de esquemas
+  **elimina las tablas y columnas** que el código con el que arranca no tiene. Desplegar BOB desde
+  una rama sin sus tipos de contenido se habría llevado copropiedades, personas y contratos.
+- **Dos despliegues simultáneos** pisaban la misma carpeta del servidor.
+
+**Cómo quedó:**
+
+| | |
+|---|---|
+| **Por servicio** | `infra/desplegar.sh <rama> <pwa\|contable\|gestion\|todo>`: los servicios que no se nombran no se tocan |
+| **BOB solo desde `main`** | Se niega a publicar `gestion` desde un commit que no esté en `origin/main`; forzarlo exige `IDIKY_GESTION_FUERA_DE_MAIN=si` |
+| **Respaldo antes de recrear BOB** | Si el respaldo falla, no se toca el pod. Los previos al despliegue se guardan aparte (5) de los diarios (7) |
+| **Un despliegue a la vez** | `flock` en el servidor: el segundo se detiene sin tocar nada |
+| **Registro** | `~/despliegues/registro.tsv`: fecha, persona, rama, commit, servicios y resultado. Se guardan las últimas 3 copias |
+| **Acceso** | `autorizar-llave.sh` agrega la llave **pública** de una persona, sin sudo y sin repetirla |
+
+**Probado en el servidor, una cosa por vez:** los tres rechazos (sin servicio, servicio
+desconocido, BOB fuera de `main`); publicar solo `pwa`, con la contable y BOB conservando su
+revisión y **el pod de BOB sin reiniciarse**; un segundo despliegue frenado por el candado; BOB con
+el permiso explícito, con **respaldo previo de 44 KB** y los datos intactos; y una llave de prueba
+que se autorizó, entró, se quitó y dejó de entrar. LangFlow, igual a la foto base al final.
+
+**La guía**, [`infra/guia-de-despliegue.md`](../infra/guia-de-despliegue.md), está escrita para
+que Mary y Jeimy —o su IA— la sigan paso a paso: quién despliega qué, la llave SSH de la primera
+vez, la foto de LangFlow antes y después, qué hacer con cada mensaje de error, qué no se hace, y la
+frase para pedírselo a Claude Code. `CLAUDE.md` le recuerda a cualquier IA las tres reglas: solo el
+servicio de quien lo pide, solo desde `main`, y LangFlow antes y después.
+
+**Lo que se dejó escrito para no confundirse:** `pwa` y `contable` son **maquetas**. **BLOKY y
+ALICE todavía no tienen espacio de desarrollo**; cuando se creen, tendrán su propio servicio,
+puerto y responsable.
+
+**Qué falta para que Mary y Jeimy desplieguen:**
+
+1. **Integrar esta rama a `main`.** Hoy `infra/`, BOB y la guía viven en
+   `claude/infra-podman-1wkn5z`, que se integra sin conflictos. Sin eso, desde `main` no hay qué
+   desplegar.
+2. **Sus llaves públicas**, autorizadas con `autorizar-llave.sh`.
+3. **La dirección del servidor y la clave del entorno**, por un canal privado.
+4. **Jeimy puede no tener `git` ni `ssh`** (ADR-0010): mientras no exista el despliegue automático,
+   el responsable de integración despliega por ella.
+
+---
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · BOB ya crea copropiedades, perfiles raíz, planes y contratos (T-37, T-39)
+
+**El pedido:** *«generemos los ajustes ahora en BOB para que podamos ver un poco cómo se crean
+estos perfiles, la creación de los planes, etc., lo que pertenece a BOB»*.
+
+**Qué quedó en BOB.** Ocho tipos de contenido —tipo de bien, plan, servicio adicional,
+copropiedad, persona, asignación, contratación y solicitud— y dos componentes, ubicación y bien
+por tipo. Todo sale de [`13-bob-copropiedades-y-contratos.md`](./13-bob-copropiedades-y-contratos.md)
+y el detalle está en `apps/gestion/README.md`.
+
+**Las reglas viven en el servidor**, en un middleware del Document Service, no en los
+formularios. Se cumplen igual si el registro llega por el panel, por la API o por otro código:
+
+- **El dígito de verificación del NIT** se comprueba con el algoritmo de la DIAN.
+- **Las unidades que se cobran se calculan** del resumen de bienes: parqueaderos, depósitos y
+  bodegas no suman.
+- **Un solo Administrador y un solo Delegado vigentes por copropiedad**, que no pueden ser la misma
+  persona. El soporte del Delegado depende del check de consejo, y solo el Administrador puede
+  ser una empresa.
+- **Lo firmado se copia al contratar y no se edita**: subir la tarifa del plan no cambia una
+  contratación. Se calculan el total, el prorrateo con meses de 30 días y la fecha de fin.
+- **El cambio de Delegado solo entra por `operaciones@idiky.com`.**
+- **Nada se borra.**
+
+**Cómo se probó antes de tocar el servidor.** Strapi se levantó en local sobre una base SQLite
+desechable, con `better-sqlite3` instalado sin guardarlo en el proyecto, y un script recorrió las
+reglas: **52 de 52 comprobaciones**, cada una aceptando lo válido y rechazando lo inválido con su
+mensaje. El script quedó en `apps/gestion/scripts/probar-bob.mjs` para repetirlo al cambiar una
+regla. La prueba encontró un error de tipos antes del despliegue, no después.
+
+**Verificado en el servidor:** Strapi respondió en 5 s; están las diez tablas nuevas; los nueve
+tipos de bien quedaron sembrados (se cobran apartamento, casa, local, oficina y consultorio); las
+etiquetas en español y las columnas quedaron guardadas en el panel; la API pública de los tipos
+nuevos responde 403; y LangFlow sigue igual a la foto base.
+
+**Decisiones de implementación que quedaron escritas en docs/13 §8:** los 12 meses cuentan desde
+el día del contrato; el prorrateo usa la convención comercial (el 1 es mes completo y el 31 cuenta
+como 30); una contratación solo edita su estado, sus notas y el contrato firmado; y el lote quedó
+sin cobro mientras se decide.
+
+**Las etiquetas del panel están en código** (`src/bob/panel.ts`) y se aplican en cada arranque:
+lo que se cambie desde el panel vuelve a lo que dice el código.
+
+**Qué sigue:** que el equipo cree en BOB una copropiedad de prueba con sus dos perfiles raíz, un
+plan y una contratación, y diga qué sobra o falta; resolver lo abierto de docs/13 §7 (los dos
+choques con reglas existentes, IVA, renovación, bordes del prorrateo); y el módulo de auditoría
+(T-38).
+
+---
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) con el responsable de integración · BOB, BLOKY y ALICE, y lo que BOB tiene que saber de una copropiedad
+
+**Los nombres.** Al hablar de «el administrador de IDIKY» y «el administrador de propiedades»
+la conversación se enredó: eran dos sistemas con casi el mismo nombre, y llegó a parecer que
+Strapi usaría Twilio. El responsable propuso bautizarlos, y quedaron así:
+
+| | Qué es | Quién entra y cómo |
+|---|---|---|
+| **BOB** | El *back office* de IDIKY (Strapi, `apps/gestion`) | El equipo de IDIKY, con el login de Strapi. **No usa Twilio** |
+| **BLOKY** | El sistema de las copropiedades (por construir; backend en ADR-0008) | Administrador, Delegado y los perfiles que ellos creen: **un código por SMS o por correo, o Google o Microsoft** |
+| **ALICE** | La app del propietario y residente (hoy, el demo de `apps/pwa`) | Propietarios y residentes |
+
+Se descartó «NIDO» para BLOKY (el responsable quería algo que aludiera a las unidades) y
+«BLOCK» tal cual, porque en programación es una palabra corriente y confunde las búsquedas.
+**BLOKY** sale de «bloque» y de la terminación de IDIKY. La página web será **IDIKY**, y todo
+se presenta como aplicaciones de IDIKY.
+
+**El panel de Strapi pasó a llamarse BOB**: la pestaña dice «BOB», el menú «BOB · IDIKY» y el
+login «BOB · ingresa con tu cuenta» (antes, «IDIKY Gestión» y «Sistema de gestión»). Se
+publicará en **`bob.idiky.com`**; en palabras del responsable, *«funcionalmente el usuario ya lo
+entenderá»*. El dominio y HTTPS siguen pendientes (T-35).
+
+**Lo que se decidió sobre cómo entra una copropiedad a BOB** (refinamiento en curso):
+
+- **Planes**: nombre, condiciones y modalidad **por unidad** o **valor fijo**. **Servicios
+  adicionales** (asesoría financiera, legal…) con valor mensual y **12 meses** de duración. El
+  precio **se copia al contratar**, como en el resto del proyecto (RN-37, RN-85).
+- **Se cobra solo por unidades residenciales o comerciales.** Parqueaderos, depósitos y zonas
+  comunes no cuentan, siguiendo el criterio de la Ley 675 (art. 53).
+- **BOB crea solo dos perfiles por copropiedad: el Administrador y el Delegado.** «Delegado»
+  porque la Ley 675 **no crea la figura de presidente del consejo**, y el consejo solo es
+  obligatorio en comerciales y mixtas de más de 30 bienes privados: la copropiedad lleva un check
+  «tiene consejo de administración», y con él el Delegado es el presidente del consejo; sin él,
+  lo nombra la asamblea (verificado en la norma).
+- **El Delegado puede pedir desde BLOKY el retiro o bloqueo del Administrador**, pero **el nuevo
+  lo crea IDIKY en BOB**. Al construir esa solicitud debe cumplir la ley: el administrador lo
+  remueve la asamblea, o el consejo si existe (art. 50), así que va con el acta.
+- **Un administrador puede tener varias copropiedades**, y en pocos casos ser además propietario
+  o residente: la persona existe una vez y tiene asignaciones por copropiedad.
+- **BOB guarda la ficha y el resumen** (cuántos bienes de cada tipo, para cotizar y cobrar);
+  **el árbol completo hasta la unidad nace en la implementación y es de BLOKY**.
+- **Ubicación**: dirección, geolocalización, **DIVIPOLA de 8 dígitos** (departamento, municipio,
+  centro poblado), estrato (1 a 6, solo uso residencial) y fotos.
+- **Jerarquía propuesta**: agrupaciones de cualquier profundidad (etapa, torre, bloque, manzana,
+  piso…) con tipos que son datos, y bienes con su **naturaleza**: un parqueadero puede ser bien
+  privado con coeficiente o bien común de uso exclusivo sin él (art. 22).
+- **Ingreso a BLOKY**: **un solo código por intento**, por el canal que la persona elija, para
+  no pagar dos envíos. Las credenciales de Twilio Verify ya están en el servidor
+  (`infra/servidor/cargar-integraciones.sh`) y **un SMS de prueba salió desde allá**; todavía
+  no las usa ningún servicio.
+
+**Y en la misma sesión se respondieron las cinco preguntas que quedaban**, y todo quedó reunido
+en [`13-bob-copropiedades-y-contratos.md`](./13-bob-copropiedades-y-contratos.md):
+
+- **El cambio del Delegado se pide a `operaciones@idiky.com`**: como es el superusuario de
+  BLOKY, no hay quién lo pida desde adentro.
+- **Se cobra por las unidades del contrato.** Si el contrato fija un rango y el plan lo
+  restringe, **BLOKY no deja cargar unidades facturables por encima del máximo**.
+- **Todo plan dura 12 meses**, y el primer mes se **prorratea con meses de 30 días**.
+- **El Administrador crea en BLOKY todos los perfiles internos**; el Delegado tiene lo mismo, más
+  la solicitud de cambio o bloqueo del Administrador.
+- **Oficinas y consultorios se cobran; bodegas, parqueaderos y zonas comunes no.**
+
+**Dos de esas respuestas chocan con reglas que ya existen**, y quedaron como pendientes en vez de
+darse por hechas: si «lo mismo que el Administrador» alcanza los actos que el repo reserva al
+administrador (RN-49, el debido proceso de CU-A-23), y si «todos los perfiles internos» quita al
+propietario el registro de las personas de su unidad, que Mary ya construyó (CU-R-27, RN-63).
+Siguen abiertos también el IVA, la renovación y los bordes del prorrateo.
+
+**Dos cuidados con Twilio:** el servicio de Verify se llama «OKMor» y así firma los SMS, así que
+conviene uno llamado IDIKY; y el Auth Token pasó por la conversación al quedar en la plantilla,
+así que conviene regenerarlo (o pasar a una API Key) y volver a subirlo.
+
+---
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · El panel de Strapi con la marca de IDIKY (T-37)
+
+**El pedido:** con el puerto 8082 ya abierto y el superadministrador cambiado por sus datos, el
+responsable pidió *«que este login parezca de IDIKY no de Strapi, lo mismo con el ícono tanto
+de la página de inicio como de la pestaña del explorador»*, revisando los estilos de Mary. Al
+ver el primer resultado agregó: *«poner el mismo fondo que usa Mary en la página de acceso de
+la PWA»*.
+
+**Qué quedó.** Todo sale de la identidad de Mary (`tokens.css`, `Logotipo.tsx`, la puerta de la
+PWA); los productos no comparten código, así que se copió y se dejó dicho de dónde viene:
+
+| | |
+|---|---|
+| **Pestaña** | El ícono de la PWA (`favicon.png`) y el título «IDIKY Gestión» en vez de «Strapi Admin» |
+| **Login** | El logotipo (la casa con la puerta fucsia y «idiky»), «Bienvenido a IDIKY», «Ingresar»; el degradado y las torres de la puerta de la PWA, la tarjeta redondeada y el botón violeta en píldora |
+| **Menú** | El ícono de la PWA como logo, y «IDIKY · Sistema de gestión» |
+| **Todo el panel** | Los colores de Mary con sus papeles: azul en enlaces, foco y selección; violeta en el botón principal; los fondos y bordes de la PWA. Español por defecto, en tú, sin recorridos ni avisos de pago de Strapi |
+
+**Lo que no se pudo igualar:** en la PWA el logotipo va en blanco **encima** de la tarjeta; en
+Strapi va **dentro**, porque ese lugar lo decide su código y no los estilos.
+
+**Verificado con Chrome sin ventana**, con perfil limpio: el título de la pestaña, los textos en
+español, que el favicon servido es byte a byte el de IDIKY, y capturas del login antes y
+después. LangFlow, sin cambios. **El celular no quedó verificado**: Chrome en macOS no deja
+achicar la ventana por debajo de unos 500 px, y la captura sale cortada también sin los
+estilos.
+
+**Dos trampas, y las dos costaron un despliegue** (quedaron en `apps/gestion/README.md`):
+
+- **El logotipo no se dibujaba.** Su comentario XML decía `--color-marca`, y un comentario XML no
+  puede llevar dos guiones seguidos: el SVG era inválido. Se vio en una vista previa local antes
+  de desplegar.
+- **El fondo no aparecía, aunque el CSS estaba en la compilación.** Con `import './marca.css'`
+  Strapi saca el CSS a una hoja aparte que su HTML nunca enlaza. Ahora se importa como texto
+  (`?raw`) y el panel lo inyecta al arrancar.
+
+**Hay que saberlo al subir de versión de Strapi:** logos, colores y textos son configuración
+oficial; el título de la pestaña y el fondo del login se apoyan en la estructura de la página.
+Si una versión nueva la cambia, el panel sigue funcionando pero el login vuelve a verse de
+Strapi, y se revisa `src/admin/extensions/marca.css`.
+
+**De paso se cerraron dos pendientes:** 8082 está en la regla `Dev` de Azure, y nginx registra
+la IP pública real de quien llega, así que el límite de intentos de login de Strapi cuenta por
+persona.
+
+**Qué sigue:** el responsable del sistema y sus primeras entidades; el disco de datos y sacar
+los respaldos del servidor antes de datos reales; el módulo de auditoría (T-38).
+
+---
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · El sistema de gestión, instalado (T-37)
+
+**El pedido:** *«subamos el tope de idiky y realicemos la instalación en el contenedor de la
+base de datos Postgres y los dos servicios»*.
+
+**Qué quedó en el entorno**
+
+- **Un pod, `idiky-gestion`**: nginx (el único con puerto, 8082), Strapi 5.53 sobre Node 24 y
+  PostgreSQL 17, hablándose por `localhost`. PostgreSQL y Strapi **no tienen puerto en el
+  servidor**.
+- **El techo de `idiky` subió a 2 núcleos y 5 GB.**
+- **`apps/gestion/`**, el proyecto Strapi en TypeScript, sin el plugin de Strapi Cloud. Apaga
+  el registro abierto de usuarios en cada arranque y confía en la IP que le pasa nginx.
+- **Secretos generados en el servidor**, fuera del repositorio; **respaldo diario** con
+  `pg_dump`; y **un freno de disco**: `levantar.sh` no construye nada con menos de 3 GB libres.
+
+**Lo que se comprobó, porque aquí nada se da por hecho**
+
+| | |
+|---|---|
+| **LangFlow** | 200 en todas las muestras durante la construcción (2–4 ms); `verificar-vecino.sh` sin cambios después del despliegue y después del redespliegue |
+| **Recursos** | `idiky` llegó a 4,6 GB construyendo, dentro de su techo; en reposo Strapi usa 137 MB y PostgreSQL 92 MB. Disco: de 6,2 a 4,9 GB libres |
+| **Nadie se adelanta** | El superadministrador se creó antes de abrir el puerto, y un segundo registro de administrador se rechaza |
+| **Por HTTP** | El login funciona: la cookie de sesión de Strapi no exige HTTPS |
+| **Cerrado** | La API pública responde 403; el registro abierto está apagado en la base y nginx lo bloquea |
+| **Persistencia** | Los datos sobreviven a reiniciar el pod (vuelve en 7 s) y a un redespliegue que lo recrea |
+| **Respaldo** | Íntegro, con las 41 tablas y el administrador |
+
+**Dos cosas que salieron distinto de lo escrito, y quedaron corregidas en ADR-0012**
+
+- **La clave del entorno no va delante de Strapi.** Yo había escrito que protegería `/admin`, y
+  era un error: el panel de Strapi manda su propio token en la cabecera `Authorization`, la
+  misma de la clave. La puerta es el login de Strapi.
+- **Se instaló sin el disco de datos de Azure**, que sigue sin agregarse. En su lugar, el freno
+  de 3 GB. Antes de cargar datos reales, el disco propio sigue siendo necesario.
+
+**Tres hallazgos que quedaron en «Trampas conocidas» (`infra/README.md` §10):** `du` dice que la
+base pesa 4 KB porque `idiky` no puede leerla por fuera (`podman unshare du` dice 50 MB); con
+`NODE_ENV=production`, `npm ci` omite TypeScript y la compilación falla; y los errores
+`relation … does not exist` de PostgreSQL en el primer arranque son Strapi creando su esquema.
+
+**La receta se actualizó con lo probado.** `infra/nuevo-servicio.md` §5 ya no dice «sin
+probar» sobre pods, volúmenes, secretos, orden de arranque, servicios que no son nginx ni
+tareas programadas: el sistema de gestión es el ejemplo a copiar.
+
+**Qué sigue**
+
+1. **Agregar 8082 a la regla `Dev` de Azure** y comprobar desde internet que Strapi ve la IP
+   real de quien llega.
+2. **El responsable del sistema y sus primeras entidades.** Se modelan en local y van a git.
+3. **El disco de datos de Azure** y **sacar los respaldos del servidor**, antes de datos reales.
+4. **El módulo de auditoría** (T-38).
+
+---
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Un tercer producto: el sistema de gestión de IDIKY (ADR-0012)
+
+**De dónde sale.** El responsable de integración planteó que, además del producto para las
+copropiedades, **la empresa necesita gestionar su propio negocio**: *«un sistema general que
+será quien desde la compañía IDIKI gestione el negocio; este no es para las propiedades»*. Y
+aclaró que la PWA y la contable desplegadas hoy **son el demo**, que Mary y Jeimy siguen
+trabajando; los servicios de desarrollo de verdad se irán creando a partir de aquí.
+
+**La decisión: Strapi 5 con PostgreSQL 17**, en `apps/gestion/`. Él propuso Strapi y
+PostgreSQL; antes de construir nada se comparó con **Directus**, que no conocía y que en lo
+técnico encajaba mejor en varios puntos (tablas SQL normales, auditoría incluida, sin
+compilar). **Se eligió Strapi por la licencia**: la de Directus cambió en mayo de 2026 y su uso
+gratuito depende de un umbral que se revisa cada año; la de Strapi es MIT. En sus palabras:
+*«si bien no trae la auditoría la podemos crear y se dejaría realizar este módulo; me gusta
+mucho Directus pero el tema de la licencia me preocupa un poco»*.
+
+**Lo que quedó escrito en [ADR-0012](./adr/0012-sistema-de-gestion-strapi.md):**
+
+- **Qué es y qué no.** No es contabilidad ni facturación DIAN, y **no es el backend del
+  producto** (ADR-0008 sigue pendiente). Se escribió explícito, porque un sistema con API y base
+  de datos tiende a volverse el backend de todo por acumulación.
+- **El modelo de datos se diseña en local y va a git.** El *Content-Type Builder* de Strapi solo
+  funciona en modo desarrollo; algo modelado dentro del contenedor del servidor se perdería en
+  el siguiente despliegue.
+- **El diseño del módulo de auditoría (T-38), verificado contra la documentación de Strapi 5**:
+  se engancha en el *Document Service* y no en los *lifecycle hooks*, que en v5 se disparan
+  varias veces por operación. Queda escrito lo que no cubre —cambios directos a la base y, por
+  ahora, GraphQL— y que sus registros no se editan ni se borran.
+- **Cinco condiciones para el entorno de desarrollo**, porque es el primer servicio con datos:
+  disco de datos propio en Azure, techo de `idiky` a 2 núcleos y 5 GB, *pod* con PostgreSQL sin
+  puerto hacia afuera, la clave del entorno solo sobre `/admin` y datos ficticios.
+
+**Identificadores:** ADR-0012, T-37 (el sistema) y T-38 (la auditoría), tomados después de
+comprobar los máximos en la rama.
+
+**Qué sigue** (T-37 está bloqueada por esto):
+
+1. **Agregar el disco de datos en Azure** (32 GB).
+2. **Autorizar el techo de `idiky` en 2 núcleos y 5 GB.**
+3. **Definir quién es responsable del sistema de gestión y cuáles son las primeras entidades**
+   (p. ej. copropiedades cliente, contratos, planes).
+
+---
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Cómo crear otro servicio, escrito para quien venga después (T-35)
+
+**El pedido:** *«documentemos como quedo todo en el repositorio indicando como esta configurado
+el contenedor para que si requiero crear otro servicios la IA pueda leer esto y entender como
+crear otro servicios»*.
+
+**Qué se escribió**
+
+| Archivo | Para qué |
+|---|---|
+| `infra/README.md` (reescrito) | **Cómo está armado**: del commit al contenedor, el camino de una petición, los techos de recursos, la unidad de systemd tal como quedó en el servidor, las imágenes, la clave, cómo operar, **lo que vive fuera de git** y las trampas que ya costaron tiempo |
+| `infra/nuevo-servicio.md` (nuevo) | **La receta**: la lista previa, el contrato de un servicio (puerto 80, `/salud`, `/revision.txt`, clave, imágenes con versión fija), los puertos libres (8082–8099), cómo registrarlo en `levantar.sh`, cómo verificarlo y qué documentar |
+| `infra/servidor/verificar-vecino.sh` (nuevo) | La verificación de LangFlow, que hasta hoy vivía fuera del repositorio |
+| `CLAUDE.md` §4 y `docs/06-arquitectura.md` §7 | Los punteros para que un agente llegue a lo anterior |
+
+**Dos decisiones que conviene conocer:**
+
+- **La verificación de LangFlow pasó a ser un script del repositorio, no una lista de pasos.**
+  Una lista se salta; un script que dice «sigue igual» o sale con error, no. Corre como `idiky`,
+  sin `sudo`, y no lleva la IP ni el dominio del servidor. Se probó en los dos sentidos: la foto
+  base de hoy **coincide con la de antes de instalar nada** (mismos PID, cero reinicios, mismos
+  códigos), y contra una foto alterada **detecta el cambio y sale con error**.
+- **Lo que no está resuelto quedó escrito como no resuelto.** Datos persistentes, contenedores
+  que se hablan entre sí, servicios que no son nginx y secretos tienen cada uno un camino
+  sugerido **marcado «sin probar»**, con la instrucción de que quien lo haga primero lo pruebe y
+  quite la marca. Un agente que lee «así se hace» sobre algo que nunca se hizo lo da por hecho.
+
+**El comando de la clave elegida se documentó probándolo.** Así se puso la clave actual. Se
+corrió tal como quedó escrito, con la misma clave, y las dos apps siguieron respondiendo 401 sin
+ella y 200 con ella.
+
+**Qué sigue:** lo mismo de la entrada anterior. HTTPS y dominio, y el pipeline.
+
+---
+
+### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · El entorno de desarrollo, sin tocar al vecino (T-35, ADR-0011)
+
+**De dónde salió.** El pedido fue preparar la infraestructura de desarrollo «según lo acordado
+en la bitácora del 2026-09-10». **La bitácora no tenía ese acuerdo**: solo nombraba T-35 como
+siguiente paso. La decisión se tomó en esta sesión, con el responsable de integración, y quedó
+escrita en [ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md) para que no vuelva a
+pasar.
+
+**La restricción que manda todo.** El único servidor disponible es una VM compartida donde
+corre LangFlow, de otro proyecto, con servicios que lo consultan. En palabras del responsable:
+*«hay que garantizar que langflow siga funcionando en los puertos y rutas que usa ya que hay
+servicios que lo consultan»*.
+
+**Qué se construyó**
+
+| | |
+|---|---|
+| **Motor** | Podman 3.4 **sin root**, el de Ubuntu 22.04. Se descartaron Docker (daemon root que reescribe `iptables` en un servidor ajeno) y el LXD que ya estaba instalado (no deja una receta reproducible en el repositorio) |
+| **Aislamiento** | Un usuario propio, `idiky`, que no puede leer los archivos de LangFlow. La red va en espacio de usuario: no toca `iptables` |
+| **Contenedores** | `idiky-pwa` compila con `npm run build` y sirve con nginx. `idiky-contable` **copia la carpeta tal cual**, así que ADR-0010 queda intacto: sigue abriéndose con doble clic |
+| **Publicación** | Primero solo en `127.0.0.1`, por túnel SSH. **Al final del día, abierto al equipo con clave** (ver abajo) |
+| **Despliegue** | `infra/desplegar.sh` sube **un commit** con `git archive` y reconstruye en unos 30 s. `/revision.txt` dice qué está publicado |
+
+**Cómo se comprobó que LangFlow no cambió.** No bastaba con decir que Idiky no toca nginx:
+
+- **Se tomó una línea base antes de instalar nada**: estado y PID de los servicios, qué
+  proceso escucha en cada puerto, y el código de respuesta de 12 rutas desde dentro del
+  servidor —con el nombre del sitio— y 6 desde internet. Se repitió después de cada cambio y
+  **salió idéntica todas las veces**.
+- **Durante la primera construcción se midió `/health` cada 6 s**: 48 de 48 respuestas 200,
+  entre 2 y 4 ms.
+- **No se ejecutaron flujos reales** para probar, porque tendrían efectos. Se revisó el log de
+  nginx.
+- **Dos alarmas, con su explicación**, porque así hay que buscarlas la próxima vez: los
+  `OPTIONS` sin `POST` eran del propio verificador (`curl`), y los seis errores 500 en la hora
+  del cambio eran de un endpoint de LangFlow que **ya fallaba igual el 2 de septiembre**: el
+  servicio externo que consulta tiene un certificado inválido.
+
+**Lo que el paquete hizo por su cuenta, y se deshizo.** Ubuntu habilita solos la API de Podman
+como root, el auto-update, el arranque de contenedores root y la API para todos los usuarios.
+Idiky no usa nada de eso, así que `preparar-servidor.sh` lo apaga.
+
+**La huella en el servidor:** 11 paquetes nuevos, sin actualizar ninguno de los existentes; el
+usuario `idiky` con *linger*; unos 200 MB de disco. `iptables` no cambió: el ruleset de nft
+solo cambió en los contadores del agente de Azure. Cómo deshacerlo todo está en
+[`infra/README.md`](../infra/README.md).
+
+**Lo que hay que saber a partir de ahora**
+
+- **Todo lo de Idiky vive dentro del usuario `idiky`.** Quedó como regla en `CLAUDE.md` §6.
+- **Abrirlo a la red no es cambiar un número.** Sobre `http://<ip>` el navegador apaga el
+  *service worker* y la huella, que exigen contexto seguro. Hace falta HTTPS, y no por el nginx
+  de LangFlow.
+- **Sin backend no hace falta Compose.** Cuando ADR-0008 traiga una base de datos se revisa
+  ADR-0011: el disco es escaso, y los datos nunca van en `/mnt`, que en Azure se borra al
+  apagar la VM.
+- **El reinicio del servidor no se probó**, porque tumbaría a LangFlow. Los servicios están
+  habilitados con *linger* y deberían volver solos; la primera vez que el servidor se reinicie,
+  hay que mirarlo.
+
+**Y en la misma sesión, abierto al equipo con clave.** En Azure se agregó la regla `Dev`
+(prioridad 340, TCP 8080 y 8081), y **tuvo que quedar abierta a cualquier origen**: Mary y
+Jeimy no tienen IP fija. Con la red abierta, la protección tiene que estar en otro sitio, y se
+puso **antes** de escuchar hacia afuera:
+
+- **Una clave de acceso en los dos nginx** (`clave-acceso.sh`). Sin clave, todo responde 401
+  salvo `/salud`, `/revision.txt` y el manifest. El responsable la aprobó: *«si me gusta lo de
+  la clave para llegar al demo»*. **No es la autenticación de la app**, que sigue como dice
+  ADR-0004: es la puerta del entorno. La clave no está en el repositorio.
+- **Un techo de un núcleo y 3 GB para todo el usuario `idiky`**, puesto por systemd. Sin root,
+  Podman no puede limitar la CPU, y el tráfico que llegue a 8080 y 8081 lo atienden procesos de
+  `idiky`. Si el entorno se satura, choca contra su techo y no contra LangFlow.
+- **El despliegue se vigiló a sí mismo:** si al abrir el demo hubiera respondido sin clave, lo
+  volvía a cerrar en el acto. Respondió 401.
+
+**Verificado desde internet:**
+- Sin clave y con clave equivocada, las dos apps responden 401. Con la correcta, 200, y
+  también sus archivos.
+- nginx arranca aunque la carpeta de la clave no esté montada.
+- LangFlow, otra vez **idéntico a la línea base**.
+
+**Qué sigue**
+
+1. Compartir el usuario y la clave con Mary y Jeimy por un canal privado. Las llaves SSH solo
+   hacen falta para desplegar.
+2. HTTPS y dominio (resto de T-35). Sin eso la clave viaja sin cifrar y la PWA no tiene
+   *service worker* ni huella. No se hará por el nginx de LangFlow.
+3. El pipeline: desplegar al integrar en `main`, en vez de a mano.
+
+---
 
 ### 2026-09-10 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Las dos ramas en una
 
