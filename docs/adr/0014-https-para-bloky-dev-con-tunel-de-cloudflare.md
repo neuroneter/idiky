@@ -39,7 +39,9 @@ que publica BLOKY Dev en **`https://bloky-dev.idiky.com`**:
    regla `Dev` de Azure, y no depende de que la IP del servidor sea estática.
 3. **El nombre público se define en el panel de Cloudflare** (túnel administrado remotamente):
    `bloky-dev.idiky.com` → `http://10.0.2.2:8083`, que es como un contenedor sin root llega al
-   puerto del servidor donde ya escucha el nginx de BLOKY. **La clave del entorno sigue**: el
+   puerto del servidor donde ya escucha el nginx de BLOKY (el contenedor va con
+   `allow_host_loopback=true`; sin eso `10.0.2.2` no responde. Probado el 2026-09-21. La IP
+   privada de la VM, `10.0.0.4`, también sirve con cualquier red). **La clave del entorno sigue**: el
    túnel no la reemplaza, solo cifra el camino hasta el navegador.
 4. `BLOKY_URL_PUBLICA` pasa a `https://bloky-dev.idiky.com`, con lo que la cookie de sesión
    va con `Secure` y el retorno de Google y Microsoft es `https://`.
