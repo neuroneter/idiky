@@ -120,6 +120,9 @@ marcas que cada proveedor permite en su botón de ingreso y el SMS en el azul de
 imágenes descargadas ni dependencias: no dependen de la red y escalan con la letra. La opción
 pasa a fila (icono · texto · flecha), con foco visible.
 
+**Dos pasos en vez de tres** (Daniel): «Documento» y «Autenticación». El «Código» del SMS no
+era un paso aparte, es parte de autenticarse; con Google, Microsoft o Yahoo ni siquiera existe.
+
 **Higiene pendiente (Daniel):** borrar el túnel sobrante en Cloudflare; regenerar los tres
 secretos (Google, Microsoft, Yahoo), que pasaron por el chat de la sesión.
 
