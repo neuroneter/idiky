@@ -98,14 +98,18 @@ LangFlow sigue igual.
 ## 5. Git
 
 - **`main` es la base de todo.** Se creó el 2026-09-10 a partir de la rama de integración
-  `claude/idiky-work-review-ugp3xj`, donde se juntaron las ramas de Mary y de Jeimy. Cada rama
-  nueva sale de `main`; nadie escribe directo en ella. No se sigue trabajando sobre las ramas
-  viejas.
+  `claude/idiky-work-review-ugp3xj`, donde se juntaron las ramas de Mary y de Jeimy. Nadie
+  escribe directo en ella: la actualiza el responsable de integración.
+- **Mary y Jeimy trabajan cada una en su rama de larga vida** (`claude/repository-review-c0p1wd`
+  Mary, `claude/repository-review-1fbujq` Jeimy). Esas ramas **no se borran ni se reemplazan**.
+  El ciclo es: **al empezar cada sesión, traer `main` a la rama** (`git fetch origin && git merge
+  origin/main`, resolver lo que choque, `npm run build`); al terminar, `push` a la misma rama; el
+  responsable de integración lleva la rama a `main` cuando corresponde.
 - Rama de trabajo asignada por sesión (p. ej. `claude/demo-copropiedad-app-*`).
 - Commits: `tipo(ámbito): descripción (CU-X-NN)` — ver `docs/08-convenciones.md`.
-- **Empieza siempre desde `main` actualizado**: `git fetch origin && git checkout -b <rama> origin/main`.
-  Retomar una rama vieja "porque ahí estaba mi trabajo" ya costó dos renumeraciones
-  (2026-09-10 y 2026-09-21).
+- **Nunca trabajes sobre una rama que no tenga el último `main` adentro.** Las dos
+  renumeraciones (2026-09-10 y 2026-09-21) pasaron porque una rama siguió avanzando sin traer
+  `main`: lo que allí se numeró ya existía con otro significado.
 - **Los identificadores nuevos** (`RN-xx`, `CU-X-NN`, `T-xx`, `ADR-NNNN`) se toman **del rango
   reservado a cada persona** en `docs/11-tablero-de-trabajo.md` §0, nunca del "siguiente
   número que veo". Si el rango se agota, se pide otro al responsable de integración.

@@ -739,9 +739,11 @@ Once días después de la primera integración, `main` había avanzado solo por 
 
 **Lo que hay que saber a partir de ahora**
 
-- **Las dos ramas viejas quedan cerradas**: `claude/repository-review-c0p1wd` (Mary) y
-  `claude/infra-podman-1wkn5z`. Mary retoma **desde `main`** con una rama nueva (T-43). Jeimy ya
-  lo hizo así el día 10 y por eso su trabajo entró sin fricción.
+- **Mary y Jeimy siguen en sus ramas de larga vida** (decisión del responsable de integración,
+  2026-09-21): no se borran ni se reemplazan. Lo que cambia es el ciclo: **antes de cada sesión
+  traen `main` a su rama** con `git merge origin/main`, y el integrador lleva la rama a `main`.
+  Jeimy lo hizo así el día 10 y su trabajo entró sin fricción; Mary lo tiene pendiente (T-43).
+  La rama `claude/infra-podman-1wkn5z` queda como historial.
 - **Cada quien tiene un rango de identificadores reservado** (tabla en el
   [tablero](./11-tablero-de-trabajo.md) §0). Es lo único que evita una tercera renumeración.
 - `infra/` está en `main`: la PWA, la contable y BOB se publican con
