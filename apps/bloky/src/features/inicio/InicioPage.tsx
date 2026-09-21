@@ -21,7 +21,7 @@ export function InicioPage() {
       <main className="consola__contenido pila">
         <h1>Estás dentro de BLOKY</h1>
         <p className="subtitulo">
-          Entraste con {sesion.canal === 'sms' ? 'un código por SMS' : sesion.canal === 'google' ? 'Google' : 'Microsoft'} como documento {sesion.documento}.
+          Entraste con {sesion.canal === 'sms' ? 'un código por SMS' : sesion.canal === 'google' ? 'Google' : sesion.canal === 'yahoo' ? 'Yahoo' : 'Microsoft'} como documento {sesion.documento}.
           La sesión vence a las {new Date(sesion.venceEn).toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}
         </p>
         <h2>Tus copropiedades</h2>

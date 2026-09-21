@@ -15,6 +15,7 @@ const TEXTO: Record<Canal, { titulo: string; ayuda: (pista: string) => string }>
   sms: { titulo: 'Código por SMS', ayuda: (p) => `Al celular ${p}` },
   google: { titulo: 'Entrar con Google', ayuda: (p) => `Con la cuenta ${p}` },
   microsoft: { titulo: 'Entrar con Microsoft', ayuda: (p) => `Con la cuenta ${p}` },
+  yahoo: { titulo: 'Entrar con Yahoo', ayuda: (p) => `Con la cuenta ${p}` },
 }
 
 export function CanalPage() {

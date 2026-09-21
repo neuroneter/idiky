@@ -13,7 +13,7 @@
 #                     (Configuracion > API Tokens > Read-only).
 #   TWILIO_*          de .env.integraciones.local (infra/servidor/cargar-integraciones.sh
 #                     ya las deja en integraciones.env; aqui se copian).
-#   GOOGLE_* / MICROSOFT_*   cuando existan las aplicaciones registradas.
+#   GOOGLE_* / MICROSOFT_* / YAHOO_*   cuando existan las aplicaciones registradas.
 #   BLOKY_URL_PUBLICA la URL con la que la gente llega: http://<ip>:8083 mientras no haya
 #                     dominio. Google y Microsoft exigen HTTPS para el retorno: hasta que
 #                     BLOKY tenga dominio con certificado, esos dos canales solo funcionan

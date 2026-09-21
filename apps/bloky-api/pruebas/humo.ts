@@ -99,7 +99,7 @@ await paso('RN-166: cinco codigos malos bloquean el documento', async () => {
 await paso('RN-167: el proveedor sale del dominio del correo', async () => {
   const casos: Array<[string, string | undefined]> = [
     ['a@gmail.com', 'google'], ['A@Googlemail.com', 'google'], ['b@hotmail.com', 'microsoft'], ['b@outlook.es', 'microsoft'],
-    ['b@live.com.mx', 'microsoft'], ['c@msn.com', 'microsoft'], ['d@yahoo.com', undefined], ['e@empresa.com.co', undefined], ['sin-arroba', undefined],
+    ['b@live.com.mx', 'microsoft'], ['c@msn.com', 'microsoft'], ['d@yahoo.com', 'yahoo'], ['d@yahoo.com.mx', 'yahoo'], ['d@ymail.com', 'yahoo'], ['e@empresa.com.co', undefined], ['sin-arroba', undefined],
   ]
   const malos = casos.filter(([c, esperado]) => proveedorDelCorreo(c) !== esperado)
   return malos.length === 0 || `fallan: ${malos.map(([c]) => c).join(', ')}`
@@ -110,6 +110,8 @@ await paso('RN-167: con Gmail se ofrece solo google; con Hotmail solo microsoft;
   const [gmail, hotmail, otro] = await Promise.all([tipos('1004'), tipos('1005'), tipos('1001')])
   return (gmail === 'sms' && hotmail === 'sms' && otro === 'sms') || `gmail=${gmail} hotmail=${hotmail} otro=${otro}`
 })
+await paso('yahoo sin configurar → 409', async () =>
+  (await app.inject({ method: 'GET', url: '/api/acceso/yahoo?tipo=CC&documento=1001' })).statusCode === 409)
 await paso('google sin configurar → 409', async () =>
   (await app.inject({ method: 'GET', url: '/api/acceso/google?tipo=CC&documento=1001' })).statusCode === 409)
 

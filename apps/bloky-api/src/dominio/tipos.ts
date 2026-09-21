@@ -8,7 +8,7 @@ export type TipoDocumento = 'CC' | 'CE' | 'PA' | 'PPT' | 'TI'
 export type RolRaiz = 'administrador' | 'delegado'
 export type EstadoAsignacion = 'vigente' | 'finalizada' | 'bloqueada'
 export type EstadoCopropiedad = 'prospecto' | 'en_implementacion' | 'activa' | 'suspendida' | 'retirada'
-export type Canal = 'sms' | 'google' | 'microsoft'
+export type Canal = 'sms' | 'google' | 'microsoft' | 'yahoo'
 
 /** Lo que BOB sabe de una persona, ya leido y normalizado. */
 export interface PersonaBob {
@@ -61,7 +61,7 @@ export interface IntentoIngreso {
 /** Lo que guarda BLOKY mientras la persona va y vuelve de Google o Microsoft. */
 export interface EstadoOauth {
   estado: string
-  proveedor: 'google' | 'microsoft'
+  proveedor: 'google' | 'microsoft' | 'yahoo'
   tipoDocumento: TipoDocumento
   numeroDocumento: string
   nonce: string

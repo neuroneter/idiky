@@ -7,7 +7,7 @@
  */
 import { createRemoteJWKSet, jwtVerify } from 'jose'
 
-export type Proveedor = 'google' | 'microsoft'
+export type Proveedor = 'google' | 'microsoft' | 'yahoo'
 
 interface ProveedorOidc {
   autorizacion: string
@@ -16,6 +16,9 @@ interface ProveedorOidc {
   /** Comprueba el emisor; Microsoft con tenant `common` lo trae por inquilino. */
   emisorValido(iss: string): boolean
   alcance: string
+  /** Como se identifica el cliente al pedir el token: en el cuerpo (Google, Microsoft) o con
+      Authorization: Basic (Yahoo, que es lo que documenta). Nunca las dos a la vez. */
+  autenticacion: 'cuerpo' | 'basic'
 }
 
 const GOOGLE: ProveedorOidc = {
@@ -24,6 +27,18 @@ const GOOGLE: ProveedorOidc = {
   jwks: 'https://www.googleapis.com/oauth2/v3/certs',
   emisorValido: (iss) => iss === 'https://accounts.google.com' || iss === 'accounts.google.com',
   alcance: 'openid email profile',
+  autenticacion: 'cuerpo',
+}
+
+// Yahoo (Sign In With Yahoo) es OpenID Connect igual que los otros dos. Solo acepta retornos
+// https, asi que en local no se puede probar: se prueba en el entorno con dominio (ADR-0014).
+const YAHOO: ProveedorOidc = {
+  autorizacion: 'https://api.login.yahoo.com/oauth2/request_auth',
+  token: 'https://api.login.yahoo.com/oauth2/get_token',
+  jwks: 'https://api.login.yahoo.com/openid/v1/certs',
+  emisorValido: (iss) => iss === 'https://api.login.yahoo.com',
+  alcance: 'openid email profile',
+  autenticacion: 'basic',
 }
 
 function microsoft(tenant: string): ProveedorOidc {
@@ -33,6 +48,7 @@ function microsoft(tenant: string): ProveedorOidc {
     jwks: `https://login.microsoftonline.com/${tenant}/discovery/v2.0/keys`,
     emisorValido: (iss) => /^https:\/\/login\.microsoftonline\.com\/[0-9a-f-]+\/v2\.0$/.test(iss),
     alcance: 'openid email profile',
+    autenticacion: 'cuerpo',
   }
 }
 
@@ -47,7 +63,7 @@ export function crearClienteOidc(
   cfg: { clientId: string; clientSecret: string; tenant?: string },
   fetchFn: typeof fetch = fetch,
 ): ClienteOidc {
-  const p = proveedor === 'google' ? GOOGLE : microsoft(cfg.tenant ?? 'common')
+  const p = proveedor === 'google' ? GOOGLE : proveedor === 'yahoo' ? YAHOO : microsoft(cfg.tenant ?? 'common')
   const llaves = createRemoteJWKSet(new URL(p.jwks))
   return {
     urlDeAutorizacion({ estado, nonce, redireccion }) {
@@ -58,14 +74,15 @@ export function crearClienteOidc(
       return `${p.autorizacion}?${q}`
     },
     async correoVerificado({ codigo, nonce, redireccion }) {
-      const r = await fetchFn(p.token, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          grant_type: 'authorization_code', code: codigo, redirect_uri: redireccion,
-          client_id: cfg.clientId, client_secret: cfg.clientSecret,
-        }),
-      })
+      const cuerpo0: Record<string, string> = { grant_type: 'authorization_code', code: codigo, redirect_uri: redireccion }
+      const cabeceras: Record<string, string> = { 'Content-Type': 'application/x-www-form-urlencoded' }
+      if (p.autenticacion === 'basic') {
+        cabeceras.Authorization = `Basic ${Buffer.from(`${cfg.clientId}:${cfg.clientSecret}`).toString('base64')}`
+      } else {
+        cuerpo0.client_id = cfg.clientId
+        cuerpo0.client_secret = cfg.clientSecret
+      }
+      const r = await fetchFn(p.token, { method: 'POST', headers: cabeceras, body: new URLSearchParams(cuerpo0) })
       if (!r.ok) return undefined
       const cuerpo = (await r.json()) as { id_token?: string }
       if (!cuerpo.id_token) return undefined
@@ -73,8 +90,8 @@ export function crearClienteOidc(
       if (typeof payload.iss !== 'string' || !p.emisorValido(payload.iss)) return undefined
       if (payload.nonce !== nonce) return undefined
       const correo = (payload.email ?? payload.preferred_username) as string | undefined
-      // Google marca si el correo esta verificado; Microsoft no trae la marca y el correo de la
-      // cuenta ya lo verifico Microsoft al crearla.
+      // Google marca si el correo esta verificado; Microsoft y Yahoo no traen la marca de forma
+      // fiable y el correo de la cuenta ya lo verifico el proveedor al crearla.
       if (proveedor === 'google' && payload.email_verified !== true) return undefined
       return correo
     },

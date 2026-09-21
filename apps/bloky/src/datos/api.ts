@@ -4,7 +4,7 @@
  * se guarda ningun token.
  */
 export type TipoDocumento = 'CC' | 'CE' | 'PA' | 'PPT' | 'TI'
-export type Canal = 'sms' | 'google' | 'microsoft'
+export type Canal = 'sms' | 'google' | 'microsoft' | 'yahoo'
 export interface Identificacion { tipoDocumento: TipoDocumento; numeroDocumento: string }
 export interface Identificado {
   nombre: string
@@ -42,6 +42,6 @@ export const api = {
   sesion: () => llamar<{ sesion: SesionPublica }>('/api/sesion'),
   salir: () => llamar<{ ok: true }>('/api/salir', {}),
   /** Google y Microsoft son una ida y vuelta del navegador entero: no es fetch. */
-  urlProveedor: (proveedor: 'google' | 'microsoft', id: Identificacion) =>
+  urlProveedor: (proveedor: 'google' | 'microsoft' | 'yahoo', id: Identificacion) =>
     `/api/acceso/${proveedor}?tipo=${encodeURIComponent(id.tipoDocumento)}&documento=${encodeURIComponent(id.numeroDocumento)}`,
 }

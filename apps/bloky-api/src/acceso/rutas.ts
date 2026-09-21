@@ -9,7 +9,7 @@ import type { Proveedor } from './oidc.js'
 import { NOMBRE_COOKIE, type crearSesiones } from './sesion.js'
 
 const TIPOS: TipoDocumento[] = ['CC', 'CE', 'PA', 'PPT', 'TI']
-const PROVEEDORES: Proveedor[] = ['google', 'microsoft']
+const PROVEEDORES: Proveedor[] = ['google', 'microsoft', 'yahoo']
 
 function identificacionDe(cuerpo: unknown): Identificacion {
   const c = (cuerpo ?? {}) as Record<string, unknown>
