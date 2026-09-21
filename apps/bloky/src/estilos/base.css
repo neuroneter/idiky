@@ -60,6 +60,7 @@ a { color: var(--color-marca); }
   background: var(--color-superficie); cursor: pointer; font-weight: 600;
 }
 .boton:disabled { opacity: 0.55; cursor: not-allowed; }
+.boton:focus-visible { outline: 2px solid var(--color-marca); outline-offset: 2px; }
 .boton--bloque { width: 100%; }
 .boton--pequeno { min-height: 36px; padding: var(--e1) var(--e3); font-size: var(--texto-sm); }
 .boton--primario { background: var(--color-acento); border-color: var(--color-acento); color: var(--color-texto-inverso); }
@@ -88,17 +89,114 @@ a { color: var(--color-marca); }
 .chip--marca { background: var(--color-marca-suave); color: var(--color-marca); }
 .chip--acento { background: var(--color-acento-suave); color: var(--color-acento); }
 
-/* ---------------------------------------------------------------- La puerta */
+/* ---------------------------------------------------------------- La puerta
+   Una sola puerta que cambia de forma con el aparato (Puerta.tsx). Primero el celular, que
+   es el caso base; la tableta y el computador se agregan con dos cortes. */
 .puerta {
-  min-height: 100dvh; padding: var(--e6) var(--e4);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--e5);
-  background: var(--degradado-marca);
+  min-height: 100dvh;
+  display: flex; flex-direction: column;
+  background: var(--degradado-marca-vertical);
 }
-.puerta__marca { text-align: center; color: var(--color-texto-inverso); }
-.puerta__lema { margin-top: var(--e2); opacity: 0.9; }
-.puerta__tarjeta { width: 100%; max-width: 420px; display: flex; flex-direction: column; gap: var(--e4); }
-.puerta__titulo { font-size: var(--texto-xl); }
-.puerta__pie { color: var(--color-texto-inverso); opacity: 0.75; font-size: var(--texto-xs); text-align: center; }
+/* La marca: arriba en el celular, panel izquierdo en el computador. */
+.puerta__marca {
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column; align-items: center; gap: var(--e3);
+  padding: calc(var(--e4) + env(safe-area-inset-top)) var(--e4) var(--e6);
+  color: var(--color-texto-inverso); text-align: center;
+}
+.puerta__marca-contenido { position: relative; z-index: 1; max-width: 460px; }
+.puerta__lema { margin-top: var(--e2); color: rgba(255, 255, 255, 0.85); font-size: var(--texto-sm); }
+.puerta__lema strong { color: var(--color-texto-inverso); }
+/* La frase de valor solo cabe en el computador. */
+.puerta__frase { display: none; margin-top: var(--e4); font-size: var(--texto-lg); line-height: 1.4; color: rgba(255, 255, 255, 0.92); }
+.puerta__siluetas { position: absolute; right: -28px; bottom: -4px; width: 240px; height: auto; color: #fff; opacity: 0.1; pointer-events: none; }
+.puerta__tamano { position: relative; z-index: 2; align-self: flex-end; }
+
+/* El formulario: hoja blanca pegada abajo en el celular. */
+.puerta__panel {
+  flex: 1; display: flex; flex-direction: column;
+  background: var(--color-superficie);
+  border-radius: var(--radio-lg) var(--radio-lg) 0 0;
+  box-shadow: var(--sombra-3);
+  padding: var(--e5) var(--e4) calc(var(--e5) + env(safe-area-inset-bottom));
+}
+.puerta__formulario { flex: 1; width: 100%; max-width: 440px; margin: 0 auto; display: flex; flex-direction: column; gap: var(--e4); }
+.puerta__titulo { font-size: var(--texto-2xl); }
+.puerta__pie { margin-top: var(--e5); color: var(--color-texto-tenue); font-size: var(--texto-xs); text-align: center; }
+
+/* Tableta: la hoja se vuelve tarjeta centrada. */
+@media (min-width: 700px) {
+  .puerta { align-items: center; justify-content: center; padding: var(--e6) var(--e4); gap: var(--e2); }
+  .puerta__marca { padding: 0 0 var(--e4); }
+  .puerta__siluetas { display: none; }
+  .puerta__panel { flex: 0 0 auto; width: 100%; max-width: 560px; border-radius: var(--radio-lg); padding: var(--e6); }
+}
+
+/* Computador: dos paneles, la marca a la izquierda y el formulario a la derecha. */
+@media (min-width: 960px) {
+  .puerta { flex-direction: row; align-items: stretch; padding: 0; gap: 0; }
+  .puerta__marca {
+    flex: 1 1 50%; align-items: flex-start; text-align: left; justify-content: center;
+    padding: var(--e6) var(--e7);
+  }
+  /* El control de la letra va a la esquina, para que la marca quede centrada en su panel. */
+  .puerta__tamano { position: absolute; top: var(--e5); left: var(--e7); align-self: auto; align-items: flex-start; }
+  .puerta__frase { display: block; }
+  .puerta__siluetas { display: block; width: min(46vw, 520px); right: -40px; bottom: -8px; opacity: 0.12; }
+  .puerta__panel {
+    flex: 1 1 50%; max-width: none; justify-content: center;
+    border-radius: 0; box-shadow: none; padding: var(--e7);
+  }
+  .puerta__formulario { flex: 0 0 auto; max-width: 420px; }
+  .puerta__pie { position: absolute; right: var(--e5); bottom: var(--e4); margin: 0; }
+  .puerta__panel { position: relative; }
+}
+
+/* Los tres pasos del ingreso, sobre blanco. Saber cuanto falta evita abandonar a la mitad. */
+.pasos { display: flex; gap: var(--e2); margin: 0; padding: 0; list-style: none; counter-reset: paso; }
+.pasos li {
+  flex: 1; display: flex; align-items: center; gap: var(--e2);
+  padding-top: var(--e2); border-top: 3px solid var(--color-borde);
+  font-size: var(--texto-xs); font-weight: 600; color: var(--color-texto-tenue);
+}
+.pasos li::before {
+  counter-increment: paso; content: counter(paso);
+  display: grid; place-items: center;
+  flex: 0 0 calc(18px * var(--escala-texto)); width: calc(18px * var(--escala-texto)); height: calc(18px * var(--escala-texto));
+  border-radius: var(--radio-completo); background: var(--color-borde); color: var(--color-texto-suave);
+  font-size: calc(0.62rem * var(--escala-texto));
+}
+.pasos li.activo { color: var(--color-marca); border-top-color: var(--color-marca-claro); }
+.pasos li.activo::before { background: var(--color-marca-claro); color: var(--color-texto-inverso); }
+.pasos li.hecho { color: var(--color-texto-suave); border-top-color: var(--color-marca); }
+.pasos li.hecho::before { background: var(--color-marca); color: var(--color-texto-inverso); }
+
+/* ---------------------------------------------------------------- Tamano de la letra (CU-R-26)
+   Copiado del demo (layout.css). Plegado en la puerta, sobre el degradado. */
+.tamano-letra { display: flex; flex-direction: column; align-items: flex-end; gap: var(--e2); }
+.tamano-letra__boton {
+  display: inline-flex; align-items: center; gap: var(--e2);
+  min-height: 44px; padding: 0 var(--e4);
+  border: 1px solid rgba(255, 255, 255, 0.32); border-radius: var(--radio-completo);
+  background: rgba(255, 255, 255, 0.16); color: var(--color-texto-inverso);
+  font-size: var(--texto-sm); font-weight: 600; cursor: pointer;
+}
+.tamano-letra__boton:hover { background: rgba(255, 255, 255, 0.26); }
+.tamano-letra__boton:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.tamano-letra__panel { width: min(100%, 320px); padding: var(--e3); border-radius: var(--radio); background: var(--color-superficie); box-shadow: var(--sombra-2); color: var(--color-texto); text-align: left; }
+.opciones-tamano { display: flex; flex-direction: column; gap: var(--e2); }
+.opcion-tamano {
+  display: flex; align-items: center; gap: var(--e3);
+  min-height: 52px; padding: var(--e2) var(--e3);
+  border: 1px solid var(--color-borde-fuerte); border-radius: var(--radio-sm);
+  background: var(--color-superficie); text-align: left; cursor: pointer;
+}
+.opcion-tamano[aria-pressed='true'] { border-color: var(--color-acento); background: var(--color-acento-suave); }
+.opcion-tamano__muestra { flex: 0 0 2.6rem; text-align: center; font-weight: 700; line-height: 1; color: var(--color-marca); }
+.opcion-tamano__nombre { flex: 1; font-size: var(--texto-sm); font-weight: 650; }
+.opcion-tamano__porcentaje { font-size: var(--texto-xs); color: var(--color-texto-tenue); }
+.opcion-tamano[aria-pressed='true'] .opcion-tamano__nombre,
+.opcion-tamano[aria-pressed='true'] .opcion-tamano__muestra { color: var(--color-acento); }
 
 /* ---------------------------------------------------------------- El interior */
 .consola { min-height: 100dvh; display: flex; flex-direction: column; }

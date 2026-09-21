@@ -52,7 +52,7 @@ export function IngresoPage() {
   }
 
   return (
-    <Puerta titulo="Ingresar">
+    <Puerta titulo="Ingresar" paso={1}>
       <form onSubmit={identificar} className="pila">
         <div className="campo">
           <label htmlFor="tipo">Tipo de documento</label>

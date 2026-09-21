@@ -47,7 +47,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-23 | **Dar poder para que otro vote por mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-23) |
 | CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-24) |
 | CU-R-25 | **Activar mi cuenta o recuperar mi contraseña** | 1 | 🟡 Parcial (el flujo, sin autenticar) | [ver](./casos-de-uso/residente.md#cu-r-25) |
-| CU-R-26 | **Ajustar el tamaño de la letra** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-26) |
+| CU-R-26 | **Ajustar el tamaño de la letra** | 1 | ✅ Demo · ✅ BLOKY (en la puerta, 2026-09-21) | [ver](./casos-de-uso/residente.md#cu-r-26) |
 | CU-R-27 | **Registrar y dar de baja a las personas de mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-27) |
 | CU-R-28 | **Adjuntar mis documentos a un registro** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-28) |
 | CU-R-29 | **Ver un proceso sancionatorio y defenderme** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-29) |
