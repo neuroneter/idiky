@@ -2,9 +2,11 @@
 # Crea el archivo de secretos del tunel de Cloudflare (T-76 · ADR-0014).
 #
 # Corre EN EL SERVIDOR, como `idiky`, UNA vez. El token viaja por la entrada estandar, no por
-# la linea de comandos (quedaria en el historial y en `ps`):
+# la linea de comandos (quedaria en el historial y en `ps`). Como la entrada estandar la ocupa
+# el token, el script se copia primero (no vale `sh -s` < script, se pisan):
 #
-#   printf '%s\n' 'EL-TOKEN' | ssh -i ~/.ssh/<llave> idiky@<ip> 'sh -s' < infra/tunel/secretos.sh
+#   scp -i ~/.ssh/<llave> infra/tunel/secretos.sh idiky@<ip>:/tmp/
+#   printf '%s\n' 'EL-TOKEN' | ssh -i ~/.ssh/<llave> idiky@<ip> 'sh /tmp/secretos.sh; rm /tmp/secretos.sh'
 #
 # Deja ~/.config/idiky/secretos/tunel.env con permisos 600, que levantar.sh pasa al contenedor
 # con --env-file. Si ya existe NO lo toca: para cambiar el token, borrarlo primero.
