@@ -19,6 +19,7 @@ export interface Config {
   bob: { url: string; token: string }
   twilio?: { cuentaSid: string; usuario: string; clave: string; verifySid: string }
   google?: { clientId: string; clientSecret: string }
+  yahoo?: { clientId: string; clientSecret: string }
   microsoft?: { clientId: string; clientSecret: string; tenant: string }
 }
 
@@ -50,6 +51,8 @@ export function cargarConfig(env: NodeJS.ProcessEnv = process.env): Config {
   const googleSecret = leer('GOOGLE_CLIENT_SECRET')
   const msId = leer('MICROSOFT_CLIENT_ID')
   const msSecret = leer('MICROSOFT_CLIENT_SECRET')
+  const yahooId = leer('YAHOO_CLIENT_ID')
+  const yahooSecret = leer('YAHOO_CLIENT_SECRET')
 
   return {
     entorno,
@@ -65,5 +68,6 @@ export function cargarConfig(env: NodeJS.ProcessEnv = process.env): Config {
     microsoft: msId && msSecret
       ? { clientId: msId, clientSecret: msSecret, tenant: leer('MICROSOFT_TENANT_ID', 'common')! }
       : undefined,
+    yahoo: yahooId && yahooSecret ? { clientId: yahooId, clientSecret: yahooSecret } : undefined,
   }
 }

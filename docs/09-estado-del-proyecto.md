@@ -108,6 +108,25 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Yahoo, el tercer proveedor del ingreso (CU-B-01)
+
+**Por qué:** Daniel quiere cubrir «los tres correos más usados en Latinoamérica»: Gmail,
+Hotmail/Outlook y Yahoo. Outlook ya estaba cubierto por la aplicación de Microsoft (es la misma
+cuenta personal que Hotmail, Live y MSN, y RN-167 ya los reconocía).
+
+**Qué se hizo:** Yahoo entra como proveedor OpenID Connect igual que los otros dos
+(`oidc.ts`: `request_auth`, `get_token`, `certs`, emisor `api.login.yahoo.com`). Diferencias
+que quedaron resueltas: Yahoo se identifica ante su servidor de tokens con `Authorization:
+Basic` (los otros lo hacen en el cuerpo; nunca las dos a la vez), y **no acepta retornos a
+`localhost`**, así que solo se prueba en el entorno con dominio. `YAHOO_CLIENT_ID` y
+`YAHOO_CLIENT_SECRET` en la configuración, ruta `/api/acceso/yahoo`, botón «Entrar con Yahoo»
+en la puerta, RN-167 reconoce `yahoo.*`, `ymail.*` y `rocketmail.*`. La guía tiene su sección
+«2 bis». Pruebas: dieciséis, todas pasan; la base no cambia (las columnas son texto).
+
+**Estado:** desplegado sin credenciales (el botón no aparece hasta que existan). Pendiente:
+Daniel registra la aplicación en developer.yahoo.com, se cargan los dos valores y se prueba con
+un correo de Yahoo en una persona de prueba.
+
 ### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Los tres canales del ingreso funcionan: SMS, Google y Microsoft (CU-B-01 completo)
 
 **Qué se hizo:** Daniel registró la aplicación en Microsoft Entra (pantalla por pantalla, con

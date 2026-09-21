@@ -38,6 +38,7 @@ con un BOB de verdad hace falta un **token de API de solo lectura** creado en el
 | `TWILIO_ACCOUNT_SID`, `TWILIO_VERIFY_SERVICE_SID` y `TWILIO_AUTH_TOKEN` o `TWILIO_API_KEY_SID` + `TWILIO_API_KEY_SECRET` | Códigos por SMS |
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Entrar con Google. Cómo obtenerlos: [`infra/bloky/credenciales-google-microsoft.md`](../../infra/bloky/credenciales-google-microsoft.md) |
 | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_TENANT_ID` | Entrar con Microsoft |
+| `YAHOO_CLIENT_ID`, `YAHOO_CLIENT_SECRET` | Entrar con Yahoo (solo con dominio HTTPS: Yahoo no acepta `localhost`) |
 
 ## Rutas
 
@@ -46,7 +47,7 @@ con un BOB de verdad hace falta un **token de API de solo lectura** creado en el
 | `POST /api/acceso/identificar` | `{tipoDocumento, numeroDocumento}` → nombre, canales disponibles (con pista) y copropiedades |
 | `POST /api/acceso/enviar-codigo` | Manda el código al celular de BOB |
 | `POST /api/acceso/verificar-codigo` | `{…, codigo}` → abre la sesión (cookie `bloky_sesion`) |
-| `GET /api/acceso/google?tipo=CC&documento=…` | Redirige a Google; `…/microsoft` igual |
+| `GET /api/acceso/google?tipo=CC&documento=…` | Redirige a Google; `…/microsoft` y `…/yahoo` igual |
 | `GET /api/acceso/<proveedor>/retorno` | Vuelve del proveedor, compara el correo con BOB y abre la sesión |
 | `GET /api/sesion` | La sesión viva, o 401 |
 | `POST /api/salir` | Revoca la sesión y borra la cookie |

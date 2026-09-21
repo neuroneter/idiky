@@ -61,7 +61,7 @@ export function crearServicioAcceso(deps: {
     /** Paso 1: quien es y por donde puede entrar. */
     async identificar(id: Identificacion) {
       const { persona, copropiedades } = await personaConAcceso(id)
-      const canales = canalesDisponibles(persona, { google: !!deps.oidc.google, microsoft: !!deps.oidc.microsoft })
+      const canales = canalesDisponibles(persona, { google: !!deps.oidc.google, microsoft: !!deps.oidc.microsoft, yahoo: !!deps.oidc.yahoo })
       if (canales.length === 0) throw new ErrorAcceso('canal_no_disponible', 'Tu registro no tiene celular ni correo utilizables. Escribe a operaciones@idiky.com.')
       return { nombre: persona.nombre, canales, copropiedades }
     },
@@ -88,7 +88,7 @@ export function crearServicioAcceso(deps: {
       return deps.sesiones.abrir({ personaId: persona.id, nombre: persona.nombre, ...id, canal: 'sms', copropiedades })
     },
 
-    /** Paso 2b: a donde mandar a la persona para que Google o Microsoft confirmen su correo. */
+    /** Paso 2b: a donde mandar a la persona para que Google, Microsoft o Yahoo confirmen su correo. */
     async iniciarProveedor(proveedor: Proveedor, id: Identificacion): Promise<string> {
       const cliente = deps.oidc[proveedor]
       if (!cliente) throw new ErrorAcceso('canal_no_disponible', 'Ese proveedor no está configurado en este entorno.')

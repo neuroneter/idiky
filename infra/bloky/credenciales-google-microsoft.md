@@ -1,8 +1,8 @@
-# Entrar a BLOKY con Google o Microsoft — cómo registrar las aplicaciones
+# Entrar a BLOKY con Google, Microsoft o Yahoo — cómo registrar las aplicaciones
 
-Guía para el responsable de integración. Es un trámite de una vez en dos consolas: la de Google
-Cloud y la de Microsoft Entra. Al final salen **cuatro valores**, que se guardan en el archivo de
-secretos del servidor y nunca en el repositorio.
+Guía para el responsable de integración. Es un trámite de una vez en tres consolas: la de Google
+Cloud, la de Microsoft Entra y la de Yahoo. Al final salen **seis valores**, que se guardan en el
+archivo de secretos del servidor y nunca en el repositorio.
 
 El código ya está construido (CU-B-01, ADR-0008): la puerta muestra los botones «Entrar con
 Google» y «Entrar con Microsoft» **sola**, en cuanto la API arranca con estos valores. BLOKY no
@@ -18,7 +18,10 @@ una dirección fija que hay que registrar **exactamente igual** en las dos conso
 | Dónde | `BLOKY_URL_PUBLICA` | Retorno de Google | Retorno de Microsoft |
 |---|---|---|---|
 | En tu máquina (`npm run dev`) | `http://localhost:5173` | `http://localhost:5173/api/acceso/google/retorno` | `http://localhost:5173/api/acceso/microsoft/retorno` |
-| Entorno de desarrollo | `https://bloky-dev.idiky.com` *(propuesto)* | `https://bloky-dev.idiky.com/api/acceso/google/retorno` | `https://bloky-dev.idiky.com/api/acceso/microsoft/retorno` |
+| Entorno de desarrollo | `https://bloky-dev.idiky.com` | `https://bloky-dev.idiky.com/api/acceso/google/retorno` | `https://bloky-dev.idiky.com/api/acceso/microsoft/retorno` |
+
+Yahoo es igual, con `/api/acceso/yahoo/retorno`, pero **no acepta `localhost`**: solo se registra y se
+prueba la del dominio.
 
 **Los dos proveedores exigen `https://`**, salvo para `localhost`. Por eso en el servidor no
 sirve `http://20.55.251.120:8083`: hasta que BLOKY Dev tenga dominio con certificado, Google y
@@ -79,13 +82,27 @@ Resultado: `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET` y `MICROSOFT_TENANT_
 (`common` es lo que permite cuentas personales y de cualquier organización; no uses el id del
 inquilino de IDIKY, o Hotmail deja de entrar).
 
+## 2 bis. Yahoo
+
+1. Entra a <https://developer.yahoo.com/apps/> con una cuenta de Yahoo y pulsa **Create an App**.
+2. Rellena: Application Name `BLOKY`; Description libre; Homepage URL
+   `https://bloky-dev.idiky.com`; **Redirect URI(s)** `https://bloky-dev.idiky.com/api/acceso/yahoo/retorno`;
+   OAuth Client Type **Confidential Client**; en API Permissions marca **OpenID Connect
+   Permissions** y, dentro, **Email** y **Profile**. **Create App**.
+3. En la pantalla de la aplicación aparecen **Client ID (Consumer Key)** y **Client Secret
+   (Consumer Secret)**. El secreto se puede volver a ver ahí mismo.
+
+Resultado: `YAHOO_CLIENT_ID` y `YAHOO_CLIENT_SECRET`. Yahoo se identifica ante su servidor de
+tokens con `Authorization: Basic`, que la API ya hace por él.
+
 ## 3. Dónde van los valores
 
 **Nunca en el repositorio ni en un chat de grupo.** Se pasan por un canal privado y se escriben:
 
 - **En el servidor**, en `~/.config/idiky/secretos/bloky-api.env` (permisos 600), como líneas
   `GOOGLE_CLIENT_ID=…`, `GOOGLE_CLIENT_SECRET=…`, `MICROSOFT_CLIENT_ID=…`,
-  `MICROSOFT_CLIENT_SECRET=…`, `MICROSOFT_TENANT_ID=common`. Ahí mismo `BLOKY_URL_PUBLICA` tiene
+  `MICROSOFT_CLIENT_SECRET=…`, `MICROSOFT_TENANT_ID=common`, `YAHOO_CLIENT_ID=…`,
+  `YAHOO_CLIENT_SECRET=…`. Ahí mismo `BLOKY_URL_PUBLICA` tiene
   que ser la dirección `https://` del dominio. Luego se reinicia el pod
   (`infra/desplegar.sh origin/main bloky` vuelve a levantarlo con el archivo nuevo).
 - **En tu máquina**, en `apps/bloky-api/.env` (está en `.gitignore`), con

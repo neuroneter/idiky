@@ -33,6 +33,7 @@ export async function construirApp(cfg = cargarConfig()) {
   const oidc: Partial<Record<Proveedor, ClienteOidc>> = {}
   if (cfg.google) oidc.google = crearClienteOidc('google', cfg.google)
   if (cfg.microsoft) oidc.microsoft = crearClienteOidc('microsoft', cfg.microsoft)
+  if (cfg.yahoo) oidc.yahoo = crearClienteOidc('yahoo', cfg.yahoo)
 
   const sesiones = crearSesiones(repo, cfg.jwtSecreto, cfg.horasSesion)
   const servicio = crearServicioAcceso({ bob: crearClienteBob(cfg.bob.url, cfg.bob.token), repo, sesiones, codigos, oidc, urlPublica: cfg.urlPublica })
