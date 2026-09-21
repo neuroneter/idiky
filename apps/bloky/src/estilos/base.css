@@ -113,12 +113,24 @@ a { color: var(--color-marca); }
   padding: calc(var(--e4) + env(safe-area-inset-top)) var(--e4) var(--e6);
   color: var(--color-texto-inverso); text-align: center;
 }
-.puerta__marca-contenido { position: relative; z-index: 1; max-width: 460px; }
-.puerta__lema { margin-top: var(--e2); color: rgba(255, 255, 255, 0.85); font-size: var(--texto-sm); }
-.puerta__lema strong { color: var(--color-texto-inverso); }
-/* La frase de valor solo cabe en el computador. */
-.puerta__frase { display: none; margin-top: var(--e4); font-size: var(--texto-lg); line-height: 1.4; color: rgba(255, 255, 255, 0.92); }
-.puerta__siluetas { position: absolute; right: -28px; bottom: -4px; width: 240px; height: auto; color: #fff; opacity: 0.1; pointer-events: none; }
+.puerta__marca-contenido { position: relative; z-index: 1; max-width: 520px; display: flex; flex-direction: column; align-items: inherit; }
+/* BLOKY, el nombre de la aplicacion, es lo mas grande de la puerta. */
+.puerta__producto {
+  font-size: calc(2.6rem * var(--escala-texto)); font-weight: 800; letter-spacing: 0.06em; line-height: 1;
+  color: var(--color-texto-inverso);
+}
+.puerta__lema { margin-top: var(--e2); color: rgba(255, 255, 255, 0.92); font-size: var(--texto-lg); font-weight: 500; }
+/* La frase de valor y los modulos solo caben en el computador. */
+.puerta__frase { display: none; margin-top: var(--e5); font-size: var(--texto-lg); line-height: 1.45; color: rgba(255, 255, 255, 0.86); }
+.puerta__modulos { display: none; margin: var(--e4) 0 0; padding: 0; list-style: none; flex-wrap: wrap; gap: var(--e2); }
+.puerta__modulos li {
+  padding: var(--e1) var(--e3); border-radius: var(--radio-completo);
+  border: 1px solid rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.12);
+  font-size: var(--texto-xs); font-weight: 600; color: var(--color-texto-inverso);
+}
+/* idiky firma en pequeno: la marca madre no compite con el nombre de la aplicacion. */
+.puerta__firma { display: inline-flex; align-items: center; gap: var(--e2); margin-top: var(--e4); font-size: var(--texto-sm); color: rgba(255, 255, 255, 0.8); }
+.puerta__siluetas { position: absolute; right: -28px; bottom: -4px; width: 260px; height: auto; color: #fff; opacity: 0.12; pointer-events: none; }
 .puerta__tamano { position: relative; z-index: 2; align-self: flex-end; }
 
 /* El formulario: hoja blanca pegada abajo en el celular. */
@@ -138,6 +150,7 @@ a { color: var(--color-marca); }
   .puerta { align-items: center; justify-content: center; padding: var(--e6) var(--e4); gap: var(--e2); }
   .puerta__marca { padding: 0 0 var(--e4); }
   .puerta__siluetas { display: none; }
+  .puerta__producto { font-size: calc(3.2rem * var(--escala-texto)); }
   .puerta__panel { flex: 0 0 auto; width: 100%; max-width: 560px; border-radius: var(--radio-lg); padding: var(--e6); }
 }
 
@@ -150,8 +163,12 @@ a { color: var(--color-marca); }
   }
   /* El control de la letra va a la esquina, para que la marca quede centrada en su panel. */
   .puerta__tamano { position: absolute; top: var(--e5); left: var(--e7); align-self: auto; align-items: flex-start; }
+  .puerta__producto { font-size: calc(4.5rem * var(--escala-texto)); }
+  .puerta__lema { font-size: var(--texto-xl); }
   .puerta__frase { display: block; }
-  .puerta__siluetas { display: block; width: min(46vw, 520px); right: -40px; bottom: -8px; opacity: 0.12; }
+  .puerta__modulos { display: flex; }
+  .puerta__firma { margin-top: var(--e6); }
+  .puerta__siluetas { display: block; width: min(58vw, 680px); right: -48px; bottom: -10px; opacity: 0.16; }
   .puerta__panel {
     flex: 1 1 50%; max-width: none; justify-content: center;
     border-radius: 0; box-shadow: none; padding: var(--e7);
