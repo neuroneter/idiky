@@ -19,7 +19,7 @@ nueva o una sesión de IA distinta.
 | **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
-| **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
+| **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 71 documentados: 38 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01, probado en el servidor el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
 | **Reglas de negocio** | 97 del demo (RN-01…RN-97; RN-41 retirada) + 7 de BLOKY (RN-160…RN-166). RN-75 a RN-91 vienen de la contable; RN-92 a RN-97, de las asambleas y registros de Mary |
@@ -107,6 +107,36 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · BLOKY Dev ya tiene HTTPS: `https://bloky-dev.idiky.com` (T-76, ADR-0014)
+
+**Qué se hizo, en el orden en que pasó**
+
+1. **DNS de idiky.com a Cloudflare** (Daniel, guiado paso a paso). Antes de mover: el dominio
+   solo tenía la `A` de la web (`20.83.154.178`), sin correo ni `TXT`, así que el riesgo era
+   mínimo. En Cloudflare quedaron `idiky.com` y `www` en «DNS only» (la web sigue directa) y
+   se quitó el `CNAME _domainconnect` de GoDaddy. Servidores de nombres: `dale` y `olga`
+   `.ns.cloudflare.com`. Propagó en minutos; Cloudflare lo marcó «Active» en menos de una hora.
+2. **Túnel `idiky-dev`** creado en Zero Trust (Daniel). El token se guardó en el servidor con
+   `infra/tunel/secretos.sh` (corregido: el script se copia primero y el token va por la
+   entrada estándar; con `sh -s < script` se pisaban). Se probó la red antes de desplegar:
+   `10.0.2.2` solo llega al servidor con `allow_host_loopback=true`; la IP privada de la VM
+   llega con cualquier red. `levantar_tunel` quedó con esa opción.
+3. **Desplegado** con `infra/desplegar.sh origin/main tunel`: `idiky-tunel` «Healthy» en el
+   panel, cuatro conexiones con Cloudflare, `/ready` en `127.0.0.1:8084`. LangFlow igual
+   antes y después.
+4. **Ruta** `bloky-dev.idiky.com` → `http://10.0.2.2:8083` (Daniel, en el panel). Comprobado
+   desde fuera: `/salud` 200, `/api/salud` 200, `/` 401 (la clave del entorno sigue),
+   certificado válido de Cloudflare.
+5. **`BLOKY_URL_PUBLICA=https://bloky-dev.idiky.com`** en `bloky-api.env` (copia previa en
+   `bloky-api.env.antes-tunel`) y reinicio del pod. Desde ahora la cookie de sesión es
+   `Secure`: **el ingreso solo funciona por el nombre**, no por `http://20.55.251.120:8083`
+   (esa dirección sigue sirviendo la página, pero la sesión no se guarda).
+
+**Qué sigue:** registrar las aplicaciones de Google y Microsoft
+(`infra/bloky/credenciales-google-microsoft.md`), cargar los cuatro valores en `bloky-api.env`,
+reiniciar el pod y probar los tres canales. Después, dar nombre también a BOB, la PWA y la
+contable con rutas más en el mismo túnel (sin desplegar nada).
 
 ### 2026-09-21 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Camino a Google y Microsoft: HTTPS con túnel de Cloudflare (T-76, ADR-0014)
 
