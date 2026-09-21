@@ -8,6 +8,7 @@
 import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { api, ErrorApi, type Canal } from '../../datos/api'
+import { IconoCanal } from '../../componentes/IconoCanal'
 import { useSesion } from '../../estado/SesionContext'
 import { Puerta } from './Puerta'
 
@@ -53,8 +54,12 @@ export function CanalPage() {
       <div className="pila">
         {enCurso.canales.map((c) => (
           <button key={c.tipo} type="button" className="opcion" disabled={!!cargando} onClick={() => void elegir(c.tipo)}>
-            <strong>{cargando === c.tipo ? 'Un momento…' : TEXTO[c.tipo].titulo}</strong>
-            <span className="subtitulo">{TEXTO[c.tipo].ayuda(c.pista)}</span>
+            <span className="opcion__icono"><IconoCanal canal={c.tipo} /></span>
+            <span className="opcion__texto">
+              <strong>{cargando === c.tipo ? 'Un momento…' : TEXTO[c.tipo].titulo}</strong>
+              <span className="subtitulo">{TEXTO[c.tipo].ayuda(c.pista)}</span>
+            </span>
+            <span className="opcion__flecha" aria-hidden="true">›</span>
           </button>
         ))}
       </div>

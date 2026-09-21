@@ -68,15 +68,24 @@ a { color: var(--color-marca); }
 .boton--fantasma { background: transparent; border-color: transparent; color: var(--color-marca); }
 .boton--salida { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.4); color: var(--color-texto-inverso); }
 
-/* Una opcion grande para elegir el canal: se toca con el pulgar. */
+/* Una opcion grande para elegir el canal: se toca con el pulgar. El icono del proveedor va a la
+   izquierda, siempre del mismo tamano, para que la eleccion sea visual antes que leida. */
 .opcion {
-  display: flex; flex-direction: column; align-items: flex-start; gap: var(--e1);
-  width: 100%; padding: var(--e4);
+  display: flex; align-items: center; gap: var(--e3);
+  width: 100%; padding: var(--e3) var(--e4);
   border: 1px solid var(--color-borde); border-radius: var(--radio);
   background: var(--color-superficie-2); text-align: left; cursor: pointer;
 }
 .opcion:hover:not(:disabled) { border-color: var(--color-marca); background: var(--color-marca-suave); }
+.opcion:focus-visible { outline: 2px solid var(--color-marca); outline-offset: 2px; }
 .opcion:disabled { opacity: 0.6; cursor: wait; }
+.opcion__icono {
+  flex: 0 0 auto; display: grid; place-items: center;
+  width: 48px; height: 48px; border-radius: var(--radio-sm);
+  background: var(--color-superficie); border: 1px solid var(--color-borde);
+}
+.opcion__texto { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.opcion__flecha { color: var(--color-texto-tenue); font-size: var(--texto-xl); line-height: 1; }
 
 /* ---------------------------------------------------------------- Avisos y chips */
 .aviso { padding: var(--e3) var(--e4); border-radius: var(--radio-sm); font-size: var(--texto-sm); }

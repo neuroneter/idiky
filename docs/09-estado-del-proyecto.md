@@ -108,6 +108,21 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Yahoo probado; iconos en las opciones de ingreso (CU-B-01)
+
+**Yahoo funcionó** con una cuenta real en `https://bloky-dev.idiky.com`: los cuatro canales
+(SMS, Google, Microsoft, Yahoo) están probados de punta a punta. Credenciales de Yahoo cargadas
+en `bloky-api.env` (copia previa `bloky-api.env.antes-yahoo`).
+
+**Iconos en «¿Cómo quieres confirmar que eres tú?»** (pedido de Daniel: que la elección sea
+visual). `componentes/IconoCanal.tsx` dibuja los cuatro como SVG, del mismo tamaño, con las
+marcas que cada proveedor permite en su botón de ingreso y el SMS en el azul de IDIKY. Sin
+imágenes descargadas ni dependencias: no dependen de la red y escalan con la letra. La opción
+pasa a fila (icono · texto · flecha), con foco visible.
+
+**Higiene pendiente (Daniel):** borrar el túnel sobrante en Cloudflare; regenerar los tres
+secretos (Google, Microsoft, Yahoo), que pasaron por el chat de la sesión.
+
 ### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Yahoo, el tercer proveedor del ingreso (CU-B-01)
 
 **Por qué:** Daniel quiere cubrir «los tres correos más usados en Latinoamérica»: Gmail,
