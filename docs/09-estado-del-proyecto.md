@@ -108,6 +108,33 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-21 · Incidente: BOB caído · Sesión de IA (Claude) a pedido del responsable de integración · No estaba caído
+
+**Síntoma reportado:** Firefox decía «No se puede conectar» en `http://20.55.251.120:8082/admin`,
+con la regla `Dev` del grupo de seguridad de Azure ya abierta para 8080-8083.
+
+**Qué se revisó, como `idiky` y sin sudo:** el servidor lleva 59 días encendido (no se reinició),
+tiene 4,9 GB libres y 12 GB de memoria disponible, `Linger=yes`. Las siete unidades de Idiky están
+activas desde el 2026-09-10 con **cero reinicios**; `podman pod ps` muestra el pod `idiky-gestion`
+corriendo con sus tres contenedores; en el servidor `/salud` responde 200 en 8080, 8081 y 8082 y
+`/_health` de Strapi 204; `/revision.txt` dice `d6e05f2`, el último despliegue registrado. El
+proxy de BOB tiene tráfico de internet en todas las horas del día (rastreadores incluidos) y
+ningún error de nginx. Desde la Mac del responsable, `/admin` en el 8082 da **200**, doce
+conexiones en paralelo dan 200, y el proxy registra esa misma IP pública llegando bien.
+
+**Causa raíz:** no hubo caída de BOB ni del servidor. Lo que Firefox vio fue algo del lado del
+cliente o del camino: lo más probable es que la prueba se hiciera **antes de que la regla `Dev`
+terminara de aplicarse** (Azure tarda entre segundos y unos minutos en propagar un cambio del
+grupo de seguridad) o desde una red que bloquea puertos altos.
+
+**Qué se hizo:** nada en el servidor. No se reinició el pod porque estaba sano y la evidencia no
+lo justificaba. `verificar-vecino.sh` antes y después: LangFlow sigue igual.
+
+**Qué queda:** si a Daniel le vuelve a fallar, probar en una ventana privada de Firefox y, si
+persiste, comparar con `curl -sI http://20.55.251.120:8082/admin` desde la misma máquina y red.
+Dato aparte: en el 8083 no hay nada escuchando todavía (BLOKY Dev no se ha desplegado); la regla
+ya lo permite.
+
 ### 2026-09-10 · Sesión de IA (Claude), a pedido de Jeimy · Lista para desplegar
 
 **Qué se hizo**
