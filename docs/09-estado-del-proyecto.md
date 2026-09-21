@@ -108,6 +108,30 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) a pedido del responsable de integración · La puerta se adapta al aparato (CU-B-01, CU-R-26)
+
+**Por qué:** al probar el ingreso en el servidor, la puerta era una tarjeta centrada sobre el
+degradado, igual en todos los tamaños: en el computador quedaba pequeña y con mucho vacío, y no
+decía qué es BLOKY ni en qué paso va la persona. El responsable de integración pidió una puerta
+«súper bien diseñada para todos los dispositivos», manteniendo los colores.
+
+**Qué se hizo** (`apps/bloky/`, sin dependencias nuevas, solo CSS y los tokens de ALICE):
+
+- **Una sola puerta que cambia de forma** (`features/acceso/Puerta.tsx` + `estilos/base.css`):
+  en el **celular**, la marca compacta arriba y el formulario como hoja blanca pegada al borde
+  de abajo, con zonas seguras; en la **tableta** (desde 700 px), tarjeta centrada; en el
+  **computador** (desde 960 px), dos paneles: la marca con una frase de valor y las siluetas a
+  la izquierda, el formulario sobre blanco a la derecha.
+- **Los tres pasos** (Documento · Cómo entras · Código) arriba del formulario, con el activo en
+  fucsia y los hechos en azul.
+- **Tamaño de la letra** (CU-R-26) en la puerta, como en ALICE: `estado/preferencias.ts`,
+  `componentes/ControlTamanoTexto.tsx` y `componentes/SiluetaTorres.tsx` se copiaron del demo
+  (ADR-0013). Misma clave de almacenamiento: quien escogió la letra en ALICE la encuentra igual.
+- Comprobado con capturas a 390, 768 y 1440 px. `npm run build` pasa.
+
+**Qué sigue:** desplegar `bloky` desde `main` cuando se integre; probar en un teléfono real el
+comportamiento con el teclado abierto; y, en el interior, el control de letra en el perfil.
+
 ### 2026-09-21 · BLOKY Dev desplegado y probado · Sesión de IA (Claude) a pedido del responsable de integración · T-75 cerrada
 
 **Qué se hizo:** se probó el ingreso a BLOKY (CU-B-01) en el servidor de desarrollo, contra el

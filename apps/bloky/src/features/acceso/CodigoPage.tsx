@@ -33,7 +33,7 @@ export function CodigoPage() {
   }
 
   return (
-    <Puerta titulo="Escribe el código">
+    <Puerta titulo="Escribe el código" paso={3}>
       <p className="subtitulo">Te lo enviamos por SMS al celular {state?.pista ?? 'registrado'}. Vale diez minutos.</p>
       {state?.codigoSimulado && (
         <p className="aviso aviso--info">

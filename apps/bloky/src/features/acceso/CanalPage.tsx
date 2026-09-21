@@ -42,7 +42,7 @@ export function CanalPage() {
   }
 
   return (
-    <Puerta titulo={`Hola, ${enCurso.nombre.split(' ')[0]}`}>
+    <Puerta titulo={`Hola, ${enCurso.nombre.split(' ')[0]}`} paso={2}>
       <p className="subtitulo">
         {enCurso.copropiedades.length === 1
           ? <>Vas a entrar a <strong>{enCurso.copropiedades[0].nombre}</strong>.</>

@@ -7,7 +7,7 @@ Entran solo los módulos que se van desarrollando; hoy, el ingreso (CU-B-01).
 | | |
 |---|---|
 | **Stack** | React + TypeScript + Vite, como el demo (ADR-0001). Sin librería de UI |
-| **Identidad visual** | `src/estilos/tokens.css` es una copia de la de ALICE: un solo diseño |
+| **Identidad visual** | `src/estilos/tokens.css` es una copia de la de ALICE: un solo diseño. También se copiaron `Logotipo`, `SiluetaTorres`, `ControlTamanoTexto` y `estado/preferencias.ts` (tamaño de la letra, CU-R-26) |
 | **Datos** | Solo por `src/datos/api.ts`, que habla con `apps/bloky-api` (ADR-0003). La sesión es una cookie httpOnly: la app no guarda tokens |
 | **Puerto** | `8083` en el entorno de desarrollo, servido por el nginx del pod `idiky-bloky` |
 

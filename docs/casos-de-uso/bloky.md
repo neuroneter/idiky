@@ -60,3 +60,6 @@ Probado el flujo por SMS contra un BOB simulado (`apps/bloky-api/pruebas/humo.ts
 2026-09-21, la identificación contra el BOB real en el servidor de desarrollo (bitácora). Google y
 Microsoft están construidos y sin credenciales: se activan al registrar las aplicaciones y
 solo funcionan con HTTPS (ADR-0008).
+La puerta **se adapta al aparato** (2026-09-21): hoja pegada abajo en el celular, tarjeta en la
+tableta y dos paneles en el computador; muestra los tres pasos y trae el control del tamaño de la
+letra (CU-R-26).
