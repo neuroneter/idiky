@@ -36,7 +36,7 @@ con un BOB de verdad hace falta un **token de API de solo lectura** creado en el
 | `BLOKY_URL_PUBLICA` | Con la que la persona llega a BLOKY. Define la cookie y el retorno de Google/Microsoft |
 | `BLOKY_HORAS_SESION` | Vigencia de la sesión (12 por defecto, RN-165) |
 | `TWILIO_ACCOUNT_SID`, `TWILIO_VERIFY_SERVICE_SID` y `TWILIO_AUTH_TOKEN` o `TWILIO_API_KEY_SID` + `TWILIO_API_KEY_SECRET` | Códigos por SMS |
-| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Entrar con Google |
+| `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Entrar con Google. Cómo obtenerlos: [`infra/bloky/credenciales-google-microsoft.md`](../../infra/bloky/credenciales-google-microsoft.md) |
 | `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_TENANT_ID` | Entrar con Microsoft |
 
 ## Rutas
