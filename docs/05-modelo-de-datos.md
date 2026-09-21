@@ -950,6 +950,7 @@ Viven en `apps/bloky-api/src/dominio/reglas.ts` como funciones puras.
 | RN-164 | **Con Google o Microsoft, el correo que el proveedor verificó debe ser el mismo de BOB**, comparado sin mayúsculas ni espacios. Si no coincide, no se entra y no se revela el correo correcto. | `reglas.ts` (`correoCoincide`) |
 | RN-165 | **La sesión vence a las doce horas** y se puede cerrar antes; cerrarla la **revoca** (no se borra: queda con su fecha de revocación). | `bloky-api/src/acceso/sesion.ts` |
 | RN-166 | **Cinco códigos equivocados en quince minutos bloquean el documento quince minutos.** Los intentos quedan registrados con su resultado. | `reglas.ts` (`documentoBloqueado`) |
+| RN-167 | **Se ofrece solo el proveedor del correo registrado**, no todos: Gmail → «Entrar con Google»; Hotmail, Outlook, Live o MSN → «Entrar con Microsoft»; cualquier otro dominio → solo el código por SMS. Se decide por el dominio del correo, sin consultar nada. | `reglas.ts` (`proveedorDelCorreo`) |
 
 ### Lo que BLOKY guarda por su cuenta para el ingreso
 

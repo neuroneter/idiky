@@ -22,7 +22,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 71 documentados: 38 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01, probado en el servidor el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 97 del demo (RN-01…RN-97; RN-41 retirada) + 7 de BLOKY (RN-160…RN-166). RN-75 a RN-91 vienen de la contable; RN-92 a RN-97, de las asambleas y registros de Mary |
+| **Reglas de negocio** | 97 del demo (RN-01…RN-97; RN-41 retirada) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-97, de las asambleas y registros de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -107,6 +107,28 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Entrar con Google funciona; solo se ofrece el proveedor del correo (RN-167)
+
+**Qué pasó:** con el dominio y HTTPS listos, Daniel registró la aplicación en Google Cloud
+siguiendo `infra/bloky/credenciales-google-microsoft.md` (proyecto `IDIKY`, pantalla de
+consentimiento externa «en pruebas», cliente web con los dos retornos). Las credenciales se
+cargaron en `bloky-api.env` del servidor (copia previa `bloky-api.env.antes-google`), se reinició
+el pod y la puerta ofreció «Entrar con Google». Con su Gmail como correo de la persona de
+prueba en BOB y como usuario de prueba en Google, **entró a BLOKY con Google** desde
+`https://bloky-dev.idiky.com`. Primera sesión real por un proveedor externo.
+
+**Regla nueva, RN-167** (pedida por Daniel al ver la pantalla): a la persona se le ofrece
+**solo el proveedor de su correo**: Gmail → Google; Hotmail, Outlook, Live o MSN → Microsoft;
+otro dominio → solo SMS. Antes, con las dos aplicaciones configuradas, todo el mundo habría
+visto los dos botones. `proveedorDelCorreo` en `reglas.ts`, documentada en `docs/05`, dos
+pruebas nuevas en `pruebas/humo.ts` (catorce en total, todas pasan).
+
+**Qué sigue:** registrar la aplicación de Microsoft (paso E de la guía) y cargar sus valores;
+poner un Hotmail u Outlook en una persona de prueba para verlo. Yahoo es posible (OpenID
+Connect) y queda para cuando haya una persona real con Yahoo. Un dominio de empresa no se
+sabe si es de Google Workspace o de Microsoft 365 mirándolo: si aparece el caso, se puede
+deducir del registro MX.
 
 ### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · BLOKY Dev ya tiene HTTPS: `https://bloky-dev.idiky.com` (T-76, ADR-0014)
 

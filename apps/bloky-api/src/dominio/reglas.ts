@@ -66,6 +66,24 @@ export function correoCoincide(correoBob: string, correoProveedor: string | unde
   return correoBob.trim().toLowerCase() === correoProveedor.trim().toLowerCase()
 }
 
+/**
+ * RN-167 — A la persona se le ofrece **solo el proveedor de su correo**, no todos: quien tiene
+ * un Gmail ve «Entrar con Google»; quien tiene Hotmail, Outlook, Live o MSN ve «Entrar con
+ * Microsoft». Un correo de otro dominio (una empresa, Yahoo) no ve ninguno: solo el SMS.
+ * Mostrarle a alguien un boton con el que no puede entrar es una pregunta que no sabe
+ * responder (responsable de integracion, 2026-09-21).
+ *
+ * Se decide por el dominio del correo, sin consultar nada. Un dominio de empresa puede ser
+ * de Google Workspace o de Microsoft 365, pero eso no se sabe mirandolo: queda para cuando
+ * haya un caso real (se podria deducir del registro MX).
+ */
+export function proveedorDelCorreo(correo: string): 'google' | 'microsoft' | undefined {
+  const dominio = correo.trim().toLowerCase().split('@')[1] ?? ''
+  if (/^(gmail|googlemail)\.com$/.test(dominio)) return 'google'
+  if (/^(hotmail|outlook|live|msn)\.[a-z]{2,}(\.[a-z]{2,})?$/.test(dominio)) return 'microsoft'
+  return undefined
+}
+
 /** Los canales que se le pueden ofrecer a la persona, con una pista que no revela el dato. */
 export function canalesDisponibles(
   persona: PersonaBob,
@@ -74,8 +92,8 @@ export function canalesDisponibles(
   const canales: Array<{ tipo: Canal; pista: string }> = []
   if (celularParaCodigo(persona.celular)) canales.push({ tipo: 'sms', pista: pistaCelular(persona.celular) })
   if (persona.correo) {
-    if (proveedores.google) canales.push({ tipo: 'google', pista: pistaCorreo(persona.correo) })
-    if (proveedores.microsoft) canales.push({ tipo: 'microsoft', pista: pistaCorreo(persona.correo) })
+    const proveedor = proveedorDelCorreo(persona.correo) // RN-167
+    if (proveedor && proveedores[proveedor]) canales.push({ tipo: proveedor, pista: pistaCorreo(persona.correo) })
   }
   return canales
 }
