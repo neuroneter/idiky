@@ -116,6 +116,10 @@ unidad. Eso es de BLOKY.
 
 ### Probarlo
 
+`scripts/sembrar-pruebas.mjs` siembra **tres copropiedades de prueba** con sus perfiles raíz (para
+probar el ingreso a BLOKY, CU-B-01); es idempotente y corre con el Strapi de verdad, en el
+contenedor del servidor o en local. Las instrucciones están en su encabezado.
+
 `scripts/probar-bob.mjs` levanta Strapi en tu máquina sobre una base SQLite desechable, recorre
 las reglas (lo válido se acepta, lo inválido se rechaza con su mensaje) y borra la base al
 terminar. No toca PostgreSQL ni el servidor:
