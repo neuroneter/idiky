@@ -108,6 +108,36 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · El primer módulo con datos: «Configurar la copropiedad», decisiones
+
+**Alcance acordado** (Daniel): lo que un administrador hace el primer día. Cinco piezas, en este
+orden porque cada una necesita a la anterior: **1)** aprovisionar desde BOB (T-77, ADR-0015);
+**2)** el **régimen legal como datos**: país + régimen; Colombia se siembra desde la Ley 675 de
+2001 con el artículo citado en cada parámetro (tipos, usos, naturaleza de los bienes, cálculo de
+coeficientes arts. 26-27, tolerancia del 100 %, consejo obligatorio art. 53, quórums); otro país
+es otra fila; **3)** la **estructura y los bienes**: agrupaciones de cualquier profundidad y bienes
+con tipo, naturaleza, área, matrícula y coeficiente, con **carga masiva desde hoja de cálculo**
+(nadie escribe 1.200 apartamentos a mano); el coeficiente legal se captura del reglamento y el
+sistema calcula una propuesta por área para comparar y valida la suma; **4)** **ubicación** en
+mapa (lat/long ya está en la ficha de BOB), afinar el punto, marcar entradas y portería;
+**5)** **galería de imágenes** con etiquetas (fachada, entrada, zona común, torre) reutilizables.
+
+**Decisiones de herramientas** (cada una con su ADR al construirla):
+
+- **Archivos: Cloudflare R2** (S3 compatible, sin cobro por descargas, sirve para fotos y
+  documentos privados, ya viven en Cloudflare). Se descartó Cloudinary: cómodo para transformar
+  imágenes, pero cobra por créditos que los documentos consumen igual y ata las URL. **Un bucket,
+  una carpeta por copropiedad** (`copropiedades/<id>/galeria/…`, `…/documentos/…`): eliminar una
+  copropiedad es borrar su carpeta, sin tocar las demás (pedido expreso de Daniel). Un bucket por
+  copropiedad no sirve: R2 limita los buckets por cuenta. Miniaturas las hace BLOKY al subir.
+- **Mapas: Google Maps** (proyecto IDIKY de Google Cloud, llave restringida por sitio).
+- **El régimen de Colombia lo redacta la IA y lo revisa después alguien con criterio jurídico**
+  al que se le dará acceso a BLOKY; los ajustes se aplican como migración de datos.
+
+**Qué sigue:** Daniel crea el bucket y el token de R2 y la llave de Google Maps (procesos en la
+conversación de la sesión, se pasarán a `infra/`); la próxima sesión escribe los casos de uso del
+módulo, ADR-0016 (archivos en R2) y ADR-0017 (Google Maps), y siembra el régimen de Colombia.
+
 ### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · La capa de datos de BLOKY, decidida (ADR-0015, T-77)
 
 **La pregunta de Daniel:** con el ingreso listo, ¿el stack aguanta todo lo que sigue, hace falta
