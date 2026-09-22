@@ -108,6 +108,28 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Cómo se siente el primer día: «Arma tu copropiedad» (prototipo)
+
+**La preocupación de Daniel:** que crear un edificio, un conjunto o sus unidades sea difícil para
+un administrador. Quiere algo sencillo, novedoso e interactivo, «como un juego», que no se sienta
+como configurar.
+
+**La idea:** en vez de formularios, **una pregunta por pantalla con tarjetas grandes**, y a la
+izquierda la copropiedad **se dibuja sola** con cada respuesta, con las siluetas del trazo de la
+marca (BLOKY = bloques). Flujo: ¿qué es tu copropiedad? (edificio, torres, casas, mixto) → ¿cómo
+está organizada? (patrones, no conceptos) → ¿cuántas torres, pisos, apartamentos por piso? (con
+contadores, «todas iguales» por defecto y vista previa de los nombres) → **recompensa**: «96
+apartamentos creados» y el edificio termina de construirse → ajustes finos sobre el dibujo
+(tocar una torre, marcar locales en el primer piso, parqueaderos y depósitos como zona aparte) →
+un **anillo de avance** con lo que falta (coeficientes, ubicación, fotos, régimen), todo
+aplazable. Para las grandes, la **ruta experta**: arrastrar la hoja de Excel y ver el árbol antes
+de confirmar. Lo que lo hace juego sin ser infantil: respuesta visual inmediata, hitos
+celebrados, deshacer siempre y «puedes cambiarlo después». Sin motor de juegos: React, CSS y SVG.
+
+**Prototipo clicable** en [`docs/prototipos/arma-tu-copropiedad/`](./prototipos/arma-tu-copropiedad/README.md)
+(un HTML sin dependencias, doble clic): tres pantallas del flujo. Pendiente de la reacción de
+Daniel para pasarlo a caso de uso.
+
 ### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · El primer módulo con datos: «Configurar la copropiedad», decisiones
 
 **Alcance acordado** (Daniel): lo que un administrador hace el primer día. Cinco piezas, en este
