@@ -19,6 +19,7 @@ persona o IA — tenga que reconstruir el razonamiento más adelante.
 | [0012](./0012-sistema-de-gestion-strapi.md) | **BOB, el back office de IDIKY**: Strapi 5 (MIT) con PostgreSQL 17. Se prefirió a Directus por la licencia; la auditoría, que Strapi Community no trae, se construye como módulo propio | Aceptada |
 | [0013](./0013-bloky-dev-separada-del-demo.md) | **BLOKY Dev se construye aparte del demo**, módulo por módulo: app nueva con backend real; del demo se traen los casos de uso, las reglas y la identidad visual, no las pantallas | Aceptada |
 | [0014](./0014-https-para-bloky-dev-con-tunel-de-cloudflare.md) | **HTTPS y dominio para BLOKY Dev con un túnel de Cloudflare** (`https://bloky-dev.idiky.com`): sin abrir puertos ni tocar Azure; el DNS de `idiky.com` pasa a Cloudflare. Es lo que enciende el ingreso con Google y Microsoft | Aceptada |
+| [0015](./0015-capa-de-datos-de-bloky-un-esquema-por-copropiedad.md) | **La capa de datos de BLOKY: un esquema de PostgreSQL por copropiedad**, estructuralmente idéntico, aprovisionado desde BOB con un botón; retirar es lo normal y eliminar la excepción con código al superadministrador | Propuesta |
 
 El ADR-0008 (backend) se escribió el 2026-09-21, con el ingreso a BLOKY. Recuerden la regla
 del [`CLAUDE.md`](../../CLAUDE.md): no se agregan dependencias sin ADR.
