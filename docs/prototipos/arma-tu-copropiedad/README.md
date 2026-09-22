@@ -1,20 +1,23 @@
 # Prototipo · «Arma tu copropiedad»
 
-**Qué es:** un boceto clicable, en un solo archivo HTML sin dependencias, de cómo podría sentirse
-el primer día de un administrador en BLOKY: configurar la estructura de su copropiedad como si la
-construyera bloque a bloque, sin formularios. Se hizo el 2026-09-21 a pedido del responsable de
-integración, que quiere algo «sencillo, novedoso e interactivo, como un juego».
+**Qué es:** bocetos clicables, en archivos HTML sin dependencias, de cómo podría sentirse el primer
+día de un administrador en BLOKY: armar la estructura de su copropiedad sin formularios. Se
+hicieron el 2026-09-21 con el responsable de integración, que quiere algo «sencillo, novedoso e
+interactivo, como un juego». **No son código de producto**: son para mirar, tocar y decidir. Lo
+que se apruebe pasa al caso de uso y, de ahí, a `apps/bloky/` en React.
 
-**Cómo se abre:** doble clic en `index.html`. No es código de producto: es para mirar, tocar y
-decidir. Lo que se apruebe pasa al caso de uso y, de ahí, a `apps/bloky/` en React.
+**Cómo se abren:** doble clic en el archivo. `tokens.css` es una copia de
+`apps/bloky/src/estilos/tokens.css` para que abran solos.
 
-**Qué muestra:** tres de las pantallas del flujo. A la izquierda la copropiedad se dibuja sola
-con cada respuesta (siluetas del mismo trazo de la marca) y un anillo de avance; a la derecha,
-una pregunta por pantalla con tarjetas grandes y contadores. Atajos: `index.html#2` abre el paso
-de cantidades y `index.html#3` el de resultado.
+Tres versiones, en el orden en que se pensaron:
 
-**Lo que no tiene todavía:** la ruta experta (importar desde Excel), los ajustes finos sobre el
-dibujo, parqueaderos y depósitos, coeficientes, ubicación y fotos. Están descritos en la bitácora
-del 2026-09-21.
+| Archivo | Idea | Estado |
+|---|---|---|
+| `preguntas.html` | **Asistente de preguntas:** una pregunta por pantalla con tarjetas grandes; la copropiedad se dibuja sola a la izquierda. Atajos `#2` y `#3` | Primera idea. Daniel la vio bien pero quiso algo menos guiado |
+| `catalogo.html` | **Catálogo, como armar un avatar:** pestañas Estructura · Unidades · Espacios; tocas un objeto y aparece; tocas lo que ya está y lo ajustas. Atajo `#demo` | Segunda idea, de Daniel |
+| `index.html` | **Terreno para arrastrar y configurar** (la vigente): arrastras del catálogo al terreno cuadriculado, sueltas donde va, tocas para configurar (pisos, apartamentos por piso, locales, cantidad), mueves, duplicas, quitas. Anillo de avance y ruta experta «Importar». Atajo `#demo` | Tercera idea, de Daniel: «una zona de dibujo donde arrastras las cosas y las configuras» |
 
-`tokens.css` es una copia de `apps/bloky/src/estilos/tokens.css` para que el archivo abra solo.
+**Lo que el prototipo no resuelve todavía:** la ruta experta con Excel, coeficientes, ubicación
+en el mapa y fotos (son pasos siguientes del módulo), la versión táctil (el arrastre es HTML5,
+solo funciona con ratón; el producto usará eventos de puntero) y el resumen para copropiedades
+muy grandes (una torre se dibuja con máximo ocho pisos y muestra «24 pisos × 4»).
