@@ -134,9 +134,17 @@ mapa (lat/long ya está en la ficha de BOB), afinar el punto, marcar entradas y 
 - **El régimen de Colombia lo redacta la IA y lo revisa después alguien con criterio jurídico**
   al que se le dará acceso a BLOKY; los ajustes se aplican como migración de datos.
 
-**Qué sigue:** Daniel crea el bucket y el token de R2 y la llave de Google Maps (procesos en la
-conversación de la sesión, se pasarán a `infra/`); la próxima sesión escribe los casos de uso del
-módulo, ADR-0016 (archivos en R2) y ADR-0017 (Google Maps), y siembra el régimen de Colombia.
+**R2 quedó configurado el mismo día** (Daniel, guiado): bucket `idiky-dev` (ubicación automática,
+quedó en ENAM), acceso público desactivado, política CORS para `https://bloky-dev.idiky.com` y
+`http://localhost:5173` (GET, PUT, HEAD), token `bloky-dev` de **lectura y escritura de objetos
+solo en ese bucket**, sin vencimiento. Comprobado desde la Mac con una petición S3 firmada
+(SigV4): lista el bucket, 200. Las cinco variables (`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`,
+`R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT`) están en `bloky-api.env` del servidor (copia
+previa `.antes-r2`); la API las usará cuando exista el módulo de archivos (ADR-0016).
+
+**Qué sigue:** Daniel crea la llave de Google Maps (proceso en la conversación de la sesión, se
+pasará a `infra/`); la próxima sesión escribe los casos de uso del módulo, ADR-0016 (archivos en
+R2) y ADR-0017 (Google Maps), y siembra el régimen de Colombia.
 
 ### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · La capa de datos de BLOKY, decidida (ADR-0015, T-77)
 
