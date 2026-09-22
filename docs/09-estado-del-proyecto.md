@@ -126,8 +126,14 @@ aplazable. Para las grandes, la **ruta experta**: arrastrar la hoja de Excel y v
 de confirmar. Lo que lo hace juego sin ser infantil: respuesta visual inmediata, hitos
 celebrados, deshacer siempre y «puedes cambiarlo después». Sin motor de juegos: React, CSS y SVG.
 
-**Prototipo clicable** en [`docs/prototipos/arma-tu-copropiedad/`](./prototipos/arma-tu-copropiedad/README.md)
-(un HTML sin dependencias, doble clic): tres pantallas del flujo. Pendiente de la reacción de
+**Tres prototipos clicables** en [`docs/prototipos/arma-tu-copropiedad/`](./prototipos/arma-tu-copropiedad/README.md)
+(HTML sin dependencias, doble clic), en el orden en que se pensaron en la misma sesión:
+`preguntas.html` (asistente de preguntas), `catalogo.html` (catálogo como armar un avatar, idea
+de Daniel) e **`index.html`, la vigente: un terreno cuadriculado donde se arrastran torres,
+manzanas, locales, parqueaderos y zonas comunes desde el catálogo, se sueltan donde van, y se
+tocan para configurar** (pisos, apartamentos por piso, locales en el primer piso, cantidades),
+mover, duplicar o quitar; anillo de avance y ruta experta «Importar». Encaja con el dominio: los
+tipos de agrupación y de bien ya son catálogos de datos (docs/13 §6). Pendiente de la reacción de
 Daniel para pasarlo a caso de uso.
 
 ### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · El primer módulo con datos: «Configurar la copropiedad», decisiones
