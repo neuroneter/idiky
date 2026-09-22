@@ -133,8 +133,15 @@ de Daniel) e **`index.html`, la vigente: un terreno cuadriculado donde se arrast
 manzanas, locales, parqueaderos y zonas comunes desde el catálogo, se sueltan donde van, y se
 tocan para configurar** (pisos, apartamentos por piso, locales en el primer piso, cantidades),
 mover, duplicar o quitar; anillo de avance y ruta experta «Importar». Encaja con el dominio: los
-tipos de agrupación y de bien ya son catálogos de datos (docs/13 §6). Pendiente de la reacción de
-Daniel para pasarlo a caso de uso.
+tipos de agrupación y de bien ya son catálogos de datos (docs/13 §6).
+
+**Decisiones sobre la v3** (Daniel, misma sesión): **1)** el terreno es un **croquis que se
+guarda**: la posición de cada torre, portería, entrada y zona común se conserva y servirá después
+para el mapa, la portería y las fotos por zona; **2)** para las grandes bastan **Duplicar** e
+**Importar desde Excel** (sin «agregar N torres»); **3)** el arrastre funciona **en computador,
+tableta y teléfono**, con eventos de puntero (el prototipo, HTML5, solo sirve con ratón).
+Pendiente: la reacción de Daniel tras probarla, para escribir el caso de uso «Armar la
+estructura».
 
 ### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · El primer módulo con datos: «Configurar la copropiedad», decisiones
 

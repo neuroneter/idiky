@@ -17,6 +17,9 @@ Tres versiones, en el orden en que se pensaron:
 | `catalogo.html` | **Catálogo, como armar un avatar:** pestañas Estructura · Unidades · Espacios; tocas un objeto y aparece; tocas lo que ya está y lo ajustas. Atajo `#demo` | Segunda idea, de Daniel |
 | `index.html` | **Terreno para arrastrar y configurar** (la vigente): arrastras del catálogo al terreno cuadriculado, sueltas donde va, tocas para configurar (pisos, apartamentos por piso, locales, cantidad), mueves, duplicas, quitas. Anillo de avance y ruta experta «Importar». Atajo `#demo` | Tercera idea, de Daniel: «una zona de dibujo donde arrastras las cosas y las configuras» |
 
+**Decidido sobre la v3 (2026-09-21):** el terreno es un croquis que se guarda; para las grandes bastan
+Duplicar e Importar; el arrastre debe funcionar también en el teléfono (eventos de puntero).
+
 **Lo que el prototipo no resuelve todavía:** la ruta experta con Excel, coeficientes, ubicación
 en el mapa y fotos (son pasos siguientes del módulo), la versión táctil (el arrastre es HTML5,
 solo funciona con ratón; el producto usará eventos de puntero) y el resumen para copropiedades
