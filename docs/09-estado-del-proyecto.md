@@ -140,7 +140,18 @@ guarda**: la posición de cada torre, portería, entrada y zona común se conser
 para el mapa, la portería y las fotos por zona; **2)** para las grandes bastan **Duplicar** e
 **Importar desde Excel** (sin «agregar N torres»); **3)** el arrastre funciona **en computador,
 tableta y teléfono**, con eventos de puntero (el prototipo, HTML5, solo sirve con ratón).
-Pendiente: la reacción de Daniel tras probarla, para escribir el caso de uso «Armar la
+**A Daniel le gustó** («es lo que estaba pensando, se está haciendo divertido») y pidió
+**asociaciones**: una zona común puede estar suelta o dentro de una estructura, varias zonas
+comunes pueden formar una zona, los parqueaderos y locales pueden estar dentro de un edificio o
+no, y los apartamentos se asocian a sus parqueaderos; y que se vea gráficamente. **Versión 4**
+(`index.html`): dos relaciones con gestos distintos. **«Está dentro de»** (contención): soltar
+encima de una torre o de una **Zona** lo mete dentro y se dibuja pegado. **«Pertenece a»**
+(asignación): al tocar parqueaderos o depósitos se dibujan líneas hacia las torres asignadas,
+con cantidad por torre y el resto de visitantes; el puesto por puesto queda para la ficha del
+apartamento o el Excel. Encaja con docs/13 §6: un bien puede colgar de cualquier nivel, y un
+parqueadero es bien privado o común de uso exclusivo asignado a una unidad. Pendiente: la
+reacción de Daniel a la v4 y dos decisiones (dónde se asigna puesto por puesto; si al crear
+parqueaderos se pregunta su naturaleza legal) para escribir el caso de uso «Armar la
 estructura».
 
 ### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · El primer módulo con datos: «Configurar la copropiedad», decisiones
