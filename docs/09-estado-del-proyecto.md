@@ -108,6 +108,31 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · La capa de datos de BLOKY, decidida (ADR-0015, T-77)
+
+**La pregunta de Daniel:** con el ingreso listo, ¿el stack aguanta todo lo que sigue, hace falta
+un *middleware*, y cómo se manejan las dos fuentes (BOB para lo comercial, una base por
+copropiedad para la operación) sin que los datos de una unidad se mezclen con los de otra?
+
+**Respuesta y decisión** ([ADR-0015](./adr/0015-capa-de-datos-de-bloky-un-esquema-por-copropiedad.md)):
+
+- **La API ya es el *middleware***: la app no toca BOB ni la base; `apps/bloky-api` combina las
+  dos fuentes. No hace falta otra capa; hace falta que esta crezca con orden. El stack (Node +
+  Fastify + PostgreSQL, ADR-0008) cubre todo el alcance; lo que irá llegando con su ADR son
+  tareas programadas, archivos, PDF/correo y PostgreSQL administrado.
+- **Un esquema de PostgreSQL por copropiedad**, estructuralmente idéntico, más un esquema común
+  con las sesiones y el **catálogo de copropiedades**. El repositorio se abre por copropiedad y el
+  esquema sale del catálogo, nunca de la petición. Las grandes pueden mudarse a una base propia
+  sin cambiar código (Daniel espera más de 500 copropiedades, muy diversas).
+- **Se aprovisiona desde BOB con un botón** en la ficha de la copropiedad, que llama a una API de
+  administración de BLOKY (token propio). Aprovisionada, el botón da paso a «Respaldar» y, si
+  está retirada, «Eliminar» con código de un solo uso al superadministrador y respaldo previo.
+  «Nada se borra» sigue: retirar es lo normal; eliminar, la excepción controlada.
+
+**Qué sigue:** confirmar quién es el superadministrador y cuánto se conserva el respaldo al
+eliminar (ADR §Abierto); documentar los casos de uso (aprovisionar en BOB; estructura y
+unidades en BLOKY) y construir T-77 junto con el primer módulo de datos.
+
 ### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Yahoo probado; iconos en las opciones de ingreso (CU-B-01)
 
 **Yahoo funcionó** con una cuenta real en `https://bloky-dev.idiky.com`: los cuatro canales

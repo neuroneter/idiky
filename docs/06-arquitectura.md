@@ -151,6 +151,10 @@ apps/bloky/          la app (React + Vite)      ──/api──▶  apps/bloky-
 - La app solo habla con la API por `src/datos/api.ts` (ADR-0003). La sesión es una cookie
   httpOnly.
 - Multi-tenant por `copropiedadId` (RN-01): el `id` es el `documentId` de la copropiedad en BOB.
+  **Cada copropiedad tiene su propio esquema de PostgreSQL**, estructuralmente idéntico, aprovisionado
+  desde BOB ([ADR-0015](./adr/0015-capa-de-datos-de-bloky-un-esquema-por-copropiedad.md)). El
+  repositorio se abre por copropiedad (`repositorio.para(copropiedadId)`); el esquema sale del
+  catálogo, nunca de la petición.
 - Las reglas de negocio de BLOKY viven en `apps/bloky-api/src/dominio/reglas.ts`, puras y
   numeradas (RN-160 en adelante). El paquete compartido `packages/dominio` se creará cuando haya
   dos consumidores del mismo código.
