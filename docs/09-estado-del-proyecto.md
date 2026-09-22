@@ -142,9 +142,20 @@ solo en ese bucket**, sin vencimiento. Comprobado desde la Mac con una petición
 `R2_SECRET_ACCESS_KEY`, `R2_BUCKET`, `R2_ENDPOINT`) están en `bloky-api.env` del servidor (copia
 previa `.antes-r2`); la API las usará cuando exista el módulo de archivos (ADR-0016).
 
-**Qué sigue:** Daniel crea la llave de Google Maps (proceso en la conversación de la sesión, se
-pasará a `infra/`); la próxima sesión escribe los casos de uso del módulo, ADR-0016 (archivos en
-R2) y ADR-0017 (Google Maps), y siembra el régimen de Colombia.
+**Google Maps quedó configurado el mismo día** (Daniel, guiado): proyecto `IDIKY` de Google
+Cloud, **Maps JavaScript API** y **Geocoding API** habilitadas, llave restringida al sitio
+`https://bloky-dev.idiky.com/*` (falta agregar `http://localhost:5173/*` para probar en local).
+Comprobado: con ese sitio como referente, Google entrega la librería de mapas sin errores.
+**Hallazgo:** una llave restringida por sitio **no sirve para los servicios de servidor** de
+Google (la Geocoding API por HTTP responde «API keys with referer restrictions cannot be used
+with this API»); en el navegador, la geocodificación se hace con el `Geocoder` de la propia
+Maps JavaScript API, que sí la acepta. Si la API de BLOKY necesitara geocodificar del lado del
+servidor, se crea una segunda llave restringida por IP. `GOOGLE_MAPS_API_KEY` está en
+`bloky-api.env` del servidor (copia previa `.antes-maps`): la API la entregará a la app cuando
+exista el módulo de ubicación (ADR-0017).
+
+**Qué sigue:** la próxima sesión escribe los casos de uso del módulo, ADR-0016 (archivos en R2) y
+ADR-0017 (Google Maps), y siembra el régimen de Colombia. Todo lo externo está resuelto.
 
 ### 2026-09-21 · Integración · Sesión de IA (Claude) con el responsable de integración · La capa de datos de BLOKY, decidida (ADR-0015, T-77)
 
