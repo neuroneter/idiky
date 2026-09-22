@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Prototipo · Arma tu copropiedad (asociaciones)</title>
+<title>Prototipo · Arma tu copropiedad (arrastrar y configurar)</title>
 <link rel="stylesheet" href="tokens.css">
 <style>
   *{box-sizing:border-box} body{margin:0;font-family:var(--fuente);color:var(--color-texto);background:var(--color-fondo);user-select:none}
@@ -36,22 +36,6 @@
   .pin{width:56px;height:56px;border-radius:14px;border:2px solid rgba(255,255,255,.8);background:rgba(255,255,255,.14);display:grid;place-items:center}
   .pin svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
   .pin.zona{width:72px;height:50px;border-radius:10px;background:rgba(196,30,140,.28);border-color:rgba(255,255,255,.7)}
-  .dentro{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:4px;max-width:120px}
-  .dentro .chip{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.6);background:rgba(255,255,255,.16);font-size:10px;white-space:nowrap}
-  .dentro .chip svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2}
-  .obj.destino{outline:2px solid var(--color-marca-claro);outline-offset:6px;border-radius:10px}
-  .zona{width:220px;height:120px;border:2px dashed rgba(255,255,255,.7);border-radius:14px;background:rgba(255,255,255,.07);position:relative}
-  .zona__titulo{position:absolute;top:-10px;left:12px;background:var(--color-marca);padding:0 8px;font-size:11px;border-radius:999px;border:1px solid rgba(255,255,255,.5)}
-  .zona__contenido{position:absolute;inset:14px 8px 8px;display:flex;gap:8px;flex-wrap:wrap;align-content:flex-start}
-  .zona__contenido .mini{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10px}
-  .zona__contenido .mini .pin{width:40px;height:40px;border-radius:10px}
-  .zona__contenido .mini .pin svg{width:22px;height:22px}
-  .lineas{position:absolute;inset:0;pointer-events:none;overflow:visible}
-  .lineas path{fill:none;stroke:var(--color-marca-claro);stroke-width:2;stroke-dasharray:6 4;animation:fluye 1s linear infinite}
-  .lineas text{fill:#fff;font-size:11px;font-weight:600;paint-order:stroke;stroke:rgba(29,46,122,.9);stroke-width:4px}
-  @keyframes fluye{to{stroke-dashoffset:-10}}
-  .leyenda{margin:0 32px 10px;font-size:12px;opacity:.85;display:flex;gap:16px}
-  .leyenda span::before{content:"";display:inline-block;width:14px;height:0;border-top:2px dashed var(--color-marca-claro);vertical-align:middle;margin-right:6px}
   @keyframes sube{from{transform:translateY(6px);opacity:0}to{transform:none;opacity:1}}
   .panel{background:var(--color-superficie);display:flex;flex-direction:column;border-left:1px solid var(--color-borde);min-height:0}
   .pestanas{display:flex;border-bottom:1px solid var(--color-borde);padding:0 16px}
@@ -93,10 +77,8 @@
     <div class="nombre">Conjunto Residencial Altos del Bosque</div>
     <div class="resumen" id="resumen">Arrastra del catálogo al terreno.</div>
     <div class="terreno" id="terreno">
-      <div class="terreno__vacio" id="vacio">Este es el terreno de tu copropiedad.<small>Arrastra una torre, una manzana o una zona común desde la derecha y suéltala donde va. Suelta algo <b>encima de una torre o de una zona</b> para meterlo dentro. Toca cualquier cosa para configurarla.</small></div>
-      <svg class="lineas" id="lineas"></svg>
+      <div class="terreno__vacio" id="vacio">Este es el terreno de tu copropiedad.<small>Arrastra una torre, una manzana o una zona común desde la derecha y suéltala donde va. Luego tócala para configurarla.</small></div>
     </div>
-    <div class="leyenda" id="leyenda" style="display:none"><span>parqueaderos asignados a cada torre</span></div>
     <div class="aviso" id="aviso"></div>
   </section>
   <aside class="panel">
@@ -120,12 +102,11 @@ const I = {
   gimnasio:'<svg viewBox="0 0 24 24"><path d="M2 12h3M19 12h3M5 8v8M19 8v8M8 6v12M16 6v12M8 12h8"/></svg>',
   parque:'<svg viewBox="0 0 24 24"><path d="M12 21v-6M12 15l-5-4 5-8 5 8zM3 21h18"/></svg>',
   entrada:'<svg viewBox="0 0 24 24"><path d="M3 21V7h8v14M11 21V3h10v18M6 14h1M15 8h2M15 12h2M15 16h2"/></svg>',
-  zona:'<svg viewBox="0 0 24 24"><path d="M4 6h16v13H4zM4 6V4h5v2M9 13h6M12 10v6" stroke-dasharray="3 2"/></svg>',
 };
-const NOMBRE = { torre:'Torre', manzana:'Manzana', local:'Locales', parqueadero:'Parqueaderos', deposito:'Depósitos', porteria:'Portería', salon:'Salón social', piscina:'Piscina', gimnasio:'Gimnasio', parque:'Parque infantil', entrada:'Entrada vehicular', zona:'Zona (agrupa)' };
+const NOMBRE = { torre:'Torre', manzana:'Manzana', local:'Locales', parqueadero:'Parqueaderos', deposito:'Depósitos', porteria:'Portería', salon:'Salón social', piscina:'Piscina', gimnasio:'Gimnasio', parque:'Parque infantil', entrada:'Entrada vehicular' };
 const CATALOGO = {
-  Estructura: { ayuda:'Arrastra al terreno. Suelta locales o parqueaderos ENCIMA de una torre para meterlos dentro.', objetos:['torre','manzana','local'] },
-  Espacios:   { ayuda:'Parqueaderos y depósitos llevan cantidad; las zonas comunes se sueltan donde están.', objetos:['zona','parqueadero','deposito','porteria','salon','piscina','gimnasio','parque','entrada'] },
+  Estructura: { ayuda:'Arrastra al terreno. Luego tócala para decir cuántos pisos y apartamentos tiene.', objetos:['torre','manzana','local'] },
+  Espacios:   { ayuda:'Parqueaderos y depósitos llevan cantidad; las zonas comunes se sueltan donde están.', objetos:['parqueadero','deposito','porteria','salon','piscina','gimnasio','parque','entrada'] },
 };
 const estado = { pestana:'Estructura', objetos:[], sel:null };
 const $ = (s)=>document.querySelector(s);
@@ -135,8 +116,7 @@ function crear(tipo, x, y){
   if (tipo==='torre') { contador.torre++; return { ...base, nombre:'Torre '+contador.torre, pisos:6, porPiso:4, locales:false }; }
   if (tipo==='manzana') { contador.manzana++; return { ...base, nombre:'Manzana '+contador.manzana, casas:8 }; }
   if (tipo==='local') { contador.local++; return { ...base, nombre:'Locales', n:4 }; }
-  if (tipo==='parqueadero'||tipo==='deposito') return { ...base, nombre:NOMBRE[tipo], n: tipo==='parqueadero'?40:20, asignados:{} };
-  if (tipo==='zona') { return { ...base, nombre:'Zona social' }; }
+  if (tipo==='parqueadero'||tipo==='deposito') return { ...base, nombre:NOMBRE[tipo], n: tipo==='parqueadero'?40:20 };
   return { ...base, nombre:NOMBRE[tipo] };
 }
 function unidades(){ return estado.objetos.reduce((a,o)=> a + (o.tipo==='torre'? o.pisos*o.porPiso : o.tipo==='manzana'? o.casas : o.tipo==='local'? o.n : 0), 0); }
@@ -150,22 +130,10 @@ terreno.addEventListener('drop', (e)=>{
   const r = terreno.getBoundingClientRect();
   const x = Math.round((e.clientX - r.left)/40)*40, y = Math.round((e.clientY - r.top)/40)*40;
   const datos = e.dataTransfer.getData('text/plain');
-  let o;
-  if (datos.startsWith('nuevo:')) { o = crear(datos.slice(6), x, y); estado.objetos.push(o); estado.sel=o.id; aviso(`${o.nombre} agregada. Tócala para configurarla.`); }
-  else { o = estado.objetos.find(z=>String(z.id)===datos); if (o) { o.x=x; o.y=y; o.dentroDe=null; } }
-  // ¿se solto encima de una torre o de una zona? Entonces queda DENTRO.
-  const destino = destinoEn(e.clientX, e.clientY, o);
-  if (o && destino) { o.dentroDe = destino.id; aviso(`${o.nombre} ahora está dentro de ${destino.nombre}.`); }
+  if (datos.startsWith('nuevo:')) { const o = crear(datos.slice(6), x, y); estado.objetos.push(o); estado.sel=o.id; aviso(`${o.nombre} agregada. Tócala para configurarla.`); }
+  else { const o = estado.objetos.find(z=>String(z.id)===datos); if (o) { o.x=x; o.y=y; } }
   render();
 });
-function destinoEn(cx, cy, o){
-  if (!o || o.tipo==='torre' || o.tipo==='manzana' || o.tipo==='zona') return null;
-  for (const el of terreno.querySelectorAll('.obj[data-contenedor]')) {
-    const r = el.getBoundingClientRect();
-    if (cx>=r.left-10 && cx<=r.right+10 && cy>=r.top-10 && cy<=r.bottom+10) return objeto(el.dataset.id);
-  }
-  return null;
-}
 function render(){
   $('#pestanas').innerHTML = Object.keys(CATALOGO).map(k=>`<button role="tab" aria-selected="${estado.pestana===k}" onclick="estado.pestana='${k}';render()">${k}</button>`).join('');
   $('#ayuda').textContent = CATALOGO[estado.pestana].ayuda;
@@ -174,33 +142,15 @@ function render(){
   terreno.querySelectorAll('.obj').forEach(n=>n.remove());
   $('#vacio').style.display = estado.objetos.length? 'none':'grid';
   for (const o of estado.objetos) {
-    if (o.dentroDe && objeto(o.dentroDe)) continue; // los contenidos se dibujan con su contenedor
-    const d=document.createElement('div'); d.className='obj'+(estado.sel===o.id?' sel':''); d.style.left=o.x+'px'; d.style.top=o.y+'px'; d.draggable=true; d.dataset.id=o.id;
-    if (o.tipo==='torre'||o.tipo==='zona') d.dataset.contenedor='1';
+    const d=document.createElement('div'); d.className='obj'+(estado.sel===o.id?' sel':''); d.style.left=o.x+'px'; d.style.top=o.y+'px'; d.draggable=true;
     d.ondragstart=(e)=>e.dataTransfer.setData('text/plain',String(o.id)); d.onclick=()=>{estado.sel=o.id;render();};
     let cuerpo='';
     if (o.tipo==='torre') { const t=document.createElement('div'); t.className='torre'; for(let p=0;p<Math.min(o.pisos,8);p++){ const piso=document.createElement('div'); piso.className='piso'+(p===0&&o.locales?' piso--local':''); piso.style.animationDelay=(p*25)+'ms'; for(let u=0;u<Math.min(o.porPiso,6);u++) piso.appendChild(document.createElement('i')); t.appendChild(piso);} const techo=document.createElement('div'); techo.className='techo'; t.appendChild(techo); d.appendChild(t); cuerpo=`${o.pisos} pisos × ${o.porPiso}`; }
     else if (o.tipo==='manzana') { const c=document.createElement('div'); c.className='casa'; d.appendChild(c); cuerpo=`${o.casas} casas`; }
-    else if (o.tipo==='zona') {
-      const z=document.createElement('div'); z.className='zona'; z.innerHTML=`<span class="zona__titulo">${o.nombre}</span><div class="zona__contenido">${estado.objetos.filter(c=>c.dentroDe===o.id).map(c=>`<div class="mini" onclick="event.stopPropagation();estado.sel='${c.id}';render()"><div class="pin">${I[c.tipo]}</div>${c.nombre}${c.n?' · '+c.n:''}</div>`).join('')||'<span style="font-size:11px;opacity:.7">Suelta aquí zonas comunes</span>'}</div>`;
-      d.appendChild(z); d.style.transform='translate(-50%,-100%)';
-    }
     else { const p=document.createElement('div'); p.className='pin'+(['parqueadero','deposito','local'].includes(o.tipo)?' zona':''); p.innerHTML=I[o.tipo]; d.appendChild(p); cuerpo = o.n? `${o.n}` : ''; }
-    if (o.tipo!=='zona') { const n=document.createElement('div'); n.className='obj__nombre'; n.textContent=o.nombre; d.appendChild(n); }
+    const n=document.createElement('div'); n.className='obj__nombre'; n.textContent=o.nombre; d.appendChild(n);
     if (cuerpo) { const s=document.createElement('div'); s.className='obj__sub'; s.textContent=cuerpo; d.appendChild(s); }
-    if (o.tipo==='torre') { const hijos=estado.objetos.filter(c=>c.dentroDe===o.id); if (hijos.length) { const h=document.createElement('div'); h.className='dentro'; h.innerHTML=hijos.map(c=>`<span class="chip" onclick="event.stopPropagation();estado.sel='${c.id}';render()">${I[c.tipo]}${c.nombre}${c.n?' · '+c.n:''}</span>`).join(''); d.appendChild(h); } }
     terreno.appendChild(d);
-  }
-  // lineas de asignacion: del parqueadero/deposito seleccionado a las torres
-  const L=$('#lineas'); L.innerHTML=''; $('#leyenda').style.display='none';
-  const sel = estado.objetos.find(z=>z.id===estado.sel);
-  if (sel && sel.asignados) {
-    const desde = terreno.querySelector(`.obj[data-id="${sel.id}"]`) || terreno.querySelector(`.obj[data-id="${sel.dentroDe}"]`);
-    if (desde) {
-      const rt=terreno.getBoundingClientRect(), rd=desde.getBoundingClientRect(); const x1=rd.left-rt.left+rd.width/2, y1=rd.top-rt.top+rd.height/2;
-      for (const [tid,n] of Object.entries(sel.asignados)) { if(!n) continue; const el=terreno.querySelector(`.obj[data-id="${tid}"]`); if(!el) continue; const r=el.getBoundingClientRect(); const x2=r.left-rt.left+r.width/2, y2=r.top-rt.top+r.height/2; const mx=(x1+x2)/2, my=Math.min(y1,y2)-40;
-        L.innerHTML += `<path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}"/><text x="${mx}" y="${my+8}" text-anchor="middle">${n}</text>`; $('#leyenda').style.display='flex'; }
-    }
   }
   const u=unidades(); const torres=estado.objetos.filter(o=>o.tipo==='torre').length, manz=estado.objetos.filter(o=>o.tipo==='manzana').length;
   $('#resumen').textContent = estado.objetos.length ? [torres&&`${torres} torres`, manz&&`${manz} manzanas`, `${u} unidades`].filter(Boolean).join(' · ') : 'Arrastra del catálogo al terreno.';
@@ -214,15 +164,6 @@ function render(){
     if (o.tipo==='torre') html += fila('Pisos','pisos',o) + fila('Apartamentos por piso','porPiso',o) + `<div class="fila"><span>Locales en el primer piso</span><button class="interruptor" role="switch" aria-checked="${o.locales}" onclick="objeto('${o.id}').locales=!${o.locales};render()"></button></div>`;
     else if (o.tipo==='manzana') html += fila('Casas','casas',o);
     else if (o.n!==undefined) html += fila('Cantidad','n',o);
-    const cont = o.dentroDe && objeto(o.dentroDe);
-    if (cont) html += `<div class="fila"><span>Está dentro de <b>${cont.nombre}</b></span><button class="boton" onclick="objeto('${o.id}').dentroDe=null;objeto('${o.id}').y+=60;render()">Sacar</button></div>`;
-    else if (!['torre','manzana','zona'].includes(o.tipo)) html += `<div class="fila"><span style="color:var(--color-texto-tenue)">Suelto en el terreno. Arrástralo encima de una torre o zona para meterlo dentro.</span></div>`;
-    if (o.asignados) {
-      const torres = estado.objetos.filter(t=>t.tipo==='torre'); const asig = Object.values(o.asignados).reduce((a,b)=>a+b,0);
-      html += `<div class="fila" style="flex-direction:column;align-items:stretch;gap:6px"><span><b>Asignados a apartamentos</b> <span style="color:var(--color-texto-tenue)">· ${asig} de ${o.n}; ${Math.max(0,o.n-asig)} de visitantes</span></span>` +
-        (torres.length? torres.map(t=>`<span style="display:flex;justify-content:space-between;align-items:center;font-size:13px">${t.nombre}<span class="stepper"><button onclick="const a=objeto('${o.id}').asignados;a['${t.id}']=Math.max(0,(a['${t.id}']||0)-4);render()">−</button><output>${o.asignados[t.id]||0}</output><button onclick="const a=objeto('${o.id}').asignados;a['${t.id}']=Math.min(objeto('${o.id}').n,(a['${t.id}']||0)+4);render()">+</button></span></span>`).join('') : '<span style="font-size:12px;color:var(--color-texto-tenue)">Agrega torres para asignarles puestos.</span>') +
-        `<span style="font-size:11px;color:var(--color-texto-tenue)">Puesto por puesto (P-12 → Apto 301) se hace después, desde cada apartamento o por Excel.</span></div>`;
-    }
     html += `<div class="acciones">${(o.tipo==='torre'||o.tipo==='manzana')?`<button class="boton" onclick="const c={...objeto('${o.id}'), id:Date.now(), x:objeto('${o.id}').x+120, nombre:(objeto('${o.id}').tipo==='torre'?'Torre ':'Manzana ')+(++contador[objeto('${o.id}').tipo])}; estado.objetos.push(c); estado.sel=c.id; render()">Duplicar</button>`:''}<button class="boton boton--peligro" onclick="estado.objetos=estado.objetos.filter(z=>String(z.id)!=='${o.id}');estado.sel=null;render()">Quitar</button></div></div>`;
   }
   $('#inspector').innerHTML = html;
@@ -230,11 +171,8 @@ function render(){
 function objeto(id){ return estado.objetos.find(z=>String(z.id)===String(id)); }
 function fila(titulo, clave, o){ return `<div class="fila"><span>${titulo}</span><span class="stepper"><button onclick="objeto('${o.id}').${clave}=Math.max(1,objeto('${o.id}').${clave}-1);render()">−</button><output>${o[clave]}</output><button onclick="objeto('${o.id}').${clave}++;render()">+</button></span></div>`; }
 if (location.hash==='#demo') {
-  const t1={...crear('torre',160,330), locales:true}, t2=crear('torre',290,330), t3={...crear('torre',420,300), pisos:8, porPiso:3};
-  const p=crear('parqueadero',640,330); p.asignados={[t1.id]:24,[t2.id]:12}; const dep={...crear('deposito',0,0), dentroDe:t3.id, n:24}; const gym={...crear('gimnasio',0,0), dentroDe:t3.id};
-  const z=crear('zona',600,560); const pi={...crear('piscina',0,0), dentroDe:z.id}, sa={...crear('salon',0,0), dentroDe:z.id}, pa={...crear('parque',0,0), dentroDe:z.id};
-  estado.objetos = [ t1, t2, t3, p, dep, gym, crear('porteria',80,520), z, pi, sa, pa, crear('entrada',200,520) ];
-  estado.sel = p.id; estado.pestana='Espacios';
+  estado.objetos = [ {...crear('torre',160,330), locales:true}, crear('torre',290,330), {...crear('torre',420,300), pisos:8, porPiso:3}, crear('parqueadero',640,330), crear('porteria',80,470), crear('piscina',560,470), crear('salon',680,470), crear('parque',440,470) ];
+  estado.sel = estado.objetos[2].id; estado.pestana='Espacios';
 }
 render();
 </script>
