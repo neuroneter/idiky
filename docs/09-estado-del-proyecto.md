@@ -129,8 +129,13 @@ copropiedad para la operación) sin que los datos de una unidad se mezclen con l
   está retirada, «Eliminar» con código de un solo uso al superadministrador y respaldo previo.
   «Nada se borra» sigue: retirar es lo normal; eliminar, la excepción controlada.
 
-**Qué sigue:** confirmar quién es el superadministrador y cuánto se conserva el respaldo al
-eliminar (ADR §Abierto); documentar los casos de uso (aprovisionar en BOB; estructura y
+**Cerrado en la misma sesión:** el superadministrador es el rol Super Admin de BOB (quien pide la
+baja elige a quién va el código); la retención del respaldo la elige quien pide la baja (6
+meses, 1 o 2 años); y la estructura evoluciona con migraciones versionadas por esquema, con la
+disciplina de *expandir y contraer* y respaldo antes de migrar. La higiene de secretos y el túnel
+sobrante quedan como pendientes de bajo riesgo por ser entorno de desarrollo.
+
+**Qué sigue:** documentar los casos de uso (aprovisionar en BOB; estructura y
 unidades en BLOKY) y construir T-77 junto con el primer módulo de datos.
 
 ### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Yahoo probado; iconos en las opciones de ingreso (CU-B-01)
