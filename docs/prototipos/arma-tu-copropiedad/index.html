@@ -57,7 +57,7 @@
   .puesto--mas::after{display:none}
   .puesto--mini{width:9px;height:7px;border-width:1px;border-radius:2px;cursor:default}
   .puesto--mini::after{display:none}
-  .pin{width:56px;height:56px;border-radius:14px;border:2px solid rgba(255,255,255,.8);background:rgba(255,255,255,.14);display:grid;place-items:center}
+  .pin{position:relative;width:56px;height:56px;border-radius:14px;border:2px solid rgba(255,255,255,.8);background:rgba(255,255,255,.14);display:grid;place-items:center}
   .pin svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
   .pin--area{width:72px;height:50px;border-radius:10px;background:rgba(196,30,140,.28);border-color:rgba(255,255,255,.7)}
   .dentro{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:4px;max-width:120px}
@@ -65,6 +65,9 @@
   .dentro .chip svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2}
   .obj.destino{outline:2px solid var(--color-marca-claro);outline-offset:6px;border-radius:10px}
   .dentro--ancho{max-width:280px}
+  /* La marca de «se reserva»: se ve en el croquis sin abrir nada. */
+  .marca-reserva{position:absolute;top:-7px;right:-7px;width:18px;height:18px;border-radius:50%;background:var(--color-marca-claro);border:2px solid rgba(255,255,255,.92);display:grid;place-items:center}
+  .marca-reserva svg{width:9px;height:9px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round}
   /* Una Agrupacion dentro de otra: caja que crece con lo que tenga, no un icono. */
   .zona--anidada{position:relative;width:auto;height:auto;min-width:120px;margin-top:11px;background:rgba(255,255,255,.07);cursor:grab}
   .zona--anidada>.zona__contenido{position:static;inset:auto;padding:8px 8px 6px}
@@ -124,6 +127,23 @@
   .boton--peligro{color:var(--color-error);border-color:var(--color-error-suave);background:var(--color-error-suave)}
   .pie{padding:12px 20px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--color-borde);font-size:12px;color:var(--color-texto-suave)}
   .pie a{color:var(--color-marca);font-weight:600}
+  /* La ficha de la zona: se abre encima del tablero, no dentro. Lo que se configura aqui
+     no se dibuja — si entra al croquis, vuelve a ser un formulario. */
+  .ficha{position:fixed;inset:0;z-index:20;display:grid;place-items:center}
+  .ficha[hidden]{display:none}
+  .ficha__fondo{position:absolute;inset:0;background:rgba(14,18,54,.55)}
+  .ficha__hoja{position:relative;width:min(560px,94vw);max-height:88vh;overflow:auto;background:var(--color-superficie);border-radius:18px;box-shadow:0 20px 60px rgba(0,0,0,.35);padding:22px 24px 20px;color:var(--color-texto)}
+  .ficha__hoja h2{margin:0;font-size:20px}
+  .ficha__sub{color:var(--color-texto-suave);font-size:13px;margin:4px 0 0}
+  .ficha__cerrar{position:absolute;top:12px;right:14px;border:0;background:none;font-size:24px;line-height:1;cursor:pointer;color:var(--color-texto-suave)}
+  .grupo{margin-top:16px;border-top:1px solid var(--color-borde);padding-top:4px}
+  .grupo h3{margin:8px 0 0;font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--color-marca)}
+  .ficha__hoja input,.ficha__hoja select{font:inherit;font-size:14px;padding:7px 9px;border-radius:8px;border:1px solid var(--color-borde-fuerte);background:#fff;color:inherit}
+  .ficha__hoja input[type=number]{width:84px;text-align:right}
+  .ficha__hoja input.plata{width:120px}
+  .ficha__hoja textarea{width:100%;min-height:72px;font:inherit;font-size:13px;padding:9px 10px;border-radius:10px;border:1px solid var(--color-borde-fuerte);resize:vertical;margin:8px 0 2px}
+  .unidad{font-size:12px;color:var(--color-texto-tenue);margin-left:6px}
+  .nota{font-size:11px;color:var(--color-texto-tenue);margin-top:16px;line-height:1.55}
   .aviso{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);background:rgba(23,25,53,.85);color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
   .aviso.ver{opacity:1}
 </style>
@@ -149,6 +169,7 @@
     <div class="pie"><span id="conteo"></span><span>¿Ya lo tienes en Excel? <a href="#">Importar</a></span></div>
   </aside>
 </div>
+<div class="ficha" id="ficha" hidden></div>
 <script>
 const I = {
   torre:'<svg viewBox="0 0 24 24"><path d="M6 21V5l6-3 6 3v16M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1M3 21h18"/></svg>',
@@ -191,7 +212,7 @@ function crear(tipo, x, y){
   if (tipo==='manzana') { contador.manzana++; return { ...base, nombre:'Manzana '+contador.manzana, casas:8 }; }
   if (tipo==='local') { contador.local++; return { ...base, nombre:'Locales', n:4 }; }
   if (tipo==='oficina') { contador.oficina=(contador.oficina||0)+1; return { ...base, nombre:'Oficina '+contador.oficina, puestos:12, fijos:[], salas:1 }; }
-  if (tipo==='espacio') { contador.espacio=(contador.espacio||0)+1; return { ...base, nombre:'Espacio '+contador.espacio, icono:'sala' }; }
+  if (tipo==='espacio') { contador.espacio=(contador.espacio||0)+1; return { ...base, nombre:'Espacio '+contador.espacio, icono:'sala', n:1 }; }
   if (tipo==='parqueadero'||tipo==='deposito') return { ...base, nombre:NOMBRE[tipo], n: tipo==='parqueadero'?40:20, asignados:{} };
   if (tipo==='zona') { contador.zona=(contador.zona||0)+1; const esp = estado.pestana==='Espacios';
     return { ...base, nombre:(esp?'Zona común ':'Etapa ')+contador.zona, clase:(esp?'Zona común':'Etapa'), piso:1, ancho:260, alto:150, sirveA:[] }; }
@@ -212,6 +233,67 @@ function bloquear(aId, bId){
   else { a.bloquea.splice(i,1); const j=b.bloquea.findIndex(x=>String(x)===String(aId)); if (j>=0) b.bloquea.splice(j,1); }
   estado.sel=aId; render();
 }
+// La ficha de reserva. Los siete primeros campos son, con el mismo nombre, los de `ZonaComun`
+// (apps/pwa/src/dominio/tipos.ts). Los demas son lo que pidieron los cuatro casos y el modelo
+// todavia no tiene; van agrupados aparte a proposito, para poder decidirlos.
+const MARCA = '<span class="marca-reserva" title="Se reserva"><svg viewBox="0 0 24 24"><path d="M12 7v5l3.5 2"/></svg></span>';
+function fichaNueva(){ return {
+  aforo:20, requiereAprobacion:true, horaInicio:'08:00', horaFin:'22:00',
+  duracionBloqueHoras:2, anticipacionMinimaHoras:24, cupoMensualPorUnidad:2,
+  invitados:'con', maxInvitados:4, tarifa:0, unidadTarifa:'franja', cargoAseo:0,
+  comercial:false, reglamento:'' }; }
+function alternarReserva(id){ const o=objeto(id); o.reserva = o.reserva? null : fichaNueva(); render(); }
+function abrirFicha(id){ estado.ficha=id; render(); }
+function cerrarFicha(){ estado.ficha=null; render(); }
+function campoFicha(id, clave, valor){ objeto(id).reserva[clave]=valor; }
+function reservables(){ return estado.objetos.filter(o=>o.reserva).length; }
+function resumenReserva(r){
+  return [`aforo ${r.aforo}`, `franjas de ${r.duracionBloqueHoras} h`, `${r.horaInicio}–${r.horaFin}`,
+    r.requiereAprobacion? 'con aprobación' : 'confirma sola',
+    r.tarifa? `$${r.tarifa.toLocaleString('es-CO')} por ${r.unidadTarifa}` : 'sin costo'].join(' · ');
+}
+function renderFicha(){
+  const cont=$('#ficha'), o = estado.ficha? objeto(estado.ficha) : null;
+  if (!o || !o.reserva) { cont.hidden=true; cont.innerHTML=''; return; }
+  const r=o.reserva, id=o.id;
+  const num=(t,k,paso,unidad,clase)=>`<div class="fila"><span>${t}</span><span><input type="number" class="${clase||''}" min="0" step="${paso||1}" value="${r[k]}" oninput="campoFicha('${id}','${k}',+this.value)" onchange="render()">${unidad?`<span class="unidad">${unidad}</span>`:''}</span></div>`;
+  const sw=(t,k)=>`<div class="fila"><span>${t}</span><button class="interruptor" role="switch" aria-checked="${!!r[k]}" onclick="campoFicha('${id}','${k}',!objeto('${id}').reserva.${k});render()"></button></div>`;
+  const bloq=(o.bloquea||[]).map(i=>objeto(i)).filter(Boolean);
+  cont.hidden=false;
+  cont.innerHTML = `<div class="ficha__fondo" onclick="cerrarFicha()"></div><div class="ficha__hoja" role="dialog" aria-modal="true" aria-label="Ficha de ${esc(o.nombre)}">
+    <button class="ficha__cerrar" aria-label="Cerrar" onclick="cerrarFicha()">×</button>
+    <h2>${esc(o.nombre)}</h2>
+    <p class="ficha__sub">Cómo se usa. Esto no se dibuja en el croquis: se guarda en la ficha de la zona.</p>
+
+    <div class="grupo"><h3>Reserva</h3>
+      ${num('Aforo','aforo',1,'personas')}
+      <div class="fila"><span>Horario</span><span><input type="time" value="${r.horaInicio}" oninput="campoFicha('${id}','horaInicio',this.value)" onchange="render()"><span class="unidad">a</span><input type="time" value="${r.horaFin}" oninput="campoFicha('${id}','horaFin',this.value)" onchange="render()"></span></div>
+      ${num('Duración de cada franja','duracionBloqueHoras',1,'horas')}
+      ${num('Se pide con anticipación de','anticipacionMinimaHoras',1,'horas')}
+      ${num('Cupo por unidad','cupoMensualPorUnidad',1,'al mes')}
+      ${sw('Requiere aprobación','requiereAprobacion')}
+    </div>
+
+    <div class="grupo"><h3>Quién puede</h3>
+      <div class="fila"><span>Uso</span><select onchange="campoFicha('${id}','invitados',this.value);render()"><option value="solo" ${r.invitados==='solo'?'selected':''}>Solo quien vive aquí</option><option value="con" ${r.invitados==='con'?'selected':''}>También con invitados</option></select></div>
+      ${r.invitados==='con'? num('Máximo de invitados','maxInvitados',1,'por reserva') : ''}
+    </div>
+
+    <div class="grupo"><h3>Costo</h3>
+      <div class="fila"><span>Tarifa</span><span><input type="number" class="plata" min="0" step="1000" value="${r.tarifa}" oninput="campoFicha('${id}','tarifa',+this.value)" onchange="render()"><select onchange="campoFicha('${id}','unidadTarifa',this.value);render()" style="margin-left:6px"><option value="franja" ${r.unidadTarifa==='franja'?'selected':''}>por franja</option><option value="hora" ${r.unidadTarifa==='hora'?'selected':''}>por hora</option></select></span></div>
+      ${num('Aseo y mantenimiento','cargoAseo',1000,'por reserva','plata')}
+    </div>
+
+    <div class="grupo"><h3>Reglas</h3>
+      ${sw('Se puede alquilar para eventos ajenos a la copropiedad','comercial')}
+      <div class="fila" style="flex-direction:column;align-items:stretch"><span>Reglamento <span class="unidad">· incumplirlo puede dar lugar a una sanción</span></span>
+        <textarea placeholder="Qué se puede y qué no en esta zona." oninput="campoFicha('${id}','reglamento',this.value)" onchange="render()">${esc(r.reglamento)}</textarea></div>
+      ${bloq.length? `<div class="fila"><span>Se bloquea con</span><span style="font-size:13px">${bloq.map(c=>esc(c.nombre)).join(', ')}</span></div>` : ''}
+    </div>
+
+    <p class="nota"><b>Todo lo de «Reserva» ya existe</b> en el modelo, con estos mismos nombres (<code>ZonaComun</code> en <code>docs/05-modelo-de-datos.md</code>), y la solicitud ya es un estado de <code>Reserva</code>. Lo de «Quién puede», «Costo» y «Reglas» es lo que pidieron los cuatro casos y todavía hay que agregarle al modelo.</p>
+  </div>`;
+}
 const ICONOS = ['sala','juegos','bbq','cafeteria','coworking','cancha','mascota','lavanderia','consultorio','piscina','gimnasio','parque','salon','deposito','parqueadero','entrada'];
 // ¿c esta dentro de o, a cualquier profundidad? Impide relacionar una Agrupacion con algo que ya tiene adentro.
 function contiene(o, c){ let p=c; while (p) { if (String(p.id)===String(o.id)) return true; p = p.dentroDe? objeto(p.dentroDe) : null; } return false; }
@@ -222,7 +304,7 @@ function relacionar(zid, eid){ const z=objeto(zid); z.sirveA = z.sirveA||[]; con
 function etiqueta(o){ const t = o.clase==='Piso'? 'Piso '+(o.piso||1) : o.clase; return (t && !o.nombre.startsWith(t))? t+' · ' : ''; }
 function plural(n, uno, varios){ return n+' '+(n===1? uno : varios); }
 // Lo que se muestra al lado del nombre de cada cosa, aqui y dentro de una Agrupacion.
-function detalle(c){ return c.tipo==='torre'? ` · ${c.pisos}×${c.porPiso}` : c.tipo==='manzana'? ' · '+plural(c.casas,'casa','casas') : c.tipo==='oficina'? ' · '+plural(c.puestos,'puesto','puestos') : c.n? ' · '+c.n : ''; }
+function detalle(c){ return c.tipo==='espacio'? (c.n>1? ' · '+c.n : '') : c.tipo==='torre'? ` · ${c.pisos}×${c.porPiso}` : c.tipo==='manzana'? ' · '+plural(c.casas,'casa','casas') : c.tipo==='oficina'? ' · '+plural(c.puestos,'puesto','puestos') : c.n? ' · '+c.n : ''; }
 function aviso(t){ const a=$('#aviso'); a.textContent=t; a.classList.add('ver'); clearTimeout(aviso.t); aviso.t=setTimeout(()=>a.classList.remove('ver'),1800); }
 // ---- arrastrar desde el catalogo y dentro del terreno (HTML5 drag & drop; en el producto real, eventos de puntero para tactil)
 const terreno = $('#terreno');
@@ -263,13 +345,13 @@ function contenido(o){
   return hs.map(c=> c.tipo==='zona'? zonaAnidada(c) : mini(c)).join('');
 }
 function zonaAnidada(c){
-  return `<div class="zona zona--anidada" data-id="${c.id}" data-contenedor="1" draggable="true" ondragstart="event.stopPropagation();event.dataTransfer.setData('text/plain','${c.id}')" onclick="event.stopPropagation();estado.sel='${c.id}';render()"><span class="zona__titulo">${etiqueta(c)}${esc(c.nombre)}</span><div class="zona__contenido">${contenido(c)}</div></div>`;
+  return `<div class="zona zona--anidada" data-id="${c.id}" data-contenedor="1" draggable="true" ondragstart="event.stopPropagation();event.dataTransfer.setData('text/plain','${c.id}')" onclick="event.stopPropagation();estado.sel='${c.id}';render()"><span class="zona__titulo">${etiqueta(c)}${esc(c.nombre)}</span><div class="zona__contenido">${contenido(c)}</div>${c.reserva?MARCA:''}</div>`;
 }
 function mini(c){
   const cuerpo = c.tipo==='torre' ? `<div class="torre" style="width:44px">${Array.from({length:Math.min(c.pisos,5)}).map((_,p)=>`<div class="piso${p===0&&c.locales?' piso--local':''}" style="height:9px;padding:1px;gap:1px"><i></i><i></i><i></i></div>`).join('')}<div class="techo" style="height:8px"></div></div>`
     : c.tipo==='oficina' ? `<div class="oficina" style="width:74px;padding:4px">${c.salas?`<div class="oficina__salas" style="margin-bottom:4px"><div class="sala" style="min-width:0;height:8px"></div></div>`:''}<div class="oficina__puestos" style="gap:2px;border-top:0;padding-top:0">${Array.from({length:Math.min(c.puestos,12)}).map((_,i)=>`<div class="puesto puesto--mini${c.fijos.includes(i)?' puesto--fijo':''}"></div>`).join('')}</div></div>`
     : c.tipo==='manzana' ? `<div class="manzana manzana--mini">${Array.from({length:Math.min(c.casas,4)}).map(()=>'<div class="casa"></div>').join('')}${c.casas>4?`<div class="casa casa--mas">+${c.casas-4}</div>`:''}</div>`
-    : `<div class="pin">${icono(c)}</div>`;
+    : `<div class="pin">${icono(c)}${c.reserva?MARCA:''}</div>`;
   return `<div class="mini" data-id="${c.id}" draggable="true" ondragstart="event.stopPropagation();event.dataTransfer.setData('text/plain','${c.id}')" onclick="event.stopPropagation();estado.sel='${c.id}';render()">${cuerpo}${esc(c.nombre)}${detalle(c)}</div>`;
 }
 function render(){
@@ -291,7 +373,7 @@ function render(){
       const z=document.createElement('div'); z.className='zona'; z.style.width=(o.ancho||260)+'px'; z.style.height=(o.alto||150)+'px';
       const hs=hijos(o), nt=hs.filter(c=>c.tipo==='torre').length, nm=hs.filter(c=>c.tipo==='manzana').length;
       const resumenZ = nt? ' · '+plural(nt,'torre','torres') : nm? ' · '+plural(nm,'manzana','manzanas') : '';
-      z.innerHTML=`<span class="zona__titulo">${etiqueta(o)}${esc(o.nombre)}${resumenZ}</span><div class="zona__contenido">${contenido(o)}</div>`;
+      z.innerHTML=`<span class="zona__titulo">${etiqueta(o)}${esc(o.nombre)}${resumenZ}</span><div class="zona__contenido">${contenido(o)}</div>${o.reserva?MARCA:''}`;
       d.appendChild(z); d.style.transform='translate(-50%,-100%)';
     }
     else if (o.tipo==='oficina') {
@@ -308,7 +390,8 @@ function render(){
       if (o.puestos>vis) { const mas=document.createElement('div'); mas.className='puesto puesto--mas'; mas.textContent='+'+(o.puestos-vis); g.appendChild(mas); }
       of.appendChild(g); d.appendChild(of); cuerpo = plural(o.puestos,'puesto','puestos') + (o.salas? ' · '+plural(o.salas,'sala','salas') : '');
     }
-    else { const p=document.createElement('div'); p.className='pin'+(['parqueadero','deposito','local'].includes(o.tipo)?' pin--area':''); p.innerHTML=icono(o); d.appendChild(p); cuerpo = o.n? `${o.n}` : ''; }
+    else { const p=document.createElement('div'); p.className='pin'+(['parqueadero','deposito','local'].includes(o.tipo)?' pin--area':''); p.innerHTML=icono(o)+(o.reserva?MARCA:''); d.appendChild(p);
+      cuerpo = o.tipo==='espacio'? (o.n>1? String(o.n):'') : (o.n? String(o.n):''); }
     if (o.tipo!=='zona') { const n=document.createElement('div'); n.className='obj__nombre'; n.textContent=o.nombre; d.appendChild(n); }
     if (cuerpo) { const s=document.createElement('div'); s.className='obj__sub'; s.textContent=cuerpo; d.appendChild(s); }
     if (o.tipo==='torre') { const hs=hijos(o); if (hs.length) { const h=document.createElement('div'); h.className='dentro'+(hs.some(c=>c.tipo==='zona')?' dentro--ancho':'');
@@ -338,7 +421,7 @@ function render(){
   $('#leyenda').innerHTML = leyendas.map(([c,t])=>`<span class="${c}">${t}</span>`).join('');
   $('#leyenda').style.display = leyendas.length? 'flex' : 'none';
   const u=unidades(); const torres=estado.objetos.filter(o=>o.tipo==='torre').length, manz=estado.objetos.filter(o=>o.tipo==='manzana').length;
-  $('#resumen').textContent = estado.objetos.length ? [torres&&plural(torres,'torre','torres'), manz&&plural(manz,'manzana','manzanas'), plural(u,'unidad','unidades'), puestos()&&plural(puestos(),'puesto','puestos')].filter(Boolean).join(' · ') : 'Arrastra del catálogo al terreno.';
+  $('#resumen').textContent = estado.objetos.length ? [torres&&plural(torres,'torre','torres'), manz&&plural(manz,'manzana','manzanas'), plural(u,'unidad','unidades'), puestos()&&plural(puestos(),'puesto','puestos'), reservables()&&plural(reservables(),'zona reservable','zonas reservables')].filter(Boolean).join(' · ') : 'Arrastra del catálogo al terreno.';
   const pct=Math.min(60, u>0? 20+Math.min(40,Math.round(u/3)) : (estado.objetos.length?8:0)); $('#anillo').style.setProperty('--p',pct+'%'); $('#pct').textContent=pct+' %';
   $('#conteo').textContent = u? `${plural(u,'unidad','unidades')} hasta ahora` : 'Nada todavía';
   // inspector
@@ -358,7 +441,7 @@ function render(){
         ? estructuras(o).map(e=>`<span style="display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:13px">${e.tipo==='zona'? etiqueta(e)+e.nombre : e.nombre}<button class="interruptor" role="switch" aria-checked="${(o.sirveA||[]).some(i=>String(i)===String(e.id))}" onclick="relacionar('${o.id}','${e.id}')"></button></span>`).join('')
         : '<span style="font-size:12px;color:var(--color-texto-tenue)">Agrega torres, manzanas u otras agrupaciones para poder relacionarla.</span>') +
       `<span style="font-size:11px;color:var(--color-texto-tenue)">Al seleccionarla se dibujan las líneas hacia lo que marques.</span></div>`;
-    else if (o.tipo==='espacio') html += `<div class="fila" style="flex-direction:column;align-items:stretch;gap:8px"><span><b>Ícono</b> <span style="color:var(--color-texto-tenue)">· ponle el nombre que quieras arriba</span></span><div class="iconos">${ICONOS.map(k=>`<button aria-pressed="${(o.icono||'sala')===k}" title="${NOMBRE[k]||k}" onclick="objeto('${o.id}').icono='${k}';render()">${I[k]}</button>`).join('')}</div></div>`;
+    else if (o.tipo==='espacio') html += fila('Cuántos','n',o) + `<div class="fila" style="flex-direction:column;align-items:stretch;gap:8px"><span><b>Ícono</b> <span style="color:var(--color-texto-tenue)">· ponle el nombre que quieras arriba</span></span><div class="iconos">${ICONOS.map(k=>`<button aria-pressed="${(o.icono||'sala')===k}" title="${NOMBRE[k]||k}" onclick="objeto('${o.id}').icono='${k}';render()">${I[k]}</button>`).join('')}</div></div>`;
     else if (o.tipo==='oficina') {
       const fij = o.fijos.filter(i=>i<o.puestos).length;
       html += fila('Puestos de trabajo','puestos',o) + fila('Salas de reunión','salas',o,0) +
@@ -370,6 +453,8 @@ function render(){
     }
     else if (o.n!==undefined) html += fila('Cantidad','n',o);
     if (bloqueable(o)) {
+      html += `<div class="fila"><span>Se reserva</span><button class="interruptor" role="switch" aria-checked="${!!o.reserva}" onclick="alternarReserva('${o.id}')"></button></div>`;
+      if (o.reserva) html += `<div class="fila" style="flex-direction:column;align-items:stretch;gap:8px;border-top:0;padding-top:0"><span style="font-size:12px;color:var(--color-texto-tenue)">${resumenReserva(o.reserva)}</span><button class="boton" onclick="abrirFicha('${o.id}')">Abrir la ficha de la zona</button></div>`;
       const otros = estado.objetos.filter(c=> bloqueable(c) && String(c.id)!==String(o.id));
       html += `<div class="fila" style="flex-direction:column;align-items:stretch;gap:6px"><span><b>Se bloquea con</b> <span style="color:var(--color-texto-tenue)">· reservar una deja la otra ocupada</span></span>` +
         (otros.length
@@ -389,7 +474,9 @@ function render(){
     html += `<div class="acciones">${['torre','manzana','oficina'].includes(o.tipo)?`<button class="boton" onclick="duplicar('${o.id}')">Duplicar</button>`:''}<button class="boton boton--peligro" onclick="estado.objetos=estado.objetos.filter(z=>String(z.id)!=='${o.id}');estado.sel=null;render()">Quitar</button></div></div>`;
   }
   $('#inspector').innerHTML = html;
+  renderFicha();
 }
+document.addEventListener('keydown', (e)=>{ if (e.key==='Escape' && estado.ficha) cerrarFicha(); });
 function duplicar(id){
   const o=objeto(id); contador[o.tipo]=(contador[o.tipo]||0)+1;
   const c={ ...o, id:Date.now()+Math.random(), x:o.x+120, nombre:NOMBRE[o.tipo]+' '+contador[o.tipo] };
@@ -411,6 +498,10 @@ if (location.hash==='#demo') {
   const bil={...crear('espacio',0,0), dentroDe:jue.id, nombre:'Billar', icono:'juegos'};
   const mes={...crear('espacio',0,0), dentroDe:jue.id, nombre:'Juegos de mesa', icono:'sala'};
   sa.bloquea=[pi.id]; pi.bloquea=[sa.id];
+  sa.reserva={...fichaNueva(), aforo:60, duracionBloqueHoras:5, tarifa:180000, cargoAseo:60000, comercial:true,
+    reglamento:'No se presta para eventos después de las 11 p. m. El sonido se apaga a las 10. Quien reserva responde por los daños.'};
+  pi.reserva={...fichaNueva(), aforo:25, requiereAprobacion:false, horaInicio:'06:00', horaFin:'20:00', duracionBloqueHoras:1, invitados:'solo'};
+  bil.reserva={...fichaNueva(), aforo:6, requiereAprobacion:false, duracionBloqueHoras:1, cupoMensualPorUnidad:4};
   estado.objetos = [ t1, t2, t3, p, dep, gym, crear('porteria',80,520), z, pi, sa, pa, crear('entrada',200,520), e2, t4, t5, l2, of1, jue, bil, mes ];
   estado.sel = p.id; estado.pestana='Espacios';
 }

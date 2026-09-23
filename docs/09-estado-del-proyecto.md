@@ -165,8 +165,16 @@ más interna, y no se puede meter una dentro de lo que ya contiene— y la **ter
 bloquea con»**, en línea blanca punteada con una × (no roja: `tokens.css` reserva el rojo para la
 plata). Además el nombre se escribe en el inspector en vez de un `prompt()`.
 
-**Lo que falta, en orden:** (3) enlazar los espacios reservables con `ZonaComun`; (4) los accesos
-—portería y entrada son adornos hoy—; (5) abrir el edificio: la pila de pisos por tramos, con
+**Y el paso 3, en la misma sesión: el croquis ya habla con el modelo de reservas.** Un interruptor
+**«Se reserva»** en el inspector; encendido, la zona queda con una **marca de reloj en el croquis**
+—se ve cuáles se reservan sin abrir nada— y se abre su **ficha**, una hoja encima del tablero. Los
+campos de la ficha son **literalmente los de `ZonaComun`**, con el mismo nombre. Lo que los casos
+pidieron y el modelo no tiene va en tres grupos aparte (Quién puede, Costo, Reglas), y la hoja lo
+advierte al pie: así **la decisión de qué agregarle a `ZonaComun` se toma mirando la ficha**. Nada
+de eso se dibuja en el croquis, a propósito.
+
+**Lo que falta, en orden:** (4) los accesos —portería y entrada son adornos hoy: no saben a qué
+recinto dan paso ni quién lo cruza—; (5) abrir el edificio: la pila de pisos por tramos, con
 sótanos y ramificada, que rehace buena parte del dibujo. **Y una decisión que no es del prototipo:
 ¿entra la categoría «trabajador» al dominio?** Toca el registro de personas y la portería, que son
 de Mary.

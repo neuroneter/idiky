@@ -75,6 +75,21 @@ en `docs/09-estado-del-proyecto.md` para el análisis completo.
   **pertenece a** (interruptor, línea fucsia) y **se bloquea con** (interruptor, línea punteada).
 - **El nombre se escribe en el inspector**, ya no en una ventana del navegador. Renombrar era un
   `prompt()`, que además bloquea la página.
+- **Se reserva, y la ficha se abre aparte** (paso 3 del plan). En el inspector, un interruptor
+  **«Se reserva»**; encendido, muestra el resumen en una línea —*aforo 60 · franjas de 5 h ·
+  08:00–22:00 · con aprobación · $180.000 por franja*— y un botón que abre la **ficha de la zona**,
+  una hoja encima del tablero. En el croquis, la zona queda con una **marca de reloj**, para que se
+  vea de un vistazo cuáles se reservan, y el encabezado las cuenta.
+  Los campos de la ficha **son los de `ZonaComun`**, con el mismo nombre
+  (`apps/pwa/src/dominio/tipos.ts`): `aforo`, `horaInicio`/`horaFin`, `duracionBloqueHoras`,
+  `anticipacionMinimaHoras`, `cupoMensualPorUnidad`, `requiereAprobacion`. Lo que los cuatro casos
+  pidieron y el modelo **todavía no tiene** va en tres grupos aparte —**Quién puede** (invitados y
+  cuántos), **Costo** (tarifa por hora o franja, aseo) y **Reglas** (alquiler comercial,
+  reglamento)— y la hoja lo dice al pie. Así la decisión de qué agregarle a `ZonaComun` se toma
+  mirándola, no leyendo una lista.
+  **Nada de esto se dibuja**: si tarifas y franjas entran al croquis, vuelve a ser un formulario.
+- El **Espacio lleva cantidad**, para «varios BBQ» y los «3 parqueaderos de carga eléctrica». Solo
+  la muestra cuando es más de uno.
 - Dos trampas de nombres corregidas: `.nombre` era a la vez el título del croquis y el campo nuevo,
   y `.pin.zona` se llamaba igual que la Agrupación (es un pin ancho: ahora `.pin--area`).
 
