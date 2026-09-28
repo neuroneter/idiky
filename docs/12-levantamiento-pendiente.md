@@ -202,8 +202,14 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   suma las dos**: una sola cuenta. Verificado además contra la norma —Ley 675 art. 42 y
   Decreto 398 de 2020 art. 1— que dicen lo mismo. Implementado: RN-92, y la app se lo dice a
   quien está conectado.
-- **Transmisión:** ¿la transmisión debe quedar **grabada** como soporte del acta? Eso
-  cambia el costo de almacenamiento y el proveedor. → *(respuesta)*
+- ~~**Transmisión:** ¿la transmisión debe quedar **grabada** como soporte del acta?~~ →
+  ✅ **Resuelto (2026-09-28):** con Vimeo como opción (Mary), la grabación la guarda la
+  herramienta; Idiky enlaza y el acta la cita como soporte (RN-99). Sin costo de almacenamiento.
+- **Transmisión de una sola vía *(pregunta nueva, 2026-09-28 — para el abogado)*:** con Vimeo o
+  YouTube los conectados ven y oyen pero no hablan; intervienen por el chat de la transmisión.
+  El art. 42 de la Ley 675 exige que puedan **deliberar** por un medio de comunicación
+  simultánea o sucesiva. **¿El chat de la transmisión basta como deliberación?** Hoy Idiky lo
+  advierte al convocar y lo deja en el acta, sin impedirlo (RN-98). → *(respuesta)*
 - ~~**Acta — comisión verificadora:**~~ → ✅ **Respondido (Mary, 2026-09-10):** *«la comisión
   verificadora o persona que revisa el acta déjala como una opción para que el administrador
   seleccione, **a veces hay revisión**»*. Implementado como opcional (RN-93). La firma quedó

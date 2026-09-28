@@ -253,7 +253,7 @@ cuenta, plegado bajo «¿Por qué se cobra?».
    | Modalidad | Se exige | El copropietario ve |
    |---|---|---|
    | Presencial | **Lugar** | Dónde es y a qué hora |
-   | Virtual | **Enlace** de Zoom, Meet o lo que usen | El botón para entrar a la reunión |
+   | Virtual | **Enlace** de Zoom, Meet, Teams o Vimeo | El botón para entrar a la reunión, o ver la transmisión |
    | Mixta | **Lugar y enlace** | Los dos, y escoge cómo asiste |
 
    Después: tipo (ordinaria | extraordinaria), fecha, hora y qué la convoca.
@@ -267,6 +267,13 @@ cuenta, plegado bajo «¿Por qué se cobra?».
   convoca por segunda vez **(?)**.
 - A2. Se modifica el orden del día antes de la asamblea → se reemite la citación.
 - A3. Se cancela la asamblea → estado `cancelada`, con motivo. No se borra (trazabilidad).
+
+**Vimeo, y la salvedad** (RN-98, Mary 2026-09-28). Idiky reconoce la herramienta por el enlace
+y, si es una **transmisión de una sola vía** (Vimeo, YouTube) en una asamblea virtual o mixta,
+muestra la salvedad al convocar: los conectados ven y oyen, intervienen por el chat de la
+transmisión y votan en Idiky; si eso basta para deliberar (Ley 675, art. 42) lo responde el
+abogado. Se dice, no se impide. Ya instalada la asamblea, el administrador puede **enlazar la
+grabación** y el acta la cita como soporte (RN-99).
 
 **Reglas de negocio**
 - RN-33: antelación mínima de la convocatoria **(?)**.

@@ -35,6 +35,7 @@ import {
   decisionAdmisibleEnLaSesion,
   etiquetaUnidad,
   hayQuorum,
+  herramientaDeEnlace,
   mayoriaDelPunto,
   resultadoVotacion,
   resumenAsistencia,
@@ -84,6 +85,17 @@ export function HojaActa({
   const resumen = resumenAsistencia(asistencias, asamblea.id)
   const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
   const deLaAsamblea = asistencias.filter((a) => a.asambleaId === asamblea.id)
+  // RN-98 — El acta dice por qué medio fue la sesión no presencial, y si fue
+  // una transmisión de una vía: es lo que se mira si alguien impugna la
+  // deliberación (Ley 675, art. 42).
+  const herramienta = herramientaDeEnlace(asamblea.enlaceTransmision)
+  const medioVirtual = herramienta
+    ? herramienta.unaVia
+      ? ` por transmisión en ${herramienta.nombre}, de una sola vía, con intervenciones por su chat`
+      : herramienta.id === 'otra'
+        ? ' por el medio de comunicación enlazado en la convocatoria'
+        : ` por ${herramienta.nombre}`
+    : ''
   // RN-95 — Aprobada, la hoja congela lo que paso: quien no reviso a tiempo se
   // mide contra el dia de la aprobacion, no contra hoy.
   const fueraDePlazo = new Set(
@@ -121,10 +133,13 @@ export function HojaActa({
         {asamblea.modalidad === 'presencial'
           ? `sesión presencial en ${asamblea.lugar}`
           : asamblea.modalidad === 'virtual'
-            ? 'sesión virtual'
-            : `sesión mixta, presencial en ${asamblea.lugar} y virtual`}
+            ? `sesión virtual${medioVirtual}`
+            : `sesión mixta, presencial en ${asamblea.lugar} y virtual${medioVirtual}`}
         , en{' '}
         <strong>{asamblea.numeroConvocatoria === 2 ? 'segunda' : 'primera'} convocatoria</strong>.
+        {/* RN-99 — La grabación, citada como soporte. No sustituye el acta. */}
+        {asamblea.enlaceGrabacion &&
+          ` La sesión quedó grabada por la herramienta de transmisión y la grabación reposa como soporte de la presente acta en ${asamblea.enlaceGrabacion}.`}
       </p>
 
       {/* Art. 45 y 41: el quorum, y con qué regla se verificó. */}

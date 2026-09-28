@@ -761,7 +761,22 @@ export interface Asamblea {
    */
   numeroConvocatoria: 1 | 2
   lugar?: string
+  /**
+   * El enlace de la reunion o de la transmision (ADR-0007). Idiky no
+   * transmite: enlaza. **De que herramienta es se deduce del enlace** (RN-98):
+   * Zoom, Meet o Teams son reuniones de dos vias; Vimeo o YouTube son
+   * transmisiones de una sola, y eso cambia como interviene quien esta
+   * conectado.
+   */
   enlaceTransmision?: string
+  /**
+   * La grabacion de la sesion, si la hubo — RN-99.
+   *
+   * Vimeo y las demas herramientas la guardan solas; aqui solo se enlaza, al
+   * cerrar la asamblea, para que el acta la cite. **No reemplaza nada**: la
+   * asistencia, los votos y el acta siguen siendo lo que prueba la asamblea.
+   */
+  enlaceGrabacion?: string
   ordenDelDia: PuntoOrdenDelDia[]
   estado: EstadoAsamblea
   /** Lo que convoca: numero y fecha del acta o de la citacion. */

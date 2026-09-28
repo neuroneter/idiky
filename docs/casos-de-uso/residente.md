@@ -493,6 +493,10 @@ se descarga. Requiere ADR-0006.
 - A1. Segunda convocatoria por falta de quórum → se emite una citación nueva **(?)**.
 - A2. Se modifica el orden del día → se reemite la citación y se avisa el cambio.
 
+**Si la asamblea va por Vimeo** (RN-98): el botón dice «Ver la transmisión en Vimeo» en vez de
+«Entrar a la reunión», y la nota explica que se interviene por el chat de la transmisión y que
+las votaciones siguen siendo aquí.
+
 **Reglas de negocio**
 - RN-33: la citación debe emitirse con la antelación mínima que exija el reglamento **(?)**.
 

@@ -22,7 +22,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 71 documentados: 38 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 97 del demo (RN-01…RN-97; RN-41 retirada) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-97, de las asambleas y registros de Mary |
+| **Reglas de negocio** | 99 del demo (RN-01…RN-99; RN-41 retirada) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-99, de las asambleas y registros de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -107,6 +107,44 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-28 · Mary + IA (Claude) · Vimeo como opción, con sus salvedades (RN-98, RN-99)
+
+Mary retomó las asambleas: *«quiero incluir el tema de Vimeo como servicio para conectarse»*, y
+al oír las salvedades, *«incluyámoslo como una opción dejando las salvedades»*. Entra **sin
+tocar ADR-0007**: Idiky sigue enlazando, no transmitiendo; un enlace de Vimeo es un enlace.
+
+**Lo que sí cambia es que una transmisión no es una reunión** (RN-98). La herramienta se
+reconoce por el enlace —Zoom, Meet, Teams, Vimeo, YouTube— sin preguntarle nada al
+administrador. Zoom, Meet y Teams son de dos vías; **Vimeo y YouTube son de una sola**: los
+conectados ven y oyen, intervienen por el chat de la transmisión y votan en Idiky. La salvedad
+legal quedó escrita en las tres capas: el art. 42 de la Ley 675 exige que en la reunión no
+presencial los copropietarios puedan **deliberar**, y con una transmisión de una vía eso depende
+del chat. Quien convoca ve la salvedad en el formulario, cuando todavía puede cambiar de
+herramienta o de modalidad; el copropietario ve «Ver la transmisión en Vimeo» y cómo intervenir;
+y el acta dice por qué medio fue la sesión, «de una sola vía, con intervenciones por su chat».
+Se dice, no se impide (mismo criterio que el tope de poderes, RN-30), y **si el chat basta para
+deliberar quedó como pregunta para el abogado** (§3 bis).
+
+**Y la grabación dejó de ser pregunta** (RN-99). Vimeo la guarda sola; el administrador enlaza
+la grabación cuando la sesión ya empezó, y **el acta la cita como soporte**. No reemplaza la
+asistencia ni los votos: es soporte, no acta. Con eso se cierra lo que T-14 y CU-A-17 A2 tenían
+abierto desde el 10 de septiembre.
+
+**Numeración.** Primera sesión con el rango reservado de Mary (§0 del tablero): RN-98 y RN-99.
+Las reglas de la sesión anterior quedaron renumeradas por el integrador al entrar a `main`
+(RN-92 a RN-97).
+
+**Verificado.** 17 comprobaciones con Playwright: Meet no muestra salvedad y Vimeo sí, la
+salvedad desaparece al pasar a presencial, la asamblea se convoca con el enlace, el detalle
+nombra la transmisión, la grabación se rechaza sin `http` y se guarda con él, el propietario ve
+el botón y la nota de Vimeo, y el acta cita el medio y la grabación. `npm run build` y la
+ortografía en verde.
+
+**Lo que sigue:** la pregunta del abogado sobre el chat como deliberación se suma a las siete
+de datos personales; y CU-A-12 sigue 🟡 por el documento de citación, no por esto.
+
+---
 
 ### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Cómo se siente el primer día: «Arma tu copropiedad» (prototipo)
 

@@ -584,7 +584,7 @@ export const MODALIDADES: ReadonlyArray<{
   {
     id: 'virtual',
     texto: 'Virtual',
-    detalle: 'Se reúnen por Zoom, Meet o la herramienta que usen. Idiky enlaza esa reunión.',
+    detalle: 'Se reúnen por Zoom, Meet, Teams o Vimeo. Idiky enlaza esa reunión o transmisión.',
     exigeLugar: false,
     exigeEnlace: true,
   },
@@ -602,6 +602,88 @@ export const MODALIDADES: ReadonlyArray<{
 
 export function definicionModalidad(modalidad: ModalidadAsamblea) {
   return MODALIDADES.find((m) => m.id === modalidad)!
+}
+
+// ---------------------------------------------------------------------------
+// RN-98 — La herramienta se reconoce por el enlace, y **una transmision no es
+// una reunion**.
+//
+// «Incluyamos Vimeo como una opcion, dejando las salvedades» (Mary,
+// 2026-09-28). Entra sin tocar ADR-0007: un enlace es un enlace. Lo que si
+// cambia es **como interviene quien esta conectado**: en Zoom, Meet o Teams
+// habla; en Vimeo o YouTube ve y oye, e interviene por el chat de la
+// transmision. Y eso importa por la ley: el art. 42 de la Ley 675 admite la
+// reunion no presencial cuando los copropietarios pueden **deliberar** por
+// un medio de comunicacion simultanea o sucesiva. Con una transmision de una
+// sola via, la deliberacion depende de ese chat.
+//
+// Idiky **lo dice, no lo impide** (mismo criterio que el tope de poderes,
+// RN-30): quien convoca ve la salvedad y decide; el copropietario conectado
+// sabe por donde intervenir; y queda como pregunta para el abogado si el
+// chat basta para deliberar (§3 bis).
+// ---------------------------------------------------------------------------
+
+export type HerramientaTransmision = 'zoom' | 'meet' | 'teams' | 'vimeo' | 'youtube' | 'otra'
+
+export const HERRAMIENTAS_TRANSMISION: ReadonlyArray<{
+  id: HerramientaTransmision
+  nombre: string
+  /** Fragmentos del dominio que la identifican. */
+  dominios: string[]
+  /** `true`: transmision de una sola via — se ve, no se habla. */
+  unaVia: boolean
+  /** Como interviene quien esta conectado. Se le dice al copropietario. */
+  comoIntervenir: string
+}> = [
+  { id: 'zoom', nombre: 'Zoom', dominios: ['zoom.us', 'zoom.com'], unaVia: false, comoIntervenir: 'Pides la palabra en la reunión.' },
+  { id: 'meet', nombre: 'Meet', dominios: ['meet.google.com'], unaVia: false, comoIntervenir: 'Pides la palabra en la reunión.' },
+  { id: 'teams', nombre: 'Teams', dominios: ['teams.microsoft.com', 'teams.live.com'], unaVia: false, comoIntervenir: 'Pides la palabra en la reunión.' },
+  { id: 'vimeo', nombre: 'Vimeo', dominios: ['vimeo.com'], unaVia: true, comoIntervenir: 'Ves y oyes la asamblea; intervienes por el chat de la transmisión.' },
+  { id: 'youtube', nombre: 'YouTube', dominios: ['youtube.com', 'youtu.be'], unaVia: true, comoIntervenir: 'Ves y oyes la asamblea; intervienes por el chat de la transmisión.' },
+  { id: 'otra', nombre: 'la reunión', dominios: [], unaVia: false, comoIntervenir: 'Pides la palabra en la reunión.' },
+]
+
+/** Que herramienta hay detras del enlace. Sin enlace, nada. */
+export function herramientaDeEnlace(enlace?: string) {
+  if (!enlace?.trim()) return undefined
+  let host = ''
+  try {
+    host = new URL(enlace.trim()).hostname.toLowerCase()
+  } catch {
+    host = enlace.trim().toLowerCase()
+  }
+  return (
+    HERRAMIENTAS_TRANSMISION.find((h) => h.dominios.some((d) => host === d || host.endsWith('.' + d))) ??
+    HERRAMIENTAS_TRANSMISION[HERRAMIENTAS_TRANSMISION.length - 1]
+  )
+}
+
+/**
+ * RN-98 — La salvedad que ve quien convoca, o `null` si no hace falta: solo
+ * cuando hay gente conectada (virtual o mixta) y el canal es de una via.
+ */
+export function salvedadCanalDeUnaVia(asamblea: {
+  modalidad: ModalidadAsamblea
+  enlaceTransmision?: string
+}): string | null {
+  if (asamblea.modalidad === 'presencial') return null
+  const herramienta = herramientaDeEnlace(asamblea.enlaceTransmision)
+  if (!herramienta?.unaVia) return null
+  return (
+    `${herramienta.nombre} es una transmisión de una sola vía: los conectados ven y oyen, pero no hablan. ` +
+    'Intervienen por el chat de la transmisión y votan en Idiky. La Ley 675 (art. 42) exige que en la reunión ' +
+    'no presencial los copropietarios puedan deliberar; si el chat basta para eso es una pregunta para el abogado.'
+  )
+}
+
+/**
+ * RN-99 — La grabacion se enlaza y el acta la cita; no reemplaza nada.
+ *
+ * Solo tiene sentido cuando hubo transmision y la asamblea ya empezo: antes no
+ * hay nada grabado.
+ */
+export function admiteGrabacion(asamblea: Asamblea): boolean {
+  return asamblea.modalidad !== 'presencial' && asamblea.estado !== 'convocada' && asamblea.estado !== 'cancelada'
 }
 
 /**

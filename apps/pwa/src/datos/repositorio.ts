@@ -76,6 +76,7 @@ import {
   convocatoriaCompleta,
   faltaEnActa,
   limiteVerificacionActa,
+  admiteGrabacion,
   comisionVencida,
   motivoPlazoComisionInvalido,
   puedeGenerarActa,
@@ -1262,6 +1263,31 @@ export async function convocarAsamblea(
  * abrir votaciones. Cerrar no deshace nada — la asamblea cerrada conserva su
  * asistencia y sus votos, que es de lo que sale el acta.
  */
+/**
+ * RN-99 — Enlazar la grabacion de la sesion, para que el acta la cite.
+ *
+ * Se guarda como se guarda el enlace de la transmision: es una direccion en
+ * la herramienta de un tercero, no un archivo de Idiky (ADR-0007).
+ */
+export async function registrarGrabacionAsamblea(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; enlace: string },
+): Promise<Resultado<Asamblea>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (!admiteGrabacion(asamblea)) {
+    throw new ErrorDeNegocio('La grabación se enlaza cuando la sesión ya empezó y hubo transmisión.')
+  }
+  const enlace = parametros.enlace.trim()
+  if (!/^https?:\/\//i.test(enlace)) {
+    throw new ErrorDeNegocio('El enlace de la grabación tiene que empezar por http:// o https://.')
+  }
+  asamblea.enlaceGrabacion = enlace
+  return persistir(bd, asamblea)
+}
+
 export async function cambiarEstadoAsamblea(
   bdActual: BaseDatos,
   parametros: { asambleaId: string; estado: EstadoAsamblea },
