@@ -475,7 +475,7 @@ export interface Pqrs {
 // ---------------------------------------------------------------------------
 // Comunicados
 // ---------------------------------------------------------------------------
-export type CategoriaComunicado = 'general' | 'urgente' | 'mantenimiento' | 'asamblea'
+export type CategoriaComunicado = 'general' | 'urgente' | 'mantenimiento' | 'asamblea' | 'proyecto'
 
 export interface Comunicado {
   id: string
@@ -489,6 +489,8 @@ export interface Comunicado {
   autor: string
   /** Ids de persona que ya lo abrieron. */
   leidoPor: string[]
+  /** Si lo genero un avance de proyecto (RN-101): desde la cartelera se llega al tablero. */
+  proyectoId?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -681,7 +683,7 @@ export interface AccesoSoporte {
 // recibi nada» es la discusion mas comun de una copropiedad.
 // ---------------------------------------------------------------------------
 
-export type MotivoMensaje = 'registro_autorizado' | 'registro_rechazado'
+export type MotivoMensaje = 'registro_autorizado' | 'registro_rechazado' | 'avance_proyecto'
 
 export interface Mensaje {
   id: string
@@ -692,7 +694,56 @@ export interface Mensaje {
   motivo: MotivoMensaje
   /** El registro que lo origino, para poder volver de uno al otro. */
   registroId?: string
+  /** El proyecto cuyo avance lo origino (RN-101). */
+  proyectoId?: string
   enviadoEn: FechaHoraISO
+}
+
+// ---------------------------------------------------------------------------
+// Proyectos de la copropiedad — CU-A-28, CU-R-32 · RN-100, RN-101
+//
+// «El administrador registra un proyecto y va registrando el avance; a los
+// propietarios les llega un mensaje con los avances y pueden entrar a ver un
+// tablero» (Mary, 2026-09-29). Una obra —la cubierta, el ascensor, la
+// fachada— es lo que mas plata mueve en una copropiedad y lo que menos se ve
+// desde un apartamento. El tablero existe para que el propietario que pago la
+// extraordinaria sepa en que va sin tener que preguntar.
+// ---------------------------------------------------------------------------
+
+/**
+ * Un avance del proyecto. **No se edita ni se borra**: si se registro mal, se
+ * registra otro que lo corrija (RN-100, RN-61). Cada uno queda con fecha,
+ * porcentaje y quien lo registro, que es lo que permite reconstruir la
+ * historia de la obra el dia que alguien la discuta.
+ */
+export interface AvanceProyecto {
+  id: string
+  fecha: FechaHoraISO
+  /** 0 a 100. Puede bajar respecto al anterior, pero entonces exige explicacion (RN-100). */
+  porcentaje: number
+  titulo: string
+  detalle: string
+  /** Una foto de la obra, si la hubo (ADR-0009). */
+  foto?: Soporte
+  registradoPor: string
+  /** El comunicado que se publico con este avance (RN-101). */
+  comunicadoId?: string
+}
+
+export interface Proyecto {
+  id: string
+  copropiedadId: string
+  nombre: string
+  descripcion: string
+  /** Quien ejecuta: el contratista, la empresa, el comite. Texto libre. */
+  responsable?: string
+  fechaInicio?: FechaISO
+  fechaFinPrevista?: FechaISO
+  presupuesto?: number
+  /** El estado **se deriva** de los avances (`estadoProyecto`); no se guarda. */
+  avances: AvanceProyecto[]
+  creadoPor: string
+  creadoEn: FechaHoraISO
 }
 
 // ---------------------------------------------------------------------------
@@ -1148,6 +1199,7 @@ export interface BaseDatos {
   visitantes: Visitante[]
   registros: RegistroPersona[]
   mensajes: Mensaje[]
+  proyectos: Proyecto[]
   accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
   asistencias: Asistencia[]

@@ -1075,3 +1075,54 @@ administración.
 
 **Estado en el demo:** ✅ — `/app/asambleas/:id`, en la asamblea en curso, botón «Enviar el
 poder firmado». La validación vive en `/admin/asambleas`, sección **Poderes** (CU-A-19).
+
+---
+
+### CU-R-32
+## CU-R-32 — Seguir el avance de los proyectos de la copropiedad
+
+- **Actor principal:** Propietario (y cualquier residente de la unidad)
+- **Precondiciones:** La administración registró al menos un proyecto (CU-A-28).
+- **Disparador:** Le llegó el mensaje de un avance, o quiere saber en qué va una obra.
+- **Resultado esperado:** Ve cada obra, en qué porcentaje va, qué pasó último y la historia
+  completa con fechas y fotos.
+
+> Mary, 2026-09-29: *«a los propietarios les llega un mensaje con los avances y pueden entrar a
+> ver un tablero con el avance»*. Una obra —la cubierta, el ascensor— es lo que más plata mueve
+> en una copropiedad y lo que menos se ve desde un apartamento. El tablero existe para que quien
+> pagó la extraordinaria sepa en qué va sin tener que preguntar.
+
+**Flujo principal**
+1. Le llega un **mensaje** al celular con el nombre del proyecto, el porcentaje y qué se hizo
+   (RN-101). En el demo el texto se guarda y se ve en la consola; no hay quién lo envíe todavía.
+2. En **Inicio** aparece «Obras en marcha» con la obra y su barra de avance; toca «Ver el
+   tablero».
+3. El **tablero** lista los proyectos, en marcha primero: nombre, estado, barra con el
+   porcentaje del último avance (RN-100) y qué se hizo último.
+4. «Ver la historia de la obra» despliega la descripción, quién la ejecuta, fechas y
+   presupuesto, y la historia: cada avance con su fecha, su detalle y su foto si la hubo, del
+   más nuevo al más viejo.
+5. En la **cartelera**, cada avance es además un comunicado de categoría *Proyecto*, con un
+   enlace al tablero.
+
+**Flujos alternativos**
+- A1. El avance **bajó** respecto al anterior → el porcentaje se ve en amarillo y el detalle dice
+  por qué: la administración no puede registrar un retroceso sin explicarlo (RN-100).
+- A2. No hay proyectos → el tablero lo dice y el inicio no muestra la sección.
+
+**Decisiones de interfaz**
+- **Es el mismo tablero que ve la administración** (`componentes/TableroProyecto.tsx`). Si cada
+  cara tuviera su versión, el día que discutan «en qué va la cubierta» no habría un tablero
+  común sobre el cual discutir.
+- **El porcentaje es el de toda la obra**, no el de una etapa, y es el del último avance: si la
+  obra retrocedió, el tablero lo dice en vez de esconderlo detrás del máximo alcanzado.
+- **La foto vale más que el porcentaje.** Cuando la hay, se muestra grande: el propietario ve la
+  cubierta sin subir a mirarla.
+
+**Reglas de negocio**
+- RN-100 (el avance es el último registrado, no se edita ni se borra, retroceder exige
+  explicación), RN-101 (cada avance se cuenta: comunicado y mensaje), RN-64 (el mensaje queda
+  guardado con su texto), RN-61 (nada se borra).
+
+**Estado en el demo:** ✅ — `/app/proyectos`, la sección «Obras en marcha» de `/app` y el
+enlace desde `/app/comunicados`.

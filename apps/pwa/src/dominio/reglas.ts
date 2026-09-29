@@ -8,6 +8,8 @@
 
 import type {
   Acta,
+  AvanceProyecto,
+  Proyecto,
   VerificacionActa,
   Asamblea,
   Asistencia,
@@ -1863,4 +1865,99 @@ export function puede(rol: RolUsuario | undefined, permiso: string): boolean {
 /** A donde entra cada rol al iniciar sesion. */
 export function rutaInicial(rol: RolUsuario): string {
   return { residente: '/app', admin: '/admin', porteria: '/porteria' }[rol]
+}
+
+// ---------------------------------------------------------------------------
+// Proyectos — RN-100, RN-101 · CU-A-28, CU-R-32
+// ---------------------------------------------------------------------------
+
+export type EstadoProyecto = 'planeado' | 'en_curso' | 'terminado'
+
+/** Los avances del mas viejo al mas nuevo. */
+export function avancesDelProyecto(proyecto: Proyecto): AvanceProyecto[] {
+  return [...proyecto.avances].sort((a, b) => a.fecha.localeCompare(b.fecha))
+}
+
+export function ultimoAvance(proyecto: Proyecto): AvanceProyecto | undefined {
+  const avances = avancesDelProyecto(proyecto)
+  return avances[avances.length - 1]
+}
+
+/**
+ * RN-100 — **El avance del proyecto es el ultimo avance registrado.**
+ *
+ * No un promedio, no el mayor: el ultimo. Si la obra retrocedio —se
+ * desmonto lo hecho, se cambio el contratista— el tablero tiene que decirlo,
+ * no esconderlo detras del maximo alcanzado.
+ */
+export function porcentajeProyecto(proyecto: Proyecto): number {
+  return ultimoAvance(proyecto)?.porcentaje ?? 0
+}
+
+/**
+ * En que va el proyecto. **Se deriva, no se guarda** (mismo criterio que el
+ * estado del acta): sin avances esta planeado; con avances, en curso; al
+ * 100 %, terminado.
+ */
+export function estadoProyecto(proyecto: Proyecto): EstadoProyecto {
+  if (proyecto.avances.length === 0) return 'planeado'
+  return porcentajeProyecto(proyecto) >= 100 ? 'terminado' : 'en_curso'
+}
+
+/**
+ * RN-100 — Por que no se puede registrar este avance, o `null` si se puede.
+ *
+ * El porcentaje es un entero entre 0 y 100. **Puede ser menor que el
+ * anterior** —las obras retroceden— pero entonces el detalle es obligatorio:
+ * un tablero que baja del 60 al 40 sin decir por que es peor que uno que no
+ * se actualiza. Se devuelve el motivo, no un booleano, para que el
+ * formulario lo muestre tal cual y el repositorio lo lance tal cual.
+ */
+export function motivoAvanceInvalido(
+  proyecto: Proyecto,
+  avance: { porcentaje: number; titulo: string; detalle: string },
+): string | null {
+  if (!Number.isInteger(avance.porcentaje) || avance.porcentaje < 0 || avance.porcentaje > 100) {
+    return 'El avance es un número entero entre 0 y 100.'
+  }
+  if (avance.titulo.trim().length < 3) return 'Escribe qué se hizo: es lo que le llega al propietario.'
+  const anterior = porcentajeProyecto(proyecto)
+  if (avance.porcentaje < anterior && avance.detalle.trim().length < 10) {
+    return `El proyecto iba en ${anterior} %. Si retrocede, explica por qué en el detalle.`
+  }
+  if (estadoProyecto(proyecto) === 'terminado') {
+    return 'El proyecto ya está terminado. Si hay algo más que hacer, es otro proyecto.'
+  }
+  return null
+}
+
+/** Los proyectos de una copropiedad, primero los que estan en marcha. */
+export function proyectosOrdenados(proyectos: Proyecto[], copropiedadId: string): Proyecto[] {
+  const orden: Record<EstadoProyecto, number> = { en_curso: 0, planeado: 1, terminado: 2 }
+  return proyectos
+    .filter((p) => p.copropiedadId === copropiedadId)
+    .sort((a, b) => {
+      const porEstado = orden[estadoProyecto(a)] - orden[estadoProyecto(b)]
+      if (porEstado !== 0) return porEstado
+      const ua = ultimoAvance(a)?.fecha ?? a.creadoEn
+      const ub = ultimoAvance(b)?.fecha ?? b.creadoEn
+      return ub.localeCompare(ua)
+    })
+}
+
+/**
+ * RN-101 — **Cada avance se les cuenta a los propietarios**, por dos vias:
+ * un comunicado en la cartelera y un mensaje al celular de cada propietario.
+ * Este es el texto del mensaje. Corto, con el nombre del proyecto, el
+ * porcentaje y a donde entrar: es lo que cabe en un SMS.
+ */
+export function textoAvanceProyecto(
+  proyecto: Proyecto,
+  avance: { porcentaje: number; titulo: string },
+  copropiedad: string,
+): string {
+  return (
+    `${copropiedad}: ${proyecto.nombre} va en ${avance.porcentaje} %. ${avance.titulo.trim()}. ` +
+    'Mira el tablero del proyecto en Idiky.'
+  )
 }

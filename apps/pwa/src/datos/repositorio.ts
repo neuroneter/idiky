@@ -36,6 +36,8 @@ import type {
   Cuota,
   Documento,
   FechaISO,
+  Proyecto,
+  AvanceProyecto,
   MedioPago,
   MotivoMensaje,
   Imputacion,
@@ -77,6 +79,8 @@ import {
   faltaEnActa,
   limiteVerificacionActa,
   admiteGrabacion,
+  motivoAvanceInvalido,
+  textoAvanceProyecto,
   comisionVencida,
   motivoPlazoComisionInvalido,
   puedeGenerarActa,
@@ -640,6 +644,148 @@ export async function publicarComunicado(
   }
   bd.comunicados.unshift(comunicado)
   return persistir(bd, comunicado)
+}
+
+// ---------------------------------------------------------------------------
+// Proyectos — CU-A-28 · RN-100, RN-101
+// ---------------------------------------------------------------------------
+
+/** CU-A-28 — El administrador registra un proyecto. Nace planeado, sin avances. */
+export async function crearProyecto(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    nombre: string
+    descripcion: string
+    responsable?: string
+    fechaInicio?: FechaISO
+    fechaFinPrevista?: FechaISO
+    presupuesto?: number
+    creadoPor: string
+  },
+): Promise<Resultado<Proyecto>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (parametros.nombre.trim().length < 3) throw new ErrorDeNegocio('Ponle nombre al proyecto.')
+  if (parametros.descripcion.trim().length < 10) {
+    throw new ErrorDeNegocio('Describe el proyecto: es lo primero que lee el propietario.')
+  }
+  if (
+    parametros.fechaInicio &&
+    parametros.fechaFinPrevista &&
+    parametros.fechaFinPrevista < parametros.fechaInicio
+  ) {
+    throw new ErrorDeNegocio('La fecha prevista de fin no puede ser anterior al inicio.')
+  }
+  if (parametros.presupuesto !== undefined && parametros.presupuesto < 0) {
+    throw new ErrorDeNegocio('El presupuesto no puede ser negativo.')
+  }
+  const proyecto: Proyecto = {
+    id: nuevoId('pro'),
+    copropiedadId: parametros.copropiedadId,
+    nombre: parametros.nombre.trim(),
+    descripcion: parametros.descripcion.trim(),
+    responsable: parametros.responsable?.trim() || undefined,
+    fechaInicio: parametros.fechaInicio || undefined,
+    fechaFinPrevista: parametros.fechaFinPrevista || undefined,
+    presupuesto: parametros.presupuesto,
+    avances: [],
+    creadoPor: parametros.creadoPor,
+    creadoEn: ahoraISO(),
+  }
+  bd.proyectos.unshift(proyecto)
+  return persistir(bd, proyecto)
+}
+
+/**
+ * CU-A-28 — Registrar un avance, y **contarlo** (RN-101).
+ *
+ * Tres cosas pasan de una vez, y por eso viven en una sola operacion: el
+ * avance queda en el proyecto (RN-100: no se edita, se corrige con otro); se
+ * publica un comunicado en la cartelera, enlazado al tablero; y sale un
+ * mensaje al celular de cada propietario que lo tenga. Los que no tengan
+ * celular no reciben mensaje, y se dice cuantos fueron.
+ */
+export async function registrarAvanceProyecto(
+  bdActual: BaseDatos,
+  parametros: {
+    proyectoId: string
+    porcentaje: number
+    titulo: string
+    detalle: string
+    foto?: string
+    registradoPor: string
+  },
+): Promise<Resultado<{ proyecto: Proyecto; avance: AvanceProyecto; avisados: number; sinCelular: number }>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const proyecto = bd.proyectos.find((p) => p.id === parametros.proyectoId)
+  if (!proyecto) throw new ErrorDeNegocio('Ese proyecto no existe.')
+  const motivo = motivoAvanceInvalido(proyecto, parametros)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+
+  const ahora = ahoraISO()
+  const copropiedad = bd.copropiedades.find((c) => c.id === proyecto.copropiedadId)
+  const nombreCopropiedad = copropiedad?.nombre ?? 'La copropiedad'
+
+  // El comunicado: mismo canal que todo lo demas que dice la administracion.
+  const comunicado: Comunicado = {
+    id: nuevoId('com'),
+    copropiedadId: proyecto.copropiedadId,
+    titulo: `${proyecto.nombre}: ${parametros.porcentaje} %`,
+    cuerpo: `${parametros.titulo.trim()}${parametros.detalle.trim() ? `. ${parametros.detalle.trim()}` : '.'}`,
+    categoria: 'proyecto',
+    fijado: false,
+    fechaPublicacion: ahora,
+    autor: 'Administración',
+    leidoPor: [],
+    proyectoId: proyecto.id,
+  }
+  bd.comunicados.unshift(comunicado)
+
+  const avance: AvanceProyecto = {
+    id: nuevoId('avn'),
+    fecha: ahora,
+    porcentaje: parametros.porcentaje,
+    titulo: parametros.titulo.trim(),
+    detalle: parametros.detalle.trim(),
+    foto: parametros.foto ? { imagen: parametros.foto, adjuntadoEn: ahora } : undefined,
+    registradoPor: parametros.registradoPor,
+    comunicadoId: comunicado.id,
+  }
+  proyecto.avances.push(avance)
+
+  // El mensaje, a cada propietario vigente con celular. Un propietario con
+  // varias unidades recibe uno solo: se avisa a personas, no a unidades.
+  const unidades = new Set(bd.unidades.filter((u) => u.copropiedadId === proyecto.copropiedadId).map((u) => u.id))
+  const propietarios = new Set(
+    bd.residencias
+      .filter((r) => unidades.has(r.unidadId) && r.rol === 'propietario' && residenciaVigente(r))
+      .map((r) => r.personaId),
+  )
+  const texto = textoAvanceProyecto(proyecto, avance, nombreCopropiedad)
+  let avisados = 0
+  let sinCelular = 0
+  for (const personaId of propietarios) {
+    const persona = bd.personas.find((p) => p.id === personaId)
+    const mensaje = redactar({
+      id: nuevoId('msj'),
+      copropiedadId: proyecto.copropiedadId,
+      destino: persona?.telefono ?? '',
+      texto,
+      motivo: 'avance_proyecto',
+      proyectoId: proyecto.id,
+      ahora,
+    })
+    if (mensaje) {
+      bd.mensajes.unshift(mensaje)
+      avisados += 1
+    } else {
+      sinCelular += 1
+    }
+  }
+
+  return persistir(bd, { proyecto, avance, avisados, sinCelular })
 }
 
 export async function marcarComunicadoLeido(

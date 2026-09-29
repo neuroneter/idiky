@@ -9,8 +9,10 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { marcarComunicadoLeido } from '../../datos/repositorio'
 import { formatearFecha } from '../../utilidades/formato'
+import { Link } from 'react-router-dom'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipComunicado } from '../../componentes/Etiquetas'
+import { Icono } from '../../componentes/Icono'
 
 export function ComunicadosPage() {
   const { bd, ejecutar } = useDatos()
@@ -90,6 +92,15 @@ export function ComunicadosPage() {
           </button>
         )
       })}
+      {/* RN-101 — Un comunicado de avance lleva al tablero. Va fuera de la
+          tarjeta porque la tarjeta es un botón, y un enlace dentro de un botón
+          no es un enlace. */}
+      {comunicados.some((c) => c.proyectoId) && (
+        <Link to="/app/proyectos" className="boton boton--bloque">
+          <Icono nombre="tablero" tamano={16} />
+          Ver el tablero de los proyectos
+        </Link>
+      )}
     </div>
   )
 }

@@ -84,6 +84,7 @@ const COMUNICADO: Record<CategoriaComunicado, [string, Variante]> = {
   urgente: ['Urgente', 'error'],
   mantenimiento: ['Mantenimiento', 'alerta'],
   asamblea: ['Asamblea', 'marca'],
+  proyecto: ['Proyecto', 'info'],
 }
 
 export function ChipComunicado({ categoria }: { categoria: CategoriaComunicado }) {

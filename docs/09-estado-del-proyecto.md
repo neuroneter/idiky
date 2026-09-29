@@ -21,8 +21,8 @@ nueva o una sesión de IA distinta.
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 71 documentados: 38 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 99 del demo (RN-01…RN-99; RN-41 retirada) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-99, de las asambleas y registros de Mary |
+| **Casos de uso** | 73 documentados: 40 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
+| **Reglas de negocio** | 101 del demo (RN-01…RN-101; RN-41 retirada) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-101, de las asambleas, registros y proyectos de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -107,6 +107,45 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-09-29 · Mary + IA (Claude) · El tablero de proyectos: la obra, su avance y el aviso (CU-A-28, CU-R-32)
+
+Mary pidió *«un tablero para el administrador y los propietarios en la que el administrador
+registra un proyecto y va registrando el avance; a los propietarios les llega un mensaje con
+los avances y pueden entrar a ver un tablero»*. Es el módulo de las obras: lo que más plata
+mueve en una copropiedad y lo que menos se ve desde un apartamento.
+
+**Lo que se construyó.** En la consola, `Proyectos`: se crea la obra (nombre, qué se va a
+hacer, quién la ejecuta, fechas, presupuesto) y se le registran avances con el porcentaje de
+toda la obra, qué se hizo, un detalle y una foto. En la app, el tablero (`/app/proyectos`), la
+sección «Obras en marcha» del inicio y el enlace desde la cartelera. **Es el mismo tablero en
+las dos caras** (`componentes/TableroProyecto.tsx`), por la misma razón que la hoja del poder:
+un tablero común sobre el cual discutir.
+
+**Dos reglas, del rango de Mary.** RN-100: el avance es **el último registrado** —no un promedio
+ni el máximo—, retroceder se admite pero exige explicación, y nada se edita ni se borra: se
+corrige con otro avance. RN-101: **registrar un avance es publicarlo**: comunicado en la
+cartelera (categoría nueva, *Proyecto*, enlazado al tablero) y mensaje al celular de cada
+propietario vigente, uno por persona. La pantalla dice a cuántos les llegó y cuántos no tienen
+celular. No hay un paso aparte de «avisar» a propósito.
+
+**Lo que se reutilizó en vez de inventar.** La cartelera (CU-R-09) y los mensajes salientes
+(RN-64) ya existían; el proyecto solo les da un motivo nuevo. La foto usa `CapturaFoto`
+(ADR-0009). El estado del proyecto se deriva de los avances, como el del acta.
+
+**La semilla** (versión 23) trae la impermeabilización de cubiertas al 40 %: la misma obra de la
+cuota extraordinaria y de la asamblea en curso, para que el demo cuente una sola historia.
+
+**Verificado.** 18 comprobaciones directas sobre el repositorio (esbuild + node: validaciones
+del proyecto, RN-100 con retroceso sin y con explicación, terminado al 100, comunicado y
+mensajes sin repetidos) y 19 con Playwright recorriendo las dos caras: crear, registrar con
+foto, el aviso con el número de avisados, el bloqueo del retroceso, el inicio, el tablero y la
+cartelera del propietario. `npm run build` y la ortografía en verde.
+
+**Lo que sigue:** cruzar el presupuesto con lo recaudado y gastado en esa destinación es de la
+contable (T-17). Y cuando exista quién envíe mensajes (T-18), el aviso del avance sale por ahí.
+
+---
 
 ### 2026-09-28 · Mary + IA (Claude) · Vimeo como opción, con sus salvedades (RN-98, RN-99)
 

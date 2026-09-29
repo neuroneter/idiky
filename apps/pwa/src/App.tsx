@@ -22,6 +22,7 @@ import { InformarAbonoPage } from './features/residente/InformarAbonoPage'
 import { ReservasPage } from './features/residente/ReservasPage'
 import { PqrsPage } from './features/residente/PqrsPage'
 import { ComunicadosPage } from './features/residente/ComunicadosPage'
+import { ProyectosPage } from './features/residente/ProyectosPage'
 import { SolicitudesPage } from './features/residente/SolicitudesPage'
 import { PazYSalvoPage } from './features/residente/PazYSalvoPage'
 import { AsambleasPage } from './features/residente/AsambleasPage'
@@ -39,6 +40,7 @@ import { PagosPage } from './features/admin/PagosPage'
 import { ReservasAdminPage } from './features/admin/ReservasAdminPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
+import { ProyectosAdminPage } from './features/admin/ProyectosAdminPage'
 import { CorrespondenciaPage as CorrespondenciaGestionPage } from './features/porteria/CorrespondenciaPage'
 import { TurnoPage } from './features/porteria/TurnoPage'
 import { ValidarVisitantePage } from './features/porteria/ValidarVisitantePage'
@@ -101,6 +103,7 @@ export function App() {
         <Route path="asambleas" element={<AsambleasPage />} />
         <Route path="asambleas/:asambleaId" element={<AsambleaDetallePage />} />
         <Route path="comunicados" element={<ComunicadosPage />} />
+        <Route path="proyectos" element={<ProyectosPage />} />
         <Route path="visitantes" element={<VisitantesPage />} />
         <Route path="correspondencia" element={<CorrespondenciaPage />} />
         <Route path="procesos" element={<ProcesosPage />} />
@@ -128,6 +131,7 @@ export function App() {
         <Route path="reservas" element={<ReservasAdminPage />} />
         <Route path="pqrs" element={<PqrsAdminPage />} />
         <Route path="comunicados" element={<ComunicadosAdminPage />} />
+        <Route path="proyectos" element={<ProyectosAdminPage />} />
         <Route path="correspondencia" element={<CorrespondenciaGestionPage />} />
       </Route>
 

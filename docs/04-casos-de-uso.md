@@ -53,6 +53,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-29 | **Ver un proceso sancionatorio y defenderme** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-29) |
 | CU-R-30 | **Informar un abono ya consignado** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-30) |
 | CU-R-31 | **Enviar el poder firmado en foto** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-31) |
+| CU-R-32 | **Seguir el avance de los proyectos de la copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-32) |
 
 ## 2. Administrador — consola web
 
@@ -85,6 +86,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-25 | **Configurar si la copropiedad cobra interés de mora** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-25) |
 | CU-A-26 | **Registrar propietarios y ver los registros de la copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-26) |
 | CU-A-27 | Conciliar abonos y administrar recibos de caja | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-27) |
+| CU-A-28 | **Registrar un proyecto y sus avances, y contárselos a los propietarios** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-28) |
 
 
 ## 3. Portería — consola de la entrada

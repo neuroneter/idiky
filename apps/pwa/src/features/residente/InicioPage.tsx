@@ -17,10 +17,13 @@ import {
   puedeImpugnar,
   puedePresentarDescargos,
   solicitudesEsperandoRespuesta,
+  estadoProyecto,
+  ultimoAvance,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearFechaCorta } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
 import { ChipComunicado, ChipReserva } from '../../componentes/Etiquetas'
+import { BarraAvance, ChipProyecto } from '../../componentes/TableroProyecto'
 
 export function InicioPage() {
   const { bd } = useDatos()
@@ -39,6 +42,9 @@ export function InicioPage() {
 
   const comunicados = sel.comunicadosVigentes(bd, sesion.copropiedadId)
   const destacado = comunicados[0]
+  const proyectoEnMarcha = sel
+    .proyectosDe(bd, sesion.copropiedadId)
+    .find((p) => estadoProyecto(p) !== 'terminado')
   const reserva = sel.proximaReserva(bd, unidadId)
   const zonaReserva = reserva ? sel.zona(bd, reserva.zonaId) : undefined
   const correspondenciaPendiente = sel
@@ -141,6 +147,30 @@ export function InicioPage() {
               {destacado.cuerpo.slice(0, 120)}
               {destacado.cuerpo.length > 120 ? '…' : ''}
             </p>
+          </Link>
+        </div>
+      )}
+
+      {/* Proyectos en marcha — CU-R-32. Va después del comunicado y antes de
+          la unidad: es la obra que se está pagando con la cuota de arriba. */}
+      {proyectoEnMarcha && (
+        <div className="pila">
+          <div className="encabezado-seccion">
+            <h2>Obras en marcha</h2>
+            <Link to="/app/proyectos">Ver el tablero</Link>
+          </div>
+          <Link to="/app/proyectos" className="tarjeta tarjeta--accion columna" style={{ gap: 'var(--e2)' }}>
+            <div className="fila fila-inicio">
+              <strong>{proyectoEnMarcha.nombre}</strong>
+              <ChipProyecto proyecto={proyectoEnMarcha} />
+            </div>
+            <BarraAvance proyecto={proyectoEnMarcha} />
+            {ultimoAvance(proyectoEnMarcha) && (
+              <span className="subtitulo">
+                {ultimoAvance(proyectoEnMarcha)!.titulo} ·{' '}
+                {formatearFechaCorta(ultimoAvance(proyectoEnMarcha)!.fecha)}
+              </span>
+            )}
           </Link>
         </div>
       )}

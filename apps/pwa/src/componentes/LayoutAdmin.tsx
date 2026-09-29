@@ -27,6 +27,9 @@ const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta
   { ruta: '/admin/reservas', texto: 'Reservas', icono: 'reservas' },
   { ruta: '/admin/pqrs', texto: 'PQRS', icono: 'pqrs' },
   { ruta: '/admin/comunicados', texto: 'Comunicados', icono: 'comunicados' },
+  // Las obras: lo que mas plata mueve y menos se ve desde un apartamento
+  // (CU-A-28). Va junto a comunicados porque cada avance es uno.
+  { ruta: '/admin/proyectos', texto: 'Proyectos', icono: 'tablero' },
   { ruta: '/admin/correspondencia', texto: 'Correspondencia', icono: 'correspondencia' },
 ]
 
@@ -42,6 +45,7 @@ const TITULOS: Record<string, string> = {
   '/admin/reservas': 'Reservas por aprobar',
   '/admin/pqrs': 'Bandeja de PQRS',
   '/admin/comunicados': 'Comunicados',
+  '/admin/proyectos': 'Proyectos y obras',
   '/admin/correspondencia': 'Correspondencia',
 }
 

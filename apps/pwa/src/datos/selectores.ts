@@ -9,6 +9,7 @@ import type {
   Asamblea,
   BaseDatos,
   Comunicado,
+  Proyecto,
   Asistencia,
   ConceptoSancion,
   Poder,
@@ -28,7 +29,7 @@ import type {
   Voto,
   ZonaComun,
 } from '../dominio/tipos'
-import { hoyISO, ordenAsamblea, residenciaVigente } from '../dominio/reglas'
+import { hoyISO, ordenAsamblea, proyectosOrdenados, residenciaVigente } from '../dominio/reglas'
 
 export function copropiedad(bd: BaseDatos, copropiedadId: string) {
   return bd.copropiedades.find((c) => c.id === copropiedadId)
@@ -166,6 +167,11 @@ export function pqrsDeCopropiedad(bd: BaseDatos, copropiedadId: string): Pqrs[] 
 }
 
 /** RN-15: los fijados primero, luego por fecha de publicacion descendente. */
+/** Los proyectos de la copropiedad, en marcha primero (CU-A-28, CU-R-32). */
+export function proyectosDe(bd: BaseDatos, copropiedadId: string): Proyecto[] {
+  return proyectosOrdenados(bd.proyectos, copropiedadId)
+}
+
 export function comunicadosVigentes(bd: BaseDatos, copropiedadId: string): Comunicado[] {
   const hoy = hoyISO()
   return bd.comunicados

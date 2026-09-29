@@ -131,6 +131,7 @@ export function ComunicadosAdminPage() {
                 <option value="urgente">Urgente</option>
                 <option value="mantenimiento">Mantenimiento</option>
                 <option value="asamblea">Asamblea</option>
+                <option value="proyecto">Proyecto</option>
               </select>
             </div>
             <div className="campo">

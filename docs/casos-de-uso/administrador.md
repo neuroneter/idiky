@@ -905,3 +905,55 @@ es un actor por encima de la copropiedad y no existe todavía en el demo. Está 
   RN-77 (consecutivo del recibo), RN-78 (anulación con traza), RN-79 (lo reportado espera).
 
 **Estado en el demo:** ✅ — `src/features/admin/PagosPage.tsx`.
+
+---
+
+### CU-A-28
+## CU-A-28 — Registrar un proyecto y sus avances, y contárselos a los propietarios
+
+- **Actor principal:** Administrador
+- **Precondiciones:** Hay una obra o un trabajo de la copropiedad que los propietarios van a
+  seguir. Normalmente, lo que paga una cuota extraordinaria.
+- **Disparador:** Arranca la obra, o hay algo nuevo que contar de ella.
+- **Resultado esperado:** El proyecto existe con su avance al día, cada avance quedó publicado
+  en la cartelera y cada propietario recibió un mensaje.
+
+> Mary, 2026-09-29: *«el administrador registra un proyecto y va registrando el avance del
+> proyecto»*. Registrar un avance **es** publicarlo: no hay un paso aparte de «avisar», porque un
+> avance que la administración conoce y el propietario no es exactamente lo que este módulo
+> existe para evitar (RN-101).
+
+**Flujo principal**
+1. En **Proyectos**, «Nuevo proyecto»: nombre, qué se va a hacer (en palabras de propietario),
+   quién lo ejecuta, fechas y presupuesto. Solo el nombre y la descripción son obligatorios.
+   Nace **planeado**, sin avances.
+2. En el tablero del proyecto, «Registrar un avance»: el **porcentaje de toda la obra**, qué se
+   hizo, un detalle y una foto si la hay. El formulario dice en qué va hoy y por qué no se puede
+   registrar, si no se puede (RN-100).
+3. «Registrar y avisar» hace tres cosas de una vez: el avance queda en la historia, se publica un
+   **comunicado** de categoría *Proyecto* con enlace al tablero, y sale un **mensaje** al celular
+   de cada propietario vigente. La pantalla dice a cuántos les llegó y cuántos no tienen celular.
+4. Al 100 % el proyecto queda **terminado** y no admite más avances: si hay algo más que hacer,
+   es otro proyecto.
+
+**Flujos alternativos**
+- A1. El porcentaje **baja** respecto al anterior → se admite, pero el detalle es obligatorio.
+  Un tablero que baja del 60 al 40 sin decir por qué es peor que uno que no se actualiza.
+- A2. Se registró mal un avance → **no se edita ni se borra**: se registra otro que lo corrija
+  (RN-61). La historia completa es lo que permite reconstruir la obra el día que alguien la
+  discuta.
+- A3. Un propietario tiene varias unidades → recibe **un solo** mensaje: se avisa a personas, no
+  a unidades.
+
+**Decisiones de interfaz**
+- **El estado se deriva de los avances** (planeado, en marcha, terminado) y no se guarda: un
+  estado guardado que depende de otros campos tarde o temprano los contradice.
+- **La foto va en el avance, no en el proyecto**: es la prueba de ese momento de la obra.
+- **El presupuesto es un dato, no una cuenta.** Lo recaudado y lo gastado en esa destinación es
+  de la contable de Jeimy (T-17); aquí solo se dice cuánto cuesta.
+
+**Reglas de negocio**
+- RN-100, RN-101, RN-64 (los mensajes quedan guardados con su texto exacto), RN-61.
+
+**Estado en el demo:** ✅ — `/admin/proyectos`. La semilla trae la impermeabilización de
+cubiertas al 40 %, la misma obra de la cuota extraordinaria y de la asamblea en curso.

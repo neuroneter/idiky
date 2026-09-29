@@ -9,6 +9,7 @@
  */
 
 import type {
+  Proyecto,
   Asamblea,
   Asistencia,
   BaseDatos,
@@ -51,7 +52,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      imputaciones y recibo de caja, y hay abonos por conciliar (RN-75 a RN-79).
 // 22 — poderes enviados en foto por el propietario y marca «No obligatorio» en el
 //      registro (Mary, 2026-09-17; su rama tambien llamo 21 a ese cambio).
-export const VERSION_ESQUEMA = 22
+export const VERSION_ESQUEMA = 23
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -597,6 +598,51 @@ function construirPqrs(): { pqrs: Pqrs[]; consecutivo: number } {
     },
   ]
   return { pqrs, consecutivo: pqrs.length + 1 }
+}
+
+/**
+ * 18 — proyectos: la obra que paga la extraordinaria, con su avance (CU-A-28).
+ *
+ * Es la misma cubierta de la cuota extraordinaria y de la asamblea en curso:
+ * el demo cuenta una sola historia, y el tablero es donde el propietario ve
+ * en que se esta yendo su plata.
+ */
+function construirProyectos(): Proyecto[] {
+  const hoy = hoyISO()
+  return [
+    {
+      id: 'pro-cubierta',
+      copropiedadId: COPROPIEDAD_ID,
+      nombre: 'Impermeabilización de cubiertas',
+      descripcion:
+        'Retiro del manto deteriorado, reparación de las grietas de la placa y aplicación de manto asfáltico nuevo en las cubiertas de las dos torres. Se financia con la cuota extraordinaria aprobada por la asamblea.',
+      responsable: 'Impermeabilizaciones del Norte S. A. S.',
+      fechaInicio: sumarDias(hoy, -20),
+      fechaFinPrevista: sumarDias(hoy, 40),
+      presupuesto: 40000000,
+      avances: [
+        {
+          id: 'avn-1',
+          fecha: `${sumarDias(hoy, -18)}T15:30:00.000Z`,
+          porcentaje: 15,
+          titulo: 'Retiro del manto viejo en la Torre 1',
+          detalle: 'Se retiró el manto deteriorado de la cubierta de la Torre 1 y se limpió la placa.',
+          registradoPor: 'per-admin',
+        },
+        {
+          id: 'avn-2',
+          fecha: `${sumarDias(hoy, -6)}T16:10:00.000Z`,
+          porcentaje: 40,
+          titulo: 'Reparación de grietas y sellado de juntas',
+          detalle:
+            'Se repararon las grietas de la placa de la Torre 1 y se selló la junta de dilatación. La semana entrante empieza la Torre 2.',
+          registradoPor: 'per-admin',
+        },
+      ],
+      creadoPor: 'per-admin',
+      creadoEn: `${sumarDias(hoy, -22)}T14:00:00.000Z`,
+    },
+  ]
 }
 
 function construirComunicados(): Comunicado[] {
@@ -1186,6 +1232,7 @@ export function crearSemilla(): BaseDatos {
     reservas: construirReservas(),
     pqrs,
     comunicados: construirComunicados(),
+    proyectos: construirProyectos(),
     correspondencia: construirCorrespondencia(),
     visitantes: construirVisitantes(),
     // Sin registros de ejemplo: llevan fotos, y una foto en la semilla es peso
