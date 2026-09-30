@@ -181,7 +181,8 @@ La integración con pasarela está en el roadmap (fase 4).
    tocarlas, y **qué incluye y cómo se usa** (las especificaciones que escribió la
    administración): se reserva viendo cómo es y sabiendo qué hay. Luego elige fecha y franja
    horaria.
-3. El sistema valida disponibilidad y las reglas de la zona.
+3. El sistema valida disponibilidad y las reglas de la zona: primero la pantalla, para avisar
+   a tiempo, y otra vez el repositorio al guardar, con la misma función (`validarReserva`).
 4. El residente confirma; el sistema crea la reserva y notifica a la administración.
 
 **Flujos alternativos**

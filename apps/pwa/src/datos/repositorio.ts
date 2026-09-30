@@ -91,8 +91,7 @@ import {
   motivoCierreInvalido,
   motivoDeCierre,
   reservasQueCancelaCierre,
-  cierreEnFecha,
-  motivoFranjaNoDisponible,
+  validarReserva,
   franjasDeZona,
   multaAlCancelar,
   puedeCancelarLaAdministracion,
@@ -563,21 +562,23 @@ export async function crearReserva(
   const bd = clonar(bdActual)
   const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
   if (!zona) throw new ErrorDeNegocio('La zona comun no existe.')
-  if (!zonaActiva(zona)) throw new ErrorDeNegocio('Esa zona no está recibiendo reservas.')
-  const cierre = cierreEnFecha(zona, parametros.fecha)
-  if (cierre) throw new ErrorDeNegocio(`La zona está cerrada por mantenimiento: ${cierre.motivo}`)
-  if (!franjasDeZona(zona, parametros.fecha).some((f) => f.inicio === parametros.horaInicio)) {
-    throw new ErrorDeNegocio('Ese turno no existe ese día en esta zona.')
-  }
-  const ocupada = motivoFranjaNoDisponible(
+  const franja = franjasDeZona(zona, parametros.fecha).find((f) => f.inicio === parametros.horaInicio)
+  if (!franja) throw new ErrorDeNegocio('Ese turno no existe ese día en esta zona.')
+  // Las reglas de la reserva se revisan otra vez aquí, con la misma función que
+  // usa la pantalla: zona activa y abierta ese día (RN-107, RN-108, RN-114),
+  // mora (RN-08), turno libre o con cupo (RN-09, RN-111, RN-113), anticipación
+  // (RN-10) y cupo mensual. La pantalla avisa antes; esto es lo que no se salta
+  // nadie, y lo que hereda un backend real (ADR-0003).
+  const validacion = validarReserva({
     zona,
-    bd.reservas,
-    parametros.fecha,
-    parametros.horaInicio,
-    parametros.unidadId,
-    parametros.personas ?? 1,
-  )
-  if (ocupada) throw new ErrorDeNegocio(ocupada)
+    fecha: parametros.fecha,
+    horaInicio: parametros.horaInicio,
+    unidadId: parametros.unidadId,
+    cuotasDeLaUnidad: cuotasDe(bd, parametros.unidadId),
+    reservas: bd.reservas,
+    personas: parametros.personas ?? 1,
+  })
+  if (!validacion.valido) throw new ErrorDeNegocio(validacion.motivo ?? 'No se puede reservar ese turno.')
   // RN-124 — Si la zona tiene condiciones, se aceptan antes de reservar.
   const condiciones = condicionesDeLaZona(zona, bd.conceptosSancion)
   if (condiciones && !parametros.aceptaCondiciones) {
@@ -594,7 +595,8 @@ export async function crearReserva(
     personaId: parametros.personaId,
     fecha: parametros.fecha,
     horaInicio: parametros.horaInicio,
-    horaFin: parametros.horaFin,
+    // El fin sale del turno de la zona, no de lo que diga quien llama.
+    horaFin: franja.fin,
     // Si la zona no requiere aprobacion, la reserva nace confirmada.
     estado: zona.requiereAprobacion ? 'solicitada' : 'confirmada',
     creadaEn: ahoraISO(),

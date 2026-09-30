@@ -110,6 +110,30 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-01 · Mary + IA (Claude) · Las reglas de la reserva también se revisan por dentro
+
+Mary: *«sí, haz el 1»* (el punto 6 de la revisión de reservas). Hasta hoy la mora (RN-08), la
+anticipación (RN-10) y el cupo mensual solo los revisaba la pantalla del residente.
+`crearReserva` en `datos/repositorio.ts` confiaba en ella.
+
+Ahora `crearReserva` llama a `validarReserva`, la misma función que usa la pantalla, así que
+las dos revisiones dicen siempre lo mismo. Revisa:
+- que la zona esté activa y abra ese día (RN-107, RN-108, RN-114);
+- la mora (RN-08);
+- que el turno esté libre o tenga cupo (RN-09, RN-111, RN-113);
+- la anticipación (RN-10) y el cupo mensual.
+
+La hora de fin ya no se toma de quien llama: sale del turno de la zona. No hay regla nueva: es
+la defensa que pide ADR-0003 para que un backend real herede las reglas completas.
+
+**Verificado.** 5 comprobaciones llamando al repositorio directamente, sin la pantalla:
+- rechaza la mora, la anticipación, el cupo mensual y más personas que cupos;
+- crea la válida con el fin correcto.
+
+Las 104 de reservas anteriores siguen en verde. `npm run build` y la ortografía, en verde.
+
+---
+
 ### 2026-10-01 · Mary + IA (Claude) · Reservas: solicitudes que vencen, avisos, condiciones aceptadas e invitados (RN-122 a RN-126)
 
 Mary preguntó *«¿nos falta algo más de reservas?»* y aprobó los cinco puntos: *«implementar del 1
