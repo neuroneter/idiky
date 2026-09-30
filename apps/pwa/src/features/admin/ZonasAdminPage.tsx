@@ -8,10 +8,12 @@
  *
  * Reglas: RN-104 (fotos y especificaciones), RN-105 (una zona valida),
  * RN-106 (cambiar las reglas no toca lo ya reservado), RN-107 (desactivar
- * cancela con mensaje) y RN-108 (cierre por mantenimiento).
+ * cancela con mensaje), RN-108 (cierre por mantenimiento), RN-109 (cobro por
+ * uso y deposito, con respaldo) y RN-110 (multa por no cancelar, del catalogo).
  */
 
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
@@ -40,6 +42,7 @@ import {
   MAXIMO_ESPECIFICACIONES,
   MAXIMO_FOTOS_ZONA,
   MINIMO_MOTIVO_DESACTIVACION,
+  ORIGENES_RESPALDO,
   motivoCierreInvalido,
   motivoDeCierre,
   motivoZonaInvalida,
@@ -48,11 +51,15 @@ import {
   reservasQueCancelaCierre,
   reservasQueCancelaDesactivar,
   sumarDias,
+  textoRespaldo,
+  tieneCobroZona,
   textoReservaCancelada,
   zonaActiva,
   type DatosZona,
 } from '../../dominio/reglas'
-import type { Reserva, ZonaComun } from '../../dominio/tipos'
+import type { ConceptoSancion, OrigenRespaldo, Reserva, ZonaComun } from '../../dominio/tipos'
+import { CondicionesZona } from '../../componentes/CondicionesZona'
+import { formatearDinero } from '../../utilidades/formato'
 import { CapturaFoto } from '../../componentes/CapturaFoto'
 import { FotosZona } from '../../componentes/FotosZona'
 import { Modal } from '../../componentes/Modal'
@@ -90,6 +97,10 @@ function datosDe(zona: ZonaComun): DatosZona {
     duracionBloqueHoras: zona.duracionBloqueHoras,
     anticipacionMinimaHoras: zona.anticipacionMinimaHoras,
     cupoMensualPorUnidad: zona.cupoMensualPorUnidad,
+    valorUso: zona.valorUso,
+    deposito: zona.deposito,
+    respaldoCobro: zona.respaldoCobro,
+    multaNoCancelar: zona.multaNoCancelar,
   }
 }
 
@@ -121,6 +132,7 @@ export function ZonasAdminPage() {
   if (!sesion) return null
 
   const zonas = sel.zonasDe(bd, sesion.copropiedadId)
+  const conceptos = sel.conceptosSancionDe(bd, sesion.copropiedadId)
   const activas = zonas.filter(zonaActiva)
   const desactivadas = zonas.filter((z) => !zonaActiva(z))
 
@@ -147,6 +159,7 @@ export function ZonasAdminPage() {
             <TarjetaZona
               key={zona.id}
               zona={zona}
+              conceptos={conceptos}
               cargando={cargando}
               alAbrir={setHoja}
               alLevantar={(cierreId) =>
@@ -170,6 +183,7 @@ export function ZonasAdminPage() {
         <FormularioZona
           zona={hoja.tipo === 'editar' ? hoja.zona : undefined}
           zonas={zonas}
+          conceptos={conceptos}
           cargando={cargando}
           alCerrar={() => setHoja(null)}
           alGuardar={async (datos) => {
@@ -235,12 +249,14 @@ export function ZonasAdminPage() {
 
 function TarjetaZona({
   zona,
+  conceptos,
   cargando,
   alAbrir,
   alLevantar,
   alReactivar,
 }: {
   zona: ZonaComun
+  conceptos: ConceptoSancion[]
   cargando: boolean
   alAbrir: (hoja: Hoja) => void
   alLevantar: (cierreId: string) => void
@@ -322,6 +338,12 @@ function TarjetaZona({
             Reactivar
           </button>
         )}
+      </div>
+
+      {/* RN-109, RN-110 — Lo que cuesta y la multa: lo mismo que lee el residente. */}
+      <div className="columna" style={{ gap: 'var(--e1)', marginBottom: 'var(--e3)' }}>
+        <span className="titulo-seccion">Costos y multa</span>
+        <CondicionesZona zona={zona} conceptos={conceptos} />
       </div>
 
       {/* RN-104 — Fotos: el residente las ve antes de reservar. */}
@@ -437,12 +459,14 @@ function TarjetaZona({
 function FormularioZona({
   zona,
   zonas,
+  conceptos,
   cargando,
   alCerrar,
   alGuardar,
 }: {
   zona?: ZonaComun
   zonas: ZonaComun[]
+  conceptos: ConceptoSancion[]
   cargando: boolean
   alCerrar: () => void
   alGuardar: (datos: DatosZona) => Promise<void>
@@ -454,7 +478,10 @@ function FormularioZona({
     setDatos((actual) => ({ ...actual, [campo]: valor }))
   }
 
-  const motivo = motivoZonaInvalida(datos, zonas, zona?.id)
+  const motivo = motivoZonaInvalida(datos, zonas, zona?.id, conceptos)
+  const multasActivas = conceptos.filter((c) => c.activo)
+  const respaldo = datos.respaldoCobro ?? { origen: 'reglamento' as OrigenRespaldo, referencia: '' }
+  const origenElegido = ORIGENES_RESPALDO.find((o) => o.id === respaldo.origen)
   // La vista previa de los turnos solo cuando el horario tiene sentido.
   const turnos = motivo && /horario|turno/i.test(motivo) ? [] : franjasDeZona({ ...datos } as ZonaComun)
 
@@ -561,6 +588,143 @@ function FormularioZona({
         />
         <span>La administración aprueba cada reserva</span>
       </label>
+
+
+      {/* RN-109 — Cobro por uso y depósito, con su respaldo. */}
+      <div className="columna" style={{ gap: 'var(--e1)', marginBottom: 'var(--e3)' }}>
+        <span className="titulo-seccion">Costos</span>
+        <span className="ayuda-campo">En 0, la zona es gratis o no pide depósito.</span>
+      </div>
+      <div className="rejilla-dos">
+        <div className="campo">
+          <label htmlFor="zona-valor-uso">Valor por reserva ($)</label>
+          <input
+            id="zona-valor-uso"
+            type="number"
+            min={0}
+            step={1000}
+            inputMode="numeric"
+            value={datos.valorUso ?? 0}
+            onChange={(e) => cambiar('valorUso', Number(e.target.value))}
+          />
+        </div>
+        <div className="campo">
+          <label htmlFor="zona-deposito">Depósito de garantía ($)</label>
+          <input
+            id="zona-deposito"
+            type="number"
+            min={0}
+            step={1000}
+            inputMode="numeric"
+            value={datos.deposito ?? 0}
+            onChange={(e) => cambiar('deposito', Number(e.target.value))}
+          />
+          <span className="ayuda-campo">Se devuelve si la zona queda como se entregó.</span>
+        </div>
+      </div>
+      {tieneCobroZona(datos) && (
+        <div className="rejilla-dos">
+          <div className="campo">
+            <label htmlFor="zona-respaldo-origen">Lo autoriza</label>
+            <select
+              id="zona-respaldo-origen"
+              value={respaldo.origen}
+              onChange={(e) => cambiar('respaldoCobro', { ...respaldo, origen: e.target.value as OrigenRespaldo })}
+            >
+              {ORIGENES_RESPALDO.map((o) => (
+                <option key={o.id} value={o.id}>{o.texto}</option>
+              ))}
+            </select>
+          </div>
+          <div className="campo">
+            <label htmlFor="zona-respaldo-referencia">{origenElegido?.etiqueta ?? 'Referencia'}</label>
+            <input
+              id="zona-respaldo-referencia"
+              value={respaldo.referencia}
+              placeholder={`Ej: ${origenElegido?.ejemplo ?? 'Artículo 42'}`}
+              onChange={(e) => cambiar('respaldoCobro', { ...respaldo, referencia: e.target.value })}
+            />
+          </div>
+          {respaldo.origen === 'otro' && (
+            <div className="campo">
+              <label htmlFor="zona-respaldo-documento">Qué documento</label>
+              <input
+                id="zona-respaldo-documento"
+                value={respaldo.documento ?? ''}
+                placeholder="Ej: Resolución del consejo N.º 12"
+                onChange={(e) => cambiar('respaldoCobro', { ...respaldo, documento: e.target.value })}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* RN-110 — La multa por no cancelar sale del catálogo de multas. */}
+      <div className="columna" style={{ gap: 'var(--e2)', marginBottom: 'var(--e3)' }}>
+        <span className="titulo-seccion">Multa por no cancelar</span>
+        <label className="fila" style={{ justifyContent: 'flex-start', gap: 'var(--e2)' }}>
+          <input
+            type="checkbox"
+            checked={!!datos.multaNoCancelar}
+            disabled={multasActivas.length === 0 && !datos.multaNoCancelar}
+            onChange={(e) =>
+              cambiar(
+                'multaNoCancelar',
+                e.target.checked
+                  ? { conceptoId: multasActivas[0]?.id ?? '', horasParaCancelar: Math.max(24, datos.anticipacionMinimaHoras) }
+                  : undefined,
+              )
+            }
+          />
+          <span>Aplica multa si no se cancela a tiempo</span>
+        </label>
+        {multasActivas.length === 0 && (
+          <span className="ayuda-campo">
+            No hay multas activas en el catálogo. Créala primero en{' '}
+            <Link to="/admin/multas" className="enlace">Multas</Link>: ahí queda su valor y su respaldo.
+          </span>
+        )}
+        {datos.multaNoCancelar && (
+          <div className="rejilla-dos">
+            <div className="campo">
+              <label htmlFor="zona-multa">Multa del catálogo</label>
+              <select
+                id="zona-multa"
+                value={datos.multaNoCancelar.conceptoId}
+                onChange={(e) => cambiar('multaNoCancelar', { ...datos.multaNoCancelar!, conceptoId: e.target.value })}
+              >
+                {multasActivas.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.nombre} · {formatearDinero(c.valor)}
+                  </option>
+                ))}
+              </select>
+              {(() => {
+                const elegido = conceptos.find((c) => c.id === datos.multaNoCancelar?.conceptoId)
+                return elegido ? <span className="ayuda-campo">{textoRespaldo(elegido)}</span> : null
+              })()}
+            </div>
+            <div className="campo">
+              <label htmlFor="zona-multa-horas">Cancelar sin multa hasta (horas antes)</label>
+              <input
+                id="zona-multa-horas"
+                type="number"
+                min={1}
+                inputMode="numeric"
+                value={datos.multaNoCancelar.horasParaCancelar}
+                onChange={(e) =>
+                  cambiar('multaNoCancelar', { ...datos.multaNoCancelar!, horasParaCancelar: Number(e.target.value) })
+                }
+              />
+            </div>
+          </div>
+        )}
+        {datos.multaNoCancelar && (
+          <span className="ayuda-campo">
+            No se cobra sola: se impone con el proceso sancionatorio, con descargos e impugnación.
+          </span>
+        )}
+      </div>
 
       <div className="columna" style={{ gap: 'var(--e1)', marginBottom: 'var(--e3)' }}>
         <span className="titulo-seccion">Así verá los turnos el residente</span>

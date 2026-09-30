@@ -986,7 +986,11 @@ rápida.
 3. El sistema le muestra los turnos como los verá el residente.
 4. Guarda. El sistema valida (RN-105). Una zona nueva nace activa; en una editada, los
    cambios valen para las reservas nuevas y las ya hechas se respetan (RN-106).
-5. En la misma tarjeta agrega fotos y escribe las especificaciones (RN-104).
+5. Si la zona cuesta, escribe el **valor por reserva** y el **depósito** si aplica, con el
+   documento que los autoriza (RN-109). Si hay **multa por no cancelar**, la escoge del
+   catálogo de multas y fija el plazo en horas para cancelar sin multa (RN-110).
+6. En la misma tarjeta agrega fotos y escribe las especificaciones (RN-104). La tarjeta muestra
+   los costos y la multa tal como los lee el residente.
 
 **Flujo alternativo — cerrar por mantenimiento (RN-108)**
 - A1. Toca «Cerrar por mantenimiento», escoge desde y hasta cuándo y escribe el motivo.
@@ -1005,10 +1009,13 @@ rápida.
 **Reglas de negocio**
 - RN-104 (fotos y especificaciones), RN-105 (una zona válida), RN-106 (cambiar las reglas
   no toca lo ya reservado), RN-107 (desactivar cancela con mensaje), RN-108 (cierre por
-  mantenimiento).
+  mantenimiento), RN-109 (cobro por uso y depósito, con respaldo), RN-110 (multa por no
+  cancelar, del catálogo).
 
-**Fuera de alcance, a propósito:** el depósito o cobro por reservar y la sanción por no
-cancelar; siguen como pregunta abierta en `docs/12-levantamiento-pendiente.md`.
+**Lo que sigue:** el cobro y el depósito hoy se parametrizan y se informan; falta generar el
+cobro en el estado de cuenta al confirmar la reserva, manejar la devolución del depósito (con
+la contable, T-17) y marcar la reserva como «No se presentó» para iniciar desde ahí el proceso
+sancionatorio.
 
 **Estado en el demo:** ✅ — `src/features/admin/ZonasAdminPage.tsx` (pestaña «Zonas
 comunes» de `ReservasAdminPage.tsx`, ruta `/admin/reservas/zonas`).

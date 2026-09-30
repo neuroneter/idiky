@@ -126,8 +126,10 @@ hay que responderlo explícitamente, no asumirlo.
   fijo? *(Supuesto actual: por coeficiente — RN-05.)* → *(respuesta)*
 - ¿Cuál es el **plazo real de respuesta** a una PQRS? *(Supuesto actual: 15 días — RN-13.)*
   → *(respuesta)*
-- ¿Las reservas de zonas comunes tienen **depósito o cobro**? ¿Sanción por no cancelar?
-  → *(respuesta)*
+- ~~¿Las reservas de zonas comunes tienen **depósito o cobro**? ¿Sanción por no cancelar?~~
+  → ✅ **Respondido (Mary, 2026-10-01):** las tres cosas se parametrizan por zona —cobro por
+  uso, depósito si aplica y multa por no cancelar— y se ven en la información de cada zona
+  (RN-109, RN-110).
 
 ## 3 bis. Asambleas — preguntas que bloquean el diseño
 

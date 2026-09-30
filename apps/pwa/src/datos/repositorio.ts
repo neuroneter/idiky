@@ -965,8 +965,35 @@ export async function quitarFotoZona(
 // Zonas comunes: crearlas, cambiarlas, desactivarlas — CU-A-10 · RN-105 a RN-107
 // ---------------------------------------------------------------------------
 
+/**
+ * Lo que se guarda: sin espacios sobrantes, y sin cobro, depósito ni respaldo
+ * cuando no aplican (RN-109). Las claves van siempre, aunque vacías, para que
+ * editar una zona también pueda quitarle el cobro o la multa.
+ */
 function datosZonaLimpios(datos: DatosZona): DatosZona {
-  return { ...datos, nombre: datos.nombre.trim(), descripcion: datos.descripcion.trim() }
+  const valorUso = datos.valorUso || undefined
+  const deposito = datos.deposito || undefined
+  const respaldo = datos.respaldoCobro
+  return {
+    ...datos,
+    nombre: datos.nombre.trim(),
+    descripcion: datos.descripcion.trim(),
+    valorUso,
+    deposito,
+    respaldoCobro:
+      (valorUso || deposito) && respaldo
+        ? {
+            origen: respaldo.origen,
+            referencia: respaldo.referencia.trim(),
+            ...(respaldo.origen === 'otro' ? { documento: respaldo.documento?.trim() } : {}),
+          }
+        : undefined,
+    multaNoCancelar: datos.multaNoCancelar,
+  }
+}
+
+function conceptosDe(bd: BaseDatos, copropiedadId: string) {
+  return bd.conceptosSancion.filter((c) => c.copropiedadId === copropiedadId)
 }
 
 /** CU-A-10 — Una zona nueva, que nace activa y recibe reservas de una vez (RN-105). */
@@ -977,7 +1004,7 @@ export async function crearZona(
   await esperar()
   const bd = clonar(bdActual)
   const zonas = bd.zonasComunes.filter((z) => z.copropiedadId === parametros.copropiedadId)
-  const motivo = motivoZonaInvalida(parametros.datos, zonas)
+  const motivo = motivoZonaInvalida(parametros.datos, zonas, undefined, conceptosDe(bd, parametros.copropiedadId))
   if (motivo) throw new ErrorDeNegocio(motivo)
   const zona: ZonaComun = {
     id: nuevoId('zon'),
@@ -1002,7 +1029,7 @@ export async function editarZona(
   const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
   if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
   const zonas = bd.zonasComunes.filter((z) => z.copropiedadId === zona.copropiedadId)
-  const motivo = motivoZonaInvalida(parametros.datos, zonas, zona.id)
+  const motivo = motivoZonaInvalida(parametros.datos, zonas, zona.id, conceptosDe(bd, zona.copropiedadId))
   if (motivo) throw new ErrorDeNegocio(motivo)
   Object.assign(zona, datosZonaLimpios(parametros.datos))
   return persistir(bd, zona)

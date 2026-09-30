@@ -444,6 +444,34 @@ export interface ZonaComun {
    * historia de la zona.
    */
   cierres?: CierreZona[]
+  /**
+   * Lo que cuesta usarla (RN-109): valor por reserva. Ausente o 0 es gratis.
+   */
+  valorUso?: Dinero
+  /** Deposito de garantia, reembolsable (RN-109). Ausente o 0 es que no aplica. */
+  deposito?: Dinero
+  /** El documento que autoriza el cobro y el deposito (RN-45, RN-109). */
+  respaldoCobro?: RespaldoCobroZona
+  /** La multa del catalogo que aplica si no se cancela a tiempo (RN-110). */
+  multaNoCancelar?: MultaNoCancelar
+}
+
+/** Que documento autoriza cobrar por usar la zona (RN-109). */
+export interface RespaldoCobroZona {
+  origen: OrigenRespaldo
+  referencia: string
+  /** Solo con `origen: 'otro'`: cual es el documento (RN-38). */
+  documento?: string
+}
+
+/**
+ * RN-110 — La multa por no cancelar sale del catalogo de multas (CU-A-22):
+ * el valor y el respaldo son los del concepto, no se escriben aqui.
+ */
+export interface MultaNoCancelar {
+  conceptoId: string
+  /** Hasta cuantas horas antes de la reserva se puede cancelar sin multa. */
+  horasParaCancelar: number
 }
 
 /** Un cierre temporal de una zona comun (RN-108). */

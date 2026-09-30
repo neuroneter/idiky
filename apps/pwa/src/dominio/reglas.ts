@@ -34,6 +34,8 @@ import type {
   Pqrs,
   RegistroPersona,
   CierreZona,
+  MultaNoCancelar,
+  RespaldoCobroZona,
   Hora,
   Reserva,
   RolResidencia,
@@ -2064,6 +2066,12 @@ export interface DatosZona {
   duracionBloqueHoras: number
   anticipacionMinimaHoras: number
   cupoMensualPorUnidad: number
+  /** RN-109 — Cobro por uso y deposito, con su respaldo. */
+  valorUso?: number
+  deposito?: number
+  respaldoCobro?: RespaldoCobroZona
+  /** RN-110 — La multa del catalogo si no se cancela a tiempo. */
+  multaNoCancelar?: MultaNoCancelar
 }
 
 /** Los turnos que se ofrecen: de una a doce horas. */
@@ -2101,6 +2109,7 @@ export function motivoZonaInvalida(
   datos: DatosZona,
   zonasDeLaCopropiedad: ZonaComun[],
   zonaId?: string,
+  conceptosSancion: ConceptoSancion[] = [],
 ): string | null {
   const nombre = datos.nombre.trim()
   if (!nombre) return 'La zona necesita un nombre.'
@@ -2126,7 +2135,7 @@ export function motivoZonaInvalida(
   if (!Number.isInteger(datos.anticipacionMinimaHoras) || datos.anticipacionMinimaHoras < 0) {
     return 'La anticipación va en horas, desde 0.'
   }
-  return null
+  return motivoCobroZonaInvalido(datos, conceptosSancion)
 }
 
 /**
@@ -2264,4 +2273,67 @@ export function motivoDeCierre(cierre: { desde: FechaISO; hasta: FechaISO; motiv
       ? `el ${fechaCorta(cierre.desde)}`
       : `del ${fechaCorta(cierre.desde)} al ${fechaCorta(cierre.hasta)}`
   return `la zona estará cerrada por mantenimiento ${fechas}: ${cierre.motivo.trim()}`
+}
+
+/**
+ * RN-109 — **Usar una zona puede costar, y el cobro necesita respaldo.**
+ *
+ * «Incluir la opción para que cuando el administrador esté parametrizando las
+ * zonas comunes incluya el cobro por uso, el depósito si aplica y la multa por
+ * no cancelar» (Mary, 2026-10-01). El **cobro por uso** es lo que vale reservar
+ * (el salón, $80.000); el **depósito** es una garantía que se devuelve si la
+ * zona queda bien. Los dos son opcionales: en 0, la zona es gratis o no pide
+ * depósito.
+ *
+ * Como todo cobro que no es la cuota ordinaria (RN-45), el que tiene valor
+ * necesita el documento que lo autoriza: el artículo del reglamento o del
+ * manual, o el acta que lo aprobó; «otro» exige además el nombre del
+ * documento (RN-38). Un cobro que no se puede explicar termina en una PQRS.
+ *
+ * Hoy el cobro y el depósito se **parametrizan y se informan**: el residente
+ * los ve antes de reservar. Generar el cobro en el estado de cuenta y manejar
+ * la devolución del depósito es lo que sigue; el depósito, además, es plata que
+ * entra y sale, y se define con la contable (T-17).
+ */
+export function tieneCobroZona(zona: { valorUso?: number; deposito?: number }): boolean {
+  return (zona.valorUso ?? 0) > 0 || (zona.deposito ?? 0) > 0
+}
+
+/**
+ * RN-110 — **La multa por no cancelar sale del catálogo de multas.**
+ *
+ * La zona no inventa una multa: escoge un concepto **activo** del catálogo
+ * (CU-A-22), que ya trae su valor y su respaldo (RN-37, RN-38), y fija hasta
+ * cuántas horas antes de la reserva se puede cancelar sin multa. El residente
+ * lo ve antes de reservar. La multa **no se cobra sola**: como toda multa, se
+ * impone con el proceso sancionatorio, con descargos e impugnación, y la cuota
+ * nace solo cuando queda firme (RN-39, RN-69).
+ */
+export function motivoCobroZonaInvalido(
+  datos: Pick<DatosZona, 'valorUso' | 'deposito' | 'respaldoCobro' | 'multaNoCancelar'>,
+  conceptosSancion: ConceptoSancion[],
+): string | null {
+  for (const [valor, nombre] of [
+    [datos.valorUso, 'El cobro por uso'],
+    [datos.deposito, 'El depósito'],
+  ] as const) {
+    if (valor !== undefined && (!Number.isInteger(valor) || valor < 0)) {
+      return `${nombre} va en pesos, sin decimales, desde 0.`
+    }
+  }
+  if (tieneCobroZona(datos)) {
+    if (!datos.respaldoCobro || !respaldoCompleto(datos.respaldoCobro)) {
+      return 'Un cobro necesita su respaldo: el artículo del reglamento o el acta que lo autoriza.'
+    }
+  }
+  const multa = datos.multaNoCancelar
+  if (multa) {
+    const concepto = conceptosSancion.find((c) => c.id === multa.conceptoId)
+    if (!concepto) return 'Escoge la multa del catálogo de multas.'
+    if (!concepto.activo) return `«${concepto.nombre}» ya no está activa en el catálogo.`
+    if (!Number.isInteger(multa.horasParaCancelar) || multa.horasParaCancelar < 1) {
+      return 'El plazo para cancelar sin multa va en horas, desde 1.'
+    }
+  }
+  return null
 }

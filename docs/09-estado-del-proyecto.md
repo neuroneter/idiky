@@ -22,7 +22,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 73 documentados: 41 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 20 ⬜ pendientes, 2 ⛔ retirados |
-| **Reglas de negocio** | 108 del demo (RN-01…RN-108; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-108, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
+| **Reglas de negocio** | 110 del demo (RN-01…RN-110; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-110, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -46,7 +46,8 @@ visitantes con código · consulta de correspondencia · consulta del coeficient
 **el proceso sancionatorio de su unidad, con descargos e impugnación** (CU-R-29).
 
 **Consola del administrador:** **zonas comunes: crearlas, cambiarles las reglas, cerrarlas por
-mantenimiento y desactivarlas, avisando con el motivo a quien tenía reserva** (CU-A-10) · **asambleas: convocar según la modalidad, instalar y ver la
+mantenimiento y desactivarlas, avisando con el motivo a quien tenía reserva, con su costo,
+depósito y multa por no cancelar** (CU-A-10) · **asambleas: convocar según la modalidad, instalar y ver la
 asistencia con su coeficiente** (CU-A-12, CU-A-17) · **registro de propietarios**, con la tabla
 de quién registró a quién (CU-A-26) · **el acta de la asamblea, armada con lo que exige el artículo 47**
 (CU-A-20) · **catálogo de multas con su respaldo, y la reincidencia con el suyo** (CU-A-22) · **procesos sancionatorios con debido proceso completo** —notificar citando
@@ -108,6 +109,45 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-01 · Mary + IA (Claude) · Costo, depósito y multa por no cancelar en cada zona (RN-109, RN-110)
+
+Mary: *«incluir la opción para que cuando el administrador esté parametrizando las zonas comunes
+incluya el cobro por uso, el depósito si aplica y la multa por no cancelar»*, y *«de igual
+manera se debe ver en la información de cada zona común»*. Responde la pregunta abierta de
+`12-levantamiento-pendiente.md` §3.
+
+**En el formulario de la zona:**
+- **Valor por reserva** y **depósito de garantía**, los dos opcionales. Si alguno tiene valor,
+  se pide el documento que lo autoriza, como a todo cobro (RN-45 → **RN-109**).
+- **Multa por no cancelar**, escogida del **catálogo de multas**, que ya trae su valor y su
+  respaldo, con el plazo en horas para cancelar sin multa (**RN-110**). Si el catálogo no tiene
+  multas activas, el formulario lo dice y lleva a Multas.
+
+**Dónde se ve:** un solo componente (`componentes/CondicionesZona.tsx`) pinta lo mismo en la
+tarjeta de la consola y en la app del residente. El residente lo ve resumido en la lista y en
+detalle antes de escoger la fecha, incluido que la multa se impone con proceso sancionatorio.
+
+**Lo que no hace todavía:**
+- No genera el cobro en el estado de cuenta.
+- No maneja la devolución del depósito; eso va con la contable (T-17).
+- No marca «No se presentó».
+
+Por ahora se parametriza y se informa.
+
+**Semilla 27:** el salón social cuesta $80.000, pide $200.000 de depósito (reglamento, art. 42)
+y tiene la multa nueva del catálogo, «Reserva no cancelada a tiempo» ($50.000, manual art. 25),
+con 48 horas para cancelar. La terraza cobra $30.000, sin depósito.
+
+**Verificado.** 11 comprobaciones con Playwright:
+- La tarjeta muestra el cobro, el respaldo y la multa.
+- El cobro sin respaldo se rechaza.
+- Agregar cobro y multa a una zona, o quitarle el cobro, queda guardado.
+- El residente ve el resumen en la lista y el detalle antes de la fecha.
+
+Las 24 de la entrada anterior siguen en verde. `npm run build` y la ortografía, en verde.
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · Las zonas comunes, completas: crear, cerrar por mantenimiento y desactivar (CU-A-10, RN-105 a RN-108)
 

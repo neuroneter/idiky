@@ -53,7 +53,9 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      imputaciones y recibo de caja, y hay abonos por conciliar (RN-75 a RN-79).
 // 22 — poderes enviados en foto por el propietario y marca «No obligatorio» en el
 //      registro (Mary, 2026-09-17; su rama tambien llamo 21 a ese cambio).
-export const VERSION_ESQUEMA = 26
+// 27 — zonas comunes con cobro por uso, deposito y multa por no cancelar
+//      (RN-109, RN-110), y la multa «Reserva no cancelada a tiempo» en el catalogo.
+export const VERSION_ESQUEMA = 27
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -234,6 +236,11 @@ const zonasComunes: ZonaComun[] = [
     duracionBloqueHoras: 4,
     anticipacionMinimaHoras: 48,
     cupoMensualPorUnidad: 2,
+    // RN-109, RN-110 — El salon es la zona que en casi todos los conjuntos cuesta.
+    valorUso: 80000,
+    deposito: 200000,
+    respaldoCobro: { origen: 'reglamento', referencia: 'Artículo 42' },
+    multaNoCancelar: { conceptoId: 'cs-6', horasParaCancelar: 48 },
   },
   {
     id: 'zon-bbq',
@@ -251,6 +258,9 @@ const zonasComunes: ZonaComun[] = [
     duracionBloqueHoras: 4,
     anticipacionMinimaHoras: 24,
     cupoMensualPorUnidad: 3,
+    // Cobra el uso pero no pide deposito: las dos cosas son independientes.
+    valorUso: 30000,
+    respaldoCobro: { origen: 'reglamento', referencia: 'Artículo 42' },
   },
   {
     id: 'zon-gimnasio',
@@ -1137,6 +1147,18 @@ const conceptosSancion: ConceptoSancion[] = [
     activo: false,
     creadoEn: fechaHoraRelativa(-540, '11:00'),
     inactivoDesde: sumarDias(hoyISO(), -60),
+  },
+  {
+    id: 'cs-6',
+    copropiedadId: COPROPIEDAD_ID,
+    nombre: 'Reserva no cancelada a tiempo',
+    descripcion:
+      'No usar una zona común reservada sin haber cancelado la reserva dentro del plazo que fija la zona.',
+    valor: 50000,
+    origen: 'manual',
+    referencia: 'Artículo 25',
+    activo: true,
+    creadoEn: fechaHoraRelativa(-320, '09:40'),
   },
 ]
 

@@ -68,7 +68,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-07 | Atender la bandeja de PQRS | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-07) |
 | CU-A-08 | Publicar un comunicado | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-08) |
 | CU-A-09 | Registrar correspondencia recibida | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-09) |
-| CU-A-10 | **Configurar zonas comunes y sus reglas** | 2 | ✅ Demo (crear, editar, cerrar por mantenimiento y desactivar con aviso; fotos y especificaciones — RN-104 a RN-108) | [ver](./casos-de-uso/administrador.md#cu-a-10) |
+| CU-A-10 | **Configurar zonas comunes y sus reglas** | 2 | ✅ Demo (crear, editar, cerrar por mantenimiento y desactivar con aviso; costos, depósito y multa por no cancelar; fotos y especificaciones — RN-104 a RN-110) | [ver](./casos-de-uso/administrador.md#cu-a-10) |
 | CU-A-11 | Cargar presupuesto anual | 3 | ⬜ Pendiente | — |
 | CU-A-12 | **Convocar la asamblea y emitir las citaciones** | 1 | 🟡 Parcial (convoca con su modalidad; falta el documento de citación, ADR-0006) | [ver](./casos-de-uso/administrador.md#cu-a-12) |
 | CU-A-13 | **Emitir el paz y salvo** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-13) |

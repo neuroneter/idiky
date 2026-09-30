@@ -6,7 +6,8 @@
  * Reglas aplicadas: RN-08 (mora bloquea), RN-09 (franja ocupada),
  * RN-10 (anticipacion minima) y el cupo mensual por unidad. Solo se ofrecen las
  * zonas activas (RN-107); la cerrada por mantenimiento se ve con su aviso y no
- * se reserva en esas fechas (RN-108).
+ * se reserva en esas fechas (RN-108). El costo, el deposito y la multa por no
+ * cancelar se leen antes de reservar (RN-109, RN-110).
  */
 
 import { useState } from 'react'
@@ -32,6 +33,7 @@ import { formatearFecha } from '../../utilidades/formato'
 import type { ZonaComun } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
 import { FotosZona } from '../../componentes/FotosZona'
+import { CondicionesZona, resumenCondicionesZona } from '../../componentes/CondicionesZona'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipReserva } from '../../componentes/Etiquetas'
 
@@ -47,6 +49,7 @@ export function ReservasPage() {
   const unidadId = sesion.unidadActivaId!
   const zonas = sel.zonasDe(bd, sesion.copropiedadId).filter(zonaActiva)
   const hoy = hoyISO()
+  const conceptos = sel.conceptosSancionDe(bd, sesion.copropiedadId)
   const misReservas = sel.reservasDeUnidad(bd, unidadId)
   const cuotas = sel.cuotasDeUnidad(bd, unidadId)
   const enMora = estaEnMora(cuotas)
@@ -151,6 +154,10 @@ export function ReservasPage() {
                     {zona.requiereAprobacion ? 'requiere aprobacion' : 'confirmación inmediata'}
                     {zona.fotos && zona.fotos.length > 1 ? ` · ${zona.fotos.length} fotos` : ''}
                   </span>
+                  {/* RN-109, RN-110 — Lo que cuesta, a la vista antes de abrirla. */}
+                  <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                    {resumenCondicionesZona(zona, conceptos)}
+                  </span>
                 </div>
                 <span className="chip chip--marca">Reservar</span>
               </div>
@@ -234,6 +241,11 @@ export function ReservasPage() {
               </ul>
             </div>
           )}
+          {/* RN-109, RN-110 — Antes de la fecha: cuánto cuesta y qué pasa si no cancela. */}
+          <div className="columna" style={{ gap: 'var(--e1)', marginBottom: 'var(--e3)' }}>
+            <span className="titulo-seccion">Costos y cancelación</span>
+            <CondicionesZona zona={zonaElegida} conceptos={conceptos} />
+          </div>
           <div className="campo">
             <label htmlFor="fecha-reserva">Fecha</label>
             <input

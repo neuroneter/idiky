@@ -192,6 +192,9 @@ La integración con pasarela está en el roadmap (fase 4).
   fechas las franjas no se pueden escoger (RN-108). Una zona desactivada no aparece (RN-107).
 - A5. La administración canceló su reserva al cerrar o desactivar la zona → le llega un
   mensaje con el motivo y en «Mis reservas» la ve cancelada, con ese motivo (RN-107, RN-108).
+- A6. La zona tiene costo, depósito o multa por no cancelar → la lista lo resume y, antes de
+  escoger la fecha, ve el detalle con el documento que lo autoriza y el plazo para cancelar
+  sin multa (RN-109, RN-110).
 
 **Reglas de negocio**
 - RN-08: una unidad en mora no puede reservar zonas comunes.
