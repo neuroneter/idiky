@@ -130,6 +130,11 @@ de una demostración.
 **Verificado.** Las 24 comprobaciones del tablero con Playwright, `npm run build` y la
 ortografía en verde.
 
+**Lo que sigue:** Mary no pudo abrir el enlace del demo publicado en claude.ai (de este lado
+carga sin errores; el artefacto es privado y solo abre con la cuenta que lo publicó). Quedó el
+demo como archivo `demo-idiky.html`, que se abre con doble clic. Y para verlo en el servidor,
+el responsable de integración lleva la rama a `main` y despliega `pwa`.
+
 ---
 
 ### 2026-09-29 · Mary + IA (Claude) · El tablero de proyectos: la obra, su avance y el aviso (CU-A-28, CU-R-32)
