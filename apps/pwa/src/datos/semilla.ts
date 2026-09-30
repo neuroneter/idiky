@@ -52,7 +52,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      imputaciones y recibo de caja, y hay abonos por conciliar (RN-75 a RN-79).
 // 22 — poderes enviados en foto por el propietario y marca «No obligatorio» en el
 //      registro (Mary, 2026-09-17; su rama tambien llamo 21 a ese cambio).
-export const VERSION_ESQUEMA = 23
+export const VERSION_ESQUEMA = 24
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -641,6 +641,31 @@ function construirProyectos(): Proyecto[] {
       ],
       creadoPor: 'per-admin',
       creadoEn: `${sumarDias(hoy, -22)}T14:00:00.000Z`,
+    },
+    // La obra callada: tres semanas sin avance, para que el tablero del
+    // administrador abra con la alerta de RN-102 (Mary, 2026-10-01).
+    {
+      id: 'pro-fachada',
+      copropiedadId: COPROPIEDAD_ID,
+      nombre: 'Pintura de fachadas',
+      descripcion:
+        'Lavado, resane y pintura de las fachadas de las dos torres, con el color aprobado por el consejo. Se paga con el fondo de imprevistos.',
+      responsable: 'Pinturas y Acabados Ltda.',
+      fechaInicio: sumarDias(hoy, -35),
+      fechaFinPrevista: sumarDias(hoy, 25),
+      presupuesto: 18000000,
+      avances: [
+        {
+          id: 'avn-3',
+          fecha: `${sumarDias(hoy, -21)}T14:20:00.000Z`,
+          porcentaje: 30,
+          titulo: 'Lavado y resane de la fachada norte de la Torre 1',
+          detalle: 'Se lavó a presión la fachada norte y se resanaron las fisuras. Falta la pintura.',
+          registradoPor: 'per-admin',
+        },
+      ],
+      creadoPor: 'per-admin',
+      creadoEn: `${sumarDias(hoy, -36)}T09:00:00.000Z`,
     },
   ]
 }

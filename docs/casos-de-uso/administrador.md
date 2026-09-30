@@ -960,4 +960,5 @@ es un actor por encima de la copropiedad y no existe todavía en el demo. Está 
 - RN-100, RN-101, RN-64 (los mensajes quedan guardados con su texto exacto), RN-61.
 
 **Estado en el demo:** ✅ — `/admin/proyectos`. La semilla trae la impermeabilización de
-cubiertas al 40 %, la misma obra de la cuota extraordinaria y de la asamblea en curso.
+cubiertas al 40 %, la misma obra de la cuota extraordinaria y de la asamblea en curso, y la
+pintura de fachadas con tres semanas sin avance, para que la alerta de RN-102 se vea al entrar.

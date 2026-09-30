@@ -123,6 +123,10 @@ desde el último avance; planeado con fecha de inicio ya pasada, desde esa fecha
 y no ha dicho nada—; planeado sin fecha o con fecha futura, nada; terminado, nunca. Es una
 alerta al administrador y no un aviso al propietario, porque quien puede resolverla es él.
 
+**La semilla** (versión 24) trae ahora una segunda obra, la pintura de fachadas, con tres
+semanas sin avance: el tablero del administrador abre con la alerta desde el primer ingreso
+(Mary pidió verla sin esperar los 14 días).
+
 **Verificado.** 8 comprobaciones de la regla (esbuild + node: el umbral exacto de 14, planeado
 con y sin fecha, terminado, orden) y 6 con Playwright: sin alerta con la semilla reciente, la
 alerta al envejecer los avances, el chip en la lista, la nota en el detalle y la alerta que
