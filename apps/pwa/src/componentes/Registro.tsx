@@ -418,8 +418,8 @@ export function FormularioRegistro({
               </span>
             </label>
             <span className="ayuda-campo">
-              El registro pasa directo a autorizar y la persona entra con el código que Idiky le
-              asigna. Queda escrito que lo eximió la administración (RN-97).
+              El registro pasa directo a autorizar y la persona entra como todos, con un código a su
+              celular o correo. Queda escrito que lo eximió la administración (RN-97).
             </span>
           </div>
         )}
@@ -513,8 +513,8 @@ export function DetalleRegistro({
             <strong>Soportes no obligatorios</strong>
             <span className="subtitulo">
               {marcado
-                ? `La administración eximió a esta persona de adjuntar la foto y el documento el ${formatearFechaHora(registro.soportesNoObligatorios!.marcadoEn)}. Se autoriza sin soportes y entra con su código.`
-                : 'Si esta persona no quiere adjuntar la foto ni el documento, márcala: el registro pasa directo a autorizar y entra con el código que Idiky le asignó.'}
+                ? `La administración eximió a esta persona de adjuntar la foto y el documento el ${formatearFechaHora(registro.soportesNoObligatorios!.marcadoEn)}. Se autoriza sin soportes y entra como todos, con un código a su celular o correo.`
+                : 'Si esta persona no quiere adjuntar la foto ni el documento, márcala: el registro pasa directo a autorizar y la persona entra como todos, con un código a su celular o correo.'}
             </span>
             {alMarcarNoObligatorio && admiteMarcaNoObligatorio(registro) && (
               <button
@@ -528,18 +528,22 @@ export function DetalleRegistro({
         </>
       )}
 
-      {/* Con la marca, el código ya no es para adjuntar: es para entrar (RN-97). */}
+      {/* Con la marca no hay soportes que adjuntar, así que el código de
+          registro no hace falta para nada: la persona entra a Idiky como todos,
+          con un código a su celular o correo (CU-R-01, RN-97). Se le dice a
+          quien la registró, que es quien se lo iba a dictar. */}
       {marcado && registro.estado !== 'rechazado' && registro.estado !== 'anulado' && (
         <>
           <div className="separador" />
           <div className="columna" style={{ gap: 'var(--e2)' }}>
-            <strong>Pásale este código</strong>
+            <strong>No necesita ningún código</strong>
             <span className="subtitulo">
-              Es la clave que Idiky le asignó: con su documento y este código{' '}
-              <strong>activa su cuenta</strong> en la pantalla de ingreso
-              {registro.estado === 'autorizado' ? '.' : ', en cuanto el registro quede autorizado.'}
+              Entra a Idiky con su documento, celular o correo, y el código que le llega por SMS o
+              correo{registro.estado === 'autorizado' ? '.' : ', en cuanto el registro quede autorizado.'}{' '}
+              {!registro.telefono && !registro.email
+                ? 'Ojo: este registro no tiene celular ni correo, y sin eso no puede entrar.'
+                : ''}
             </span>
-            <span className="codigo-registro numerico">{registro.codigo}</span>
           </div>
         </>
       )}

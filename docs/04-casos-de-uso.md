@@ -22,7 +22,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 
 | ID | Caso de uso | Fase | Estado | Detalle |
 |---|---|---|---|---|
-| CU-R-01 | **Ingresar a la app** (documento y contraseña) | 1 | 🟡 Parcial (el flujo, sin autenticar) | [ver](./casos-de-uso/residente.md#cu-r-01) |
+| CU-R-01 | **Ingresar a la app** (código por SMS o correo, sin clave) | 1 | 🟡 Parcial (el flujo, sin autenticar) | [ver](./casos-de-uso/residente.md#cu-r-01) |
 | CU-R-02 | Ver resumen de mi copropiedad (inicio) | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-02) |
 | CU-R-03 | Consultar estado de cuenta | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-03) |
 | CU-R-04 | Pagar una cuota | 1 | ✅ Demo (simulado) | [ver](./casos-de-uso/residente.md#cu-r-04) |
@@ -46,7 +46,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-22 | **Otorgar poder a otro copropietario** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-22) |
 | CU-R-23 | **Dar poder para que otro vote por mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-23) |
 | CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-24) |
-| CU-R-25 | **Activar mi cuenta o recuperar mi contraseña** | 1 | 🟡 Parcial (el flujo, sin autenticar) | [ver](./casos-de-uso/residente.md#cu-r-25) |
+| CU-R-25 | ~~Activar mi cuenta o recuperar mi contraseña~~ | 1 | ⛔ Retirado (2026-10-01: sin clave no hay nada que activar ni recuperar; ver CU-R-01) | [ver](./casos-de-uso/residente.md#cu-r-25) |
 | CU-R-26 | **Ajustar el tamaño de la letra** | 1 | ✅ Demo · ✅ BLOKY (en la puerta, 2026-09-21) | [ver](./casos-de-uso/residente.md#cu-r-26) |
 | CU-R-27 | **Registrar y dar de baja a las personas de mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-27) |
 | CU-R-28 | **Adjuntar mis documentos a un registro** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-28) |

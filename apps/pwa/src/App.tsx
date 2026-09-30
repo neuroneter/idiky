@@ -10,7 +10,6 @@ import { LayoutResidente } from './componentes/LayoutResidente'
 import { LayoutAdmin } from './componentes/LayoutAdmin'
 import { LayoutPorteria } from './componentes/LayoutPorteria'
 import { AccesoPage } from './features/auth/AccesoPage'
-import { ActivarPage } from './features/auth/ActivarPage'
 import { AdjuntarPage } from './features/auth/AdjuntarPage'
 import { InicioPage } from './features/residente/InicioPage'
 import { MiUnidadPage } from './features/residente/MiUnidadPage'
@@ -69,10 +68,10 @@ export function App() {
     <AvisoVersionNueva />
     <Routes>
       <Route path="/acceso" element={<AccesoPage />} />
-      {/* Activar y recuperar son el mismo tramite en tres pasos; cambia el texto,
-          no el flujo (CU-R-25). */}
-      <Route path="/acceso/activar" element={<ActivarPage modo="activar" />} />
-      <Route path="/acceso/recuperar" element={<ActivarPage modo="recuperar" />} />
+      {/* Activar y recuperar ya no existen: se entra con un codigo al celular o
+          al correo, y la primera vez eso activa la cuenta (CU-R-01, 2026-10-01). */}
+      <Route path="/acceso/activar" element={<Navigate to="/acceso" replace />} />
+      <Route path="/acceso/recuperar" element={<Navigate to="/acceso" replace />} />
       {/* Fuera de la sesion: quien adjunta todavia no tiene cuenta (CU-R-28). */}
       <Route path="/acceso/adjuntar" element={<AdjuntarPage />} />
 

@@ -9,50 +9,67 @@
 ## CU-R-01 — Ingresar a la app
 
 - **Actor principal:** Residente
-- **Precondiciones:** La administración lo vinculó a una unidad (CU-A-02) y él activó su
-  cuenta (CU-R-25).
+- **Precondiciones:** Alguien lo registró en una unidad (la administración, CU-A-26, o el
+  propietario, CU-R-27) y el registro quedó autorizado. Tiene celular o correo registrados.
 - **Disparador:** Abre la aplicación.
 - **Resultado esperado:** Queda dentro con una **unidad activa**; todo lo que vea a partir de
   ese momento pertenece a esa unidad.
 
-**Cómo se entra** (decisión del equipo, 2026-08-28)
+**Cómo se entra** (Mary, 2026-10-01: *«necesitamos que el ingreso sea con su correo
+autenticado o con SMS, como funciona ahora la mayoría de ingresos»*)
 
 | | |
 |---|---|
-| **Se identifica con** | Su **documento de identidad**. Es lo que la administración ya tiene de cada propietario, y no cambia cuando cambia el correo o el celular |
-| **Se confirma con** | **Una clave de 4 números** (RN-55) y, en un dispositivo nuevo, además un **código de un solo uso** (RN-54). Desde la app se paga plata |
-| **O con huella** | Donde el teléfono tenga lector, la huella reemplaza teclear la clave (RN-56) |
-| **La cuenta nace** | Cuando la administración vincula la unidad. La persona **la activa**, no la crea (RN-53) |
+| **Se identifica con** | Su **documento, su celular o su correo**, en un solo campo: no tiene por qué saber con cuál de los tres lo registraron |
+| **Se confirma con** | Un **código de un solo uso** de 6 números, enviado por **SMS** al celular registrado o por **correo** al correo registrado (RN-54). Vale 10 minutos y admite 5 intentos |
+| **O con huella** | Donde el teléfono tenga lector, la huella reemplaza pedir el código (RN-56) |
+| **La cuenta nace** | Cuando alguien lo registra. **No se activa aparte**: la primera vez que entra con el código, ya está (RN-53) |
+| **Sin clave** | No hay contraseña ni clave de números: no hay nada que recordar ni que recuperar |
 
 **Flujo principal**
 1. El sistema muestra la pantalla de acceso. Si **alguien ya entró en este teléfono**, muestra
-   su nombre y pide **solo la clave** (Mary, 2026-08-28): volver a pedirle diez dígitos de
-   cédula a quien ya entró aquí es trabajo por nada. Si no, pide documento y clave.
-2. El residente se identifica —o toca **Entrar con huella**, si la registró (RN-56)—.
-3. Si el dispositivo no es conocido, el sistema envía un **código de un solo uso** y lo pide.
-4. El sistema resuelve sus residencias.
-5. Si tiene una sola unidad, la selecciona; si tiene varias, le pide elegir.
-6. El sistema abre el inicio (CU-R-02) con la unidad activa.
+   su nombre y ofrece **Entrar con huella**, si la registró, o **Enviarme un código**. Si no,
+   pide el documento, celular o correo.
+2. El residente se identifica. El sistema le dice «Hola, Nombre» y le ofrece **por dónde
+   recibir el código**: solo los canales que tiene registrados, enmascarados (celular ···2233,
+   correo m···a@gmail.com).
+3. Elige el canal. El sistema envía el código y lo pide.
+4. Escribe el código. Si el teléfono tiene lector, puede dejar marcada la huella para la
+   próxima vez.
+5. El sistema resuelve sus residencias; con una sola unidad la selecciona, con varias le pide
+   elegir, y abre el inicio (CU-R-02).
 
 **Flujos alternativos**
-- A1. El documento no está en la copropiedad → el sistema **no dice «documento incorrecto»**:
-  dice que la administración es quien vincula la unidad y que le escriba (RN-53).
-- A2. La cuenta no está activada → lo lleva a activarla (CU-R-25).
+- A1. El dato no está en la copropiedad → el sistema **no dice «dato incorrecto»**: dice que
+  la administración o el propietario de su unidad son quienes lo registran (RN-53).
+- A2. Está registrado pero **sin celular ni correo** → no hay a dónde enviarle el código: se le
+  dice que pida a quien lo registró que los agregue.
 - A3. Sin unidades vinculadas → «tu administrador aún no ha vinculado tu unidad».
-- A4. El residente cambia de unidad activa desde el selector del encabezado.
-- A5. Olvidó la clave → CU-R-25, mismo trámite.
-- A6. **Se le acabaron los intentos** → el sistema bloquea la clave y lo manda al código
-  (RN-55). Es lo que permite que la clave sea corta.
-- A7. **No es él** quien el teléfono recuerda → toca «No soy yo» y vuelve a documento y clave.
+- A4. El código no coincide → cuenta los intentos; al quinto, o si pasaron los 10 minutos, lo
+  devuelve a elegir canal y pedir otro.
+- A5. **No es él** quien el teléfono recuerda → toca «No soy yo» y vuelve al campo.
+- A6. Cambia de unidad activa desde el selector del encabezado.
+
+**Decisiones de interfaz**
+- **Un campo, no tres.** La persona escribe lo que se acuerde; el sistema reconoce si es correo
+  (tiene arroba) o números (documento o celular).
+- **Los canales se muestran enmascarados.** Confirman a la persona que es su dato sin
+  exponerlo a quien mire la pantalla.
+- **La huella se ofrece ya adentro**, con la identidad recién confirmada por el código, y como
+  atajo: si el aparato no la registra, se entra igual.
 
 **Reglas de negocio**
 - RN-01 (contexto de copropiedad), RN-02 (rol efectivo por unidad).
-- RN-53: la cuenta existe porque la administración vinculó a la persona.
-- RN-54: dispositivo nuevo, código de un solo uso además de la clave.
-- RN-55: la clave es de 4 números y los intentos se acaban.
-- RN-56: la huella reemplaza teclear la clave en el dispositivo donde se registró.
+- RN-53: la cuenta existe porque alguien registró a la persona; no se activa aparte.
+- RN-54: código de un solo uso por SMS o correo, sin clave.
+- RN-56: la huella reemplaza pedir el código en el dispositivo donde se registró.
 
-**Estado en el demo:** 🟡 — `src/features/auth/AccesoPage.tsx` muestra el flujo completo, pero
+> **Lo que el demo no hace** (ADR-0004): enviar el código de verdad. Se muestra en pantalla. En
+> la versión real lo envía el servidor por el proveedor que se decida en T-18, y Google y
+> Microsoft con el correo llegan con el backend (ADR-0008), como ya los tiene BLOKY (CU-B-01).
+
+**Estado en el demo:** 🟡 — `src/features/auth/AccesoPage.tsx`. El flujo completo, sin
+autenticar.
 **no autentica**: no se guarda ninguna clave, cualquiera de 4 números sirve, y el código se
 muestra en pantalla (ver [ADR-0004](../adr/0004-autenticacion-demo.md)). **La huella sí es
 real** —la lee el aparato con WebAuthn—; lo que falta es el servidor que la comprobaría. El
@@ -61,35 +78,12 @@ atajo de perfiles sigue disponible, plegado debajo.
 ---
 
 ### CU-R-25
-## CU-R-25 — Activar mi cuenta o recuperar mi contraseña
+## CU-R-25 — ~~Activar mi cuenta o recuperar mi contraseña~~ (retirado)
 
-- **Actor principal:** Residente
-- **Precondiciones:** La administración lo vinculó a una unidad (CU-A-02).
-- **Disparador:** Entra por primera vez, o no recuerda su contraseña.
-- **Resultado esperado:** Queda con contraseña propia y dentro de la app.
-
-**Flujo principal** — tres pasos, los mismos para activar y para recuperar
-1. Escribe su **documento**. El sistema comprueba que esté vinculado (RN-53).
-2. El sistema le envía un **código de un solo uso** y él lo confirma.
-3. Crea su **clave de 4 números** (dos veces) y entra. El dispositivo queda como conocido
-   (RN-54). Si el teléfono tiene lector, ahí mismo se le ofrece **dejar la huella** (RN-56):
-   es el único momento en que registrarla no exige volver a pedirle nada.
-
-**Flujos alternativos**
-- A1. Documento no vinculado → «la administración es quien te registra».
-- A2. Activar una cuenta ya activada → lo manda a entrar o a recuperar.
-- A3. Recuperar una cuenta sin activar → lo manda a activarla.
-
-**Reglas de negocio**
-- RN-53: no se crea la cuenta aquí, se activa.
-- RN-54: el código prueba la identidad en este dispositivo.
-
-> **El código de registro también activa la cuenta** (RN-97): quien fue registrado con la marca
-> «No obligatorio» no adjuntó nada y no tiene otro código; el que Idiky le asignó al crearlo es su
-> clave para entrar. Vale solo con el registro ya autorizado.
-
-**Estado en el demo:** 🟡 — `src/features/auth/ActivarPage.tsx`. El trámite completo, sin
-guardar contraseñas y con el código a la vista.
+> ⛔ **Retirado el 2026-10-01.** Desde que se entra con un código por SMS o correo (CU-R-01,
+> RN-54) no hay clave que crear ni que recuperar: la primera vez que la persona entra con el
+> código, la cuenta queda activa. Las rutas `/acceso/activar` y `/acceso/recuperar` redirigen
+> al ingreso. Lo que este caso hacía de verdad —vincular la huella— quedó dentro de CU-R-01.
 
 ---
 

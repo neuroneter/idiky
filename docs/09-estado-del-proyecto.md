@@ -20,8 +20,8 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
-| **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 73 documentados: 40 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
+| **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
+| **Casos de uso** | 73 documentados: 40 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 21 ⬜ pendientes, 2 ⛔ retirados |
 | **Reglas de negocio** | 102 del demo (RN-01…RN-102; RN-41 retirada) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-102, de las asambleas, registros y proyectos de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
@@ -107,6 +107,41 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-01 · Mary + IA (Claude) · El ingreso sin clave: código por SMS o por correo (CU-R-01, RN-54)
+
+Mary, al repasar cómo entra un usuario: *«no, necesitamos que el ingreso sea con su correo
+autenticado o con SMS, como funciona ahora la mayoría de ingresos»*. Se rehízo la puerta.
+
+**Tres pasos y ninguna clave.** Quién eres —documento, celular o correo, **un solo campo**,
+porque la persona no tiene por qué saber con cuál la registraron—; por dónde recibes el código
+—SMS o correo, solo los canales registrados, enmascarados (···2233, m···a@gmail.com)—; y el
+código de 6 números, que vale 10 minutos y admite 5 intentos. La primera vez, eso activa la
+cuenta: **se retiran CU-R-25 y la clave de 4 números (RN-55)**, y con ellas «Activar mi
+cuenta» y «Olvidé mi clave». La huella (RN-56) sigue como atajo en el teléfono donde se
+registró y se ofrece ya adentro, con la identidad confirmada por el código. Si el teléfono
+recuerda a alguien, muestra su nombre y ofrece huella o «Enviarme un código».
+
+**Por qué está bien retirar la clave corta.** Lo que la sostenía —adultos mayores que no
+teclean contraseñas— lo cumple mejor un código que no hay que recordar. Y es lo mismo que BLOKY
+ya hace con el administrador (CU-B-01): las dos aplicaciones entran igual.
+
+**Lo que arrastra.** La marca «No obligatorio» (RN-97) ya no necesita el código de registro
+para entrar: esa persona entra como todos, y el detalle del registro lo dice. Y **cada persona
+necesita celular o correo registrados**; si no los tiene, la puerta se lo dice y le pide que
+quien la registró los agregue (RN-53).
+
+**Sigue simulado** (ADR-0004): el código se muestra en pantalla. En la versión real lo envía el
+servidor por el proveedor de T-18, que pasa a ser la puerta entera. Google y Microsoft con el
+correo llegan con el backend (ADR-0008); sin botones falsos mientras tanto.
+
+**Verificado** con Playwright: sin clave ni «activar»; desconocido con el mensaje de RN-53;
+documento con puntos; canales enmascarados según los datos; código malo con conteo de
+intentos; cinco fallos devuelven a pedir otro; entra; el teléfono la recuerda y ofrece «Enviarme
+un código»; «No soy yo»; por correo también; y las rutas viejas redirigen. `npm run build` y la
+ortografía en verde.
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · La alerta del proyecto callado (RN-102)
 

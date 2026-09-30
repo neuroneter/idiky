@@ -395,8 +395,9 @@ texto o configuración.
   cadena — el operador de Idiky crea al administrador, el administrador crea a los
   propietarios, el propietario crea a los demás de su unidad, y el residente crea visitantes
   (RN-63). En una copropiedad el derecho a estar ahí se lo da a uno alguien que ya está.
-- ¿Cómo se identifica un residente al registrarse: correo, celular, número de documento?
-  → *(respuesta)*
+- ~~¿Cómo se identifica un residente al registrarse: correo, celular, número de documento?~~
+  → ✅ **Respondido (Mary, 2026-10-01):** con cualquiera de los tres, en un solo campo, y entra
+  con un código por SMS o por correo, sin clave (CU-R-01, RN-54).
 - ¿Un arrendatario ve la cartera de la unidad, o solo el propietario? → *(respuesta)*
 
 ## 5. Técnico

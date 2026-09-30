@@ -1730,8 +1730,8 @@ export function exigeSoportes(categoria: CategoriaRegistro): boolean {
 // fotos (RN-57).
 //
 // Con la marca, el registro no tiene nada que esperar de la persona: pasa a la
-// autorizacion de quien lo creo, y la persona **entra con el codigo que Idiky
-// le asigno al crearla** — es la clave que dijo el equipo.
+// autorizacion de quien lo creo, y la persona entra a Idiky como todos, con un
+// codigo a su celular o correo (CU-R-01, desde el 2026-10-01).
 // ---------------------------------------------------------------------------
 
 /** Si a este registro se le pueden eximir los soportes: solo a quien los debe. */
@@ -1754,28 +1754,6 @@ export function soportesCompletos(registro: RegistroPersona): boolean {
   return !!registro.fotoDocumento && !!registro.fotoPersona
 }
 
-/**
- * RN-97 — El codigo del registro sirve para activar la cuenta.
- *
- * Es «la contrasena que le asigna Idiky cuando el administrador o propietario
- * lo crea» (equipo, 2026-09-17). Vale el de un registro **autorizado** de ese
- * documento: antes de autorizarlo no hay cuenta que activar.
- */
-export function codigoDeRegistroValido(
-  registros: RegistroPersona[],
-  documento: string,
-  codigo: string,
-): boolean {
-  const limpio = (valor: string) => valor.replace(/[\s.,-]/g, '').toUpperCase()
-  const buscado = codigo.trim().toUpperCase()
-  if (!buscado) return false
-  return registros.some(
-    (registro) =>
-      registro.estado === 'autorizado' &&
-      limpio(registro.documento) === limpio(documento) &&
-      registro.codigo.toUpperCase() === buscado,
-  )
-}
 
 /**
  * RN-62 — La vigencia depende de la categoria, no del capricho de quien registra.

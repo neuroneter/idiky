@@ -1,101 +1,68 @@
 /**
- * Estado del acceso, **simulado** (ADR-0004).
+ * Lo que la puerta de la app necesita saber, por fuera de los datos de la
+ * copropiedad — CU-R-01.
  *
- * Guarda dos cosas por navegador: que cuentas se activaron y si este dispositivo
- * ya es conocido. Con eso alcanza para que el demo muestre el flujo que decidio
- * el equipo el 2026-08-28:
+ * **Desde el 2026-10-01 no hay clave.** Mary: «necesitamos que el ingreso sea
+ * con su correo autenticado o con SMS, como funciona ahora la mayoria de
+ * ingresos». La persona se identifica con su documento, su celular o su
+ * correo, elige por donde recibir un **codigo de un solo uso** y entra con
+ * el. La primera vez, eso mismo activa la cuenta: no hay activacion ni
+ * recuperacion aparte (RN-53, RN-54). Es lo mismo que BLOKY ya hace con el
+ * administrador (CU-B-01).
  *
- *   la administracion vincula la unidad (CU-A-02)
- *   -> la persona activa su cuenta con su documento (CU-R-25)
- *   -> entra con documento y contrasena (CU-R-01)
- *   -> en un telefono nuevo, ademas, un codigo de un solo uso (RN-54)
- *
- * **Aqui no se guarda ninguna clave, ni cifrada ni en claro.** No es un descuido,
- * es lo contrario: guardar credenciales de mentira ensena la forma equivocada, y
- * en la fase 2 esto lo hace un servidor. El demo comprueba que la clave tenga los
- * digitos que debe y nada mas; la pantalla lo dice en voz alta para que nadie
- * confunda el demo con un sistema de autenticacion.
+ * **Aqui no se guarda ninguna credencial.** El codigo se genera en el
+ * navegador y se muestra en pantalla, porque un demo que pide un codigo que
+ * nunca llega no se puede mostrar a nadie (ADR-0004). En la fase 2 lo genera
+ * y lo envia el servidor (T-18). La huella si es real (RN-56): la registra y
+ * la comprueba el aparato, en `servicios/plataforma.ts`.
  */
 
-const CLAVE_ACTIVADAS = 'idiky.demo.cuentas-activadas'
-const CLAVE_DISPOSITIVO = 'idiky.demo.dispositivo-conocido'
+import type { Persona } from '../dominio/tipos'
+
 const CLAVE_ULTIMA = 'idiky.demo.ultima-persona'
-
-/**
- * Digitos de la clave de acceso.
- *
- * Cuatro, no una contrasena larga (Mary, 2026-08-28): **la app la usan adultos
- * mayores**, y una contrasena con mayusculas y simbolos en un teclado de telefono
- * es la barrera que hace que la persona deje de entrar y vuelva a llamar a la
- * administracion.
- *
- * La seguridad no se baja, se **mueve de sitio**. Cuatro digitos son debiles si
- * cualquiera puede probarlos mil veces contra un servidor; aqui no puede:
- *
- *  - la clave **solo sirve en un dispositivo ya probado** con un codigo de un
- *    solo uso (RN-54);
- *  - **los intentos se acaban** (`INTENTOS_MAXIMOS`), y despues hay que volver a
- *    probar la identidad con el codigo;
- *  - quien quiera, entra con **huella** y no teclea nada (RN-55).
- *
- * Es el mismo razonamiento de la clave del cajero: cuatro digitos bastan cuando
- * hacen falta la tarjeta y un numero limitado de intentos.
- */
-export const DIGITOS_CLAVE = 4
-
-/** Intentos seguidos antes de exigir el codigo de un solo uso otra vez. */
-export const INTENTOS_MAXIMOS = 5
 
 /** Digitos del codigo de un solo uso. */
 export const DIGITOS_CODIGO = 6
 
-function leerLista(clave: string): string[] {
-  try {
-    const bruto = window.localStorage.getItem(clave)
-    return bruto ? (JSON.parse(bruto) as string[]) : []
-  } catch {
-    return []
-  }
-}
+/** Minutos que vale un codigo. Despues hay que pedir otro. */
+export const VIGENCIA_CODIGO_MINUTOS = 10
 
-function guardarLista(clave: string, valores: string[]): void {
-  try {
-    window.localStorage.setItem(clave, JSON.stringify(valores))
-  } catch {
-    // Modo privado: la activacion vale solo mientras la pestana este abierta.
-  }
-}
+/** Intentos con el mismo codigo. Agotados, hay que pedir otro. */
+export const INTENTOS_CODIGO = 5
 
-export function cuentaActivada(personaId: string): boolean {
-  return leerLista(CLAVE_ACTIVADAS).includes(personaId)
-}
-
-export function activarCuenta(personaId: string): void {
-  const activadas = leerLista(CLAVE_ACTIVADAS)
-  if (!activadas.includes(personaId)) guardarLista(CLAVE_ACTIVADAS, [...activadas, personaId])
-}
+export type CanalCodigo = 'sms' | 'correo'
 
 /**
- * RN-54 — En un dispositivo nuevo se pide un codigo ademas de la contrasena.
- *
- * «Conocido» es por persona y por navegador: que un familiar haya entrado en este
- * telefono no vuelve conocido el mio.
+ * Por donde puede recibir el codigo esta persona: solo los canales que tiene
+ * registrados. Sin celular ni correo no hay por donde entrar, y eso se le
+ * dice (RN-53: quien la registro tiene que completarle el dato).
  */
-export function dispositivoConocido(personaId: string): boolean {
-  return leerLista(CLAVE_DISPOSITIVO).includes(personaId)
+export function canalesDe(persona: Persona): Array<{ canal: CanalCodigo; destino: string }> {
+  const canales: Array<{ canal: CanalCodigo; destino: string }> = []
+  if (persona.telefono?.trim()) canales.push({ canal: 'sms', destino: enmascararCelular(persona.telefono) })
+  if (persona.email?.trim()) canales.push({ canal: 'correo', destino: enmascararCorreo(persona.email) })
+  return canales
 }
 
-export function recordarDispositivo(personaId: string): void {
-  const conocidos = leerLista(CLAVE_DISPOSITIVO)
-  if (!conocidos.includes(personaId)) guardarLista(CLAVE_DISPOSITIVO, [...conocidos, personaId])
+/** «···2233»: lo justo para reconocer el numero sin mostrarlo entero. */
+export function enmascararCelular(telefono: string): string {
+  const digitos = telefono.replace(/\D/g, '')
+  return digitos.length <= 4 ? '···' + digitos : '···' + digitos.slice(-4)
+}
+
+/** «m···a@gmail.com»: la primera y la ultima letra, y el dominio. */
+export function enmascararCorreo(correo: string): string {
+  const [usuario, dominio] = correo.trim().toLowerCase().split('@')
+  if (!dominio) return '···'
+  const visible = usuario.length <= 2 ? usuario[0] + '···' : `${usuario[0]}···${usuario[usuario.length - 1]}`
+  return `${visible}@${dominio}`
 }
 
 /**
  * Codigo de un solo uso.
  *
- * En la version real lo genera el servidor y lo manda por SMS, WhatsApp o correo.
- * Aqui se genera en el navegador y **se muestra en pantalla**, porque un demo que
- * pide un codigo que nunca llega no se puede mostrar a nadie.
+ * En la version real lo genera el servidor y lo manda por SMS, WhatsApp o
+ * correo. Aqui se genera en el navegador y **se muestra en pantalla**.
  */
 export function generarCodigo(): string {
   let codigo = ''
@@ -105,34 +72,55 @@ export function generarCodigo(): string {
   return codigo
 }
 
+/** El codigo sigue valiendo si no han pasado los minutos de vigencia. */
+export function codigoVigente(emitidoEn: number, ahora: number = Date.now()): boolean {
+  return ahora - emitidoEn < VIGENCIA_CODIGO_MINUTOS * 60_000
+}
+
 /**
  * Deja el documento en su forma comparable: sin puntos, espacios ni guiones.
  *
  * La gente escribe su cedula de las dos maneras —1.010.000.000 y 1010000000— y
- * las dos son la misma. Fallar por un punto seria una barrera absurda justo en la
- * puerta.
+ * las dos son la misma. Fallar por un punto seria una barrera absurda justo en
+ * la puerta.
  */
 export function normalizarDocumento(documento: string): string {
   return documento.replace(/[\s.,-]/g, '')
 }
 
 /**
+ * Quien es, a partir de lo que escribio: documento, celular o correo.
+ *
+ * Un solo campo y no tres, porque la persona no tiene por que saber con cual
+ * de los tres la registraron. Si escribio un correo se compara como correo; si
+ * escribio numeros, contra el documento y contra el celular.
+ */
+export function identificarPersona(personas: Persona[], texto: string): Persona | undefined {
+  const limpio = texto.trim().toLowerCase()
+  if (!limpio) return undefined
+  if (limpio.includes('@')) {
+    return personas.find((p) => p.email?.trim().toLowerCase() === limpio)
+  }
+  const digitos = limpio.replace(/\D/g, '')
+  if (!digitos) return undefined
+  return (
+    personas.find((p) => normalizarDocumento(p.documento) === digitos) ??
+    personas.find((p) => p.telefono && p.telefono.replace(/\D/g, '').endsWith(digitos) && digitos.length >= 7)
+  )
+}
+
+/**
  * Quien entro por ultima vez en este telefono.
  *
- * Con esto la puerta deja de pedir el documento cada vez: **una vez creada la
- * cuenta, solo se pide la contrasena** (Mary, 2026-08-28). El documento sirve
- * para reconocer a alguien que la app no conoce; volver a pedirselo a quien ya
- * entro aqui es hacerle teclear diez digitos por nada.
- *
- * Es del telefono, no de la cuenta: no viaja, no se sincroniza y se borra con
- * los datos del navegador.
+ * Con esto la puerta deja de pedir el documento cada vez: muestra el nombre y
+ * ofrece la huella (RN-56) o un codigo nuevo. Es del telefono, no de la
+ * cuenta: no viaja, no se sincroniza y se borra con los datos del navegador.
  */
 export function recordarUltimaPersona(personaId: string): void {
   try {
     window.localStorage.setItem(CLAVE_ULTIMA, personaId)
   } catch {
-    // Modo privado: la proxima vez se pide el documento, que es el camino largo
-    // pero siempre funciona.
+    // Modo privado: la proxima vez se pide el documento, que siempre funciona.
   }
 }
 
@@ -149,47 +137,5 @@ export function olvidarUltimaPersona(): void {
     window.localStorage.removeItem(CLAVE_ULTIMA)
   } catch {
     // Nada que olvidar.
-  }
-}
-
-/**
- * Intentos fallidos seguidos, por persona y por dispositivo.
- *
- * Es lo que sostiene que la clave pueda ser de cuatro digitos: sin limite de
- * intentos, cuatro digitos se prueban enteros en un rato.
- */
-const CLAVE_INTENTOS = 'idiky.demo.intentos'
-
-function leerIntentos(): Record<string, number> {
-  try {
-    const bruto = window.localStorage.getItem(CLAVE_INTENTOS)
-    return bruto ? (JSON.parse(bruto) as Record<string, number>) : {}
-  } catch {
-    return {}
-  }
-}
-
-export function intentosFallidos(personaId: string): number {
-  return leerIntentos()[personaId] ?? 0
-}
-
-export function registrarFallo(personaId: string): number {
-  const intentos = leerIntentos()
-  const nuevos = (intentos[personaId] ?? 0) + 1
-  try {
-    window.localStorage.setItem(CLAVE_INTENTOS, JSON.stringify({ ...intentos, [personaId]: nuevos }))
-  } catch {
-    // Sin poder guardar el conteo, el limite no aplica en esta sesion.
-  }
-  return nuevos
-}
-
-export function limpiarFallos(personaId: string): void {
-  const intentos = leerIntentos()
-  delete intentos[personaId]
-  try {
-    window.localStorage.setItem(CLAVE_INTENTOS, JSON.stringify(intentos))
-  } catch {
-    // Nada que limpiar.
   }
 }
