@@ -2309,10 +2309,14 @@ export function motivoDeCierre(cierre: { desde: FechaISO; hasta: FechaISO; motiv
  * manual, o el acta que lo aprobó; «otro» exige además el nombre del
  * documento (RN-38). Un cobro que no se puede explicar termina en una PQRS.
  *
+ * **Si aplican o no lo escoge el administrador**, zona por zona: «Se cobra
+ * por usarla» y «Pide depósito de garantía» (Mary: «hay copropiedades que
+ * cobran el depósito… hay que dejar la opción para que el administrador
+ * seleccione si aplica o no»). Marcada, pide el valor.
+ *
  * Hoy el cobro y el depósito se **parametrizan y se informan**: el residente
- * los ve antes de reservar. Generar el cobro en el estado de cuenta y manejar
- * la devolución del depósito es lo que sigue; el depósito, además, es plata que
- * entra y sale, y se define con la contable (T-17).
+ * los ve antes de reservar. Generar el cobro en el estado de cuenta y registrar
+ * la devolución del depósito es lo que sigue.
  */
 export function tieneCobroZona(zona: { valorUso?: number; deposito?: number }): boolean {
   return (zona.valorUso ?? 0) > 0 || (zona.deposito ?? 0) > 0

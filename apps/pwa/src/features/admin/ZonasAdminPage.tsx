@@ -514,7 +514,15 @@ function FormularioZona({
     cambiar('horarioSemanal', horario ? [...otros, { dia, ...horario }].sort((a, b) => ORDEN_SEMANA.indexOf(a.dia) - ORDEN_SEMANA.indexOf(b.dia)) : otros)
   }
 
-  const motivo = motivoZonaInvalida(datos, zonas, zona?.id, conceptos)
+  /** RN-109 — Si aplican o no: lo escoge el administrador, zona por zona. */
+  const [cobraUso, setCobraUso] = useState(!!zona?.valorUso)
+  const [pideDeposito, setPideDeposito] = useState(!!zona?.deposito)
+  const motivo =
+    cobraUso && !((datos.valorUso ?? 0) > 0)
+      ? 'Escribe el valor por reserva, o desmarca «Se cobra por usarla».'
+      : pideDeposito && !((datos.deposito ?? 0) > 0)
+        ? 'Escribe el valor del depósito, o desmarca «Pide depósito de garantía».'
+        : motivoZonaInvalida(datos, zonas, zona?.id, conceptos)
   const multasActivas = conceptos.filter((c) => c.activo)
   const respaldo = datos.respaldoCobro ?? { origen: 'reglamento' as OrigenRespaldo, referencia: '' }
   const origenElegido = ORIGENES_RESPALDO.find((o) => o.id === respaldo.origen)
@@ -721,37 +729,60 @@ function FormularioZona({
       </label>
 
 
-      {/* RN-109 — Cobro por uso y depósito, con su respaldo. */}
-      <div className="columna" style={{ gap: 'var(--e1)', marginBottom: 'var(--e3)' }}>
+      {/* RN-109 — Cobro por uso y depósito: el administrador escoge si aplican. */}
+      <div className="columna" style={{ gap: 'var(--e2)', marginBottom: 'var(--e3)' }}>
         <span className="titulo-seccion">Costos</span>
-        <span className="ayuda-campo">En 0, la zona es gratis o no pide depósito.</span>
-      </div>
-      <div className="rejilla-dos">
-        <div className="campo">
-          <label htmlFor="zona-valor-uso">Valor por reserva ($)</label>
+        <label className="fila" style={{ justifyContent: 'flex-start', gap: 'var(--e2)' }}>
           <input
-            id="zona-valor-uso"
-            type="number"
-            min={0}
-            step={1000}
-            inputMode="numeric"
-            value={datos.valorUso ?? 0}
-            onChange={(e) => cambiar('valorUso', Number(e.target.value))}
+            type="checkbox"
+            checked={cobraUso}
+            onChange={(e) => {
+              setCobraUso(e.target.checked)
+              if (!e.target.checked) cambiar('valorUso', undefined)
+            }}
           />
-        </div>
-        <div className="campo">
-          <label htmlFor="zona-deposito">Depósito de garantía ($)</label>
+          <span>Se cobra por usarla</span>
+        </label>
+        {cobraUso && (
+          <div className="campo">
+            <label htmlFor="zona-valor-uso">Valor por reserva ($)</label>
+            <input
+              id="zona-valor-uso"
+              type="number"
+              min={0}
+              step={1000}
+              inputMode="numeric"
+              value={datos.valorUso ?? ''}
+              onChange={(e) => cambiar('valorUso', Number(e.target.value))}
+            />
+          </div>
+        )}
+        <label className="fila" style={{ justifyContent: 'flex-start', gap: 'var(--e2)' }}>
           <input
-            id="zona-deposito"
-            type="number"
-            min={0}
-            step={1000}
-            inputMode="numeric"
-            value={datos.deposito ?? 0}
-            onChange={(e) => cambiar('deposito', Number(e.target.value))}
+            type="checkbox"
+            checked={pideDeposito}
+            onChange={(e) => {
+              setPideDeposito(e.target.checked)
+              if (!e.target.checked) cambiar('deposito', undefined)
+            }}
           />
-          <span className="ayuda-campo">Se devuelve si la zona queda como se entregó.</span>
-        </div>
+          <span>Pide depósito de garantía</span>
+        </label>
+        {pideDeposito && (
+          <div className="campo">
+            <label htmlFor="zona-deposito">Depósito de garantía ($)</label>
+            <input
+              id="zona-deposito"
+              type="number"
+              min={0}
+              step={1000}
+              inputMode="numeric"
+              value={datos.deposito ?? ''}
+              onChange={(e) => cambiar('deposito', Number(e.target.value))}
+            />
+            <span className="ayuda-campo">Se devuelve si la zona queda como se entregó.</span>
+          </div>
+        )}
       </div>
       {tieneCobroZona(datos) && (
         <div className="rejilla-dos">

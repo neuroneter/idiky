@@ -136,6 +136,12 @@ propiedad»*. Al cerrar, la casilla «Avisar a toda la copropiedad» viene marca
 acción publica un comunicado en la cartelera y deja un mensaje a cada residente vigente, uno
 por persona. A quien ya le cancelaron la reserva no le llega un segundo mensaje.
 
+**Cobro y depósito, «aplica o no».** Mary: *«no hay que coordinar, hay copropiedades que cobran
+el depósito; hay que dejar la opción para que el administrador seleccione si aplica o no»*. El
+formulario ya no pide los valores en 0 cuando no aplican. Tiene dos casillas, «Se cobra por
+usarla» y «Pide depósito de garantía», y al marcar una pide el valor; marcada sin valor no deja
+guardar (13 comprobaciones de costos en verde).
+
 **Semilla 28:** gimnasio y coworking compartidos; horario del gimnasio por día; reservas con
 personas; una de hoy (para portería), dos que comparten el gimnasio mañana y el salón de mañana
 de María Camila (para ver el aviso de multa).
@@ -146,8 +152,8 @@ Además siguen en verde las 24 de zonas (una ajustada: el gimnasio ahora dice «
 
 **Lo que sigue:**
 - Calendario de ocupación por zona.
-- Mover la plata: generar el cobro por uso en la cartera, manejar el depósito con la contable
-  (T-17) y marcar «No se presentó».
+- Mover la plata: generar el cobro por uso en la cartera, registrar la devolución del depósito
+  y marcar «No se presentó».
 
 ---
 
@@ -171,7 +177,7 @@ detalle antes de escoger la fecha, incluido que la multa se impone con proceso s
 
 **Lo que no hace todavía:**
 - No genera el cobro en el estado de cuenta.
-- No maneja la devolución del depósito; eso va con la contable (T-17).
+- No registra la devolución del depósito.
 - No marca «No se presentó».
 
 Por ahora se parametriza y se informa.
