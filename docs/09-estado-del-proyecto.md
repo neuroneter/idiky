@@ -21,7 +21,7 @@ nueva o una sesión de IA distinta.
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 73 documentados: 41 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 20 ⬜ pendientes, 2 ⛔ retirados |
+| **Casos de uso** | 74 documentados: 42 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 20 ⬜ pendientes, 2 ⛔ retirados |
 | **Reglas de negocio** | 117 del demo (RN-01…RN-117; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-117, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
@@ -47,7 +47,7 @@ visitantes con código · consulta de correspondencia · consulta del coeficient
 
 **Consola del administrador:** **zonas comunes: crearlas, cambiarles las reglas, cerrarlas por
 mantenimiento y desactivarlas, avisando con el motivo a quien tenía reserva, con su costo,
-depósito y multa por no cancelar** (CU-A-10) · **asambleas: convocar según la modalidad, instalar y ver la
+depósito y multa por no cancelar** (CU-A-10) · **calendario de ocupación de cada zona** (CU-A-29) · **asambleas: convocar según la modalidad, instalar y ver la
 asistencia con su coeficiente** (CU-A-12, CU-A-17) · **registro de propietarios**, con la tabla
 de quién registró a quién (CU-A-26) · **el acta de la asamblea, armada con lo que exige el artículo 47**
 (CU-A-20) · **catálogo de multas con su respaldo, y la reincidencia con el suyo** (CU-A-22) · **procesos sancionatorios con debido proceso completo** —notificar citando
@@ -110,6 +110,34 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-01 · Mary + IA (Claude) · El calendario de ocupación de las zonas (CU-A-29)
+
+Mary escogió el punto 7 de la revisión de zonas comunes: *«con el 7»*.
+
+**Qué es.** En la consola, Reservas tiene ahora tres pestañas: Reservas, **Calendario** y Zonas
+comunes. El calendario muestra la semana de una zona, con los días en columnas y los turnos en
+filas. Cada casilla dice en palabras qué hay: «Libre», la unidad con sus personas, «5 de 8» en
+el turno compartido, «Mantenimiento» o «—» si ese día no abre a esa hora. El color ayuda, pero
+nunca va solo. Una línea arriba resume la semana: turnos con reserva y, en la compartida, cupos
+usados. Al tocar una casilla reservada se ve quién la tiene. Se navega por semanas.
+
+**Por qué no hay regla nueva.** Es una vista: junta RN-09, RN-108, RN-111, RN-113 y RN-114, y la
+casilla sale de una sola función (`celdaCalendario` en `dominio/reglas.ts`).
+
+**Verificado.** 9 comprobaciones con Playwright:
+- La pestaña y el resumen de la semana.
+- La casilla del salón con la unidad y las personas, y su detalle.
+- El gimnasio en «5 de 8», y el domingo por la tarde en «—».
+- El cierre por mantenimiento de la cancha.
+- El cambio de semana.
+- En celular, la tabla se desliza sin desbordar la página.
+
+`npm run build` y la ortografía, en verde.
+
+**Lo que sigue:** mover la plata del cobro por uso, el depósito y la multa (punto 8).
+
+---
+
 ### 2026-10-01 · Mary + IA (Claude) · Zonas compartidas, horario por día, aviso al cancelar, portería y aviso masivo (RN-111 a RN-117)
 
 Mary preguntó *«¿crees que nos falta algo más en zonas comunes?»* y aprobó los puntos 1 a 6 de
@@ -151,7 +179,7 @@ Además siguen en verde las 24 de zonas (una ajustada: el gimnasio ahora dice «
 10 personas») y las 11 de costos. `npm run build` y la ortografía, en verde.
 
 **Lo que sigue:**
-- Calendario de ocupación por zona.
+- ~~Calendario de ocupación por zona~~ → hecho (CU-A-29).
 - Mover la plata: generar el cobro por uso en la cartera, registrar la devolución del depósito
   y marcar «No se presentó».
 

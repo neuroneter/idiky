@@ -1028,10 +1028,48 @@ rápida.
   cancelar, del catálogo), RN-111 (uso exclusivo o compartido), RN-114 (días y horario de cada
   día), RN-117 (aviso masivo del cierre).
 
-**Lo que sigue:** un calendario de ocupación por zona. Además, el cobro y el depósito hoy se
+**Lo que sigue:** el calendario ya existe (CU-A-29). El cobro y el depósito hoy se
 parametrizan y se informan; falta generar el
 cobro en el estado de cuenta al confirmar la reserva, registrar la devolución del depósito y marcar la reserva como «No se presentó» para iniciar desde ahí el proceso
 sancionatorio.
 
 **Estado en el demo:** ✅ — `src/features/admin/ZonasAdminPage.tsx` (pestaña «Zonas
 comunes» de `ReservasAdminPage.tsx`, ruta `/admin/reservas/zonas`).
+
+---
+
+### CU-A-29
+## CU-A-29 — Ver la ocupación de las zonas comunes en un calendario
+
+- **Actor principal:** Administrador
+- **Precondiciones:** Hay al menos una zona activa.
+- **Disparador:** Entra a `Reservas → Calendario`.
+- **Resultado esperado:** Ve la semana de una zona de un vistazo: qué turnos están libres,
+  cuáles reservados y por quién, cuánto lleva el turno compartido, qué días no abre y cuáles
+  están cerrados por mantenimiento.
+
+Mary, 2026-10-01, al pedir el punto 7 de la revisión de zonas comunes: *«con el 7»*. Sirve para
+ver cuándo se llena el salón, qué días nadie usa la cancha y dónde cabe un mantenimiento sin
+cancelarle la reserva a nadie.
+
+**Flujo principal**
+1. El administrador escoge la zona. El sistema muestra la semana en curso, de lunes a domingo:
+   los días en columnas, los turnos en filas y el día de hoy marcado.
+2. Cada casilla dice en palabras, además del color, qué hay:
+   - «Libre».
+   - En la zona exclusiva, la unidad y las personas, por ejemplo «T1 · 402 · 20 p.», con «por
+     aprobar» si todavía no se ha aprobado.
+   - En la compartida, «5 de 8».
+   - «Mantenimiento».
+   - «—» si ese día no abre a esa hora.
+3. Arriba, una línea resume la semana: cuántos turnos tienen reserva y, en la compartida,
+   cuántos cupos se usaron del total.
+4. Al tocar una casilla reservada ve quién la tiene: unidad, persona, cuántas personas van y el
+   estado de la reserva.
+5. «Anterior», «Esta semana» y «Siguiente» cambian de semana. Los días pasados se ven más
+   tenues.
+
+**Reglas de negocio:** ninguna nueva; la vista junta RN-09, RN-108, RN-111, RN-113 y RN-114.
+
+**Estado en el demo:** ✅ — `src/features/admin/CalendarioZonasPage.tsx`, ruta
+`/admin/reservas/calendario`.

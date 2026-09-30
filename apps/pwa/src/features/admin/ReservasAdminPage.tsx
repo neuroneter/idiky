@@ -2,7 +2,8 @@
  * CU-A-06 — Aprobar o rechazar reservas.
  * Doc: docs/casos-de-uso/administrador.md#cu-a-06
  *
- * Reservas tiene dos pestañas: las reservas y las zonas comunes (CU-A-10, en
+ * Reservas tiene tres pestañas: las reservas, el calendario de ocupación
+ * (CU-A-29, en `CalendarioZonasPage`) y las zonas comunes (CU-A-10, en
  * `ZonasAdminPage`). Lo de reservas va dentro de reservas (Mary, 2026-10-01).
  */
 
@@ -27,13 +28,16 @@ import { ChipReserva } from '../../componentes/Etiquetas'
 
 type Filtro = 'pendientes' | 'proximas' | 'todas'
 
-/** Las dos pestañas de Reservas. Son navegación, no filtros: cada una tiene su ruta. */
+/** Las pestañas de Reservas. Son navegación, no filtros: cada una tiene su ruta. */
 export function ReservasSeccionAdmin() {
   return (
     <>
       <nav className="segmentos" aria-label="Reservas">
         <NavLink to="/admin/reservas" end className="segmento">
           Reservas
+        </NavLink>
+        <NavLink to="/admin/reservas/calendario" className="segmento">
+          Calendario
         </NavLink>
         <NavLink to="/admin/reservas/zonas" className="segmento">
           Zonas comunes

@@ -38,6 +38,7 @@ import { AsambleasAdminPage } from './features/admin/AsambleasAdminPage'
 import { PagosPage } from './features/admin/PagosPage'
 import { ReservasAdminPage, ReservasSeccionAdmin } from './features/admin/ReservasAdminPage'
 import { ZonasAdminPage } from './features/admin/ZonasAdminPage'
+import { CalendarioZonasPage } from './features/admin/CalendarioZonasPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
 import { ProyectosAdminPage } from './features/admin/ProyectosAdminPage'
@@ -135,6 +136,7 @@ export function App() {
             reservas (Mary, 2026-10-01). */}
         <Route path="reservas" element={<ReservasSeccionAdmin />}>
           <Route index element={<ReservasAdminPage />} />
+          <Route path="calendario" element={<CalendarioZonasPage />} />
           <Route path="zonas" element={<ZonasAdminPage />} />
         </Route>
         <Route path="pqrs" element={<PqrsAdminPage />} />

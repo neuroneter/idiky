@@ -87,6 +87,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-26 | **Registrar propietarios y ver los registros de la copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-26) |
 | CU-A-27 | Conciliar abonos y administrar recibos de caja | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-27) |
 | CU-A-28 | **Registrar un proyecto y sus avances, y contárselos a los propietarios** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-28) |
+| CU-A-29 | **Ver la ocupación de las zonas comunes en un calendario** | 2 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-29) |
 
 
 ## 3. Portería — consola de la entrada

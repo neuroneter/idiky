@@ -2603,3 +2603,75 @@ export function textoCierreZona(
   const porque = cierre.motivo.trim().replace(/[.\s]+$/, '')
   return `${copropiedad}: ${zona.nombre} estará cerrada por mantenimiento ${fechas}. Motivo: ${porque}. Más detalles en la cartelera de Idiky.`
 }
+
+// ---------------------------------------------------------------------------
+// Calendario de ocupación — CU-A-29
+// ---------------------------------------------------------------------------
+
+/** El lunes de la semana de esa fecha: la semana se lee de lunes a domingo. */
+export function lunesDeLaSemana(fecha: FechaISO): FechaISO {
+  const dia = diaDeLaSemana(fecha)
+  return sumarDias(fecha, dia === 0 ? -6 : 1 - dia)
+}
+
+/** Los turnos que existen en alguno de esos días, en orden (RN-114: cada día puede tener los suyos). */
+export function franjasDeLaSemana(zona: ZonaComun, dias: FechaISO[]): Array<{ inicio: string; fin: string }> {
+  const todas = new Map<string, { inicio: string; fin: string }>()
+  for (const dia of dias) for (const f of franjasDeZona(zona, dia)) todas.set(`${f.inicio}-${f.fin}`, f)
+  return [...todas.values()].sort((a, b) => a.inicio.localeCompare(b.inicio))
+}
+
+/**
+ * Qué hay en una casilla del calendario. No es una regla nueva: junta las que
+ * ya existen para que el administrador las vea de un vistazo —el horario del
+ * día (RN-114), el cierre por mantenimiento (RN-108), la reserva exclusiva
+ * (RN-09) o la ocupación del turno compartido (RN-111)—.
+ */
+export type CeldaCalendario =
+  | { tipo: 'no_abre' }
+  | { tipo: 'cerrada'; motivo: string }
+  | { tipo: 'libre' }
+  | { tipo: 'ocupada'; reservas: Reserva[]; personas: number }
+
+export function celdaCalendario(
+  zona: ZonaComun,
+  reservas: Reserva[],
+  fecha: FechaISO,
+  horaInicio: string,
+): CeldaCalendario {
+  if (!franjasDeZona(zona, fecha).some((f) => f.inicio === horaInicio)) return { tipo: 'no_abre' }
+  const cierre = cierreEnFecha(zona, fecha)
+  if (cierre) return { tipo: 'cerrada', motivo: cierre.motivo }
+  const delTurno = reservas.filter(
+    (r) => r.zonaId === zona.id && r.fecha === fecha && r.horaInicio === horaInicio && reservaOcupaFranja(r),
+  )
+  if (delTurno.length === 0) return { tipo: 'libre' }
+  return { tipo: 'ocupada', reservas: delTurno, personas: delTurno.reduce((t, r) => t + (r.personas ?? 1), 0) }
+}
+
+/**
+ * La ocupación de la semana, en turnos: cuántos de los que abren tienen al
+ * menos una reserva. En la zona compartida cuenta además las personas sobre
+ * el cupo total, que es lo que dice si el gimnasio se queda corto.
+ */
+export function ocupacionDeLaSemana(
+  zona: ZonaComun,
+  reservas: Reserva[],
+  dias: FechaISO[],
+): { turnos: number; ocupados: number; personas: number; cupo: number } {
+  let turnos = 0
+  let ocupados = 0
+  let personas = 0
+  for (const dia of dias) {
+    for (const f of franjasDeZona(zona, dia)) {
+      const celda = celdaCalendario(zona, reservas, dia, f.inicio)
+      if (celda.tipo === 'no_abre' || celda.tipo === 'cerrada') continue
+      turnos += 1
+      if (celda.tipo === 'ocupada') {
+        ocupados += 1
+        personas += celda.personas
+      }
+    }
+  }
+  return { turnos, ocupados, personas, cupo: turnos * zona.aforo }
+}

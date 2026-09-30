@@ -43,6 +43,7 @@ const TITULOS: Record<string, string> = {
   '/admin/asambleas': 'Asambleas',
   '/admin/pagos': 'Pagos y recibos de caja',
   '/admin/reservas': 'Reservas',
+  '/admin/reservas/calendario': 'Calendario de ocupación',
   '/admin/reservas/zonas': 'Zonas comunes',
   '/admin/pqrs': 'Bandeja de PQRS',
   '/admin/comunicados': 'Comunicados',
