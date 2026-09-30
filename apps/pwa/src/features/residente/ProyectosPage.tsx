@@ -22,11 +22,15 @@ import { BarraAvance, ChipProyecto, FichaProyecto, HistoriaProyecto } from '../.
 export function ProyectosPage() {
   const { bd } = useDatos()
   const { sesion } = useSesion()
-  const [abierto, setAbierto] = useState<string | null>(null)
+  // Abierta por defecto la primera obra: los avances son el tablero, no un
+  // detalle que haya que ir a buscar (Mary, 2026-09-30: «¿dónde veo los
+  // avances?»). `undefined` = todavía no tocó nada; `null` = cerró la abierta.
+  const [abierto, setAbierto] = useState<string | null | undefined>(undefined)
 
   if (!sesion) return null
 
   const proyectos = sel.proyectosDe(bd, sesion.copropiedadId)
+  const abiertoEfectivo = abierto === undefined ? proyectos[0]?.id ?? null : abierto
 
   return (
     <div className="pila">
@@ -47,7 +51,7 @@ export function ProyectosPage() {
       ) : (
         <div className="lista">
           {proyectos.map((proyecto) => {
-            const desplegado = abierto === proyecto.id
+            const desplegado = abiertoEfectivo === proyecto.id
             const ultimo = ultimoAvance(proyecto)
             return (
               <div key={proyecto.id} className="tarjeta columna" style={{ gap: 'var(--e3)' }}>
@@ -66,13 +70,16 @@ export function ProyectosPage() {
                   onClick={() => setAbierto(desplegado ? null : proyecto.id)}
                 >
                   <Icono nombre={desplegado ? 'cerrar' : 'buscar'} tamano={16} />
-                  {desplegado ? 'Ocultar la historia' : 'Ver la historia de la obra'}
+                  {desplegado
+                    ? 'Ocultar los avances'
+                    : `Ver los ${proyecto.avances.length} ${proyecto.avances.length === 1 ? 'avance' : 'avances'}`}
                 </button>
                 {desplegado && (
                   <>
                     <p className="subtitulo">{proyecto.descripcion}</p>
                     <FichaProyecto proyecto={proyecto} />
                     <div className="separador" />
+                    <span className="titulo-seccion">Avances ({proyecto.avances.length})</span>
                     <HistoriaProyecto proyecto={proyecto} personaDe={(id) => sel.persona(bd, id)} />
                   </>
                 )}

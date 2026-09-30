@@ -167,10 +167,14 @@ export function InicioPage() {
             <BarraAvance proyecto={proyectoEnMarcha} />
             {ultimoAvance(proyectoEnMarcha) && (
               <span className="subtitulo">
-                {ultimoAvance(proyectoEnMarcha)!.titulo} ·{' '}
+                <strong>Último avance:</strong> {ultimoAvance(proyectoEnMarcha)!.titulo} ·{' '}
                 {formatearFechaCorta(ultimoAvance(proyectoEnMarcha)!.fecha)}
               </span>
             )}
+            <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+              {proyectoEnMarcha.avances.length}{' '}
+              {proyectoEnMarcha.avances.length === 1 ? 'avance registrado' : 'avances registrados'} · toca para ver la historia
+            </span>
           </Link>
         </div>
       )}

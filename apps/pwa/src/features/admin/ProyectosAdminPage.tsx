@@ -90,7 +90,9 @@ export function ProyectosAdminPage() {
                     : 'Sin avances todavía.'}
                 </span>
                 <button className="boton boton--pequeno" onClick={() => setViendo(proyecto.id)}>
-                  Abrir el tablero
+                  {proyecto.avances.length === 0
+                    ? 'Abrir el tablero'
+                    : `Ver los ${proyecto.avances.length} ${proyecto.avances.length === 1 ? 'avance' : 'avances'} y registrar`}
                 </button>
               </div>
             )
@@ -280,6 +282,16 @@ function DetalleProyecto({
         <FichaProyecto proyecto={proyecto} />
       </div>
 
+      {/* Los avances van antes del formulario: el tablero es para ver en qué
+          va la obra; registrar es lo que se hace después de mirar. */}
+      <div className="separador" />
+      <span className="titulo-seccion">
+        Avances ({proyecto.avances.length})
+      </span>
+      <div style={{ marginTop: 'var(--e3)', marginBottom: 'var(--e3)' }}>
+        <HistoriaProyecto proyecto={proyecto} personaDe={personaDe} />
+      </div>
+
       <div className="separador" />
 
       {terminado ? (
@@ -353,11 +365,6 @@ function DetalleProyecto({
         </div>
       )}
 
-      <div className="separador" />
-      <span className="titulo-seccion">Historia de la obra</span>
-      <div style={{ marginTop: 'var(--e3)' }}>
-        <HistoriaProyecto proyecto={proyecto} personaDe={personaDe} />
-      </div>
     </Modal>
   )
 }
