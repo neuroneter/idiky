@@ -1127,5 +1127,10 @@ reglas que existen (`informeDeUsoDeZonas` en `dominio/reglas.ts`).
 - Ocupación: con los días y los cierres de cada zona (RN-108, RN-114).
 - Cobrado y recaudado: de las cuotas de uso (RN-75, RN-119).
 
+**Dónde se usa (Mary, 2026-10-01):** el informe es para **descargar en la versión web**, desde la
+consola del administrador; la app del residente no lo tiene. Se ve también en el celular, para
+mirar una cifra o reenviar el archivo, pero su lugar es el escritorio. **En BLOKY** debe vivir en la
+consola del administrador (T-45).
+
 **Estado en el demo:** ✅ — `src/features/admin/InformeZonasPage.tsx`, ruta
 `/admin/reservas/informe`; la descarga en `src/utilidades/descarga.ts`.

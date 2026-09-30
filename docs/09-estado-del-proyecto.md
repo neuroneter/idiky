@@ -128,6 +128,11 @@ lo necesita para abrirlo con columnas y tildes. Se hace sin dependencias
 con un enlace: allí la descarga pasa por su capacidad `downloads`, que primero pide
 confirmación. Por eso el artefacto se publica declarándola.
 
+**Dónde se usa.** Mary: *«el reporte es para descargar en la versión web»*. Así quedó: vive en la
+consola web del administrador y baja directo en el navegador; la confirmación aparece solo en el
+visor de claude.ai. **Pendiente para BLOKY (T-45):** llevar allá las reservas y las zonas comunes,
+con este informe en la consola del administrador.
+
 **Sin regla nueva.** El informe suma lo que ya registran RN-107, RN-108, RN-112, RN-114, RN-115 y
 RN-119 (`informeDeUsoDeZonas`). No se gastó ningún número del rango de reglas, que ya casi se
 agota.
