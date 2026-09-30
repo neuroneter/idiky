@@ -60,7 +60,9 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      mañana para ver portería (RN-116) y el aviso al cancelar (RN-112).
 // 29 — la plata de la reserva: valores copiados al reservar (RN-118) y dos
 //      reservas pasadas por cerrar, una con deposito recibido (RN-119 a RN-121).
-export const VERSION_ESQUEMA = 29
+// 30 — una solicitud sin respuesta ya pasada, que vence al abrir (RN-122); otra
+//      que vence mañana, para la alerta del tablero; invitados en la de hoy (RN-126).
+export const VERSION_ESQUEMA = 30
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -587,6 +589,7 @@ function construirReservas(): Reserva[] {
       creadaEn: `${sumarDias(hoy, -3)}T10:00:00.000Z`,
       personas: 10,
       valorUso: 30000,
+      invitados: ['Ana María Gómez', 'Carlos Ruiz', 'Lucía Pardo'],
     },
     // RN-111 — Dos unidades comparten el gimnasio mañana a las 7: quedan 3 cupos.
     {
@@ -656,6 +659,35 @@ function construirReservas(): Reserva[] {
       estado: 'confirmada',
       creadaEn: `${sumarDias(hoy, -9)}T12:00:00.000Z`,
       personas: 8,
+      valorUso: 30000,
+    },
+    // RN-122 — Nadie la contestó y su turno ya pasó: vence al abrir el demo.
+    {
+      id: 'rsv-11',
+      zonaId: 'zon-salon',
+      unidadId: 'uni-torre2-501',
+      personaId: 'per-8',
+      fecha: sumarDias(hoy, -1),
+      horaInicio: '09:00',
+      horaFin: '13:00',
+      estado: 'solicitada',
+      creadaEn: `${sumarDias(hoy, -6)}T14:00:00.000Z`,
+      personas: 15,
+      valorUso: 80000,
+      deposito: 200000,
+    },
+    // RN-122 — Por aprobar y a menos de 48 horas: sale en la alerta del tablero.
+    {
+      id: 'rsv-12',
+      zonaId: 'zon-bbq',
+      unidadId: 'uni-torre1-402',
+      personaId: 'per-1',
+      fecha: sumarDias(hoy, 1),
+      horaInicio: '11:00',
+      horaFin: '15:00',
+      estado: 'solicitada',
+      creadaEn: `${sumarDias(hoy, -1)}T09:00:00.000Z`,
+      personas: 6,
       valorUso: 30000,
     },
   ]

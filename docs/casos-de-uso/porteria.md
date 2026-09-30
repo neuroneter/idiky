@@ -10,7 +10,8 @@ administrador.
 >
 > **Desde el 2026-10-01 el turno muestra las reservas de hoy** (RN-116): zona, horario, unidad,
 > quién reservó y cuántas personas van, para dejar entrar a los invitados sin llamar a nadie.
-> Sin costos ni multas (RN-52).
+> Sin costos ni multas (RN-52). Si quien reservó escribió la lista de invitados, portería la
+> ve con sus nombres (RN-126).
 
 **Por qué tiene rol propio y no la cuenta del administrador**
 

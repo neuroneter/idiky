@@ -21,8 +21,8 @@ nueva o una sesión de IA distinta.
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 74 documentados: 42 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 20 ⬜ pendientes, 2 ⛔ retirados |
-| **Reglas de negocio** | 121 del demo (RN-01…RN-121; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-121, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
+| **Casos de uso** | 74 documentados: 43 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 19 ⬜ pendientes, 2 ⛔ retirados |
+| **Reglas de negocio** | 126 del demo (RN-01…RN-126; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-126, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -109,6 +109,47 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-01 · Mary + IA (Claude) · Reservas: solicitudes que vencen, avisos, condiciones aceptadas e invitados (RN-122 a RN-126)
+
+Mary preguntó *«¿nos falta algo más de reservas?»* y aprobó los cinco puntos: *«implementar del 1
+al 5»*.
+
+1. **La solicitud sin respuesta vence en su turno (RN-122, CU-S-03 ✅).** El turno se libera y al
+   residente se le avisa, sin cobro. El tablero del administrador alerta las que vencen en menos
+   de 48 horas.
+2. **El residente recibe la respuesta (RN-123):** un mensaje al aprobar, o al rechazar con el
+   motivo.
+3. **Condiciones aceptadas (RN-124).** Si la zona cobra, pide depósito o tiene multa, el
+   residente marca que las acepta antes de reservar. Se guarda el texto tal como lo leyó, con la
+   hora, y cada condición con su respaldo. Los hechos de un proceso por la multa lo citan.
+4. **Recordatorio el día antes (RN-125),** una sola vez, con el depósito si falta.
+5. **Lista de invitados (RN-126).** El residente la escribe al reservar o después, hasta que
+   empieza el turno; caben las personas declaradas menos él. Portería la ve en las reservas de
+   hoy.
+
+**Cómo corre lo automático.** El demo no tiene servidor. El vencimiento y el recordatorio los
+aplica `aplicarProcesosDelSistema` (en `datos/repositorio.ts`) cada vez que se abre la app o se
+reinicia el demo. En la fase 2 lo hará un servidor a su hora.
+
+**Semilla 30:**
+- Una solicitud del salón ya pasada, que vence al abrir.
+- Una de la terraza para mañana, que sale en la alerta del tablero.
+- La reserva de hoy con tres invitados.
+
+**Verificado.** 13 comprobaciones con Playwright:
+- El vencimiento y su mensaje.
+- El recordatorio, una sola vez.
+- La alerta del tablero.
+- Los mensajes al aprobar y al rechazar.
+- Las condiciones, que sin aceptarlas no dejan reservar y quedan guardadas.
+- Que no caben más invitados que los declarados, que la lista se edita y que portería la ve.
+
+Las 91 de reservas anteriores siguen en verde. Además se corrigió la redacción de la aceptación,
+que atribuía la multa al artículo del reglamento del cobro: ahora cada condición cita su propio
+respaldo. `npm run build` y la ortografía, en verde.
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · La plata de la reserva: cobro por uso, depósito y multa (RN-118 a RN-121)
 

@@ -154,9 +154,15 @@ cuenta, plegado bajo «¿Por qué se cobra?».
 - **Resultado esperado:** La reserva queda `confirmada` o `rechazada` y el residente se entera.
 
 **Flujo principal**
-1. El sistema lista las reservas pendientes, las más próximas primero.
+1. El sistema lista las reservas pendientes, las más próximas primero. El tablero avisa las que
+   vencen en menos de 48 horas (RN-122).
 2. El administrador aprueba o rechaza; al rechazar indica el motivo.
-3. El sistema actualiza el estado y libera la franja si fue rechazada.
+3. El sistema actualiza el estado, libera la franja si fue rechazada y le deja un mensaje al
+   residente, con el motivo si es un rechazo (RN-123).
+4. Si nadie contesta y llega la hora del turno, la solicitud vence sola (RN-122, CU-S-03).
+
+La tabla muestra también si el residente aceptó las condiciones (RN-124) y cuántos invitados
+tiene en lista (RN-126).
 
 **Flujo alternativo — cancelar una reserva confirmada (RN-115)**
 - A1. En una reserva confirmada de hoy en adelante, «Cancelar» pide el motivo, que es
@@ -181,7 +187,7 @@ marca las que el residente canceló fuera de plazo (RN-112).
 
 **Reglas de negocio**
 - RN-09 (una sola reserva confirmada por franja en la zona exclusiva; en la compartida, hasta
-  el aforo, RN-111), RN-08 (mora bloquea), RN-112, RN-113, RN-115, RN-118 a RN-121.
+  el aforo, RN-111), RN-08 (mora bloquea), RN-112, RN-113, RN-115, RN-118 a RN-124, RN-126.
 
 **Estado en el demo:** ✅ — `src/features/admin/ReservasAdminPage.tsx`.
 

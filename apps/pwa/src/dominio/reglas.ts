@@ -2781,7 +2781,177 @@ export function puedeAbrirProcesoPorReserva(reserva: Reserva, zona: ZonaComun | 
 
 export function hechosDeLaReserva(reserva: Reserva, zona: ZonaComun): string {
   const cuando = `el ${fechaCorta(reserva.fecha)} de ${reserva.horaInicio} a ${reserva.horaFin}`
-  return reserva.canceladaFueraDePlazo
+  // RN-124 — Si aceptó las condiciones al reservar, los hechos lo dicen.
+  const acepto = reserva.condicionesAceptadas
+    ? ` Al reservar aceptó las condiciones de la zona, incluida la multa, el ${fechaCorta(reserva.condicionesAceptadas.aceptadasEn.slice(0, 10))}.`
+    : ''
+  return (reserva.canceladaFueraDePlazo
     ? `La unidad canceló su reserva de ${zona.nombre} ${cuando} fuera del plazo de ${zona.multaNoCancelar?.horasParaCancelar ?? 0} horas que fija la zona.`
-    : `La unidad reservó ${zona.nombre} ${cuando}, no se presentó y no canceló la reserva.`
+    : `La unidad reservó ${zona.nombre} ${cuando}, no se presentó y no canceló la reserva.`) + acepto
+}
+
+// ---------------------------------------------------------------------------
+// Solicitudes, avisos, condiciones e invitados — RN-122 a RN-126
+// ---------------------------------------------------------------------------
+
+function inicioDeReserva(reserva: Reserva): number {
+  return new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime()
+}
+
+/** `80000` → `$80.000`, dentro de un texto que se guarda o se manda. */
+function pesos(valor: number): string {
+  return `$${valor.toLocaleString('es-CO')}`
+}
+
+/**
+ * RN-122 — **La solicitud que nadie contesta vence en su turno** (CU-S-03).
+ *
+ * «Implementar del 1 al 5» (Mary, 2026-10-01). Una zona con aprobación deja
+ * la reserva en `solicitada`, y así el turno queda apartado. Si la
+ * administración no la aprueba ni la rechaza, al llegar la hora del turno la
+ * solicitud **vence**: queda `vencida`, el turno se libera y al residente le
+ * llega un mensaje. Antes de eso, el tablero del administrador avisa las
+ * solicitudes a las que les faltan menos de 48 horas.
+ *
+ * El demo no tiene un servidor que corra a la hora exacta: el vencimiento se
+ * aplica cada vez que se abre la app, que para una reserva ya pasada da lo
+ * mismo.
+ */
+export const HORAS_ALERTA_SOLICITUD = 48
+
+export function solicitudVencida(reserva: Reserva, ahora: Date = new Date()): boolean {
+  return reserva.estado === 'solicitada' && inicioDeReserva(reserva) <= ahora.getTime()
+}
+
+/** Las solicitudes a las que les faltan menos de 48 horas, la más urgente primero. */
+export function solicitudesPorVencer(
+  reservas: Reserva[],
+  zonasDeLaCopropiedad: ZonaComun[],
+  ahora: Date = new Date(),
+): Array<{ reserva: Reserva; horas: number }> {
+  const zonas = new Set(zonasDeLaCopropiedad.map((z) => z.id))
+  return reservas
+    .filter((r) => zonas.has(r.zonaId) && r.estado === 'solicitada')
+    .map((reserva) => ({ reserva, horas: (inicioDeReserva(reserva) - ahora.getTime()) / 3_600_000 }))
+    .filter((x) => x.horas > 0 && x.horas <= HORAS_ALERTA_SOLICITUD)
+    .map((x) => ({ reserva: x.reserva, horas: Math.floor(x.horas) }))
+    .sort((a, b) => a.horas - b.horas)
+}
+
+export function textoReservaVencida(reserva: Reserva, zona: ZonaComun, copropiedad: string): string {
+  return (
+    `${copropiedad}: tu solicitud de ${zona.nombre} del ${fechaCorta(reserva.fecha)} de ` +
+    `${reserva.horaInicio} a ${reserva.horaFin} venció sin respuesta de la administración. ` +
+    'No tiene ningún cobro. Puedes volver a reservar en Idiky.'
+  )
+}
+
+/**
+ * RN-123 — **Al residente le llega la respuesta a su solicitud.**
+ *
+ * Aprobada o rechazada, con el motivo si se rechazó: es lo que promete CU-A-06
+ * («el residente se entera»), por el mismo canal de los demás avisos (RN-64).
+ */
+export function textoReservaDecidida(
+  reserva: Reserva,
+  zona: ZonaComun,
+  decision: 'confirmada' | 'rechazada',
+  motivo: string | undefined,
+  copropiedad: string,
+): string {
+  const cuando = `del ${fechaCorta(reserva.fecha)} de ${reserva.horaInicio} a ${reserva.horaFin}`
+  if (decision === 'confirmada') {
+    const deposito = reserva.deposito ? ` Recuerda entregar el depósito de ${pesos(reserva.deposito)} antes del turno.` : ''
+    return `${copropiedad}: la administración aprobó tu reserva de ${zona.nombre} ${cuando}.${deposito}`
+  }
+  const porque = (motivo ?? '').trim().replace(/[.\s]+$/, '')
+  return `${copropiedad}: la administración rechazó tu reserva de ${zona.nombre} ${cuando}.${porque ? ` Motivo: ${porque}.` : ''}`
+}
+
+/**
+ * RN-124 — **Quien reserva acepta las condiciones, y queda constancia.**
+ *
+ * Si la zona cobra, pide depósito o tiene multa por no cancelar, antes de
+ * confirmar el residente marca que las acepta. Se guarda **el texto tal como
+ * lo leyó** y la hora: si mañana la zona cambia, la constancia sigue diciendo
+ * lo que aceptó. Es lo que respalda el cobro (RN-119), la retención (RN-120) y
+ * la multa (RN-121) si después se reclaman. Una zona sin nada de eso no pide
+ * aceptar nada.
+ */
+export function condicionesDeLaZona(zona: ZonaComun, conceptosSancion: ConceptoSancion[]): string | null {
+  const partes: string[] = []
+  // Cada cosa con su respaldo: el cobro y el depósito, el de la zona; la multa, el de su concepto.
+  const cobros: string[] = []
+  if (zona.valorUso) cobros.push(`valor por reserva de ${pesos(zona.valorUso)}`)
+  if (zona.deposito) cobros.push(`depósito de garantía de ${pesos(zona.deposito)}, que se devuelve si la zona queda como se entregó`)
+  if (cobros.length) {
+    const respaldo = zona.respaldoCobro ? ` (${textoRespaldo(zona.respaldoCobro)})` : ''
+    partes.push(`${cobros.join('; ')}${respaldo}`)
+  }
+  const multa = zona.multaNoCancelar
+  const concepto = multa ? conceptosSancion.find((c) => c.id === multa.conceptoId) : undefined
+  if (multa && concepto) {
+    partes.push(
+      `multa de ${pesos(concepto.valor)} («${concepto.nombre}», ${textoRespaldo(concepto)}) si no cancelo con al menos ${multa.horasParaCancelar} horas de anticipación o no me presento`,
+    )
+  }
+  if (partes.length === 0) return null
+  return `Acepto las condiciones de ${zona.nombre}: ${partes.join('; ')}.`
+}
+
+/**
+ * RN-125 — **El día antes, un recordatorio.**
+ *
+ * A la reserva confirmada de hoy o de mañana que todavía no empieza le llega
+ * un mensaje, una sola vez: qué zona, a qué hora y, si falta, que entregue el
+ * depósito. Evita el «se me olvidó» que termina en «no se presentó» (RN-121).
+ * Como el vencimiento (RN-122), se aplica al abrir la app.
+ */
+export function debeRecordarse(reserva: Reserva, ahora: Date = new Date()): boolean {
+  if (reserva.estado !== 'confirmada' || reserva.cierre || reserva.recordatorioEnviadoEn) return false
+  const faltan = inicioDeReserva(reserva) - ahora.getTime()
+  const manana = new Date(ahora)
+  manana.setDate(manana.getDate() + 1)
+  const fechaManana = `${manana.getFullYear()}-${String(manana.getMonth() + 1).padStart(2, '0')}-${String(manana.getDate()).padStart(2, '0')}`
+  return faltan > 0 && reserva.fecha <= fechaManana
+}
+
+export function textoRecordatorioReserva(reserva: Reserva, zona: ZonaComun, copropiedad: string, hoy: FechaISO = hoyISO()): string {
+  const cuando = reserva.fecha === hoy ? 'hoy' : 'mañana'
+  const deposito =
+    reserva.deposito && !reserva.depositoRecibidoEn ? ` Recuerda entregar el depósito de ${pesos(reserva.deposito)} a la administración.` : ''
+  const invitados = reserva.invitados?.length ? ` Portería tiene la lista de tus ${reserva.invitados.length} invitados.` : ''
+  return `${copropiedad}: ${cuando} tienes ${zona.nombre} de ${reserva.horaInicio} a ${reserva.horaFin}.${deposito}${invitados} Si no vas a ir, cancela en Idiky.`
+}
+
+/**
+ * RN-126 — **La lista de invitados la ve portería.**
+ *
+ * Quien reserva puede escribir los nombres de sus invitados, uno por renglón,
+ * al reservar o después, hasta que empiece el turno. Caben tantos como
+ * personas declaró menos él mismo (RN-113). Portería los ve en las reservas de
+ * hoy (RN-116), para dejarlos entrar sin llamar al apartamento. Son nombres,
+ * no documentos: portería pide el documento en la entrada como a cualquier
+ * visitante.
+ */
+export const MAXIMO_LARGO_INVITADO = 80
+
+export function limpiarInvitados(texto: string): string[] {
+  return texto
+    .split('\n')
+    .map((linea) => linea.replace(/^[-•*\d.)\s]+/, '').trim())
+    .filter((linea) => linea.length > 0)
+}
+
+export function motivoInvitadosInvalido(invitados: string[], personas: number): string | null {
+  const maximo = Math.max(0, personas - 1)
+  if (invitados.length > maximo) {
+    return `Declaraste ${personas} ${personas === 1 ? 'persona' : 'personas'}: caben ${maximo} ${maximo === 1 ? 'invitado' : 'invitados'} además de ti.`
+  }
+  if (invitados.some((n) => n.length > MAXIMO_LARGO_INVITADO)) return 'Cada nombre cabe en 80 caracteres.'
+  return null
+}
+
+export function puedeEditarInvitados(reserva: Reserva, ahora: Date = new Date()): boolean {
+  return (reserva.estado === 'solicitada' || reserva.estado === 'confirmada') && inicioDeReserva(reserva) > ahora.getTime()
 }

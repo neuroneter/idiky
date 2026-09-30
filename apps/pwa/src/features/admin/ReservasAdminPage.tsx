@@ -356,6 +356,9 @@ function PlataDeLaReserva({ reserva }: { reserva: Reserva }) {
   }
   const sancion = reserva.sancionId ? bd.sanciones.find((s) => s.id === reserva.sancionId) : undefined
   if (sancion) lineas.push(`Proceso ${sancion.radicado}`)
+  // RN-124, RN-126 — La constancia de las condiciones y la lista para portería.
+  if (reserva.condicionesAceptadas) lineas.push('Aceptó las condiciones')
+  if (reserva.invitados?.length) lineas.push(`${reserva.invitados.length} invitados en lista`)
   if (lineas.length === 0) return null
   return (
     <div className="tenue" style={{ fontSize: 'var(--texto-xs)', marginTop: 'var(--e1)' }}>

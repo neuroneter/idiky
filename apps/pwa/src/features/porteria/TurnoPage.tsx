@@ -16,7 +16,8 @@
  *    nombre encabeza la pantalla: no es un saludo, es de quién es la
  *    responsabilidad de lo que se registre en la próxima hora.
  *  - **Las reservas de hoy** (RN-116): quién tiene qué zona, a qué hora y con
- *    cuántas personas, para dejar entrar a los invitados sin llamar a nadie.
+ *    cuántas personas, para dejar entrar a los invitados sin llamar a nadie;
+ *    con la lista de sus nombres si quien reservó la escribió (RN-126).
  */
 
 import { Link } from 'react-router-dom'
@@ -136,6 +137,23 @@ export function TurnoPage() {
                       {reserva.personas ?? 1} {(reserva.personas ?? 1) === 1 ? 'persona' : 'personas'}
                     </span>
                   </div>
+                  {/* RN-126 — Los invitados que escribió quien reservó. Se pide el documento en la entrada. */}
+                  {reserva.invitados?.length ? (
+                    <details style={{ marginTop: 'var(--e2)' }}>
+                      <summary className="subtitulo" style={{ cursor: 'pointer' }}>
+                        Invitados ({reserva.invitados.length})
+                      </summary>
+                      <ul className="especificaciones" style={{ marginTop: 'var(--e1)' }}>
+                        {reserva.invitados.map((nombre) => (
+                          <li key={nombre}>{nombre}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : (
+                    <span className="tenue" style={{ fontSize: 'var(--texto-xs)', display: 'block', marginTop: 'var(--e1)' }}>
+                      Sin lista de invitados.
+                    </span>
+                  )}
                 </div>
               )
             })}

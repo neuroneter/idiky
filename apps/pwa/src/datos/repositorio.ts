@@ -98,6 +98,14 @@ import {
   puedeCancelarLaAdministracion,
   textoCierreZona,
   valoresDeLaReserva,
+  solicitudVencida,
+  textoReservaVencida,
+  textoReservaDecidida,
+  condicionesDeLaZona,
+  debeRecordarse,
+  textoRecordatorioReserva,
+  motivoInvitadosInvalido,
+  puedeEditarInvitados,
   justificacionCobroUso,
   motivoCierreReservaInvalido,
   puedeAbrirProcesoPorReserva,
@@ -177,13 +185,59 @@ function nuevoId(prefijo: string): string {
 
 export async function cargar(): Promise<BaseDatos> {
   await esperar()
-  return leer()
+  const bd = leer()
+  if (aplicarProcesosDelSistema(bd)) guardar(bd)
+  return bd
+}
+
+/**
+ * Los procesos que en la fase 2 correrá un servidor a su hora, y que el demo
+ * aplica al abrir la app: vencer las solicitudes que nadie contestó (RN-122,
+ * CU-S-03) y recordar las reservas de hoy y de mañana (RN-125). Devuelve si
+ * cambió algo, para guardar solo entonces.
+ */
+function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boolean {
+  let cambio = false
+  const momento = ahora.toISOString()
+  for (const reserva of bd.reservas) {
+    const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+    if (!zona) continue
+    const copropiedad = bd.copropiedades.find((c) => c.id === zona.copropiedadId)?.nombre ?? 'La copropiedad'
+    let texto: string | null = null
+    let motivo: MotivoMensaje | null = null
+    if (solicitudVencida(reserva, ahora)) {
+      reserva.estado = 'vencida'
+      reserva.vencidaEn = momento
+      texto = textoReservaVencida(reserva, zona, copropiedad)
+      motivo = 'reserva_vencida'
+    } else if (debeRecordarse(reserva, ahora)) {
+      reserva.recordatorioEnviadoEn = momento
+      texto = textoRecordatorioReserva(reserva, zona, copropiedad)
+      motivo = 'recordatorio_reserva'
+    }
+    if (!texto || !motivo) continue
+    cambio = true
+    const persona = bd.personas.find((p) => p.id === reserva.personaId)
+    const mensaje = redactar({
+      id: nuevoId('msj'),
+      copropiedadId: zona.copropiedadId,
+      destino: persona?.telefono ?? '',
+      texto,
+      motivo,
+      reservaId: reserva.id,
+      ahora: momento,
+    })
+    if (mensaje) bd.mensajes.unshift(mensaje)
+  }
+  return cambio
 }
 
 /** Devuelve el demo a su estado inicial. */
 export async function reiniciar(): Promise<BaseDatos> {
   await esperar()
-  return sembrar()
+  const bd = sembrar()
+  if (aplicarProcesosDelSistema(bd)) guardar(bd)
+  return bd
 }
 
 // ---------------------------------------------------------------------------
@@ -499,6 +553,10 @@ export async function crearReserva(
     horaFin: string
     /** RN-111 — En una zona compartida, cuantas personas van. */
     personas?: number
+    /** RN-124 — Marcó que acepta las condiciones de la zona. */
+    aceptaCondiciones?: boolean
+    /** RN-126 — Los nombres de sus invitados. */
+    invitados?: string[]
   },
 ): Promise<Resultado<Reserva>> {
   await esperar()
@@ -520,6 +578,14 @@ export async function crearReserva(
     parametros.personas ?? 1,
   )
   if (ocupada) throw new ErrorDeNegocio(ocupada)
+  // RN-124 — Si la zona tiene condiciones, se aceptan antes de reservar.
+  const condiciones = condicionesDeLaZona(zona, bd.conceptosSancion)
+  if (condiciones && !parametros.aceptaCondiciones) {
+    throw new ErrorDeNegocio('Para reservar esta zona hay que aceptar sus condiciones.')
+  }
+  const invitados = parametros.invitados ?? []
+  const motivoInvitados = motivoInvitadosInvalido(invitados, parametros.personas ?? 1)
+  if (motivoInvitados) throw new ErrorDeNegocio(motivoInvitados)
 
   const reserva: Reserva = {
     id: nuevoId('rsv'),
@@ -535,6 +601,8 @@ export async function crearReserva(
     personas: parametros.personas ?? 1,
     // RN-118 — Lo que cuesta se fija al reservar.
     ...valoresDeLaReserva(zona),
+    ...(condiciones ? { condicionesAceptadas: { aceptadasEn: ahoraISO(), texto: condiciones } } : {}),
+    ...(invitados.length ? { invitados } : {}),
   }
 
   bd.reservas.push(reserva)
@@ -573,6 +641,38 @@ export async function decidirReserva(
   }
   reserva.estado = decision
   if (decision === 'rechazada') reserva.motivoRechazo = motivoRechazo || 'Sin motivo registrado'
+  // RN-123 — Al residente le llega la respuesta.
+  const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  if (zona) {
+    const copropiedad = bd.copropiedades.find((c) => c.id === zona.copropiedadId)?.nombre ?? 'La copropiedad'
+    const persona = bd.personas.find((p) => p.id === reserva.personaId)
+    const mensaje = redactar({
+      id: nuevoId('msj'),
+      copropiedadId: zona.copropiedadId,
+      destino: persona?.telefono ?? '',
+      texto: textoReservaDecidida(reserva, zona, decision, reserva.motivoRechazo, copropiedad),
+      motivo: 'reserva_decidida',
+      reservaId: reserva.id,
+      ahora: ahoraISO(),
+    })
+    if (mensaje) bd.mensajes.unshift(mensaje)
+  }
+  return persistir(bd, reserva)
+}
+
+/** RN-126 — Quien reservó cambia la lista de invitados, hasta que empiece el turno. */
+export async function editarInvitados(
+  bdActual: BaseDatos,
+  parametros: { reservaId: string; invitados: string[] },
+): Promise<Resultado<Reserva>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const reserva = bd.reservas.find((r) => r.id === parametros.reservaId)
+  if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  if (!puedeEditarInvitados(reserva)) throw new ErrorDeNegocio('La lista se cambia hasta que empiece el turno.')
+  const motivo = motivoInvitadosInvalido(parametros.invitados, reserva.personas ?? 1)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  reserva.invitados = parametros.invitados.length ? parametros.invitados : undefined
   return persistir(bd, reserva)
 }
 

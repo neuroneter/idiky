@@ -206,6 +206,12 @@ La integración con pasarela está en el roadmap (fase 4).
   y, después del turno, cómo se cerró la reserva: el cobro por uso que se cargó a su estado de
   cuenta, el depósito que le devuelven o lo que se retuvo con su motivo, y el proceso por la
   multa si se abrió, para presentar descargos (RN-118 a RN-121).
+- A11. Si la zona cobra, pide depósito o tiene multa, antes de confirmar marca que acepta las
+  condiciones; queda la constancia con el texto y la hora (RN-124).
+- A12. Si van más personas, escribe los nombres de sus invitados para portería, y puede
+  cambiarlos hasta que empiece el turno (RN-126).
+- A13. Le llegan mensajes: la respuesta a su solicitud (RN-123), el vencimiento si nadie la
+  contestó (RN-122) y el recordatorio el día antes (RN-125).
 
 **Reglas de negocio**
 - RN-08: una unidad en mora no puede reservar zonas comunes.

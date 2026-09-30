@@ -256,7 +256,7 @@ en el extracto de ese propietario y en su saldo.
 
 ### Reserva
 `id`, `zonaId`, `unidadId`, `personaId`, `fecha` (`AAAA-MM-DD`), `horaInicio`, `horaFin`,
-`estado` (`'solicitada' \| 'confirmada' \| 'rechazada' \| 'cancelada'`), `motivoRechazo?`, `creadaEn`,
+`estado` (`'solicitada' \| 'confirmada' \| 'rechazada' \| 'cancelada' \| 'vencida'`: la `vencida` nadie la contestó antes de su turno, RN-122), `motivoRechazo?`, `creadaEn`,
 `motivoCancelacion?` y `canceladaEn?` (cuando la cancela la administración al cerrar o desactivar la
 zona, o una sola reserva: el motivo que se le mandó a quien reservó, RN-107, RN-108 y RN-115),
 `personas?` (cuántas van, contando a quien reserva, RN-113) y `canceladaFueraDePlazo?` (el
@@ -264,7 +264,10 @@ residente canceló dentro del plazo con multa después del aviso, RN-112). Y la 
 `deposito?`, copiados de la zona al reservar (RN-118); `depositoRecibidoEn?` (RN-120);
 `cierre?` = `{resultado: 'usada' | 'no_se_presento', registradoEn, registradoPor, estadoZona?,
 observaciones?, foto?, cuotaUsoId?, depositoDevuelto?, depositoRetenido?, motivoRetencion?}`
-(RN-119, RN-120); `sancionId?`, el proceso por la multa (RN-121).
+(RN-119, RN-120); `sancionId?`, el proceso por la multa (RN-121). Y los avisos: `vencidaEn?`
+(RN-122), `recordatorioEnviadoEn?` (RN-125, una sola vez), `condicionesAceptadas?` =
+`{aceptadasEn, texto}`, el texto tal como lo aceptó (RN-124), e `invitados?`, los nombres para
+portería (RN-126).
 
 ### Pqrs y MensajePqrs
 `radicado` (RN-12), `tipo` (`'peticion' \| 'queja' \| 'reclamo' \| 'sugerencia'`),
@@ -294,7 +297,8 @@ avance, RN-101).
 | *estado* | derivado | `planeado` sin avances · `en_curso` · `terminado` al 100 % (`estadoProyecto`) |
 
 El `Mensaje` (RN-64) gana el motivo `avance_proyecto` y `proyectoId?`; y, con RN-107, el motivo
-`reserva_cancelada` y `reservaId?`; con RN-117, el motivo `cierre_zona` y `zonaId?`.
+`reserva_cancelada` y `reservaId?`; con RN-117, el motivo `cierre_zona` y `zonaId?`; con RN-122,
+RN-123 y RN-125, `reserva_vencida`, `reserva_decidida` y `recordatorio_reserva`.
 
 ### Correspondencia
 `unidadId`, `tipo` (`'paquete' \| 'carta' \| 'domicilio'`), `remitente`, `observaciones`,
@@ -741,6 +745,11 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-119 | **El cobro por uso se genera al cerrar la reserva, no al confirmarla** (Mary, 2026-10-01: *«sigamos con el 8»*). Después del turno, la administración cierra la reserva: se usó, o no se presentó. En los dos casos se genera el cobro en el estado de cuenta de la unidad, porque el turno quedó apartado y nadie más lo pudo usar. Es una cuota `uso_zona`, con su justificación y el documento que la autoriza (RN-45, RN-47), que vence a los diez días. **Por qué al cerrar:** una reserva cancelada nunca deja un cobro, y así no hay cuotas que anular, lo que habría cambiado las reglas de cartera que se comparten con la contable (RN-75 a RN-79). Se cierra una sola vez, y solo una reserva confirmada cuyo turno ya empezó; la consola las reúne en el filtro «Por cerrar». | `dominio/reglas.ts` (`puedeCerrarReserva`, `justificacionCobroUso`) + `datos/repositorio.ts` (`cerrarReserva`) + `features/admin/CerrarReservaHoja.tsx` |
 | RN-120 | **El depósito se devuelve completo si la zona queda bien; si no, se retiene una parte, con motivo.** La administración registra «Recibí el depósito». Al cerrar la reserva anota cómo quedó la zona —bien, o con daños o faltantes descritos, con una foto opcional— y decide: devolverlo completo o retener una parte que no pasa del depósito. Retener exige que haya novedades y un motivo, que el residente lee en su app. Si no se presentó, la zona no se usó y el depósito se devuelve completo. | `dominio/reglas.ts` (`motivoCierreReservaInvalido`) + `datos/repositorio.ts` (`registrarDepositoRecibido`, `cerrarReserva`) |
 | RN-121 | **Si no se presentó, o canceló fuera de plazo, la administración puede abrir el proceso por la multa.** Se usa la multa del catálogo que la zona tiene configurada (RN-110), con un solo proceso por reserva y los hechos ya redactados: qué zona, qué turno y qué pasó. No es automático: la administración decide, al cerrar la reserva o con «Abrir proceso». Desde ahí es un proceso sancionatorio como cualquier otro: descargos, decisión, impugnación, y la cuota solo cuando queda firme (RN-39, RN-69). | `dominio/reglas.ts` (`puedeAbrirProcesoPorReserva`, `hechosDeLaReserva`) + `datos/repositorio.ts` (`abrirProcesoPorReserva`, que usa `imponerSancion`) |
+| RN-122 | **La solicitud que nadie contesta vence en su turno** (CU-S-03; Mary, 2026-10-01: *«implementar del 1 al 5»*). Una zona con aprobación deja la reserva en `solicitada`, con el turno apartado. Si la administración no la aprueba ni la rechaza, al llegar la hora del turno la solicitud **vence**: queda `vencida`, el turno se libera y al residente le llega un mensaje, sin ningún cobro. Antes, el tablero del administrador avisa las solicitudes a las que les faltan menos de 48 horas. El demo no tiene un servidor que corra a una hora fija: el vencimiento se aplica al abrir la app. | `dominio/reglas.ts` (`solicitudVencida`, `solicitudesPorVencer`, `textoReservaVencida`) + `datos/repositorio.ts` (`aplicarProcesosDelSistema`, en `cargar`) + `features/admin/TableroPage.tsx` |
+| RN-123 | **Al residente le llega la respuesta a su solicitud.** Si la aprueban o la rechazan, recibe un mensaje (RN-64); si es un rechazo, con el motivo, y si es una aprobación, con el recordatorio del depósito cuando aplica. Es lo que promete CU-A-06: «el residente se entera». | `dominio/reglas.ts` (`textoReservaDecidida`) + `datos/repositorio.ts` (`decidirReserva`) |
+| RN-124 | **Quien reserva acepta las condiciones, y queda constancia.** Si la zona cobra, pide depósito o tiene multa por no cancelar, antes de confirmar el residente marca que las acepta. Se guarda el texto **tal como lo leyó** y la hora: si la zona cambia después, la constancia sigue diciendo lo que aceptó. Cada condición lleva su respaldo: el cobro y el depósito, el documento de la zona; la multa, el de su concepto del catálogo. Sin aceptarlas no se reserva; una zona sin nada de eso no pide aceptar nada. Los hechos del proceso por la multa (RN-121) dicen que las aceptó. | `dominio/reglas.ts` (`condicionesDeLaZona`) + `datos/repositorio.ts` (`crearReserva`) |
+| RN-125 | **El día antes, un recordatorio.** A la reserva confirmada de hoy o de mañana que todavía no empieza le llega un mensaje, una sola vez: qué zona, a qué hora, que entregue el depósito si falta, y que cancele si no va a ir. Evita el «se me olvidó» que termina en «no se presentó» (RN-121). Como RN-122, se aplica al abrir la app. | `dominio/reglas.ts` (`debeRecordarse`, `textoRecordatorioReserva`) + `datos/repositorio.ts` (`aplicarProcesosDelSistema`) |
+| RN-126 | **La lista de invitados la ve portería.** Quien reserva escribe los nombres de sus invitados, uno por renglón, al reservar o después, hasta que empiece el turno. Caben tantos como personas declaró, menos él mismo (RN-113). Portería los ve en las reservas de hoy (RN-116). Son nombres, no documentos: en la entrada se pide el documento como a cualquier visitante. | `dominio/reglas.ts` (`limpiarInvitados`, `motivoInvitadosInvalido`, `puedeEditarInvitados`) + `datos/repositorio.ts` (`crearReserva`, `editarInvitados`) + `features/porteria/TurnoPage.tsx` |
 | RN-31 | El poder vale para **una sola asamblea** y vence al cerrarse. Está en el modelo, no en una comprobación: `Poder.asambleaId` lo ata a una, y `registrarPoder`/`otorgarPoder` rechazan una asamblea cerrada. Es lo mismo que hace temporal al usuario de asamblea (RN-30). | `dominio/tipos.ts` (`Poder.asambleaId`) + `repositorio.ts` |
 | RN-32 | **Quien otorgó poder no puede votar esa unidad directamente.** Serían dos personas con derecho al mismo voto, ganando quien llegue primero — que es justo lo que un poder resuelve. Se comprueba en el repositorio; en la pantalla las opciones quedan **deshabilitadas, no escondidas** (Mary, 2026-09-10), para que quien dio poder siga viendo qué se decide en su unidad. | `repositorio.ts` (`emitirVoto`) |
 | RN-33 | La citación se emite con la antelación mínima del reglamento. **(?)** | *pendiente* |

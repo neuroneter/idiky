@@ -10,14 +10,16 @@
  * cancelar se leen antes de reservar (RN-109, RN-110). En la zona compartida
  * varias unidades toman el turno hasta el aforo (RN-111); quien reserva dice
  * cuantas personas van (RN-113); cancelar fuera de plazo se advierte antes
- * (RN-112); cada dia tiene su horario (RN-114).
+ * (RN-112); cada dia tiene su horario (RN-114). Si la zona tiene condiciones,
+ * se aceptan antes de reservar y queda constancia (RN-124); los invitados se
+ * escriben para porteria (RN-126).
  */
 
 import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
-import { cancelarReserva, crearReserva } from '../../datos/repositorio'
+import { cancelarReserva, crearReserva, editarInvitados } from '../../datos/repositorio'
 import {
   estaEnMora,
   franjaOcupada,
@@ -39,6 +41,10 @@ import {
   multaAlCancelar,
   textoHorarioSemanal,
   textoRespaldo,
+  condicionesDeLaZona,
+  limpiarInvitados,
+  motivoInvitadosInvalido,
+  puedeEditarInvitados,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha } from '../../utilidades/formato'
 import type { Reserva, ZonaComun } from '../../dominio/tipos'
@@ -58,6 +64,13 @@ export function ReservasPage() {
   const [personas, setPersonas] = useState(1)
   /** RN-112 — La reserva que va a cancelar dentro del plazo con multa. */
   const [cancelando, setCancelando] = useState<Reserva | null>(null)
+  /** RN-124 — Marcó que acepta las condiciones de la zona. */
+  const [acepta, setAcepta] = useState(false)
+  /** RN-126 — Los invitados, un nombre por renglón. */
+  const [invitadosTexto, setInvitadosTexto] = useState('')
+  /** RN-126 — La reserva cuya lista de invitados se está editando. */
+  const [editandoInvitados, setEditandoInvitados] = useState<Reserva | null>(null)
+  const [invitadosEdicion, setInvitadosEdicion] = useState('')
 
   if (!sesion) return null
 
@@ -69,6 +82,8 @@ export function ReservasPage() {
   const cuotas = sel.cuotasDeUnidad(bd, unidadId)
   const enMora = estaEnMora(cuotas)
   const cierreDelDia = zonaElegida ? cierreEnFecha(zonaElegida, fecha) : undefined
+  const condiciones = zonaElegida ? condicionesDeLaZona(zonaElegida, conceptos) : null
+  const motivoInvitados = motivoInvitadosInvalido(limpiarInvitados(invitadosTexto), personas)
   const compartida = zonaElegida ? zonaCompartida(zonaElegida) : false
   const abreEseDia = zonaElegida ? !!horarioDelDia(zonaElegida, fecha) : true
   const multaCancelando = cancelando
@@ -87,6 +102,8 @@ export function ReservasPage() {
     setZonaElegida(zona)
     setFranja(null)
     setPersonas(1)
+    setAcepta(false)
+    setInvitadosTexto('')
     setFecha(sumarDias(hoyISO(), Math.ceil(zona.anticipacionMinimaHoras / 24) || 1))
   }
 
@@ -129,6 +146,8 @@ export function ReservasPage() {
           horaInicio: seleccionada.inicio,
           horaFin: seleccionada.fin,
           personas,
+          aceptaCondiciones: acepta,
+          invitados: limpiarInvitados(invitadosTexto),
         }),
       zonaElegida.requiereAprobacion
         ? 'Solicitud enviada. La administración la revisará.'
@@ -240,6 +259,17 @@ export function ReservasPage() {
                     </div>
                     <div className="columna" style={{ alignItems: 'flex-end', gap: 'var(--e2)' }}>
                       <ChipReserva estado={reserva.estado} />
+                      {puedeEditarInvitados(reserva) && (reserva.personas ?? 1) > 1 && (
+                        <button
+                          className="boton boton--pequeno"
+                          onClick={() => {
+                            setEditandoInvitados(reserva)
+                            setInvitadosEdicion((reserva.invitados ?? []).join('\n'))
+                          }}
+                        >
+                          Invitados{reserva.invitados?.length ? ` (${reserva.invitados.length})` : ''}
+                        </button>
+                      )}
                       {sePuedeCancelar(reserva) && (
                         <button
                           className="boton boton--pequeno boton--peligro"
@@ -368,15 +398,82 @@ export function ReservasPage() {
             </span>
           </div>
 
+          {/* RN-126 — Los invitados, para que portería los deje entrar. */}
+          {personas > 1 && (
+            <div className="campo">
+              <label htmlFor="invitados-reserva">Tus invitados (opcional)</label>
+              <textarea
+                id="invitados-reserva"
+                value={invitadosTexto}
+                onChange={(e) => setInvitadosTexto(e.target.value)}
+                placeholder={'Un nombre por renglón. Por ejemplo:\nAna María Gómez\nCarlos Ruiz'}
+              />
+              <span className="ayuda-campo" style={motivoInvitados ? { color: 'var(--color-error)' } : undefined}>
+                {motivoInvitados ?? 'Portería los ve el día de la reserva. Puedes cambiarlos hasta que empiece el turno.'}
+              </span>
+            </div>
+          )}
+
+          {/* RN-124 — Si hay cobro, depósito o multa, se aceptan y queda constancia. */}
+          {condiciones && (
+            <label className="fila fila-inicio" style={{ justifyContent: 'flex-start', gap: 'var(--e2)', marginBottom: 'var(--e3)' }}>
+              <input type="checkbox" checked={acepta} onChange={(e) => setAcepta(e.target.checked)} />
+              <span className="subtitulo">{condiciones}</span>
+            </label>
+          )}
+
           <button
             className="boton boton--primario boton--bloque"
-            disabled={!franja || cargando || !!cierreDelDia || personas < 1 || personas > zonaElegida.aforo}
+            disabled={
+              !franja ||
+              cargando ||
+              !!cierreDelDia ||
+              personas < 1 ||
+              personas > zonaElegida.aforo ||
+              (!!condiciones && !acepta) ||
+              !!motivoInvitados
+            }
             onClick={confirmar}
           >
             {zonaElegida.requiereAprobacion ? 'Solicitar reserva' : 'Confirmar reserva'}
           </button>
         </Modal>
       )}
+
+      {/* RN-126 — Cambiar la lista de invitados hasta que empiece el turno. */}
+      {editandoInvitados && (() => {
+        const lista = limpiarInvitados(invitadosEdicion)
+        const invalido = motivoInvitadosInvalido(lista, editandoInvitados.personas ?? 1)
+        return (
+          <Modal
+            titulo="Tus invitados"
+            descripcion={`${sel.zona(bd, editandoInvitados.zonaId)?.nombre ?? 'Zona'} · ${formatearFecha(editandoInvitados.fecha)} · ${editandoInvitados.horaInicio} a ${editandoInvitados.horaFin}`}
+            onCerrar={() => setEditandoInvitados(null)}
+          >
+            <div className="campo">
+              <label htmlFor="invitados-edicion">Un nombre por renglón</label>
+              <textarea id="invitados-edicion" value={invitadosEdicion} onChange={(e) => setInvitadosEdicion(e.target.value)} />
+              <span className="ayuda-campo" style={invalido ? { color: 'var(--color-error)' } : undefined}>
+                {invalido ?? `${lista.length} de ${Math.max(0, (editandoInvitados.personas ?? 1) - 1)}. Portería los ve el día de la reserva.`}
+              </span>
+            </div>
+            <button
+              className="boton boton--primario boton--bloque"
+              disabled={cargando || !!invalido}
+              onClick={() =>
+                void ejecutar(
+                  (base) => editarInvitados(base, { reservaId: editandoInvitados.id, invitados: lista }),
+                  'Lista de invitados guardada.',
+                ).then((hecho) => {
+                  if (hecho) setEditandoInvitados(null)
+                })
+              }
+            >
+              Guardar
+            </button>
+          </Modal>
+        )
+      })()}
 
       {/* RN-112 — Cancelar dentro del plazo: primero se sabe, después se decide. */}
       {cancelando && multaCancelando && (

@@ -118,7 +118,7 @@ con datos reales.
 |---|---|---|---|
 | CU-S-01 | Generar cuotas ordinarias mensuales | 2 | ⬜ Pendiente (hoy es manual, CU-A-05) |
 | CU-S-02 | Marcar cuotas vencidas y calcular interés de mora | 1 | 🟡 Parcial (el vencimiento se marca; el interés no se calcula — **solo si la copropiedad lo activó**, RN-42) |
-| CU-S-03 | Liberar reservas no confirmadas | 2 | ⬜ Pendiente |
+| CU-S-03 | **Liberar reservas no confirmadas** | 2 | ✅ Demo (vence la solicitud sin respuesta al llegar su turno y avisa al residente; el tablero alerta las que vencen en menos de 48 h — RN-122) |
 | CU-S-04 | Vencer códigos de visitante | 1 | ✅ Demo (por fecha de vigencia) |
 | CU-S-05 | Alertar PQRS próximas a vencer SLA | 2 | 🟡 Parcial (se muestra el indicador de vencida) |
 | CU-S-06 | Enviar recordatorios de pago | 3 | ⬜ Pendiente |

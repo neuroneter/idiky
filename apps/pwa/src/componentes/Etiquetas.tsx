@@ -49,6 +49,7 @@ const RESERVA: Record<EstadoReserva, [string, Variante]> = {
   confirmada: ['Confirmada', 'exito'],
   rechazada: ['Rechazada', 'error'],
   cancelada: ['Cancelada', ''],
+  vencida: ['Vencida sin respuesta', ''],
 }
 
 export function ChipReserva({ estado }: { estado: EstadoReserva }) {

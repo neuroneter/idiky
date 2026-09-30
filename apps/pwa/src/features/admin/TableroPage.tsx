@@ -16,6 +16,8 @@ import {
   pqrsAbierta,
   pqrsFueraDeSla,
   proyectosSinAvanceReciente,
+  solicitudesPorVencer,
+  HORAS_ALERTA_SOLICITUD,
   DIAS_SIN_AVANCE_ALERTA,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearPeriodo } from '../../utilidades/formato'
@@ -79,6 +81,8 @@ export function TableroPage() {
     .filter((registro) => registro.estado === 'en_porteria')
 
   const proyectosCallados = proyectosSinAvanceReciente(bd.proyectos, copropiedadId)
+  // RN-122 — Las solicitudes que vencen pronto si nadie las contesta.
+  const porVencer = solicitudesPorVencer(bd.reservas, sel.zonasDe(bd, copropiedadId))
 
   return (
     <>
@@ -110,6 +114,36 @@ export function TableroPage() {
           <span className="subtitulo" style={{ display: 'block', marginTop: 'var(--e2)' }}>
             Más de {DIAS_SIN_AVANCE_ALERTA} días sin novedades. Los propietarios no saben si la obra
             sigue: registra un avance aunque sea «sigue igual» (RN-102).
+          </span>
+        </div>
+      )}
+
+      {porVencer.length > 0 && (
+        <div className="tarjeta tarjeta--alerta">
+          <div className="fila" style={{ marginBottom: 'var(--e2)' }}>
+            <span className="titulo-seccion">
+              {porVencer.length === 1 ? 'Una reserva por aprobar vence pronto' : `${porVencer.length} reservas por aprobar vencen pronto`}
+            </span>
+            <Link to="/admin/reservas" className="boton boton--pequeno boton--primario">
+              Revisar
+            </Link>
+          </div>
+          <div className="lista lista--compacta">
+            {porVencer.map(({ reserva, horas }) => {
+              const unidad = sel.unidad(bd, reserva.unidadId)
+              return (
+                <div key={reserva.id} className="fila">
+                  <strong>
+                    {sel.zona(bd, reserva.zonaId)?.nombre} · {unidad ? etiquetaUnidad(unidad) : ''}
+                  </strong>
+                  <span className="chip chip--alerta">faltan {horas} h</span>
+                </div>
+              )
+            })}
+          </div>
+          <span className="subtitulo" style={{ display: 'block', marginTop: 'var(--e2)' }}>
+            Si llega la hora sin respuesta, la solicitud vence, el turno se libera y al residente se le
+            avisa (RN-122). Menos de {HORAS_ALERTA_SOLICITUD} horas.
           </span>
         </div>
       )}

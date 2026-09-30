@@ -509,7 +509,11 @@ export interface CierreZona {
   comunicadoId?: string
 }
 
-export type EstadoReserva = 'solicitada' | 'confirmada' | 'rechazada' | 'cancelada'
+/**
+ * `vencida`: nadie la aprobo ni la rechazo antes de su turno (RN-122, CU-S-03).
+ * El turno se libera y al residente se le avisa.
+ */
+export type EstadoReserva = 'solicitada' | 'confirmada' | 'rechazada' | 'cancelada' | 'vencida'
 
 export interface Reserva {
   id: string
@@ -551,6 +555,17 @@ export interface Reserva {
   cierre?: CierreReserva
   /** El proceso por la multa, si la administracion lo abrio (RN-121). */
   sancionId?: string
+  /** Cuando vencio sin respuesta (RN-122). */
+  vencidaEn?: FechaHoraISO
+  /** Cuando se le recordo al residente (RN-125): una sola vez. */
+  recordatorioEnviadoEn?: FechaHoraISO
+  /**
+   * Las condiciones que el residente acepto al reservar, tal como las leyo
+   * (RN-124): valor, deposito y multa. Es la constancia si despues las reclama.
+   */
+  condicionesAceptadas?: { aceptadasEn: FechaHoraISO; texto: string }
+  /** Los nombres de los invitados, para porteria (RN-126). */
+  invitados?: string[]
 }
 
 /**
@@ -837,6 +852,9 @@ export type MotivoMensaje =
   | 'avance_proyecto'
   | 'reserva_cancelada'
   | 'cierre_zona'
+  | 'reserva_decidida'
+  | 'reserva_vencida'
+  | 'recordatorio_reserva'
 
 export interface Mensaje {
   id: string
