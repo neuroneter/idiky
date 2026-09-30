@@ -78,6 +78,7 @@ import {
   convocatoriaCompleta,
   faltaEnActa,
   limiteVerificacionActa,
+  puedeConfirmarRecepcion,
   admiteGrabacion,
   motivoAvanceInvalido,
   textoAvanceProyecto,
@@ -856,6 +857,38 @@ export async function entregarCorrespondencia(
   registro.estado = 'entregada'
   registro.recibidoPor = recibidoPor
   registro.fechaEntrega = ahoraISO()
+  return persistir(bd, registro)
+}
+
+/**
+ * CU-R-11 — El residente confirma que recibio el paquete (RN-103).
+ *
+ * Si porteria ya lo habia entregado, queda confirmado. Si no, la confirmacion
+ * **es** la entrega: el residente lo tiene, y `recibidoPor` queda con su
+ * nombre. La correspondencia entregada no se edita (RN-25); esto no la edita,
+ * la cierra.
+ */
+export async function confirmarRecepcionCorrespondencia(
+  bdActual: BaseDatos,
+  parametros: { correspondenciaId: string; personaId: string },
+): Promise<Resultado<Correspondencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const registro = bd.correspondencia.find((c) => c.id === parametros.correspondenciaId)
+  if (!registro) throw new ErrorDeNegocio('El registro no existe.')
+  if (registro.confirmadoEn) throw new ErrorDeNegocio('Ya confirmaste que lo recibiste.')
+  if (!puedeConfirmarRecepcion(registro, bd.residencias, parametros.personaId)) {
+    throw new ErrorDeNegocio('Solo un residente de esa unidad puede confirmar que lo recibio.')
+  }
+  const ahora = ahoraISO()
+  const persona = bd.personas.find((p) => p.id === parametros.personaId)
+  if (registro.estado !== 'entregada') {
+    registro.estado = 'entregada'
+    registro.recibidoPor = persona ? `${persona.nombres} ${persona.apellidos}` : 'El residente'
+    registro.fechaEntrega = ahora
+  }
+  registro.confirmadoPor = parametros.personaId
+  registro.confirmadoEn = ahora
   return persistir(bd, registro)
 }
 

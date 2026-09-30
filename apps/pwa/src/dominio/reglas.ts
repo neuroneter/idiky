@@ -8,6 +8,8 @@
 
 import type {
   Acta,
+  Correspondencia,
+  Residencia,
   AvanceProyecto,
   Proyecto,
   VerificacionActa,
@@ -1975,4 +1977,30 @@ export function proyectosSinAvanceReciente(
     .map((proyecto) => ({ proyecto, dias: diasSinAvance(proyecto, hoy) }))
     .filter((x): x is { proyecto: Proyecto; dias: number } => x.dias !== null && x.dias >= DIAS_SIN_AVANCE_ALERTA)
     .sort((a, b) => b.dias - a.dias)
+}
+
+/**
+ * RN-103 — **La entrega la cierra quien recibe.**
+ *
+ * «En la vista del propietario o arrendatario, en paquetes, incluir el boton
+ * Recibido» (Mary, 2026-10-01). Porteria registra a quien se lo entrego; eso
+ * es la palabra de porteria. La confirmacion del residente desde su app es la
+ * otra mitad: con las dos, la cadena de custodia (RN-52) cierra de punta a
+ * punta, y «a mi nunca me llego» deja de ser una discusion.
+ *
+ * Puede confirmar **cualquier residente vigente de la unidad**, no solo a
+ * quien porteria anoto: el paquete es de la unidad, y quien lo recogio puede
+ * no ser quien tiene la app en la mano. Si porteria todavia no lo marco como
+ * entregado, la confirmacion vale como entrega: el residente lo tiene.
+ * Se confirma una sola vez.
+ */
+export function puedeConfirmarRecepcion(
+  registro: Correspondencia,
+  residencias: Residencia[],
+  personaId: string,
+): boolean {
+  if (registro.confirmadoEn) return false
+  return residencias.some(
+    (r) => r.unidadId === registro.unidadId && r.personaId === personaId && residenciaVigente(r),
+  )
 }

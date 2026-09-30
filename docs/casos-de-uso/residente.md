@@ -307,17 +307,31 @@ este caso de uso figuraba terminado con la mitad en el aire.
 ---
 
 ### CU-R-11
-## CU-R-11 — Ver correspondencia pendiente
+## CU-R-11 — Ver correspondencia pendiente y confirmar que la recibí
 
-- **Actor principal:** Residente
-- **Resultado esperado:** Sabe qué paquetes o cartas tiene en portería.
+- **Actor principal:** Residente (propietario o arrendatario)
+- **Resultado esperado:** Sabe qué paquetes o cartas tiene en portería, y deja constancia de
+  que recibió los que ya tiene.
 
 **Flujo principal**
 1. El sistema lista la correspondencia de la unidad con tipo, remitente, fecha de recepción
    y estado (`en_porteria` | `entregada`).
-2. Al entregarse, portería registra quién recibió y cuándo (CU-A-09).
+2. Al entregarse, portería registra quién recibió y cuándo (CU-P-01). En la app aparece
+   «Entregado a X, según portería».
+3. El residente toca **Recibido** (Mary, 2026-10-01). Queda «Confirmaste que lo recibiste el…»
+   y portería ve «Confirmado por el residente» (RN-103).
 
-**Estado en el demo:** ✅ — `src/features/residente/CorrespondenciaPage.tsx` (solo lectura).
+**Flujos alternativos**
+- A1. Portería no lo marcó entregado pero el residente ya lo tiene → toca **Recibido** igual: la
+  confirmación vale como entrega, con su nombre.
+- A2. Ya confirmó → el botón desaparece; se confirma una sola vez.
+- A3. Quien confirma es otro residente de la misma unidad → puede: el paquete es de la unidad.
+
+**Reglas de negocio**
+- RN-103 (la entrega la cierra quien recibe), RN-52 (cadena de custodia), RN-25 (la
+  correspondencia entregada no se edita: esto no la edita, la cierra).
+
+**Estado en el demo:** ✅ — `src/features/residente/CorrespondenciaPage.tsx`.
 
 ---
 

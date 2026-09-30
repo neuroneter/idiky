@@ -513,9 +513,17 @@ export interface Correspondencia {
    */
   registradoPor: string
   estado: EstadoCorrespondencia
-  /** El residente que la recogio. */
+  /** El residente que la recogio, segun porteria. */
   recibidoPor?: string
   fechaEntrega?: FechaHoraISO
+  /**
+   * La confirmacion del residente desde su app: «Recibido» (RN-103, Mary
+   * 2026-10-01). Es la otra mitad de la entrega: porteria dice que lo
+   * entrego; quien lo recibio dice que lo recibio. Con las dos, la cadena de
+   * custodia cierra; con una sola, queda la palabra de porteria.
+   */
+  confirmadoPor?: string
+  confirmadoEn?: FechaHoraISO
 }
 
 // ---------------------------------------------------------------------------

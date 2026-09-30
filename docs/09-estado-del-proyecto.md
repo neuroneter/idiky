@@ -22,7 +22,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 73 documentados: 40 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 21 ⬜ pendientes, 2 ⛔ retirados |
-| **Reglas de negocio** | 102 del demo (RN-01…RN-102; RN-41 retirada) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-102, de las asambleas, registros y proyectos de Mary |
+| **Reglas de negocio** | 103 del demo (RN-01…RN-103; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-103, de las asambleas, registros, proyectos y correspondencia de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -107,6 +107,29 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-01 · Mary + IA (Claude) · El botón «Recibido»: la entrega la cierra quien recibe (RN-103)
+
+Mary: *«en la vista del propietario o arrendatario, en paquetes, incluir el botón Recibido»*.
+Hasta hoy la correspondencia en la app era de solo lectura: portería registraba y entregaba, y
+el residente miraba. Faltaba la otra mitad de la cadena de custodia (RN-52): que quien recibe
+lo diga.
+
+**RN-103.** En la app, cada paquete o carta trae el botón **Recibido** mientras el residente no
+haya confirmado. Si portería ya lo había entregado, la app dice «Entregado a X, según portería»
+hasta que confirme; si no lo había marcado, la confirmación **es** la entrega, con el nombre
+del residente. Puede confirmar cualquier residente vigente de la unidad —el paquete es de la
+unidad, y quien lo recogió puede no ser quien tiene la app en la mano—, una sola vez. Portería
+ve «Confirmado por el residente». Con las dos constancias, «a mí nunca me llegó» deja de ser
+una discusión.
+
+**Verificado.** 8 comprobaciones del repositorio (otra unidad no puede; pendiente confirmado
+queda entregado con el nombre de la residente; entregado confirmado conserva lo que anotó
+portería; no se confirma dos veces) y 8 con Playwright: los dos botones, el «según portería»,
+la confirmación, el contador en cero y portería viendo la confirmación. `npm run build` y la
+ortografía en verde.
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · El ingreso sin clave: código por SMS o por correo (CU-R-01, RN-54)
 
