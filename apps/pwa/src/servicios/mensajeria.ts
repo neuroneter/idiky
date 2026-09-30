@@ -90,6 +90,7 @@ export function redactar(parametros: {
   registroId?: string
   proyectoId?: string
   reservaId?: string
+  zonaId?: string
   id: string
   ahora: string
 }): Mensaje | null {
@@ -104,6 +105,7 @@ export function redactar(parametros: {
     registroId: parametros.registroId,
     proyectoId: parametros.proyectoId,
     reservaId: parametros.reservaId,
+    zonaId: parametros.zonaId,
     enviadoEn: parametros.ahora,
   }
 }

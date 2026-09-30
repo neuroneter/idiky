@@ -454,7 +454,28 @@ export interface ZonaComun {
   respaldoCobro?: RespaldoCobroZona
   /** La multa del catalogo que aplica si no se cancela a tiempo (RN-110). */
   multaNoCancelar?: MultaNoCancelar
+  /**
+   * Como se usa (RN-111). `exclusivo`: el turno es de una sola unidad (el
+   * salon). `compartido`: varias unidades en el mismo turno hasta llenar el
+   * aforo (el gimnasio). Ausente es exclusivo, como funcionaba antes.
+   */
+  modoUso?: ModoUsoZona
+  /**
+   * Horario por dia de la semana (RN-114). Ausente: abre todos los dias con
+   * `horaInicio`–`horaFin`. Presente: solo abre los dias que estan, cada uno
+   * con su horario.
+   */
+  horarioSemanal?: HorarioDia[]
 }
+
+/** Un dia de la semana en que abre la zona. `dia`: 0 domingo … 6 sabado. */
+export interface HorarioDia {
+  dia: number
+  horaInicio: Hora
+  horaFin: Hora
+}
+
+export type ModoUsoZona = 'exclusivo' | 'compartido'
 
 /** Que documento autoriza cobrar por usar la zona (RN-109). */
 export interface RespaldoCobroZona {
@@ -483,6 +504,8 @@ export interface CierreZona {
   registradoEn: FechaHoraISO
   /** Si la administracion lo termino antes de `hasta`: desde ese dia se reserva otra vez. */
   levantadoEn?: FechaHoraISO
+  /** El comunicado con que se aviso a toda la copropiedad, si se escogio (RN-117). */
+  comunicadoId?: string
 }
 
 export type EstadoReserva = 'solicitada' | 'confirmada' | 'rechazada' | 'cancelada'
@@ -504,6 +527,17 @@ export interface Reserva {
    */
   motivoCancelacion?: string
   canceladaEn?: FechaHoraISO
+  /**
+   * Cuantas personas van, contando a quien reserva (RN-113). En una zona
+   * compartida es lo que llena el turno (RN-111). Ausente cuenta como una.
+   */
+  personas?: number
+  /**
+   * El residente la cancelo dentro del plazo con multa, despues de ver el
+   * aviso (RN-112). No impone nada: es el dato con el que la administracion
+   * decide si abre el proceso.
+   */
+  canceladaFueraDePlazo?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -768,6 +802,7 @@ export type MotivoMensaje =
   | 'registro_rechazado'
   | 'avance_proyecto'
   | 'reserva_cancelada'
+  | 'cierre_zona'
 
 export interface Mensaje {
   id: string
@@ -782,6 +817,8 @@ export interface Mensaje {
   proyectoId?: string
   /** La reserva cuya cancelacion lo origino (RN-107). */
   reservaId?: string
+  /** La zona cuyo cierre por mantenimiento se aviso a todos (RN-117). */
+  zonaId?: string
   enviadoEn: FechaHoraISO
 }
 

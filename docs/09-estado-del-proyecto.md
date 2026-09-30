@@ -22,7 +22,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 73 documentados: 41 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 20 ⬜ pendientes, 2 ⛔ retirados |
-| **Reglas de negocio** | 110 del demo (RN-01…RN-110; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-110, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
+| **Reglas de negocio** | 117 del demo (RN-01…RN-117; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-117, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -109,6 +109,47 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-01 · Mary + IA (Claude) · Zonas compartidas, horario por día, aviso al cancelar, portería y aviso masivo (RN-111 a RN-117)
+
+Mary preguntó *«¿crees que nos falta algo más en zonas comunes?»* y aprobó los puntos 1 a 6 de
+la revisión. Después pidió el aviso masivo del cierre.
+
+1. **Uso exclusivo o compartido (RN-111).** Había un error de funcionamiento: una familia
+   apartaba el gimnasio (aforo 8) por dos horas. Ahora el administrador escoge en cada zona.
+   En la compartida, varias unidades toman el mismo turno hasta el aforo y el residente ve
+   «quedan N».
+2. **Aviso antes de cancelar fuera de plazo (RN-112).** La app muestra la multa, su valor y su
+   respaldo antes de confirmar. Si el residente cancela de todos modos, la reserva queda
+   marcada «fuera de plazo» y la consola lo ve. No se multa sola.
+3. **Cuántas personas van (RN-113),** en toda reserva: llena el turno compartido y no pasa del
+   aforo en la exclusiva.
+4. **Portería ve las reservas de hoy (RN-116)** en la pantalla del turno, sin costos.
+5. **La administración cancela una sola reserva (RN-115),** con motivo y mensaje.
+6. **Días y horario de cada día (RN-114),** que define el administrador (*«los horarios y días
+   los debe parametrizar el administrador»*).
+
+**El aviso masivo del cierre (RN-117).** Mary: *«es importante que el administrador tenga la
+opción, si el área común se cierra por mantenimiento, de seleccionar esta opción y que se
+genere un mensaje masivo… imagínate una copropiedad de 500 unidades enviar mensaje por
+propiedad»*. Al cerrar, la casilla «Avisar a toda la copropiedad» viene marcada. Con una sola
+acción publica un comunicado en la cartelera y deja un mensaje a cada residente vigente, uno
+por persona. A quien ya le cancelaron la reserva no le llega un segundo mensaje.
+
+**Semilla 28:** gimnasio y coworking compartidos; horario del gimnasio por día; reservas con
+personas; una de hoy (para portería), dos que comparten el gimnasio mañana y el salón de mañana
+de María Camila (para ver el aviso de multa).
+
+**Verificado:** 20 comprobaciones de los seis puntos y 8 del aviso masivo, con Playwright.
+Además siguen en verde las 24 de zonas (una ajustada: el gimnasio ahora dice «compartida hasta
+10 personas») y las 11 de costos. `npm run build` y la ortografía, en verde.
+
+**Lo que sigue:**
+- Calendario de ocupación por zona.
+- Mover la plata: generar el cobro por uso en la cartera, manejar el depósito con la contable
+  (T-17) y marcar «No se presentó».
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · Costo, depósito y multa por no cancelar en cada zona (RN-109, RN-110)
 

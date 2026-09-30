@@ -7,7 +7,10 @@
  * RN-10 (anticipacion minima) y el cupo mensual por unidad. Solo se ofrecen las
  * zonas activas (RN-107); la cerrada por mantenimiento se ve con su aviso y no
  * se reserva en esas fechas (RN-108). El costo, el deposito y la multa por no
- * cancelar se leen antes de reservar (RN-109, RN-110).
+ * cancelar se leen antes de reservar (RN-109, RN-110). En la zona compartida
+ * varias unidades toman el turno hasta el aforo (RN-111); quien reserva dice
+ * cuantas personas van (RN-113); cancelar fuera de plazo se advierte antes
+ * (RN-112); cada dia tiene su horario (RN-114).
  */
 
 import { useState } from 'react'
@@ -28,9 +31,17 @@ import {
   cierresPendientes,
   fechaCorta,
   zonaActiva,
+  zonaCompartida,
+  cuposLibres,
+  horarioDelDia,
+  diaDeLaSemana,
+  NOMBRES_DIA,
+  multaAlCancelar,
+  textoHorarioSemanal,
+  textoRespaldo,
 } from '../../dominio/reglas'
-import { formatearFecha } from '../../utilidades/formato'
-import type { ZonaComun } from '../../dominio/tipos'
+import { formatearDinero, formatearFecha } from '../../utilidades/formato'
+import type { Reserva, ZonaComun } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
 import { FotosZona } from '../../componentes/FotosZona'
 import { CondicionesZona, resumenCondicionesZona } from '../../componentes/CondicionesZona'
@@ -43,6 +54,10 @@ export function ReservasPage() {
   const [zonaElegida, setZonaElegida] = useState<ZonaComun | null>(null)
   const [fecha, setFecha] = useState(sumarDias(hoyISO(), 3))
   const [franja, setFranja] = useState<string | null>(null)
+  /** RN-113 — Cuántas personas van, contando a quien reserva. */
+  const [personas, setPersonas] = useState(1)
+  /** RN-112 — La reserva que va a cancelar dentro del plazo con multa. */
+  const [cancelando, setCancelando] = useState<Reserva | null>(null)
 
   if (!sesion) return null
 
@@ -54,6 +69,11 @@ export function ReservasPage() {
   const cuotas = sel.cuotasDeUnidad(bd, unidadId)
   const enMora = estaEnMora(cuotas)
   const cierreDelDia = zonaElegida ? cierreEnFecha(zonaElegida, fecha) : undefined
+  const compartida = zonaElegida ? zonaCompartida(zonaElegida) : false
+  const abreEseDia = zonaElegida ? !!horarioDelDia(zonaElegida, fecha) : true
+  const multaCancelando = cancelando
+    ? multaAlCancelar(cancelando, sel.zona(bd, cancelando.zonaId), conceptos)
+    : null
 
   function abrirZona(zona: ZonaComun) {
     // RN-08: el bloqueo por mora se avisa antes de que el residente pierda tiempo.
@@ -66,12 +86,22 @@ export function ReservasPage() {
     }
     setZonaElegida(zona)
     setFranja(null)
+    setPersonas(1)
     setFecha(sumarDias(hoyISO(), Math.ceil(zona.anticipacionMinimaHoras / 24) || 1))
+  }
+
+  /** RN-112 — Si cancelar ahora tiene multa, primero se advierte. */
+  function pedirCancelacion(reserva: Reserva) {
+    if (multaAlCancelar(reserva, sel.zona(bd, reserva.zonaId), conceptos)) {
+      setCancelando(reserva)
+      return
+    }
+    void ejecutar((base) => cancelarReserva(base, reserva.id), 'Reserva cancelada.')
   }
 
   async function confirmar() {
     if (!zonaElegida || !franja) return
-    const franjas = franjasDeZona(zonaElegida)
+    const franjas = franjasDeZona(zonaElegida, fecha)
     const seleccionada = franjas.find((f) => f.inicio === franja)
     if (!seleccionada) return
 
@@ -82,6 +112,7 @@ export function ReservasPage() {
       unidadId,
       cuotasDeLaUnidad: cuotas,
       reservas: bd.reservas,
+      personas,
     })
     if (!validacion.valido) {
       mostrarAviso(validacion.motivo!, 'error')
@@ -97,6 +128,7 @@ export function ReservasPage() {
           fecha,
           horaInicio: seleccionada.inicio,
           horaFin: seleccionada.fin,
+          personas,
         }),
       zonaElegida.requiereAprobacion
         ? 'Solicitud enviada. La administración la revisará.'
@@ -150,7 +182,8 @@ export function ReservasPage() {
                     </span>
                   )}
                   <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
-                    {zona.horaInicio} a {zona.horaFin} · aforo {zona.aforo} ·{' '}
+                    {textoHorarioSemanal(zona)} ·{' '}
+                    {zonaCompartida(zona) ? `compartida, hasta ${zona.aforo} personas por turno` : `aforo ${zona.aforo}`} ·{' '}
                     {zona.requiereAprobacion ? 'requiere aprobacion' : 'confirmación inmediata'}
                     {zona.fotos && zona.fotos.length > 1 ? ` · ${zona.fotos.length} fotos` : ''}
                   </span>
@@ -186,6 +219,7 @@ export function ReservasPage() {
                       <span className="subtitulo">
                         {formatearFecha(reserva.fecha)} · {reserva.horaInicio} a{' '}
                         {reserva.horaFin}
+                        {reserva.personas ? ` · ${reserva.personas} ${reserva.personas === 1 ? 'persona' : 'personas'}` : ''}
                       </span>
                       {reserva.motivoCancelacion && (
                         <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
@@ -204,9 +238,7 @@ export function ReservasPage() {
                         <button
                           className="boton boton--pequeno boton--peligro"
                           disabled={cargando}
-                          onClick={() =>
-                            ejecutar((base) => cancelarReserva(base, reserva.id), 'Reserva cancelada.')
-                          }
+                          onClick={() => pedirCancelacion(reserva)}
                         >
                           Cancelar
                         </button>
@@ -267,12 +299,44 @@ export function ReservasPage() {
             </p>
           )}
 
+          {/* RN-113 — Cuántos van: llena el turno compartido y no pasa del aforo. */}
+          <div className="campo">
+            <label htmlFor="personas-reserva">¿Cuántas personas van, contándote?</label>
+            <input
+              id="personas-reserva"
+              type="number"
+              min={1}
+              max={zonaElegida.aforo}
+              inputMode="numeric"
+              value={personas}
+              onChange={(evento) => {
+                setPersonas(Number(evento.target.value))
+                setFranja(null)
+              }}
+            />
+            <span className="ayuda-campo">
+              {compartida
+                ? `Se comparte con otras unidades: el turno se llena con ${zonaElegida.aforo} personas.`
+                : `Es solo para tu unidad. Aforo: ${zonaElegida.aforo} personas. Portería lo ve para dejar entrar a tus invitados.`}
+            </span>
+          </div>
+
+          {!cierreDelDia && !abreEseDia && (
+            <p className="ayuda-campo" style={{ color: 'var(--color-error)', marginBottom: 'var(--e2)' }}>
+              {zonaElegida.nombre} no abre los {NOMBRES_DIA[diaDeLaSemana(fecha)]}. Escoge otra fecha.
+            </p>
+          )}
+
           <div className="campo">
             <label>Franja horaria</label>
             <div className="franjas">
-              {franjasDeZona(zonaElegida).map((opcion) => {
+              {franjasDeZona(zonaElegida, fecha).map((opcion) => {
+                const libres = compartida ? cuposLibres(zonaElegida, bd.reservas, fecha, opcion.inicio) : null
                 const ocupada =
-                  !!cierreDelDia || franjaOcupada(bd.reservas, zonaElegida.id, fecha, opcion.inicio)
+                  !!cierreDelDia ||
+                  (compartida
+                    ? (libres ?? 0) < Math.max(1, personas)
+                    : franjaOcupada(bd.reservas, zonaElegida.id, fecha, opcion.inicio))
                 return (
                   <button
                     key={opcion.inicio}
@@ -282,22 +346,68 @@ export function ReservasPage() {
                     onClick={() => setFranja(opcion.inicio)}
                   >
                     {opcion.inicio} - {opcion.fin}
+                    {libres !== null && (
+                      <span style={{ display: 'block', fontWeight: 400 }}>
+                        {libres === 0 ? 'lleno' : `quedan ${libres}`}
+                      </span>
+                    )}
                   </button>
                 )
               })}
             </div>
             <span className="ayuda-campo">
-              Las franjas tachadas ya están reservadas por otra unidad.
+              {compartida
+                ? 'Las franjas tachadas no tienen cupo para tantas personas.'
+                : 'Las franjas tachadas ya están reservadas por otra unidad.'}
             </span>
           </div>
 
           <button
             className="boton boton--primario boton--bloque"
-            disabled={!franja || cargando || !!cierreDelDia}
+            disabled={!franja || cargando || !!cierreDelDia || personas < 1 || personas > zonaElegida.aforo}
             onClick={confirmar}
           >
             {zonaElegida.requiereAprobacion ? 'Solicitar reserva' : 'Confirmar reserva'}
           </button>
+        </Modal>
+      )}
+
+      {/* RN-112 — Cancelar dentro del plazo: primero se sabe, después se decide. */}
+      {cancelando && multaCancelando && (
+        <Modal
+          titulo="Cancelar fuera de plazo"
+          descripcion={`${sel.zona(bd, cancelando.zonaId)?.nombre ?? 'Zona'} · ${formatearFecha(cancelando.fecha)} · ${cancelando.horaInicio} a ${cancelando.horaFin}`}
+          onCerrar={() => setCancelando(null)}
+        >
+          <div className="tarjeta tarjeta--plana tarjeta--alerta" style={{ marginBottom: 'var(--e4)' }}>
+            <p>
+              Faltan <strong>{multaCancelando.horasRestantes} horas</strong> y esta zona se cancela sin multa hasta{' '}
+              {multaCancelando.plazo} horas antes. Si cancelas ahora, puede aplicarse la multa de{' '}
+              <strong>{formatearDinero(multaCancelando.concepto.valor)}</strong> («{multaCancelando.concepto.nombre}»,{' '}
+              {textoRespaldo(multaCancelando.concepto)}).
+            </p>
+            <p className="subtitulo" style={{ marginTop: 'var(--e2)' }}>
+              No se cobra sola: la administración decide si abre el proceso, y en él puedes presentar descargos.
+            </p>
+          </div>
+          <div className="columna" style={{ gap: 'var(--e2)' }}>
+            <button className="boton boton--primario boton--bloque" onClick={() => setCancelando(null)}>
+              Conservar mi reserva
+            </button>
+            <button
+              className="boton boton--peligro boton--bloque"
+              disabled={cargando}
+              onClick={() =>
+                void ejecutar((base) => cancelarReserva(base, cancelando.id), 'Reserva cancelada fuera de plazo.').then(
+                  (hecho) => {
+                    if (hecho) setCancelando(null)
+                  },
+                )
+              }
+            >
+              Cancelar de todos modos
+            </button>
+          </div>
         </Modal>
       )}
     </>

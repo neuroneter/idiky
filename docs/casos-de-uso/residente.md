@@ -195,6 +195,13 @@ La integración con pasarela está en el roadmap (fase 4).
 - A6. La zona tiene costo, depósito o multa por no cancelar → la lista lo resume y, antes de
   escoger la fecha, ve el detalle con el documento que lo autoriza y el plazo para cancelar
   sin multa (RN-109, RN-110).
+- A7. Dice cuántas personas van, contándose (RN-113). En una zona **compartida** cada franja
+  muestra «quedan N» y se tacha la que no alcanza para tantas personas; en una **exclusiva** no
+  pasa del aforo (RN-111).
+- A8. La zona no abre ese día → «no abre los domingos», sin franjas (RN-114).
+- A9. Al cancelar dentro del plazo con multa, la app lo advierte antes, con el valor y el
+  respaldo: conserva la reserva o cancela de todos modos, y queda marcada fuera de plazo
+  (RN-112).
 
 **Reglas de negocio**
 - RN-08: una unidad en mora no puede reservar zonas comunes.

@@ -158,8 +158,17 @@ cuenta, plegado bajo «¿Por qué se cobra?».
 2. El administrador aprueba o rechaza; al rechazar indica el motivo.
 3. El sistema actualiza el estado y libera la franja si fue rechazada.
 
+**Flujo alternativo — cancelar una reserva confirmada (RN-115)**
+- A1. En una reserva confirmada de hoy en adelante, «Cancelar» pide el motivo, que es
+  obligatorio, y muestra el mensaje que le llegará a quien reservó.
+- A2. Confirma: la reserva queda cancelada, con el motivo, y el mensaje queda escrito.
+
+La tabla muestra cuántas personas van (RN-113) y marca las reservas que el residente canceló
+fuera de plazo (RN-112), para que la administración decida si abre el proceso por la multa.
+
 **Reglas de negocio**
-- RN-09 (una sola reserva confirmada por franja), RN-08 (mora bloquea).
+- RN-09 (una sola reserva confirmada por franja en la zona exclusiva; en la compartida, hasta
+  el aforo, RN-111), RN-08 (mora bloquea), RN-112, RN-113, RN-115.
 
 **Estado en el demo:** ✅ — `src/features/admin/ReservasAdminPage.tsx`.
 
@@ -981,8 +990,10 @@ rápida.
 
 **Flujo principal — crear o editar**
 1. El administrador toca «Nueva zona» (o «Editar reglas» en una existente).
-2. Escribe nombre y descripción corta, y escoge horario, duración del turno, aforo, horas de
-   anticipación, reservas al mes por unidad y si la administración aprueba cada reserva.
+2. Escribe nombre y descripción corta. Escoge los **días y el horario**: todos los días igual,
+   o día por día con sus horas (RN-114). Luego la duración del turno, el aforo, las horas de
+   anticipación, las reservas al mes por unidad, si el turno es **exclusivo o compartido**
+   (RN-111) y si la administración aprueba cada reserva.
 3. El sistema le muestra los turnos como los verá el residente.
 4. Guarda. El sistema valida (RN-105). Una zona nueva nace activa; en una editada, los
    cambios valen para las reservas nuevas y las ya hechas se respetan (RN-106).
@@ -996,8 +1007,11 @@ rápida.
 - A1. Toca «Cerrar por mantenimiento», escoge desde y hasta cuándo y escribe el motivo.
 - A2. El sistema le muestra las reservas que caen en esas fechas y el mensaje exacto que le
   llegará a cada persona.
-- A3. Confirma: se cancelan esas reservas con aviso y la zona queda cerrada en esas fechas. Al
-  terminar vuelve sola; «Levantar» la abre antes.
+- A3. «Avisar a toda la copropiedad» viene marcada: publica un comunicado en la cartelera y
+  deja un mensaje a cada residente, de una vez; la consola muestra a cuántas personas y el
+  texto (RN-117). Se puede desmarcar.
+- A3 bis. Confirma: se cancelan esas reservas con aviso y la zona queda cerrada en esas fechas.
+  Al terminar vuelve sola; «Levantar» la abre antes.
 
 **Flujo alternativo — desactivar (RN-107)**
 - A4. Toca «Desactivar» y escribe el motivo, que es obligatorio. El sistema le muestra las
@@ -1010,9 +1024,11 @@ rápida.
 - RN-104 (fotos y especificaciones), RN-105 (una zona válida), RN-106 (cambiar las reglas
   no toca lo ya reservado), RN-107 (desactivar cancela con mensaje), RN-108 (cierre por
   mantenimiento), RN-109 (cobro por uso y depósito, con respaldo), RN-110 (multa por no
-  cancelar, del catálogo).
+  cancelar, del catálogo), RN-111 (uso exclusivo o compartido), RN-114 (días y horario de cada
+  día), RN-117 (aviso masivo del cierre).
 
-**Lo que sigue:** el cobro y el depósito hoy se parametrizan y se informan; falta generar el
+**Lo que sigue:** un calendario de ocupación por zona. Además, el cobro y el depósito hoy se
+parametrizan y se informan; falta generar el
 cobro en el estado de cuenta al confirmar la reserva, manejar la devolución del depósito (con
 la contable, T-17) y marcar la reserva como «No se presentó» para iniciar desde ahí el proceso
 sancionatorio.

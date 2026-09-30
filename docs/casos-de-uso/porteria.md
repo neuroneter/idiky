@@ -7,6 +7,10 @@ administrador.
 > **Construido el 2026-08-28**, después de aprobar la propuesta: el puesto tiene tres
 > pantallas —el turno, validar visitantes y correspondencia— y su propio perfil en el demo.
 > Lo que sigue pendiente es la **minuta**: registrar el ingreso, no solo validarlo.
+>
+> **Desde el 2026-10-01 el turno muestra las reservas de hoy** (RN-116): zona, horario, unidad,
+> quién reservó y cuántas personas van, para dejar entrar a los invitados sin llamar a nadie.
+> Sin costos ni multas (RN-52).
 
 **Por qué tiene rol propio y no la cuenta del administrador**
 

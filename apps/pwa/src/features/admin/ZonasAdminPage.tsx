@@ -9,7 +9,10 @@
  * Reglas: RN-104 (fotos y especificaciones), RN-105 (una zona valida),
  * RN-106 (cambiar las reglas no toca lo ya reservado), RN-107 (desactivar
  * cancela con mensaje), RN-108 (cierre por mantenimiento), RN-109 (cobro por
- * uso y deposito, con respaldo) y RN-110 (multa por no cancelar, del catalogo).
+ * uso y deposito, con respaldo), RN-110 (multa por no cancelar, del catalogo) y
+ * RN-111 (uso exclusivo o compartido hasta el aforo), RN-114 (dias y horario
+ * de cada dia, que define el administrador) y RN-117 (el cierre, avisado a toda
+ * la copropiedad con una sola accion).
  */
 
 import { useState } from 'react'
@@ -52,8 +55,13 @@ import {
   reservasQueCancelaDesactivar,
   sumarDias,
   textoRespaldo,
+  textoHorarioSemanal,
+  ORDEN_SEMANA,
+  NOMBRES_DIA,
   tieneCobroZona,
   textoReservaCancelada,
+  textoCierreZona,
+  residenciaVigente,
   zonaActiva,
   type DatosZona,
 } from '../../dominio/reglas'
@@ -82,6 +90,15 @@ const ZONA_EN_BLANCO: DatosZona = {
   duracionBloqueHoras: 2,
   anticipacionMinimaHoras: 24,
   cupoMensualPorUnidad: 4,
+  modoUso: 'exclusivo',
+}
+
+/** Los selectores de hora del horario semanal: fuera de `.campo`, con su mismo aspecto. */
+const ESTILO_HORA = {
+  padding: '.4rem .5rem',
+  border: '1px solid var(--color-borde-fuerte)',
+  borderRadius: 'var(--radio-sm)',
+  background: 'var(--color-superficie)',
 }
 
 const HORAS = Array.from({ length: 25 }, (_, h) => `${String(h).padStart(2, '0')}:00`)
@@ -101,15 +118,17 @@ function datosDe(zona: ZonaComun): DatosZona {
     deposito: zona.deposito,
     respaldoCobro: zona.respaldoCobro,
     multaNoCancelar: zona.multaNoCancelar,
+    modoUso: zona.modoUso ?? 'exclusivo',
+    horarioSemanal: zona.horarioSemanal,
   }
 }
 
 /** Una línea con las reglas, como la lee quien administra. */
 function resumenReglas(zona: ZonaComun): string {
   return [
-    `${zona.horaInicio} a ${zona.horaFin}`,
+    textoHorarioSemanal(zona),
     `turnos de ${zona.duracionBloqueHoras} h`,
-    `aforo ${zona.aforo}`,
+    zona.modoUso === 'compartido' ? `compartida hasta ${zona.aforo} personas` : `exclusiva · aforo ${zona.aforo}`,
     `${zona.anticipacionMinimaHoras} h de anticipación`,
     `${zona.cupoMensualPorUnidad} al mes por unidad`,
     zona.requiereAprobacion ? 'requiere aprobación' : 'confirmación inmediata',
@@ -133,6 +152,11 @@ export function ZonasAdminPage() {
 
   const zonas = sel.zonasDe(bd, sesion.copropiedadId)
   const conceptos = sel.conceptosSancionDe(bd, sesion.copropiedadId)
+  // RN-117 — A cuántas personas les llegaría el aviso masivo.
+  const unidades = new Set(bd.unidades.filter((u) => u.copropiedadId === sesion.copropiedadId).map((u) => u.id))
+  const residentes = new Set(
+    bd.residencias.filter((r) => unidades.has(r.unidadId) && residenciaVigente(r)).map((r) => r.personaId),
+  ).size
   const activas = zonas.filter(zonaActiva)
   const desactivadas = zonas.filter((z) => !zonaActiva(z))
 
@@ -206,6 +230,7 @@ export function ZonasAdminPage() {
         <HojaCierre
           zona={hoja.zona}
           reservas={bd.reservas}
+          residentes={residentes}
           copropiedad={sel.copropiedad(bd, sesion.copropiedadId)?.nombre ?? 'La copropiedad'}
           cargando={cargando}
           alCerrar={() => setHoja(null)}
@@ -214,7 +239,10 @@ export function ZonasAdminPage() {
               cerrarZonaPorMantenimiento(base, { zonaId: hoja.zona.id, ...cierre }),
             )
             if (resumen) {
-              mostrarAviso(textoResumen('Cierre registrado.', resumen), 'exito')
+              const masivo = resumen.masivo
+                ? ` Aviso a toda la copropiedad: comunicado en la cartelera y ${resumen.masivo.avisados} mensajes.`
+                : ''
+              mostrarAviso(textoResumen('Cierre registrado.', resumen) + masivo, 'exito')
               setHoja(null)
             }
           }}
@@ -478,12 +506,24 @@ function FormularioZona({
     setDatos((actual) => ({ ...actual, [campo]: valor }))
   }
 
+  const porDia = !!datos.horarioSemanal
+
+  /** RN-114 — Abre o cierra un día, o le cambia el horario. */
+  function cambiarDia(dia: number, horario: { horaInicio: string; horaFin: string } | null) {
+    const otros = (datos.horarioSemanal ?? []).filter((h) => h.dia !== dia)
+    cambiar('horarioSemanal', horario ? [...otros, { dia, ...horario }].sort((a, b) => ORDEN_SEMANA.indexOf(a.dia) - ORDEN_SEMANA.indexOf(b.dia)) : otros)
+  }
+
   const motivo = motivoZonaInvalida(datos, zonas, zona?.id, conceptos)
   const multasActivas = conceptos.filter((c) => c.activo)
   const respaldo = datos.respaldoCobro ?? { origen: 'reglamento' as OrigenRespaldo, referencia: '' }
   const origenElegido = ORIGENES_RESPALDO.find((o) => o.id === respaldo.origen)
   // La vista previa de los turnos solo cuando el horario tiene sentido.
-  const turnos = motivo && /horario|turno/i.test(motivo) ? [] : franjasDeZona({ ...datos } as ZonaComun)
+  const primerDia = datos.horarioSemanal?.[0]
+  const turnos =
+    motivo && /horario|turno|pedazo|día/i.test(motivo)
+      ? []
+      : franjasDeZona({ ...datos, ...(primerDia ?? {}), horarioSemanal: undefined })
 
   return (
     <Modal
@@ -516,23 +556,96 @@ function FormularioZona({
         <span className="ayuda-campo">Una línea. El detalle va en las especificaciones.</span>
       </div>
 
+      {/* RN-114 — Los días y el horario los define el administrador. */}
+      <div className="campo">
+        <label htmlFor="zona-dias">Días y horario</label>
+        <select
+          id="zona-dias"
+          value={porDia ? 'por-dia' : 'todos'}
+          onChange={(e) =>
+            cambiar(
+              'horarioSemanal',
+              e.target.value === 'por-dia'
+                ? ORDEN_SEMANA.map((dia) => ({ dia, horaInicio: datos.horaInicio, horaFin: datos.horaFin }))
+                : undefined,
+            )
+          }
+        >
+          <option value="todos">Todos los días, con el mismo horario</option>
+          <option value="por-dia">Escoger los días y el horario de cada uno</option>
+        </select>
+      </div>
+
+      {porDia && (
+        <div className="columna" style={{ gap: 'var(--e2)', marginBottom: 'var(--e3)' }}>
+          {ORDEN_SEMANA.map((dia) => {
+            const horario = datos.horarioSemanal!.find((h) => h.dia === dia)
+            const nombre = NOMBRES_DIA[dia][0].toUpperCase() + NOMBRES_DIA[dia].slice(1)
+            return (
+              <div key={dia} className="fila" style={{ justifyContent: 'flex-start', gap: 'var(--e2)', flexWrap: 'wrap' }}>
+                <label className="fila" style={{ justifyContent: 'flex-start', gap: 'var(--e2)', minWidth: 120 }}>
+                  <input
+                    type="checkbox"
+                    aria-label={`Abre los ${NOMBRES_DIA[dia]}`}
+                    checked={!!horario}
+                    onChange={(e) => cambiarDia(dia, e.target.checked ? { horaInicio: datos.horaInicio, horaFin: datos.horaFin } : null)}
+                  />
+                  <span>{nombre}</span>
+                </label>
+                {horario ? (
+                  <>
+                    <select
+                      aria-label={`Abre los ${NOMBRES_DIA[dia]} a las`}
+                      style={ESTILO_HORA}
+                      value={horario.horaInicio}
+                      onChange={(e) => cambiarDia(dia, { ...horario, horaInicio: e.target.value })}
+                    >
+                      {HORAS.slice(0, 24).map((h) => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+                    <span className="subtitulo">a</span>
+                    <select
+                      aria-label={`Cierra los ${NOMBRES_DIA[dia]} a las`}
+                      style={ESTILO_HORA}
+                      value={horario.horaFin}
+                      onChange={(e) => cambiarDia(dia, { ...horario, horaFin: e.target.value })}
+                    >
+                      {HORAS.slice(1).map((h) => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+                  </>
+                ) : (
+                  <span className="tenue">No abre</span>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
       <div className="rejilla-dos">
-        <div className="campo">
-          <label htmlFor="zona-desde">Abre a las</label>
-          <select id="zona-desde" value={datos.horaInicio} onChange={(e) => cambiar('horaInicio', e.target.value)}>
-            {HORAS.slice(0, 24).map((h) => (
-              <option key={h} value={h}>{h}</option>
-            ))}
-          </select>
-        </div>
-        <div className="campo">
-          <label htmlFor="zona-hasta">Cierra a las</label>
-          <select id="zona-hasta" value={datos.horaFin} onChange={(e) => cambiar('horaFin', e.target.value)}>
-            {HORAS.slice(1).map((h) => (
-              <option key={h} value={h}>{h}</option>
-            ))}
-          </select>
-        </div>
+        {!porDia && (
+          <>
+            <div className="campo">
+              <label htmlFor="zona-desde">Abre a las</label>
+              <select id="zona-desde" value={datos.horaInicio} onChange={(e) => cambiar('horaInicio', e.target.value)}>
+                {HORAS.slice(0, 24).map((h) => (
+                  <option key={h} value={h}>{h}</option>
+                ))}
+              </select>
+            </div>
+            <div className="campo">
+              <label htmlFor="zona-hasta">Cierra a las</label>
+              <select id="zona-hasta" value={datos.horaFin} onChange={(e) => cambiar('horaFin', e.target.value)}>
+                {HORAS.slice(1).map((h) => (
+                  <option key={h} value={h}>{h}</option>
+                ))}
+              </select>
+            </div>
+          </>
+        )}
         <div className="campo">
           <label htmlFor="zona-turno">Cada turno dura</label>
           <select
@@ -578,6 +691,24 @@ function FormularioZona({
             onChange={(e) => cambiar('cupoMensualPorUnidad', Number(e.target.value))}
           />
         </div>
+      </div>
+
+      {/* RN-111 — Exclusiva: el turno es de una unidad. Compartida: varias hasta el aforo. */}
+      <div className="campo">
+        <label htmlFor="zona-modo">Cómo se usa cada turno</label>
+        <select
+          id="zona-modo"
+          value={datos.modoUso ?? 'exclusivo'}
+          onChange={(e) => cambiar('modoUso', e.target.value as DatosZona['modoUso'])}
+        >
+          <option value="exclusivo">Exclusiva: el turno es de una sola unidad (salón, BBQ)</option>
+          <option value="compartido">Compartida: varias unidades, hasta llenar el aforo (gimnasio)</option>
+        </select>
+        <span className="ayuda-campo">
+          {datos.modoUso === 'compartido'
+            ? `Cada residente dice cuántas personas van; el turno se llena con ${datos.aforo || 0} personas.`
+            : 'Quien reserva se queda con la zona todo el turno.'}
+        </span>
       </div>
 
       <label className="fila" style={{ justifyContent: 'flex-start', gap: 'var(--e2)', marginBottom: 'var(--e3)' }}>
@@ -727,7 +858,9 @@ function FormularioZona({
       </div>
 
       <div className="columna" style={{ gap: 'var(--e1)', marginBottom: 'var(--e3)' }}>
-        <span className="titulo-seccion">Así verá los turnos el residente</span>
+        <span className="titulo-seccion">
+          Así verá los turnos el residente{primerDia ? ` (los ${NOMBRES_DIA[primerDia.dia]})` : ''}
+        </span>
         {turnos.length > 0 ? (
           <div className="franjas">
             {turnos.map((t) => (
@@ -805,6 +938,7 @@ function ReservasAfectadas({ reservas, texto, vacio }: { reservas: Reserva[]; te
 function HojaCierre({
   zona,
   reservas,
+  residentes,
   copropiedad,
   cargando,
   alCerrar,
@@ -812,12 +946,15 @@ function HojaCierre({
 }: {
   zona: ZonaComun
   reservas: Reserva[]
+  residentes: number
   copropiedad: string
   cargando: boolean
   alCerrar: () => void
-  alConfirmar: (cierre: { desde: string; hasta: string; motivo: string }) => Promise<void>
+  alConfirmar: (cierre: { desde: string; hasta: string; motivo: string; avisarATodos: boolean }) => Promise<void>
 }) {
   const hoy = hoyISO()
+  /** RN-117 — Marcado de entrada: un cierre es justo lo que todos deben saber. */
+  const [avisarATodos, setAvisarATodos] = useState(true)
   const [desde, setDesde] = useState(sumarDias(hoy, 1))
   const [hasta, setHasta] = useState(sumarDias(hoy, 3))
   const [motivo, setMotivo] = useState('')
@@ -859,7 +996,26 @@ function HojaCierre({
         <span className="ayuda-campo">Lo lee quien tenía reserva y quien quiera reservar esos días.</span>
       </div>
 
-      <ReservasAfectadas reservas={afectadas} texto={texto} vacio="No hay reservas en esas fechas: nadie tiene que ser avisado." />
+      <ReservasAfectadas reservas={afectadas} texto={texto} vacio="No hay reservas en esas fechas: nadie pierde su reserva." />
+
+      {/* RN-117 — Una sola acción avisa a toda la copropiedad, sea de 20 o de 500 unidades. */}
+      <label className="fila fila-inicio" style={{ justifyContent: 'flex-start', gap: 'var(--e2)', marginBottom: 'var(--e2)' }}>
+        <input type="checkbox" checked={avisarATodos} onChange={(e) => setAvisarATodos(e.target.checked)} />
+        <span>
+          <strong>Avisar a toda la copropiedad</strong>
+          <span className="subtitulo" style={{ display: 'block' }}>
+            Un comunicado en la cartelera y un mensaje a cada residente ({residentes} personas), de una vez.
+          </span>
+        </span>
+      </label>
+      {avisarATodos && motivo.trim() && fechasBien && (
+        <div className="tarjeta tarjeta--plana" style={{ marginBottom: 'var(--e3)' }}>
+          <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+            El mensaje para todos (el demo lo deja escrito, no lo envía)
+          </span>
+          <p style={{ marginTop: 'var(--e1)' }}>{textoCierreZona(zona, cierre, copropiedad)}</p>
+        </div>
+      )}
 
       {intento && invalido && (
         <p className="ayuda-campo" style={{ color: 'var(--color-error)', marginBottom: 'var(--e2)' }}>
@@ -871,7 +1027,7 @@ function HojaCierre({
         disabled={cargando}
         onClick={() => {
           setIntento(true)
-          if (!invalido) void alConfirmar(cierre)
+          if (!invalido) void alConfirmar({ ...cierre, avisarATodos })
         }}
       >
         {afectadas.length > 0 ? `Cerrar y avisar a ${afectadas.length}` : 'Cerrar por mantenimiento'}

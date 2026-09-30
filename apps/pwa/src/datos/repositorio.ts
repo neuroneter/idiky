@@ -31,6 +31,7 @@ import type {
   Reincidencia,
   CategoriaRegistro,
   CategoriaPqrs,
+  CierreZona,
   Comunicado,
   Correspondencia,
   Cuota,
@@ -91,6 +92,11 @@ import {
   motivoDeCierre,
   reservasQueCancelaCierre,
   cierreEnFecha,
+  motivoFranjaNoDisponible,
+  franjasDeZona,
+  multaAlCancelar,
+  puedeCancelarLaAdministracion,
+  textoCierreZona,
   type DatosZona,
   puedeConfirmarRecepcion,
   admiteGrabacion,
@@ -485,6 +491,8 @@ export async function crearReserva(
     fecha: string
     horaInicio: string
     horaFin: string
+    /** RN-111 — En una zona compartida, cuantas personas van. */
+    personas?: number
   },
 ): Promise<Resultado<Reserva>> {
   await esperar()
@@ -494,6 +502,18 @@ export async function crearReserva(
   if (!zonaActiva(zona)) throw new ErrorDeNegocio('Esa zona no está recibiendo reservas.')
   const cierre = cierreEnFecha(zona, parametros.fecha)
   if (cierre) throw new ErrorDeNegocio(`La zona está cerrada por mantenimiento: ${cierre.motivo}`)
+  if (!franjasDeZona(zona, parametros.fecha).some((f) => f.inicio === parametros.horaInicio)) {
+    throw new ErrorDeNegocio('Ese turno no existe ese día en esta zona.')
+  }
+  const ocupada = motivoFranjaNoDisponible(
+    zona,
+    bd.reservas,
+    parametros.fecha,
+    parametros.horaInicio,
+    parametros.unidadId,
+    parametros.personas ?? 1,
+  )
+  if (ocupada) throw new ErrorDeNegocio(ocupada)
 
   const reserva: Reserva = {
     id: nuevoId('rsv'),
@@ -506,6 +526,7 @@ export async function crearReserva(
     // Si la zona no requiere aprobacion, la reserva nace confirmada.
     estado: zona.requiereAprobacion ? 'solicitada' : 'confirmada',
     creadaEn: ahoraISO(),
+    personas: parametros.personas ?? 1,
   }
 
   bd.reservas.push(reserva)
@@ -520,7 +541,12 @@ export async function cancelarReserva(
   const bd = clonar(bdActual)
   const reserva = bd.reservas.find((r) => r.id === reservaId)
   if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  // RN-112 — Si cancela dentro del plazo con multa, queda anotado; no se multa aqui.
+  const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  const conceptos = zona ? conceptosDe(bd, zona.copropiedadId) : []
+  if (multaAlCancelar(reserva, zona, conceptos)) reserva.canceladaFueraDePlazo = true
   reserva.estado = 'cancelada'
+  reserva.canceladaEn = ahoraISO()
   return persistir(bd, reserva)
 }
 
@@ -1109,14 +1135,43 @@ function cancelarConAviso(
   return { canceladas: afectadas.length, avisados, sinCelular }
 }
 
+/** RN-115 — La administración cancela una reserva, con motivo y mensaje. */
+export async function cancelarReservaPorAdministracion(
+  bdActual: BaseDatos,
+  parametros: { reservaId: string; motivo: string },
+): Promise<Resultado<{ reserva: Reserva } & ResumenCancelacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const reserva = bd.reservas.find((r) => r.id === parametros.reservaId)
+  if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  if (!puedeCancelarLaAdministracion(reserva)) {
+    throw new ErrorDeNegocio('Solo se cancela una reserva confirmada de hoy en adelante.')
+  }
+  const motivo = parametros.motivo.trim()
+  if (motivo.length < MINIMO_MOTIVO_DESACTIVACION) {
+    throw new ErrorDeNegocio('Escribe el motivo: es lo que le llega a quien reservó.')
+  }
+  const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  if (!zona) throw new ErrorDeNegocio('La zona de esa reserva no existe.')
+  const aviso = cancelarConAviso(bd, zona, [reserva], motivo, ahoraISO())
+  return persistir(bd, { reserva, ...aviso })
+}
+
 /**
  * RN-108 — Cierra la zona por mantenimiento entre dos fechas: cancela con
  * aviso las reservas que caen dentro y la zona vuelve sola al terminar.
  */
 export async function cerrarZonaPorMantenimiento(
   bdActual: BaseDatos,
-  parametros: { zonaId: string; desde: string; hasta: string; motivo: string },
-): Promise<Resultado<{ zona: ZonaComun } & ResumenCancelacion>> {
+  parametros: {
+    zonaId: string
+    desde: string
+    hasta: string
+    motivo: string
+    /** RN-117 — Avisar a toda la copropiedad: comunicado y mensaje a cada persona. */
+    avisarATodos?: boolean
+  },
+): Promise<Resultado<{ zona: ZonaComun; masivo?: { avisados: number; sinCelular: number } } & ResumenCancelacion>> {
   await esperar()
   const bd = clonar(bdActual)
   const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
@@ -1125,7 +1180,7 @@ export async function cerrarZonaPorMantenimiento(
   if (invalido) throw new ErrorDeNegocio(invalido)
 
   const ahora = ahoraISO()
-  const cierre = {
+  const cierre: CierreZona = {
     id: nuevoId('cie'),
     desde: parametros.desde,
     hasta: parametros.hasta,
@@ -1135,7 +1190,68 @@ export async function cerrarZonaPorMantenimiento(
   zona.cierres = [...(zona.cierres ?? []), cierre]
   const afectadas = reservasQueCancelaCierre(zona.id, bd.reservas, cierre.desde, cierre.hasta)
   const aviso = cancelarConAviso(bd, zona, afectadas, motivoDeCierre(cierre), ahora)
-  return persistir(bd, { zona, ...aviso })
+  const masivo = parametros.avisarATodos
+    ? avisarCierreATodos(bd, zona, cierre, new Set(afectadas.map((r) => r.personaId)), ahora)
+    : undefined
+  return persistir(bd, { zona, ...aviso, masivo })
+}
+
+/**
+ * RN-117 — El aviso masivo del cierre: un comunicado de mantenimiento en la
+ * cartelera y un mensaje a cada persona con residencia vigente, salvo a quien
+ * ya se le aviso la cancelacion de su reserva.
+ */
+function avisarCierreATodos(
+  bd: BaseDatos,
+  zona: ZonaComun,
+  cierre: CierreZona,
+  yaAvisados: Set<string>,
+  ahora: string,
+): { avisados: number; sinCelular: number } {
+  const nombreCopropiedad =
+    bd.copropiedades.find((c) => c.id === zona.copropiedadId)?.nombre ?? 'La copropiedad'
+  const texto = textoCierreZona(zona, cierre, nombreCopropiedad)
+  const comunicado: Comunicado = {
+    id: nuevoId('com'),
+    copropiedadId: zona.copropiedadId,
+    titulo: `${zona.nombre}: cerrada por mantenimiento`,
+    cuerpo: texto.slice(texto.indexOf(':') + 2),
+    categoria: 'mantenimiento',
+    fijado: false,
+    fechaPublicacion: ahora,
+    vigenteHasta: cierre.hasta,
+    autor: 'Administración',
+    leidoPor: [],
+  }
+  bd.comunicados.unshift(comunicado)
+  cierre.comunicadoId = comunicado.id
+
+  const unidades = new Set(bd.unidades.filter((u) => u.copropiedadId === zona.copropiedadId).map((u) => u.id))
+  const personas = new Set(
+    bd.residencias.filter((r) => unidades.has(r.unidadId) && residenciaVigente(r)).map((r) => r.personaId),
+  )
+  let avisados = 0
+  let sinCelular = 0
+  for (const personaId of personas) {
+    if (yaAvisados.has(personaId)) continue
+    const persona = bd.personas.find((p) => p.id === personaId)
+    const mensaje = redactar({
+      id: nuevoId('msj'),
+      copropiedadId: zona.copropiedadId,
+      destino: persona?.telefono ?? '',
+      texto,
+      motivo: 'cierre_zona',
+      zonaId: zona.id,
+      ahora,
+    })
+    if (mensaje) {
+      bd.mensajes.unshift(mensaje)
+      avisados += 1
+    } else {
+      sinCelular += 1
+    }
+  }
+  return { avisados, sinCelular }
 }
 
 /**

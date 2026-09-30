@@ -55,7 +55,10 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      registro (Mary, 2026-09-17; su rama tambien llamo 21 a ese cambio).
 // 27 — zonas comunes con cobro por uso, deposito y multa por no cancelar
 //      (RN-109, RN-110), y la multa «Reserva no cancelada a tiempo» en el catalogo.
-export const VERSION_ESQUEMA = 27
+// 28 — zonas compartidas (gimnasio y coworking, RN-111), personas por reserva
+//      (RN-113), horario por dia del gimnasio (RN-114) y reservas de hoy y de
+//      mañana para ver portería (RN-116) y el aviso al cancelar (RN-112).
+export const VERSION_ESQUEMA = 28
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -278,6 +281,13 @@ const zonasComunes: ZonaComun[] = [
     duracionBloqueHoras: 2,
     anticipacionMinimaHoras: 2,
     cupoMensualPorUnidad: 12,
+    // RN-111 — Varias unidades por turno, hasta ocho personas.
+    modoUso: 'compartido',
+    // RN-114 — De lunes a sabado de 5 a 9; el domingo, solo la mañana.
+    horarioSemanal: [
+      ...[1, 2, 3, 4, 5, 6].map((dia) => ({ dia, horaInicio: '05:00', horaFin: '21:00' })),
+      { dia: 0, horaInicio: '07:00', horaFin: '13:00' },
+    ],
   },
   {
     id: 'zon-coworking',
@@ -292,6 +302,7 @@ const zonasComunes: ZonaComun[] = [
     duracionBloqueHoras: 2,
     anticipacionMinimaHoras: 2,
     cupoMensualPorUnidad: 10,
+     modoUso: 'compartido',
   },
   {
     id: 'zon-cancha',
@@ -521,6 +532,7 @@ function construirReservas(): Reserva[] {
       horaFin: '17:00',
       estado: 'confirmada',
       creadaEn: `${sumarDias(hoy, -2)}T18:20:00.000Z`,
+      personas: 30,
     },
     {
       id: 'rsv-2',
@@ -554,6 +566,57 @@ function construirReservas(): Reserva[] {
       horaFin: '11:00',
       estado: 'confirmada',
       creadaEn: `${sumarDias(hoy, -8)}T11:00:00.000Z`,
+    },
+    // RN-116 — Una de hoy, para que portería vea a quién dejar entrar.
+    {
+      id: 'rsv-5',
+      zonaId: 'zon-bbq',
+      unidadId: 'uni-torre1-202',
+      personaId: 'per-4',
+      fecha: hoy,
+      horaInicio: '19:00',
+      horaFin: '23:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -3)}T10:00:00.000Z`,
+      personas: 10,
+    },
+    // RN-111 — Dos unidades comparten el gimnasio mañana a las 7: quedan 3 cupos.
+    {
+      id: 'rsv-6',
+      zonaId: 'zon-gimnasio',
+      unidadId: 'uni-torre1-202',
+      personaId: 'per-4',
+      fecha: sumarDias(hoy, 1),
+      horaInicio: '07:00',
+      horaFin: '09:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -1)}T19:00:00.000Z`,
+      personas: 2,
+    },
+    {
+      id: 'rsv-7',
+      zonaId: 'zon-gimnasio',
+      unidadId: 'uni-torre2-501',
+      personaId: 'per-8',
+      fecha: sumarDias(hoy, 1),
+      horaInicio: '07:00',
+      horaFin: '09:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -1)}T21:30:00.000Z`,
+      personas: 3,
+    },
+    // RN-112 — El salón mañana: cancelarla hoy está dentro de las 48 horas con multa.
+    {
+      id: 'rsv-8',
+      zonaId: 'zon-salon',
+      unidadId: 'uni-torre1-402',
+      personaId: 'per-1',
+      fecha: sumarDias(hoy, 1),
+      horaInicio: '17:00',
+      horaFin: '21:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -10)}T09:00:00.000Z`,
+      personas: 20,
     },
   ]
 }

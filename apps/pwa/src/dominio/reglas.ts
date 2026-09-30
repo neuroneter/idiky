@@ -34,6 +34,8 @@ import type {
   Pqrs,
   RegistroPersona,
   CierreZona,
+  HorarioDia,
+  ModoUsoZona,
   MultaNoCancelar,
   RespaldoCobroZona,
   Hora,
@@ -365,11 +367,17 @@ export function validarReserva(parametros: {
   cuotasDeLaUnidad: Cuota[]
   reservas: Reserva[]
   ahora?: Date
+  /** En una zona compartida, cuantas personas van (RN-111). */
+  personas?: number
 }): ResultadoValidacion {
   const { zona, fecha, horaInicio, unidadId, cuotasDeLaUnidad, reservas, ahora } = parametros
+  const personas = parametros.personas ?? 1
 
   if (!zonaActiva(zona)) {
     return { valido: false, motivo: 'Esta zona no está recibiendo reservas.' }
+  }
+  if (!horarioDelDia(zona, fecha)) {
+    return { valido: false, motivo: `${zona.nombre} no abre los ${NOMBRES_DIA[diaDeLaSemana(fecha)]}.` }
   }
   const cierre = cierreEnFecha(zona, fecha)
   if (cierre) {
@@ -384,9 +392,8 @@ export function validarReserva(parametros: {
       motivo: 'La unidad tiene cuotas vencidas. Ponte al dia para reservar zonas comunes.',
     }
   }
-  if (franjaOcupada(reservas, zona.id, fecha, horaInicio)) {
-    return { valido: false, motivo: 'Esa franja ya esta reservada.' }
-  }
+  const motivoFranja = motivoFranjaNoDisponible(zona, reservas, fecha, horaInicio, unidadId, personas)
+  if (motivoFranja) return { valido: false, motivo: motivoFranja }
   if (!cumpleAnticipacion(zona, fecha, horaInicio, ahora)) {
     return {
       valido: false,
@@ -403,10 +410,16 @@ export function validarReserva(parametros: {
 }
 
 /** Franjas horarias reservables de una zona, segun su ventana y duracion de bloque. */
-export function franjasDeZona(zona: ZonaComun): Array<{ inicio: string; fin: string }> {
+export function franjasDeZona(
+  zona: Pick<ZonaComun, 'horaInicio' | 'horaFin' | 'duracionBloqueHoras' | 'horarioSemanal'>,
+  fecha?: FechaISO,
+): Array<{ inicio: string; fin: string }> {
   const franjas: Array<{ inicio: string; fin: string }> = []
-  const [horaInicio] = zona.horaInicio.split(':').map(Number)
-  const [horaFin] = zona.horaFin.split(':').map(Number)
+  // RN-114 — Con fecha, el horario de ese dia; un dia que no abre no tiene franjas.
+  const horario = fecha ? horarioDelDia(zona, fecha) : zona
+  if (!horario) return franjas
+  const [horaInicio] = horario.horaInicio.split(':').map(Number)
+  const [horaFin] = horario.horaFin.split(':').map(Number)
   for (let h = horaInicio; h + zona.duracionBloqueHoras <= horaFin; h += zona.duracionBloqueHoras) {
     franjas.push({
       inicio: `${String(h).padStart(2, '0')}:00`,
@@ -2072,6 +2085,10 @@ export interface DatosZona {
   respaldoCobro?: RespaldoCobroZona
   /** RN-110 — La multa del catalogo si no se cancela a tiempo. */
   multaNoCancelar?: MultaNoCancelar
+  /** RN-111 — Exclusiva o compartida hasta el aforo. */
+  modoUso?: ModoUsoZona
+  /** RN-114 — Horario por dia de la semana. */
+  horarioSemanal?: HorarioDia[]
 }
 
 /** Los turnos que se ofrecen: de una a doce horas. */
@@ -2128,6 +2145,8 @@ export function motivoZonaInvalida(
   if ((fin - inicio) % datos.duracionBloqueHoras !== 0) {
     return `Con turnos de ${datos.duracionBloqueHoras} horas, el horario de ${fin - inicio} horas deja un pedazo que nadie puede reservar.`
   }
+  const motivoSemana = motivoHorarioSemanalInvalido(datos.horarioSemanal, datos.duracionBloqueHoras)
+  if (motivoSemana) return motivoSemana
   if (!Number.isInteger(datos.aforo) || datos.aforo < 1) return 'El aforo es de al menos una persona.'
   if (!Number.isInteger(datos.cupoMensualPorUnidad) || datos.cupoMensualPorUnidad < 1) {
     return 'Cada unidad debe poder reservar al menos una vez al mes.'
@@ -2336,4 +2355,247 @@ export function motivoCobroZonaInvalido(
     }
   }
   return null
+}
+
+/**
+ * RN-111 — **Una zona se usa de forma exclusiva o compartida.**
+ *
+ * «Si una familia reserva el gimnasio de 6 a 8, nadie más puede entrar a esa
+ * hora» era el comportamiento de RN-09 para todas las zonas, y está bien para
+ * el salón pero no para el gimnasio, que tiene aforo 8. Desde el 2026-10-01
+ * (Mary: «arranca con 1 y 2») el administrador escoge en cada zona:
+ *
+ * - **Exclusiva** (el salón, la terraza): el turno es de una sola unidad. Es
+ *   RN-09 tal como estaba, y es lo que vale cuando la zona no dice nada.
+ * - **Compartida** (el gimnasio, el coworking): varias unidades reservan el
+ *   mismo turno, cada una diciendo cuántas personas van, hasta llenar el aforo.
+ *   Una unidad tiene una sola reserva por turno: si van más, se cancela y se
+ *   vuelve a pedir con el número nuevo.
+ *
+ * El cupo mensual por unidad (uso justo) aplica igual en las dos.
+ *
+ * RN-113 — **Quien reserva dice cuántas personas van**, en las dos clases de
+ * zona, contándose a sí mismo. En la compartida es lo que llena el turno; en la
+ * exclusiva no puede pasar del aforo, y es el dato con el que portería deja
+ * entrar a los invitados («el 402 tiene el salón con 30 personas»).
+ */
+export function zonaCompartida(zona: ZonaComun): boolean {
+  return zona.modoUso === 'compartido'
+}
+
+/** Las personas que ya tienen el turno, sumando las reservas activas. */
+export function personasEnFranja(
+  reservas: Reserva[],
+  zonaId: string,
+  fecha: FechaISO,
+  horaInicio: string,
+): number {
+  return reservas
+    .filter(
+      (r) => r.zonaId === zonaId && r.fecha === fecha && r.horaInicio === horaInicio && reservaOcupaFranja(r),
+    )
+    .reduce((total, r) => total + (r.personas ?? 1), 0)
+}
+
+/** RN-111 — Cuántos cupos le quedan al turno de una zona compartida. */
+export function cuposLibres(zona: ZonaComun, reservas: Reserva[], fecha: FechaISO, horaInicio: string): number {
+  return Math.max(0, zona.aforo - personasEnFranja(reservas, zona.id, fecha, horaInicio))
+}
+
+/** RN-09 / RN-111 — Por qué no se puede tomar ese turno, o `null` si se puede. */
+export function motivoFranjaNoDisponible(
+  zona: ZonaComun,
+  reservas: Reserva[],
+  fecha: FechaISO,
+  horaInicio: string,
+  unidadId: string,
+  personas = 1,
+): string | null {
+  if (!Number.isInteger(personas) || personas < 1) return 'Di cuántas personas van, desde una.'
+  if (!zonaCompartida(zona)) {
+    if (franjaOcupada(reservas, zona.id, fecha, horaInicio)) return 'Esa franja ya esta reservada.'
+    // RN-113 — En la exclusiva, lo declarado no pasa del aforo.
+    if (personas > zona.aforo) return `El aforo de ${zona.nombre} es de ${zona.aforo} personas.`
+    return null
+  }
+  const yaTiene = reservas.some(
+    (r) =>
+      r.zonaId === zona.id &&
+      r.fecha === fecha &&
+      r.horaInicio === horaInicio &&
+      r.unidadId === unidadId &&
+      reservaOcupaFranja(r),
+  )
+  if (yaTiene) return 'Tu unidad ya tiene ese turno. Si van más personas, cancela y vuelve a reservar.'
+  const libres = cuposLibres(zona, reservas, fecha, horaInicio)
+  if (libres === 0) return 'Ese turno ya está lleno.'
+  if (personas > libres) return `En ese turno quedan ${libres} ${libres === 1 ? 'cupo' : 'cupos'}.`
+  return null
+}
+
+/**
+ * RN-112 — **Antes de cancelar fuera de plazo, el residente sabe que hay multa.**
+ *
+ * Si la zona tiene multa por no cancelar (RN-110) y faltan menos horas que el
+ * plazo, la app lo advierte antes de confirmar, con el valor, el concepto y
+ * su respaldo. Solo cuenta para la reserva **confirmada**: la que la
+ * administración todavía no aprobó no le ha quitado el turno a nadie.
+ *
+ * Avisar no es multar: si cancela de todos modos, la reserva queda marcada
+ * «fuera de plazo» y la administración decide si abre el proceso
+ * sancionatorio, con descargos e impugnación (RN-39, RN-69).
+ *
+ * Devuelve las horas que faltan y el concepto, o `null` si cancelar no tiene
+ * multa.
+ */
+export function multaAlCancelar(
+  reserva: Reserva,
+  zona: ZonaComun | undefined,
+  conceptosSancion: ConceptoSancion[],
+  ahora: Date = new Date(),
+): { horasRestantes: number; concepto: ConceptoSancion; plazo: number } | null {
+  if (!zona?.multaNoCancelar || reserva.estado !== 'confirmada') return null
+  const concepto = conceptosSancion.find((c) => c.id === zona.multaNoCancelar!.conceptoId)
+  if (!concepto) return null
+  const inicio = new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime()
+  const horasRestantes = (inicio - ahora.getTime()) / 3_600_000
+  const plazo = zona.multaNoCancelar.horasParaCancelar
+  if (horasRestantes >= plazo) return null
+  return { horasRestantes: Math.max(0, Math.floor(horasRestantes)), concepto, plazo }
+}
+
+/**
+ * RN-114 — **Cada zona puede tener un horario distinto según el día.**
+ *
+ * El gimnasio cierra los domingos; el salón solo se alquila de viernes a
+ * domingo; la cancha abre más tarde el sábado. Sin horario semanal, la zona
+ * abre todos los días con su horario general, como antes. Con horario
+ * semanal, abre solo los días marcados, cada uno con sus horas. El turno es el
+ * mismo toda la semana y cada día tiene que dividirse en turnos exactos
+ * (RN-105). Un día que no abre no ofrece franjas y no se puede reservar.
+ */
+export const NOMBRES_DIA = ['domingos', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábados']
+export const DIAS_CORTOS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+/** De lunes a domingo, como se lee una semana en Colombia. */
+export const ORDEN_SEMANA = [1, 2, 3, 4, 5, 6, 0]
+
+export function diaDeLaSemana(fecha: FechaISO): number {
+  return new Date(`${fecha}T12:00:00`).getDay()
+}
+
+/** El horario de esa fecha, o `null` si ese día la zona no abre. */
+export function horarioDelDia(
+  zona: Pick<ZonaComun, 'horaInicio' | 'horaFin' | 'horarioSemanal'>,
+  fecha: FechaISO,
+): { horaInicio: Hora; horaFin: Hora } | null {
+  if (!zona.horarioSemanal) return { horaInicio: zona.horaInicio, horaFin: zona.horaFin }
+  return zona.horarioSemanal.find((h) => h.dia === diaDeLaSemana(fecha)) ?? null
+}
+
+export function motivoHorarioSemanalInvalido(
+  horario: HorarioDia[] | undefined,
+  duracionBloqueHoras: number,
+): string | null {
+  if (!horario) return null
+  if (horario.length === 0) return 'Marca al menos un día en que abre la zona.'
+  for (const dia of horario) {
+    const nombre = NOMBRES_DIA[dia.dia]
+    const inicio = horaEntera(dia.horaInicio)
+    const fin = horaEntera(dia.horaFin)
+    if (inicio === null || fin === null) return `El horario de los ${nombre} va en horas en punto.`
+    if (fin <= inicio) return `El horario de los ${nombre} tiene que terminar después de empezar.`
+    if ((fin - inicio) % duracionBloqueHoras !== 0) {
+      return `Los ${nombre}, con turnos de ${duracionBloqueHoras} horas, sobra un pedazo que nadie puede reservar.`
+    }
+  }
+  return null
+}
+
+/** El horario en palabras: «Lun a Vie 05:00–21:00 · Sáb 08:00–14:00». */
+export function textoHorarioSemanal(zona: Pick<ZonaComun, 'horaInicio' | 'horaFin' | 'horarioSemanal'>): string {
+  if (!zona.horarioSemanal) return `Todos los días ${zona.horaInicio} a ${zona.horaFin}`
+  const dias = ORDEN_SEMANA.map((d) => zona.horarioSemanal!.find((h) => h.dia === d)).filter(
+    (h): h is HorarioDia => !!h,
+  )
+  // Se agrupan los días seguidos con el mismo horario.
+  const grupos: Array<{ desde: number; hasta: number; horario: string }> = []
+  for (const h of dias) {
+    const horario = `${h.horaInicio} a ${h.horaFin}`
+    const ultimo = grupos[grupos.length - 1]
+    const posicion = ORDEN_SEMANA.indexOf(h.dia)
+    if (ultimo && ultimo.horario === horario && ORDEN_SEMANA.indexOf(ultimo.hasta) === posicion - 1) {
+      ultimo.hasta = h.dia
+    } else {
+      grupos.push({ desde: h.dia, hasta: h.dia, horario })
+    }
+  }
+  return grupos
+    .map((g) =>
+      g.desde === g.hasta
+        ? `${DIAS_CORTOS[g.desde]} ${g.horario}`
+        : `${DIAS_CORTOS[g.desde]} a ${DIAS_CORTOS[g.hasta]} ${g.horario}`,
+    )
+    .join(' · ')
+}
+
+/**
+ * RN-115 — **La administración puede cancelar una sola reserva, con motivo, y a
+ * quien reservó le llega el mensaje.**
+ *
+ * Hasta hoy solo podía rechazar la que estaba por aprobar, o cerrar la zona
+ * entera (RN-107, RN-108). Pero pasa que el salón se necesita para una reunión
+ * del consejo, o que se reservó violando el reglamento. Se cancela la reserva
+ * activa de hoy en adelante; el motivo es obligatorio y viaja en el mismo
+ * mensaje de RN-107. No es una multa ni la genera.
+ */
+export function puedeCancelarLaAdministracion(reserva: Reserva, hoy: FechaISO = hoyISO()): boolean {
+  return reserva.estado === 'confirmada' && reserva.fecha >= hoy
+}
+
+/**
+ * RN-116 — **Portería ve las reservas de hoy.**
+ *
+ * «El vigilante no sabe que el 402 tiene el salón hoy de 1 a 5 con 30
+ * invitados», y sin eso los invitados esperan en la puerta mientras alguien
+ * llama al apartamento. En el turno aparecen las reservas **confirmadas** de
+ * hoy, por hora: la zona, el horario, la unidad, quién reservó y cuántas
+ * personas van (RN-113). Nada de costos, depósitos ni multas: como la
+ * cartera, no son asunto de la portería (RN-52).
+ */
+export function reservasDeHoyParaPorteria(
+  reservas: Reserva[],
+  zonasDeLaCopropiedad: ZonaComun[],
+  hoy: FechaISO = hoyISO(),
+): Reserva[] {
+  const zonas = new Set(zonasDeLaCopropiedad.map((z) => z.id))
+  return reservas
+    .filter((r) => zonas.has(r.zonaId) && r.fecha === hoy && r.estado === 'confirmada')
+    .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio))
+}
+
+/**
+ * RN-117 — **El cierre por mantenimiento se le puede avisar a toda la
+ * copropiedad.**
+ *
+ * «Es importante que el administrador tenga la opción, si el área común se
+ * cierra por mantenimiento, de seleccionar esta opción y que se genere un
+ * mensaje masivo» (Mary, 2026-10-01). A quien tenía reserva le llega siempre
+ * su cancelación (RN-108); con esta opción, además, todos se enteran antes de
+ * intentar reservar. Va por las dos vías de siempre, como los avances de obra
+ * (RN-101): un comunicado de mantenimiento en la cartelera y un mensaje a cada
+ * persona con residencia vigente —propietarios, arrendatarios y autorizados—,
+ * uno por persona aunque tenga varias unidades. Quien ya recibió la
+ * cancelación de su reserva no recibe un segundo mensaje: ya lo sabe.
+ */
+export function textoCierreZona(
+  zona: ZonaComun,
+  cierre: { desde: FechaISO; hasta: FechaISO; motivo: string },
+  copropiedad: string,
+): string {
+  const fechas =
+    cierre.desde === cierre.hasta
+      ? `el ${fechaCorta(cierre.desde)}`
+      : `del ${fechaCorta(cierre.desde)} al ${fechaCorta(cierre.hasta)}`
+  const porque = cierre.motivo.trim().replace(/[.\s]+$/, '')
+  return `${copropiedad}: ${zona.nombre} estará cerrada por mantenimiento ${fechas}. Motivo: ${porque}. Más detalles en la cartelera de Idiky.`
 }
