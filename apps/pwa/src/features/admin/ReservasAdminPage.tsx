@@ -8,8 +8,8 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { agregarFotoZona, decidirReserva, quitarFotoZona } from '../../datos/repositorio'
-import { MAXIMO_FOTOS_ZONA, puedeAgregarFotoZona } from '../../dominio/reglas'
+import { agregarFotoZona, decidirReserva, editarEspecificacionesZona, quitarFotoZona } from '../../datos/repositorio'
+import { MAXIMO_ESPECIFICACIONES, MAXIMO_FOTOS_ZONA, puedeAgregarFotoZona, puntosDeEspecificaciones } from '../../dominio/reglas'
 import { CapturaFoto } from '../../componentes/CapturaFoto'
 import { FotosZona } from '../../componentes/FotosZona'
 import { etiquetaUnidad, hoyISO } from '../../dominio/reglas'
@@ -28,6 +28,9 @@ export function ReservasAdminPage() {
   const [motivo, setMotivo] = useState('')
   /** La zona a la que se le está agregando una foto (RN-104). */
   const [fotoPara, setFotoPara] = useState<string | null>(null)
+  /** La zona cuyas especificaciones se están editando, y el texto en curso. */
+  const [editando, setEditando] = useState<string | null>(null)
+  const [texto, setTexto] = useState('')
 
   if (!sesion) return null
 
@@ -150,8 +153,8 @@ export function ReservasAdminPage() {
           Viven aquí porque todavía no hay pantalla de zonas (CU-A-10, parcial). */}
       <div className="tarjeta">
         <div className="fila" style={{ marginBottom: 'var(--e2)' }}>
-          <span className="titulo-seccion">Fotos de las zonas comunes</span>
-          <span className="subtitulo">Hasta {MAXIMO_FOTOS_ZONA} por zona · el residente las ve al reservar</span>
+          <span className="titulo-seccion">Fotos y especificaciones de las zonas comunes</span>
+          <span className="subtitulo">Hasta {MAXIMO_FOTOS_ZONA} fotos por zona · el residente lo ve al reservar</span>
         </div>
         <div className="lista">
           {zonas.map((zona) => (
@@ -177,6 +180,67 @@ export function ReservasAdminPage() {
                   )
                 }
               />
+              {/* RN-104 — Las especificaciones: qué incluye, qué no, cómo se usa.
+                  Un renglón por punto; el residente las lee como lista. */}
+              {editando === zona.id ? (
+                <div className="campo">
+                  <label htmlFor={`especificaciones-${zona.id}`}>Especificaciones generales</label>
+                  <textarea
+                    id={`especificaciones-${zona.id}`}
+                    value={texto}
+                    maxLength={MAXIMO_ESPECIFICACIONES}
+                    onChange={(evento) => setTexto(evento.target.value)}
+                    placeholder={'Un punto por renglón. Por ejemplo:\nIncluye 8 mesas y 40 sillas\nCocineta con nevera y microondas\nSe entrega limpio y se devuelve limpio'}
+                    style={{ minHeight: 120 }}
+                  />
+                  <span className="ayuda-campo">
+                    {texto.length} de {MAXIMO_ESPECIFICACIONES} caracteres. Lo que el residente alcanza a leer antes de reservar.
+                  </span>
+                  <div className="grupo-botones">
+                    <button
+                      className="boton boton--primario boton--pequeno"
+                      disabled={cargando}
+                      onClick={() =>
+                        void ejecutar(
+                          (base) => editarEspecificacionesZona(base, { zonaId: zona.id, especificaciones: texto }),
+                          'Especificaciones guardadas. El residente ya las ve al reservar.',
+                        ).then((hecho) => {
+                          if (hecho) setEditando(null)
+                        })
+                      }
+                    >
+                      Guardar
+                    </button>
+                    <button className="boton boton--pequeno" disabled={cargando} onClick={() => setEditando(null)}>
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="fila fila-inicio">
+                  {puntosDeEspecificaciones(zona).length > 0 ? (
+                    <ul className="especificaciones" style={{ flex: 1 }}>
+                      {puntosDeEspecificaciones(zona).map((punto, i) => (
+                        <li key={i}>{punto}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <span className="subtitulo" style={{ flex: 1 }}>
+                      Sin especificaciones: el residente no sabe qué incluye.
+                    </span>
+                  )}
+                  <button
+                    className="boton boton--pequeno"
+                    disabled={cargando}
+                    onClick={() => {
+                      setEditando(zona.id)
+                      setTexto(zona.especificaciones ?? '')
+                    }}
+                  >
+                    {zona.especificaciones ? 'Editar' : 'Escribir'}
+                  </button>
+                </div>
+              )}
               {fotoPara === zona.id && (
                 <CapturaFoto
                   etiqueta={`Nueva foto de ${zona.nombre}`}

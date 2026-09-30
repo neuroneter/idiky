@@ -423,6 +423,12 @@ export interface ZonaComun {
    * cinco, reducidas (ADR-0009).
    */
   fotos?: Soporte[]
+  /**
+   * Especificaciones generales de la zona, en palabras del administrador
+   * (RN-104, Mary 2026-10-01): que incluye, que no, condiciones de uso.
+   * Texto libre, un renglon por punto; el residente lo ve al reservar.
+   */
+  especificaciones?: string
 }
 
 export type EstadoReserva = 'solicitada' | 'confirmada' | 'rechazada' | 'cancelada'

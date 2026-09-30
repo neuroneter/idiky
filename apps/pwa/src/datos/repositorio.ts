@@ -80,6 +80,7 @@ import {
   faltaEnActa,
   limiteVerificacionActa,
   MAXIMO_FOTOS_ZONA,
+  MAXIMO_ESPECIFICACIONES,
   puedeAgregarFotoZona,
   puedeConfirmarRecepcion,
   admiteGrabacion,
@@ -912,6 +913,23 @@ export async function agregarFotoZona(
     throw new ErrorDeNegocio(`Una zona lleva hasta ${MAXIMO_FOTOS_ZONA} fotos. Quita una para agregar otra.`)
   }
   zona.fotos = [...(zona.fotos ?? []), { imagen: parametros.imagen, adjuntadoEn: ahoraISO() }]
+  return persistir(bd, zona)
+}
+
+/** CU-A-10 (parcial) — Las especificaciones generales de la zona (RN-104). */
+export async function editarEspecificacionesZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; especificaciones: string },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  const texto = parametros.especificaciones.trim()
+  if (texto.length > MAXIMO_ESPECIFICACIONES) {
+    throw new ErrorDeNegocio(`Las especificaciones caben en ${MAXIMO_ESPECIFICACIONES} caracteres: lo que el residente alcanza a leer antes de reservar.`)
+  }
+  zona.especificaciones = texto || undefined
   return persistir(bd, zona)
 }
 

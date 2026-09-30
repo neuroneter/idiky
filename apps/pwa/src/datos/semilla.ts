@@ -53,7 +53,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      imputaciones y recibo de caja, y hay abonos por conciliar (RN-75 a RN-79).
 // 22 — poderes enviados en foto por el propietario y marca «No obligatorio» en el
 //      registro (Mary, 2026-09-17; su rama tambien llamo 21 a ese cambio).
-export const VERSION_ESQUEMA = 25
+export const VERSION_ESQUEMA = 26
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -225,6 +225,8 @@ const zonasComunes: ZonaComun[] = [
       fotoIlustrativa('Salón social', '#1d2e7a', '#4b5fb8', '2026-09-01T10:00:00.000Z'),
       fotoIlustrativa('Cocineta y baño', '#812485', '#c41e8c', '2026-09-01T10:05:00.000Z'),
     ],
+    especificaciones:
+      'Incluye 8 mesas y 40 sillas\nCocineta con nevera, microondas y estufa de dos puestos\nBaño para invitados\nSonido y decoración los pone el residente\nSe entrega limpio y se devuelve limpio antes de las 9:00 p. m.',
     aforo: 40,
     requiereAprobacion: true,
     horaInicio: '09:00',
@@ -240,6 +242,8 @@ const zonasComunes: ZonaComun[] = [
     descripcion: 'Zona de asados en la terraza de la Torre 2.',
     icono: 'bbq',
     fotos: [fotoIlustrativa('Terraza BBQ', '#a6620a', '#e0a04a', '2026-09-01T10:10:00.000Z')],
+    especificaciones:
+      'Asador a carbón y mesón de trabajo\nDos mesas con parasol\nEl carbón lo trae el residente\nSin música después de las 10:00 p. m.',
     aforo: 12,
     requiereAprobacion: true,
     horaInicio: '11:00',
@@ -255,6 +259,8 @@ const zonasComunes: ZonaComun[] = [
     descripcion: 'Equipos cardiovasculares y de fuerza. Aforo controlado.',
     icono: 'gimnasio',
     fotos: [fotoIlustrativa('Gimnasio', '#0f7a52', '#3fb98a', '2026-09-01T10:15:00.000Z')],
+    especificaciones:
+      'Dos caminadoras, una elíptica y una bicicleta\nMancuernas de 2 a 20 kg y multifuerza\nToalla obligatoria; se limpia cada equipo al terminar\nMenores de 14 años solo con un adulto',
     aforo: 8,
     requiereAprobacion: false,
     horaInicio: '05:00',

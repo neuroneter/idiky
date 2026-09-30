@@ -20,6 +20,7 @@ import {
   sePuedeCancelar,
   sumarDias,
   validarReserva,
+  puntosDeEspecificaciones,
 } from '../../dominio/reglas'
 import { formatearFecha } from '../../utilidades/formato'
 import type { ZonaComun } from '../../dominio/tipos'
@@ -194,10 +195,21 @@ export function ReservasPage() {
           descripcion={`Reserva con al menos ${zonaElegida.anticipacionMinimaHoras} horas de anticipacion.`}
           onCerrar={() => setZonaElegida(null)}
         >
-          {/* RN-104 — Las fotos antes de la fecha: primero se mira, después se reserva. */}
+          {/* RN-104 — Las fotos y las especificaciones antes de la fecha:
+              primero se mira qué es y qué incluye, después se reserva. */}
           <div style={{ marginBottom: 'var(--e3)' }}>
             <FotosZona fotos={zonaElegida.fotos} nombre={zonaElegida.nombre} />
           </div>
+          {puntosDeEspecificaciones(zonaElegida).length > 0 && (
+            <div className="columna" style={{ gap: 'var(--e1)', marginBottom: 'var(--e3)' }}>
+              <span className="titulo-seccion">Qué incluye y cómo se usa</span>
+              <ul className="especificaciones">
+                {puntosDeEspecificaciones(zonaElegida).map((punto, i) => (
+                  <li key={i}>{punto}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="campo">
             <label htmlFor="fecha-reserva">Fecha</label>
             <input

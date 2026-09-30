@@ -120,14 +120,25 @@ administrador las carga y las quita desde `Reservas` en la consola, en una secci
 porque la pantalla de zonas (CU-A-10) todavía no existe: queda 🟡, solo con las fotos. Son
 configuración, no registro: quitar una no borra ninguna historia.
 
-**La semilla** (versión 25) trae fotos ilustrativas del salón, la terraza y el gimnasio: un
-dibujo rotulado «Foto ilustrativa del demo», no una fotografía, de menos de 1 KB cada uno, para
-que la galería se vea con algo hasta que la administración cargue las reales. La sala de
-coworking queda sin fotos a propósito, para mostrar el caso vacío.
+**Y las especificaciones generales**, que Mary pidió enseguida (*«incluir también unas
+especificaciones generales de cada zona, estas también las debe cargar el administrador»*):
+qué incluye, qué no y cómo se usa, en texto libre con un renglón por punto, hasta 1200
+caracteres. Texto libre a propósito: el salón tiene cocineta y el gimnasio horario de aseo, y
+un formulario de campos fijos dejaría fuera justo lo que importa. El administrador las escribe
+en la misma sección de la consola; el residente las lee como lista, bajo las fotos, antes de la
+fecha.
+
+**La semilla** (versión 26) trae fotos ilustrativas del salón, la terraza y el gimnasio —un
+dibujo rotulado «Foto ilustrativa del demo», no una fotografía, de menos de 1 KB cada uno— y
+sus especificaciones, para que la galería y la lista se vean con algo hasta que la
+administración cargue lo real. La sala de coworking queda sin nada a propósito, para mostrar el
+caso vacío.
 
 **Verificado.** 7 comprobaciones del repositorio (tope de cinco, la sexta se rechaza, quitar
-libera cupo) y 10 con Playwright: miniatura y conteo en la lista, galería y foto grande en la
-reserva, agregar y quitar desde la consola, y el residente viendo la nueva. `npm run build` y la
+libera cupo), 10 con Playwright para las fotos (miniatura y conteo en la lista, galería y foto
+grande en la reserva, agregar y quitar desde la consola, el residente viendo la nueva) y 9 para
+las especificaciones (la lista en la reserva, el caso vacío, escribir desde la consola con el
+contador, y el residente viéndolas). `npm run build` y la
 ortografía en verde.
 
 ---

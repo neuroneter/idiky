@@ -2020,3 +2020,19 @@ export const MAXIMO_FOTOS_ZONA = 5
 export function puedeAgregarFotoZona(zona: { fotos?: unknown[] }): boolean {
   return (zona.fotos?.length ?? 0) < MAXIMO_FOTOS_ZONA
 }
+
+/** Tope de las especificaciones: cabe una hoja, no un reglamento entero. */
+export const MAXIMO_ESPECIFICACIONES = 1200
+
+/**
+ * RN-104 — Las especificaciones, como lista: un renglon por punto. Se escriben
+ * en texto libre porque cada zona es distinta —el salon tiene cocineta, el
+ * gimnasio tiene horario de aseo— y un formulario con campos fijos dejaria
+ * fuera justo lo que importa.
+ */
+export function puntosDeEspecificaciones(zona: { especificaciones?: string }): string[] {
+  return (zona.especificaciones ?? '')
+    .split('\n')
+    .map((linea) => linea.replace(/^[-•*]\s*/, '').trim())
+    .filter((linea) => linea.length > 0)
+}

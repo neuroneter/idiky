@@ -972,15 +972,18 @@ pintura de fachadas con tres semanas sin avance, para que la alerta de RN-102 se
 - **Resultado esperado:** Las zonas comunes existen con sus reglas y **con sus fotos**, y el
   residente reserva viendo cómo es la zona.
 
-**Lo que existe hoy (2026-10-01):** solo las fotos (RN-104). En la consola, en `Reservas`, la
-sección **Fotos de las zonas comunes** lista cada zona con sus fotos; «Agregar foto» toma o
-escoge una, se guarda reducida (ADR-0009), y «Quitar» la retira. Hasta cinco por zona. Las
-reglas de la zona (horario, aforo, aprobación, cupo) siguen viniendo de los datos de ejemplo.
+**Lo que existe hoy (2026-10-01):** las fotos y las especificaciones (RN-104). En la consola,
+en `Reservas`, la sección **Fotos y especificaciones de las zonas comunes** lista cada zona;
+«Agregar foto» toma o escoge una, se guarda reducida (ADR-0009), y «Quitar» la retira, hasta
+cinco por zona; «Escribir» o «Editar» abre las **especificaciones generales**: qué incluye, qué
+no y cómo se usa, un renglón por punto, hasta 1200 caracteres, que el residente lee como lista
+al reservar. Las reglas de la zona (horario, aforo, aprobación, cupo) siguen viniendo de los
+datos de ejemplo.
 
 **Pendiente:** crear, editar y desactivar zonas y sus reglas. Cuando exista esa pantalla, las
 fotos se mudan a ella.
 
 **Reglas de negocio**
-- RN-104 (hasta cinco fotos, configuración y no registro).
+- RN-104 (hasta cinco fotos y las especificaciones; configuración, no registro).
 
 **Estado en el demo:** 🟡 — `src/features/admin/ReservasAdminPage.tsx`, sección de fotos.

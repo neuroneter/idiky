@@ -859,3 +859,15 @@ textarea {
   max-height: 320px;
   object-fit: contain;
 }
+
+/* Especificaciones de una zona (RN-104): lista corta, legible en el celular. */
+.especificaciones {
+  margin: 0;
+  padding-left: 1.2em;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
+}
