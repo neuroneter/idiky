@@ -221,6 +221,12 @@ export function ReservasPage() {
                         {reserva.horaFin}
                         {reserva.personas ? ` · ${reserva.personas} ${reserva.personas === 1 ? 'persona' : 'personas'}` : ''}
                       </span>
+                      {/* RN-119 a RN-121 — Lo que pasó con la plata de su reserva. */}
+                      {textosDePlata(reserva, bd).map((linea) => (
+                        <span key={linea} className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                          {linea}
+                        </span>
+                      ))}
                       {reserva.motivoCancelacion && (
                         <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
                           Cancelada por la administración. Motivo: {reserva.motivoCancelacion}
@@ -412,4 +418,34 @@ export function ReservasPage() {
       )}
     </>
   )
+}
+
+/** RN-119 a RN-121 — El depósito, el cobro y el proceso de la reserva, dichos al residente. */
+function textosDePlata(reserva: Reserva, bd: ReturnType<typeof useDatos>['bd']): string[] {
+  const lineas: string[] = []
+  const cierre = reserva.cierre
+  if (!cierre) {
+    if (reserva.deposito && reserva.estado === 'confirmada') {
+      lineas.push(
+        reserva.depositoRecibidoEn
+          ? `Depósito de ${formatearDinero(reserva.deposito)}: la administración ya lo recibió.`
+          : `Depósito de ${formatearDinero(reserva.deposito)}: entrégalo a la administración antes del turno.`,
+      )
+    }
+  } else {
+    lineas.push(cierre.resultado === 'no_se_presento' ? 'La administración registró que no te presentaste.' : 'Reserva cerrada: se usó.')
+    if (cierre.cuotaUsoId && reserva.valorUso) {
+      lineas.push(`Se cargaron ${formatearDinero(reserva.valorUso)} a tu estado de cuenta.`)
+    }
+    if (cierre.depositoRetenido) {
+      lineas.push(
+        `Depósito: te devuelven ${formatearDinero(cierre.depositoDevuelto ?? 0)} y se retienen ${formatearDinero(cierre.depositoRetenido)}. Motivo: ${cierre.motivoRetencion}`,
+      )
+    } else if (cierre.depositoDevuelto) {
+      lineas.push(`Depósito: te devuelven ${formatearDinero(cierre.depositoDevuelto)}.`)
+    }
+  }
+  const sancion = reserva.sancionId ? bd.sanciones.find((s) => s.id === reserva.sancionId) : undefined
+  if (sancion) lineas.push(`La administración abrió el proceso ${sancion.radicado}: puedes presentar descargos en Procesos.`)
+  return lineas
 }

@@ -64,7 +64,7 @@ Regla estructural: **todo dato cuelga de una `Copropiedad`**, directamente o a t
 | Campo | Tipo | Notas |
 |---|---|---|
 | `periodo` | `AAAA-MM` | |
-| `tipo` | `'ordinaria' \| 'extraordinaria' \| 'interes' \| 'sancion'` | |
+| `tipo` | `'ordinaria' \| 'extraordinaria' \| 'interes' \| 'sancion' \| 'uso_zona'` | `uso_zona`: el cobro por usar una zona común, al cerrar la reserva (RN-119) |
 | `concepto` | string | Texto visible |
 | `valor` | number | Lo facturado. **Pesos enteros, sin decimales.** No cambia nunca |
 | `saldo` | number | Lo que falta por pagar. Nace igual a `valor` y baja con cada abono (RN-75) |
@@ -260,7 +260,11 @@ en el extracto de ese propietario y en su saldo.
 `motivoCancelacion?` y `canceladaEn?` (cuando la cancela la administración al cerrar o desactivar la
 zona, o una sola reserva: el motivo que se le mandó a quien reservó, RN-107, RN-108 y RN-115),
 `personas?` (cuántas van, contando a quien reserva, RN-113) y `canceladaFueraDePlazo?` (el
-residente canceló dentro del plazo con multa después del aviso, RN-112).
+residente canceló dentro del plazo con multa después del aviso, RN-112). Y la plata: `valorUso?` y
+`deposito?`, copiados de la zona al reservar (RN-118); `depositoRecibidoEn?` (RN-120);
+`cierre?` = `{resultado: 'usada' | 'no_se_presento', registradoEn, registradoPor, estadoZona?,
+observaciones?, foto?, cuotaUsoId?, depositoDevuelto?, depositoRetenido?, motivoRetencion?}`
+(RN-119, RN-120); `sancionId?`, el proceso por la multa (RN-121).
 
 ### Pqrs y MensajePqrs
 `radicado` (RN-12), `tipo` (`'peticion' \| 'queja' \| 'reclamo' \| 'sugerencia'`),
@@ -366,6 +370,12 @@ aprobó esa copropiedad, y la ley solo dice hasta dónde puede llegar.
 impuesta **no es una entidad nueva en la cartera**: es una `Cuota` con su tipo, así que entra
 sola en el saldo (RN-03), en la imputación por antigüedad (RN-06), en la mora (RN-71) y en el
 estado de cuenta del residente, sin tocar nada de eso.
+
+**2026-10-01: `'uso_zona'`** (RN-119). El cobro por usar una zona común entra de la misma manera,
+como una `Cuota` con su justificación y su respaldo. No contradice RN-73: esa regla rechazó un
+segundo nombre para la extraordinaria; esto es otra cosa, el precio de un servicio que la unidad
+pidió, y no lo aprueba la asamblea turno por turno. **Aviso para la contable (T-17):** es un tipo
+de cuota nuevo que su cartera también tendrá que reconocer.
 
 ### ConceptoSancion — el catálogo de multas
 
@@ -727,6 +737,10 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-115 | **La administración puede cancelar una sola reserva, con motivo, y a quien reservó le llega el mensaje.** Hasta hoy solo podía rechazar la que estaba por aprobar o cerrar la zona entera. Pero puede pasar que el consejo necesite el salón, o que la reserva se hizo violando el reglamento. Se cancela una reserva confirmada de hoy en adelante, con motivo obligatorio y el mismo mensaje de RN-107. No es una multa ni la genera. | `dominio/reglas.ts` (`puedeCancelarLaAdministracion`) + `datos/repositorio.ts` (`cancelarReservaPorAdministracion`) |
 | RN-116 | **Portería ve las reservas de hoy.** En la pantalla del turno aparecen las reservas confirmadas del día, por hora: zona, horario, unidad, quién reservó y cuántas personas van. Así se deja entrar a los invitados sin llamar al apartamento. Nada de costos, depósitos ni multas: igual que la cartera, no son asunto de la portería (RN-52). | `dominio/reglas.ts` (`reservasDeHoyParaPorteria`) + `features/porteria/TurnoPage.tsx` |
 | RN-117 | **El cierre por mantenimiento se le puede avisar a toda la copropiedad, con una sola acción** (Mary, 2026-10-01: *«que se genere un mensaje masivo… imagínate una copropiedad de 500 unidades enviar mensaje por propiedad»*). Al cerrar, la opción «Avisar a toda la copropiedad» viene marcada. Publica un comunicado de mantenimiento en la cartelera, vigente hasta que termina el cierre, y deja un mensaje a cada persona con residencia vigente: propietarios, arrendatarios y autorizados, uno por persona aunque tenga varias unidades. Quien ya recibió la cancelación de su reserva no recibe un segundo mensaje. La consola muestra antes a cuántas personas llegará y el texto exacto. | `dominio/reglas.ts` (`textoCierreZona`) + `datos/repositorio.ts` (`cerrarZonaPorMantenimiento`, `avisarCierreATodos`) |
+| RN-118 | **Lo que cuesta una reserva se fija al reservar.** El valor por uso y el depósito se copian de la zona a la reserva cuando se crea, igual que un documento contable guarda su cuenta (RN-85): si la administración sube el precio después, lo que el residente aceptó no cambia. | `dominio/reglas.ts` (`valoresDeLaReserva`) + `datos/repositorio.ts` (`crearReserva`) |
+| RN-119 | **El cobro por uso se genera al cerrar la reserva, no al confirmarla** (Mary, 2026-10-01: *«sigamos con el 8»*). Después del turno, la administración cierra la reserva: se usó, o no se presentó. En los dos casos se genera el cobro en el estado de cuenta de la unidad, porque el turno quedó apartado y nadie más lo pudo usar. Es una cuota `uso_zona`, con su justificación y el documento que la autoriza (RN-45, RN-47), que vence a los diez días. **Por qué al cerrar:** una reserva cancelada nunca deja un cobro, y así no hay cuotas que anular, lo que habría cambiado las reglas de cartera que se comparten con la contable (RN-75 a RN-79). Se cierra una sola vez, y solo una reserva confirmada cuyo turno ya empezó; la consola las reúne en el filtro «Por cerrar». | `dominio/reglas.ts` (`puedeCerrarReserva`, `justificacionCobroUso`) + `datos/repositorio.ts` (`cerrarReserva`) + `features/admin/CerrarReservaHoja.tsx` |
+| RN-120 | **El depósito se devuelve completo si la zona queda bien; si no, se retiene una parte, con motivo.** La administración registra «Recibí el depósito». Al cerrar la reserva anota cómo quedó la zona —bien, o con daños o faltantes descritos, con una foto opcional— y decide: devolverlo completo o retener una parte que no pasa del depósito. Retener exige que haya novedades y un motivo, que el residente lee en su app. Si no se presentó, la zona no se usó y el depósito se devuelve completo. | `dominio/reglas.ts` (`motivoCierreReservaInvalido`) + `datos/repositorio.ts` (`registrarDepositoRecibido`, `cerrarReserva`) |
+| RN-121 | **Si no se presentó, o canceló fuera de plazo, la administración puede abrir el proceso por la multa.** Se usa la multa del catálogo que la zona tiene configurada (RN-110), con un solo proceso por reserva y los hechos ya redactados: qué zona, qué turno y qué pasó. No es automático: la administración decide, al cerrar la reserva o con «Abrir proceso». Desde ahí es un proceso sancionatorio como cualquier otro: descargos, decisión, impugnación, y la cuota solo cuando queda firme (RN-39, RN-69). | `dominio/reglas.ts` (`puedeAbrirProcesoPorReserva`, `hechosDeLaReserva`) + `datos/repositorio.ts` (`abrirProcesoPorReserva`, que usa `imponerSancion`) |
 | RN-31 | El poder vale para **una sola asamblea** y vence al cerrarse. Está en el modelo, no en una comprobación: `Poder.asambleaId` lo ata a una, y `registrarPoder`/`otorgarPoder` rechazan una asamblea cerrada. Es lo mismo que hace temporal al usuario de asamblea (RN-30). | `dominio/tipos.ts` (`Poder.asambleaId`) + `repositorio.ts` |
 | RN-32 | **Quien otorgó poder no puede votar esa unidad directamente.** Serían dos personas con derecho al mismo voto, ganando quien llegue primero — que es justo lo que un poder resuelve. Se comprueba en el repositorio; en la pantalla las opciones quedan **deshabilitadas, no escondidas** (Mary, 2026-09-10), para que quien dio poder siga viendo qué se decide en su unidad. | `repositorio.ts` (`emitirVoto`) |
 | RN-33 | La citación se emite con la antelación mínima del reglamento. **(?)** | *pendiente* |

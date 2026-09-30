@@ -97,6 +97,12 @@ import {
   multaAlCancelar,
   puedeCancelarLaAdministracion,
   textoCierreZona,
+  valoresDeLaReserva,
+  justificacionCobroUso,
+  motivoCierreReservaInvalido,
+  puedeAbrirProcesoPorReserva,
+  hechosDeLaReserva,
+  DIAS_PARA_PAGAR_USO,
   type DatosZona,
   puedeConfirmarRecepcion,
   admiteGrabacion,
@@ -527,6 +533,8 @@ export async function crearReserva(
     estado: zona.requiereAprobacion ? 'solicitada' : 'confirmada',
     creadaEn: ahoraISO(),
     personas: parametros.personas ?? 1,
+    // RN-118 — Lo que cuesta se fija al reservar.
+    ...valoresDeLaReserva(zona),
   }
 
   bd.reservas.push(reserva)
@@ -566,6 +574,149 @@ export async function decidirReserva(
   reserva.estado = decision
   if (decision === 'rechazada') reserva.motivoRechazo = motivoRechazo || 'Sin motivo registrado'
   return persistir(bd, reserva)
+}
+
+// ---------------------------------------------------------------------------
+// La plata de la reserva — RN-119 a RN-121
+// ---------------------------------------------------------------------------
+
+/** RN-120 — La administración recibió el depósito. */
+export async function registrarDepositoRecibido(
+  bdActual: BaseDatos,
+  reservaId: string,
+): Promise<Resultado<Reserva>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const reserva = bd.reservas.find((r) => r.id === reservaId)
+  if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  if (!reserva.deposito) throw new ErrorDeNegocio('Esa reserva no pide depósito.')
+  if (reserva.depositoRecibidoEn) throw new ErrorDeNegocio('El depósito ya estaba recibido.')
+  if (reserva.estado !== 'confirmada') throw new ErrorDeNegocio('Solo se recibe el depósito de una reserva confirmada.')
+  reserva.depositoRecibidoEn = ahoraISO()
+  return persistir(bd, reserva)
+}
+
+/**
+ * RN-119 a RN-121 — Cierra la reserva después del turno: genera el cobro por
+ * uso, devuelve o retiene el depósito y, si se pide, abre el proceso.
+ */
+export async function cerrarReserva(
+  bdActual: BaseDatos,
+  parametros: {
+    reservaId: string
+    resultado: 'usada' | 'no_se_presento'
+    estadoZona?: 'bien' | 'con_novedades'
+    observaciones?: string
+    foto?: string
+    retener?: number
+    motivoRetencion?: string
+    registradoPor: string
+    abrirProceso?: boolean
+  },
+): Promise<Resultado<{ reserva: Reserva; cuota?: Cuota; sancion?: Sancion }>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const reserva = bd.reservas.find((r) => r.id === parametros.reservaId)
+  if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  if (!zona) throw new ErrorDeNegocio('La zona de esa reserva no existe.')
+  const invalido = motivoCierreReservaInvalido(reserva, parametros)
+  if (invalido) throw new ErrorDeNegocio(invalido)
+
+  const ahora = ahoraISO()
+  const noSePresento = parametros.resultado === 'no_se_presento'
+
+  // RN-119 — El cobro por uso, en el estado de cuenta.
+  let cuota: Cuota | undefined
+  if (reserva.valorUso) {
+    const hoy = hoyISO()
+    const origen = zona.respaldoCobro?.origen
+    cuota = {
+      id: nuevoId('cuo'),
+      unidadId: reserva.unidadId,
+      periodo: hoy.slice(0, 7),
+      tipo: 'uso_zona',
+      concepto: `Uso de ${zona.nombre} · ${fechaCortaReserva(reserva.fecha)}`,
+      valor: reserva.valorUso,
+      saldo: reserva.valorUso,
+      fechaVencimiento: sumarDias(hoy, DIAS_PARA_PAGAR_USO),
+      estado: 'pendiente',
+      ...(origen === 'reglamento' || origen === 'asamblea' ? { origen } : {}),
+      ...(zona.respaldoCobro ? { referencia: zona.respaldoCobro.referencia } : {}),
+      justificacion: justificacionCobroUso(reserva, zona, noSePresento),
+    }
+    bd.cuotas.push(cuota)
+  }
+
+  // RN-120 — El depósito: completo si no se usó o quedó bien; si no, lo que se retiene.
+  const recibido = reserva.depositoRecibidoEn ? (reserva.deposito ?? 0) : 0
+  const retenido = noSePresento ? 0 : Math.min(parametros.retener ?? 0, recibido)
+  reserva.cierre = {
+    resultado: parametros.resultado,
+    registradoEn: ahora,
+    registradoPor: parametros.registradoPor,
+    ...(noSePresento
+      ? {}
+      : {
+          estadoZona: parametros.estadoZona,
+          ...(parametros.observaciones?.trim() ? { observaciones: parametros.observaciones.trim() } : {}),
+          ...(parametros.foto ? { foto: { imagen: parametros.foto, adjuntadoEn: ahora } } : {}),
+        }),
+    ...(cuota ? { cuotaUsoId: cuota.id } : {}),
+    ...(recibido
+      ? {
+          depositoDevuelto: recibido - retenido,
+          ...(retenido ? { depositoRetenido: retenido, motivoRetencion: parametros.motivoRetencion!.trim() } : {}),
+        }
+      : {}),
+  }
+
+  if (!parametros.abrirProceso) return persistir(bd, { reserva, cuota })
+
+  // RN-121 — El proceso por la multa, con el mismo camino que cualquier sanción.
+  const conProceso = await abrirProcesoPorReservaEn(bd, reserva.id, parametros.registradoPor)
+  return persistir(conProceso.bd, {
+    reserva: conProceso.bd.reservas.find((r) => r.id === reserva.id)!,
+    cuota,
+    sancion: conProceso.datos,
+  })
+}
+
+/** RN-121 — Abre el proceso por la multa de una reserva (no se presentó o canceló fuera de plazo). */
+export async function abrirProcesoPorReserva(
+  bdActual: BaseDatos,
+  parametros: { reservaId: string; impuestaPor: string },
+): Promise<Resultado<Sancion>> {
+  return abrirProcesoPorReservaEn(clonar(bdActual), parametros.reservaId, parametros.impuestaPor)
+}
+
+async function abrirProcesoPorReservaEn(
+  bd: BaseDatos,
+  reservaId: string,
+  impuestaPor: string,
+): Promise<Resultado<Sancion>> {
+  const reserva = bd.reservas.find((r) => r.id === reservaId)
+  if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  if (!zona || !puedeAbrirProcesoPorReserva(reserva, zona)) {
+    throw new ErrorDeNegocio('Esa reserva no tiene un proceso por abrir.')
+  }
+  const resultado = await imponerSancion(bd, {
+    copropiedadId: zona.copropiedadId,
+    unidadId: reserva.unidadId,
+    conceptoId: zona.multaNoCancelar!.conceptoId,
+    hechos: hechosDeLaReserva(reserva, zona),
+    impuestaPor,
+  })
+  const enLaNueva = resultado.bd.reservas.find((r) => r.id === reservaId)!
+  enLaNueva.sancionId = resultado.datos.id
+  return persistir(resultado.bd, resultado.datos)
+}
+
+/** `2026-10-06` → `06/10/2026`, para el concepto de la cuota. */
+function fechaCortaReserva(fecha: string): string {
+  const [anio, mes, dia] = fecha.split('-')
+  return `${dia}/${mes}/${anio}`
 }
 
 // ---------------------------------------------------------------------------

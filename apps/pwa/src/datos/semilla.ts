@@ -58,7 +58,9 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 28 — zonas compartidas (gimnasio y coworking, RN-111), personas por reserva
 //      (RN-113), horario por dia del gimnasio (RN-114) y reservas de hoy y de
 //      mañana para ver portería (RN-116) y el aviso al cancelar (RN-112).
-export const VERSION_ESQUEMA = 28
+// 29 — la plata de la reserva: valores copiados al reservar (RN-118) y dos
+//      reservas pasadas por cerrar, una con deposito recibido (RN-119 a RN-121).
+export const VERSION_ESQUEMA = 29
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -533,6 +535,8 @@ function construirReservas(): Reserva[] {
       estado: 'confirmada',
       creadaEn: `${sumarDias(hoy, -2)}T18:20:00.000Z`,
       personas: 30,
+      valorUso: 80000,
+      deposito: 200000,
     },
     {
       id: 'rsv-2',
@@ -544,6 +548,7 @@ function construirReservas(): Reserva[] {
       horaFin: '19:00',
       estado: 'solicitada',
       creadaEn: `${sumarDias(hoy, -1)}T20:05:00.000Z`,
+      valorUso: 30000,
     },
     {
       id: 'rsv-3',
@@ -555,6 +560,8 @@ function construirReservas(): Reserva[] {
       horaFin: '21:00',
       estado: 'solicitada',
       creadaEn: `${sumarDias(hoy, -1)}T08:40:00.000Z`,
+      valorUso: 80000,
+      deposito: 200000,
     },
     {
       id: 'rsv-4',
@@ -579,6 +586,7 @@ function construirReservas(): Reserva[] {
       estado: 'confirmada',
       creadaEn: `${sumarDias(hoy, -3)}T10:00:00.000Z`,
       personas: 10,
+      valorUso: 30000,
     },
     // RN-111 — Dos unidades comparten el gimnasio mañana a las 7: quedan 3 cupos.
     {
@@ -617,6 +625,38 @@ function construirReservas(): Reserva[] {
       estado: 'confirmada',
       creadaEn: `${sumarDias(hoy, -10)}T09:00:00.000Z`,
       personas: 20,
+      valorUso: 80000,
+      deposito: 200000,
+    },
+    // RN-119 a RN-121 — Dos turnos ya pasados, para cerrar desde la consola:
+    // el salón, con el depósito recibido; la terraza, para el «no se presentó».
+    {
+      id: 'rsv-9',
+      zonaId: 'zon-salon',
+      unidadId: 'uni-torre1-202',
+      personaId: 'per-4',
+      fecha: sumarDias(hoy, -2),
+      horaInicio: '13:00',
+      horaFin: '17:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -12)}T15:00:00.000Z`,
+      personas: 25,
+      valorUso: 80000,
+      deposito: 200000,
+      depositoRecibidoEn: `${sumarDias(hoy, -3)}T16:00:00.000Z`,
+    },
+    {
+      id: 'rsv-10',
+      zonaId: 'zon-bbq',
+      unidadId: 'uni-torre2-501',
+      personaId: 'per-8',
+      fecha: sumarDias(hoy, -3),
+      horaInicio: '15:00',
+      horaFin: '19:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -9)}T12:00:00.000Z`,
+      personas: 8,
+      valorUso: 30000,
     },
   ]
 }

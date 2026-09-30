@@ -126,7 +126,8 @@ export interface Residencia {
 // ---------------------------------------------------------------------------
 // Cartera
 // ---------------------------------------------------------------------------
-export type TipoCuota = 'ordinaria' | 'extraordinaria' | 'interes' | 'sancion'
+/** `uso_zona`: el cobro por usar una zona comun, al cerrar la reserva (RN-119). */
+export type TipoCuota = 'ordinaria' | 'extraordinaria' | 'interes' | 'sancion' | 'uso_zona'
 
 /**
  * Estado de una cuota. `abonada` es el estado intermedio: ya recibio pagos
@@ -538,6 +539,39 @@ export interface Reserva {
    * decide si abre el proceso.
    */
   canceladaFueraDePlazo?: boolean
+  /**
+   * Lo que costaba cuando se reservo (RN-118). Se copia de la zona al crear la
+   * reserva: si la administracion cambia el precio despues, lo pactado no cambia.
+   */
+  valorUso?: Dinero
+  deposito?: Dinero
+  /** Cuando la administracion recibio el deposito (RN-120). */
+  depositoRecibidoEn?: FechaHoraISO
+  /** Como termino: se uso o no se presento (RN-119 a RN-121). */
+  cierre?: CierreReserva
+  /** El proceso por la multa, si la administracion lo abrio (RN-121). */
+  sancionId?: string
+}
+
+/**
+ * El cierre de una reserva, despues del turno (RN-119). Es el momento en que
+ * la plata se mueve: el cobro por uso, el deposito y, si no se presento, la
+ * multa.
+ */
+export interface CierreReserva {
+  resultado: 'usada' | 'no_se_presento'
+  registradoEn: FechaHoraISO
+  registradoPor: string
+  /** Como quedo la zona al recibirla (RN-120). Solo si se uso. */
+  estadoZona?: 'bien' | 'con_novedades'
+  observaciones?: string
+  foto?: Soporte
+  /** La cuota del cobro por uso, en el estado de cuenta (RN-119). */
+  cuotaUsoId?: string
+  /** Lo que se devolvio y lo que se retuvo del deposito, con su motivo (RN-120). */
+  depositoDevuelto?: Dinero
+  depositoRetenido?: Dinero
+  motivoRetencion?: string
 }
 
 // ---------------------------------------------------------------------------

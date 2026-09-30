@@ -2675,3 +2675,113 @@ export function ocupacionDeLaSemana(
   }
   return { turnos, ocupados, personas, cupo: turnos * zona.aforo }
 }
+
+// ---------------------------------------------------------------------------
+// La plata de la reserva: cobro por uso, depósito y multa — RN-118 a RN-121
+// ---------------------------------------------------------------------------
+
+/**
+ * RN-118 — **Lo que cuesta una reserva se fija al reservar.**
+ *
+ * El valor por uso y el depósito se copian de la zona a la reserva cuando se
+ * crea, como el documento contable guarda su cuenta (RN-85): si la
+ * administración sube el precio después, lo que el residente aceptó no cambia.
+ */
+export function valoresDeLaReserva(zona: ZonaComun): { valorUso?: number; deposito?: number } {
+  return {
+    ...(zona.valorUso ? { valorUso: zona.valorUso } : {}),
+    ...(zona.deposito ? { deposito: zona.deposito } : {}),
+  }
+}
+
+/**
+ * RN-119 — **El cobro por uso se genera al cerrar la reserva, no al
+ * confirmarla.**
+ *
+ * «Sigamos con el 8» (Mary, 2026-10-01). Después del turno, la administración
+ * cierra la reserva: se usó, o no se presentó. En los dos casos se genera el
+ * cobro por uso en el estado de cuenta de la unidad —el turno quedó apartado
+ * y nadie más lo pudo usar—, como una cuota `uso_zona` con su justificación
+ * y el documento que la autoriza (RN-45, RN-47), que vence a los diez días.
+ *
+ * Por qué al cerrar y no al confirmar: una reserva cancelada nunca deja un
+ * cobro, y así no hace falta anular cuotas, que es tocar las reglas de cartera
+ * que se comparten con la contable (RN-75 a RN-79). Se cierra una reserva
+ * confirmada cuyo turno ya empezó, una sola vez.
+ */
+export const DIAS_PARA_PAGAR_USO = 10
+
+export function puedeCerrarReserva(reserva: Reserva, ahora: Date = new Date()): boolean {
+  if (reserva.estado !== 'confirmada' || reserva.cierre) return false
+  return new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime() <= ahora.getTime()
+}
+
+/** Por qué se cobra, en la línea del estado de cuenta (RN-47). */
+export function justificacionCobroUso(reserva: Reserva, zona: ZonaComun, noSePresento: boolean): string {
+  const respaldo = zona.respaldoCobro ? ` (${textoRespaldo(zona.respaldoCobro)})` : ''
+  const cuando = `${fechaCorta(reserva.fecha)}, ${reserva.horaInicio} a ${reserva.horaFin}`
+  return noSePresento
+    ? `Reserva de ${zona.nombre} del ${cuando}: el turno quedó apartado y no se usó${respaldo}.`
+    : `Uso de ${zona.nombre} el ${cuando}${respaldo}.`
+}
+
+/**
+ * RN-120 — **El depósito se devuelve completo si la zona queda bien; si no, se
+ * retiene una parte, con motivo.**
+ *
+ * La administración registra que lo recibió. Al cerrar la reserva anota cómo
+ * quedó la zona —bien, o con novedades, que se describen, con una foto si la
+ * hay— y decide: devolverlo completo o retener una parte que no pasa del
+ * depósito. Retener exige que haya novedades y el motivo: es la plata del
+ * residente, y sin prueba es la queja que sigue. Si no se presentó, la zona no
+ * se usó y el depósito se devuelve completo.
+ */
+export function motivoCierreReservaInvalido(
+  reserva: Reserva,
+  cierre: {
+    resultado: 'usada' | 'no_se_presento'
+    estadoZona?: 'bien' | 'con_novedades'
+    observaciones?: string
+    retener?: number
+    motivoRetencion?: string
+  },
+): string | null {
+  if (!puedeCerrarReserva(reserva)) return 'Esa reserva no se puede cerrar: tiene que estar confirmada y su turno ya empezado.'
+  if (cierre.resultado === 'no_se_presento') return null
+  if (!cierre.estadoZona) return 'Di cómo quedó la zona.'
+  if (cierre.estadoZona === 'con_novedades' && (cierre.observaciones ?? '').trim().length < 10) {
+    return 'Describe las novedades: qué se dañó o qué faltó.'
+  }
+  const retener = cierre.retener ?? 0
+  if (retener > 0) {
+    if (!reserva.depositoRecibidoEn) return 'No se puede retener un depósito que no se recibió.'
+    if (cierre.estadoZona !== 'con_novedades') return 'Solo se retiene si la zona quedó con novedades.'
+    if (!Number.isInteger(retener) || retener > (reserva.deposito ?? 0)) {
+      return 'Lo retenido va en pesos y no pasa del depósito.'
+    }
+    if ((cierre.motivoRetencion ?? '').trim().length < 10) return 'Escribe por qué se retiene: es lo que lee el residente.'
+  }
+  return null
+}
+
+/**
+ * RN-121 — **Si no se presentó, o canceló fuera de plazo, la administración
+ * puede abrir el proceso por la multa.**
+ *
+ * Con la multa que la zona tiene en el catálogo (RN-110), un solo proceso por
+ * reserva y con los hechos ya escritos: qué zona, qué turno y qué pasó. La
+ * administración decide si lo abre —no es automático—, y desde ahí es un
+ * proceso sancionatorio como cualquiera: descargos, decisión, impugnación y
+ * la cuota solo cuando queda firme (RN-39, RN-69).
+ */
+export function puedeAbrirProcesoPorReserva(reserva: Reserva, zona: ZonaComun | undefined): boolean {
+  if (!zona?.multaNoCancelar || reserva.sancionId) return false
+  return reserva.cierre?.resultado === 'no_se_presento' || !!reserva.canceladaFueraDePlazo
+}
+
+export function hechosDeLaReserva(reserva: Reserva, zona: ZonaComun): string {
+  const cuando = `el ${fechaCorta(reserva.fecha)} de ${reserva.horaInicio} a ${reserva.horaFin}`
+  return reserva.canceladaFueraDePlazo
+    ? `La unidad canceló su reserva de ${zona.nombre} ${cuando} fuera del plazo de ${zona.multaNoCancelar?.horasParaCancelar ?? 0} horas que fija la zona.`
+    : `La unidad reservó ${zona.nombre} ${cuando}, no se presentó y no canceló la reserva.`
+}

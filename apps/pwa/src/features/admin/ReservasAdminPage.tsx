@@ -1,5 +1,6 @@
 /**
- * CU-A-06 — Aprobar o rechazar reservas.
+ * CU-A-06 — Aprobar o rechazar reservas, cancelarlas con motivo (RN-115) y
+ * cerrarlas después del turno: cobro por uso, depósito y multa (RN-119 a RN-121).
  * Doc: docs/casos-de-uso/administrador.md#cu-a-06
  *
  * Reservas tiene tres pestañas: las reservas, el calendario de ocupación
@@ -13,20 +14,29 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { cancelarReservaPorAdministracion, decidirReserva } from '../../datos/repositorio'
+import {
+  abrirProcesoPorReserva,
+  cancelarReservaPorAdministracion,
+  decidirReserva,
+  registrarDepositoRecibido,
+} from '../../datos/repositorio'
 import {
   etiquetaUnidad,
   hoyISO,
   MINIMO_MOTIVO_DESACTIVACION,
+  puedeAbrirProcesoPorReserva,
   puedeCancelarLaAdministracion,
+  puedeCerrarReserva,
   textoReservaCancelada,
 } from '../../dominio/reglas'
-import { formatearFecha } from '../../utilidades/formato'
+import { formatearDinero, formatearFecha } from '../../utilidades/formato'
+import { CerrarReservaHoja } from './CerrarReservaHoja'
 import { Modal } from '../../componentes/Modal'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipReserva } from '../../componentes/Etiquetas'
+import type { Reserva } from '../../dominio/tipos'
 
-type Filtro = 'pendientes' | 'proximas' | 'todas'
+type Filtro = 'pendientes' | 'por_cerrar' | 'proximas' | 'todas'
 
 /** Las pestañas de Reservas. Son navegación, no filtros: cada una tiene su ruta. */
 export function ReservasSeccionAdmin() {
@@ -57,12 +67,15 @@ export function ReservasAdminPage() {
   /** RN-115 — La reserva que la administración va a cancelar, y su motivo. */
   const [cancelando, setCancelando] = useState<string | null>(null)
   const [motivoCancelacion, setMotivoCancelacion] = useState('')
+  /** RN-119 — La reserva que se está cerrando después del turno. */
+  const [cerrando, setCerrando] = useState<string | null>(null)
 
   if (!sesion) return null
 
   const hoy = hoyISO()
   const reservas = sel.reservasDeCopropiedad(bd, sesion.copropiedadId).filter((reserva) => {
     if (filtro === 'pendientes') return reserva.estado === 'solicitada'
+    if (filtro === 'por_cerrar') return puedeCerrarReserva(reserva)
     if (filtro === 'proximas') return reserva.fecha >= hoy
     return true
   })
@@ -85,6 +98,7 @@ export function ReservasAdminPage() {
         {(
           [
             ['pendientes', 'Por aprobar'],
+            ['por_cerrar', 'Por cerrar'],
             ['proximas', 'Proximas'],
             ['todas', 'Todas'],
           ] as Array<[Filtro, string]>
@@ -140,6 +154,8 @@ export function ReservasAdminPage() {
                       </td>
                       <td>
                         <ChipReserva estado={reserva.estado} />
+                        {/* RN-119 a RN-121 — La plata de la reserva, a la vista. */}
+                        <PlataDeLaReserva reserva={reserva} />
                         {reserva.canceladaFueraDePlazo && (
                           <div style={{ fontSize: 'var(--texto-xs)', marginTop: 'var(--e1)', color: 'var(--color-alerta)' }}>
                             Cancelada fuera de plazo: puede abrir el proceso por la multa
@@ -152,6 +168,42 @@ export function ReservasAdminPage() {
                         )}
                       </td>
                       <td style={{ textAlign: 'right' }}>
+                        <div className="grupo-botones" style={{ justifyContent: 'flex-end' }}>
+                          {reserva.deposito && !reserva.depositoRecibidoEn && reserva.estado === 'confirmada' && !reserva.cierre && (
+                            <button
+                              className="boton boton--pequeno"
+                              disabled={cargando}
+                              onClick={() =>
+                                ejecutar((base) => registrarDepositoRecibido(base, reserva.id), 'Depósito registrado como recibido.')
+                              }
+                            >
+                              Recibí el depósito
+                            </button>
+                          )}
+                          {puedeCerrarReserva(reserva) && (
+                            <button className="boton boton--pequeno boton--primario" onClick={() => setCerrando(reserva.id)}>
+                              Cerrar
+                            </button>
+                          )}
+                          {puedeAbrirProcesoPorReserva(reserva, sel.zona(bd, reserva.zonaId)) && (
+                            <button
+                              className="boton boton--pequeno"
+                              disabled={cargando}
+                              onClick={() =>
+                                ejecutar(
+                                  (base) =>
+                                    abrirProcesoPorReserva(base, {
+                                      reservaId: reserva.id,
+                                      impuestaPor: nombreCompleto(sel.persona(bd, sesion.personaId)),
+                                    }),
+                                  'Proceso abierto. Se ve en Procesos, con su plazo para descargos.',
+                                )
+                              }
+                            >
+                              Abrir proceso
+                            </button>
+                          )}
+                        </div>
                         {puedeCancelarLaAdministracion(reserva) && (
                           <button
                             className="boton boton--pequeno boton--peligro"
@@ -194,6 +246,13 @@ export function ReservasAdminPage() {
           </div>
         </div>
       )}
+
+      {cerrando && (() => {
+        const reserva = bd.reservas.find((r) => r.id === cerrando)
+        const zona = reserva && sel.zona(bd, reserva.zonaId)
+        if (!reserva || !zona) return null
+        return <CerrarReservaHoja reserva={reserva} zona={zona} alCerrar={() => setCerrando(null)} />
+      })()}
 
       {cancelando && (() => {
         const reserva = bd.reservas.find((r) => r.id === cancelando)
@@ -266,5 +325,41 @@ export function ReservasAdminPage() {
         </Modal>
       )}
     </>
+  )
+}
+
+/** RN-119 a RN-121 — El cobro, el depósito y el proceso de una reserva, en pocas palabras. */
+function PlataDeLaReserva({ reserva }: { reserva: Reserva }) {
+  const { bd } = useDatos()
+  const lineas: string[] = []
+  const cierre = reserva.cierre
+  if (cierre) {
+    lineas.push(
+      cierre.resultado === 'no_se_presento'
+        ? 'No se presentó'
+        : `Se usó · ${cierre.estadoZona === 'con_novedades' ? 'con novedades' : 'quedó bien'}`,
+    )
+    if (cierre.cuotaUsoId && reserva.valorUso) lineas.push(`Cobro ${formatearDinero(reserva.valorUso)}`)
+    if (cierre.depositoDevuelto !== undefined) {
+      lineas.push(
+        cierre.depositoRetenido
+          ? `Depósito: devuelto ${formatearDinero(cierre.depositoDevuelto)}, retenido ${formatearDinero(cierre.depositoRetenido)}`
+          : `Depósito devuelto ${formatearDinero(cierre.depositoDevuelto)}`,
+      )
+    }
+  } else if (reserva.deposito && reserva.estado === 'confirmada') {
+    lineas.push(
+      reserva.depositoRecibidoEn
+        ? `Depósito ${formatearDinero(reserva.deposito)} recibido`
+        : `Depósito ${formatearDinero(reserva.deposito)} por recibir`,
+    )
+  }
+  const sancion = reserva.sancionId ? bd.sanciones.find((s) => s.id === reserva.sancionId) : undefined
+  if (sancion) lineas.push(`Proceso ${sancion.radicado}`)
+  if (lineas.length === 0) return null
+  return (
+    <div className="tenue" style={{ fontSize: 'var(--texto-xs)', marginTop: 'var(--e1)' }}>
+      {lineas.join(' · ')}
+    </div>
   )
 }

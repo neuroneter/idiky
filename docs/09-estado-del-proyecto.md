@@ -22,7 +22,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 74 documentados: 42 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 20 ⬜ pendientes, 2 ⛔ retirados |
-| **Reglas de negocio** | 117 del demo (RN-01…RN-117; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-117, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
+| **Reglas de negocio** | 121 del demo (RN-01…RN-121; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-121, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -110,6 +110,50 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-01 · Mary + IA (Claude) · La plata de la reserva: cobro por uso, depósito y multa (RN-118 a RN-121)
+
+Mary: *«sigamos con el 8»*. Hasta hoy el cobro, el depósito y la multa se configuraban y se
+informaban, pero no pasaba nada con la plata.
+
+- **RN-118:** el valor y el depósito se copian a la reserva al crearla; un cambio de precio
+  posterior no cambia lo pactado.
+- **RN-119:** el cobro por uso se genera **al cerrar la reserva**, después del turno. Si se usó o
+  si no se presentó, va al estado de cuenta como cuota `uso_zona`, con su justificación y su
+  respaldo, y vence a los diez días. **Decisión de diseño:** cobrar al confirmar obligaría a
+  anular cuotas cuando alguien cancela, y eso toca las reglas de cartera que se comparten con la
+  contable. Cobrando al cerrar, una reserva cancelada nunca deja cobro.
+- **RN-120:** «Recibí el depósito». Al cerrar se anota cómo quedó la zona, con una foto opcional,
+  y se devuelve completo o se retiene una parte, con novedades descritas y un motivo que el
+  residente lee.
+- **RN-121:** si no se presentó o canceló fuera de plazo, la administración puede abrir el
+  proceso por la multa del catálogo, con los hechos ya redactados. Es un solo proceso por reserva
+  y sigue el debido proceso de siempre.
+
+**En la consola:** Reservas tiene el filtro nuevo «Por cerrar», los botones «Recibí el
+depósito», «Cerrar» y «Abrir proceso», y la hoja de cierre (`features/admin/CerrarReservaHoja.tsx`)
+muestra lo que se mueve antes de confirmar. **El residente** ve en «Mis reservas» el depósito
+por entregar, el cobro, lo que le devuelven o retienen, y el proceso si se abrió.
+
+**Aviso para Jeimy (T-17):** hay un tipo de cuota nuevo, `uso_zona`. Su cartera también tendrá
+que reconocerlo cuando se crucen los datos.
+
+**Semilla 29:** las reservas llevan sus valores, y hay dos turnos ya pasados por cerrar: el salón
+con el depósito recibido y la terraza.
+
+**Verificado.** 14 comprobaciones con Playwright:
+- Las validaciones del cierre: novedades sin describir, retener más que el depósito.
+- La retención de $90.000 sobre $200.000.
+- La cuota con su justificación y su respaldo, y el cobro en el estado de cuenta del residente.
+- El «no se presentó» con cobro.
+- El proceso por cancelar fuera de plazo, uno solo.
+
+Otras 3 cubren el «no se presentó» con proceso al cerrar. Las 74 anteriores de zonas comunes
+siguen en verde. `npm run build` y la ortografía, en verde.
+
+**Con esto se cierran los ocho puntos de la revisión de zonas comunes.**
+
+---
+
 ### 2026-10-01 · Mary + IA (Claude) · El calendario de ocupación de las zonas (CU-A-29)
 
 Mary escogió el punto 7 de la revisión de zonas comunes: *«con el 7»*.
@@ -134,7 +178,7 @@ casilla sale de una sola función (`celdaCalendario` en `dominio/reglas.ts`).
 
 `npm run build` y la ortografía, en verde.
 
-**Lo que sigue:** mover la plata del cobro por uso, el depósito y la multa (punto 8).
+**Lo que sigue:** ~~mover la plata (punto 8)~~ → hecho (RN-118 a RN-121).
 
 ---
 

@@ -202,6 +202,10 @@ La integración con pasarela está en el roadmap (fase 4).
 - A9. Al cancelar dentro del plazo con multa, la app lo advierte antes, con el valor y el
   respaldo: conserva la reserva o cancela de todos modos, y queda marcada fuera de plazo
   (RN-112).
+- A10. En «Mis reservas» ve si debe entregar el depósito o si la administración ya lo recibió
+  y, después del turno, cómo se cerró la reserva: el cobro por uso que se cargó a su estado de
+  cuenta, el depósito que le devuelven o lo que se retuvo con su motivo, y el proceso por la
+  multa si se abrió, para presentar descargos (RN-118 a RN-121).
 
 **Reglas de negocio**
 - RN-08: una unidad en mora no puede reservar zonas comunes.

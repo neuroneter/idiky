@@ -163,12 +163,25 @@ cuenta, plegado bajo «¿Por qué se cobra?».
   obligatorio, y muestra el mensaje que le llegará a quien reservó.
 - A2. Confirma: la reserva queda cancelada, con el motivo, y el mensaje queda escrito.
 
-La tabla muestra cuántas personas van (RN-113) y marca las reservas que el residente canceló
-fuera de plazo (RN-112), para que la administración decida si abre el proceso por la multa.
+**Flujo alternativo — la plata de la reserva (RN-118 a RN-121)**
+- A3. Si la reserva pide depósito, «Recibí el depósito» deja constancia de que se recibió.
+- A4. Después del turno la reserva aparece en «Por cerrar». «Cerrar» pregunta qué pasó:
+  - **Se usó:** cómo quedó la zona (bien, o con daños o faltantes descritos) y una foto
+    opcional. Si hubo novedades y se recibió el depósito, cuánto se retiene y por qué.
+  - **No se presentó:** el depósito se devuelve completo. Si la zona tiene multa, la
+    administración puede marcar «Abrir el proceso por la multa».
+- A5. Antes de confirmar, la consola muestra lo que se mueve: el cobro por uso al estado de
+  cuenta y el depósito que se devuelve o se retiene. Al cerrar, se genera la cuota `uso_zona` y
+  queda el registro.
+- A6. En una reserva cancelada fuera de plazo, «Abrir proceso» abre el proceso por la multa del
+  catálogo, con los hechos ya redactados. Hay un solo proceso por reserva.
+
+La tabla muestra cuántas personas van (RN-113), el depósito y el cierre de cada reserva, y
+marca las que el residente canceló fuera de plazo (RN-112).
 
 **Reglas de negocio**
 - RN-09 (una sola reserva confirmada por franja en la zona exclusiva; en la compartida, hasta
-  el aforo, RN-111), RN-08 (mora bloquea), RN-112, RN-113, RN-115.
+  el aforo, RN-111), RN-08 (mora bloquea), RN-112, RN-113, RN-115, RN-118 a RN-121.
 
 **Estado en el demo:** ✅ — `src/features/admin/ReservasAdminPage.tsx`.
 
@@ -1028,10 +1041,9 @@ rápida.
   cancelar, del catálogo), RN-111 (uso exclusivo o compartido), RN-114 (días y horario de cada
   día), RN-117 (aviso masivo del cierre).
 
-**Lo que sigue:** el calendario ya existe (CU-A-29). El cobro y el depósito hoy se
-parametrizan y se informan; falta generar el
-cobro en el estado de cuenta al confirmar la reserva, registrar la devolución del depósito y marcar la reserva como «No se presentó» para iniciar desde ahí el proceso
-sancionatorio.
+**La plata se mueve desde CU-A-06** (2026-10-01): el cobro por uso al cerrar la reserva, el
+depósito recibido y devuelto o retenido, y el proceso por la multa (RN-118 a RN-121). El
+calendario de ocupación es CU-A-29.
 
 **Estado en el demo:** ✅ — `src/features/admin/ZonasAdminPage.tsx` (pestaña «Zonas
 comunes» de `ReservasAdminPage.tsx`, ruta `/admin/reservas/zonas`).
