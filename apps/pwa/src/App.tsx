@@ -39,6 +39,7 @@ import { PagosPage } from './features/admin/PagosPage'
 import { ReservasAdminPage, ReservasSeccionAdmin } from './features/admin/ReservasAdminPage'
 import { ZonasAdminPage } from './features/admin/ZonasAdminPage'
 import { CalendarioZonasPage } from './features/admin/CalendarioZonasPage'
+import { InformeZonasPage } from './features/admin/InformeZonasPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
 import { ProyectosAdminPage } from './features/admin/ProyectosAdminPage'
@@ -137,6 +138,7 @@ export function App() {
         <Route path="reservas" element={<ReservasSeccionAdmin />}>
           <Route index element={<ReservasAdminPage />} />
           <Route path="calendario" element={<CalendarioZonasPage />} />
+          <Route path="informe" element={<InformeZonasPage />} />
           <Route path="zonas" element={<ZonasAdminPage />} />
         </Route>
         <Route path="pqrs" element={<PqrsAdminPage />} />

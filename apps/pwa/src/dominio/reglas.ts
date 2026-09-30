@@ -2955,3 +2955,122 @@ export function motivoInvitadosInvalido(invitados: string[], personas: number): 
 export function puedeEditarInvitados(reserva: Reserva, ahora: Date = new Date()): boolean {
   return (reserva.estado === 'solicitada' || reserva.estado === 'confirmada') && inicioDeReserva(reserva) > ahora.getTime()
 }
+
+// ---------------------------------------------------------------------------
+// Informe de uso de las zonas comunes — CU-A-30
+// ---------------------------------------------------------------------------
+
+/** Los días de un periodo, de `desde` a `hasta`, incluidos los dos. */
+export function diasDelPeriodo(desde: FechaISO, hasta: FechaISO): FechaISO[] {
+  const dias: FechaISO[] = []
+  for (let dia = desde; dia <= hasta && dias.length < 400; dia = sumarDias(dia, 1)) dias.push(dia)
+  return dias
+}
+
+/** Lo que dice el informe de una zona en un periodo. */
+export interface FilaInformeZona {
+  zona: ZonaComun
+  /** Todas las reservas con fecha en el periodo, en cualquier estado. */
+  solicitudes: number
+  /** Las que quedaron tomadas: confirmadas, usadas o no. */
+  tomadas: number
+  usadas: number
+  noSePresento: number
+  canceladasPorResidente: number
+  canceladasFueraDePlazo: number
+  canceladasPorAdministracion: number
+  rechazadas: number
+  vencidas: number
+  /** Personas declaradas en las tomadas (RN-113). */
+  personas: number
+  /** Turnos que abrieron en el periodo y cuántos tuvieron al menos una reserva. */
+  turnos: number
+  turnosOcupados: number
+  /** Cobros por uso generados al cerrar (RN-119) y lo que ya se pagó de ellos. */
+  cobrado: number
+  recaudado: number
+  depositoRetenido: number
+  procesos: number
+}
+
+/**
+ * CU-A-30 — **El informe de uso cuenta lo que ya está registrado; no inventa.**
+ *
+ * «Me gusta la idea del informe del uso de las zonas comunes» (Mary,
+ * 2026-10-01). Toma las reservas con fecha dentro del periodo y cuenta así:
+ * tomadas son las confirmadas (se hayan cerrado o no); usadas y «no se
+ * presentó» salen del cierre (RN-119); las canceladas se separan por quién y
+ * cuándo (el residente a tiempo, fuera de plazo —RN-112— o la administración,
+ * RN-107, RN-108, RN-115); la ocupación son los turnos que abrieron con al
+ * menos una reserva, con los días y cierres de cada zona (RN-114, RN-108); lo
+ * cobrado son las cuotas de uso generadas y lo recaudado, lo que ya se pagó
+ * de ellas (RN-75). No es una regla nueva: es la suma de las que ya existen.
+ */
+export function informeDeUsoDeZonas(
+  zonas: ZonaComun[],
+  reservas: Reserva[],
+  cuotas: Cuota[],
+  desde: FechaISO,
+  hasta: FechaISO,
+): FilaInformeZona[] {
+  const dias = diasDelPeriodo(desde, hasta)
+  return zonas.map((zona) => {
+    const delPeriodo = reservas.filter((r) => r.zonaId === zona.id && r.fecha >= desde && r.fecha <= hasta)
+    const tomadas = delPeriodo.filter((r) => r.estado === 'confirmada')
+    const canceladas = delPeriodo.filter((r) => r.estado === 'cancelada')
+    const ocupacion = ocupacionDeLaSemana(zona, reservas, dias)
+    let cobrado = 0
+    let recaudado = 0
+    let depositoRetenido = 0
+    for (const r of tomadas) {
+      const cuota = r.cierre?.cuotaUsoId ? cuotas.find((c) => c.id === r.cierre!.cuotaUsoId) : undefined
+      if (cuota) {
+        cobrado += cuota.valor
+        recaudado += cuota.valor - cuota.saldo
+      }
+      depositoRetenido += r.cierre?.depositoRetenido ?? 0
+    }
+    return {
+      zona,
+      solicitudes: delPeriodo.length,
+      tomadas: tomadas.length,
+      usadas: tomadas.filter((r) => r.cierre?.resultado === 'usada').length,
+      noSePresento: tomadas.filter((r) => r.cierre?.resultado === 'no_se_presento').length,
+      canceladasPorResidente: canceladas.filter((r) => !r.motivoCancelacion && !r.canceladaFueraDePlazo).length,
+      canceladasFueraDePlazo: canceladas.filter((r) => r.canceladaFueraDePlazo).length,
+      canceladasPorAdministracion: canceladas.filter((r) => !!r.motivoCancelacion).length,
+      rechazadas: delPeriodo.filter((r) => r.estado === 'rechazada').length,
+      vencidas: delPeriodo.filter((r) => r.estado === 'vencida').length,
+      personas: tomadas.reduce((t, r) => t + (r.personas ?? 1), 0),
+      turnos: ocupacion.turnos,
+      turnosOcupados: ocupacion.ocupados,
+      cobrado,
+      recaudado,
+      depositoRetenido,
+      procesos: delPeriodo.filter((r) => r.sancionId).length,
+    }
+  })
+}
+
+/** Las unidades que más turnos tomaron en el periodo, de más a menos. */
+export function unidadesQueMasReservan(
+  reservas: Reserva[],
+  zonas: ZonaComun[],
+  desde: FechaISO,
+  hasta: FechaISO,
+  cuantas = 5,
+): Array<{ unidadId: string; reservas: number; noSePresento: number }> {
+  const ids = new Set(zonas.map((z) => z.id))
+  const conteo = new Map<string, { reservas: number; noSePresento: number }>()
+  for (const r of reservas) {
+    if (!ids.has(r.zonaId) || r.fecha < desde || r.fecha > hasta || r.estado !== 'confirmada') continue
+    const actual = conteo.get(r.unidadId) ?? { reservas: 0, noSePresento: 0 }
+    actual.reservas += 1
+    if (r.cierre?.resultado === 'no_se_presento') actual.noSePresento += 1
+    conteo.set(r.unidadId, actual)
+  }
+  return [...conteo.entries()]
+    .map(([unidadId, c]) => ({ unidadId, ...c }))
+    .sort((a, b) => b.reservas - a.reservas)
+    .slice(0, cuantas)
+}

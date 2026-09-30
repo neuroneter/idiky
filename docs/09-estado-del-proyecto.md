@@ -21,7 +21,7 @@ nueva o una sesión de IA distinta.
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 74 documentados: 43 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 19 ⬜ pendientes, 2 ⛔ retirados |
+| **Casos de uso** | 75 documentados: 44 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 19 ⬜ pendientes, 2 ⛔ retirados |
 | **Reglas de negocio** | 126 del demo (RN-01…RN-126; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-126, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
@@ -47,7 +47,8 @@ visitantes con código · consulta de correspondencia · consulta del coeficient
 
 **Consola del administrador:** **zonas comunes: crearlas, cambiarles las reglas, cerrarlas por
 mantenimiento y desactivarlas, avisando con el motivo a quien tenía reserva, con su costo,
-depósito y multa por no cancelar** (CU-A-10) · **calendario de ocupación de cada zona** (CU-A-29) · **asambleas: convocar según la modalidad, instalar y ver la
+depósito y multa por no cancelar** (CU-A-10) · **calendario de ocupación de cada zona** (CU-A-29) · **informe de uso de las zonas, descargable para
+Excel** (CU-A-30) · **asambleas: convocar según la modalidad, instalar y ver la
 asistencia con su coeficiente** (CU-A-12, CU-A-17) · **registro de propietarios**, con la tabla
 de quién registró a quién (CU-A-26) · **el acta de la asamblea, armada con lo que exige el artículo 47**
 (CU-A-20) · **catálogo de multas con su respaldo, y la reincidencia con el suyo** (CU-A-22) · **procesos sancionatorios con debido proceso completo** —notificar citando
@@ -109,6 +110,38 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-01 · Mary + IA (Claude) · El informe de uso de las zonas comunes (CU-A-30)
+
+Mary: *«me gusta la idea del informe del uso de las zonas comunes»*.
+
+**Qué es.** Reservas tiene una cuarta pestaña, **Informe**. Muestra:
+- Un periodo: este mes, el mes anterior u otras fechas.
+- Cuatro cifras: reservas tomadas, ocupación, cobrado y recaudado por uso, y cuántos no se
+  presentaron.
+- Una fila por zona.
+- Las unidades que más reservan.
+
+**«Descargar para Excel»** baja un CSV con punto y coma y la marca BOM, porque Excel en español
+lo necesita para abrirlo con columnas y tildes. Se hace sin dependencias
+(`utilidades/descarga.ts`).
+
+**Sin regla nueva.** El informe suma lo que ya registran RN-107, RN-108, RN-112, RN-114, RN-115 y
+RN-119 (`informeDeUsoDeZonas`). No se gastó ningún número del rango de reglas, que ya casi se
+agota.
+
+**Verificado.** 9 comprobaciones con Playwright:
+- La pestaña y las cifras.
+- Lo cobrado del mes cuadra con las reservas cerradas ($110.000).
+- El ranking de unidades.
+- El CSV (BOM, punto y coma, tildes) y el nombre del archivo con el periodo.
+- Las fechas al revés, que se avisan.
+- El mes anterior.
+- En celular, sin desborde.
+
+`npm run build` y la ortografía, en verde.
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · Las reglas de la reserva también se revisan por dentro
 

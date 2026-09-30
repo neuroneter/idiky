@@ -1091,3 +1091,40 @@ cancelarle la reserva a nadie.
 
 **Estado en el demo:** ✅ — `src/features/admin/CalendarioZonasPage.tsx`, ruta
 `/admin/reservas/calendario`.
+
+---
+
+### CU-A-30
+## CU-A-30 — Ver y descargar el informe de uso de las zonas comunes
+
+- **Actor principal:** Administrador
+- **Disparador:** Entra a `Reservas → Informe`.
+- **Resultado esperado:** Sabe cuánto se usa cada zona en un periodo, quién no llegó, cuánto se
+  cobró y cuánto se recaudó, y lo descarga para llevarlo al consejo o a la asamblea.
+
+Mary, 2026-10-01: *«me gusta la idea del informe del uso de las zonas comunes»*.
+
+**Flujo principal**
+1. Escoge el periodo: este mes (completo, incluidas las reservas ya tomadas para los próximos
+   días), el mes anterior u otras fechas.
+2. Arriba ve cuatro cifras: reservas tomadas y personas; ocupación, es decir, turnos con
+   reserva sobre turnos abiertos; cobrado por uso y lo recaudado de eso; y cuántos no se
+   presentaron, con el depósito retenido.
+3. Debajo, una fila por zona: tomadas, usadas, no se presentó, canceladas (con cuántas fuera de
+   plazo), rechazadas y vencidas, personas, ocupación, cobrado y recaudado. Una zona
+   desactivada solo aparece si tuvo movimiento en el periodo.
+4. Al final, las cinco unidades que más turnos tomaron, con cuántas veces no se presentaron.
+5. «Descargar para Excel» baja un CSV con todo lo anterior y el desglose completo de
+   cancelaciones, depósitos y procesos. Usa punto y coma y la marca BOM, que es lo que Excel en
+   español necesita para abrirlo con columnas y tildes.
+
+**Cómo se cuenta.** No hay regla nueva: el informe suma lo que ya está registrado con las
+reglas que existen (`informeDeUsoDeZonas` en `dominio/reglas.ts`).
+- Tomadas: las confirmadas.
+- Usadas y «no se presentó»: salen del cierre (RN-119).
+- Canceladas: se separan por quién y cuándo (RN-107, RN-108, RN-112, RN-115).
+- Ocupación: con los días y los cierres de cada zona (RN-108, RN-114).
+- Cobrado y recaudado: de las cuotas de uso (RN-75, RN-119).
+
+**Estado en el demo:** ✅ — `src/features/admin/InformeZonasPage.tsx`, ruta
+`/admin/reservas/informe`; la descarga en `src/utilidades/descarga.ts`.

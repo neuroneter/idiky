@@ -3,9 +3,9 @@
  * cerrarlas después del turno: cobro por uso, depósito y multa (RN-119 a RN-121).
  * Doc: docs/casos-de-uso/administrador.md#cu-a-06
  *
- * Reservas tiene tres pestañas: las reservas, el calendario de ocupación
- * (CU-A-29, en `CalendarioZonasPage`) y las zonas comunes (CU-A-10, en
- * `ZonasAdminPage`). Lo de reservas va dentro de reservas (Mary, 2026-10-01).
+ * Reservas tiene cuatro pestañas: las reservas, el calendario de ocupación
+ * (CU-A-29, en `CalendarioZonasPage`), el informe de uso (CU-A-30, en
+ * `InformeZonasPage`) y las zonas comunes (CU-A-10, en `ZonasAdminPage`). Lo de reservas va dentro de reservas (Mary, 2026-10-01).
  */
 
 import { useState } from 'react'
@@ -48,6 +48,9 @@ export function ReservasSeccionAdmin() {
         </NavLink>
         <NavLink to="/admin/reservas/calendario" className="segmento">
           Calendario
+        </NavLink>
+        <NavLink to="/admin/reservas/informe" className="segmento">
+          Informe
         </NavLink>
         <NavLink to="/admin/reservas/zonas" className="segmento">
           Zonas comunes
