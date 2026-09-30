@@ -966,24 +966,49 @@ pintura de fachadas con tres semanas sin avance, para que la alerta de RN-102 se
 ---
 
 ### CU-A-10
-## CU-A-10 — Configurar zonas comunes y sus reglas *(parcial: las fotos)*
+## CU-A-10 — Configurar zonas comunes y sus reglas
 
 - **Actor principal:** Administrador
-- **Resultado esperado:** Las zonas comunes existen con sus reglas y **con sus fotos**, y el
-  residente reserva viendo cómo es la zona.
+- **Precondiciones:** Sesión de administrador en la consola.
+- **Disparador:** Entra a `Reservas → Zonas comunes`.
+- **Resultado esperado:** Las zonas existen con sus reglas, fotos y especificaciones; el
+  administrador las cierra o las desactiva cuando hace falta, y quien tenía reserva se entera
+  del porqué.
 
-**Lo que existe hoy (2026-10-01):** las fotos y las especificaciones (RN-104). En la consola,
-en `Reservas`, la sección **Fotos y especificaciones de las zonas comunes** lista cada zona;
-«Agregar foto» toma o escoge una, se guarda reducida (ADR-0009), y «Quitar» la retira, hasta
-cinco por zona; «Escribir» o «Editar» abre las **especificaciones generales**: qué incluye, qué
-no y cómo se usa, un renglón por punto, hasta 1200 caracteres, que el residente lee como lista
-al reservar. Las reglas de la zona (horario, aforo, aprobación, cupo) siguen viniendo de los
-datos de ejemplo.
+Todo lo de una zona vive dentro de Reservas, en su propia pestaña (Mary, 2026-10-01: *«lo de
+reservas va dentro de reservas»*), para que el administrador lo gestione de forma fácil y
+rápida.
 
-**Pendiente:** crear, editar y desactivar zonas y sus reglas. Cuando exista esa pantalla, las
-fotos se mudan a ella.
+**Flujo principal — crear o editar**
+1. El administrador toca «Nueva zona» (o «Editar reglas» en una existente).
+2. Escribe nombre y descripción corta, y escoge horario, duración del turno, aforo, horas de
+   anticipación, reservas al mes por unidad y si la administración aprueba cada reserva.
+3. El sistema le muestra los turnos como los verá el residente.
+4. Guarda. El sistema valida (RN-105). Una zona nueva nace activa; en una editada, los
+   cambios valen para las reservas nuevas y las ya hechas se respetan (RN-106).
+5. En la misma tarjeta agrega fotos y escribe las especificaciones (RN-104).
+
+**Flujo alternativo — cerrar por mantenimiento (RN-108)**
+- A1. Toca «Cerrar por mantenimiento», escoge desde y hasta cuándo y escribe el motivo.
+- A2. El sistema le muestra las reservas que caen en esas fechas y el mensaje exacto que le
+  llegará a cada persona.
+- A3. Confirma: se cancelan esas reservas con aviso y la zona queda cerrada en esas fechas. Al
+  terminar vuelve sola; «Levantar» la abre antes.
+
+**Flujo alternativo — desactivar (RN-107)**
+- A4. Toca «Desactivar» y escribe el motivo, que es obligatorio. El sistema le muestra las
+  reservas de hoy en adelante que se cancelarán y el mensaje.
+- A5. Confirma: se cancelan con aviso, la zona deja de aparecer para el residente y queda en
+  la consola como «Desactivada», con su motivo. «Reactivar» la devuelve, sin revivir las
+  reservas canceladas.
 
 **Reglas de negocio**
-- RN-104 (hasta cinco fotos y las especificaciones; configuración, no registro).
+- RN-104 (fotos y especificaciones), RN-105 (una zona válida), RN-106 (cambiar las reglas
+  no toca lo ya reservado), RN-107 (desactivar cancela con mensaje), RN-108 (cierre por
+  mantenimiento).
 
-**Estado en el demo:** 🟡 — `src/features/admin/ReservasAdminPage.tsx`, sección de fotos.
+**Fuera de alcance, a propósito:** el depósito o cobro por reservar y la sanción por no
+cancelar; siguen como pregunta abierta en `docs/12-levantamiento-pendiente.md`.
+
+**Estado en el demo:** ✅ — `src/features/admin/ZonasAdminPage.tsx` (pestaña «Zonas
+comunes» de `ReservasAdminPage.tsx`, ruta `/admin/reservas/zonas`).

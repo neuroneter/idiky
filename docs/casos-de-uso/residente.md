@@ -188,6 +188,10 @@ La integración con pasarela está en el roadmap (fase 4).
 - A1. Franja ocupada → el sistema la muestra deshabilitada y sugiere otras.
 - A2. Unidad en mora → el sistema **bloquea** la reserva y explica el motivo (RN-08).
 - A3. Excede el cupo mensual de la unidad → se rechaza con mensaje.
+- A4. La zona está cerrada por mantenimiento → la lista lo avisa con las fechas, y en esas
+  fechas las franjas no se pueden escoger (RN-108). Una zona desactivada no aparece (RN-107).
+- A5. La administración canceló su reserva al cerrar o desactivar la zona → le llega un
+  mensaje con el motivo y en «Mis reservas» la ve cancelada, con ese motivo (RN-107, RN-108).
 
 **Reglas de negocio**
 - RN-08: una unidad en mora no puede reservar zonas comunes.

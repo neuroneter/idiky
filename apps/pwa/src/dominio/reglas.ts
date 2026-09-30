@@ -33,6 +33,8 @@ import type {
   Periodo,
   Pqrs,
   RegistroPersona,
+  CierreZona,
+  Hora,
   Reserva,
   RolResidencia,
   TipoCuota,
@@ -364,6 +366,16 @@ export function validarReserva(parametros: {
 }): ResultadoValidacion {
   const { zona, fecha, horaInicio, unidadId, cuotasDeLaUnidad, reservas, ahora } = parametros
 
+  if (!zonaActiva(zona)) {
+    return { valido: false, motivo: 'Esta zona no está recibiendo reservas.' }
+  }
+  const cierre = cierreEnFecha(zona, fecha)
+  if (cierre) {
+    return {
+      valido: false,
+      motivo: `La zona está cerrada por mantenimiento del ${fechaCorta(cierre.desde)} al ${fechaCorta(cierre.hasta)}.`,
+    }
+  }
   if (estaEnMora(cuotasDeLaUnidad)) {
     return {
       valido: false,
@@ -2035,4 +2047,221 @@ export function puntosDeEspecificaciones(zona: { especificaciones?: string }): s
     .split('\n')
     .map((linea) => linea.replace(/^[-•*]\s*/, '').trim())
     .filter((linea) => linea.length > 0)
+}
+
+// ---------------------------------------------------------------------------
+// Zonas comunes: crearlas, cambiarlas y desactivarlas — CU-A-10 · RN-105 a RN-107
+// ---------------------------------------------------------------------------
+
+/** Lo que el administrador define de una zona: sus reglas de reserva. */
+export interface DatosZona {
+  nombre: string
+  descripcion: string
+  aforo: number
+  requiereAprobacion: boolean
+  horaInicio: Hora
+  horaFin: Hora
+  duracionBloqueHoras: number
+  anticipacionMinimaHoras: number
+  cupoMensualPorUnidad: number
+}
+
+/** Los turnos que se ofrecen: de una a doce horas. */
+export const DURACIONES_TURNO = [1, 2, 3, 4, 6, 12]
+
+/** Una descripcion es la linea bajo el nombre, no las especificaciones (RN-104). */
+export const MAXIMO_DESCRIPCION_ZONA = 140
+
+/** Una zona que no dice lo contrario esta activa (las que ya existian no se migran). */
+export function zonaActiva(zona: ZonaComun): boolean {
+  return zona.activa !== false
+}
+
+function horaEntera(hora: string): number | null {
+  const coincide = /^(\d{2}):00$/.exec(hora)
+  if (!coincide) return null
+  const valor = Number(coincide[1])
+  return valor >= 0 && valor <= 24 ? valor : null
+}
+
+/**
+ * RN-105 — **Una zona se reserva por turnos que caben exactos en su horario.**
+ *
+ * «Terminemos de configurar zonas comunes» (Mary, 2026-10-01). Hasta hoy las
+ * reglas de cada zona venian de los datos de ejemplo; desde CU-A-10 las
+ * escribe el administrador, y por eso se validan: el nombre no se repite en la
+ * copropiedad (dos «Salón social» confunden al que reserva), el horario va en
+ * horas en punto y termina despues de empezar, el turno divide el horario sin
+ * sobrar (un horario de 9 a 21 con turnos de 5 horas deja dos horas que nadie
+ * puede reservar), y aforo y cupo son de al menos 1.
+ *
+ * Devuelve el motivo por el que no se puede guardar, o `null` si se puede.
+ */
+export function motivoZonaInvalida(
+  datos: DatosZona,
+  zonasDeLaCopropiedad: ZonaComun[],
+  zonaId?: string,
+): string | null {
+  const nombre = datos.nombre.trim()
+  if (!nombre) return 'La zona necesita un nombre.'
+  const repetida = zonasDeLaCopropiedad.some(
+    (z) => z.id !== zonaId && z.nombre.trim().toLocaleLowerCase('es') === nombre.toLocaleLowerCase('es'),
+  )
+  if (repetida) return `Ya hay una zona que se llama «${nombre}».`
+  if (datos.descripcion.trim().length > MAXIMO_DESCRIPCION_ZONA) {
+    return `La descripción cabe en ${MAXIMO_DESCRIPCION_ZONA} caracteres; el detalle va en las especificaciones.`
+  }
+  const inicio = horaEntera(datos.horaInicio)
+  const fin = horaEntera(datos.horaFin)
+  if (inicio === null || fin === null) return 'El horario va en horas en punto.'
+  if (fin <= inicio) return 'El horario tiene que terminar después de empezar.'
+  if (!DURACIONES_TURNO.includes(datos.duracionBloqueHoras)) return 'Escoge la duración del turno.'
+  if ((fin - inicio) % datos.duracionBloqueHoras !== 0) {
+    return `Con turnos de ${datos.duracionBloqueHoras} horas, el horario de ${fin - inicio} horas deja un pedazo que nadie puede reservar.`
+  }
+  if (!Number.isInteger(datos.aforo) || datos.aforo < 1) return 'El aforo es de al menos una persona.'
+  if (!Number.isInteger(datos.cupoMensualPorUnidad) || datos.cupoMensualPorUnidad < 1) {
+    return 'Cada unidad debe poder reservar al menos una vez al mes.'
+  }
+  if (!Number.isInteger(datos.anticipacionMinimaHoras) || datos.anticipacionMinimaHoras < 0) {
+    return 'La anticipación va en horas, desde 0.'
+  }
+  return null
+}
+
+/**
+ * RN-106 — **Cambiar las reglas de una zona no toca las reservas ya hechas.**
+ *
+ * El nuevo horario, turno, aforo o cupo vale para las reservas que se hagan
+ * desde ese momento. La que ya estaba se respeta tal como se pidio: el
+ * residente reservo con las reglas que habia, y cambiarselas despues es
+ * quitarle algo sin decirle. Si la administracion necesita la zona, la
+ * desactiva, y eso si cancela con aviso (RN-107).
+ *
+ * No necesita funcion propia: la garantiza que editar una zona no recorra
+ * `bd.reservas`. Queda escrita aqui para que nadie lo «arregle».
+ */
+
+/**
+ * RN-107 — **Desactivar una zona cancela sus reservas futuras, y a cada quien
+ * que reservo le llega un mensaje con la justificacion.**
+ *
+ * Decision de Mary (2026-10-01): «le debe llegar un mensaje al que reservó con
+ * la justificación de la cancelación». Se cancelan las reservas activas
+ * (solicitadas o confirmadas) de hoy en adelante; las pasadas quedan como
+ * fueron. El motivo es obligatorio porque es lo que se le manda: «cancelada»
+ * sin porque es la queja que sigue. El mensaje va a la persona que hizo la
+ * reserva, no a toda la unidad, y el residente ademas lo ve en su app, junto a
+ * la reserva. La zona no se borra: se reactiva cuando vuelva a estar lista, y
+ * las reservas canceladas no reviven.
+ */
+export const MINIMO_MOTIVO_DESACTIVACION = 10
+
+export function reservasQueCancelaDesactivar(
+  zonaId: string,
+  reservas: Reserva[],
+  hoy: FechaISO = hoyISO(),
+): Reserva[] {
+  return reservas
+    .filter((r) => r.zonaId === zonaId && reservaOcupaFranja(r) && r.fecha >= hoy)
+    .sort((a, b) => `${a.fecha}${a.horaInicio}`.localeCompare(`${b.fecha}${b.horaInicio}`))
+}
+
+/** RN-107 — El texto del mensaje: que se cancelo, cuando era, por que, y que hacer. */
+export function textoReservaCancelada(
+  reserva: Reserva,
+  zona: ZonaComun,
+  motivo: string,
+  copropiedad: string,
+): string {
+  const porque = motivo.trim().replace(/[.\s]+$/, '')
+  return (
+    `${copropiedad}: la administración canceló tu reserva de ${zona.nombre} del ` +
+    `${fechaCorta(reserva.fecha)} de ${reserva.horaInicio} a ${reserva.horaFin}. ` +
+    `Motivo: ${porque}. Puedes reservar otra zona en Idiky.`
+  )
+}
+
+/**
+ * RN-108 — **Una zona se puede cerrar por mantenimiento entre dos fechas.**
+ *
+ * «Me gusta lo de mantenimiento, es una opción para el administrador» (Mary,
+ * 2026-10-01). La piscina en reparación o el salón en pintura no dejan de
+ * existir: se cierran unos días. El cierre lleva fechas y motivo; mientras
+ * dura, nadie reserva en esas fechas y la zona se sigue viendo, con el aviso
+ * del cierre, para que el residente sepa cuándo vuelve. Al pasar la fecha
+ * final vuelve sola, sin que nadie tenga que acordarse de reabrirla.
+ *
+ * Como en RN-107, las reservas activas que caen dentro del cierre se cancelan
+ * y a quien reservó le llega el mensaje con la justificación. Dos cierres de
+ * la misma zona no se cruzan; el cierre empieza hoy o después. La
+ * administración lo puede levantar antes: desde ese día se reserva otra vez.
+ * Nada se borra: el cierre levantado queda en la historia de la zona.
+ */
+export function cierreVigente(cierre: CierreZona, hoy: FechaISO = hoyISO()): boolean {
+  if (cierre.levantadoEn) return false
+  return cierre.hasta >= hoy
+}
+
+/** El cierre que cubre esa fecha, si hay uno. */
+export function cierreEnFecha(zona: ZonaComun, fecha: FechaISO): CierreZona | undefined {
+  return (zona.cierres ?? []).find(
+    (c) => !c.levantadoEn && c.desde <= fecha && fecha <= c.hasta,
+  )
+}
+
+/** Los cierres que todavía no terminan, del más próximo al más lejano. */
+export function cierresPendientes(zona: ZonaComun, hoy: FechaISO = hoyISO()): CierreZona[] {
+  return (zona.cierres ?? [])
+    .filter((c) => cierreVigente(c, hoy))
+    .sort((a, b) => a.desde.localeCompare(b.desde))
+}
+
+export const MINIMO_MOTIVO_CIERRE = MINIMO_MOTIVO_DESACTIVACION
+
+/** RN-108 — Por qué no se puede registrar ese cierre, o `null` si se puede. */
+export function motivoCierreInvalido(
+  zona: ZonaComun,
+  cierre: { desde: FechaISO; hasta: FechaISO; motivo: string },
+  hoy: FechaISO = hoyISO(),
+): string | null {
+  if (!zonaActiva(zona)) return 'La zona está desactivada: no hay nada que cerrar.'
+  if (!cierre.desde || !cierre.hasta) return 'Escoge desde y hasta cuándo se cierra.'
+  if (cierre.desde < hoy) return 'El cierre empieza hoy o después.'
+  if (cierre.hasta < cierre.desde) return 'La fecha final va después de la inicial.'
+  if (cierre.motivo.trim().length < MINIMO_MOTIVO_CIERRE) {
+    return 'Escribe el motivo: es lo que le llega a quien tenía reserva.'
+  }
+  const cruzado = cierresPendientes(zona, hoy).find(
+    (c) => c.desde <= cierre.hasta && cierre.desde <= c.hasta,
+  )
+  if (cruzado) return `Ya hay un cierre del ${fechaCorta(cruzado.desde)} al ${fechaCorta(cruzado.hasta)}.`
+  return null
+}
+
+/** RN-108 — Las reservas activas que caen dentro del cierre. */
+export function reservasQueCancelaCierre(
+  zonaId: string,
+  reservas: Reserva[],
+  desde: FechaISO,
+  hasta: FechaISO,
+): Reserva[] {
+  return reservas
+    .filter((r) => r.zonaId === zonaId && reservaOcupaFranja(r) && r.fecha >= desde && r.fecha <= hasta)
+    .sort((a, b) => `${a.fecha}${a.horaInicio}`.localeCompare(`${b.fecha}${b.horaInicio}`))
+}
+
+/** `2026-10-05` → `05/10/2026`: lo que cabe en un SMS y se lee igual en todos lados. */
+export function fechaCorta(fecha: FechaISO): string {
+  const [anio, mes, dia] = fecha.slice(0, 10).split('-')
+  return `${dia}/${mes}/${anio}`
+}
+
+/** El motivo que viaja en el mensaje de un cierre: las fechas primero, después el porqué. */
+export function motivoDeCierre(cierre: { desde: FechaISO; hasta: FechaISO; motivo: string }): string {
+  const fechas =
+    cierre.desde === cierre.hasta
+      ? `el ${fechaCorta(cierre.desde)}`
+      : `del ${fechaCorta(cierre.desde)} al ${fechaCorta(cierre.hasta)}`
+  return `la zona estará cerrada por mantenimiento ${fechas}: ${cierre.motivo.trim()}`
 }

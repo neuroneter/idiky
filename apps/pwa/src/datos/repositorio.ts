@@ -82,6 +82,16 @@ import {
   MAXIMO_FOTOS_ZONA,
   MAXIMO_ESPECIFICACIONES,
   puedeAgregarFotoZona,
+  motivoZonaInvalida,
+  reservasQueCancelaDesactivar,
+  textoReservaCancelada,
+  zonaActiva,
+  MINIMO_MOTIVO_DESACTIVACION,
+  motivoCierreInvalido,
+  motivoDeCierre,
+  reservasQueCancelaCierre,
+  cierreEnFecha,
+  type DatosZona,
   puedeConfirmarRecepcion,
   admiteGrabacion,
   motivoAvanceInvalido,
@@ -481,6 +491,9 @@ export async function crearReserva(
   const bd = clonar(bdActual)
   const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
   if (!zona) throw new ErrorDeNegocio('La zona comun no existe.')
+  if (!zonaActiva(zona)) throw new ErrorDeNegocio('Esa zona no está recibiendo reservas.')
+  const cierre = cierreEnFecha(zona, parametros.fecha)
+  if (cierre) throw new ErrorDeNegocio(`La zona está cerrada por mantenimiento: ${cierre.motivo}`)
 
   const reserva: Reserva = {
     id: nuevoId('rsv'),
@@ -945,6 +958,189 @@ export async function quitarFotoZona(
   const antes = zona.fotos?.length ?? 0
   zona.fotos = (zona.fotos ?? []).filter((f) => f.adjuntadoEn !== parametros.adjuntadoEn)
   if (zona.fotos.length === antes) throw new ErrorDeNegocio('Esa foto ya no está.')
+  return persistir(bd, zona)
+}
+
+// ---------------------------------------------------------------------------
+// Zonas comunes: crearlas, cambiarlas, desactivarlas — CU-A-10 · RN-105 a RN-107
+// ---------------------------------------------------------------------------
+
+function datosZonaLimpios(datos: DatosZona): DatosZona {
+  return { ...datos, nombre: datos.nombre.trim(), descripcion: datos.descripcion.trim() }
+}
+
+/** CU-A-10 — Una zona nueva, que nace activa y recibe reservas de una vez (RN-105). */
+export async function crearZona(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; datos: DatosZona },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zonas = bd.zonasComunes.filter((z) => z.copropiedadId === parametros.copropiedadId)
+  const motivo = motivoZonaInvalida(parametros.datos, zonas)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const zona: ZonaComun = {
+    id: nuevoId('zon'),
+    copropiedadId: parametros.copropiedadId,
+    icono: 'zona',
+    ...datosZonaLimpios(parametros.datos),
+  }
+  bd.zonasComunes.push(zona)
+  return persistir(bd, zona)
+}
+
+/**
+ * CU-A-10 — Cambia las reglas de una zona. RN-106: no recorre las reservas;
+ * las ya hechas se respetan tal como se pidieron.
+ */
+export async function editarZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; datos: DatosZona },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  const zonas = bd.zonasComunes.filter((z) => z.copropiedadId === zona.copropiedadId)
+  const motivo = motivoZonaInvalida(parametros.datos, zonas, zona.id)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  Object.assign(zona, datosZonaLimpios(parametros.datos))
+  return persistir(bd, zona)
+}
+
+/**
+ * RN-107 — Desactiva la zona: cancela sus reservas de hoy en adelante y a cada
+ * persona que reservo le deja el mensaje con la justificacion. La zona no se
+ * borra; su historia sigue.
+ */
+export async function desactivarZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; motivo: string },
+): Promise<Resultado<{ zona: ZonaComun } & ResumenCancelacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  if (!zonaActiva(zona)) throw new ErrorDeNegocio('Esa zona ya está desactivada.')
+  const motivo = parametros.motivo.trim()
+  if (motivo.length < MINIMO_MOTIVO_DESACTIVACION) {
+    throw new ErrorDeNegocio('Escribe el motivo: es lo que le llega a quien tenía reserva.')
+  }
+
+  const ahora = ahoraISO()
+  const aviso = cancelarConAviso(bd, zona, reservasQueCancelaDesactivar(zona.id, bd.reservas), motivo, ahora)
+  zona.activa = false
+  zona.desactivadaEn = ahora
+  zona.motivoDesactivacion = motivo
+  return persistir(bd, { zona, ...aviso })
+}
+
+/** Lo que cuenta la consola despues de cancelar con aviso (RN-107, RN-108). */
+export interface ResumenCancelacion {
+  canceladas: number
+  avisados: number
+  sinCelular: number
+}
+
+/**
+ * RN-107 / RN-108 — Cancela las reservas y le deja a cada persona que reservo
+ * el mensaje con la justificacion. Un solo lugar, para que el cierre y la
+ * desactivacion digan lo mismo de la misma manera.
+ */
+function cancelarConAviso(
+  bd: BaseDatos,
+  zona: ZonaComun,
+  afectadas: Reserva[],
+  motivo: string,
+  ahora: string,
+): ResumenCancelacion {
+  const nombreCopropiedad =
+    bd.copropiedades.find((c) => c.id === zona.copropiedadId)?.nombre ?? 'La copropiedad'
+  let avisados = 0
+  let sinCelular = 0
+  for (const reserva of afectadas) {
+    reserva.estado = 'cancelada'
+    reserva.motivoCancelacion = motivo
+    reserva.canceladaEn = ahora
+    const persona = bd.personas.find((p) => p.id === reserva.personaId)
+    const mensaje = redactar({
+      id: nuevoId('msj'),
+      copropiedadId: zona.copropiedadId,
+      destino: persona?.telefono ?? '',
+      texto: textoReservaCancelada(reserva, zona, motivo, nombreCopropiedad),
+      motivo: 'reserva_cancelada',
+      reservaId: reserva.id,
+      ahora,
+    })
+    if (mensaje) {
+      bd.mensajes.unshift(mensaje)
+      avisados += 1
+    } else {
+      sinCelular += 1
+    }
+  }
+  return { canceladas: afectadas.length, avisados, sinCelular }
+}
+
+/**
+ * RN-108 — Cierra la zona por mantenimiento entre dos fechas: cancela con
+ * aviso las reservas que caen dentro y la zona vuelve sola al terminar.
+ */
+export async function cerrarZonaPorMantenimiento(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; desde: string; hasta: string; motivo: string },
+): Promise<Resultado<{ zona: ZonaComun } & ResumenCancelacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  const invalido = motivoCierreInvalido(zona, parametros)
+  if (invalido) throw new ErrorDeNegocio(invalido)
+
+  const ahora = ahoraISO()
+  const cierre = {
+    id: nuevoId('cie'),
+    desde: parametros.desde,
+    hasta: parametros.hasta,
+    motivo: parametros.motivo.trim(),
+    registradoEn: ahora,
+  }
+  zona.cierres = [...(zona.cierres ?? []), cierre]
+  const afectadas = reservasQueCancelaCierre(zona.id, bd.reservas, cierre.desde, cierre.hasta)
+  const aviso = cancelarConAviso(bd, zona, afectadas, motivoDeCierre(cierre), ahora)
+  return persistir(bd, { zona, ...aviso })
+}
+
+/**
+ * RN-108 — Termina un cierre antes de tiempo: la zona se reserva otra vez desde
+ * ya. El cierre no se borra; queda levantado, en la historia de la zona.
+ */
+export async function levantarCierreZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; cierreId: string },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  const cierre = zona.cierres?.find((c) => c.id === parametros.cierreId)
+  if (!cierre || cierre.levantadoEn) throw new ErrorDeNegocio('Ese cierre ya no está vigente.')
+  cierre.levantadoEn = ahoraISO()
+  return persistir(bd, zona)
+}
+
+/** RN-107 — La zona vuelve a recibir reservas; las canceladas no reviven. */
+export async function reactivarZona(
+  bdActual: BaseDatos,
+  zonaId: string,
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  zona.activa = true
+  delete zona.desactivadaEn
+  delete zona.motivoDesactivacion
   return persistir(bd, zona)
 }
 

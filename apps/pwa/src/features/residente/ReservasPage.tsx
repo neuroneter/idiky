@@ -4,7 +4,9 @@
  * Doc: docs/casos-de-uso/residente.md#cu-r-05
  *
  * Reglas aplicadas: RN-08 (mora bloquea), RN-09 (franja ocupada),
- * RN-10 (anticipacion minima) y el cupo mensual por unidad.
+ * RN-10 (anticipacion minima) y el cupo mensual por unidad. Solo se ofrecen las
+ * zonas activas (RN-107); la cerrada por mantenimiento se ve con su aviso y no
+ * se reserva en esas fechas (RN-108).
  */
 
 import { useState } from 'react'
@@ -21,6 +23,10 @@ import {
   sumarDias,
   validarReserva,
   puntosDeEspecificaciones,
+  cierreEnFecha,
+  cierresPendientes,
+  fechaCorta,
+  zonaActiva,
 } from '../../dominio/reglas'
 import { formatearFecha } from '../../utilidades/formato'
 import type { ZonaComun } from '../../dominio/tipos'
@@ -39,10 +45,12 @@ export function ReservasPage() {
   if (!sesion) return null
 
   const unidadId = sesion.unidadActivaId!
-  const zonas = sel.zonasDe(bd, sesion.copropiedadId)
+  const zonas = sel.zonasDe(bd, sesion.copropiedadId).filter(zonaActiva)
+  const hoy = hoyISO()
   const misReservas = sel.reservasDeUnidad(bd, unidadId)
   const cuotas = sel.cuotasDeUnidad(bd, unidadId)
   const enMora = estaEnMora(cuotas)
+  const cierreDelDia = zonaElegida ? cierreEnFecha(zonaElegida, fecha) : undefined
 
   function abrirZona(zona: ZonaComun) {
     // RN-08: el bloqueo por mora se avisa antes de que el residente pierda tiempo.
@@ -110,7 +118,9 @@ export function ReservasPage() {
         {/* Sin titulo de seccion: la barra superior ya dice "Zonas comunes" y
             repetirlo dos veces seguidas no informa nada. */}
         <div className="lista lista--compacta">
-          {zonas.map((zona) => (
+          {zonas.map((zona) => {
+            const cierre = cierresPendientes(zona, hoy)[0]
+            return (
             <button
               key={zona.id}
               className="tarjeta tarjeta--accion"
@@ -128,6 +138,14 @@ export function ReservasPage() {
                 <div className="columna" style={{ flex: 1 }}>
                   <strong>{zona.nombre}</strong>
                   <span className="subtitulo">{zona.descripcion}</span>
+                  {/* RN-108 — El cierre se avisa en la lista: que no lo descubra al escoger fecha. */}
+                  {cierre && (
+                    <span className="chip chip--alerta" style={{ alignSelf: 'flex-start', whiteSpace: 'normal', borderRadius: 'var(--radio-sm)' }}>
+                      {cierre.desde > hoy
+                        ? `Se cierra por mantenimiento del ${fechaCorta(cierre.desde)} al ${fechaCorta(cierre.hasta)}`
+                        : `Cerrada por mantenimiento hasta el ${fechaCorta(cierre.hasta)}`}
+                    </span>
+                  )}
                   <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
                     {zona.horaInicio} a {zona.horaFin} · aforo {zona.aforo} ·{' '}
                     {zona.requiereAprobacion ? 'requiere aprobacion' : 'confirmación inmediata'}
@@ -137,7 +155,8 @@ export function ReservasPage() {
                 <span className="chip chip--marca">Reservar</span>
               </div>
             </button>
-          ))}
+            )
+          })}
         </div>
       </div>
 
@@ -161,6 +180,11 @@ export function ReservasPage() {
                         {formatearFecha(reserva.fecha)} · {reserva.horaInicio} a{' '}
                         {reserva.horaFin}
                       </span>
+                      {reserva.motivoCancelacion && (
+                        <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                          Cancelada por la administración. Motivo: {reserva.motivoCancelacion}
+                        </span>
+                      )}
                       {reserva.motivoRechazo && (
                         <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
                           Motivo: {reserva.motivoRechazo}
@@ -224,11 +248,19 @@ export function ReservasPage() {
             />
           </div>
 
+          {cierreDelDia && (
+            <p className="ayuda-campo" style={{ color: 'var(--color-error)', marginBottom: 'var(--e2)' }}>
+              Cerrada por mantenimiento del {fechaCorta(cierreDelDia.desde)} al {fechaCorta(cierreDelDia.hasta)}:{' '}
+              {cierreDelDia.motivo}. Escoge otra fecha.
+            </p>
+          )}
+
           <div className="campo">
             <label>Franja horaria</label>
             <div className="franjas">
               {franjasDeZona(zonaElegida).map((opcion) => {
-                const ocupada = franjaOcupada(bd.reservas, zonaElegida.id, fecha, opcion.inicio)
+                const ocupada =
+                  !!cierreDelDia || franjaOcupada(bd.reservas, zonaElegida.id, fecha, opcion.inicio)
                 return (
                   <button
                     key={opcion.inicio}
@@ -249,7 +281,7 @@ export function ReservasPage() {
 
           <button
             className="boton boton--primario boton--bloque"
-            disabled={!franja || cargando}
+            disabled={!franja || cargando || !!cierreDelDia}
             onClick={confirmar}
           >
             {zonaElegida.requiereAprobacion ? 'Solicitar reserva' : 'Confirmar reserva'}

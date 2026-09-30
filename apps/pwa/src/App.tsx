@@ -36,7 +36,8 @@ import { CatalogoMultasPage } from './features/admin/CatalogoMultasPage'
 import { SancionesPage } from './features/admin/SancionesPage'
 import { AsambleasAdminPage } from './features/admin/AsambleasAdminPage'
 import { PagosPage } from './features/admin/PagosPage'
-import { ReservasAdminPage } from './features/admin/ReservasAdminPage'
+import { ReservasAdminPage, ReservasSeccionAdmin } from './features/admin/ReservasAdminPage'
+import { ZonasAdminPage } from './features/admin/ZonasAdminPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
 import { ProyectosAdminPage } from './features/admin/ProyectosAdminPage'
@@ -130,7 +131,12 @@ export function App() {
         <Route path="sanciones" element={<SancionesPage />} />
         <Route path="asambleas" element={<AsambleasAdminPage />} />
         <Route path="pagos" element={<PagosPage />} />
-        <Route path="reservas" element={<ReservasAdminPage />} />
+        {/* Reservas y zonas comunes van juntas: lo de reservas va dentro de
+            reservas (Mary, 2026-10-01). */}
+        <Route path="reservas" element={<ReservasSeccionAdmin />}>
+          <Route index element={<ReservasAdminPage />} />
+          <Route path="zonas" element={<ZonasAdminPage />} />
+        </Route>
         <Route path="pqrs" element={<PqrsAdminPage />} />
         <Route path="comunicados" element={<ComunicadosAdminPage />} />
         <Route path="proyectos" element={<ProyectosAdminPage />} />

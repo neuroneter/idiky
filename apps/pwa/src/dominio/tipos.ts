@@ -429,6 +429,32 @@ export interface ZonaComun {
    * Texto libre, un renglon por punto; el residente lo ve al reservar.
    */
   especificaciones?: string
+  /**
+   * Si la zona recibe reservas (CU-A-10, RN-107). Ausente es activa: las zonas
+   * que ya existian no tienen que migrarse. Una zona no se borra, se desactiva:
+   * su historia de reservas sigue apuntandole.
+   */
+  activa?: boolean
+  desactivadaEn?: FechaHoraISO
+  /** Por que se desactivo; es la justificacion que les llega a quienes tenian reserva. */
+  motivoDesactivacion?: string
+  /**
+   * Cierres por mantenimiento (RN-108): la zona sigue activa pero no se
+   * reserva entre dos fechas. Se guardan todos, tambien los levantados: son la
+   * historia de la zona.
+   */
+  cierres?: CierreZona[]
+}
+
+/** Un cierre temporal de una zona comun (RN-108). */
+export interface CierreZona {
+  id: string
+  desde: FechaISO
+  hasta: FechaISO
+  motivo: string
+  registradoEn: FechaHoraISO
+  /** Si la administracion lo termino antes de `hasta`: desde ese dia se reserva otra vez. */
+  levantadoEn?: FechaHoraISO
 }
 
 export type EstadoReserva = 'solicitada' | 'confirmada' | 'rechazada' | 'cancelada'
@@ -444,6 +470,12 @@ export interface Reserva {
   estado: EstadoReserva
   motivoRechazo?: string
   creadaEn: FechaHoraISO
+  /**
+   * Cuando la cancela la administracion y no el residente (RN-107): el motivo
+   * que se le mando. Sin el, «cancelada» no le dice a quien reservo por que.
+   */
+  motivoCancelacion?: string
+  canceladaEn?: FechaHoraISO
 }
 
 // ---------------------------------------------------------------------------
@@ -703,7 +735,11 @@ export interface AccesoSoporte {
 // recibi nada» es la discusion mas comun de una copropiedad.
 // ---------------------------------------------------------------------------
 
-export type MotivoMensaje = 'registro_autorizado' | 'registro_rechazado' | 'avance_proyecto'
+export type MotivoMensaje =
+  | 'registro_autorizado'
+  | 'registro_rechazado'
+  | 'avance_proyecto'
+  | 'reserva_cancelada'
 
 export interface Mensaje {
   id: string
@@ -716,6 +752,8 @@ export interface Mensaje {
   registroId?: string
   /** El proyecto cuyo avance lo origino (RN-101). */
   proyectoId?: string
+  /** La reserva cuya cancelacion lo origino (RN-107). */
+  reservaId?: string
   enviadoEn: FechaHoraISO
 }
 

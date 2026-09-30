@@ -89,6 +89,7 @@ export function redactar(parametros: {
   motivo: MotivoMensaje
   registroId?: string
   proyectoId?: string
+  reservaId?: string
   id: string
   ahora: string
 }): Mensaje | null {
@@ -102,6 +103,7 @@ export function redactar(parametros: {
     motivo: parametros.motivo,
     registroId: parametros.registroId,
     proyectoId: parametros.proyectoId,
+    reservaId: parametros.reservaId,
     enviadoEn: parametros.ahora,
   }
 }

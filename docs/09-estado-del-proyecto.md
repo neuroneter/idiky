@@ -21,8 +21,8 @@ nueva o una sesión de IA distinta.
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 73 documentados: 40 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 20 ⬜ pendientes, 2 ⛔ retirados |
-| **Reglas de negocio** | 104 del demo (RN-01…RN-104; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-104, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
+| **Casos de uso** | 73 documentados: 41 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 20 ⬜ pendientes, 2 ⛔ retirados |
+| **Reglas de negocio** | 108 del demo (RN-01…RN-108; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-108, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -45,7 +45,8 @@ asistencia según la modalidad** (CU-R-21) · cartelera de comunicados · autori
 visitantes con código · consulta de correspondencia · consulta del coeficiente ·
 **el proceso sancionatorio de su unidad, con descargos e impugnación** (CU-R-29).
 
-**Consola del administrador:** **asambleas: convocar según la modalidad, instalar y ver la
+**Consola del administrador:** **zonas comunes: crearlas, cambiarles las reglas, cerrarlas por
+mantenimiento y desactivarlas, avisando con el motivo a quien tenía reserva** (CU-A-10) · **asambleas: convocar según la modalidad, instalar y ver la
 asistencia con su coeficiente** (CU-A-12, CU-A-17) · **registro de propietarios**, con la tabla
 de quién registró a quién (CU-A-26) · **el acta de la asamblea, armada con lo que exige el artículo 47**
 (CU-A-20) · **catálogo de multas con su respaldo, y la reincidencia con el suyo** (CU-A-22) · **procesos sancionatorios con debido proceso completo** —notificar citando
@@ -107,6 +108,47 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-01 · Mary + IA (Claude) · Las zonas comunes, completas: crear, cerrar por mantenimiento y desactivar (CU-A-10, RN-105 a RN-108)
+
+Mary: *«terminemos de configurar zonas comunes»*. Hasta hoy el administrador solo cargaba fotos
+y especificaciones (RN-104); el nombre, el horario, el aforo y el cupo venían de los datos de
+ejemplo, y ninguna zona se podía crear ni cerrar.
+
+**Dónde vive.** Dentro de Reservas (*«lo de reservas va dentro de reservas»*): la consola tiene
+ahora dos pestañas, «Reservas» y «Zonas comunes» (`/admin/reservas/zonas`). Las fotos y las
+especificaciones se mudaron a la tarjeta de cada zona.
+
+**Las herramientas del administrador** (*«debemos darle al administrador todas las herramientas
+para gestionar de una forma fácil y rápida»*):
+
+- **Crear y editar** una zona, con los turnos a la vista tal como los verá el residente.
+  **RN-105** valida: nombre sin repetir, horario en horas en punto y turnos que caben exactos.
+  **RN-106**: cambiar las reglas no toca lo ya reservado.
+- **Cerrar por mantenimiento** entre dos fechas, con motivo (**RN-108**). Mary: *«me gusta lo de
+  mantenimiento, es una opción para el administrador»*. La zona se sigue viendo con el aviso,
+  no se reserva en esas fechas y vuelve sola al terminar; «Levantar» la abre antes.
+- **Desactivar** sin fecha de regreso (**RN-107**). Mary: *«le debe llegar un mensaje al que
+  reservó con la justificación de la cancelación»* y *«puede ser que no se vuelva a activar»*.
+  El motivo es obligatorio, desaparece para el residente, y «Reactivar» queda como opción.
+
+En los dos cierres, la consola muestra **antes de confirmar** qué reservas se cancelan y el
+mensaje exacto que le llega a cada persona. El mensaje queda escrito (RN-64, motivo nuevo
+`reserva_cancelada`) y el residente ve el motivo junto a su reserva en «Mis reservas». Nada se
+borra: la zona desactivada y los cierres levantados quedan en la historia.
+
+**Fuera, a propósito:** el depósito y la sanción por no cancelar siguen como pregunta abierta
+(`docs/12-levantamiento-pendiente.md`). La semilla no cambia de versión: los campos nuevos son
+opcionales.
+
+**Verificado.** 24 comprobaciones con Playwright: el turno que no cabe y el nombre repetido se
+rechazan; crear, editar, cerrar y desactivar funcionan; los dos mensajes quedan escritos; la
+tabla de la consola muestra el motivo. En la app del residente, la zona desactivada no aparece,
+el cierre se avisa en la lista y bloquea esas fechas, y la reserva cancelada muestra su motivo.
+También se probó levantar el cierre y reactivar la zona. `npm run build` y la ortografía en
+verde.
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · Las fotos de la zona antes de reservar (RN-104)
 
