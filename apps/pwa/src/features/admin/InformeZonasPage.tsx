@@ -47,7 +47,7 @@ function sumar(filas: FilaInformeZona[], campo: keyof Omit<FilaInformeZona, 'zon
 }
 
 export function InformeZonasPage() {
-  const { bd } = useDatos()
+  const { bd, mostrarAviso } = useDatos()
   const { sesion } = useSesion()
   const hoy = hoyISO()
   const [periodo, setPeriodo] = useState<Periodo>('este_mes')
@@ -75,9 +75,9 @@ export function InformeZonasPage() {
     depositoRetenido: sumar(visibles, 'depositoRetenido'),
   }
 
-  function descargar() {
+  async function descargar() {
     const copropiedad = sel.copropiedad(bd, sesion!.copropiedadId)?.nombre ?? 'Copropiedad'
-    descargarCsv(`uso-zonas-comunes-${desde}-a-${hasta}.csv`, [
+    const resultado = await descargarCsv(`uso-zonas-comunes-${desde}-a-${hasta}.csv`, [
       [`Informe de uso de las zonas comunes · ${copropiedad}`],
       [`Del ${fechaCorta(desde)} al ${fechaCorta(hasta)} · generado el ${fechaCorta(hoy)}`],
       [],
@@ -100,6 +100,9 @@ export function InformeZonasPage() {
         return [unidad ? etiquetaUnidad(unidad) : u.unidadId, u.reservas, u.noSePresento]
       }),
     ])
+    if (resultado === 'no_disponible') {
+      mostrarAviso('Aquí no se pueden descargar archivos. Ábrelo desde la app de Idiky.', 'error')
+    }
   }
 
   return (
@@ -127,7 +130,7 @@ export function InformeZonasPage() {
             </>
           )}
         </div>
-        <button className="boton boton--primario" disabled={!rangoValido || visibles.length === 0} onClick={descargar}>
+        <button className="boton boton--primario" disabled={!rangoValido || visibles.length === 0} onClick={() => void descargar()}>
           Descargar para Excel
         </button>
       </div>

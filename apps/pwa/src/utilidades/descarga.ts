@@ -17,8 +17,27 @@ export function textoCsv(filas: Celda[][]): string {
   return filas.map((fila) => fila.map(celdaCsv).join(';')).join('\r\n')
 }
 
-export function descargarCsv(nombreArchivo: string, filas: Celda[][]): void {
-  const blob = new Blob(['﻿' + textoCsv(filas)], { type: 'text/csv;charset=utf-8' })
+/** Cómo terminó la descarga, para decírselo a quien la pidió. */
+export type ResultadoDescarga = 'descargado' | 'cancelado' | 'no_disponible'
+
+interface VisorClaude {
+  use?: (nombre: string) => Promise<{ save: (p: { filename: string; data: string }) => Promise<unknown> } | null>
+}
+
+export async function descargarCsv(nombreArchivo: string, filas: Celda[][]): Promise<ResultadoDescarga> {
+  const contenido = '\uFEFF' + textoCsv(filas)
+  const visor = (window as unknown as { claude?: VisorClaude }).claude
+  if (visor?.use) {
+    const descargas = await visor.use('downloads').catch(() => null)
+    if (!descargas) return 'no_disponible'
+    try {
+      await descargas.save({ filename: nombreArchivo, data: contenido })
+      return 'descargado'
+    } catch (error) {
+      return (error as { code?: string }).code === 'declined' ? 'cancelado' : 'no_disponible'
+    }
+  }
+  const blob = new Blob([contenido], { type: 'text/csv;charset=utf-8' })
   const url = URL.createObjectURL(blob)
   const enlace = document.createElement('a')
   enlace.href = url
@@ -27,4 +46,5 @@ export function descargarCsv(nombreArchivo: string, filas: Celda[][]): void {
   enlace.click()
   enlace.remove()
   URL.revokeObjectURL(url)
+  return 'descargado'
 }

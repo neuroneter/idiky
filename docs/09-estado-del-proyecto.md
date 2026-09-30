@@ -124,7 +124,9 @@ Mary: *«me gusta la idea del informe del uso de las zonas comunes»*.
 
 **«Descargar para Excel»** baja un CSV con punto y coma y la marca BOM, porque Excel en español
 lo necesita para abrirlo con columnas y tildes. Se hace sin dependencias
-(`utilidades/descarga.ts`).
+(`utilidades/descarga.ts`). En el demo publicado, el visor de claude.ai no deja bajar archivos
+con un enlace: allí la descarga pasa por su capacidad `downloads`, que primero pide
+confirmación. Por eso el artefacto se publica declarándola.
 
 **Sin regla nueva.** El informe suma lo que ya registran RN-107, RN-108, RN-112, RN-114, RN-115 y
 RN-119 (`informeDeUsoDeZonas`). No se gastó ningún número del rango de reglas, que ya casi se

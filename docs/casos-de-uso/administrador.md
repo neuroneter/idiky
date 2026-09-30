@@ -1116,7 +1116,8 @@ Mary, 2026-10-01: *«me gusta la idea del informe del uso de las zonas comunes»
 4. Al final, las cinco unidades que más turnos tomaron, con cuántas veces no se presentaron.
 5. «Descargar para Excel» baja un CSV con todo lo anterior y el desglose completo de
    cancelaciones, depósitos y procesos. Usa punto y coma y la marca BOM, que es lo que Excel en
-   español necesita para abrirlo con columnas y tildes.
+   español necesita para abrirlo con columnas y tildes. En el demo publicado en claude.ai el
+   archivo lo entrega el visor, que primero pide confirmación (capacidad `downloads`).
 
 **Cómo se cuenta.** No hay regla nueva: el informe suma lo que ya está registrado con las
 reglas que existen (`informeDeUsoDeZonas` en `dominio/reglas.ts`).
