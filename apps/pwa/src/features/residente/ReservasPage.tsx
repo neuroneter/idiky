@@ -24,6 +24,7 @@ import {
 import { formatearFecha } from '../../utilidades/formato'
 import type { ZonaComun } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
+import { FotosZona } from '../../componentes/FotosZona'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipReserva } from '../../componentes/Etiquetas'
 
@@ -115,12 +116,21 @@ export function ReservasPage() {
               onClick={() => abrirZona(zona)}
             >
               <div className="fila fila-inicio">
+                {/* RN-104 — La primera foto, en la lista: se elige viendo. */}
+                {zona.fotos?.[0] && (
+                  <img
+                    src={zona.fotos[0].imagen}
+                    alt={zona.nombre}
+                    style={{ width: 72, height: 56, objectFit: 'cover', borderRadius: 'var(--radio-sm)', flex: '0 0 72px' }}
+                  />
+                )}
                 <div className="columna" style={{ flex: 1 }}>
                   <strong>{zona.nombre}</strong>
                   <span className="subtitulo">{zona.descripcion}</span>
                   <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
                     {zona.horaInicio} a {zona.horaFin} · aforo {zona.aforo} ·{' '}
                     {zona.requiereAprobacion ? 'requiere aprobacion' : 'confirmación inmediata'}
+                    {zona.fotos && zona.fotos.length > 1 ? ` · ${zona.fotos.length} fotos` : ''}
                   </span>
                 </div>
                 <span className="chip chip--marca">Reservar</span>
@@ -184,6 +194,10 @@ export function ReservasPage() {
           descripcion={`Reserva con al menos ${zonaElegida.anticipacionMinimaHoras} horas de anticipacion.`}
           onCerrar={() => setZonaElegida(null)}
         >
+          {/* RN-104 — Las fotos antes de la fecha: primero se mira, después se reserva. */}
+          <div style={{ marginBottom: 'var(--e3)' }}>
+            <FotosZona fotos={zonaElegida.fotos} nombre={zonaElegida.nombre} />
+          </div>
           <div className="campo">
             <label htmlFor="fecha-reserva">Fecha</label>
             <input

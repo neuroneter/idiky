@@ -8,7 +8,10 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { decidirReserva } from '../../datos/repositorio'
+import { agregarFotoZona, decidirReserva, quitarFotoZona } from '../../datos/repositorio'
+import { MAXIMO_FOTOS_ZONA, puedeAgregarFotoZona } from '../../dominio/reglas'
+import { CapturaFoto } from '../../componentes/CapturaFoto'
+import { FotosZona } from '../../componentes/FotosZona'
 import { etiquetaUnidad, hoyISO } from '../../dominio/reglas'
 import { formatearFecha } from '../../utilidades/formato'
 import { Modal } from '../../componentes/Modal'
@@ -23,8 +26,12 @@ export function ReservasAdminPage() {
   const [filtro, setFiltro] = useState<Filtro>('pendientes')
   const [rechazando, setRechazando] = useState<string | null>(null)
   const [motivo, setMotivo] = useState('')
+  /** La zona a la que se le está agregando una foto (RN-104). */
+  const [fotoPara, setFotoPara] = useState<string | null>(null)
 
   if (!sesion) return null
+
+  const zonas = sel.zonasDe(bd, sesion.copropiedadId)
 
   const hoy = hoyISO()
   const reservas = sel.reservasDeCopropiedad(bd, sesion.copropiedadId).filter((reserva) => {
@@ -138,6 +145,58 @@ export function ReservasAdminPage() {
           </div>
         </div>
       )}
+
+      {/* RN-104 — Las fotos de cada zona, que el residente ve antes de reservar.
+          Viven aquí porque todavía no hay pantalla de zonas (CU-A-10, parcial). */}
+      <div className="tarjeta">
+        <div className="fila" style={{ marginBottom: 'var(--e2)' }}>
+          <span className="titulo-seccion">Fotos de las zonas comunes</span>
+          <span className="subtitulo">Hasta {MAXIMO_FOTOS_ZONA} por zona · el residente las ve al reservar</span>
+        </div>
+        <div className="lista">
+          {zonas.map((zona) => (
+            <div key={zona.id} className="columna" style={{ gap: 'var(--e2)' }}>
+              <div className="fila">
+                <strong>{zona.nombre}</strong>
+                <button
+                  className="boton boton--pequeno"
+                  disabled={cargando || !puedeAgregarFotoZona(zona)}
+                  onClick={() => setFotoPara(fotoPara === zona.id ? null : zona.id)}
+                >
+                  {puedeAgregarFotoZona(zona) ? 'Agregar foto' : `Ya tiene ${MAXIMO_FOTOS_ZONA}`}
+                </button>
+              </div>
+              <FotosZona
+                fotos={zona.fotos}
+                nombre={zona.nombre}
+                vacio="Sin fotos todavía: el residente reserva a ciegas."
+                alQuitar={(foto) =>
+                  void ejecutar(
+                    (base) => quitarFotoZona(base, { zonaId: zona.id, adjuntadoEn: foto.adjuntadoEn }),
+                    'Foto quitada.',
+                  )
+                }
+              />
+              {fotoPara === zona.id && (
+                <CapturaFoto
+                  etiqueta={`Nueva foto de ${zona.nombre}`}
+                  ayuda="Como la ve quien entra: el salón montado, la terraza de día. Se guarda reducida."
+                  valor={null}
+                  alCambiar={(imagen) => {
+                    if (!imagen) return
+                    void ejecutar(
+                      (base) => agregarFotoZona(base, { zonaId: zona.id, imagen }),
+                      'Foto agregada. El residente ya la ve al reservar.',
+                    ).then((hecho) => {
+                      if (hecho) setFotoPara(null)
+                    })
+                  }}
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
 
       {rechazando && (
         <Modal

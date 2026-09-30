@@ -417,6 +417,12 @@ export interface ZonaComun {
   duracionBloqueHoras: number
   anticipacionMinimaHoras: number
   cupoMensualPorUnidad: number
+  /**
+   * Fotos de la zona, para reservar viendo como es (RN-104, Mary 2026-10-01).
+   * Configuracion, no registro: se agregan y se quitan desde la consola. Hasta
+   * cinco, reducidas (ADR-0009).
+   */
+  fotos?: Soporte[]
 }
 
 export type EstadoReserva = 'solicitada' | 'confirmada' | 'rechazada' | 'cancelada'

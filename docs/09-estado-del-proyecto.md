@@ -21,8 +21,8 @@ nueva o una sesión de IA distinta.
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 73 documentados: 40 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 21 ⬜ pendientes, 2 ⛔ retirados |
-| **Reglas de negocio** | 103 del demo (RN-01…RN-103; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-103, de las asambleas, registros, proyectos y correspondencia de Mary |
+| **Casos de uso** | 73 documentados: 40 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 20 ⬜ pendientes, 2 ⛔ retirados |
+| **Reglas de negocio** | 104 del demo (RN-01…RN-104; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-104, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -107,6 +107,30 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-01 · Mary + IA (Claude) · Las fotos de la zona antes de reservar (RN-104)
+
+Mary: *«en reservas debe ser posible ver la foto o fotos de la zona que el residente quiere
+reservar»*. Hasta hoy la zona era un nombre, un horario y un aforo; se reservaba a ciegas.
+
+**RN-104.** Cada zona común lleva hasta cinco fotos, reducidas como todas (ADR-0009). El
+residente ve la primera en la lista de zonas —con «2 fotos» si hay más— y, al abrir la reserva,
+la galería completa antes de la fecha: se mira y después se reserva; al tocar una se amplía. El
+administrador las carga y las quita desde `Reservas` en la consola, en una sección nueva,
+porque la pantalla de zonas (CU-A-10) todavía no existe: queda 🟡, solo con las fotos. Son
+configuración, no registro: quitar una no borra ninguna historia.
+
+**La semilla** (versión 25) trae fotos ilustrativas del salón, la terraza y el gimnasio: un
+dibujo rotulado «Foto ilustrativa del demo», no una fotografía, de menos de 1 KB cada uno, para
+que la galería se vea con algo hasta que la administración cargue las reales. La sala de
+coworking queda sin fotos a propósito, para mostrar el caso vacío.
+
+**Verificado.** 7 comprobaciones del repositorio (tope de cinco, la sexta se rechaza, quitar
+libera cupo) y 10 con Playwright: miniatura y conteo en la lista, galería y foto grande en la
+reserva, agregar y quitar desde la consola, y el residente viendo la nueva. `npm run build` y la
+ortografía en verde.
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · El botón «Recibido»: la entrega la cierra quien recibe (RN-103)
 

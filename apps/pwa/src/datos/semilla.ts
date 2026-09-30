@@ -9,6 +9,7 @@
  */
 
 import type {
+  Soporte,
   Proyecto,
   Asamblea,
   Asistencia,
@@ -52,7 +53,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      imputaciones y recibo de caja, y hay abonos por conciliar (RN-75 a RN-79).
 // 22 — poderes enviados en foto por el propietario y marca «No obligatorio» en el
 //      registro (Mary, 2026-09-17; su rama tambien llamo 21 a ese cambio).
-export const VERSION_ESQUEMA = 24
+export const VERSION_ESQUEMA = 25
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -191,6 +192,28 @@ const administrador: Persona = {
 // ---------------------------------------------------------------------------
 // Zonas comunes
 // ---------------------------------------------------------------------------
+
+/**
+ * Una «foto» ilustrativa para el demo (RN-104): un SVG con un color, unas
+ * formas y el rotulo «Foto ilustrativa del demo». No es una fotografia y lo
+ * dice; existe para que la galeria se vea con algo antes de que la
+ * administracion cargue las fotos reales. Pesa menos de 1 KB.
+ */
+function fotoIlustrativa(titulo: string, colorA: string, colorB: string, adjuntadoEn: string): Soporte {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">` +
+    `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${colorA}"/><stop offset="1" stop-color="${colorB}"/></linearGradient></defs>` +
+    `<rect width="800" height="600" fill="url(#g)"/>` +
+    `<rect x="60" y="380" width="680" height="120" rx="12" fill="rgba(255,255,255,0.22)"/>` +
+    `<rect x="120" y="300" width="160" height="80" rx="10" fill="rgba(255,255,255,0.35)"/>` +
+    `<rect x="520" y="280" width="200" height="100" rx="10" fill="rgba(255,255,255,0.3)"/>` +
+    `<circle cx="660" cy="120" r="48" fill="rgba(255,255,255,0.45)"/>` +
+    `<text x="400" y="200" text-anchor="middle" font-family="sans-serif" font-size="44" font-weight="700" fill="#fff">${titulo}</text>` +
+    `<text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="22" fill="rgba(255,255,255,0.85)">Foto ilustrativa del demo</text>` +
+    `</svg>`
+  return { imagen: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`, adjuntadoEn }
+}
+
 const zonasComunes: ZonaComun[] = [
   {
     id: 'zon-salon',
@@ -198,6 +221,10 @@ const zonasComunes: ZonaComun[] = [
     nombre: 'Salón social',
     descripcion: 'Salón para reuniones y celebraciones, con cocineta y baño.',
     icono: 'salon',
+    fotos: [
+      fotoIlustrativa('Salón social', '#1d2e7a', '#4b5fb8', '2026-09-01T10:00:00.000Z'),
+      fotoIlustrativa('Cocineta y baño', '#812485', '#c41e8c', '2026-09-01T10:05:00.000Z'),
+    ],
     aforo: 40,
     requiereAprobacion: true,
     horaInicio: '09:00',
@@ -212,6 +239,7 @@ const zonasComunes: ZonaComun[] = [
     nombre: 'Terraza BBQ',
     descripcion: 'Zona de asados en la terraza de la Torre 2.',
     icono: 'bbq',
+    fotos: [fotoIlustrativa('Terraza BBQ', '#a6620a', '#e0a04a', '2026-09-01T10:10:00.000Z')],
     aforo: 12,
     requiereAprobacion: true,
     horaInicio: '11:00',
@@ -226,6 +254,7 @@ const zonasComunes: ZonaComun[] = [
     nombre: 'Gimnasio',
     descripcion: 'Equipos cardiovasculares y de fuerza. Aforo controlado.',
     icono: 'gimnasio',
+    fotos: [fotoIlustrativa('Gimnasio', '#0f7a52', '#3fb98a', '2026-09-01T10:15:00.000Z')],
     aforo: 8,
     requiereAprobacion: false,
     horaInicio: '05:00',

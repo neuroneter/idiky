@@ -962,3 +962,25 @@ es un actor por encima de la copropiedad y no existe todavía en el demo. Está 
 **Estado en el demo:** ✅ — `/admin/proyectos`. La semilla trae la impermeabilización de
 cubiertas al 40 %, la misma obra de la cuota extraordinaria y de la asamblea en curso, y la
 pintura de fachadas con tres semanas sin avance, para que la alerta de RN-102 se vea al entrar.
+
+---
+
+### CU-A-10
+## CU-A-10 — Configurar zonas comunes y sus reglas *(parcial: las fotos)*
+
+- **Actor principal:** Administrador
+- **Resultado esperado:** Las zonas comunes existen con sus reglas y **con sus fotos**, y el
+  residente reserva viendo cómo es la zona.
+
+**Lo que existe hoy (2026-10-01):** solo las fotos (RN-104). En la consola, en `Reservas`, la
+sección **Fotos de las zonas comunes** lista cada zona con sus fotos; «Agregar foto» toma o
+escoge una, se guarda reducida (ADR-0009), y «Quitar» la retira. Hasta cinco por zona. Las
+reglas de la zona (horario, aforo, aprobación, cupo) siguen viniendo de los datos de ejemplo.
+
+**Pendiente:** crear, editar y desactivar zonas y sus reglas. Cuando exista esa pantalla, las
+fotos se mudan a ella.
+
+**Reglas de negocio**
+- RN-104 (hasta cinco fotos, configuración y no registro).
+
+**Estado en el demo:** 🟡 — `src/features/admin/ReservasAdminPage.tsx`, sección de fotos.

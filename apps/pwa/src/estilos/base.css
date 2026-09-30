@@ -813,3 +813,49 @@ textarea {
   background: var(--color-exito-suave);
   color: var(--color-exito);
 }
+
+/* Fotos de las zonas comunes (RN-104): tira de miniaturas y foto grande al tocar. */
+.fotos-zona {
+  display: flex;
+  gap: var(--e2);
+  overflow-x: auto;
+  padding-bottom: var(--e1);
+}
+.fotos-zona__miniatura {
+  position: relative;
+  flex: 0 0 auto;
+}
+.fotos-zona__miniatura > button:first-child {
+  display: block;
+  padding: 0;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie-2);
+  overflow: hidden;
+}
+.fotos-zona__miniatura img {
+  display: block;
+  width: 112px;
+  height: 84px;
+  object-fit: cover;
+}
+.fotos-zona__quitar {
+  position: absolute;
+  right: var(--e1);
+  bottom: var(--e1);
+}
+.fotos-zona__grande {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-superficie-2);
+  overflow: hidden;
+}
+.fotos-zona__grande img {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+}

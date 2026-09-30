@@ -175,8 +175,10 @@ La integración con pasarela está en el roadmap (fase 4).
   zona no requiere aprobación).
 
 **Flujo principal**
-1. El sistema lista las zonas comunes con su horario, aforo y si requieren aprobación.
-2. El residente elige zona, fecha y franja horaria.
+1. El sistema lista las zonas comunes con su horario, aforo, si requieren aprobación y **su
+   primera foto** (RN-104, Mary 2026-10-01).
+2. El residente elige la zona. Antes de la fecha ve **las fotos de la zona**, ampliables al
+   tocarlas: se reserva viendo cómo es. Luego elige fecha y franja horaria.
 3. El sistema valida disponibilidad y las reglas de la zona.
 4. El residente confirma; el sistema crea la reserva y notifica a la administración.
 

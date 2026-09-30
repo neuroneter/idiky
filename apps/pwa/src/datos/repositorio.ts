@@ -36,6 +36,7 @@ import type {
   Cuota,
   Documento,
   FechaISO,
+  ZonaComun,
   Proyecto,
   AvanceProyecto,
   MedioPago,
@@ -78,6 +79,8 @@ import {
   convocatoriaCompleta,
   faltaEnActa,
   limiteVerificacionActa,
+  MAXIMO_FOTOS_ZONA,
+  puedeAgregarFotoZona,
   puedeConfirmarRecepcion,
   admiteGrabacion,
   motivoAvanceInvalido,
@@ -890,6 +893,41 @@ export async function confirmarRecepcionCorrespondencia(
   registro.confirmadoPor = parametros.personaId
   registro.confirmadoEn = ahora
   return persistir(bd, registro)
+}
+
+// ---------------------------------------------------------------------------
+// Zonas comunes: sus fotos — CU-A-10 (parcial) · RN-104
+// ---------------------------------------------------------------------------
+
+export async function agregarFotoZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; imagen: string },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  if (!parametros.imagen) throw new ErrorDeNegocio('Falta la foto.')
+  if (!puedeAgregarFotoZona(zona)) {
+    throw new ErrorDeNegocio(`Una zona lleva hasta ${MAXIMO_FOTOS_ZONA} fotos. Quita una para agregar otra.`)
+  }
+  zona.fotos = [...(zona.fotos ?? []), { imagen: parametros.imagen, adjuntadoEn: ahoraISO() }]
+  return persistir(bd, zona)
+}
+
+/** Las fotos son configuracion: quitar una no borra ninguna historia (RN-104). */
+export async function quitarFotoZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; adjuntadoEn: string },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  const antes = zona.fotos?.length ?? 0
+  zona.fotos = (zona.fotos ?? []).filter((f) => f.adjuntadoEn !== parametros.adjuntadoEn)
+  if (zona.fotos.length === antes) throw new ErrorDeNegocio('Esa foto ya no está.')
+  return persistir(bd, zona)
 }
 
 // ---------------------------------------------------------------------------

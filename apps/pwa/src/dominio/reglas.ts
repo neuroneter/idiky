@@ -2004,3 +2004,19 @@ export function puedeConfirmarRecepcion(
     (r) => r.unidadId === registro.unidadId && r.personaId === personaId && residenciaVigente(r),
   )
 }
+
+/**
+ * RN-104 — **La zona se reserva viendo como es.**
+ *
+ * «En reservas debe ser posible ver la foto o fotos de la zona que el
+ * residente quiere reservar» (Mary, 2026-10-01). Hasta cinco fotos por zona:
+ * bastan para un salon, una terraza o un gimnasio, y en el demo, que vive en
+ * el navegador, cinco por zona no lo llenan (ADR-0009). Son configuracion, no
+ * registro: el administrador las agrega y las quita desde la consola, y
+ * quitar una no borra ninguna historia.
+ */
+export const MAXIMO_FOTOS_ZONA = 5
+
+export function puedeAgregarFotoZona(zona: { fotos?: unknown[] }): boolean {
+  return (zona.fotos?.length ?? 0) < MAXIMO_FOTOS_ZONA
+}
