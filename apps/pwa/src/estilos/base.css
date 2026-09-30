@@ -531,6 +531,26 @@ textarea {
   font-size: var(--texto-sm);
   animation: aparecer 0.18s ease;
 }
+.aviso--version {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  bottom: auto;
+  top: calc(env(safe-area-inset-top, 0px) + var(--e3));
+  background: var(--color-marca);
+}
+.aviso--version .boton {
+  background: var(--color-superficie);
+  border-color: transparent;
+  color: var(--color-marca);
+}
+.acceso__version {
+  text-align: center;
+  font-size: var(--texto-xs);
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: var(--e4);
+}
+
 .aviso--exito {
   background: var(--color-exito);
 }

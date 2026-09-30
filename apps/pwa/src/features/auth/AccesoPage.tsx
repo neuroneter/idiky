@@ -63,6 +63,7 @@ import { ControlTamanoTexto } from '../../componentes/ControlTamanoTexto'
 import { Icono } from '../../componentes/Icono'
 import { iniciales } from '../../utilidades/formato'
 import { perfilDe } from './perfil'
+import { FECHA_BUILD, VERSION_APP, leerRevisionDelServidor } from '../../servicios/version'
 
 export function AccesoPage() {
   const { bd } = useDatos()
@@ -360,8 +361,31 @@ export function AccesoPage() {
         </form>
 
         <AtajoDemo alSeleccionar={(id) => entrar(id)} />
+
+        {/* Que version tiene esta persona: es lo primero que hay que saber
+            cuando alguien dice «a mi no me sale» (Mary, 2026-10-01). */}
+        <VersionAlPie />
       </div>
     </div>
+  )
+}
+
+function VersionAlPie() {
+  const [revision, setRevision] = useState<string | null>(null)
+  useEffect(() => {
+    void leerRevisionDelServidor().then(setRevision)
+  }, [])
+  return (
+    <p className="acceso__version">
+      Idiky {VERSION_APP} · compilada el {FECHA_BUILD}
+      {revision ? (
+        <>
+          {' '}· servidor <span className="numerico">{revision}</span>
+        </>
+      ) : (
+        ' · demo en este dispositivo'
+      )}
+    </p>
   )
 }
 

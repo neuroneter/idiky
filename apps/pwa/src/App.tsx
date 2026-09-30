@@ -45,6 +45,7 @@ import { CorrespondenciaPage as CorrespondenciaGestionPage } from './features/po
 import { TurnoPage } from './features/porteria/TurnoPage'
 import { ValidarVisitantePage } from './features/porteria/ValidarVisitantePage'
 import { ResidentesPage } from './features/porteria/ResidentesPage'
+import { AvisoVersionNueva } from './componentes/AvisoVersionNueva'
 
 /** Deja pasar solo si hay sesion con el rol esperado (ADR-0004). */
 function Protegida({
@@ -64,6 +65,8 @@ export function App() {
   const { sesion } = useSesion()
 
   return (
+    <>
+    <AvisoVersionNueva />
     <Routes>
       <Route path="/acceso" element={<AccesoPage />} />
       {/* Activar y recuperar son el mismo tramite en tres pasos; cambia el texto,
@@ -155,5 +158,6 @@ export function App() {
         element={<Navigate to={sesion ? rutaInicial(sesion.rol) : '/acceso'} replace />}
       />
     </Routes>
+    </>
   )
 }

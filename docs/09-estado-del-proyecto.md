@@ -108,6 +108,30 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-01 · Mary + IA (Claude) · Cómo le llega una actualización al usuario
+
+Mary preguntó *«cuando hay una actualización en la app o en la web, para el usuario cómo va a
+funcionar»*. La respuesta quedó escrita en [`06-arquitectura.md`](./06-arquitectura.md), por
+cada forma de entrar: la consola en el navegador se actualiza al recargar; la PWA instalada baja
+la versión nueva sola al abrirse con internet (el *service worker* pide al servidor primero);
+las apps de las tiendas (fase 3) se actualizan por la tienda para el envoltorio y desde el
+servidor para el contenido; y los datos, en el producto, viven en el servidor y una
+actualización nunca los borra.
+
+**Dos cosas que faltaban y se construyeron** (`servicios/version.ts`): la app **muestra su
+versión** al pie de la pantalla de ingreso —paquete, día de compilación y la revisión que el
+servidor publicó en `revision.txt`—, y **avisa cuando sale una nueva** a quien la tiene abierta:
+compara la revisión del servidor cada diez minutos y al volver a la pestaña, y muestra «Hay una
+versión nueva» con el botón «Actualizar». No recarga sola. En el demo empaquetado y en
+desarrollo, sin servidor, el pie dice «demo en este dispositivo» y no hay aviso.
+
+**Verificado** con Playwright: el pie muestra la revisión del servidor, al cambiar
+`revision.txt` y volver a la pestaña aparece el aviso con la revisión nueva, «Actualizar»
+recarga y el pie la muestra, y el demo en un archivo dice que no hay servidor. `npm run build` y
+la ortografía en verde.
+
+---
+
 ### 2026-09-30 · Mary + IA (Claude) · Los avances a la vista, y las fotos de obra se quedan
 
 Mary revisó el tablero: *«me gusta, pero ¿dónde veo los avances?»*. Estaban debajo del
