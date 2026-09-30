@@ -22,7 +22,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 73 documentados: 40 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 101 del demo (RN-01…RN-101; RN-41 retirada) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-101, de las asambleas, registros y proyectos de Mary |
+| **Reglas de negocio** | 102 del demo (RN-01…RN-102; RN-41 retirada) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-102, de las asambleas, registros y proyectos de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -107,6 +107,28 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-01 · Mary + IA (Claude) · La alerta del proyecto callado (RN-102)
+
+Mary pidió *«en el tablero del administrador, una alerta de reportar avance si han pasado dos
+semanas sin actualización»*. Es la otra mitad del tablero de proyectos: registrar avances
+sirve mientras alguien los registre, y un «40 %» de hace un mes no le dice al propietario si
+la obra sigue, se paró o se olvidó.
+
+**RN-102.** A los 14 días sin avance, el tablero de la copropiedad (`/admin`) abre con la
+alerta: cada proyecto callado con sus días y el botón «Reportar avance». La lista de proyectos
+marca la tarjeta y el detalle lo dice antes del botón de registrar. Se resuelve registrando un
+avance, aunque sea «sigue igual, esperando el material». Desde cuándo se cuenta: en marcha,
+desde el último avance; planeado con fecha de inicio ya pasada, desde esa fecha —debió empezar
+y no ha dicho nada—; planeado sin fecha o con fecha futura, nada; terminado, nunca. Es una
+alerta al administrador y no un aviso al propietario, porque quien puede resolverla es él.
+
+**Verificado.** 8 comprobaciones de la regla (esbuild + node: el umbral exacto de 14, planeado
+con y sin fecha, terminado, orden) y 6 con Playwright: sin alerta con la semilla reciente, la
+alerta al envejecer los avances, el chip en la lista, la nota en el detalle y la alerta que
+desaparece al registrar un avance. `npm run build` y la ortografía en verde.
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · Cómo le llega una actualización al usuario
 

@@ -15,7 +15,14 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { crearProyecto, ocupacionDelDemo, registrarAvanceProyecto } from '../../datos/repositorio'
-import { estadoProyecto, motivoAvanceInvalido, porcentajeProyecto, ultimoAvance } from '../../dominio/reglas'
+import {
+  DIAS_SIN_AVANCE_ALERTA,
+  diasSinAvance,
+  estadoProyecto,
+  motivoAvanceInvalido,
+  porcentajeProyecto,
+  ultimoAvance,
+} from '../../dominio/reglas'
 import { formatearFechaCorta } from '../../utilidades/formato'
 import type { Proyecto } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
@@ -77,11 +84,21 @@ export function ProyectosAdminPage() {
         <div className="rejilla-dos">
           {proyectos.map((proyecto) => {
             const ultimo = ultimoAvance(proyecto)
+            const callado = diasSinAvance(proyecto)
+            const debeAvance = callado !== null && callado >= DIAS_SIN_AVANCE_ALERTA
             return (
-              <div key={proyecto.id} className="tarjeta columna" style={{ gap: 'var(--e3)' }}>
+              <div
+                key={proyecto.id}
+                className={`tarjeta columna${debeAvance ? ' tarjeta--alerta' : ''}`}
+                style={{ gap: 'var(--e3)' }}
+              >
                 <div className="fila fila-inicio">
                   <strong>{proyecto.nombre}</strong>
-                  <ChipProyecto proyecto={proyecto} />
+                  <div className="grupo-botones">
+                    {/* RN-102 — El silencio se ve desde la lista, no solo en el tablero. */}
+                    {debeAvance && <span className="chip chip--alerta">{callado} días sin avance</span>}
+                    <ChipProyecto proyecto={proyecto} />
+                  </div>
                 </div>
                 <BarraAvance proyecto={proyecto} />
                 <span className="subtitulo">
@@ -297,6 +314,17 @@ function DetalleProyecto({
       </div>
 
       <div className="separador" />
+
+      {/* RN-102 — Al abrir un proyecto callado, se dice antes del botón. */}
+      {(() => {
+        const callado = diasSinAvance(proyecto)
+        return callado !== null && callado >= DIAS_SIN_AVANCE_ALERTA ? (
+          <p className="acceso__nota" style={{ marginBottom: 'var(--e3)' }}>
+            Lleva <strong>{callado} días</strong> sin avance reportado. Los propietarios no saben si
+            la obra sigue: registra uno aunque sea «sigue igual, esperando el material».
+          </p>
+        ) : null
+      })()}
 
       {terminado ? (
         <p className="acceso__nota">

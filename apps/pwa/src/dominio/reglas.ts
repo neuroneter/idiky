@@ -1961,3 +1961,40 @@ export function textoAvanceProyecto(
     'Mira el tablero del proyecto en Idiky.'
   )
 }
+
+/**
+ * RN-102 — **El silencio de una obra también se reporta.**
+ *
+ * «Una alerta de reportar avance si han pasado dos semanas sin actualización»
+ * (Mary, 2026-10-01). Un tablero que dice «40 %» desde hace un mes no informa:
+ * el propietario no sabe si la obra sigue, se paró o se olvidó actualizarla.
+ * Por eso la alerta es para el administrador, que es quien puede resolverla
+ * con un avance —aunque sea «sigue igual, esperando el material».
+ *
+ * Desde cuándo se cuenta: en una obra **en marcha**, desde el último avance;
+ * en una **planeada** cuya fecha de inicio ya pasó, desde esa fecha (debió
+ * empezar y no ha dicho nada); una planeada sin fecha, o con fecha futura, no
+ * debe nada todavía; una **terminada**, nunca.
+ */
+export const DIAS_SIN_AVANCE_ALERTA = 14
+
+export function diasSinAvance(proyecto: Proyecto, hoy: FechaISO = hoyISO()): number | null {
+  const estado = estadoProyecto(proyecto)
+  if (estado === 'terminado') return null
+  if (estado === 'en_curso') return diasEntre(ultimoAvance(proyecto)!.fecha, hoy)
+  if (proyecto.fechaInicio && proyecto.fechaInicio <= hoy) return diasEntre(proyecto.fechaInicio, hoy)
+  return null
+}
+
+/** Los proyectos que deben un avance, del más callado al menos. */
+export function proyectosSinAvanceReciente(
+  proyectos: Proyecto[],
+  copropiedadId: string,
+  hoy: FechaISO = hoyISO(),
+): Array<{ proyecto: Proyecto; dias: number }> {
+  return proyectos
+    .filter((p) => p.copropiedadId === copropiedadId)
+    .map((proyecto) => ({ proyecto, dias: diasSinAvance(proyecto, hoy) }))
+    .filter((x): x is { proyecto: Proyecto; dias: number } => x.dias !== null && x.dias >= DIAS_SIN_AVANCE_ALERTA)
+    .sort((a, b) => b.dias - a.dias)
+}

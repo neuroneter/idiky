@@ -15,6 +15,8 @@ import {
   porcentajeRecaudo,
   pqrsAbierta,
   pqrsFueraDeSla,
+  proyectosSinAvanceReciente,
+  DIAS_SIN_AVANCE_ALERTA,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearPeriodo } from '../../utilidades/formato'
 import { ChipPqrs, ChipReserva } from '../../componentes/Etiquetas'
@@ -76,8 +78,42 @@ export function TableroPage() {
     .correspondenciaDeCopropiedad(bd, copropiedadId)
     .filter((registro) => registro.estado === 'en_porteria')
 
+  const proyectosCallados = proyectosSinAvanceReciente(bd.proyectos, copropiedadId)
+
   return (
     <>
+      {/* RN-102 — Las obras que deben un avance, arriba de todo: es lo único
+          del tablero que el propietario está esperando y nadie más le va a
+          reclamar al administrador. */}
+      {proyectosCallados.length > 0 && (
+        <div className="tarjeta tarjeta--alerta">
+          <div className="fila" style={{ marginBottom: 'var(--e2)' }}>
+            <span className="titulo-seccion">
+              {proyectosCallados.length === 1
+                ? 'Un proyecto sin avance reportado'
+                : `${proyectosCallados.length} proyectos sin avance reportado`}
+            </span>
+            <Link to="/admin/proyectos" className="boton boton--pequeno boton--primario">
+              Reportar avance
+            </Link>
+          </div>
+          <div className="lista lista--compacta">
+            {proyectosCallados.map(({ proyecto, dias }) => (
+              <div key={proyecto.id} className="fila">
+                <strong>{proyecto.nombre}</strong>
+                <span className="chip chip--alerta">
+                  {dias} días sin avance
+                </span>
+              </div>
+            ))}
+          </div>
+          <span className="subtitulo" style={{ display: 'block', marginTop: 'var(--e2)' }}>
+            Más de {DIAS_SIN_AVANCE_ALERTA} días sin novedades. Los propietarios no saben si la obra
+            sigue: registra un avance aunque sea «sigue igual» (RN-102).
+          </span>
+        </div>
+      )}
+
       <div className="rejilla-indicadores">
         <Indicador
           etiqueta={`Recaudo ${formatearPeriodo(periodo)}`}

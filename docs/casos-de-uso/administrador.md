@@ -944,6 +944,10 @@ es un actor por encima de la copropiedad y no existe todavía en el demo. Está 
   discuta.
 - A3. Un propietario tiene varias unidades → recibe **un solo** mensaje: se avisa a personas, no
   a unidades.
+- A4. **Pasan dos semanas sin avance** → el tablero de la copropiedad (`/admin`) muestra la
+  alerta «proyectos sin avance reportado» con los días de cada uno y el botón «Reportar
+  avance»; la lista y el detalle del proyecto lo marcan también (RN-102). Se resuelve registrando
+  un avance, aunque sea «sigue igual».
 
 **Decisiones de interfaz**
 - **El estado se deriva de los avances** (planeado, en marcha, terminado) y no se guarda: un
