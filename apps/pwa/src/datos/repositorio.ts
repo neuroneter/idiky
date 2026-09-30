@@ -107,7 +107,7 @@ import {
 } from '../dominio/reglas'
 import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajeria'
 import { finDePeriodo, formatearDinero, formatearFecha } from '../utilidades/formato'
-import { guardar, leer, sembrar } from './almacen'
+import { guardar, leer, sembrar, ocupacion } from './almacen'
 
 /** Resultado de una operacion: base de datos actualizada + lo que se creo. */
 export interface Resultado<T> {
@@ -644,6 +644,16 @@ export async function publicarComunicado(
   }
   bd.comunicados.unshift(comunicado)
   return persistir(bd, comunicado)
+}
+
+/**
+ * Cuanto del almacenamiento del demo va ocupado, para avisar antes de que se
+ * llene (ADR-0009). Solo tiene sentido mientras los datos vivan en el
+ * navegador: con backend, las fotos van a un archivo y esto desaparece.
+ */
+export function ocupacionDelDemo(bd: BaseDatos): { porcentaje: number; usadoKB: number; limiteKB: number } {
+  const o = ocupacion(bd)
+  return { porcentaje: o.porcentaje, usadoKB: Math.round(o.usado / 1024), limiteKB: Math.round(o.limite / 1024) }
 }
 
 // ---------------------------------------------------------------------------

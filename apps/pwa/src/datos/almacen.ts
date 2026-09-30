@@ -34,6 +34,26 @@ export function leer(): BaseDatos {
   }
 }
 
+/**
+ * Cuanto del almacenamiento del demo ocupa esta base de datos.
+ *
+ * `localStorage` da unos 5 MiB por origen, contados en UTF-16: unos 2,6
+ * millones de caracteres. Se mide sobre lo que se guardaria (el JSON), no
+ * sobre `localStorage`, para que la cuenta sea la misma con o sin navegador.
+ * Con fotos de 60 KB (ADR-0009) caben decenas; el aviso llega antes de que
+ * `guardar` empiece a fallar en silencio.
+ */
+export const LIMITE_CARACTERES_DEMO = 2_600_000
+
+export function ocupacion(bd: BaseDatos): { usado: number; limite: number; porcentaje: number } {
+  const usado = JSON.stringify(bd).length
+  return {
+    usado,
+    limite: LIMITE_CARACTERES_DEMO,
+    porcentaje: Math.min(100, Math.round((usado / LIMITE_CARACTERES_DEMO) * 100)),
+  }
+}
+
 export function guardar(bd: BaseDatos): void {
   if (!disponible()) return
   try {

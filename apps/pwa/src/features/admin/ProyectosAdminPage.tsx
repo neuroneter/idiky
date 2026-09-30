@@ -14,7 +14,7 @@ import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
-import { crearProyecto, registrarAvanceProyecto } from '../../datos/repositorio'
+import { crearProyecto, ocupacionDelDemo, registrarAvanceProyecto } from '../../datos/repositorio'
 import { estadoProyecto, motivoAvanceInvalido, porcentajeProyecto, ultimoAvance } from '../../dominio/reglas'
 import { formatearFechaCorta } from '../../utilidades/formato'
 import type { Proyecto } from '../../dominio/tipos'
@@ -125,6 +125,7 @@ export function ProyectosAdminPage() {
         <DetalleProyecto
           proyecto={enDetalle}
           cargando={cargando}
+          ocupacion={ocupacionDelDemo(bd)}
           personaDe={(id) => sel.persona(bd, id)}
           alCerrar={() => setViendo(null)}
           alRegistrarAvance={async (datos) => {
@@ -250,12 +251,15 @@ function FormularioProyecto({
 function DetalleProyecto({
   proyecto,
   cargando,
+  ocupacion,
   personaDe,
   alRegistrarAvance,
   alCerrar,
 }: {
   proyecto: Proyecto
   cargando: boolean
+  /** Cuánto del almacenamiento del demo va ocupado (ADR-0009). */
+  ocupacion: { porcentaje: number; usadoKB: number; limiteKB: number }
   personaDe: (id: string) => ReturnType<typeof sel.persona>
   alRegistrarAvance: (datos: { porcentaje: number; titulo: string; detalle: string; foto?: string }) => Promise<boolean>
   alCerrar: () => void
@@ -332,10 +336,21 @@ function DetalleProyecto({
           </div>
           <CapturaFoto
             etiqueta="Foto de la obra (opcional)"
-            ayuda="Una foto vale más que el porcentaje: el propietario ve la cubierta sin subir a mirarla."
+            ayuda="Una foto vale más que el porcentaje: el propietario ve la cubierta sin subir a mirarla. Se guarda reducida, unos 60 KB."
             valor={foto}
             alCambiar={setFoto}
           />
+          {/* El demo vive en el navegador y se llena (ADR-0009). Se avisa
+              antes de que deje de guardar en silencio; con backend esto
+              desaparece porque las fotos van a un archivo. */}
+          {ocupacion.porcentaje >= 80 && (
+            <p className="acceso__nota">
+              <strong>Demo:</strong> el navegador va al {ocupacion.porcentaje} % de lo que puede
+              guardar ({ocupacion.usadoKB} de {ocupacion.limiteKB} KB). Las fotos nuevas pueden dejar
+              de guardarse. Si es una demostración, reinicia el demo desde la pantalla de ingreso.
+              En la versión real las fotos van al servidor y este límite no existe.
+            </p>
+          )}
           {motivo && <p className="acceso__nota">{motivo}</p>}
           <p className="subtitulo">
             Al registrarlo se publica en la cartelera y le llega un mensaje a cada propietario

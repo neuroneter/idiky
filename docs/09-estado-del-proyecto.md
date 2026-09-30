@@ -108,6 +108,30 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-30 · Mary + IA (Claude) · Los avances a la vista, y las fotos de obra se quedan
+
+Mary revisó el tablero: *«me gusta, pero ¿dónde veo los avances?»*. Estaban debajo del
+formulario en la consola y plegados en la app, o sea, escondidos. **Ahora son lo primero**: en
+la consola la sección «Avances (N)» va antes del formulario y la tarjeta dice cuántos hay; en la
+app la primera obra viene con sus avances abiertos; en el inicio se ve el último y cuántos van.
+
+Después preguntó si **las fotos pesan demasiado** y si convendría ir borrando las viejas. Con
+números: cada foto se guarda reducida a unos 60 KB (ADR-0009); en el demo, que vive en el
+navegador con unos 5 MB para todo, caben decenas; en el producto van a un archivo (R2, T-77) y el
+peso no importa. **Se decidió no borrarlas**: la foto de cada avance es la prueba de la obra ese
+día, no es dato personal y no tiene plazo. Quedó escrito en ADR-0009 y en RN-100, para que el
+proceso que un día borre las fotos de cédula no se lleve las de obra.
+
+Lo que sí se agregó: **un aviso en el demo** cuando el navegador va al 80 % de su capacidad
+(`ocupacionDelDemo`, medido sobre lo que se guardaría), porque hasta hoy al llenarse dejaba de
+guardar en silencio y al recargar se perdía lo último, que es lo peor que puede pasar en medio
+de una demostración.
+
+**Verificado.** Las 24 comprobaciones del tablero con Playwright, `npm run build` y la
+ortografía en verde.
+
+---
+
 ### 2026-09-29 · Mary + IA (Claude) · El tablero de proyectos: la obra, su avance y el aviso (CU-A-28, CU-R-32)
 
 Mary pidió *«un tablero para el administrador y los propietarios en la que el administrador
