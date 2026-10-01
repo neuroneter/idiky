@@ -186,11 +186,11 @@ export function PazYSalvoPage() {
 
       <div className="pila">
         <span className="titulo-seccion">Emitidos antes</span>
-        {sel.documentosDeUnidad(bd, sesion.unidadActivaId).length === 0 ? (
+        {sel.documentosDeUnidad(bd, sesion.unidadActivaId).filter((d) => d.tipo === 'paz_y_salvo').length === 0 ? (
           <p className="subtitulo">Todavía no has emitido ningún certificado.</p>
         ) : (
           <div className="lista">
-            {sel.documentosDeUnidad(bd, sesion.unidadActivaId).map((documento) => (
+            {sel.documentosDeUnidad(bd, sesion.unidadActivaId).filter((d) => d.tipo === 'paz_y_salvo').map((documento) => (
               <div key={documento.id} className="tarjeta tarjeta--plana">
                 <div className="fila">
                   <div className="columna">

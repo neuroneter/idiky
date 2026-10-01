@@ -92,6 +92,8 @@ import {
   motivoDeCierre,
   reservasQueCancelaCierre,
   validarReserva,
+  estadoDeCuenta,
+  motivoEstadoCuentaInvalido,
   franjasDeZona,
   multaAlCancelar,
   puedeCancelarLaAdministracion,
@@ -3362,6 +3364,46 @@ export async function emitirVoto(
  * de ADR-0006, que sigue pendiente. Por eso el certificado se guarda y se muestra
  * en pantalla, y la descarga es lo unico que queda en deuda.
  */
+/**
+ * CU-R-18 — Emite el estado de cuenta de la unidad para un rango de periodos
+ * (RN-127): lo calcula, lo congela en el documento y le da su consecutivo y su
+ * código (RN-36, ADR-0006). Se imprime desde la app, como el paz y salvo.
+ */
+export async function emitirEstadoCuenta(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; unidadId: string; desde: string; hasta: string; solicitadoPor: string },
+): Promise<Resultado<Documento>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
+  if (!unidad) throw new ErrorDeNegocio('La unidad no existe.')
+  const estado = estadoDeCuenta(
+    cuotasDe(bd, unidad.id),
+    bd.pagos.filter((p) => p.unidadId === unidad.id),
+    parametros.desde,
+    parametros.hasta,
+  )
+  const invalido = motivoEstadoCuentaInvalido(parametros.desde, parametros.hasta, estado)
+  if (invalido) throw new ErrorDeNegocio(invalido)
+
+  const hoy = hoyISO()
+  const consecutivo = bd.consecutivos.estadoCuenta ?? 1
+  const documento: Documento = {
+    id: nuevoId('doc'),
+    tipo: 'estado_cuenta',
+    numero: `EC-${hoy.slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`,
+    codigoVerificacion: nuevoCodigoVerificacion(),
+    copropiedadId: parametros.copropiedadId,
+    unidadId: unidad.id,
+    emitidoEn: hoy,
+    estadoCuenta: { ...estado, solicitadoPor: parametros.solicitadoPor },
+    estado: 'vigente',
+  }
+  bd.documentos.push(documento)
+  bd.consecutivos.estadoCuenta = consecutivo + 1
+  return persistir(bd, documento)
+}
+
 export async function emitirPazYSalvo(
   bdActual: BaseDatos,
   parametros: { copropiedadId: string; unidadId: string },

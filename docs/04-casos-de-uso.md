@@ -39,7 +39,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-15 | Registrar mis vehículos y mascotas | 3 | ⬜ Pendiente | — |
 | CU-R-16 | Recibir notificaciones push | 3 | ⬜ Pendiente | — |
 | CU-R-17 | Directorio de contactos útiles y emergencias | 3 | ⬜ Pendiente | — |
-| CU-R-18 | **Descargar el informe de estado de cuenta** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-18) |
+| CU-R-18 | **Descargar el informe de estado de cuenta** | 1 | ✅ Demo (se emite con consecutivo y código, y se imprime o guarda en PDF desde la app — RN-127) | [ver](./casos-de-uso/residente.md#cu-r-18) |
 | CU-R-19 | **Consultar y descargar mis comprobantes de pago** | 1 | 🟡 Parcial | [ver](./casos-de-uso/residente.md#cu-r-19) |
 | CU-R-20 | **Recibir la citación a asamblea y confirmar asistencia** | 1 | 🟡 Parcial (muestra la citación y el orden del día; no confirma asistencia) | [ver](./casos-de-uso/residente.md#cu-r-20) |
 | CU-R-21 | **Entrar a la asamblea y marcar mi asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-21) |

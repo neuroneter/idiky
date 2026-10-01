@@ -21,8 +21,8 @@ nueva o una sesión de IA distinta.
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 75 documentados: 44 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 19 ⬜ pendientes, 2 ⛔ retirados |
-| **Reglas de negocio** | 126 del demo (RN-01…RN-126; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-126, de las asambleas, registros, proyectos, correspondencia y zonas de Mary |
+| **Casos de uso** | 75 documentados: 45 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 18 ⬜ pendientes, 2 ⛔ retirados |
+| **Reglas de negocio** | 127 del demo (RN-01…RN-127; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-127, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -110,6 +110,46 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-01 · Mary + IA (Claude) · El estado de cuenta descargable (CU-R-18, RN-127)
+
+Mary escogió seguir con los dos pendientes cortos de la fase 1. El primero es el estado de
+cuenta.
+
+**Qué hace.** En «Estado de cuenta», el botón «Descargar estado de cuenta» abre una pantalla
+donde se escoge el rango de meses y se ve el resumen antes de emitir. El documento sale con
+número `EC-AAAA-NNNN` y código de verificación, y se imprime o se guarda en PDF desde el
+teléfono, igual que el paz y salvo (revisión de ADR-0006: sin servidor ni librerías). Los
+emitidos antes se vuelven a imprimir **tal como se emitieron**.
+
+**RN-127, cómo se cuenta:**
+- Saldo anterior.
+- Cargos: las cuotas del rango, de todo tipo.
+- Abonos: solo los pagos **aplicados**, nunca los informados sin aplicar (RN-79) ni los anulados
+  (RN-78).
+- Saldo final, con el saldo corrido en cada renglón.
+
+El documento guarda lo que afirmó y dice que no es un paz y salvo.
+
+**Lo que corrigió la prueba.** El rango por defecto terminaba en el mes actual, pero una unidad
+puede tener facturada la cuota del mes siguiente, y el «valor adeudado» la incluye (RN-26). Ahora
+el rango llega hasta el último mes facturado, y el documento cuadra con lo que la persona ve en
+pantalla.
+
+**De paso:** la lista «Emitidos antes» del paz y salvo mostraba todos los documentos de la
+unidad. Ahora muestra solo los paz y salvo.
+
+**Verificado.** 9 comprobaciones con Playwright, en celular:
+- El saldo final cuadra con el valor adeudado ($3.234.000).
+- El consecutivo, la tabla y el pie con el código.
+- Lo congelado en el documento.
+- El rango sin movimientos, que no se emite.
+- El paz y salvo, que no mezcla estados de cuenta.
+- La reimpresión.
+
+`npm run build` y la ortografía, en verde.
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · El informe de uso de las zonas comunes (CU-A-30)
 

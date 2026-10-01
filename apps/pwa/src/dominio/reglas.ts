@@ -29,6 +29,8 @@ import type {
   EstadoCuota,
   FechaISO,
   Imputacion,
+  EstadoCuentaCongelado,
+  MovimientoCuenta,
   Pago,
   Periodo,
   Pqrs,
@@ -3073,4 +3075,76 @@ export function unidadesQueMasReservan(
     .map(([unidadId, c]) => ({ unidadId, ...c }))
     .sort((a, b) => b.reservas - a.reservas)
     .slice(0, cuantas)
+}
+
+// ---------------------------------------------------------------------------
+// Estado de cuenta — CU-R-18 · RN-127
+// ---------------------------------------------------------------------------
+
+/**
+ * RN-127 — **El estado de cuenta cuenta lo que se cobró y lo que se aplicó, y
+ * congela lo que afirma.**
+ *
+ * «Sí, por favor» (Mary, 2026-10-01, al escoger CU-R-18). Para un rango de
+ * periodos —por defecto el año en curso— el estado de cuenta lista:
+ *
+ * - **Saldo anterior:** lo cobrado antes del rango menos lo aplicado antes.
+ * - **Cargos:** cada cuota con periodo dentro del rango —ordinarias,
+ *   extraordinarias, intereses, multas en firme, uso de zonas—, por su valor.
+ * - **Abonos:** cada pago **aplicado** con fecha de aplicación dentro del
+ *   rango, por su valor completo; si sobró, el saldo final queda a favor
+ *   (RN-76). El abono que el propietario informó y la administración no ha
+ *   aplicado **no cuenta** (RN-79), y el anulado tampoco (RN-78).
+ * - **Saldo final** = saldo anterior + cargos − abonos, con el saldo corrido
+ *   en cada renglón.
+ *
+ * Se emite como documento con consecutivo y código de verificación (RN-36,
+ * ADR-0006) y **guarda lo que afirmó**: reimprimirlo en junio da el papel de
+ * marzo, no uno nuevo con el mismo número. Sin movimientos ni saldo en el
+ * rango no se emite: se avisa antes (CU-R-18, A1).
+ */
+export function estadoDeCuenta(
+  cuotas: Cuota[],
+  pagos: Pago[],
+  desde: Periodo,
+  hasta: Periodo,
+): Omit<EstadoCuentaCongelado, 'solicitadoPor'> {
+  const aplicados = pagos.filter((p) => p.estado === 'aplicado')
+  const mesDePago = (p: Pago) => (p.fechaAplicacion ?? p.fecha).slice(0, 7)
+  const saldoInicial =
+    cuotas.filter((c) => c.periodo < desde).reduce((t, c) => t + c.valor, 0) -
+    aplicados.filter((p) => mesDePago(p) < desde).reduce((t, p) => t + p.valor, 0)
+
+  const renglones: Array<Omit<MovimientoCuenta, 'saldo'>> = [
+    ...cuotas
+      .filter((c) => c.periodo >= desde && c.periodo <= hasta)
+      .map((c) => ({ fecha: `${c.periodo}-01`, tipo: 'cargo' as const, concepto: c.concepto, valor: c.valor })),
+    ...aplicados
+      .filter((p) => mesDePago(p) >= desde && mesDePago(p) <= hasta)
+      .map((p) => ({
+        fecha: (p.fechaAplicacion ?? p.fecha).slice(0, 10),
+        tipo: 'abono' as const,
+        concepto: p.recibo ? `Pago aplicado · recibo ${p.recibo}` : 'Pago aplicado',
+        valor: p.valor,
+      })),
+  ].sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.tipo === b.tipo ? 0 : a.tipo === 'cargo' ? -1 : 1))
+
+  let saldo = saldoInicial
+  const movimientos = renglones.map((r) => {
+    saldo += r.tipo === 'cargo' ? r.valor : -r.valor
+    return { ...r, saldo }
+  })
+  const totalCargos = renglones.filter((r) => r.tipo === 'cargo').reduce((t, r) => t + r.valor, 0)
+  const totalAbonos = renglones.filter((r) => r.tipo === 'abono').reduce((t, r) => t + r.valor, 0)
+  return { desde, hasta, saldoInicial, movimientos, totalCargos, totalAbonos, saldoFinal: saldo }
+}
+
+/** Por qué no se puede emitir con ese rango, o `null` si se puede. */
+export function motivoEstadoCuentaInvalido(desde: Periodo, hasta: Periodo, estado: { saldoInicial: number; movimientos: unknown[] }): string | null {
+  if (!/^\d{4}-\d{2}$/.test(desde) || !/^\d{4}-\d{2}$/.test(hasta)) return 'Escoge el mes inicial y el final.'
+  if (desde > hasta) return 'El mes final va después del inicial.'
+  if (estado.movimientos.length === 0 && estado.saldoInicial === 0) {
+    return 'En ese rango no hay cobros, pagos ni saldo: no hay nada que certificar.'
+  }
+  return null
 }

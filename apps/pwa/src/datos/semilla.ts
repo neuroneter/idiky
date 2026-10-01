@@ -1537,6 +1537,7 @@ export function crearSemilla(): BaseDatos {
       poder: 1,
       acta: 1,
       recibo: consecutivoRecibo,
+      estadoCuenta: 1,
     },
   }
 }

@@ -1276,7 +1276,7 @@ export interface Voto {
 // ---------------------------------------------------------------------------
 // Documentos formales — CU-R-12
 // ---------------------------------------------------------------------------
-export type TipoDocumento = 'paz_y_salvo' | 'acta' | 'poder'
+export type TipoDocumento = 'paz_y_salvo' | 'acta' | 'poder' | 'estado_cuenta'
 
 export interface Documento {
   id: string
@@ -1307,7 +1307,36 @@ export interface Documento {
   cubiertoHasta?: FechaISO
   /** La asamblea a la que se refiere: el acta da fe de ella, el poder vale para ella. */
   asambleaId?: string
+  /**
+   * Solo en el estado de cuenta (CU-R-18, RN-127): lo que afirma, congelado al
+   * emitirlo. Reimprimirlo da el mismo papel aunque la cartera siga su curso.
+   */
+  estadoCuenta?: EstadoCuentaCongelado
   estado: 'vigente' | 'anulado'
+}
+
+/** Un renglón del estado de cuenta: un cobro o un pago aplicado (RN-127). */
+export interface MovimientoCuenta {
+  fecha: FechaISO
+  tipo: 'cargo' | 'abono'
+  concepto: string
+  valor: Dinero
+  /** El saldo después de este movimiento. */
+  saldo: Dinero
+}
+
+export interface EstadoCuentaCongelado {
+  /** Periodos `AAAA-MM`, incluidos los dos. */
+  desde: Periodo
+  hasta: Periodo
+  saldoInicial: Dinero
+  movimientos: MovimientoCuenta[]
+  totalCargos: Dinero
+  totalAbonos: Dinero
+  /** Positivo: lo que se debe. Negativo: saldo a favor. */
+  saldoFinal: Dinero
+  /** Quien lo pidió. */
+  solicitadoPor: string
 }
 
 // ---------------------------------------------------------------------------
@@ -1392,5 +1421,7 @@ export interface BaseDatos {
     acta: number
     /** Consecutivo del recibo de caja (RN-77). */
     recibo: number
+    /** Consecutivo del estado de cuenta (RN-36, CU-R-18). Ausente en bases viejas: empieza en 1. */
+    estadoCuenta?: number
   }
 }

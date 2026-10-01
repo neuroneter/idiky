@@ -479,8 +479,23 @@ como causal** (A4), que es de §3 bis.
 **Reglas de negocio**
 - RN-03 (composición del saldo), RN-06 (orden de imputación), RN-36 (consecutivo).
 
-**Estado en el demo:** ⬜ — el estado de cuenta se ve en pantalla (`CuentaPage.tsx`) pero no
-se descarga. Requiere ADR-0006.
+**Cómo quedó (2026-10-01).** Desde «Estado de cuenta», el botón **«Descargar estado de cuenta»**
+lleva a la pantalla nueva:
+1. Escoge desde qué mes y hasta qué mes. Por defecto, el año en curso hasta el último mes
+   facturado, para que diga lo mismo que el «valor adeudado».
+2. Antes de emitir ve el resumen: saldo anterior, cobros, pagos aplicados y saldo final.
+3. «Emitir estado de cuenta» lo registra con su número (`EC-AAAA-NNNN`) y su código de
+   verificación, y muestra la hoja.
+4. «Imprimir o guardar en PDF» abre la impresión, donde el teléfono ofrece guardarlo como PDF.
+
+Los emitidos antes se pueden volver a ver e imprimir, y dicen lo que dijeron (RN-127). Sin
+cobros, pagos ni saldo en el rango, no deja emitir y lo dice (A1). Como pide ADR-0006 en su
+revisión, se imprime desde la app, sin servidor ni librerías.
+
+**Reglas:** RN-03, RN-36, RN-76, RN-78, RN-79, RN-127.
+
+**Estado en el demo:** ✅ — `src/features/residente/EstadoCuentaPage.tsx` y
+`src/componentes/HojaEstadoCuenta.tsx`.
 
 ---
 
