@@ -32,7 +32,8 @@ import { CorrespondenciaPage } from './features/residente/CorrespondenciaPage'
 import { TableroPage } from './features/admin/TableroPage'
 import { UnidadesPage } from './features/admin/UnidadesPage'
 import { RegistrosPage } from './features/admin/RegistrosPage'
-import { CarteraPage } from './features/admin/CarteraPage'
+import { CarteraPage, CarteraSeccionAdmin } from './features/admin/CarteraPage'
+import { PazYSalvoAdminPage } from './features/admin/PazYSalvoAdminPage'
 import { CatalogoMultasPage } from './features/admin/CatalogoMultasPage'
 import { SancionesPage } from './features/admin/SancionesPage'
 import { AsambleasAdminPage } from './features/admin/AsambleasAdminPage'
@@ -130,7 +131,10 @@ export function App() {
         <Route index element={<TableroPage />} />
         <Route path="unidades" element={<UnidadesPage />} />
         <Route path="registros" element={<RegistrosPage />} />
-        <Route path="cartera" element={<CarteraPage />} />
+        <Route path="cartera" element={<CarteraSeccionAdmin />}>
+          <Route index element={<CarteraPage />} />
+          <Route path="paz-y-salvo" element={<PazYSalvoAdminPage />} />
+        </Route>
         <Route path="multas" element={<CatalogoMultasPage />} />
         <Route path="sanciones" element={<SancionesPage />} />
         <Route path="asambleas" element={<AsambleasAdminPage />} />

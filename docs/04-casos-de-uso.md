@@ -71,7 +71,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-10 | **Configurar zonas comunes y sus reglas** | 2 | ✅ Demo (crear, editar, cerrar por mantenimiento y desactivar con aviso; costos, depósito y multa por no cancelar; uso exclusivo o compartido; días y horario; aviso masivo del cierre; fotos y especificaciones — RN-104 a RN-117) | [ver](./casos-de-uso/administrador.md#cu-a-10) |
 | CU-A-11 | Cargar presupuesto anual | 3 | ⬜ Pendiente | — |
 | CU-A-12 | **Convocar la asamblea y emitir las citaciones** | 1 | 🟡 Parcial (convoca con su modalidad; falta el documento de citación, ADR-0006) | [ver](./casos-de-uso/administrador.md#cu-a-12) |
-| CU-A-13 | **Emitir el paz y salvo** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-13) |
+| CU-A-13 | **Emitir el paz y salvo** | 1 | ✅ Demo (desde Cartera → Paz y salvo: busca la unidad, ve el saldo, emite, imprime y anula con motivo — RN-26, RN-36) | [ver](./casos-de-uso/administrador.md#cu-a-13) |
 | CU-A-14 | Gestionar proveedores y mantenimientos | 3 | ⬜ Pendiente | — |
 | CU-A-15 | Administrar varias copropiedades | 3 | ⬜ Pendiente | — |
 | CU-A-16 | Exportar informes (cartera, PQRS) | 2 | ⬜ Pendiente | — |

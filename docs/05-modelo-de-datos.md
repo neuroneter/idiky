@@ -674,6 +674,8 @@ convocatoria, poder y acta.
 | `emitidoEn` | fecha ISO | |
 | `vigenteHasta` | fecha ISO? | Paz y salvo **(?)** |
 | `estado` | `'vigente' \| 'anulado'` | **Nunca se borra** (O3): un anulado sigue existiendo y la verificación lo dice |
+| `anuladoEn`, `anuladoPor`, `motivoAnulacion` | string? | Al anular, con motivo obligatorio (CU-A-13, ADR-0006 §5). El propietario lo ve en su lista, con el motivo |
+| `emitidoPor` | string? | Quién lo emitió: la administración desde la consola (CU-A-13). Ausente, lo emitió el propietario desde su app (CU-R-12) |
 | `codigoVerificacion` | string | Aleatorio, va impreso junto al número. Con los dos, un tercero verifica el documento **sin la app** ([ADR-0006](./adr/0006-documentos-formales.md)) |
 | `huella` | string | SHA-256 del archivo generado. El archivo **se guarda, no se regenera**: afirma un estado a una fecha |
 | `archivo` | string | Referencia al PDF en el almacenamiento de objetos. Vacío mientras no exista backend |

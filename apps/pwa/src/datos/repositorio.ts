@@ -3406,7 +3406,7 @@ export async function emitirEstadoCuenta(
 
 export async function emitirPazYSalvo(
   bdActual: BaseDatos,
-  parametros: { copropiedadId: string; unidadId: string },
+  parametros: { copropiedadId: string; unidadId: string; emitidoPor?: string },
 ): Promise<Resultado<Documento>> {
   await esperar()
   const bd = clonar(bdActual)
@@ -3442,9 +3442,33 @@ export async function emitirPazYSalvo(
     unidadId: unidad.id,
     emitidoEn: hoy,
     cubiertoHasta: finDePeriodo(ultimoPeriodo),
+    ...(parametros.emitidoPor ? { emitidoPor: parametros.emitidoPor } : {}),
     estado: 'vigente',
   }
   bd.documentos.push(documento)
   bd.consecutivos.pazYSalvo = consecutivo + 1
+  return persistir(bd, documento)
+}
+
+/**
+ * CU-A-13 — Anula un documento emitido. No se borra (ADR-0006 §5, O3): queda
+ * con su motivo, y quien lo reciba en papel puede confirmar con la
+ * administración que ya no vale.
+ */
+export async function anularDocumento(
+  bdActual: BaseDatos,
+  parametros: { documentoId: string; motivo: string; anuladoPor: string },
+): Promise<Resultado<Documento>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const documento = bd.documentos.find((d) => d.id === parametros.documentoId)
+  if (!documento) throw new ErrorDeNegocio('Ese documento no existe.')
+  if (documento.estado === 'anulado') throw new ErrorDeNegocio('Ese documento ya estaba anulado.')
+  const motivo = parametros.motivo.trim()
+  if (motivo.length < 10) throw new ErrorDeNegocio('Escribe por qué se anula: es lo que se responde si alguien presenta el papel.')
+  documento.estado = 'anulado'
+  documento.anuladoEn = ahoraISO()
+  documento.anuladoPor = parametros.anuladoPor
+  documento.motivoAnulacion = motivo
   return persistir(bd, documento)
 }

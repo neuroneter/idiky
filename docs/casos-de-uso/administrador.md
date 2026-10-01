@@ -334,10 +334,26 @@ día y **la modalidad manda**: el botón queda deshabilitado diciendo qué falta
 - A1. La unidad tiene saldo → no se puede emitir; el sistema muestra la deuda.
 - A2. Anular un certificado emitido → se marca `anulado` con motivo; **no se borra** (O3).
 
-**Reglas de negocio**
-- RN-26, RN-36.
+**Cómo quedó (2026-10-01).** En la consola, **Cartera** tiene dos pestañas: «Cartera» y
+**«Paz y salvo»**. Se emite donde se ve si la unidad debe, sin agregar una entrada al menú.
+- El administrador busca por unidad o por propietario y filtra por al día o con saldo.
+- Cada unidad muestra su saldo («Al día» o lo que debe) y su último paz y salvo.
+- **Con saldo cero:** «Emitir paz y salvo» lo emite con número `PS-AAAA-NNNN` y código, a nombre
+  de la administración, y muestra la hoja para «Imprimir o guardar en PDF».
+- **Con saldo:** no se ofrece emitir; se ofrece «Ver la deuda» (A1).
+- **La lista de emitidos** incluye también los que el propietario sacó desde su app. Cada uno se
+  ve, se imprime o se anula: «Anular» pide un motivo de al menos 10 caracteres, el certificado
+  queda `anulado` con fecha, quién y por qué, y **el propietario lo ve así en su lista** (A2).
+- Lo que emite la administración lo ve también el propietario en su app (CU-R-12).
 
-**Estado en el demo:** ⬜ — requiere ADR-0006.
+La pregunta que sigue abierta en ADR-0006 —si el paz y salvo lo saca el propietario solo o
+necesita autorización previa— no cambia: hoy pueden emitirlo los dos.
+
+**Reglas de negocio**
+- RN-26, RN-36; ADR-0006 §5 (se anula, no se borra).
+
+**Estado en el demo:** ✅ — `src/features/admin/PazYSalvoAdminPage.tsx`, ruta
+`/admin/cartera/paz-y-salvo`.
 
 ---
 

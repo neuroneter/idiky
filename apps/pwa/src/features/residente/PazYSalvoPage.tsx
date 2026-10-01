@@ -198,6 +198,12 @@ export function PazYSalvoPage() {
                     <span className="subtitulo">
                       Expedido el {formatearFecha(documento.emitidoEn)}
                     </span>
+                    {/* ADR-0006 §5 — Un anulado sigue en la lista y dice que no vale. */}
+                    {documento.estado === 'anulado' && (
+                      <span className="tenue" style={{ fontSize: 'var(--texto-xs)', color: 'var(--color-error)' }}>
+                        Anulado por la administración: {documento.motivoAnulacion}
+                      </span>
+                    )}
                   </div>
                   {/* Sin chip de «vencido»: el certificado no caduca solo. Dice
                       hasta cuando la unidad estaba al dia, y eso sigue siendo

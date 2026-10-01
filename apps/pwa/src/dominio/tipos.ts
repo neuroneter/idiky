@@ -1312,7 +1312,13 @@ export interface Documento {
    * emitirlo. Reimprimirlo da el mismo papel aunque la cartera siga su curso.
    */
   estadoCuenta?: EstadoCuentaCongelado
+  /** Quien lo emitio: el residente desde su app (CU-R-12) o la administracion (CU-A-13). */
+  emitidoPor?: string
   estado: 'vigente' | 'anulado'
+  /** Un documento no se borra: se anula, con motivo (ADR-0006 §5, O3). */
+  anuladoEn?: FechaHoraISO
+  anuladoPor?: string
+  motivoAnulacion?: string
 }
 
 /** Un renglón del estado de cuenta: un cobro o un pago aplicado (RN-127). */

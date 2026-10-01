@@ -38,6 +38,7 @@ const TITULOS: Record<string, string> = {
   '/admin/registros': 'Registro de personas',
   '/admin/unidades': 'Unidades y residentes',
   '/admin/cartera': 'Cartera',
+  '/admin/cartera/paz-y-salvo': 'Paz y salvo',
   '/admin/multas': 'Catálogo de multas',
   '/admin/sanciones': 'Procesos sancionatorios',
   '/admin/asambleas': 'Asambleas',
