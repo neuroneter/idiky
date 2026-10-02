@@ -62,7 +62,9 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      reservas pasadas por cerrar, una con deposito recibido (RN-119 a RN-121).
 // 30 — una solicitud sin respuesta ya pasada, que vence al abrir (RN-122); otra
 //      que vence mañana, para la alerta del tablero; invitados en la de hoy (RN-126).
-export const VERSION_ESQUEMA = 30
+// 31 — el salón se cancela hasta 12 horas antes del turno (RN-128), y sus
+//      reservas llevan ese límite copiado.
+export const VERSION_ESQUEMA = 31
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -248,6 +250,8 @@ const zonasComunes: ZonaComun[] = [
     deposito: 200000,
     respaldoCobro: { origen: 'reglamento', referencia: 'Artículo 42' },
     multaNoCancelar: { conceptoId: 'cs-6', horasParaCancelar: 48 },
+    // RN-128 — Hasta 12 horas antes se cancela (con multa si faltan menos de 48); después, no.
+    horasLimiteCancelacion: 12,
   },
   {
     id: 'zon-bbq',
@@ -539,6 +543,7 @@ function construirReservas(): Reserva[] {
       personas: 30,
       valorUso: 80000,
       deposito: 200000,
+      horasLimiteCancelacion: 12,
     },
     {
       id: 'rsv-2',
@@ -564,6 +569,7 @@ function construirReservas(): Reserva[] {
       creadaEn: `${sumarDias(hoy, -1)}T08:40:00.000Z`,
       valorUso: 80000,
       deposito: 200000,
+      horasLimiteCancelacion: 12,
     },
     {
       id: 'rsv-4',
@@ -630,6 +636,7 @@ function construirReservas(): Reserva[] {
       personas: 20,
       valorUso: 80000,
       deposito: 200000,
+      horasLimiteCancelacion: 12,
     },
     // RN-119 a RN-121 — Dos turnos ya pasados, para cerrar desde la consola:
     // el salón, con el depósito recibido; la terraza, para el «no se presentó».
@@ -646,6 +653,7 @@ function construirReservas(): Reserva[] {
       personas: 25,
       valorUso: 80000,
       deposito: 200000,
+      horasLimiteCancelacion: 12,
       depositoRecibidoEn: `${sumarDias(hoy, -3)}T16:00:00.000Z`,
     },
     {
@@ -675,6 +683,7 @@ function construirReservas(): Reserva[] {
       personas: 15,
       valorUso: 80000,
       deposito: 200000,
+      horasLimiteCancelacion: 12,
     },
     // RN-122 — Por aprobar y a menos de 48 horas: sale en la alerta del tablero.
     {

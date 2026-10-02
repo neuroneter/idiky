@@ -11,8 +11,8 @@
  * cancela con mensaje), RN-108 (cierre por mantenimiento), RN-109 (cobro por
  * uso y deposito, con respaldo), RN-110 (multa por no cancelar, del catalogo) y
  * RN-111 (uso exclusivo o compartido hasta el aforo), RN-114 (dias y horario
- * de cada dia, que define el administrador) y RN-117 (el cierre, avisado a toda
- * la copropiedad con una sola accion).
+ * de cada dia, que define el administrador), RN-117 (el cierre, avisado a toda
+ * la copropiedad con una sola accion) y RN-128 (hasta cuando se cancela).
  */
 
 import { useState } from 'react'
@@ -91,6 +91,7 @@ const ZONA_EN_BLANCO: DatosZona = {
   anticipacionMinimaHoras: 24,
   cupoMensualPorUnidad: 4,
   modoUso: 'exclusivo',
+  horasLimiteCancelacion: 0,
 }
 
 /** Los selectores de hora del horario semanal: fuera de `.campo`, con su mismo aspecto. */
@@ -114,6 +115,7 @@ function datosDe(zona: ZonaComun): DatosZona {
     duracionBloqueHoras: zona.duracionBloqueHoras,
     anticipacionMinimaHoras: zona.anticipacionMinimaHoras,
     cupoMensualPorUnidad: zona.cupoMensualPorUnidad,
+    horasLimiteCancelacion: zona.horasLimiteCancelacion ?? 0,
     valorUso: zona.valorUso,
     deposito: zona.deposito,
     respaldoCobro: zona.respaldoCobro,
@@ -687,6 +689,20 @@ function FormularioZona({
             value={datos.anticipacionMinimaHoras}
             onChange={(e) => cambiar('anticipacionMinimaHoras', Number(e.target.value))}
           />
+        </div>
+        {/* RN-128 — Hasta cuándo se cancela: después, la reserva se cierra. */}
+        <div className="campo">
+          <label htmlFor="zona-limite-cancelar">Se puede cancelar hasta (horas antes)</label>
+          <input
+            id="zona-limite-cancelar"
+            type="number"
+            min={0}
+            max={720}
+            inputMode="numeric"
+            value={datos.horasLimiteCancelacion ?? 0}
+            onChange={(e) => cambiar('horasLimiteCancelacion', Number(e.target.value))}
+          />
+          <span className="ayuda-campo">En 0, hasta que empiece el turno. El residente lo ve al reservar.</span>
         </div>
         <div className="campo">
           <label htmlFor="zona-cupo">Reservas al mes por unidad</label>

@@ -22,7 +22,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 75 documentados: 46 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 17 ⬜ pendientes, 2 ⛔ retirados |
-| **Reglas de negocio** | 127 del demo (RN-01…RN-127; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-127, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
+| **Reglas de negocio** | 129 del demo (RN-01…RN-129; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-129, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -110,6 +110,50 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-02 · Mary + IA (Claude) · Revisión de reservas: hasta cuándo se cancela y cierre automático (RN-128, RN-129)
+
+Mary: *«antes de esto quiero revisar si en reservas todo está bien o falta algo»*.
+
+**Cómo se revisó.** Las 10 pruebas de reservas (122 comprobaciones) pasaron; solo una había
+quedado vieja, porque contaba tres pestañas y desde el informe son cuatro. Además se probaron
+los casos límite llamando directamente al repositorio, y ahí salieron **dos errores reales**:
+1. Se podía cancelar una reserva con el turno ya pasado, si era del mismo día, o llamando al
+   repositorio. Así se esquivaban el cobro por uso y el «no se presentó».
+2. Una reserva ya cerrada se podía volver a cancelar. El cobro quedaba en el estado de cuenta y
+   la reserva decía «cancelada».
+
+**RN-128 — hasta cuándo se cancela.** Mary: *«debe ser posible cancelar antes, y el
+administrador debe tener un campo en el que parametrice este dato y que este se vea en la vista
+de la reserva al residente»*.
+- Cada zona tiene **«Se puede cancelar hasta (horas antes)»**; en 0, hasta que empiece.
+- El residente lo ve en la información de la zona y en cada reserva suya, con fecha y hora.
+- El límite se copia a la reserva al crearla y entra en las condiciones que acepta.
+- Mary confirmó: una reserva cerrada, rechazada o cancelada no se cancela, y tampoco una
+  vencida.
+- La administración cancela solo antes del turno (punto 3, aprobado); después, la cierra.
+- El cierre por mantenimiento y la desactivación ya no tocan reservas empezadas ni cerradas.
+- El repositorio lo revisa, no solo el botón.
+
+**RN-129 — cierre automático.** Mary: *«de acuerdo con el punto 4, las demás quedan cerradas»*.
+«Por cerrar» muestra solo las reservas que mueven plata. Las gratis se cierran solas como usadas
+al terminar el turno, sin cobro ni mensaje.
+
+**Semilla 31:** el salón se cancela hasta 12 horas antes.
+
+**Verificado:**
+- 10 comprobaciones del límite: los dos errores rechazados, la vencida, el límite al minuto, la
+  administración solo antes, el campo del administrador con su validación (0 a 720) y lo que ve
+  el residente.
+- 5 del cierre automático.
+- Las 13 pruebas anteriores, en verde (147 comprobaciones).
+
+`npm run build` y la ortografía, en verde.
+
+**Rango agotado.** Con RN-129 se acabó el rango de reglas de Mary (RN-98 a RN-129). **Antes de
+la próxima regla hay que pedirle a Daniel uno nuevo.**
+
+---
 
 ### 2026-10-01 · Mary + IA (Claude) · El paz y salvo desde la consola (CU-A-13)
 

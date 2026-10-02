@@ -228,16 +228,30 @@ están implementadas.
 ## CU-R-06 — Cancelar una reserva
 
 - **Actor principal:** Residente
-- **Precondiciones:** Existe una reserva propia en estado `solicitada` o `confirmada` y su
-  fecha es futura.
+- **Precondiciones:** Existe una reserva propia en estado `solicitada` o `confirmada`, sin
+  cerrar, y **no ha pasado su límite para cancelar** (RN-128).
 - **Disparador:** Toca "Cancelar" sobre la reserva.
 - **Resultado esperado:** La reserva pasa a `cancelada` y la franja se libera.
 
+**Hasta cuándo (RN-128, Mary 2026-10-02).** Cada zona dice hasta cuántas horas antes del turno
+se puede cancelar; lo define el administrador y en 0 vale hasta que empiece el turno. El
+residente lo ve en la información de la zona al reservar y, en cada reserva suya, con la fecha y
+la hora exactas: «Puedes cancelar hasta el 5 de octubre de 2026 a las 05:00». El límite se copia
+a la reserva al crearla, así que si la zona cambia después, la reserva conserva el suyo.
+
 **Flujos alternativos**
-- A1. La reserva ya ocurrió → la acción no se ofrece.
+- A1. Pasó el límite, o el turno ya empezó → no se ofrece cancelar y la reserva dice «Ya no se
+  puede cancelar», con el límite que tenía. Si no va, la administración la cierra como «no se
+  presentó» (RN-121).
+- A2. La reserva ya está cerrada, rechazada, vencida o cancelada → no se cancela. El repositorio
+  lo revisa también, no solo el botón.
+- A3. Cancela dentro del plazo con multa → primero se le advierte (RN-112).
 
 **Reglas de negocio**
-- RN-11: cancelar con menos de 24 h de anticipación puede acarrear sanción *(fase 2)*.
+- RN-128 (hasta cuándo se cancela), RN-112 y RN-110 (la multa por cancelar tarde, que es otro
+  plazo).
+- ~~RN-11: cancelar con menos de 24 h de anticipación puede acarrear sanción (fase 2)~~ → lo
+  resolvieron RN-110, RN-112 y RN-128: el plazo y la multa los parametriza cada zona.
 
 **Estado en el demo:** ✅ — misma pantalla que CU-R-05.
 

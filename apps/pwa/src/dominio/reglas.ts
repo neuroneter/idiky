@@ -431,9 +431,53 @@ export function franjasDeZona(
   return franjas
 }
 
-/** Una reserva futura y activa se puede cancelar (CU-R-06). */
-export function sePuedeCancelar(reserva: Reserva, hoy: FechaISO = hoyISO()): boolean {
-  return reservaOcupaFranja(reserva) && reserva.fecha >= hoy
+/**
+ * RN-128 — **Una reserva se cancela solo antes de su límite, nunca después del
+ * turno.**
+ *
+ * «Debe ser posible cancelar antes, y el administrador debe tener un campo en
+ * el que parametrice este dato y que este se vea en la vista de la reserva al
+ * residente» (Mary, 2026-10-02). Hasta hoy se podía cancelar cualquier reserva
+ * del día, aunque el turno ya hubiera pasado, y así se esquivaban el cobro por
+ * uso y el «no se presentó» (RN-119, RN-121); y una reserva ya cerrada se podía
+ * volver a cancelar.
+ *
+ * Ahora cada zona dice **hasta cuántas horas antes del turno** se puede
+ * cancelar (0: hasta que empiece). El límite se copia a la reserva al crearla,
+ * como su precio (RN-118), y el residente lo ve al reservar y en cada reserva
+ * suya, con la fecha y la hora exactas. Pasado el límite ya no se cancela: si no
+ * va, la administración cierra la reserva como «no se presentó».
+ *
+ * Es distinto del plazo para cancelar **sin multa** (RN-110): se puede cancelar
+ * con multa entre los dos. La administración cancela solo antes de que empiece
+ * el turno (RN-115); después, lo que corresponde es cerrarla. Una reserva
+ * cerrada, rechazada, vencida o ya cancelada no se cancela.
+ */
+export const MAXIMO_HORAS_LIMITE_CANCELACION = 720
+
+/** Si el turno de la reserva ya empezó. */
+export function yaEmpezo(reserva: Reserva, ahora: Date = new Date()): boolean {
+  return new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime() <= ahora.getTime()
+}
+
+export function horasLimiteCancelacion(reserva: Reserva, zona?: Pick<ZonaComun, 'horasLimiteCancelacion'>): number {
+  return reserva.horasLimiteCancelacion ?? zona?.horasLimiteCancelacion ?? 0
+}
+
+/** El momento hasta el que se puede cancelar: el inicio del turno menos el límite. */
+export function limiteParaCancelar(reserva: Reserva, zona?: Pick<ZonaComun, 'horasLimiteCancelacion'>): Date {
+  const inicio = new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime()
+  return new Date(inicio - horasLimiteCancelacion(reserva, zona) * 3_600_000)
+}
+
+/** RN-128 — El residente puede cancelar: activa, sin cerrar y antes de su límite (CU-R-06). */
+export function sePuedeCancelar(
+  reserva: Reserva,
+  zona?: Pick<ZonaComun, 'horasLimiteCancelacion'>,
+  ahora: Date = new Date(),
+): boolean {
+  if (!reservaOcupaFranja(reserva) || reserva.cierre) return false
+  return ahora.getTime() < limiteParaCancelar(reserva, zona).getTime()
 }
 
 // ---------------------------------------------------------------------------
@@ -2091,6 +2135,8 @@ export interface DatosZona {
   modoUso?: ModoUsoZona
   /** RN-114 — Horario por dia de la semana. */
   horarioSemanal?: HorarioDia[]
+  /** RN-128 — Hasta cuantas horas antes del turno se puede cancelar. */
+  horasLimiteCancelacion?: number
 }
 
 /** Los turnos que se ofrecen: de una a doce horas. */
@@ -2156,6 +2202,10 @@ export function motivoZonaInvalida(
   if (!Number.isInteger(datos.anticipacionMinimaHoras) || datos.anticipacionMinimaHoras < 0) {
     return 'La anticipación va en horas, desde 0.'
   }
+  const limite = datos.horasLimiteCancelacion ?? 0
+  if (!Number.isInteger(limite) || limite < 0 || limite > MAXIMO_HORAS_LIMITE_CANCELACION) {
+    return 'El límite para cancelar va en horas, de 0 a 720 (30 días).'
+  }
   return motivoCobroZonaInvalido(datos, conceptosSancion)
 }
 
@@ -2193,7 +2243,8 @@ export function reservasQueCancelaDesactivar(
   hoy: FechaISO = hoyISO(),
 ): Reserva[] {
   return reservas
-    .filter((r) => r.zonaId === zonaId && reservaOcupaFranja(r) && r.fecha >= hoy)
+    // RN-128 — Ni las ya cerradas ni las que ya empezaron: esas se cierran, no se cancelan.
+    .filter((r) => r.zonaId === zonaId && reservaOcupaFranja(r) && !r.cierre && r.fecha >= hoy && !yaEmpezo(r))
     .sort((a, b) => `${a.fecha}${a.horaInicio}`.localeCompare(`${b.fecha}${b.horaInicio}`))
 }
 
@@ -2277,7 +2328,7 @@ export function reservasQueCancelaCierre(
   hasta: FechaISO,
 ): Reserva[] {
   return reservas
-    .filter((r) => r.zonaId === zonaId && reservaOcupaFranja(r) && r.fecha >= desde && r.fecha <= hasta)
+    .filter((r) => r.zonaId === zonaId && reservaOcupaFranja(r) && !r.cierre && !yaEmpezo(r) && r.fecha >= desde && r.fecha <= hasta)
     .sort((a, b) => `${a.fecha}${a.horaInicio}`.localeCompare(`${b.fecha}${b.horaInicio}`))
 }
 
@@ -2554,8 +2605,10 @@ export function textoHorarioSemanal(zona: Pick<ZonaComun, 'horaInicio' | 'horaFi
  * activa de hoy en adelante; el motivo es obligatorio y viaja en el mismo
  * mensaje de RN-107. No es una multa ni la genera.
  */
-export function puedeCancelarLaAdministracion(reserva: Reserva, hoy: FechaISO = hoyISO()): boolean {
-  return reserva.estado === 'confirmada' && reserva.fecha >= hoy
+export function puedeCancelarLaAdministracion(reserva: Reserva, ahora: Date = new Date()): boolean {
+  // RN-128 — Hasta que empiece el turno; después se cierra (RN-119).
+  if (reserva.estado !== 'confirmada' || reserva.cierre) return false
+  return ahora.getTime() < new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime()
 }
 
 /**
@@ -2689,10 +2742,12 @@ export function ocupacionDeLaSemana(
  * crea, como el documento contable guarda su cuenta (RN-85): si la
  * administración sube el precio después, lo que el residente aceptó no cambia.
  */
-export function valoresDeLaReserva(zona: ZonaComun): { valorUso?: number; deposito?: number } {
+export function valoresDeLaReserva(zona: ZonaComun): { valorUso?: number; deposito?: number; horasLimiteCancelacion?: number } {
   return {
     ...(zona.valorUso ? { valorUso: zona.valorUso } : {}),
     ...(zona.deposito ? { deposito: zona.deposito } : {}),
+    // RN-128 — El límite para cancelar también se fija al reservar.
+    ...(zona.horasLimiteCancelacion ? { horasLimiteCancelacion: zona.horasLimiteCancelacion } : {}),
   }
 }
 
@@ -2898,6 +2953,12 @@ export function condicionesDeLaZona(zona: ZonaComun, conceptosSancion: ConceptoS
     )
   }
   if (partes.length === 0) return null
+  // RN-128 — Si hay algo que aceptar, el límite para cancelar va con ello.
+  partes.push(
+    zona.horasLimiteCancelacion
+      ? `solo puedo cancelar hasta ${zona.horasLimiteCancelacion} horas antes del turno`
+      : 'solo puedo cancelar antes de que empiece el turno',
+  )
   return `Acepto las condiciones de ${zona.nombre}: ${partes.join('; ')}.`
 }
 
@@ -3147,4 +3208,34 @@ export function motivoEstadoCuentaInvalido(desde: Periodo, hasta: Periodo, estad
     return 'En ese rango no hay cobros, pagos ni saldo: no hay nada que certificar.'
   }
   return null
+}
+
+/**
+ * RN-129 — **Solo se cierran a mano las reservas que mueven plata; las demás se
+ * cierran solas.**
+ *
+ * «De acuerdo con el punto 4, las demás quedan cerradas» (Mary, 2026-10-02).
+ * Cerrar una reserva (RN-119) sirve para cobrar el uso, devolver o retener el
+ * depósito y, si no se presentó, abrir el proceso por la multa. Una reserva sin
+ * cobro, sin depósito y en una zona sin multa no tiene nada de eso: pedirle al
+ * administrador que la cierre llenaría «Por cerrar» con cientos de turnos del
+ * gimnasio al mes. Por eso:
+ *
+ * - **«Por cerrar» muestra solo las que mueven plata:** con valor por uso o
+ *   depósito (los que se fijaron al reservar, RN-118) o en una zona con multa
+ *   por no cancelar (RN-110).
+ * - **Las demás se cierran solas como usadas** cuando termina su turno, marcadas
+ *   como cierre automático. El informe de uso (CU-A-30) las cuenta como usadas.
+ *
+ * Como el vencimiento y el recordatorio (RN-122, RN-125), se aplica al abrir la
+ * app.
+ */
+export function reservaMueveDinero(reserva: Reserva, zona: Pick<ZonaComun, 'multaNoCancelar'> | undefined): boolean {
+  return !!reserva.valorUso || !!reserva.deposito || !!zona?.multaNoCancelar
+}
+
+/** RN-129 — Una reserva que no mueve plata y cuyo turno ya terminó se cierra sola. */
+export function debeCerrarseSola(reserva: Reserva, zona: Pick<ZonaComun, 'multaNoCancelar'> | undefined, ahora: Date = new Date()): boolean {
+  if (reserva.estado !== 'confirmada' || reserva.cierre || reservaMueveDinero(reserva, zona)) return false
+  return new Date(`${reserva.fecha}T${reserva.horaFin}:00`).getTime() <= ahora.getTime()
 }

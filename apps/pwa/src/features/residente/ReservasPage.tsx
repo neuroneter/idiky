@@ -45,6 +45,8 @@ import {
   limpiarInvitados,
   motivoInvitadosInvalido,
   puedeEditarInvitados,
+  limiteParaCancelar,
+  reservaOcupaFranja,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha } from '../../utilidades/formato'
 import type { Reserva, ZonaComun } from '../../dominio/tipos'
@@ -240,6 +242,14 @@ export function ReservasPage() {
                         {reserva.horaFin}
                         {reserva.personas ? ` · ${reserva.personas} ${reserva.personas === 1 ? 'persona' : 'personas'}` : ''}
                       </span>
+                      {/* RN-128 — Hasta cuándo puede cancelar esta reserva, con fecha y hora. */}
+                      {reservaOcupaFranja(reserva) && !reserva.cierre && (
+                        <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                          {sePuedeCancelar(reserva, zona)
+                            ? `Puedes cancelar hasta el ${textoMomento(limiteParaCancelar(reserva, zona))}.`
+                            : `Ya no se puede cancelar: el límite era el ${textoMomento(limiteParaCancelar(reserva, zona))}.`}
+                        </span>
+                      )}
                       {/* RN-119 a RN-121 — Lo que pasó con la plata de su reserva. */}
                       {textosDePlata(reserva, bd).map((linea) => (
                         <span key={linea} className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
@@ -270,7 +280,7 @@ export function ReservasPage() {
                           Invitados{reserva.invitados?.length ? ` (${reserva.invitados.length})` : ''}
                         </button>
                       )}
-                      {sePuedeCancelar(reserva) && (
+                      {sePuedeCancelar(reserva, zona) && (
                         <button
                           className="boton boton--pequeno boton--peligro"
                           disabled={cargando}
@@ -545,4 +555,11 @@ function textosDePlata(reserva: Reserva, bd: ReturnType<typeof useDatos>['bd']):
   const sancion = reserva.sancionId ? bd.sanciones.find((s) => s.id === reserva.sancionId) : undefined
   if (sancion) lineas.push(`La administración abrió el proceso ${sancion.radicado}: puedes presentar descargos en Procesos.`)
   return lineas
+}
+
+/** `2026-10-05 13:00` → «5 de octubre de 2026 a las 13:00», en la hora del teléfono. */
+function textoMomento(momento: Date): string {
+  const fecha = `${momento.getFullYear()}-${String(momento.getMonth() + 1).padStart(2, '0')}-${String(momento.getDate()).padStart(2, '0')}`
+  const hora = `${String(momento.getHours()).padStart(2, '0')}:${String(momento.getMinutes()).padStart(2, '0')}`
+  return `${formatearFecha(fecha)} a las ${hora}`
 }

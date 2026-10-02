@@ -92,6 +92,8 @@ import {
   motivoDeCierre,
   reservasQueCancelaCierre,
   validarReserva,
+  reservaOcupaFranja,
+  sePuedeCancelar,
   estadoDeCuenta,
   motivoEstadoCuentaInvalido,
   franjasDeZona,
@@ -99,6 +101,7 @@ import {
   puedeCancelarLaAdministracion,
   textoCierreZona,
   valoresDeLaReserva,
+  debeCerrarseSola,
   solicitudVencida,
   textoReservaVencida,
   textoReservaDecidida,
@@ -194,7 +197,8 @@ export async function cargar(): Promise<BaseDatos> {
 /**
  * Los procesos que en la fase 2 correrá un servidor a su hora, y que el demo
  * aplica al abrir la app: vencer las solicitudes que nadie contestó (RN-122,
- * CU-S-03) y recordar las reservas de hoy y de mañana (RN-125). Devuelve si
+ * CU-S-03), recordar las reservas de hoy y de mañana (RN-125) y cerrar las que
+ * no mueven plata cuando termina su turno (RN-129). Devuelve si
  * cambió algo, para guardar solo entonces.
  */
 function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boolean {
@@ -204,6 +208,12 @@ function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boo
     const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
     if (!zona) continue
     const copropiedad = bd.copropiedades.find((c) => c.id === zona.copropiedadId)?.nombre ?? 'La copropiedad'
+    // RN-129 — La que no mueve plata se cierra sola al terminar su turno, sin mensaje.
+    if (debeCerrarseSola(reserva, zona, ahora)) {
+      reserva.cierre = { resultado: 'usada', registradoEn: momento, registradoPor: 'Cierre automático', automatico: true }
+      cambio = true
+      continue
+    }
     let texto: string | null = null
     let motivo: MotivoMensaje | null = null
     if (solicitudVencida(reserva, ahora)) {
@@ -621,8 +631,17 @@ export async function cancelarReserva(
   const bd = clonar(bdActual)
   const reserva = bd.reservas.find((r) => r.id === reservaId)
   if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
-  // RN-112 — Si cancela dentro del plazo con multa, queda anotado; no se multa aqui.
   const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  // RN-128 — Solo activa, sin cerrar y antes de su límite. Lo revisa el
+  // repositorio, no solo el botón: así nadie esquiva el cobro ni el cierre.
+  if (!sePuedeCancelar(reserva, zona)) {
+    throw new ErrorDeNegocio(
+      reserva.cierre || !reservaOcupaFranja(reserva)
+        ? 'Esa reserva ya no se puede cancelar.'
+        : 'Ya pasó el límite para cancelar esta reserva.',
+    )
+  }
+  // RN-112 — Si cancela dentro del plazo con multa, queda anotado; no se multa aqui.
   const conceptos = zona ? conceptosDe(bd, zona.copropiedadId) : []
   if (multaAlCancelar(reserva, zona, conceptos)) reserva.canceladaFueraDePlazo = true
   reserva.estado = 'cancelada'

@@ -1,6 +1,6 @@
 /**
  * Lo que cuesta una zona común y la multa si no se cancela a tiempo
- * (RN-109, RN-110). El mismo texto en la consola y en la app del residente:
+ * (RN-109, RN-110), y hasta cuándo se cancela (RN-128). El mismo texto en la consola y en la app del residente:
  * «de igual manera se debe ver en la información de cada zona común» (Mary,
  * 2026-10-01). Lo que el administrador parametriza es lo que el residente lee.
  */
@@ -63,6 +63,16 @@ export function CondicionesZona({
       ) : (
         <li>Cancelar no tiene multa.</li>
       )}
+      {/* RN-128 — Hasta cuándo se puede cancelar: después ya no. */}
+      <li>
+        {zona.horasLimiteCancelacion ? (
+          <>
+            Puedes cancelar hasta <strong>{zona.horasLimiteCancelacion} horas antes</strong> del turno; después ya no.
+          </>
+        ) : (
+          'Puedes cancelar hasta que empiece el turno; después ya no.'
+        )}
+      </li>
     </ul>
   )
 }

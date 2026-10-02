@@ -467,6 +467,11 @@ export interface ZonaComun {
    * con su horario.
    */
   horarioSemanal?: HorarioDia[]
+  /**
+   * Hasta cuantas horas antes del turno se puede cancelar (RN-128). Ausente o
+   * 0: hasta que empiece. Despues de ese limite ya no se cancela.
+   */
+  horasLimiteCancelacion?: number
 }
 
 /** Un dia de la semana en que abre la zona. `dia`: 0 domingo … 6 sabado. */
@@ -566,6 +571,8 @@ export interface Reserva {
   condicionesAceptadas?: { aceptadasEn: FechaHoraISO; texto: string }
   /** Los nombres de los invitados, para porteria (RN-126). */
   invitados?: string[]
+  /** El limite para cancelar con que se reservo, copiado de la zona (RN-128, RN-118). */
+  horasLimiteCancelacion?: number
 }
 
 /**
@@ -587,6 +594,8 @@ export interface CierreReserva {
   depositoDevuelto?: Dinero
   depositoRetenido?: Dinero
   motivoRetencion?: string
+  /** La cerró el sistema al terminar el turno: no movía plata (RN-129). */
+  automatico?: boolean
 }
 
 // ---------------------------------------------------------------------------

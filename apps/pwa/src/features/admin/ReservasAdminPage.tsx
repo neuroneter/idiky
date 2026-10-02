@@ -27,6 +27,7 @@ import {
   puedeAbrirProcesoPorReserva,
   puedeCancelarLaAdministracion,
   puedeCerrarReserva,
+  reservaMueveDinero,
   textoReservaCancelada,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha } from '../../utilidades/formato'
@@ -78,7 +79,8 @@ export function ReservasAdminPage() {
   const hoy = hoyISO()
   const reservas = sel.reservasDeCopropiedad(bd, sesion.copropiedadId).filter((reserva) => {
     if (filtro === 'pendientes') return reserva.estado === 'solicitada'
-    if (filtro === 'por_cerrar') return puedeCerrarReserva(reserva)
+    // RN-129 — Solo las que mueven plata: las demás se cierran solas.
+    if (filtro === 'por_cerrar') return puedeCerrarReserva(reserva) && reservaMueveDinero(reserva, sel.zona(bd, reserva.zonaId))
     if (filtro === 'proximas') return reserva.fecha >= hoy
     return true
   })
@@ -340,7 +342,9 @@ function PlataDeLaReserva({ reserva }: { reserva: Reserva }) {
     lineas.push(
       cierre.resultado === 'no_se_presento'
         ? 'No se presentó'
-        : `Se usó · ${cierre.estadoZona === 'con_novedades' ? 'con novedades' : 'quedó bien'}`,
+        : cierre.automatico
+          ? 'Se usó · cierre automático, sin cobro'
+          : `Se usó · ${cierre.estadoZona === 'con_novedades' ? 'con novedades' : 'quedó bien'}`,
     )
     if (cierre.cuotaUsoId && reserva.valorUso) lineas.push(`Cobro ${formatearDinero(reserva.valorUso)}`)
     if (cierre.depositoDevuelto !== undefined) {

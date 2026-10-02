@@ -165,13 +165,15 @@ La tabla muestra también si el residente aceptó las condiciones (RN-124) y cu�
 tiene en lista (RN-126).
 
 **Flujo alternativo — cancelar una reserva confirmada (RN-115)**
-- A1. En una reserva confirmada de hoy en adelante, «Cancelar» pide el motivo, que es
+- A1. En una reserva confirmada **cuyo turno no ha empezado** (RN-128), «Cancelar» pide el motivo, que es
   obligatorio, y muestra el mensaje que le llegará a quien reservó.
 - A2. Confirma: la reserva queda cancelada, con el motivo, y el mensaje queda escrito.
 
 **Flujo alternativo — la plata de la reserva (RN-118 a RN-121)**
 - A3. Si la reserva pide depósito, «Recibí el depósito» deja constancia de que se recibió.
-- A4. Después del turno la reserva aparece en «Por cerrar». «Cerrar» pregunta qué pasó:
+- A4. Después del turno, **si mueve plata** (cobro, depósito o multa), la reserva aparece en
+  «Por cerrar»; las demás se cierran solas como usadas al terminar el turno (RN-129). «Cerrar»
+  pregunta qué pasó:
   - **Se usó:** cómo quedó la zona (bien, o con daños o faltantes descritos) y una foto
     opcional. Si hubo novedades y se recibió el depósito, cuánto se retiene y por qué.
   - **No se presentó:** el depósito se devuelve completo. Si la zona tiene multa, la
@@ -1025,7 +1027,8 @@ rápida.
 
 **Flujo principal — crear o editar**
 1. El administrador toca «Nueva zona» (o «Editar reglas» en una existente).
-2. Escribe nombre y descripción corta. Escoge los **días y el horario**: todos los días igual,
+2. Escribe nombre y descripción corta, y **hasta cuántas horas antes del turno se puede
+   cancelar** (RN-128; en 0, hasta que empiece). Escoge los **días y el horario**: todos los días igual,
    o día por día con sus horas (RN-114). Luego la duración del turno, el aforo, las horas de
    anticipación, las reservas al mes por unidad, si el turno es **exclusivo o compartido**
    (RN-111) y si la administración aprueba cada reserva.
