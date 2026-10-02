@@ -95,7 +95,11 @@ export interface Persona {
  * porque no es un titulo: es la marca de sesion que llevan el propietario y el
  * arrendatario por igual (ver `RolUsuario`).
  */
-export type RolResidencia = 'propietario' | 'arrendatario' | 'autorizado'
+/**
+ * `familiar`: la familia o el acompañante de quien vive ahí (2026-10-02): vive en
+ * la unidad, no vota y no registra a nadie.
+ */
+export type RolResidencia = 'propietario' | 'arrendatario' | 'familiar' | 'autorizado'
 
 /** Vinculo entre una persona y una unidad. Define el rol efectivo (RN-02). */
 /** Por qué se inhabilita a alguien en una unidad. */
@@ -146,6 +150,8 @@ export interface Residencia {
    * visitante a más de 7 días (RN-60).
    */
   cambioPendiente?: { condicion: CondicionRegistro; hasta?: FechaISO; pedidoPor: string; pedidoEn: FechaHoraISO }
+  /** La fecha de salida de la que ya se avisó, para no repetir el aviso. */
+  avisoFinPara?: FechaISO
   /** El último cambio que el propietario no aprobó, con su motivo. */
   cambioNoAprobado?: { hasta?: FechaISO; motivo: string; por: string; en: FechaHoraISO }
   cierre?: {
@@ -740,6 +746,8 @@ export interface Visitante {
   /** Codigo que presenta el visitante en porteria (RN-16, RN-17). */
   codigo: string
   recurrente: boolean
+  /** El visitante frecuente: los días de la semana en que entra (0 = domingo). */
+  dias?: number[]
   estado: EstadoVisitante
   creadoEn: FechaHoraISO
   /** Registro que lo origino (CU-R-27). Los de la semilla no tienen. */
@@ -763,7 +771,10 @@ export interface Visitante {
  * condición de abajo. «Con este cambio el usuario denominado residente temporal
  * ya no va» (Mary, 2026-10-02).
  */
-export type CategoriaRegistro = 'propietario' | 'arrendatario' | 'visitante'
+/** El documento con que se identifica la persona. */
+export type TipoIdentificacion = 'cc' | 'ti' | 'rc' | 'ce' | 'pasaporte'
+
+export type CategoriaRegistro = 'propietario' | 'arrendatario' | 'familiar' | 'visitante'
 
 /**
  * **Cómo se queda** en la unidad (RN-62, RN-68). Se escoge siempre, al crear a
@@ -771,7 +782,11 @@ export type CategoriaRegistro = 'propietario' | 'arrendatario' | 'visitante'
  * debe seleccionar si es residente, no residente o residente temporal» (Mary,
  * 2026-10-02). El visitante no puede ser residente: quien vive ahí no es visita.
  */
-export type CondicionRegistro = 'residente' | 'no_residente' | 'temporal'
+/**
+ * `frecuente`: solo el visitante que viene ciertos días de la semana —la
+ * empleada del servicio, la niñera, el conductor— hasta una fecha (2026-10-02).
+ */
+export type CondicionRegistro = 'residente' | 'no_residente' | 'temporal' | 'frecuente'
 
 /**
  * Los cinco estados por los que pasa un registro.
@@ -822,6 +837,14 @@ export interface RegistroPersona {
    * la opción de las fotos»). A los demás siempre se les piden.
    */
   pedirFotos?: boolean
+  /** Días de la semana en que viene el visitante frecuente (0 = domingo). */
+  dias?: number[]
+  /**
+   * Menor de edad (2026-10-02): no se le exige celular ni correo, y su documento
+   * puede ser tarjeta de identidad o registro civil.
+   */
+  menorDeEdad?: boolean
+  tipoIdentificacion?: TipoIdentificacion
   nombres: string
   apellidos: string
   documento: string
@@ -915,6 +938,7 @@ export type MotivoMensaje =
   | 'recordatorio_reserva'
   | 'estadia_por_aprobar'
   | 'estadia_decidida'
+  | 'fin_de_estadia'
 
 export interface Mensaje {
   id: string

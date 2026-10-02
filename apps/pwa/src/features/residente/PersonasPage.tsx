@@ -45,6 +45,9 @@ import {
 import {
   categoriasQuePuedeRegistrar,
   puedeAutorizar,
+  DIAS_AVISO_FIN_DE_ESTADIA,
+  diasEntre,
+  hoyISO,
   categoriaDeResidencia,
   condicionDeResidencia,
   esperaAlPropietario,
@@ -176,6 +179,12 @@ export function PersonasPage() {
                         {' · desde '}
                         {formatearFecha(residencia.desde)}
                         {residencia.hasta ? ` hasta ${formatearFecha(residencia.hasta)}` : ''}
+                        {residencia.hasta && diasEntre(hoyISO(), residencia.hasta) <= DIAS_AVISO_FIN_DE_ESTADIA ? (
+                          <>
+                            {' '}
+                            <span className="chip chip--alerta">Termina pronto</span>
+                          </>
+                        ) : null}
                       </span>
                     </div>
                     {/* Quién puede inhabilitar depende de quién creó el vínculo

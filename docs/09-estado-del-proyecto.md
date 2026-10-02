@@ -111,6 +111,26 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-02 · Mary + IA (Claude) · Familia, menores, visitante frecuente, fotos en cadena y aviso de fin de estadía
+
+Mary: *«sí a las 5 propuestas»*. **Sin números nuevos** (revisiones de RN-60, RN-62 y RN-67).
+
+| # | Qué | Dónde |
+|---|---|---|
+| 1 | Tipo **Familiar o acompañante** (rol `familiar`): lo registran propietario y arrendatario; residente o temporal; no vota ni registra. Sale con el arrendatario | `dominio/tipos.ts`, `dominio/reglas.ts`, `componentes/Registro.tsx`, `cerrarLoQueDejo` |
+| 2 | **Menores de edad**: sin celular obligatorio; tarjeta de identidad o registro civil | `TIPOS_IDENTIFICACION`, `admiteMenor`, `faltaContacto` |
+| 3 | **Visitante frecuente**: días de la semana y fecha de fin, con fotos; la portería lo deja entrar solo esos días | `estadoRealVisitante`, `crearVisitanteDeRegistro`, `features/residente/VisitantesPage.tsx` |
+| 4 | **Fotos en cadena**: el propietario ve los soportes de lo que registró su arrendatario | `puedeVerSoportes`, `responsablesDeRegistro` |
+| 5 | **Aviso dos días antes** del fin de una estadía temporal, a quien la registró; «Termina pronto» en la lista | `avisarFinesDeEstadia`, `features/residente/PersonasPage.tsx` |
+
+**Pruebas:** nuevas `prueba-cinco` (19 casos) y `prueba-cinco-ui` (9, en pantalla). Las de
+usuarios siguen en verde. **Ojo:** `prueba-autocierre` y `prueba-seis` (reservas) fallan a esta
+hora del día **también con el código anterior** (se comprobó contra `569bd23`): dependen de que
+las reservas de hoy de la semilla todavía no hayan pasado. No las causó este cambio; conviene
+hacerlas independientes de la hora.
+
+---
+
 ### 2026-10-02 · Mary + IA (Claude) · Inhabilitar en cadena, cambiar sin repetir el trámite y contacto obligatorio
 
 Mary respondió las preguntas abiertas sobre crear e inhabilitar usuarios: *«sí, 1, 3, 4 y 6»*,

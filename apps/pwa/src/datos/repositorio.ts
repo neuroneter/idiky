@@ -32,6 +32,7 @@ import type {
   Reincidencia,
   CategoriaRegistro,
   CondicionRegistro,
+  TipoIdentificacion,
   RolResidencia,
   CategoriaPqrs,
   CierreZona,
@@ -144,6 +145,10 @@ import {
   esVisitaDeUnDia,
   condicionesPosibles,
   marcaResidente,
+  debeAvisarseFinDeEstadia,
+  saleConCodigo,
+  admiteMenor,
+  TIPOS_IDENTIFICACION,
   categoriaDeResidencia,
   condicionDeResidencia,
   condicionesParaCambiar,
@@ -164,7 +169,7 @@ import {
 import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajeria'
 import { finDePeriodo, formatearDinero, formatearFecha } from '../utilidades/formato'
 import { guardar, leer, sembrar, ocupacion } from './almacen'
-import { responsablesDeVisita, responsablesDelVinculo, unidadTienePropietario } from './selectores'
+import { responsablesDeRegistro, responsablesDeVisita, responsablesDelVinculo, unidadTienePropietario } from './selectores'
 
 /** Resultado de una operacion: base de datos actualizada + lo que se creo. */
 export interface Resultado<T> {
@@ -252,6 +257,36 @@ function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boo
       texto,
       motivo,
       reservaId: reserva.id,
+      ahora: momento,
+    })
+  }
+  if (avisarFinesDeEstadia(bd, momento)) cambio = true
+  return cambio
+}
+
+/**
+ * Dos días antes de que termine una estadía temporal, se le avisa a quien
+ * registró a la persona, para que la alargue si hace falta (Mary, 2026-10-02).
+ * Una vez por fecha de salida: si la alargan, el aviso vuelve a tocar.
+ */
+function avisarFinesDeEstadia(bd: BaseDatos, momento: string): boolean {
+  let cambio = false
+  for (const residencia of bd.residencias) {
+    if (!residencia.hasta || residencia.cierre || !residenciaVigente(residencia)) continue
+    if (!debeAvisarseFinDeEstadia(residencia)) continue
+    const registro = bd.registros.find((r) => r.id === residencia.registroId)
+    const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
+    const persona = bd.personas.find((p) => p.id === residencia.personaId)
+    if (!registro || !unidad) continue
+    residencia.avisoFinPara = residencia.hasta
+    cambio = true
+    avisarAPersona(bd, {
+      copropiedadId: unidad.copropiedadId,
+      personaId: registro.creadoPor,
+      motivo: 'fin_de_estadia',
+      texto:
+        `Idiky: la estadía de ${persona?.nombres ?? 'tu residente temporal'} en ${etiquetaUnidad(unidad)} termina el ` +
+        `${fechaCorta(residencia.hasta)}. Si se queda más tiempo, cámbiale la fecha de salida en la app.`,
       ahora: momento,
     })
   }
@@ -1616,8 +1651,9 @@ export async function revocarVisitante(
  *
  * - Sus registros **en curso** se anulan: solo él podía autorizarlos y ya no
  *   está. Vale para todos, y con el motivo del cambio de propietario si lo es.
- * - Si es **arrendatario**, salen con él los visitantes que registró: los
- *   temporales y las visitas de un día que aún no pasan (Mary, 2026-10-02). Los
+ * - Si es **arrendatario**, salen con él su familia y los visitantes que
+ *   registró: los temporales, los frecuentes y las visitas que aún no pasan
+ *   (Mary, 2026-10-02). Los
  *   de un propietario, en cambio, los hereda el siguiente (RN-65).
  */
 function cerrarLoQueDejo(bd: BaseDatos, residencia: Residencia, cerradoPor: string, motivo: MotivoCierreVinculo) {
@@ -1639,7 +1675,12 @@ function cerrarLoQueDejo(bd: BaseDatos, residencia: Residencia, cerradoPor: stri
     bd.registros.filter((r) => r.unidadId === residencia.unidadId && r.creadoPor === residencia.personaId).map((r) => r.id),
   )
   for (const vinculo of bd.residencias) {
-    if (vinculo.rol === 'autorizado' && vinculo.registroId && registrados.has(vinculo.registroId) && residenciaVigente(vinculo)) {
+    if (
+      (vinculo.rol === 'autorizado' || vinculo.rol === 'familiar') &&
+      vinculo.registroId &&
+      registrados.has(vinculo.registroId) &&
+      residenciaVigente(vinculo)
+    ) {
       vinculo.hasta = ayer
       vinculo.cierre = { motivo: 'otro', detalle: 'Salió el arrendatario que lo registró.', cerradoPor, cerradoEn: ahora }
     }
@@ -3142,6 +3183,10 @@ export async function crearRegistroPersona(
     condicion: CondicionRegistro
     /** Solo la visita de un día: si quien registra le pide las fotos (RN-57). */
     pedirFotos?: boolean
+    /** Solo el visitante frecuente: los días de la semana en que viene. */
+    dias?: number[]
+    menorDeEdad?: boolean
+    tipoIdentificacion?: TipoIdentificacion
     nombres: string
     apellidos: string
     documento: string
@@ -3178,18 +3223,31 @@ export async function crearRegistroPersona(
   }
 
   // RN-60 — Sin celular ni correo no hay a dónde mandarle el código de entrada.
-  if (faltaContacto(parametros.categoria, parametros.telefono, parametros.email)) {
+  // Menores de edad (2026-10-02): solo familia o visitas, y con tarjeta de
+  // identidad o registro civil solo si son menores.
+  if (parametros.menorDeEdad && !admiteMenor(parametros.categoria)) {
+    throw new ErrorDeNegocio('El propietario y el arrendatario son mayores de edad.')
+  }
+  if (parametros.tipoIdentificacion && TIPOS_IDENTIFICACION[parametros.tipoIdentificacion].soloMenores && !parametros.menorDeEdad) {
+    throw new ErrorDeNegocio('La tarjeta de identidad y el registro civil son documentos de menores de edad.')
+  }
+  // El visitante frecuente dice qué días viene.
+  if (parametros.condicion === 'frecuente' && !(parametros.dias && parametros.dias.length > 0)) {
+    throw new ErrorDeNegocio('Escoge los días de la semana en que viene.')
+  }
+  if (faltaContacto(parametros.categoria, parametros.telefono, parametros.email, parametros.menorDeEdad)) {
     throw new ErrorDeNegocio('Escribe el celular o el correo: es a donde le llega el código para entrar a la app.')
   }
 
   // RN-68 — El visitante no es residente: quien vive ahí no es una visita.
   if (!condicionesPosibles(parametros.categoria).includes(parametros.condicion)) {
     throw new ErrorDeNegocio(
-      parametros.categoria === 'visitante'
-        ? 'Un visitante es de un día o temporal; no puede ser residente.'
-        : parametros.categoria === 'propietario'
-          ? 'El propietario es residente o no residente: no existe un propietario temporal.'
-          : 'El arrendatario es residente o temporal: arrienda para vivir ahí.',
+      {
+        visitante: 'Un visitante es de un día, frecuente o temporal; no puede ser residente.',
+        propietario: 'El propietario es residente o no residente: no existe un propietario temporal.',
+        arrendatario: 'El arrendatario es residente o temporal: arrienda para vivir ahí.',
+        familiar: 'El familiar o acompañante vive ahí: es residente o temporal.',
+      }[parametros.categoria],
     )
   }
 
@@ -3210,7 +3268,7 @@ export async function crearRegistroPersona(
   // RN-61 — Quien ya está vinculado a la unidad no se registra otra vez: dos
   // vínculos vigentes de la misma persona son dos verdades sobre quién es ahí.
   // La visita no crea vínculo, así que no cuenta.
-  if (!esVisitaDeUnDia(parametros) && yaVinculadaALaUnidad(bd, parametros.documento, parametros.unidadId)) {
+  if (!saleConCodigo(parametros) && yaVinculadaALaUnidad(bd, parametros.documento, parametros.unidadId)) {
     throw new ErrorDeNegocio('Esa persona ya está vinculada a esta unidad. Si cambia su papel, inhabilítala primero.')
   }
 
@@ -3237,6 +3295,7 @@ export async function crearRegistroPersona(
     id: nuevoId('reg'),
     ...datos,
     ...(pedirFotos && esVisitaDeUnDia(parametros) ? { pedirFotos: true } : {}),
+    ...(parametros.condicion !== 'frecuente' ? { dias: undefined } : {}),
     codigo: nuevoCodigoRegistro(),
     estado: 'esperando_soportes',
     creadoEn: ahora,
@@ -3301,7 +3360,9 @@ function crearVisitanteDeRegistro(bd: BaseDatos, registro: RegistroPersona): Vis
     vigenciaDesde: registro.vigenciaDesde ?? hoyISO(),
     vigenciaHasta: registro.vigenciaHasta ?? hoyISO(),
     codigo: generarCodigoVisitante(),
-    recurrente: false,
+    // El frecuente entra los días escogidos hasta su fecha (2026-10-02).
+    recurrente: registro.condicion === 'frecuente',
+    dias: registro.condicion === 'frecuente' ? registro.dias : undefined,
     estado: 'activo',
     creadoEn: ahoraISO(),
     registroId: registro.id,
@@ -3433,7 +3494,7 @@ export async function autorizarRegistro(
     bd.personas.push(persona)
   }
 
-  if (esVisitaDeUnDia(registro)) {
+  if (saleConCodigo(registro)) {
     registro.visitanteId = crearVisitanteDeRegistro(bd, registro).id
   } else {
     // RN-61 — Entre crear y autorizar pudo vincularse por otro registro.
@@ -3540,10 +3601,11 @@ export async function registrarAccesoSoportes(
   const bd = clonar(bdActual)
   const registro = bd.registros.find((r) => r.id === parametros.registroId)
   if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
-  // RN-67 — Ve los soportes quien creó el registro o la administración; nadie más.
+  // RN-67 — Ve los soportes quien creó el registro, el propietario por encima (RN-65) o la administración.
   const rol = esAdministracion(bd, parametros.personaId, registro.copropiedadId) ? 'admin' : 'residente'
-  if (!puedeVerSoportes({ creadoPor: registro.creadoPor, personaId: parametros.personaId, rol })) {
-    throw new ErrorDeNegocio('Solo quien creó el registro o la administración pueden ver sus soportes.')
+  const { heredadoPor } = responsablesDeRegistro(bd, registro)
+  if (!puedeVerSoportes({ creadoPor: registro.creadoPor, heredadoPor, personaId: parametros.personaId, rol })) {
+    throw new ErrorDeNegocio('Los soportes los ven quien creó el registro, el propietario o la administración.')
   }
 
   const acceso: AccesoSoporte = {

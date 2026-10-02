@@ -19,6 +19,7 @@ import { formatearFecha, formatearFechaHora } from '../utilidades/formato'
 import type {
   CategoriaRegistro,
   CondicionRegistro,
+  TipoIdentificacion,
   Mensaje,
   RegistroPersona,
   Unidad,
@@ -28,6 +29,9 @@ import {
   DIAS_SIN_APROBACION_DEL_PROPIETARIO,
   esperaAlPropietario,
   faltaContacto,
+  admiteMenor,
+  NOMBRES_DIAS,
+  TIPOS_IDENTIFICACION,
   requiereAprobacionPropietario,
   etiquetaUnidad,
   exigeSoportes,
@@ -51,9 +55,13 @@ export const CATEGORIAS: Record<CategoriaRegistro, { texto: string; ayuda: strin
     texto: 'Arrendatario',
     ayuda: 'Arrienda la unidad para vivir en ella.',
   },
+  familiar: {
+    texto: 'Familiar o acompañante',
+    ayuda: 'Vive con el propietario o el arrendatario: pareja, hijos, padres. No vota ni registra a nadie.',
+  },
   visitante: {
     texto: 'Visitante',
-    ayuda: 'Viene de visita: una tarde, o se queda unos días (huésped de Airbnb, un familiar).',
+    ayuda: 'Viene de visita: una tarde, ciertos días de la semana (empleada, niñera) o se queda unos días.',
   },
 }
 
@@ -64,6 +72,7 @@ export const CATEGORIAS: Record<CategoriaRegistro, { texto: string; ayuda: strin
 export function textoCondicion(categoria: CategoriaRegistro, condicion: CondicionRegistro): string {
   if (condicion === 'residente') return 'Residente'
   if (condicion === 'temporal') return 'Residente temporal'
+  if (condicion === 'frecuente') return 'Frecuente'
   return categoria === 'visitante' ? 'De un día' : 'No residente'
 }
 
@@ -84,6 +93,9 @@ export interface DatosRegistro {
   categoria: CategoriaRegistro
   condicion: CondicionRegistro
   pedirFotos?: boolean
+  dias?: number[]
+  menorDeEdad?: boolean
+  tipoIdentificacion?: TipoIdentificacion
   nombres: string
   apellidos: string
   documento: string
@@ -136,6 +148,10 @@ export function FormularioRegistro({
   )
   const [condicion, setCondicion] = useState<CondicionRegistro>(condicionesPosibles(categoria)[0])
   const [pedirFotos, setPedirFotos] = useState(false)
+  /** El visitante frecuente: qué días viene (0 = domingo). */
+  const [dias, setDias] = useState<number[]>([1, 2, 3, 4, 5])
+  const [menor, setMenor] = useState(false)
+  const [tipoIdentificacion, setTipoIdentificacion] = useState<TipoIdentificacion>('cc')
   const [nombres, setNombres] = useState('')
   const [apellidos, setApellidos] = useState('')
   const [documento, setDocumento] = useState('')
@@ -164,6 +180,10 @@ export function FormularioRegistro({
   function escogerCategoria(opcion: CategoriaRegistro) {
     setCategoria(opcion)
     if (!condicionesPosibles(opcion).includes(condicion)) setCondicion(condicionesPosibles(opcion)[0])
+    if (!admiteMenor(opcion)) {
+      setMenor(false)
+      if (TIPOS_IDENTIFICACION[tipoIdentificacion].soloMenores) setTipoIdentificacion('cc')
+    }
   }
 
   function enviar(evento: React.FormEvent) {
@@ -188,7 +208,15 @@ export function FormularioRegistro({
       return
     }
     // RN-60 — Sin celular ni correo no hay a dónde mandarle el código de entrada.
-    if (faltaContacto(categoria, telefono, email)) {
+    if (condicion === 'frecuente' && dias.length === 0) {
+      setError('Escoge los días de la semana en que viene.')
+      return
+    }
+    if (TIPOS_IDENTIFICACION[tipoIdentificacion].soloMenores && !menor) {
+      setError('La tarjeta de identidad y el registro civil son documentos de menores de edad.')
+      return
+    }
+    if (faltaContacto(categoria, telefono, email, menor)) {
       setError('Escribe el celular o el correo: es a donde le llega el código para entrar a la app.')
       return
     }
@@ -200,6 +228,9 @@ export function FormularioRegistro({
       categoria,
       condicion,
       pedirFotos: unDia ? pedirFotos : undefined,
+      dias: condicion === 'frecuente' ? dias : undefined,
+      menorDeEdad: menor || undefined,
+      tipoIdentificacion,
       nombres: nombres.trim(),
       apellidos: apellidos.trim(),
       documento: documento.trim(),
@@ -285,7 +316,9 @@ export function FormularioRegistro({
               ? 'Vive aquí un tiempo, con fecha de salida. Lleva la marca de residente mientras esté.'
               : condicion === 'residente'
                 ? 'Vive aquí. Lleva la marca de residente: la portería lo reconoce en la entrada.'
-                : categoria === 'visitante'
+                : condicion === 'frecuente'
+                  ? 'Viene ciertos días de la semana hasta una fecha. Sube sus fotos y entra con su código esos días.'
+                  : categoria === 'visitante'
                   ? 'Viene un solo día y entra con un código para la portería.'
                   : 'Tiene la unidad arrendada o vacía. Sigue siendo propietario —vota, recibe la cuota y registra gente—, pero no aparece en la lista de la portería.'}
           </span>
@@ -308,6 +341,35 @@ export function FormularioRegistro({
 
         <div className="campo">
           <label htmlFor="documento">Documento de identidad</label>
+          {/* Menores de edad (2026-10-02): tarjeta de identidad o registro
+              civil, y sin celular obligatorio. */}
+          {admiteMenor(categoria) && (
+            <label className="fila" style={{ gap: 'var(--e2)', cursor: 'pointer', marginBottom: 'var(--e2)' }}>
+              <input
+                type="checkbox"
+                checked={menor}
+                onChange={(e) => {
+                  setMenor(e.target.checked)
+                  if (!e.target.checked && TIPOS_IDENTIFICACION[tipoIdentificacion].soloMenores) setTipoIdentificacion('cc')
+                }}
+              />
+              <span>Es menor de edad</span>
+            </label>
+          )}
+          <select
+            aria-label="Tipo de documento"
+            value={tipoIdentificacion}
+            onChange={(e) => setTipoIdentificacion(e.target.value as TipoIdentificacion)}
+            style={{ marginBottom: 'var(--e2)' }}
+          >
+            {(Object.keys(TIPOS_IDENTIFICACION) as TipoIdentificacion[])
+              .filter((tipo) => menor || !TIPOS_IDENTIFICACION[tipo].soloMenores)
+              .map((tipo) => (
+                <option key={tipo} value={tipo}>
+                  {TIPOS_IDENTIFICACION[tipo].texto}
+                </option>
+              ))}
+          </select>
           <input
             id="documento"
             inputMode="numeric"
@@ -382,6 +444,27 @@ export function FormularioRegistro({
                 />
               </div>
             )}
+          </div>
+        )}
+
+        {/* El visitante frecuente: los días en que entra (2026-10-02). */}
+        {condicion === 'frecuente' && (
+          <div className="campo">
+            <label>¿Qué días viene?</label>
+            <div className="segmentos" style={{ flexWrap: 'wrap' }}>
+              {NOMBRES_DIAS.map((nombre, dia) => (
+                <button
+                  key={nombre}
+                  type="button"
+                  className="segmento"
+                  aria-current={dias.includes(dia) ? 'page' : undefined}
+                  onClick={() => setDias((antes) => (antes.includes(dia) ? antes.filter((d) => d !== dia) : [...antes, dia].sort()))}
+                >
+                  {nombre}
+                </button>
+              ))}
+            </div>
+            <span className="ayuda-campo">Entra con su código solo esos días, hasta la fecha de fin.</span>
           </div>
         )}
 

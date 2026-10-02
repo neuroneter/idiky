@@ -21,6 +21,7 @@ import type {
   Poder,
   CategoriaRegistro,
   CondicionRegistro,
+  TipoIdentificacion,
   ConceptoSancion,
   EstadoSancion,
   OrigenRespaldo,
@@ -531,6 +532,11 @@ export function estadoRealVisitante(
   if (visitante.estado === 'revocado') return 'revocado'
   if (visitante.vigenciaHasta < hoy) return 'vencido'
   if (visitante.vigenciaDesde > hoy) return 'programado'
+  // El visitante frecuente solo entra los días escogidos (2026-10-02).
+  if (visitante.dias && visitante.dias.length > 0) {
+    const dia = new Date(`${hoy}T12:00:00`).getDay()
+    if (!visitante.dias.includes(dia)) return 'programado'
+  }
   return 'activo'
 }
 
@@ -1627,8 +1633,14 @@ export function puedeVerSoportes(parametros: {
   creadoPor: string
   personaId: string
   rol: RolUsuario
+  /**
+   * La misma cadena de RN-65 (Mary, 2026-10-02): el propietario ve los soportes
+   * de lo que registró su arrendatario, porque también responde por ello.
+   */
+  heredadoPor?: readonly string[]
 }): boolean {
   if (parametros.rol === 'admin') return true
+  if (parametros.heredadoPor?.includes(parametros.personaId)) return true
   return parametros.creadoPor === parametros.personaId
 }
 
@@ -1738,8 +1750,10 @@ export const CADENA_DE_REGISTRO: ReadonlyArray<{
  * cadena sin dueno.
  */
 const CATEGORIAS_POR_ROL: Record<RolResidencia, readonly CategoriaRegistro[]> = {
-  propietario: ['propietario', 'arrendatario', 'visitante'],
-  arrendatario: ['visitante'],
+  propietario: ['propietario', 'arrendatario', 'familiar', 'visitante'],
+  // El arrendatario registra a su familia y a sus visitas (2026-10-02).
+  arrendatario: ['familiar', 'visitante'],
+  familiar: [],
   autorizado: [],
 }
 
@@ -1824,6 +1838,14 @@ export function categoriaDeResidencia(residencia: Pick<Residencia, 'rol'>): Cate
   return residencia.rol === 'autorizado' ? 'visitante' : residencia.rol
 }
 
+/**
+ * El visitante que no se vincula sino que sale con un código: el de un día y el
+ * frecuente (2026-10-02). El frecuente entra los días escogidos hasta su fecha.
+ */
+export function saleConCodigo(clase: Pick<RegistroPersona, 'categoria' | 'condicion'>): boolean {
+  return clase.categoria === 'visitante' && (clase.condicion === 'no_residente' || clase.condicion === 'frecuente')
+}
+
 /** Cómo se queda hoy, leído del vínculo vigente (RN-62, RN-68). */
 export function condicionDeResidencia(residencia: Pick<Residencia, 'hasta' | 'reside'>): CondicionRegistro {
   if (residencia.hasta) return 'temporal'
@@ -1845,8 +1867,48 @@ export function condicionesParaCambiar(residencia: Pick<Residencia, 'rol'>): rea
  * propietario y al arrendatario se les exige **celular o correo** (Mary,
  * 2026-10-02). Al visitante no: entra con su código de portería.
  */
-export function faltaContacto(categoria: CategoriaRegistro, telefono: string, email: string): boolean {
+export function faltaContacto(
+  categoria: CategoriaRegistro,
+  telefono: string,
+  email: string,
+  menorDeEdad = false,
+): boolean {
+  // Al menor no se le exige (2026-10-02): muchas veces no tiene celular ni correo.
+  if (menorDeEdad) return false
   return categoria !== 'visitante' && !telefono.trim() && !email.trim()
+}
+
+/**
+ * Los documentos de identidad que se aceptan. La tarjeta de identidad y el
+ * registro civil solo para menores de edad (2026-10-02).
+ */
+export const TIPOS_IDENTIFICACION: Record<TipoIdentificacion, { texto: string; soloMenores: boolean }> = {
+  cc: { texto: 'Cédula de ciudadanía', soloMenores: false },
+  ce: { texto: 'Cédula de extranjería', soloMenores: false },
+  pasaporte: { texto: 'Pasaporte', soloMenores: false },
+  ti: { texto: 'Tarjeta de identidad', soloMenores: true },
+  rc: { texto: 'Registro civil', soloMenores: true },
+}
+
+/** Quién puede ser menor de edad: la familia y las visitas, no el titular. */
+export function admiteMenor(categoria: CategoriaRegistro): boolean {
+  return categoria === 'familiar' || categoria === 'visitante'
+}
+
+/** El visitante frecuente necesita al menos un día de la semana. */
+export const NOMBRES_DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'] as const
+
+/** Cuántos días antes de la salida se avisa a quien registró (2026-10-02). */
+export const DIAS_AVISO_FIN_DE_ESTADIA = 2
+
+/** Si toca avisar que una estadía temporal termina pronto, y no se ha avisado. */
+export function debeAvisarseFinDeEstadia(
+  residencia: Pick<Residencia, 'hasta' | 'avisoFinPara'>,
+  hoy: FechaISO = hoyISO(),
+): boolean {
+  if (!residencia.hasta || residencia.avisoFinPara === residencia.hasta) return false
+  const faltan = diasEntre(hoy, residencia.hasta)
+  return faltan >= 0 && faltan <= DIAS_AVISO_FIN_DE_ESTADIA
 }
 
 /** El registro espera que el propietario apruebe la estadía (RN-60). */
@@ -1896,7 +1958,9 @@ const CONDICIONES: Record<CategoriaRegistro, readonly CondicionRegistro[]> = {
   // «No existe un propietario temporal» (Mary, 2026-10-02).
   propietario: ['residente', 'no_residente'],
   arrendatario: ['residente', 'temporal'],
-  visitante: ['no_residente', 'temporal'],
+  // La familia o el acompañante vive ahí, siempre o un tiempo (2026-10-02).
+  familiar: ['residente', 'temporal'],
+  visitante: ['no_residente', 'frecuente', 'temporal'],
 }
 
 export function condicionesPosibles(categoria: CategoriaRegistro): readonly CondicionRegistro[] {
@@ -1949,7 +2013,7 @@ export function soportesCompletos(registro: RegistroPersona): boolean {
  * visita de un día también (es su único día).
  */
 export function exigeVigencia(clase: ClaseRegistro): boolean {
-  return clase.condicion === 'temporal' || esVisitaDeUnDia(clase)
+  return clase.condicion === 'temporal' || clase.condicion === 'frecuente' || esVisitaDeUnDia(clase)
 }
 
 /**
@@ -1974,7 +2038,8 @@ export function soloUnDia(clase: ClaseRegistro): boolean {
  */
 export function rolDeRegistro(clase: ClaseRegistro): RolResidencia | undefined {
   if (esVisitaDeUnDia(clase)) return undefined
-  return clase.categoria === 'visitante' ? 'autorizado' : clase.categoria
+  if (clase.categoria === 'visitante') return clase.condicion === 'temporal' ? 'autorizado' : undefined
+  return clase.categoria
 }
 
 /** RN-68 — La marca de residente: la lleva quien no es «no residente». */

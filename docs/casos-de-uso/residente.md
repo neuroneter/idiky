@@ -846,6 +846,26 @@ residente temporal ya no va»*. Son dos preguntas: **quién es** y **cómo se qu
 | **Propietario** | Vive en su apartamento · fotos · sin fecha de fin | Lo tiene arrendado o vacío · fotos · no aparece en portería | **No aplica** (*«no existe un propietario temporal»*) |
 | **Arrendatario** | Vive en el apartamento · fotos · sin fecha de fin | **No aplica** (*«el arrendatario no puede tener la categoría de no residente»*) | Arriendo corto · fotos · fecha de salida |
 | **Visitante** | **No aplica**: quien vive ahí no es visita | **De un día** · fotos **opcionales** · sale con su código | Huésped de Airbnb, un familiar · fotos · fecha de salida · queda como `autorizado` |
+| **Familiar o acompañante** *(2026-10-02)* | Pareja, hijos, padres · fotos · sin fecha de fin | **No aplica** | Vive ahí un tiempo · fotos · fecha de salida |
+
+**Visitante frecuente** *(2026-10-02)*: la empleada del servicio, la niñera, el conductor. Se
+escogen **los días de la semana** en que viene y una fecha de fin; sube sus fotos y, autorizado,
+entra con su código **solo esos días** (en `Visitante` usa la marca `recurrente`, que existía sin
+usarse, y `dias`). No lleva la marca de residente: no vive ahí.
+
+**El familiar o acompañante** lo registran el propietario o el arrendatario; no vota y no registra a
+nadie (rol `familiar`). Si sale el arrendatario, sale su familia.
+
+**Menores de edad** *(2026-10-02)*: el familiar o el visitante puede marcarse como menor. Entonces
+no se le exige celular ni correo, y su documento puede ser **tarjeta de identidad** o **registro
+civil** (que solo se aceptan para menores). El propietario y el arrendatario son mayores de edad.
+
+**Fotos en la misma cadena** (RN-67): los soportes de lo que registró un arrendatario los ven él,
+el propietario y la administración.
+
+**Aviso de fin de estadía**: dos días antes de que termine una estadía temporal le llega un aviso a
+quien registró a la persona, para alargarla con «Cambiar» si hace falta. En la lista aparece
+«Termina pronto».
 
 **Quién registra a quién** (RN-60, RN-63): la administración, al primer propietario; el
 propietario, a los demás propietarios, arrendatarios y visitantes; el arrendatario, a visitantes

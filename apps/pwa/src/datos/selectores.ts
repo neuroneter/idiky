@@ -101,6 +101,14 @@ export function responsablesDelVinculo(
   return responsablesPorCreador(bd, residencia.unidadId, creadoPor, residencia.id)
 }
 
+/** Lo mismo para un registro: responde quien lo creó y, subiendo, el propietario (RN-65, RN-67). */
+export function responsablesDeRegistro(
+  bd: BaseDatos,
+  registro: { unidadId: string; creadoPor: string },
+): { creadoPor?: string; heredadoPor: string[] } {
+  return responsablesPorCreador(bd, registro.unidadId, registro.creadoPor)
+}
+
 /** Lo mismo para una visita de un día: la creó quien la autorizó (RN-65). */
 export function responsablesDeVisita(bd: BaseDatos, visitante: Visitante): { creadoPor?: string; heredadoPor: string[] } {
   return responsablesPorCreador(bd, visitante.unidadId, visitante.personaId)
