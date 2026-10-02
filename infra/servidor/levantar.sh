@@ -223,7 +223,7 @@ levantar_jitsi() {
   systemctl --user stop "pod-$pod.service" 2>/dev/null || true
   podman pod rm --force --ignore "$pod" >/dev/null
   podman pod create --name "$pod" --network slirp4netns:port_handler=slirp4netns \
-    --publish "$IDIKY_HOST:$1:80" --publish "$IDIKY_HOST:$2:$2/udp" >/dev/null
+    --publish "$IDIKY_HOST:$1:8090" --publish "$IDIKY_HOST:$2:$2/udp" >/dev/null
   podman create --pod "$pod" --name "$pod-prosody" --memory 192m --pids-limit 256 \
     --env-file "$COMUN" --env-file "$SECRETOS/jitsi.env" \
     --volume "$IDIKY_DATOS/jitsi/prosody:/config" \
@@ -236,10 +236,10 @@ levantar_jitsi() {
     --env-file "$COMUN" --env-file "$SECRETOS/jitsi.env" \
     --env "JVB_PORT=$2" \
     "docker.io/jitsi/jvb:$IDIKY_JITSI_VERSION" >/dev/null
-  # jitsi/web cede el 80 del pod al nginx de Idiky, que es el que responde /salud.
+  # jitsi/web se queda con el 80 del pod: su imagen lo trae fijo (HTTP_PORT no surte efecto,
+  # 2026-10-02). El nginx de Idiky, que responde /salud, escucha en el 8090 y es el publicado.
   podman create --pod "$pod" --name "$pod-web" --memory 128m --pids-limit 256 \
     --env-file "$COMUN" --env-file "$SECRETOS/jitsi.env" \
-    --env "HTTP_PORT=8000" \
     "docker.io/jitsi/web:$IDIKY_JITSI_VERSION" >/dev/null
   podman create --pod "$pod" --name "$pod-proxy" --memory 64m --pids-limit 64 \
     "localhost/idiky-jitsi-proxy:actual" >/dev/null

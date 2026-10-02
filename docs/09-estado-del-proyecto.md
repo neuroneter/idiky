@@ -136,6 +136,30 @@ computador normal basta `npm run probar:navegador:instalar` una vez.
 
 ---
 
+### 2026-10-02 · Integración · Sesión de IA (Claude) con Daniel · Jitsi encendido: la regla UDP ya existe (T-78)
+
+**Lo que cambió:** Daniel consiguió en Azure la regla **`Dev-Udp` — 10000/UDP desde cualquier
+origen**, que era el bloqueo n.º 1 de ADR-0016. La regla `Dev` ya incluía el 8085.
+
+**Lo que se hizo:** los secretos de Jitsi (`secretos.sh`, con `PUBLIC_URL=https://jitsi-dev.idiky.com`
+y `JVB_ADVERTISE_IPS` = la IP pública; las claves no se mostraron), foto de LangFlow y
+`desplegar.sh origin/main jitsi`. **El primer intento falló** en lo que el README de Jitsi
+anunciaba como no probado: `jitsi/web` **ignora `HTTP_PORT`** —su plantilla trae `listen 80`
+fijo— y chocaba con el nginx de Idiky en el 80 del pod. Se invirtió: `jitsi/web` se queda con el
+80 y el proxy de Idiky pasa al **8090 del pod**, que se publica en el 8085. Corregido con Git
+Flow en `Jitsi-Streaming-Idiky` (`hotfix/0.1.1` → `main` con etiqueta `v0.1.1` y `develop`) y en
+`levantar.sh`. **Segundo intento sano:** los cinco contenedores arriba, videobridge
+`/about/health` 200, `10000/udp` escuchando, `http://20.55.251.120:8085/salud` 200 desde
+internet. LangFlow: igual. Disco: 3,3 GB libres (el mínimo es 3 GB: **el próximo despliegue
+que construya algo puede quedarse corto**).
+
+**Qué falta para usarlo:** **1)** el nombre `jitsi-dev.idiky.com` → `http://10.0.2.2:8085` en el
+panel del túnel `idiky-dev` (Daniel, Cloudflare): **sin HTTPS los navegadores no prestan cámara
+ni micrófono**, así que por `http://<ip>:8085` la sala abre pero no sirve; **2)** la primera
+cuenta, con `prosodyctl` (la crea Daniel con su clave); **3)** una reunión de prueba con dos
+personas y video, que es lo único que confirma de verdad el UDP a través de `slirp4netns`;
+**4)** la decisión de fondo frente a ADR-0007.
+
 ### 2026-10-02 · Integración · Sesión de IA (Claude) con Daniel · Lo que Mary dejó pendiente: la solicitud #3, su rango de reglas, T-43 y T-42
 
 **1. Solicitud #3 integrada** (`bf05bc6`, rama `claude/repository-review-c0p1wd` → `main`). Trae:
