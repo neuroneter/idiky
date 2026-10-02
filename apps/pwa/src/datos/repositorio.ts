@@ -92,6 +92,9 @@ import {
   motivoDeCierre,
   reservasQueCancelaCierre,
   validarReserva,
+  fechaCorta,
+  puedeRegistrar,
+  puedeVerSoportes,
   reservaOcupaFranja,
   sePuedeCancelar,
   estadoDeCuenta,
@@ -228,17 +231,14 @@ function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boo
     }
     if (!texto || !motivo) continue
     cambio = true
-    const persona = bd.personas.find((p) => p.id === reserva.personaId)
-    const mensaje = redactar({
-      id: nuevoId('msj'),
+    avisarAPersona(bd, {
       copropiedadId: zona.copropiedadId,
-      destino: persona?.telefono ?? '',
+      personaId: reserva.personaId,
       texto,
       motivo,
       reservaId: reserva.id,
       ahora: momento,
     })
-    if (mensaje) bd.mensajes.unshift(mensaje)
   }
   return cambio
 }
@@ -668,17 +668,13 @@ export async function decidirReserva(
   const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
   if (zona) {
     const copropiedad = bd.copropiedades.find((c) => c.id === zona.copropiedadId)?.nombre ?? 'La copropiedad'
-    const persona = bd.personas.find((p) => p.id === reserva.personaId)
-    const mensaje = redactar({
-      id: nuevoId('msj'),
+    avisarAPersona(bd, {
       copropiedadId: zona.copropiedadId,
-      destino: persona?.telefono ?? '',
+      personaId: reserva.personaId,
       texto: textoReservaDecidida(reserva, zona, decision, reserva.motivoRechazo, copropiedad),
       motivo: 'reserva_decidida',
       reservaId: reserva.id,
-      ahora: ahoraISO(),
     })
-    if (mensaje) bd.mensajes.unshift(mensaje)
   }
   return persistir(bd, reserva)
 }
@@ -759,7 +755,7 @@ export async function cerrarReserva(
       unidadId: reserva.unidadId,
       periodo: hoy.slice(0, 7),
       tipo: 'uso_zona',
-      concepto: `Uso de ${zona.nombre} · ${fechaCortaReserva(reserva.fecha)}`,
+      concepto: `Uso de ${zona.nombre} · ${fechaCorta(reserva.fecha)}`,
       valor: reserva.valorUso,
       saldo: reserva.valorUso,
       fechaVencimiento: sumarDias(hoy, DIAS_PARA_PAGAR_USO),
@@ -834,12 +830,6 @@ async function abrirProcesoPorReservaEn(
   const enLaNueva = resultado.bd.reservas.find((r) => r.id === reservaId)!
   enLaNueva.sancionId = resultado.datos.id
   return persistir(resultado.bd, resultado.datos)
-}
-
-/** `2026-10-06` → `06/10/2026`, para el concepto de la cuota. */
-function fechaCortaReserva(fecha: string): string {
-  const [anio, mes, dia] = fecha.split('-')
-  return `${dia}/${mes}/${anio}`
 }
 
 // ---------------------------------------------------------------------------
@@ -1095,22 +1085,16 @@ export async function registrarAvanceProyecto(
   let avisados = 0
   let sinCelular = 0
   for (const personaId of propietarios) {
-    const persona = bd.personas.find((p) => p.id === personaId)
-    const mensaje = redactar({
-      id: nuevoId('msj'),
+    const avisado = avisarAPersona(bd, {
       copropiedadId: proyecto.copropiedadId,
-      destino: persona?.telefono ?? '',
+      personaId,
       texto,
       motivo: 'avance_proyecto',
       proyectoId: proyecto.id,
       ahora,
     })
-    if (mensaje) {
-      bd.mensajes.unshift(mensaje)
-      avisados += 1
-    } else {
-      sinCelular += 1
-    }
+    if (avisado) avisados += 1
+    else sinCelular += 1
   }
 
   return persistir(bd, { proyecto, avance, avisados, sinCelular })
@@ -1389,22 +1373,16 @@ function cancelarConAviso(
     reserva.estado = 'cancelada'
     reserva.motivoCancelacion = motivo
     reserva.canceladaEn = ahora
-    const persona = bd.personas.find((p) => p.id === reserva.personaId)
-    const mensaje = redactar({
-      id: nuevoId('msj'),
+    const avisado = avisarAPersona(bd, {
       copropiedadId: zona.copropiedadId,
-      destino: persona?.telefono ?? '',
+      personaId: reserva.personaId,
       texto: textoReservaCancelada(reserva, zona, motivo, nombreCopropiedad),
       motivo: 'reserva_cancelada',
       reservaId: reserva.id,
       ahora,
     })
-    if (mensaje) {
-      bd.mensajes.unshift(mensaje)
-      avisados += 1
-    } else {
-      sinCelular += 1
-    }
+    if (avisado) avisados += 1
+    else sinCelular += 1
   }
   return { canceladas: afectadas.length, avisados, sinCelular }
 }
@@ -1508,22 +1486,16 @@ function avisarCierreATodos(
   let sinCelular = 0
   for (const personaId of personas) {
     if (yaAvisados.has(personaId)) continue
-    const persona = bd.personas.find((p) => p.id === personaId)
-    const mensaje = redactar({
-      id: nuevoId('msj'),
+    const avisado = avisarAPersona(bd, {
       copropiedadId: zona.copropiedadId,
-      destino: persona?.telefono ?? '',
+      personaId,
       texto,
       motivo: 'cierre_zona',
       zonaId: zona.id,
       ahora,
     })
-    if (mensaje) {
-      bd.mensajes.unshift(mensaje)
-      avisados += 1
-    } else {
-      sinCelular += 1
-    }
+    if (avisado) avisados += 1
+    else sinCelular += 1
   }
   return { avisados, sinCelular }
 }
@@ -2459,6 +2431,7 @@ function prepararPoder(
 ): { asamblea: Asamblea; unidad: Unidad; apoderado: Persona; otorgadoPor: string } {
   const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
   if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  // RN-31 — El poder vale para una sola asamblea: en una que terminó no hay poder nuevo.
   if (asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') {
     throw new ErrorDeNegocio('Esa asamblea ya terminó: no admite poderes nuevos.')
   }
@@ -2916,6 +2889,50 @@ function avisar(
 }
 
 /**
+ * Deja escrito el mensaje para una persona, a su celular (RN-64). Un solo lugar
+ * para los avisos de reservas, cierres de zonas y avances de obra: así todos
+ * se guardan igual. Devuelve `false` si la persona no tiene celular: sin destino
+ * no hay mensaje, y quien llama decide cómo contarlo.
+ */
+function avisarAPersona(
+  bd: BaseDatos,
+  aviso: {
+    copropiedadId: string
+    personaId: string
+    texto: string
+    motivo: MotivoMensaje
+    reservaId?: string
+    zonaId?: string
+    proyectoId?: string
+    ahora?: string
+  },
+): boolean {
+  const persona = bd.personas.find((p) => p.id === aviso.personaId)
+  const mensaje = redactar({
+    id: nuevoId('msj'),
+    copropiedadId: aviso.copropiedadId,
+    destino: persona?.telefono ?? '',
+    texto: aviso.texto,
+    motivo: aviso.motivo,
+    reservaId: aviso.reservaId,
+    zonaId: aviso.zonaId,
+    proyectoId: aviso.proyectoId,
+    ahora: aviso.ahora ?? ahoraISO(),
+  })
+  if (!mensaje) return false
+  bd.mensajes.unshift(mensaje)
+  return true
+}
+
+/**
+ * Si la persona es la administración de esa copropiedad. En el demo lo dice su
+ * perfil; en BLOKY vendrá de las asignaciones de BOB (RN-161).
+ */
+function esAdministracion(bd: BaseDatos, personaId: string, copropiedadId: string): boolean {
+  return bd.perfilesDemo.some((p) => p.rol === 'admin' && p.personaId === personaId && p.copropiedadId === copropiedadId)
+}
+
+/**
  * Codigo con el que la persona registrada abre su registro para adjuntar.
  *
  * Mismo alfabeto sin ambiguedades que los documentos formales: se dicta por
@@ -2955,6 +2972,18 @@ export async function crearRegistroPersona(
 ): Promise<Resultado<RegistroPersona>> {
   await esperar()
   const bd = clonar(bdActual)
+
+  // RN-60 — Quién registra a quién. Se revisa aquí y no solo en la pantalla: el
+  // arrendatario que llame a esta función directamente tampoco registra a un
+  // residente. La administración registra lo que su consola ofrece (RN-63).
+  if (!esAdministracion(bd, parametros.creadoPor, parametros.copropiedadId)) {
+    const rolEnLaUnidad = bd.residencias.find(
+      (r) => r.unidadId === parametros.unidadId && r.personaId === parametros.creadoPor && residenciaVigente(r),
+    )?.rol
+    if (!puedeRegistrar(rolEnLaUnidad, parametros.categoria)) {
+      throw new ErrorDeNegocio('Tu papel en esta unidad no te permite registrar a esa clase de persona (RN-60).')
+    }
+  }
 
   // RN-62: la vigencia no es opcional donde la categoria la exige. Se valida aqui
   // y no solo en el formulario: el formulario es una comodidad, la regla es esto.
@@ -3234,6 +3263,11 @@ export async function registrarAccesoSoportes(
   const bd = clonar(bdActual)
   const registro = bd.registros.find((r) => r.id === parametros.registroId)
   if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  // RN-67 — Ve los soportes quien creó el registro o la administración; nadie más.
+  const rol = esAdministracion(bd, parametros.personaId, registro.copropiedadId) ? 'admin' : 'residente'
+  if (!puedeVerSoportes({ creadoPor: registro.creadoPor, personaId: parametros.personaId, rol })) {
+    throw new ErrorDeNegocio('Solo quien creó el registro o la administración pueden ver sus soportes.')
+  }
 
   const acceso: AccesoSoporte = {
     id: nuevoId('acc'),
@@ -3313,7 +3347,8 @@ export async function emitirVoto(
   const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
   if (!unidad) throw new ErrorDeNegocio('La unidad no existe.')
 
-  // **Quien puede votar por esta unidad: el propietario, o su apoderado.**
+  // **Quien puede votar por esta unidad: el propietario, o su apoderado.** Si hay
+  // poder, vota solo el apoderado: quien lo otorgó ya no vota esa unidad (RN-32).
   //
   // Las dos comprobaciones van juntas porque son una sola pregunta, y separarlas
   // fue lo que rompio el flujo del apoderado la primera vez: un apoderado **no

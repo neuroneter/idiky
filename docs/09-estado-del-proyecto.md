@@ -22,7 +22,7 @@ nueva o una sesión de IA distinta.
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 75 documentados: 48 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 13 ⬜ pendientes, 3 ⛔ retirados |
-| **Reglas de negocio** | 129 del demo (RN-01…RN-129; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-129, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
+| **Reglas de negocio** | 129 del demo (RN-01…RN-129; RN-07, RN-11, RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-129, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -110,6 +110,43 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-02 · Mary + IA (Claude) · Auditoría de reglas y limpieza del código
+
+Mary: *«aprovechemos este tiempo para hacer esta auditoría al proyecto, así el código estará más
+limpio»* y *«sí, haz A, B y C»*. **No se gastaron números nuevos ni cambió lo que ve el usuario.**
+
+**A · Reglas repetidas o desactualizadas** (`docs/05-modelo-de-datos.md`):
+- **RN-07 retirada**: decía lo mismo que RN-77 (el pago se aplica a la cuota más antigua). Las
+  referencias en `casos-de-uso/residente.md` y `administrador.md` ahora citan RN-77.
+- **RN-11 retirada**: la reemplazaron RN-110, RN-112 y RN-128 (multa, horario y plazo para cancelar).
+- **RN-09 corregida**: el choque de horario solo aplica a zonas exclusivas; las compartidas tienen aforo (RN-111).
+- **RN-52 corregida**: la portería ve también las reservas del día y sus invitados (RN-116, RN-126).
+- RN-01, RN-31, RN-32 y RN-71 ya se cumplían, pero el código no lo decía: ahora lo cita.
+
+**B · RN-60 se cumple también por dentro** (`apps/pwa/src/datos/repositorio.ts`): antes solo la
+pantalla impedía que un arrendatario registrara a un residente; ahora el repositorio lo rechaza
+aunque se salte la pantalla. La administración sí puede registrar. Igual para RN-67: solo quien
+creó el registro o la administración ven los soportes.
+
+**C · Limpieza sin cambio de comportamiento:**
+- Se borraron funciones que nadie usaba: en `apps/pwa/src/dominio/reglas.ts` (`esperaAplicacion`,
+  `aclaratoriasDe`, `unidadesRepresentadas`, `sancionesPorResolver`, `registrosPorAutorizar`),
+  en `apps/pwa/src/datos/selectores.ts` (`pagoPorId`, `asambleaVigente`) y la interfaz
+  `Consentimiento` en `apps/pwa/src/dominio/consentimiento.ts`.
+- Lo repetido quedó en un solo lugar: `inicioDeReserva` y `finDeReserva` (8 copias de la misma
+  fecha), `avisarAPersona` en el repositorio (5 copias del aviso) y los selectores
+  `propietariosDeUnidad` y `administradorDe` (3 pantallas).
+- `apps/pwa/src/features/porteria/ResidentesPage.tsx`: además del menú, la pantalla misma
+  revisa que quien entra pueda ver rostros.
+
+**Pruebas:** las 15 pruebas del navegador en verde (incluida una nueva de RN-60 y RN-67) y las 36
+pantallas de los tres perfiles abren sin errores.
+
+**Queda recomendado, sin hacer:** partir `reglas.ts` y `repositorio.ts` por módulo, y guardar las
+pruebas del navegador en el repositorio (conversarlo con Daniel).
+
+---
 
 ### 2026-10-02 · Mary + IA (Claude) · Puesta al día del catálogo de asambleas
 

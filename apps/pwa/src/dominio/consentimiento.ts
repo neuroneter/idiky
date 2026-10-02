@@ -34,11 +34,6 @@
 /** Versión del texto. **Subirla cada vez que el texto cambie**, sin excepción. */
 export const VERSION_POLITICA = '2026-09-07'
 
-export interface Consentimiento {
-  version: string
-  aceptadoEn: string
-}
-
 /** Un punto de la política: el titular lo lee, no lo estudia. */
 export interface PuntoPolitica {
   titulo: string

@@ -158,7 +158,7 @@ atajo de perfiles sigue disponible, plegado debajo.
 
 **Reglas de negocio**
 - RN-06: un pago siempre se imputa primero a la deuda más antigua.
-- RN-07: todo pago genera un comprobante con consecutivo único.
+- RN-77: todo pago aplicado genera un recibo de caja con consecutivo único (antes RN-07, retirada por repetida).
 
 **Estado en el demo:** ✅ **simulado** — no hay pasarela real. `src/features/residente/PagoPage.tsx`.
 La integración con pasarela está en el roadmap (fase 4).
@@ -532,7 +532,7 @@ revisión, se imprime desde la app, sin servidor ni librerías.
   con quién lo registró.
 
 **Reglas de negocio**
-- RN-07: todo pago tiene comprobante con consecutivo único.
+- RN-77: todo pago aplicado tiene recibo de caja con consecutivo único (antes RN-07, retirada por repetida).
 
 **Estado en el demo:** 🟡 — el comprobante se muestra **una sola vez**, al terminar el pago
 (`PagoPage.tsx`); después no hay forma de volver a verlo ni de descargarlo.

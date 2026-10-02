@@ -42,12 +42,8 @@ export function EstadoCuentaPage() {
   const vista = estadoDeCuenta(sel.cuotasDeUnidad(bd, unidadId), sel.pagosDeUnidad(bd, unidadId), desde, hasta)
   const invalido = motivoEstadoCuentaInvalido(desde, hasta, vista)
   const emitidos = sel.documentosDeUnidad(bd, unidadId).filter((d) => d.tipo === 'estado_cuenta')
-  const propietarios = sel
-    .residenciasDeUnidad(bd, unidadId ?? '')
-    .filter((r) => r.rol === 'propietario')
-    .map((r) => sel.persona(bd, r.personaId))
-    .filter((p): p is NonNullable<typeof p> => !!p)
-  const administrador = sel.persona(bd, bd.perfilesDemo.find((perfil) => perfil.rol === 'admin')?.personaId)
+  const propietarios = sel.propietariosDeUnidad(bd, unidadId)
+  const administrador = sel.administradorDe(bd)
 
   async function emitir() {
     if (!unidad) return

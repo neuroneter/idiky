@@ -38,13 +38,8 @@ export function PazYSalvoAdminPage() {
 
   const quien = nombreCompleto(sel.persona(bd, sesion.personaId))
   const copropiedad = sel.copropiedad(bd, sesion.copropiedadId)
-  const administrador = sel.persona(bd, bd.perfilesDemo.find((p) => p.rol === 'admin')?.personaId)
-  const propietariosDe = (unidadId: string) =>
-    sel
-      .residenciasDeUnidad(bd, unidadId)
-      .filter((r) => r.rol === 'propietario')
-      .map((r) => sel.persona(bd, r.personaId))
-      .filter((p): p is NonNullable<typeof p> => !!p)
+  const administrador = sel.administradorDe(bd)
+  const propietariosDe = (unidadId: string) => sel.propietariosDeUnidad(bd, unidadId)
 
   const termino = busqueda.trim().toLowerCase()
   const unidades = sel

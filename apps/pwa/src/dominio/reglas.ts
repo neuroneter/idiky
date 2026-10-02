@@ -192,7 +192,11 @@ export function diasDeMora(cuotas: Cuota[], hoy: FechaISO = hoyISO()): number {
   return diasEntre(vencidas[0], hoy)
 }
 
-/** Una unidad esta en mora si tiene al menos una cuota vencida. */
+/**
+ * Una unidad esta en mora si tiene al menos una cuota vencida. RN-71: no
+ * distingue el origen —ordinaria, extraordinaria, multa en firme o uso de
+ * zona—; la vencida pesa igual.
+ */
 export function estaEnMora(cuotas: Cuota[], hoy: FechaISO = hoyISO()): boolean {
   return cuotas.some((cuota) => estadoRealCuota(cuota, hoy) === 'vencida')
 }
@@ -282,11 +286,6 @@ export function sePuedeAnular(pago: Pago): boolean {
   return pago.estado === 'aplicado'
 }
 
-/** RN-79 — Un abono informado por el propietario espera a que se aplique. */
-export function esperaAplicacion(pago: Pago): boolean {
-  return pago.estado === 'reportado'
-}
-
 /**
  * RN-18 — Porcentaje de recaudo sobre lo facturado en un periodo.
  * Cuenta lo efectivamente abonado, no solo las cuotas saldadas: un abono
@@ -308,6 +307,16 @@ export function vencimientoDelPeriodo(periodo: Periodo): FechaISO {
 // ---------------------------------------------------------------------------
 // Reservas
 // ---------------------------------------------------------------------------
+
+/** El momento en que empieza el turno de una reserva, en milisegundos. */
+export function inicioDeReserva(reserva: Pick<Reserva, 'fecha' | 'horaInicio'>): number {
+  return new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime()
+}
+
+/** El momento en que termina el turno de una reserva, en milisegundos. */
+export function finDeReserva(reserva: Pick<Reserva, 'fecha' | 'horaFin'>): number {
+  return new Date(`${reserva.fecha}T${reserva.horaFin}:00`).getTime()
+}
 
 export function reservaOcupaFranja(reserva: Reserva): boolean {
   return reserva.estado === 'solicitada' || reserva.estado === 'confirmada'
@@ -336,7 +345,7 @@ export function cumpleAnticipacion(
   horaInicio: string,
   ahora: Date = new Date(),
 ): boolean {
-  const inicio = new Date(`${fecha}T${horaInicio}:00`).getTime()
+  const inicio = inicioDeReserva({ fecha, horaInicio })
   const horasDeMargen = (inicio - ahora.getTime()) / 3_600_000
   return horasDeMargen >= zona.anticipacionMinimaHoras
 }
@@ -457,7 +466,7 @@ export const MAXIMO_HORAS_LIMITE_CANCELACION = 720
 
 /** Si el turno de la reserva ya empezó. */
 export function yaEmpezo(reserva: Reserva, ahora: Date = new Date()): boolean {
-  return new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime() <= ahora.getTime()
+  return inicioDeReserva(reserva) <= ahora.getTime()
 }
 
 export function horasLimiteCancelacion(reserva: Reserva, zona?: Pick<ZonaComun, 'horasLimiteCancelacion'>): number {
@@ -466,7 +475,7 @@ export function horasLimiteCancelacion(reserva: Reserva, zona?: Pick<ZonaComun, 
 
 /** El momento hasta el que se puede cancelar: el inicio del turno menos el límite. */
 export function limiteParaCancelar(reserva: Reserva, zona?: Pick<ZonaComun, 'horasLimiteCancelacion'>): Date {
-  const inicio = new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime()
+  const inicio = inicioDeReserva(reserva)
   return new Date(inicio - horasLimiteCancelacion(reserva, zona) * 3_600_000)
 }
 
@@ -1147,13 +1156,6 @@ export function actaDeAsamblea(actas: Acta[], asambleaId: string): Acta | undefi
   return actas.find((acta) => acta.asambleaId === asambleaId && !acta.aclaraActaId)
 }
 
-/** Las aclaratorias de un acta, de la mas vieja a la mas nueva. */
-export function aclaratoriasDe(actas: Acta[], actaId: string): Acta[] {
-  return actas
-    .filter((acta) => acta.aclaraActaId === actaId)
-    .sort((a, b) => a.creadaEn.localeCompare(b.creadaEn))
-}
-
 /** La mayoria que exige un punto. Sin decir nada, la general de la ley. */
 export function mayoriaDelPunto(punto: { mayoria?: MayoriaExigida }): MayoriaExigida {
   return punto.mayoria ?? 'simple'
@@ -1292,17 +1294,6 @@ export function poderDeUnidad(
   unidadId: string,
 ): Poder | undefined {
   return poderesDeAsamblea(poderes, asambleaId).find((poder) => poder.unidadId === unidadId)
-}
-
-/** Las unidades que una persona representa en esta asamblea (RN-29, RN-30). */
-export function unidadesRepresentadas(
-  poderes: Poder[],
-  asambleaId: string,
-  apoderadoId: string,
-): Poder[] {
-  return poderesDeAsamblea(poderes, asambleaId).filter(
-    (poder) => poder.apoderadoId === apoderadoId,
-  )
 }
 
 /**
@@ -1449,13 +1440,6 @@ export function diasDePlazo(sancion: Sancion, hoy: FechaISO = hoyISO()): number 
     return diasEntre(hoy, sancion.limiteImpugnacion)
   }
   return null
-}
-
-/** Lo que le toca a la administracion resolver ahora. */
-export function sancionesPorResolver(sanciones: Sancion[]): Sancion[] {
-  return sanciones.filter(
-    (sancion) => sancion.estado === 'en_estudio' || sancion.estado === 'impugnada',
-  )
 }
 
 // ---------------------------------------------------------------------------
@@ -1870,14 +1854,6 @@ export function rolDeCategoria(
 /** Un registro sigue vivo mientras espera algo de alguien. */
 export function registroEnCurso(registro: RegistroPersona): boolean {
   return registro.estado === 'esperando_soportes' || registro.estado === 'esperando_autorizacion'
-}
-
-/** Lo que le toca a **esta** persona, que es lo unico que hay que mostrarle. */
-export function registrosPorAutorizar(
-  registros: RegistroPersona[],
-  personaId: string,
-): RegistroPersona[] {
-  return registros.filter((registro) => puedeAutorizar(registro, personaId))
 }
 
 /**
@@ -2514,7 +2490,7 @@ export function multaAlCancelar(
   if (!zona?.multaNoCancelar || reserva.estado !== 'confirmada') return null
   const concepto = conceptosSancion.find((c) => c.id === zona.multaNoCancelar!.conceptoId)
   if (!concepto) return null
-  const inicio = new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime()
+  const inicio = inicioDeReserva(reserva)
   const horasRestantes = (inicio - ahora.getTime()) / 3_600_000
   const plazo = zona.multaNoCancelar.horasParaCancelar
   if (horasRestantes >= plazo) return null
@@ -2608,7 +2584,7 @@ export function textoHorarioSemanal(zona: Pick<ZonaComun, 'horaInicio' | 'horaFi
 export function puedeCancelarLaAdministracion(reserva: Reserva, ahora: Date = new Date()): boolean {
   // RN-128 — Hasta que empiece el turno; después se cierra (RN-119).
   if (reserva.estado !== 'confirmada' || reserva.cierre) return false
-  return ahora.getTime() < new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime()
+  return ahora.getTime() < inicioDeReserva(reserva)
 }
 
 /**
@@ -2770,7 +2746,7 @@ export const DIAS_PARA_PAGAR_USO = 10
 
 export function puedeCerrarReserva(reserva: Reserva, ahora: Date = new Date()): boolean {
   if (reserva.estado !== 'confirmada' || reserva.cierre) return false
-  return new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime() <= ahora.getTime()
+  return inicioDeReserva(reserva) <= ahora.getTime()
 }
 
 /** Por qué se cobra, en la línea del estado de cuenta (RN-47). */
@@ -2851,9 +2827,6 @@ export function hechosDeLaReserva(reserva: Reserva, zona: ZonaComun): string {
 // Solicitudes, avisos, condiciones e invitados — RN-122 a RN-126
 // ---------------------------------------------------------------------------
 
-function inicioDeReserva(reserva: Reserva): number {
-  return new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime()
-}
 
 /** `80000` → `$80.000`, dentro de un texto que se guarda o se manda. */
 function pesos(valor: number): string {
@@ -3237,5 +3210,5 @@ export function reservaMueveDinero(reserva: Reserva, zona: Pick<ZonaComun, 'mult
 /** RN-129 — Una reserva que no mueve plata y cuyo turno ya terminó se cierra sola. */
 export function debeCerrarseSola(reserva: Reserva, zona: Pick<ZonaComun, 'multaNoCancelar'> | undefined, ahora: Date = new Date()): boolean {
   if (reserva.estado !== 'confirmada' || reserva.cierre || reservaMueveDinero(reserva, zona)) return false
-  return new Date(`${reserva.fecha}T${reserva.horaFin}:00`).getTime() <= ahora.getTime()
+  return finDeReserva(reserva) <= ahora.getTime()
 }

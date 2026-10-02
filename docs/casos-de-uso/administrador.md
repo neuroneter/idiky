@@ -85,7 +85,7 @@ y vincular residente).
 3. Confirma; el sistema registra el `Pago` y actualiza la cartera.
 
 **Reglas de negocio**
-- RN-06 (imputación a la deuda más antigua), RN-07 (comprobante único).
+- RN-06 (imputación a la deuda más antigua), RN-77 (recibo de caja con consecutivo único; antes RN-07).
 
 **Estado en el demo:** ✅ — `src/features/admin/CarteraPage.tsx` (acción "Registrar pago").
 

@@ -31,6 +31,8 @@ import type {
 } from '../dominio/tipos'
 import { hoyISO, ordenAsamblea, proyectosOrdenados, residenciaVigente } from '../dominio/reglas'
 
+// RN-01 — Todo se lee filtrado por copropiedad: un selector nunca mezcla dos.
+
 export function copropiedad(bd: BaseDatos, copropiedadId: string) {
   return bd.copropiedades.find((c) => c.id === copropiedadId)
 }
@@ -207,11 +209,6 @@ export function visitantesDeUnidad(bd: BaseDatos, unidadId?: string): Visitante[
     .sort((a, b) => b.creadoEn.localeCompare(a.creadoEn))
 }
 
-export function pagoPorId(bd: BaseDatos, pagoId?: string): Pago | undefined {
-  if (!pagoId) return undefined
-  return bd.pagos.find((p) => p.id === pagoId)
-}
-
 // ---------------------------------------------------------------------------
 // Asambleas — CU-R-13, CU-R-20
 // ---------------------------------------------------------------------------
@@ -234,13 +231,6 @@ export function asambleasDe(bd: BaseDatos, copropiedadId: string): Asamblea[] {
 export function asamblea(bd: BaseDatos, asambleaId?: string): Asamblea | undefined {
   if (!asambleaId) return undefined
   return bd.asambleas.find((a) => a.id === asambleaId)
-}
-
-/** La que esta pasando o, si no hay ninguna, la siguiente convocada. */
-export function asambleaVigente(bd: BaseDatos, copropiedadId: string): Asamblea | undefined {
-  return asambleasDe(bd, copropiedadId).find(
-    (a) => a.estado === 'instalada' || a.estado === 'convocada',
-  )
 }
 
 export function votacionesDe(bd: BaseDatos, asambleaId: string): Votacion[] {
@@ -331,3 +321,20 @@ export function pagosDeCuota(bd: BaseDatos, cuotaId: string): Pago[] {
 function porFechaDescendente(a: Pago, b: Pago): number {
   return b.fecha.localeCompare(a.fecha)
 }
+
+/**
+ * Los propietarios vigentes de una unidad: a nombre de quienes se expiden el paz
+ * y salvo y el estado de cuenta. Pueden ser varios.
+ */
+export function propietariosDeUnidad(bd: BaseDatos, unidadId?: string): Persona[] {
+  return residenciasDeUnidad(bd, unidadId ?? '')
+    .filter((r) => r.rol === 'propietario')
+    .map((r) => persona(bd, r.personaId))
+    .filter((p): p is Persona => !!p)
+}
+
+/** Quien firma como administración. En el demo, la persona del perfil de administrador. */
+export function administradorDe(bd: BaseDatos): Persona | undefined {
+  return persona(bd, bd.perfilesDemo.find((perfil) => perfil.rol === 'admin')?.personaId)
+}
+
