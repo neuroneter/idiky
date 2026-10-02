@@ -58,7 +58,20 @@ Y si necesita que **pase** el tiempo dentro de la prueba: `await page.clock.fast
 **Las suites «autocierre» y «seis» de reservas** dependían de la hora del día. Al traerlas aquí
 se les pone su hora con `test.use({ ahora })` y dejan de depender de cuándo se corran.
 
-## Lo que falta
+## Qué hay
 
-Traer las ~25 suites de Mary (reservas, cartera, usuarios y la de humo de 36 pantallas), que
-hoy están fuera del repositorio, y adaptarlas a esta base (T-42).
+| Archivo | Qué cubre |
+|---|---|
+| `humo.spec.ts` | El reloj fijo y la entrada por los perfiles del demo |
+| `pantallas.spec.ts` | Las 36 pantallas de la propietaria, la administradora y el portero abren con contenido y sin errores |
+| `reservas.spec.ts` | Zonas comunes y reservas: configuración, cobros, depósito y multa, zonas compartidas, calendario, informe, vencimientos, avisos, límite para cancelar y autocierre (CU-A-10, CU-A-29, CU-A-30, RN-104 a RN-129) |
+| `cartera.spec.ts` | Estado de cuenta y paz y salvo (CU-R-18, CU-A-13, RN-127) |
+| `usuarios.spec.ts` | Crear, cambiar e inhabilitar personas: quién es y cómo se queda, la cadena de registro, el cambio de propietario, la familia, los menores, el visitante frecuente y la aprobación del propietario (CU-R-27, CU-A-26, CU-A-02, RN-57 a RN-68) |
+
+Las de reservas, cartera, usuarios y pantallas se escribieron como scripts sueltos en las sesiones
+de Mary y se trajeron aquí el 2026-10-02 (T-42): por eso llevan `// @ts-nocheck` y una
+función `check(condición, mensaje)` que es un `expect.soft`. **Las pruebas nuevas se escriben
+con `expect` directamente**, como `humo.spec.ts`.
+
+**Falta:** las de asambleas (las once suites de sesiones anteriores ya no existen); se escriben
+cuando se toque asambleas (CU-A-18, T-46).
