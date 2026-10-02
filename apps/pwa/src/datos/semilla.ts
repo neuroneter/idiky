@@ -68,7 +68,8 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      se queda (residente, no residente, temporal); el residente temporal deja
 //      de ser una categoría (Mary, 2026-10-02). Las unidades 301 y 502 tienen
 //      propietario no residente.
-export const VERSION_ESQUEMA = 32
+// 33 — Gustavo, dueño no residente de la 301, en la lista de perfiles del demo.
+export const VERSION_ESQUEMA = 33
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1526,6 +1527,17 @@ export function crearSemilla(): BaseDatos {
         descripcion: 'Arrendataria · Torre 1 · 301',
         rol: 'residente',
         personaId: 'per-5',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre1-301',
+      },
+      {
+        id: 'perfil-propietario-no-residente',
+        etiqueta: 'Gustavo Adolfo Mejia',
+        // El dueño de la 301, donde vive Sandra: propietario no residente
+        // (RN-68). Es quien aprueba las estadías largas que ella registra (RN-60).
+        descripcion: 'Propietario no residente · Torre 1 · 301',
+        rol: 'residente',
+        personaId: 'per-13',
         copropiedadId: COPROPIEDAD_ID,
         unidadId: 'uni-torre1-301',
       },

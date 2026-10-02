@@ -138,7 +138,7 @@ fecha, en `docs/05-modelo-de-datos.md`).
 
 **Semilla v32:** las unidades 301 y 502, de las arrendatarias Sandra y Diana, ahora tienen
 propietario **no residente** (Gustavo Mejía y Beatriz Franco). Antes no tenían dueño, y no había
-a quién pedirle la aprobación. Al abrir el demo, los datos se reinician.
+a quién pedirle la aprobación. Al abrir el demo, los datos se reinician. **Gustavo está en la lista de perfiles del demo** (semilla v33), para entrar como él y aprobar la estadía.
 
 **Pruebas:** nuevas `prueba-condicion` (todas las combinaciones, la aprobación y las fotos
 opcionales) y `prueba-condicion-ui` (10 casos en pantalla); las 19 anteriores siguen en verde.
