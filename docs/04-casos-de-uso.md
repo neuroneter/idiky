@@ -34,7 +34,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-10 | Autorizar un visitante y generar su código | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-10) |
 | CU-R-11 | Ver correspondencia pendiente | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-11) |
 | CU-R-12 | **Descargar el paz y salvo** | 1 | ✅ Demo (se emite e imprime a PDF desde el teléfono) | [ver](./casos-de-uso/residente.md#cu-r-12) |
-| CU-R-13 | **Votar en una asamblea** | 1 | ✅ Hecho (mayoría y quórum citando la ley; RN-74, RN-94) | [ver](./casos-de-uso/residente.md#cu-r-13) |
+| CU-R-13 | **Votar en una asamblea** | 1 | ✅ Demo (mayoría y quórum citando la ley; RN-74, RN-94; vota también el apoderado por la unidad que representa) | [ver](./casos-de-uso/residente.md#cu-r-13) |
 | CU-R-14 | Reportar una novedad con foto (daño, ruido) | 3 | ⬜ Pendiente | — |
 | CU-R-15 | Registrar mis vehículos y mascotas | 3 | ⬜ Pendiente | — |
 | CU-R-16 | Recibir notificaciones push | 3 | ⬜ Pendiente | — |
@@ -43,7 +43,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-19 | **Consultar y descargar mis comprobantes de pago** | 1 | 🟡 Parcial | [ver](./casos-de-uso/residente.md#cu-r-19) |
 | CU-R-20 | **Recibir la citación a asamblea y confirmar asistencia** | 1 | 🟡 Parcial (muestra la citación y el orden del día; no confirma asistencia) | [ver](./casos-de-uso/residente.md#cu-r-20) |
 | CU-R-21 | **Entrar a la asamblea y marcar mi asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-21) |
-| CU-R-22 | **Otorgar poder a otro copropietario** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/residente.md#cu-r-22) |
+| CU-R-22 | ~~Otorgar poder a otro copropietario~~ | — | ⛔ Retirado (2026-10-02, puesta al día del catálogo): lo cubren CU-R-23 —dar poder desde la app—, CU-R-31 —enviar el papel en foto— y CU-A-19 —registrarlo en papel—. Lo que dejaba abierto (tope y firma) son preguntas jurídicas de §3 bis | [ver](./casos-de-uso/residente.md#cu-r-22) |
 | CU-R-23 | **Dar poder para que otro vote por mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-23) |
 | CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-24) |
 | CU-R-25 | ~~Activar mi cuenta o recuperar mi contraseña~~ | 1 | ⛔ Retirado (2026-10-01: sin clave no hay nada que activar ni recuperar; ver CU-R-01) | [ver](./casos-de-uso/residente.md#cu-r-25) |
@@ -123,9 +123,9 @@ con datos reales.
 | CU-S-04 | Vencer códigos de visitante | 1 | ✅ Demo (por fecha de vigencia) |
 | CU-S-05 | Alertar PQRS próximas a vencer SLA | 2 | 🟡 Parcial (se muestra el indicador de vencida) |
 | CU-S-06 | Enviar recordatorios de pago | 3 | ⬜ Pendiente |
-| CU-S-07 | **Calcular el quórum en vivo por coeficientes (presentes + representados)** | 1 | ⬜ Pendiente |
-| CU-S-08 | **Consolidar el resultado de una votación ponderado por coeficiente** | 1 | ⬜ Pendiente |
-| CU-S-09 | **Vencer los poderes al cerrarse la asamblea** | 1 | ⬜ Pendiente |
+| CU-S-07 | **Calcular el quórum en vivo por coeficientes (presentes + representados)** | 1 | ✅ Demo (en la asamblea instalada, la consola muestra unidades, coeficiente reunido —presentes y representadas por poder— y cuánto falta, según la convocatoria: `hayQuorum`, `faltaParaQuorum`, RN-28, RN-92) |
+| CU-S-08 | **Consolidar el resultado de una votación ponderado por coeficiente** | 1 | 🟡 Parcial (se calcula por coeficiente con la mayoría y la base que exige la ley —`contarVotacion`, `resultadoVotacion`, RN-74— y se ve en la app del residente y en el acta; falta verlo en la consola mientras se vota, que llega con CU-A-18) |
+| CU-S-09 | **Vencer los poderes al cerrarse la asamblea** | 1 | ✅ Demo (por construcción, RN-31: cada poder está atado a una sola asamblea y no se registra ni se otorga en una cerrada; el usuario temporal del apoderado no sirve para ninguna otra) |
 
 ---
 

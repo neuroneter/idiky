@@ -618,7 +618,13 @@ curso es **mixta**, así que se ven las dos formas de asistir.
 ---
 
 ### CU-R-22
-## CU-R-22 — Otorgar poder a otro copropietario
+## CU-R-22 — ~~Otorgar poder a otro copropietario~~ (retirado)
+
+> ⛔ **Retirado el 2026-10-02** al poner al día el catálogo. Era el diseño original del poder
+> desde la app y quedó cubierto por **CU-R-23** (dar poder desde la app, construido), **CU-R-31**
+> (enviar el papel en foto) y **CU-A-19** (registrarlo en papel). Lo que este texto dejaba con
+> **(?)** —el tope de poderes y si hace falta firma— sigue abierto como pregunta jurídica en
+> `docs/12-levantamiento-pendiente.md` §3 bis. Se conserva abajo como estaba, por trazabilidad.
 
 - **Actor principal:** Copropietario que no podrá asistir
 - **Precondiciones:** Hay una asamblea convocada y todavía no instalada.
@@ -650,7 +656,14 @@ curso es **mixta**, así que se ven las dos formas de asistir.
 ---
 
 ### CU-R-23
-## CU-R-23 — Recibir y ejercer poderes de otros copropietarios
+## ~~CU-R-23 — Recibir y ejercer poderes de otros copropietarios~~ (versión anterior)
+
+> 🔄 **Esta es la primera versión de CU-R-23, reemplazada.** El número quedó para **«Dar poder
+> para que otro vote por mi unidad»** (más abajo en este documento), que es lo que se construyó.
+> De esta versión, el apoderado **sí** vota por cada unidad que representa (`emitirVoto`, RN-29) y
+> se le muestra el acumulado (CU-A-19). Lo que **no** existe es el paso de **aceptar o rechazar**
+> el poder recibido: el diseño construido no lo pide. Si hace falta, es una decisión de Mary.
+> Se conserva abajo como estaba, por trazabilidad.
 
 - **Actor principal:** Copropietario apoderado
 - **Precondiciones:** Otro copropietario le otorgó poder (CU-R-22) y la administración lo

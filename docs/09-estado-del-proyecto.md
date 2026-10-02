@@ -21,7 +21,7 @@ nueva o una sesión de IA distinta.
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 75 documentados: 46 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 9 🟡 a medias, 17 ⬜ pendientes, 2 ⛔ retirados |
+| **Casos de uso** | 75 documentados: 48 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 13 ⬜ pendientes, 3 ⛔ retirados |
 | **Reglas de negocio** | 129 del demo (RN-01…RN-129; RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-129, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
@@ -110,6 +110,38 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-02 · Mary + IA (Claude) · Puesta al día del catálogo de asambleas
+
+Mary: *«sí, empieza con el catálogo»*. Antes de construir las votaciones desde la consola
+(CU-A-18) se revisó cada caso de uso de asambleas contra el código. **No se escribió código ni se
+gastaron números.**
+
+**Lo que estaba desactualizado:**
+
+| CU | Decía | Queda | Por qué |
+|---|---|---|---|
+| CU-S-07 Quórum en vivo | ⬜ | ✅ | La consola ya muestra, en la asamblea instalada, unidades, coeficiente reunido (presentes y por poder) y cuánto falta (`hayQuorum`, `faltaParaQuorum`) |
+| CU-S-08 Resultado ponderado | ⬜ | 🟡 | Se calcula con la mayoría y la base de la ley (RN-74) y se ve en la app del residente y en el acta; falta en la consola mientras se vota, que llega con CU-A-18 |
+| CU-S-09 Vencer los poderes | ⬜ | ✅ | Por construcción (RN-31): cada poder está atado a una sola asamblea, y en una cerrada no se registra ni se otorga |
+| CU-R-22 Otorgar poder | ⬜ | ⛔ retirado | Lo cubren CU-R-23 (desde la app), CU-R-31 (foto) y CU-A-19 (papel); lo abierto es jurídico (§3 bis) |
+| CU-R-13 Votar | «✅ Hecho» | ✅ Demo | Se igualó la etiqueta; vota también el apoderado |
+
+**Un número repetido.** `casos-de-uso/residente.md` tenía **dos secciones CU-R-23**: la primera
+versión («recibir y ejercer poderes») y la construida («dar poder para que otro vote por mi
+unidad»). La primera quedó marcada como versión anterior, con lo que sí existe de ella (el
+apoderado vota por cada unidad) y lo que **no**: **aceptar o rechazar el poder recibido**. Si
+hace falta, es una decisión de Mary.
+
+**Lo que sigue pendiente de verdad, confirmado en el código:**
+- **CU-A-18** (⬜): no existe forma de crear, abrir ni cerrar una votación desde la consola. Las
+  del demo vienen de la semilla. **Es lo siguiente**, con el rango nuevo de reglas.
+- **CU-R-20** (🟡): no se confirma la asistencia antes de la asamblea.
+- **CU-A-12** (🟡): falta el documento de citación.
+- **CU-A-21** (⬜): no se administran los coeficientes desde la consola.
+- **CU-A-19** (🟡): el tope de poderes espera la respuesta jurídica (RN-30, §3 bis).
+
+---
 
 ### 2026-10-02 · Mary + IA (Claude) · Revisión de reservas: hasta cuándo se cancela y cierre automático (RN-128, RN-129)
 
