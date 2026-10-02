@@ -9,50 +9,67 @@
 ## CU-R-01 — Ingresar a la app
 
 - **Actor principal:** Residente
-- **Precondiciones:** La administración lo vinculó a una unidad (CU-A-02) y él activó su
-  cuenta (CU-R-25).
+- **Precondiciones:** Alguien lo registró en una unidad (la administración, CU-A-26, o el
+  propietario, CU-R-27) y el registro quedó autorizado. Tiene celular o correo registrados.
 - **Disparador:** Abre la aplicación.
 - **Resultado esperado:** Queda dentro con una **unidad activa**; todo lo que vea a partir de
   ese momento pertenece a esa unidad.
 
-**Cómo se entra** (decisión del equipo, 2026-08-28)
+**Cómo se entra** (Mary, 2026-10-01: *«necesitamos que el ingreso sea con su correo
+autenticado o con SMS, como funciona ahora la mayoría de ingresos»*)
 
 | | |
 |---|---|
-| **Se identifica con** | Su **documento de identidad**. Es lo que la administración ya tiene de cada propietario, y no cambia cuando cambia el correo o el celular |
-| **Se confirma con** | **Una clave de 4 números** (RN-55) y, en un dispositivo nuevo, además un **código de un solo uso** (RN-54). Desde la app se paga plata |
-| **O con huella** | Donde el teléfono tenga lector, la huella reemplaza teclear la clave (RN-56) |
-| **La cuenta nace** | Cuando la administración vincula la unidad. La persona **la activa**, no la crea (RN-53) |
+| **Se identifica con** | Su **documento, su celular o su correo**, en un solo campo: no tiene por qué saber con cuál de los tres lo registraron |
+| **Se confirma con** | Un **código de un solo uso** de 6 números, enviado por **SMS** al celular registrado o por **correo** al correo registrado (RN-54). Vale 10 minutos y admite 5 intentos |
+| **O con huella** | Donde el teléfono tenga lector, la huella reemplaza pedir el código (RN-56) |
+| **La cuenta nace** | Cuando alguien lo registra. **No se activa aparte**: la primera vez que entra con el código, ya está (RN-53) |
+| **Sin clave** | No hay contraseña ni clave de números: no hay nada que recordar ni que recuperar |
 
 **Flujo principal**
 1. El sistema muestra la pantalla de acceso. Si **alguien ya entró en este teléfono**, muestra
-   su nombre y pide **solo la clave** (Mary, 2026-08-28): volver a pedirle diez dígitos de
-   cédula a quien ya entró aquí es trabajo por nada. Si no, pide documento y clave.
-2. El residente se identifica —o toca **Entrar con huella**, si la registró (RN-56)—.
-3. Si el dispositivo no es conocido, el sistema envía un **código de un solo uso** y lo pide.
-4. El sistema resuelve sus residencias.
-5. Si tiene una sola unidad, la selecciona; si tiene varias, le pide elegir.
-6. El sistema abre el inicio (CU-R-02) con la unidad activa.
+   su nombre y ofrece **Entrar con huella**, si la registró, o **Enviarme un código**. Si no,
+   pide el documento, celular o correo.
+2. El residente se identifica. El sistema le dice «Hola, Nombre» y le ofrece **por dónde
+   recibir el código**: solo los canales que tiene registrados, enmascarados (celular ···2233,
+   correo m···a@gmail.com).
+3. Elige el canal. El sistema envía el código y lo pide.
+4. Escribe el código. Si el teléfono tiene lector, puede dejar marcada la huella para la
+   próxima vez.
+5. El sistema resuelve sus residencias; con una sola unidad la selecciona, con varias le pide
+   elegir, y abre el inicio (CU-R-02).
 
 **Flujos alternativos**
-- A1. El documento no está en la copropiedad → el sistema **no dice «documento incorrecto»**:
-  dice que la administración es quien vincula la unidad y que le escriba (RN-53).
-- A2. La cuenta no está activada → lo lleva a activarla (CU-R-25).
+- A1. El dato no está en la copropiedad → el sistema **no dice «dato incorrecto»**: dice que
+  la administración o el propietario de su unidad son quienes lo registran (RN-53).
+- A2. Está registrado pero **sin celular ni correo** → no hay a dónde enviarle el código: se le
+  dice que pida a quien lo registró que los agregue.
 - A3. Sin unidades vinculadas → «tu administrador aún no ha vinculado tu unidad».
-- A4. El residente cambia de unidad activa desde el selector del encabezado.
-- A5. Olvidó la clave → CU-R-25, mismo trámite.
-- A6. **Se le acabaron los intentos** → el sistema bloquea la clave y lo manda al código
-  (RN-55). Es lo que permite que la clave sea corta.
-- A7. **No es él** quien el teléfono recuerda → toca «No soy yo» y vuelve a documento y clave.
+- A4. El código no coincide → cuenta los intentos; al quinto, o si pasaron los 10 minutos, lo
+  devuelve a elegir canal y pedir otro.
+- A5. **No es él** quien el teléfono recuerda → toca «No soy yo» y vuelve al campo.
+- A6. Cambia de unidad activa desde el selector del encabezado.
+
+**Decisiones de interfaz**
+- **Un campo, no tres.** La persona escribe lo que se acuerde; el sistema reconoce si es correo
+  (tiene arroba) o números (documento o celular).
+- **Los canales se muestran enmascarados.** Confirman a la persona que es su dato sin
+  exponerlo a quien mire la pantalla.
+- **La huella se ofrece ya adentro**, con la identidad recién confirmada por el código, y como
+  atajo: si el aparato no la registra, se entra igual.
 
 **Reglas de negocio**
 - RN-01 (contexto de copropiedad), RN-02 (rol efectivo por unidad).
-- RN-53: la cuenta existe porque la administración vinculó a la persona.
-- RN-54: dispositivo nuevo, código de un solo uso además de la clave.
-- RN-55: la clave es de 4 números y los intentos se acaban.
-- RN-56: la huella reemplaza teclear la clave en el dispositivo donde se registró.
+- RN-53: la cuenta existe porque alguien registró a la persona; no se activa aparte.
+- RN-54: código de un solo uso por SMS o correo, sin clave.
+- RN-56: la huella reemplaza pedir el código en el dispositivo donde se registró.
 
-**Estado en el demo:** 🟡 — `src/features/auth/AccesoPage.tsx` muestra el flujo completo, pero
+> **Lo que el demo no hace** (ADR-0004): enviar el código de verdad. Se muestra en pantalla. En
+> la versión real lo envía el servidor por el proveedor que se decida en T-18, y Google y
+> Microsoft con el correo llegan con el backend (ADR-0008), como ya los tiene BLOKY (CU-B-01).
+
+**Estado en el demo:** 🟡 — `src/features/auth/AccesoPage.tsx`. El flujo completo, sin
+autenticar.
 **no autentica**: no se guarda ninguna clave, cualquiera de 4 números sirve, y el código se
 muestra en pantalla (ver [ADR-0004](../adr/0004-autenticacion-demo.md)). **La huella sí es
 real** —la lee el aparato con WebAuthn—; lo que falta es el servidor que la comprobaría. El
@@ -61,35 +78,12 @@ atajo de perfiles sigue disponible, plegado debajo.
 ---
 
 ### CU-R-25
-## CU-R-25 — Activar mi cuenta o recuperar mi contraseña
+## CU-R-25 — ~~Activar mi cuenta o recuperar mi contraseña~~ (retirado)
 
-- **Actor principal:** Residente
-- **Precondiciones:** La administración lo vinculó a una unidad (CU-A-02).
-- **Disparador:** Entra por primera vez, o no recuerda su contraseña.
-- **Resultado esperado:** Queda con contraseña propia y dentro de la app.
-
-**Flujo principal** — tres pasos, los mismos para activar y para recuperar
-1. Escribe su **documento**. El sistema comprueba que esté vinculado (RN-53).
-2. El sistema le envía un **código de un solo uso** y él lo confirma.
-3. Crea su **clave de 4 números** (dos veces) y entra. El dispositivo queda como conocido
-   (RN-54). Si el teléfono tiene lector, ahí mismo se le ofrece **dejar la huella** (RN-56):
-   es el único momento en que registrarla no exige volver a pedirle nada.
-
-**Flujos alternativos**
-- A1. Documento no vinculado → «la administración es quien te registra».
-- A2. Activar una cuenta ya activada → lo manda a entrar o a recuperar.
-- A3. Recuperar una cuenta sin activar → lo manda a activarla.
-
-**Reglas de negocio**
-- RN-53: no se crea la cuenta aquí, se activa.
-- RN-54: el código prueba la identidad en este dispositivo.
-
-> **El código de registro también activa la cuenta** (RN-97): quien fue registrado con la marca
-> «No obligatorio» no adjuntó nada y no tiene otro código; el que Idiky le asignó al crearlo es su
-> clave para entrar. Vale solo con el registro ya autorizado.
-
-**Estado en el demo:** 🟡 — `src/features/auth/ActivarPage.tsx`. El trámite completo, sin
-guardar contraseñas y con el código a la vista.
+> ⛔ **Retirado el 2026-10-01.** Desde que se entra con un código por SMS o correo (CU-R-01,
+> RN-54) no hay clave que crear ni que recuperar: la primera vez que la persona entra con el
+> código, la cuenta queda activa. Las rutas `/acceso/activar` y `/acceso/recuperar` redirigen
+> al ingreso. Lo que este caso hacía de verdad —vincular la huella— quedó dentro de CU-R-01.
 
 ---
 
@@ -164,7 +158,7 @@ guardar contraseñas y con el código a la vista.
 
 **Reglas de negocio**
 - RN-06: un pago siempre se imputa primero a la deuda más antigua.
-- RN-07: todo pago genera un comprobante con consecutivo único.
+- RN-77: todo pago aplicado genera un recibo de caja con consecutivo único (antes RN-07, retirada por repetida).
 
 **Estado en el demo:** ✅ **simulado** — no hay pasarela real. `src/features/residente/PagoPage.tsx`.
 La integración con pasarela está en el roadmap (fase 4).
@@ -181,15 +175,44 @@ La integración con pasarela está en el roadmap (fase 4).
   zona no requiere aprobación).
 
 **Flujo principal**
-1. El sistema lista las zonas comunes con su horario, aforo y si requieren aprobación.
-2. El residente elige zona, fecha y franja horaria.
-3. El sistema valida disponibilidad y las reglas de la zona.
+1. El sistema lista las zonas comunes con su horario, aforo, si requieren aprobación y **su
+   primera foto** (RN-104, Mary 2026-10-01).
+2. El residente elige la zona. Antes de la fecha ve **las fotos de la zona**, ampliables al
+   tocarlas, y **qué incluye y cómo se usa** (las especificaciones que escribió la
+   administración): se reserva viendo cómo es y sabiendo qué hay. Luego elige fecha y franja
+   horaria.
+3. El sistema valida disponibilidad y las reglas de la zona: primero la pantalla, para avisar
+   a tiempo, y otra vez el repositorio al guardar, con la misma función (`validarReserva`).
 4. El residente confirma; el sistema crea la reserva y notifica a la administración.
 
 **Flujos alternativos**
 - A1. Franja ocupada → el sistema la muestra deshabilitada y sugiere otras.
 - A2. Unidad en mora → el sistema **bloquea** la reserva y explica el motivo (RN-08).
 - A3. Excede el cupo mensual de la unidad → se rechaza con mensaje.
+- A4. La zona está cerrada por mantenimiento → la lista lo avisa con las fechas, y en esas
+  fechas las franjas no se pueden escoger (RN-108). Una zona desactivada no aparece (RN-107).
+- A5. La administración canceló su reserva al cerrar o desactivar la zona → le llega un
+  mensaje con el motivo y en «Mis reservas» la ve cancelada, con ese motivo (RN-107, RN-108).
+- A6. La zona tiene costo, depósito o multa por no cancelar → la lista lo resume y, antes de
+  escoger la fecha, ve el detalle con el documento que lo autoriza y el plazo para cancelar
+  sin multa (RN-109, RN-110).
+- A7. Dice cuántas personas van, contándose (RN-113). En una zona **compartida** cada franja
+  muestra «quedan N» y se tacha la que no alcanza para tantas personas; en una **exclusiva** no
+  pasa del aforo (RN-111).
+- A8. La zona no abre ese día → «no abre los domingos», sin franjas (RN-114).
+- A9. Al cancelar dentro del plazo con multa, la app lo advierte antes, con el valor y el
+  respaldo: conserva la reserva o cancela de todos modos, y queda marcada fuera de plazo
+  (RN-112).
+- A10. En «Mis reservas» ve si debe entregar el depósito o si la administración ya lo recibió
+  y, después del turno, cómo se cerró la reserva: el cobro por uso que se cargó a su estado de
+  cuenta, el depósito que le devuelven o lo que se retuvo con su motivo, y el proceso por la
+  multa si se abrió, para presentar descargos (RN-118 a RN-121).
+- A11. Si la zona cobra, pide depósito o tiene multa, antes de confirmar marca que acepta las
+  condiciones; queda la constancia con el texto y la hora (RN-124).
+- A12. Si van más personas, escribe los nombres de sus invitados para portería, y puede
+  cambiarlos hasta que empiece el turno (RN-126).
+- A13. Le llegan mensajes: la respuesta a su solicitud (RN-123), el vencimiento si nadie la
+  contestó (RN-122) y el recordatorio el día antes (RN-125).
 
 **Reglas de negocio**
 - RN-08: una unidad en mora no puede reservar zonas comunes.
@@ -205,16 +228,30 @@ están implementadas.
 ## CU-R-06 — Cancelar una reserva
 
 - **Actor principal:** Residente
-- **Precondiciones:** Existe una reserva propia en estado `solicitada` o `confirmada` y su
-  fecha es futura.
+- **Precondiciones:** Existe una reserva propia en estado `solicitada` o `confirmada`, sin
+  cerrar, y **no ha pasado su límite para cancelar** (RN-128).
 - **Disparador:** Toca "Cancelar" sobre la reserva.
 - **Resultado esperado:** La reserva pasa a `cancelada` y la franja se libera.
 
+**Hasta cuándo (RN-128, Mary 2026-10-02).** Cada zona dice hasta cuántas horas antes del turno
+se puede cancelar; lo define el administrador y en 0 vale hasta que empiece el turno. El
+residente lo ve en la información de la zona al reservar y, en cada reserva suya, con la fecha y
+la hora exactas: «Puedes cancelar hasta el 5 de octubre de 2026 a las 05:00». El límite se copia
+a la reserva al crearla, así que si la zona cambia después, la reserva conserva el suyo.
+
 **Flujos alternativos**
-- A1. La reserva ya ocurrió → la acción no se ofrece.
+- A1. Pasó el límite, o el turno ya empezó → no se ofrece cancelar y la reserva dice «Ya no se
+  puede cancelar», con el límite que tenía. Si no va, la administración la cierra como «no se
+  presentó» (RN-121).
+- A2. La reserva ya está cerrada, rechazada, vencida o cancelada → no se cancela. El repositorio
+  lo revisa también, no solo el botón.
+- A3. Cancela dentro del plazo con multa → primero se le advierte (RN-112).
 
 **Reglas de negocio**
-- RN-11: cancelar con menos de 24 h de anticipación puede acarrear sanción *(fase 2)*.
+- RN-128 (hasta cuándo se cancela), RN-112 y RN-110 (la multa por cancelar tarde, que es otro
+  plazo).
+- ~~RN-11: cancelar con menos de 24 h de anticipación puede acarrear sanción (fase 2)~~ → lo
+  resolvieron RN-110, RN-112 y RN-128: el plazo y la multa los parametriza cada zona.
 
 **Estado en el demo:** ✅ — misma pantalla que CU-R-05.
 
@@ -313,17 +350,31 @@ este caso de uso figuraba terminado con la mitad en el aire.
 ---
 
 ### CU-R-11
-## CU-R-11 — Ver correspondencia pendiente
+## CU-R-11 — Ver correspondencia pendiente y confirmar que la recibí
 
-- **Actor principal:** Residente
-- **Resultado esperado:** Sabe qué paquetes o cartas tiene en portería.
+- **Actor principal:** Residente (propietario o arrendatario)
+- **Resultado esperado:** Sabe qué paquetes o cartas tiene en portería, y deja constancia de
+  que recibió los que ya tiene.
 
 **Flujo principal**
 1. El sistema lista la correspondencia de la unidad con tipo, remitente, fecha de recepción
    y estado (`en_porteria` | `entregada`).
-2. Al entregarse, portería registra quién recibió y cuándo (CU-A-09).
+2. Al entregarse, portería registra quién recibió y cuándo (CU-P-01). En la app aparece
+   «Entregado a X, según portería».
+3. El residente toca **Recibido** (Mary, 2026-10-01). Queda «Confirmaste que lo recibiste el…»
+   y portería ve «Confirmado por el residente» (RN-103).
 
-**Estado en el demo:** ✅ — `src/features/residente/CorrespondenciaPage.tsx` (solo lectura).
+**Flujos alternativos**
+- A1. Portería no lo marcó entregado pero el residente ya lo tiene → toca **Recibido** igual: la
+  confirmación vale como entrega, con su nombre.
+- A2. Ya confirmó → el botón desaparece; se confirma una sola vez.
+- A3. Quien confirma es otro residente de la misma unidad → puede: el paquete es de la unidad.
+
+**Reglas de negocio**
+- RN-103 (la entrega la cierra quien recibe), RN-52 (cadena de custodia), RN-25 (la
+  correspondencia entregada no se edita: esto no la edita, la cierra).
+
+**Estado en el demo:** ✅ — `src/features/residente/CorrespondenciaPage.tsx`.
 
 ---
 
@@ -442,8 +493,23 @@ como causal** (A4), que es de §3 bis.
 **Reglas de negocio**
 - RN-03 (composición del saldo), RN-06 (orden de imputación), RN-36 (consecutivo).
 
-**Estado en el demo:** ⬜ — el estado de cuenta se ve en pantalla (`CuentaPage.tsx`) pero no
-se descarga. Requiere ADR-0006.
+**Cómo quedó (2026-10-01).** Desde «Estado de cuenta», el botón **«Descargar estado de cuenta»**
+lleva a la pantalla nueva:
+1. Escoge desde qué mes y hasta qué mes. Por defecto, el año en curso hasta el último mes
+   facturado, para que diga lo mismo que el «valor adeudado».
+2. Antes de emitir ve el resumen: saldo anterior, cobros, pagos aplicados y saldo final.
+3. «Emitir estado de cuenta» lo registra con su número (`EC-AAAA-NNNN`) y su código de
+   verificación, y muestra la hoja.
+4. «Imprimir o guardar en PDF» abre la impresión, donde el teléfono ofrece guardarlo como PDF.
+
+Los emitidos antes se pueden volver a ver e imprimir, y dicen lo que dijeron (RN-127). Sin
+cobros, pagos ni saldo en el rango, no deja emitir y lo dice (A1). Como pide ADR-0006 en su
+revisión, se imprime desde la app, sin servidor ni librerías.
+
+**Reglas:** RN-03, RN-36, RN-76, RN-78, RN-79, RN-127.
+
+**Estado en el demo:** ✅ — `src/features/residente/EstadoCuentaPage.tsx` y
+`src/componentes/HojaEstadoCuenta.tsx`.
 
 ---
 
@@ -466,7 +532,7 @@ se descarga. Requiere ADR-0006.
   con quién lo registró.
 
 **Reglas de negocio**
-- RN-07: todo pago tiene comprobante con consecutivo único.
+- RN-77: todo pago aplicado tiene recibo de caja con consecutivo único (antes RN-07, retirada por repetida).
 
 **Estado en el demo:** 🟡 — el comprobante se muestra **una sola vez**, al terminar el pago
 (`PagoPage.tsx`); después no hay forma de volver a verlo ni de descargarlo.
@@ -492,6 +558,10 @@ se descarga. Requiere ADR-0006.
 **Flujos alternativos**
 - A1. Segunda convocatoria por falta de quórum → se emite una citación nueva **(?)**.
 - A2. Se modifica el orden del día → se reemite la citación y se avisa el cambio.
+
+**Si la asamblea va por Vimeo** (RN-98): el botón dice «Ver la transmisión en Vimeo» en vez de
+«Entrar a la reunión», y la nota explica que se interviene por el chat de la transmisión y que
+las votaciones siguen siendo aquí.
 
 **Reglas de negocio**
 - RN-33: la citación debe emitirse con la antelación mínima que exija el reglamento **(?)**.
@@ -548,7 +618,13 @@ curso es **mixta**, así que se ven las dos formas de asistir.
 ---
 
 ### CU-R-22
-## CU-R-22 — Otorgar poder a otro copropietario
+## CU-R-22 — ~~Otorgar poder a otro copropietario~~ (retirado)
+
+> ⛔ **Retirado el 2026-10-02** al poner al día el catálogo. Era el diseño original del poder
+> desde la app y quedó cubierto por **CU-R-23** (dar poder desde la app, construido), **CU-R-31**
+> (enviar el papel en foto) y **CU-A-19** (registrarlo en papel). Lo que este texto dejaba con
+> **(?)** —el tope de poderes y si hace falta firma— sigue abierto como pregunta jurídica en
+> `docs/12-levantamiento-pendiente.md` §3 bis. Se conserva abajo como estaba, por trazabilidad.
 
 - **Actor principal:** Copropietario que no podrá asistir
 - **Precondiciones:** Hay una asamblea convocada y todavía no instalada.
@@ -580,7 +656,22 @@ curso es **mixta**, así que se ven las dos formas de asistir.
 ---
 
 ### CU-R-23
-## CU-R-23 — Recibir y ejercer poderes de otros copropietarios
+## ~~CU-R-23 — Recibir y ejercer poderes de otros copropietarios~~ (versión anterior)
+
+> 🔄 **Esta es la primera versión de CU-R-23, reemplazada.** El número quedó para **«Dar poder
+> para que otro vote por mi unidad»** (más abajo en este documento), que es lo que se construyó.
+> De esta versión, el apoderado **sí** vota por cada unidad que representa (`emitirVoto`, RN-29) y
+> se le muestra el acumulado (CU-A-19). Lo que **no** existe es el paso de **aceptar o rechazar**
+> el poder recibido: el diseño construido no lo pide.
+>
+> **Decisión de Mary (2026-10-02), por construir (T-46):** *«si es usuario de Idiky lo debería
+> aprobar y la administración debe darlo como recibido»*. El poder dado desde la app valdrá cuando:
+> (1) si el apoderado **usa Idiky**, **lo apruebe** en su app; y (2) **la administración lo dé por
+> recibido**. Si el apoderado **no usa Idiky**, no tiene cómo aprobarlo antes: le llega el aviso a
+> su celular y basta con que la administración lo reciba. A los dos les llega un aviso. Mientras
+> falte un paso, la unidad no está representada y vota su propietario, como el poder en foto
+> (RN-96).
+> Se conserva abajo como estaba, por trazabilidad.
 
 - **Actor principal:** Copropietario apoderado
 - **Precondiciones:** Otro copropietario le otorgó poder (CU-R-22) y la administración lo
@@ -744,13 +835,61 @@ categoría, y ahí sí duerme, usa las zonas comunes y la portería lo ve a diar
 **El visitante sigue dejando registro.** Aunque su trámite sea de un toque, queda escrito quién
 lo dejó entrar y cuándo: aliviar el requisito no es renunciar al rastro.
 
-**Las categorías** (RN-62)
+**Quién es y cómo se queda** (RN-62, RN-68 — revisión 2026-10-02)
+
+Mary: *«cuando se crea a un propietario, arrendatario y/o visitante se debe seleccionar si es
+residente, no residente o residente temporal»*, y *«con este cambio el usuario denominado
+residente temporal ya no va»*. Son dos preguntas: **quién es** y **cómo se queda**.
+
+| | Residente | No residente | Residente temporal |
+|---|---|---|---|
+| **Propietario** | Vive en su apartamento · fotos · sin fecha de fin | Lo tiene arrendado o vacío · fotos · no aparece en portería | **No aplica** (*«no existe un propietario temporal»*) |
+| **Arrendatario** | Vive en el apartamento · fotos · sin fecha de fin | **No aplica** (*«el arrendatario no puede tener la categoría de no residente»*) | Arriendo corto · fotos · fecha de salida |
+| **Visitante** | **No aplica**: quien vive ahí no es visita | **De un día** · fotos **opcionales** · sale con su código | Huésped de Airbnb, un familiar · fotos · fecha de salida · queda como `autorizado` |
+| **Familiar o acompañante** *(2026-10-02)* | Pareja, hijos, padres · fotos · sin fecha de fin | **No aplica** | Vive ahí un tiempo · fotos · fecha de salida |
+
+**Visitante frecuente** *(2026-10-02)*: la empleada del servicio, la niñera, el conductor. Se
+escogen **los días de la semana** en que viene y una fecha de fin; sube sus fotos y, autorizado,
+entra con su código **solo esos días** (en `Visitante` usa la marca `recurrente`, que existía sin
+usarse, y `dias`). No lleva la marca de residente: no vive ahí.
+
+**El familiar o acompañante** lo registran el propietario o el arrendatario; no vota y no registra a
+nadie (rol `familiar`). Si sale el arrendatario, sale su familia.
+
+**Menores de edad** *(2026-10-02)*: el familiar o el visitante puede marcarse como menor. Entonces
+no se le exige celular ni correo, y su documento puede ser **tarjeta de identidad** o **registro
+civil** (que solo se aceptan para menores). El propietario y el arrendatario son mayores de edad.
+
+**Fotos en la misma cadena** (RN-67): los soportes de lo que registró un arrendatario los ven él,
+el propietario y la administración.
+
+**Aviso de fin de estadía**: dos días antes de que termine una estadía temporal le llega un aviso a
+quien registró a la persona, para alargarla con «Cambiar» si hace falta. En la lista aparece
+«Termina pronto».
+
+**Quién registra a quién** (RN-60, RN-63): la administración, al primer propietario; el
+propietario, a los demás propietarios, arrendatarios y visitantes; el arrendatario, a visitantes
+de un día o temporales. **Si el visitante temporal del arrendatario se queda más de 7 días, lo
+aprueba el propietario** (*«si es más de una semana debe ser aprobado por el propietario»*): le
+llega un aviso, lo aprueba o no desde **Personas de la unidad**, y solo entonces el arrendatario
+autoriza. En el demo, las unidades 301 y 502 tienen dueño no residente para probarlo.
+
+**Celular o correo obligatorio** para propietario y arrendatario: es a donde le llega el código
+para entrar a la app (2026-10-02). Al visitante no se le exige.
+
+**Las fotos de la visita de un día son opcionales** (*«para el visitante también debe existir la
+opción de las fotos»*): quien la registra marca «Pedirle las fotos» y la visita sigue el trámite
+completo; sin la marca, sale con su código de una vez, como antes.
+
+<details><summary>Versión anterior (hasta 2026-10-01): tres categorías</summary>
 
 | Categoría | Quién es, en concreto | ¿Fotos? | ¿Marca de residente? | Vigencia | Qué se crea al autorizar |
 |---|---|---|---|---|---|
 | Residente | El dueño, quien le arrienda, su familia | **Sí** | Al **propietario se le pregunta** (puede tenerla arrendada); el arrendatario la trae | Sin fecha de fin | Una residencia como propietario o arrendatario |
-| **Residente temporal** | **Un huésped de Airbnb, un familiar unos meses** | **Sí** | Por defecto **sí** | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
-| Visitante | **Quien viene una tarde** | **No** | **No** | **Un solo día** | Un visitante con su código, de una vez |
+| Residente temporal | Un huésped de Airbnb, un familiar unos meses | **Sí** | Por defecto **sí** | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
+| Visitante | Quien viene una tarde | **No** | **No** | **Un solo día** | Un visitante con su código, de una vez |
+
+</details>
 
 **El visitante es de un solo día** (Mary, 2026-09-07). No se registra un rango: se escoge el día
 en que viene, y ese día entra y sale. **Ese día puede ser futuro** —una visita del sábado se
@@ -769,11 +908,10 @@ ahora lo reconoce de una.
 
 **Flujo principal**
 1. El residente abre **Mi unidad → Personas de la unidad**.
-2. Toca **Registrar** y escoge la categoría. Lo que se pregunta después depende de ella:
-   pedirle fecha de salida a quien compró un apartamento no tiene sentido. **La marca de
-   residente se ve en las cuatro categorías —para saber qué va a quedar— pero solo se cambia
-   en el propietario** (RN-68), que es el único que puede tener la unidad arrendada o vacía.
-   La marca se escoge **aquí y solo aquí**: en las demás vistas no aporta nada.
+2. Toca **Registrar**, escoge **quién es** (propietario, arrendatario o visitante) y **cómo se
+   queda** (residente, no residente o residente temporal; solo se ofrecen las que le aplican).
+   Lo que se pregunta después depende de eso: la fecha de salida, solo al temporal y a la visita
+   de un día; la casilla de fotos, solo a la visita de un día (2026-10-02).
 3. El sistema crea el registro en `esperando_soportes` y muestra **el código**.
 4. El residente le pasa el código a la persona (en el producto real se lo manda un mensaje).
 5. La persona adjunta (CU-R-28) y el registro pasa a `esperando_autorizacion`.
@@ -798,6 +936,17 @@ ahora lo reconoce de una.
   Idiky, por eso lo de inhabilitar nada más»* (Mary, 2026-09-07). Al registrarlo allá se le
   reconoce por su documento y llega con su historia, en vez de nacer de cero.
 - A6. Nadie se inhabilita a sí mismo: quedaría una unidad sin quien responda por ella.
+- A6b. **Quién inhabilita** (RN-65, Mary 2026-10-02): *«el que lo creó o por orden ascendente el
+  propietario o administrador según sea el caso»*. El visitante —de un día o temporal— que
+  registró un arrendatario lo pueden sacar él, el propietario o la administración.
+- A6c. **Sale el arrendatario → salen sus visitantes**: los temporales que registró y las visitas
+  de un día que aún no pasan. Sus registros en curso se anulan.
+- A7. **Cambiar** (2026-10-02): sin repetir el trámite, se cambia la condición (p. ej. el
+  propietario que se muda pasa a no residente) o la **fecha de salida** de un temporal. Lo
+  cambian quien registró a la persona, el propietario sobre sí mismo o la administración. **Si el
+  arrendatario alarga a su visitante a más de 7 días, el cambio espera al propietario**, que lo
+  aprueba o no desde Personas de la unidad; al arrendatario le llega la respuesta. Cada cambio
+  queda anotado en el vínculo, con quién lo hizo y quién lo aprobó.
 
 **Reglas de negocio**
 - RN-57 (dos soportes), RN-58 (los adjunta la persona), RN-59 (autoriza quien registró),
@@ -829,13 +978,19 @@ alguien encontró el camino corto.
 distintos para lo mismo acaban pidiendo cosas distintas).
 
 **Pendiente:** en el producto real el código viaja por mensaje; aquí se muestra en pantalla
-(misma honestidad que ADR-0004). Y falta avisarle a la persona cuando la autorizan.
+(misma honestidad que ADR-0004). El aviso al autorizar ya existe (RN-64).
+
+**Revisión 2026-10-02:** el residente temporal ya puede entrar a la app hasta su fecha de salida
+(antes la puerta solo dejaba entrar a quien no tenía fecha de fin); quien se inhabilita deja de
+estar ese mismo día; nadie queda vinculado dos veces a la unidad; y tras un cambio de
+propietario, el nuevo dueño hereda a los arrendatarios que siguen (RN-65).
 
 ---
 
 ## CU-R-28 — Adjuntar mis documentos a un registro
 
-- **Actor principal:** La persona que están registrando **como residente o residente temporal**.
+- **Actor principal:** La persona que están registrando —propietario, arrendatario, visitante
+  temporal, o visita de un día a la que se le pidieron las fotos—.
   **Todavía no tiene cuenta.** Un visitante no llega aquí: no lleva fotos (RN-57).
 - **Precondiciones:** Alguien la registró y le pasó el código.
 - **Disparador:** Le llega el código.
@@ -1071,3 +1226,54 @@ administración.
 
 **Estado en el demo:** ✅ — `/app/asambleas/:id`, en la asamblea en curso, botón «Enviar el
 poder firmado». La validación vive en `/admin/asambleas`, sección **Poderes** (CU-A-19).
+
+---
+
+### CU-R-32
+## CU-R-32 — Seguir el avance de los proyectos de la copropiedad
+
+- **Actor principal:** Propietario (y cualquier residente de la unidad)
+- **Precondiciones:** La administración registró al menos un proyecto (CU-A-28).
+- **Disparador:** Le llegó el mensaje de un avance, o quiere saber en qué va una obra.
+- **Resultado esperado:** Ve cada obra, en qué porcentaje va, qué pasó último y la historia
+  completa con fechas y fotos.
+
+> Mary, 2026-09-29: *«a los propietarios les llega un mensaje con los avances y pueden entrar a
+> ver un tablero con el avance»*. Una obra —la cubierta, el ascensor— es lo que más plata mueve
+> en una copropiedad y lo que menos se ve desde un apartamento. El tablero existe para que quien
+> pagó la extraordinaria sepa en qué va sin tener que preguntar.
+
+**Flujo principal**
+1. Le llega un **mensaje** al celular con el nombre del proyecto, el porcentaje y qué se hizo
+   (RN-101). En el demo el texto se guarda y se ve en la consola; no hay quién lo envíe todavía.
+2. En **Inicio** aparece «Obras en marcha» con la obra y su barra de avance; toca «Ver el
+   tablero».
+3. El **tablero** lista los proyectos, en marcha primero: nombre, estado, barra con el
+   porcentaje del último avance (RN-100) y qué se hizo último.
+4. «Ver la historia de la obra» despliega la descripción, quién la ejecuta, fechas y
+   presupuesto, y la historia: cada avance con su fecha, su detalle y su foto si la hubo, del
+   más nuevo al más viejo.
+5. En la **cartelera**, cada avance es además un comunicado de categoría *Proyecto*, con un
+   enlace al tablero.
+
+**Flujos alternativos**
+- A1. El avance **bajó** respecto al anterior → el porcentaje se ve en amarillo y el detalle dice
+  por qué: la administración no puede registrar un retroceso sin explicarlo (RN-100).
+- A2. No hay proyectos → el tablero lo dice y el inicio no muestra la sección.
+
+**Decisiones de interfaz**
+- **Es el mismo tablero que ve la administración** (`componentes/TableroProyecto.tsx`). Si cada
+  cara tuviera su versión, el día que discutan «en qué va la cubierta» no habría un tablero
+  común sobre el cual discutir.
+- **El porcentaje es el de toda la obra**, no el de una etapa, y es el del último avance: si la
+  obra retrocedió, el tablero lo dice en vez de esconderlo detrás del máximo alcanzado.
+- **La foto vale más que el porcentaje.** Cuando la hay, se muestra grande: el propietario ve la
+  cubierta sin subir a mirarla.
+
+**Reglas de negocio**
+- RN-100 (el avance es el último registrado, no se edita ni se borra, retroceder exige
+  explicación), RN-101 (cada avance se cuenta: comunicado y mensaje), RN-64 (el mensaje queda
+  guardado con su texto), RN-61 (nada se borra).
+
+**Estado en el demo:** ✅ — `/app/proyectos`, la sección «Obras en marcha» de `/app` y el
+enlace desde `/app/comunicados`.

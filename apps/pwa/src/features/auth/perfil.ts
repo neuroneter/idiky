@@ -12,6 +12,7 @@
  */
 
 import type { BaseDatos, PerfilDemo } from '../../dominio/tipos'
+import { residenciaVigente } from '../../dominio/reglas'
 
 export function perfilDe(bd: BaseDatos, personaId: string): PerfilDemo | undefined {
   const conocido = bd.perfilesDemo.find((perfil) => perfil.personaId === personaId)
@@ -20,7 +21,9 @@ export function perfilDe(bd: BaseDatos, personaId: string): PerfilDemo | undefin
   const persona = bd.personas.find((p) => p.id === personaId)
   if (!persona) return undefined
 
-  const residencia = bd.residencias.find((r) => r.personaId === personaId && !r.hasta)
+  // Vigente, no «sin fecha de fin»: el residente temporal tiene fecha de salida
+  // y entra hasta ese día (RN-62).
+  const residencia = bd.residencias.find((r) => r.personaId === personaId && residenciaVigente(r))
   if (!residencia) return undefined
 
   const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)

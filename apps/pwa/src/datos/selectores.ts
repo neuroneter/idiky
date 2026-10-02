@@ -9,6 +9,7 @@ import type {
   Asamblea,
   BaseDatos,
   Comunicado,
+  Proyecto,
   Asistencia,
   ConceptoSancion,
   Poder,
@@ -28,7 +29,9 @@ import type {
   Voto,
   ZonaComun,
 } from '../dominio/tipos'
-import { hoyISO, ordenAsamblea, residenciaVigente } from '../dominio/reglas'
+import { hoyISO, ordenAsamblea, proyectosOrdenados, registroEnCurso, residenciaVigente } from '../dominio/reglas'
+
+// RN-01 — Todo se lee filtrado por copropiedad: un selector nunca mezcla dos.
 
 export function copropiedad(bd: BaseDatos, copropiedadId: string) {
   return bd.copropiedades.find((c) => c.id === copropiedadId)
@@ -67,6 +70,67 @@ export function registro(bd: BaseDatos, registroId?: string): RegistroPersona | 
 /** Vinculos vigentes de una unidad: sin fecha de fin, o con una que aun no llega. */
 export function residenciasDeUnidad(bd: BaseDatos, unidadId: string): Residencia[] {
   return bd.residencias.filter((r) => r.unidadId === unidadId && residenciaVigente(r))
+}
+
+/**
+ * Si la unidad ya tiene propietario: vigente, o con su registro en curso. Es lo
+ * que decide si la administración puede registrar uno (RN-63).
+ */
+export function unidadTienePropietario(bd: BaseDatos, unidadId: string): boolean {
+  return (
+    bd.residencias.some((r) => r.unidadId === unidadId && r.rol === 'propietario' && residenciaVigente(r)) ||
+    bd.registros.some(
+      (r) => r.unidadId === unidadId && r.categoria === 'propietario' && registroEnCurso(r),
+    )
+  )
+}
+
+/**
+ * Quién responde por un vínculo para inhabilitarlo (RN-65): quien lo registró y,
+ * **subiendo en la cadena**, el propietario o la administración (Mary,
+ * 2026-10-02: «debe inhabilitar el que lo creó o por orden ascendente el
+ * propietario o administrador según sea el caso»). Los propietarios de hoy
+ * responden por lo que registró un arrendatario, y por lo que dejó un
+ * propietario que ya salió de la unidad (cambio de propietario).
+ */
+export function responsablesDelVinculo(
+  bd: BaseDatos,
+  residencia: Residencia,
+): { creadoPor?: string; heredadoPor: string[] } {
+  const creadoPor = bd.registros.find((r) => r.id === residencia.registroId)?.creadoPor
+  return responsablesPorCreador(bd, residencia.unidadId, creadoPor, residencia.id)
+}
+
+/** Lo mismo para un registro: responde quien lo creó y, subiendo, el propietario (RN-65, RN-67). */
+export function responsablesDeRegistro(
+  bd: BaseDatos,
+  registro: { unidadId: string; creadoPor: string },
+): { creadoPor?: string; heredadoPor: string[] } {
+  return responsablesPorCreador(bd, registro.unidadId, registro.creadoPor)
+}
+
+/** Lo mismo para una visita de un día: la creó quien la autorizó (RN-65). */
+export function responsablesDeVisita(bd: BaseDatos, visitante: Visitante): { creadoPor?: string; heredadoPor: string[] } {
+  return responsablesPorCreador(bd, visitante.unidadId, visitante.personaId)
+}
+
+function responsablesPorCreador(
+  bd: BaseDatos,
+  unidadId: string,
+  creadoPor: string | undefined,
+  excluirResidenciaId?: string,
+): { creadoPor?: string; heredadoPor: string[] } {
+  const vigentes = residenciasDeUnidad(bd, unidadId)
+  const creadorSigue = vigentes.some((r) => r.personaId === creadoPor)
+  const creadorEsAdministracion = bd.perfilesDemo.some((p) => p.rol === 'admin' && p.personaId === creadoPor)
+  const creadoPorArrendatario = bd.residencias.some(
+    (r) => r.unidadId === unidadId && r.personaId === creadoPor && r.rol === 'arrendatario',
+  )
+  const heredadoPor =
+    creadoPor && !creadorEsAdministracion && (!creadorSigue || creadoPorArrendatario)
+      ? vigentes.filter((r) => r.rol === 'propietario' && r.id !== excluirResidenciaId).map((r) => r.personaId)
+      : []
+  return { creadoPor, heredadoPor }
 }
 
 export function residenciasDePersona(bd: BaseDatos, personaId: string): Residencia[] {
@@ -166,6 +230,11 @@ export function pqrsDeCopropiedad(bd: BaseDatos, copropiedadId: string): Pqrs[] 
 }
 
 /** RN-15: los fijados primero, luego por fecha de publicacion descendente. */
+/** Los proyectos de la copropiedad, en marcha primero (CU-A-28, CU-R-32). */
+export function proyectosDe(bd: BaseDatos, copropiedadId: string): Proyecto[] {
+  return proyectosOrdenados(bd.proyectos, copropiedadId)
+}
+
 export function comunicadosVigentes(bd: BaseDatos, copropiedadId: string): Comunicado[] {
   const hoy = hoyISO()
   return bd.comunicados
@@ -201,11 +270,6 @@ export function visitantesDeUnidad(bd: BaseDatos, unidadId?: string): Visitante[
     .sort((a, b) => b.creadoEn.localeCompare(a.creadoEn))
 }
 
-export function pagoPorId(bd: BaseDatos, pagoId?: string): Pago | undefined {
-  if (!pagoId) return undefined
-  return bd.pagos.find((p) => p.id === pagoId)
-}
-
 // ---------------------------------------------------------------------------
 // Asambleas — CU-R-13, CU-R-20
 // ---------------------------------------------------------------------------
@@ -228,13 +292,6 @@ export function asambleasDe(bd: BaseDatos, copropiedadId: string): Asamblea[] {
 export function asamblea(bd: BaseDatos, asambleaId?: string): Asamblea | undefined {
   if (!asambleaId) return undefined
   return bd.asambleas.find((a) => a.id === asambleaId)
-}
-
-/** La que esta pasando o, si no hay ninguna, la siguiente convocada. */
-export function asambleaVigente(bd: BaseDatos, copropiedadId: string): Asamblea | undefined {
-  return asambleasDe(bd, copropiedadId).find(
-    (a) => a.estado === 'instalada' || a.estado === 'convocada',
-  )
 }
 
 export function votacionesDe(bd: BaseDatos, asambleaId: string): Votacion[] {
@@ -325,3 +382,20 @@ export function pagosDeCuota(bd: BaseDatos, cuotaId: string): Pago[] {
 function porFechaDescendente(a: Pago, b: Pago): number {
   return b.fecha.localeCompare(a.fecha)
 }
+
+/**
+ * Los propietarios vigentes de una unidad: a nombre de quienes se expiden el paz
+ * y salvo y el estado de cuenta. Pueden ser varios.
+ */
+export function propietariosDeUnidad(bd: BaseDatos, unidadId?: string): Persona[] {
+  return residenciasDeUnidad(bd, unidadId ?? '')
+    .filter((r) => r.rol === 'propietario')
+    .map((r) => persona(bd, r.personaId))
+    .filter((p): p is Persona => !!p)
+}
+
+/** Quien firma como administración. En el demo, la persona del perfil de administrador. */
+export function administradorDe(bd: BaseDatos): Persona | undefined {
+  return persona(bd, bd.perfilesDemo.find((perfil) => perfil.rol === 'admin')?.personaId)
+}
+

@@ -3,12 +3,15 @@
  * CU-A-05 — Generar cuotas del periodo.
  * Doc: docs/casos-de-uso/administrador.md#cu-a-03
  *
+ * Cartera tiene dos pestañas: la cartera y el paz y salvo (CU-A-13, en
+ * `PazYSalvoAdminPage`): el certificado se emite donde se ve si la unidad debe.
+ *
  * Cartera responde dos preguntas: quien debe y por que. Registrar la plata que
  * entra es el otro modulo (`PagosPage`), para no mezclar la consulta con la caja.
  */
 
 import { useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
@@ -33,6 +36,23 @@ import { ChipCuota, ChipPago } from '../../componentes/Etiquetas'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 
 type Filtro = 'todas' | 'mora' | 'al-dia'
+
+/** Las pestañas de Cartera. Son navegación, no filtros: cada una tiene su ruta. */
+export function CarteraSeccionAdmin() {
+  return (
+    <>
+      <nav className="segmentos" aria-label="Cartera">
+        <NavLink to="/admin/cartera" end className="segmento">
+          Cartera
+        </NavLink>
+        <NavLink to="/admin/cartera/paz-y-salvo" className="segmento">
+          Paz y salvo
+        </NavLink>
+      </nav>
+      <Outlet />
+    </>
+  )
+}
 
 export function CarteraPage() {
   const { bd, ejecutar, cargando } = useDatos()

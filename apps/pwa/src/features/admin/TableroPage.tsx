@@ -15,6 +15,10 @@ import {
   porcentajeRecaudo,
   pqrsAbierta,
   pqrsFueraDeSla,
+  proyectosSinAvanceReciente,
+  solicitudesPorVencer,
+  HORAS_ALERTA_SOLICITUD,
+  DIAS_SIN_AVANCE_ALERTA,
 } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearPeriodo } from '../../utilidades/formato'
 import { ChipPqrs, ChipReserva } from '../../componentes/Etiquetas'
@@ -76,8 +80,74 @@ export function TableroPage() {
     .correspondenciaDeCopropiedad(bd, copropiedadId)
     .filter((registro) => registro.estado === 'en_porteria')
 
+  const proyectosCallados = proyectosSinAvanceReciente(bd.proyectos, copropiedadId)
+  // RN-122 — Las solicitudes que vencen pronto si nadie las contesta.
+  const porVencer = solicitudesPorVencer(bd.reservas, sel.zonasDe(bd, copropiedadId))
+
   return (
     <>
+      {/* RN-102 — Las obras que deben un avance, arriba de todo: es lo único
+          del tablero que el propietario está esperando y nadie más le va a
+          reclamar al administrador. */}
+      {proyectosCallados.length > 0 && (
+        <div className="tarjeta tarjeta--alerta">
+          <div className="fila" style={{ marginBottom: 'var(--e2)' }}>
+            <span className="titulo-seccion">
+              {proyectosCallados.length === 1
+                ? 'Un proyecto sin avance reportado'
+                : `${proyectosCallados.length} proyectos sin avance reportado`}
+            </span>
+            <Link to="/admin/proyectos" className="boton boton--pequeno boton--primario">
+              Reportar avance
+            </Link>
+          </div>
+          <div className="lista lista--compacta">
+            {proyectosCallados.map(({ proyecto, dias }) => (
+              <div key={proyecto.id} className="fila">
+                <strong>{proyecto.nombre}</strong>
+                <span className="chip chip--alerta">
+                  {dias} días sin avance
+                </span>
+              </div>
+            ))}
+          </div>
+          <span className="subtitulo" style={{ display: 'block', marginTop: 'var(--e2)' }}>
+            Más de {DIAS_SIN_AVANCE_ALERTA} días sin novedades. Los propietarios no saben si la obra
+            sigue: registra un avance aunque sea «sigue igual» (RN-102).
+          </span>
+        </div>
+      )}
+
+      {porVencer.length > 0 && (
+        <div className="tarjeta tarjeta--alerta">
+          <div className="fila" style={{ marginBottom: 'var(--e2)' }}>
+            <span className="titulo-seccion">
+              {porVencer.length === 1 ? 'Una reserva por aprobar vence pronto' : `${porVencer.length} reservas por aprobar vencen pronto`}
+            </span>
+            <Link to="/admin/reservas" className="boton boton--pequeno boton--primario">
+              Revisar
+            </Link>
+          </div>
+          <div className="lista lista--compacta">
+            {porVencer.map(({ reserva, horas }) => {
+              const unidad = sel.unidad(bd, reserva.unidadId)
+              return (
+                <div key={reserva.id} className="fila">
+                  <strong>
+                    {sel.zona(bd, reserva.zonaId)?.nombre} · {unidad ? etiquetaUnidad(unidad) : ''}
+                  </strong>
+                  <span className="chip chip--alerta">faltan {horas} h</span>
+                </div>
+              )
+            })}
+          </div>
+          <span className="subtitulo" style={{ display: 'block', marginTop: 'var(--e2)' }}>
+            Si llega la hora sin respuesta, la solicitud vence, el turno se libera y al residente se le
+            avisa (RN-122). Menos de {HORAS_ALERTA_SOLICITUD} horas.
+          </span>
+        </div>
+      )}
+
       <div className="rejilla-indicadores">
         <Indicador
           etiqueta={`Recaudo ${formatearPeriodo(periodo)}`}

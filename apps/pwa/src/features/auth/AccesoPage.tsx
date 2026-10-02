@@ -2,35 +2,23 @@
  * CU-R-01 — Ingresar a la app.
  * Doc: docs/casos-de-uso/residente.md#cu-r-01
  *
- * La puerta de la app. Hasta el 2026-08-28 aqui habia una lista de perfiles, que
- * es un atajo de demostracion y no una pantalla de producto.
+ * La puerta de la app, **sin clave** desde el 2026-10-01 (Mary: «necesitamos
+ * que el ingreso sea con su correo autenticado o con SMS, como funciona ahora
+ * la mayoría de ingresos»). Tres pasos:
  *
- * **La pantalla tiene dos caras**, y esa es la decision que la ordena:
+ *   1. **Quién eres**: documento, celular o correo, un solo campo.
+ *   2. **Por dónde recibes el código**: SMS al celular registrado o correo
+ *      registrado; solo los canales que la persona tiene.
+ *   3. **El código** de seis números. Con él entra; la primera vez, eso mismo
+ *      activa la cuenta. No hay «activar» ni «olvidé mi clave».
  *
- *   - **El telefono ya te conoce** → tu nombre y **solo la clave** (Mary,
- *     2026-08-28), o la huella si la dejaste registrada (RN-55). Volver a pedir
- *     diez digitos de cedula a quien ya entro aqui es trabajo por nada.
- *   - **Nadie ha entrado en este telefono** → documento, clave y un **codigo de
- *     un solo uso** (RN-54), porque desde aqui se paga plata.
+ * Si el teléfono ya conoce a alguien, muestra su nombre y ofrece la **huella**
+ * (RN-56) o un código nuevo. La cuenta **nace vinculada**: si nadie registró a
+ * la persona, no hay a quién dejar entrar (RN-53).
  *
- * Y la cuenta **nace vinculada**: si la administracion no vinculo a la persona a
- * una unidad, no hay a quien dejar entrar (RN-53).
- *
- * ## Por que una clave de cuatro digitos y no una contrasena
- *
- * «La contrasena debe ser algo muy sencillo porque tenemos adultos mayores»
- * (Mary). Una contrasena con mayusculas y simbolos, tecleada en un telefono, es
- * la barrera que hace que la persona deje de entrar y vuelva a llamar a la
- * administracion — es decir, la que hace que la app no sirva.
- *
- * La seguridad no baja, **cambia de sitio**: la clave solo sirve en un
- * dispositivo ya probado con un codigo (RN-54), los intentos se acaban, y quien
- * quiera entra con huella sin teclear nada. Es el razonamiento de la clave del
- * cajero.
- *
- * Nada de esto autentica de verdad (ADR-0004): no se guarda ninguna clave y el
- * codigo se muestra en pantalla. La huella si es real —la lee el aparato—; lo que
- * no existe todavia es el servidor que la comprobaria.
+ * Nada de esto autentica de verdad (ADR-0004): el código se muestra en
+ * pantalla. La huella sí es real —la lee el aparato—; lo que no existe todavía
+ * es el servidor que enviaría el código y comprobaría la credencial (T-18).
  */
 
 import { useEffect, useState } from 'react'
@@ -40,20 +28,17 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
 import {
-  activarCuenta,
-  cuentaActivada,
-  DIGITOS_CLAVE,
-  dispositivoConocido,
+  type CanalCodigo,
+  canalesDe,
+  codigoVigente,
+  DIGITOS_CODIGO,
   generarCodigo,
-  INTENTOS_MAXIMOS,
-  intentosFallidos,
-  limpiarFallos,
-  normalizarDocumento,
+  identificarPersona,
+  INTENTOS_CODIGO,
   olvidarUltimaPersona,
-  recordarDispositivo,
   recordarUltimaPersona,
-  registrarFallo,
   ultimaPersona,
+  VIGENCIA_CODIGO_MINUTOS,
 } from '../../estado/acceso'
 import { rutaInicial } from '../../dominio/reglas'
 import { biometria } from '../../servicios/plataforma'
@@ -63,46 +48,48 @@ import { ControlTamanoTexto } from '../../componentes/ControlTamanoTexto'
 import { Icono } from '../../componentes/Icono'
 import { iniciales } from '../../utilidades/formato'
 import { perfilDe } from './perfil'
+import { FECHA_BUILD, VERSION_APP, leerRevisionDelServidor } from '../../servicios/version'
+
+type Paso = 'quien' | 'canal' | 'codigo'
 
 export function AccesoPage() {
   const { bd } = useDatos()
   const { iniciar } = useSesion()
   const navegar = useNavigate()
 
-  const [documento, setDocumento] = useState('')
-  const [clave, setClave] = useState('')
-  const [codigo, setCodigo] = useState('')
-  const [esperado, setEsperado] = useState<string | null>(null)
+  const [paso, setPaso] = useState<Paso>('quien')
+  const [identificador, setIdentificador] = useState('')
   const [personaId, setPersonaId] = useState<string | null>(null)
+  const [canal, setCanal] = useState<CanalCodigo | null>(null)
+  const [esperado, setEsperado] = useState<string | null>(null)
+  const [emitidoEn, setEmitidoEn] = useState(0)
+  const [intentos, setIntentos] = useState(0)
+  const [codigo, setCodigo] = useState('')
   const [error, setError] = useState<string | null>(null)
+  /** Registrar la huella al entrar, si el aparato tiene lector y aún no está. */
+  const [conHuella, setConHuella] = useState(true)
+  const [hayLector, setHayLector] = useState(false)
 
-  /** Quien entro aqui la ultima vez, si sigue vinculado y con la cuenta activa. */
+  /** Quien entró aquí la última vez, si sigue vinculado. */
   const recordada = ultimaPersona()
-  const conocida = recordada && cuentaActivada(recordada) ? sel.persona(bd, recordada) : undefined
-  /** Deja entrar con otro documento sin borrar a quien el telefono recuerda. */
-  const [usarDocumento, setUsarDocumento] = useState(false)
-  const modoConocida = !!conocida && !usarDocumento
-
-  /**
-   * Si se puede entrar con huella.
-   *
-   * Se resuelve al abrir porque preguntar si hay lector es asincrono: hasta que
-   * responde, el boton no existe. Vale mas que aparezca medio segundo tarde que
-   * ofrecer una huella donde no hay lector.
-   */
-  const [hayHuella, setHayHuella] = useState(false)
+  const conocida = recordada ? sel.persona(bd, recordada) : undefined
+  const [usarOtra, setUsarOtra] = useState(false)
+  const modoConocida = !!conocida && !usarOtra && paso === 'quien'
+  const huellaRegistrada = !!conocida && hayLector && biometria.registrada(conocida.id)
 
   useEffect(() => {
     let vigente = true
     biometria.disponible().then((hay) => {
-      if (vigente && hay && conocida) setHayHuella(biometria.registrada(conocida.id))
+      if (vigente) setHayLector(hay)
     })
     return () => {
       vigente = false
     }
-  }, [conocida])
+  }, [])
 
   const copropiedad = bd.copropiedades[0]
+  const persona = personaId ? sel.persona(bd, personaId) : undefined
+  const canales = persona ? canalesDe(persona) : []
 
   function entrar(id: string) {
     const perfil = perfilDe(bd, id)
@@ -110,143 +97,104 @@ export function AccesoPage() {
       setError('Tu unidad todavía no está vinculada. Escríbele a la administración.')
       return
     }
-    limpiarFallos(id)
-    recordarDispositivo(id)
     recordarUltimaPersona(id)
     iniciar(perfil)
     navegar(rutaInicial(perfil.rol), { replace: true })
   }
 
-  /** RN-55 — la huella entra en el dispositivo donde se registró. */
+  /** RN-56 — la huella entra en el dispositivo donde se registró. */
   async function entrarConHuella(id: string) {
     setError(null)
     const confirmado = await biometria.verificar(id)
     if (!confirmado) {
-      setError('No pudimos confirmar tu huella. Entra con tu clave.')
+      setError('No pudimos confirmar tu huella. Pide un código y entra con él.')
       return
     }
     entrar(id)
   }
 
-  function verificar(evento: React.FormEvent) {
+  /** Paso 1 → 2: quién es, y por dónde puede recibir el código. */
+  function identificar(evento: React.FormEvent) {
     evento.preventDefault()
     setError(null)
-
-    // A quien el telefono ya conoce no se le vuelve a pedir el documento.
-    const persona = modoConocida
-      ? conocida
-      : bd.personas.find((p) => normalizarDocumento(p.documento) === normalizarDocumento(documento))
-
-    // RN-53: la cuenta existe porque la administración vinculó a la persona. No se
-    // dice «documento incorrecto»: se dice qué hacer, que es lo útil aquí.
-    if (!persona) {
+    const encontrada = identificarPersona(bd.personas, identificador)
+    // RN-53: la cuenta existe porque alguien registró a la persona. No se dice
+    // «dato incorrecto»: se dice qué hacer, que es lo útil aquí.
+    if (!encontrada) {
       setError(
-        'No encontramos ese documento en la copropiedad. La administración es quien vincula tu unidad; escríbele para que te registre.',
+        'No encontramos ese dato en la copropiedad. La administración o el propietario de tu unidad son quienes te registran; escríbeles y vuelve a intentar.',
       )
       return
     }
-    if (!cuentaActivada(persona.id)) {
-      setError('Todavía no has activado tu cuenta. Actívala aquí abajo y creas tu clave.')
-      return
-    }
-
-    // El limite de intentos es lo que sostiene que la clave sea de cuatro digitos.
-    if (intentosFallidos(persona.id) >= INTENTOS_MAXIMOS) {
+    if (canalesDe(encontrada).length === 0) {
       setError(
-        'Por seguridad bloqueamos la clave después de varios intentos. Toca «Olvidé mi clave» y te enviamos un código.',
+        `Hola, ${encontrada.nombres}. No tienes celular ni correo registrados, y sin eso no hay a dónde enviarte el código. Pide a quien te registró que los agregue.`,
       )
       return
     }
-    if (clave.length !== DIGITOS_CLAVE || !/^\d+$/.test(clave)) {
-      const fallos = registrarFallo(persona.id)
-      const quedan = INTENTOS_MAXIMOS - fallos
-      setError(
-        quedan > 0
-          ? `La clave son ${DIGITOS_CLAVE} números. Te quedan ${quedan} ${quedan === 1 ? 'intento' : 'intentos'}.`
-          : 'Se acabaron los intentos. Toca «Olvidé mi clave» y te enviamos un código.',
-      )
-      return
-    }
+    prepararCanal(encontrada.id)
+  }
 
-    // RN-54: teléfono nuevo, código además de la clave.
-    if (dispositivoConocido(persona.id)) {
-      entrar(persona.id)
-      return
-    }
-    setPersonaId(persona.id)
+  function prepararCanal(id: string) {
+    setPersonaId(id)
+    setUsarOtra(false)
+    setCanal(null)
+    setEsperado(null)
+    setCodigo('')
+    setIntentos(0)
+    setError(null)
+    setPaso('canal')
+  }
+
+  /** Paso 2 → 3: se «envía» el código por el canal elegido. */
+  function enviarCodigo(elegido: CanalCodigo) {
+    setCanal(elegido)
     setEsperado(generarCodigo())
+    setEmitidoEn(Date.now())
+    setIntentos(0)
+    setCodigo('')
+    setError(null)
+    setPaso('codigo')
   }
 
-  function confirmarCodigo(evento: React.FormEvent) {
+  /** Paso 3: el código, con vigencia y con intentos. */
+  async function confirmarCodigo(evento: React.FormEvent) {
     evento.preventDefault()
-    if (codigo.trim() !== esperado) {
-      setError('Ese código no coincide. Revísalo y vuelve a intentar.')
+    setError(null)
+    if (!esperado || !personaId) return
+    if (!codigoVigente(emitidoEn)) {
+      setError(`Ese código ya venció: valía ${VIGENCIA_CODIGO_MINUTOS} minutos. Pide uno nuevo.`)
+      setPaso('canal')
       return
     }
-    if (personaId) entrar(personaId)
+    if (codigo.trim() !== esperado) {
+      const hechos = intentos + 1
+      setIntentos(hechos)
+      if (hechos >= INTENTOS_CODIGO) {
+        setError('Se acabaron los intentos con ese código. Pide uno nuevo.')
+        setPaso('canal')
+        return
+      }
+      const quedan = INTENTOS_CODIGO - hechos
+      setError(`Ese código no coincide. Te ${quedan === 1 ? 'queda un intento' : `quedan ${quedan} intentos`}.`)
+      return
+    }
+    // RN-56 — La huella se registra ya adentro de la puerta, con la identidad
+    // recién confirmada por el código. Si el aparato no la registra, se entra
+    // igual: la huella es un atajo, no la puerta.
+    if (conHuella && hayLector && persona && !biometria.registrada(persona.id)) {
+      await biometria.registrar(persona.id, nombreCompleto(persona))
+    }
+    entrar(personaId)
   }
 
-  if (esperado && personaId) {
-    const persona = sel.persona(bd, personaId)
-    return (
-      <div className="acceso-fondo">
-        <SiluetaTorres className="acceso-fondo__siluetas" />
-        <div className="acceso">
-          <div className="acceso__marca">
-            <Logotipo inverso tamano="var(--texto-3xl)" />
-          </div>
-
-          <form className="tarjeta" onSubmit={confirmarCodigo}>
-            <div className="columna" style={{ gap: 'var(--e2)', marginBottom: 'var(--e4)' }}>
-              <strong>Confirma que eres tú</strong>
-              <span className="subtitulo">
-                Es la primera vez que entras desde este teléfono. Te enviamos un código a{' '}
-                {persona?.telefono ?? 'tu celular'}.
-              </span>
-            </div>
-
-            <div className="campo">
-              <label htmlFor="codigo">Código de {esperado.length} números</label>
-              <input
-                id="codigo"
-                className="campo-numeros"
-                inputMode="numeric"
-                autoComplete="one-time-code"
-                value={codigo}
-                onChange={(evento) => setCodigo(evento.target.value)}
-                placeholder="000000"
-              />
-            </div>
-
-            {error && <p className="acceso__error">{error}</p>}
-
-            <button className="boton boton--primario boton--bloque" type="submit">
-              Confirmar
-            </button>
-
-            {/* En la versión real esto llega por SMS. Aquí se muestra: un demo que
-                pide un código que nunca llega no se le puede mostrar a nadie. */}
-            <p className="acceso__nota" style={{ marginTop: 'var(--e4)' }}>
-              <strong>Demo:</strong> tu código es <strong className="numerico">{esperado}</strong>.
-              En la versión real llega por mensaje y no se ve aquí.
-            </p>
-          </form>
-
-          <button
-            className="boton boton--fantasma"
-            onClick={() => {
-              setEsperado(null)
-              setPersonaId(null)
-              setCodigo('')
-              setError(null)
-            }}
-          >
-            <Icono nombre="volver" tamano={15} />
-            Volver
-          </button>
-        </div>
-      </div>
-    )
+  const volverAlInicio = () => {
+    setPaso('quien')
+    setPersonaId(null)
+    setCanal(null)
+    setEsperado(null)
+    setCodigo('')
+    setError(null)
   }
 
   return (
@@ -256,7 +204,7 @@ export function AccesoPage() {
       <SiluetaTorres className="acceso-fondo__siluetas" />
       <div className="acceso">
         {/* Antes que el logo y que el formulario: quien no puede leer la pantalla
-            necesita esto primero, no después de fallar al escribir la clave. */}
+            necesita esto primero, no después de fallar al escribir. */}
         <ControlTamanoTexto />
 
         <div className="acceso__marca">
@@ -268,110 +216,211 @@ export function AccesoPage() {
           </p>
         </div>
 
-        <form className="tarjeta" onSubmit={verificar}>
-          {modoConocida && conocida ? (
-            /* El teléfono ya sabe quién eres: solo falta la clave. */
-            <div className="tarjeta__cuerpo" style={{ marginBottom: 'var(--e4)' }}>
-              <span className="avatar avatar--perfil">
-                {iniciales(conocida.nombres, conocida.apellidos)}
+        {paso === 'quien' && (
+          <form className="tarjeta" onSubmit={identificar}>
+            {modoConocida && conocida ? (
+              /* El teléfono ya sabe quién eres: huella, o un código nuevo. */
+              <>
+                <div className="tarjeta__cuerpo" style={{ marginBottom: 'var(--e4)' }}>
+                  <span className="avatar avatar--perfil">
+                    {iniciales(conocida.nombres, conocida.apellidos)}
+                  </span>
+                  <div className="columna">
+                    <strong>{nombreCompleto(conocida)}</strong>
+                    <span className="subtitulo">
+                      {huellaRegistrada ? 'Entra con tu huella o pide un código' : 'Te enviamos un código para entrar'}
+                    </span>
+                  </div>
+                </div>
+                {error && <p className="acceso__error">{error}</p>}
+                {huellaRegistrada && (
+                  <button
+                    type="button"
+                    className="boton boton--primario boton--bloque"
+                    onClick={() => void entrarConHuella(conocida.id)}
+                  >
+                    <Icono nombre="huella" tamano={20} />
+                    Entrar con huella
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className={`boton boton--bloque${huellaRegistrada ? '' : ' boton--primario'}`}
+                  style={{ marginTop: huellaRegistrada ? 'var(--e2)' : undefined }}
+                  onClick={() => prepararCanal(conocida.id)}
+                >
+                  Enviarme un código
+                </button>
+                <div className="acceso__enlaces">
+                  <button
+                    type="button"
+                    className="enlace"
+                    onClick={() => {
+                      olvidarUltimaPersona()
+                      setUsarOtra(true)
+                      setError(null)
+                    }}
+                  >
+                    No soy yo
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="campo">
+                  <label htmlFor="identificador">Tu documento, celular o correo</label>
+                  <input
+                    id="identificador"
+                    autoComplete="username"
+                    value={identificador}
+                    onChange={(evento) => setIdentificador(evento.target.value)}
+                    placeholder="Con el que te registraron"
+                  />
+                  <span className="ayuda-campo">
+                    Te enviamos un código por SMS o por correo, y con él entras. Sin clave.
+                  </span>
+                </div>
+                {error && <p className="acceso__error">{error}</p>}
+                <button className="boton boton--primario boton--bloque" type="submit">
+                  Continuar
+                </button>
+              </>
+            )}
+
+            {/* Quien tiene que adjuntar sus documentos todavía no tiene cuenta:
+                si esto estuviera detrás del ingreso, no podría llegar (CU-R-28). */}
+            <div className="separador" />
+            <Link to="/acceso/adjuntar" className="boton boton--bloque">
+              <Icono nombre="camara" tamano={16} />
+              Adjuntar mis documentos
+            </Link>
+          </form>
+        )}
+
+        {paso === 'canal' && persona && (
+          <div className="tarjeta">
+            <div className="columna" style={{ gap: 'var(--e2)', marginBottom: 'var(--e4)' }}>
+              <strong>Hola, {persona.nombres}. ¿Por dónde te enviamos el código?</strong>
+              <span className="subtitulo">
+                Solo a los datos que la copropiedad tiene registrados de ti.
               </span>
-              <div className="columna">
-                <strong>{nombreCompleto(conocida)}</strong>
-                <span className="subtitulo">Escribe tu clave para entrar</span>
-              </div>
             </div>
-          ) : (
-            <div className="campo">
-              <label htmlFor="documento">Documento de identidad</label>
-              <input
-                id="documento"
-                className="campo-numeros"
-                inputMode="numeric"
-                autoComplete="username"
-                value={documento}
-                onChange={(evento) => setDocumento(evento.target.value)}
-                placeholder="Sin puntos ni espacios"
-              />
+            {error && <p className="acceso__error">{error}</p>}
+            <div className="lista lista--compacta">
+              {canales.map(({ canal: opcion, destino }) => (
+                <button
+                  key={opcion}
+                  type="button"
+                  className="opcion-categoria"
+                  onClick={() => enviarCodigo(opcion)}
+                >
+                  <strong>{opcion === 'sms' ? 'Por SMS' : 'Por correo'}</strong>
+                  <span className="subtitulo">
+                    {opcion === 'sms' ? `Al celular ${destino}` : `A ${destino}`}
+                  </span>
+                </button>
+              ))}
             </div>
-          )}
-
-          <div className="campo">
-            <label htmlFor="clave">Tu clave de {DIGITOS_CLAVE} números</label>
-            <input
-              id="clave"
-              className="campo-numeros"
-              type="password"
-              inputMode="numeric"
-              autoComplete="current-password"
-              maxLength={DIGITOS_CLAVE}
-              value={clave}
-              onChange={(evento) => setClave(evento.target.value.replace(/\D/g, ''))}
-              placeholder="••••"
-            />
-          </div>
-
-          {error && <p className="acceso__error">{error}</p>}
-
-          <button className="boton boton--primario boton--bloque" type="submit">
-            Ingresar
-          </button>
-
-          {/* La huella va debajo de la clave, no encima: es un atajo de este
-              teléfono, y quien lo cambió o lo perdió necesita ver primero el
-              camino que siempre funciona. */}
-          {modoConocida && conocida && hayHuella && (
-            <button
-              type="button"
-              className="boton boton--salida boton--bloque"
-              style={{ marginTop: 'var(--e2)' }}
-              onClick={() => void entrarConHuella(conocida.id)}
-            >
-              <Icono nombre="huella" tamano={20} />
-              Entrar con huella
-            </button>
-          )}
-
-          <div className="acceso__enlaces">
-            {modoConocida ? (
-              <button
-                type="button"
-                className="enlace"
-                onClick={() => {
-                  olvidarUltimaPersona()
-                  setUsarDocumento(true)
-                  setError(null)
-                }}
-              >
+            <div className="acceso__enlaces">
+              <button type="button" className="enlace" onClick={volverAlInicio}>
                 No soy yo
               </button>
-            ) : (
-              <Link to="/acceso/activar">Activar mi cuenta</Link>
-            )}
-            <Link to="/acceso/recuperar">Olvidé mi clave</Link>
+            </div>
           </div>
+        )}
 
-          {/* Quien tiene que adjuntar sus documentos todavia no tiene cuenta:
-              si esto estuviera detras del ingreso, no podria llegar (CU-R-28). */}
-          <div className="separador" />
-          <Link to="/acceso/adjuntar" className="boton boton--bloque">
-            <Icono nombre="camara" tamano={16} />
-            Adjuntar mis documentos
-          </Link>
-        </form>
+        {paso === 'codigo' && persona && esperado && (
+          <form className="tarjeta" onSubmit={(evento) => void confirmarCodigo(evento)}>
+            <div className="columna" style={{ gap: 'var(--e2)', marginBottom: 'var(--e4)' }}>
+              <strong>Escribe el código que te llegó</strong>
+              <span className="subtitulo">
+                {canal === 'sms'
+                  ? `Lo enviamos por SMS al celular ${canalesDe(persona).find((c) => c.canal === 'sms')?.destino}.`
+                  : `Lo enviamos al correo ${canalesDe(persona).find((c) => c.canal === 'correo')?.destino}.`}{' '}
+                Vale {VIGENCIA_CODIGO_MINUTOS} minutos.
+              </span>
+            </div>
+            <div className="campo">
+              <label htmlFor="codigo">Código de {DIGITOS_CODIGO} números</label>
+              <input
+                id="codigo"
+                className="campo-numeros"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={codigo}
+                onChange={(evento) => setCodigo(evento.target.value.replace(/\D/g, ''))}
+                placeholder="000000"
+              />
+            </div>
+
+            {/* RN-56 — La huella, como atajo para la próxima vez. Solo donde hay lector. */}
+            {hayLector && !biometria.registrada(persona.id) && (
+              <label className="opcion-huella">
+                <input type="checkbox" checked={conHuella} onChange={(e) => setConHuella(e.target.checked)} />
+                <span>
+                  <strong>Entrar con huella la próxima vez</strong>
+                  <span className="subtitulo">En este teléfono, sin esperar ningún código.</span>
+                </span>
+              </label>
+            )}
+
+            {error && <p className="acceso__error">{error}</p>}
+
+            <button className="boton boton--primario boton--bloque" type="submit">
+              Entrar
+            </button>
+
+            {/* En la versión real esto llega por SMS o correo. Aquí se muestra: un
+                demo que pide un código que nunca llega no se le puede mostrar a nadie. */}
+            <p className="acceso__nota" style={{ marginTop: 'var(--e4)' }}>
+              <strong>Demo:</strong> tu código es <strong className="numerico">{esperado}</strong>.
+              En la versión real llega por {canal === 'sms' ? 'SMS' : 'correo'} y no se ve aquí.
+            </p>
+
+            <div className="acceso__enlaces">
+              <button type="button" className="enlace" onClick={() => setPaso('canal')}>
+                Enviar otro código
+              </button>
+              <button type="button" className="enlace" onClick={volverAlInicio}>
+                No soy yo
+              </button>
+            </div>
+          </form>
+        )}
 
         <AtajoDemo alSeleccionar={(id) => entrar(id)} />
+
+        {/* Qué versión tiene esta persona: es lo primero que hay que saber
+            cuando alguien dice «a mí no me sale» (Mary, 2026-10-01). */}
+        <VersionAlPie />
       </div>
     </div>
   )
 }
 
+function VersionAlPie() {
+  const [revision, setRevision] = useState<string | null>(null)
+  useEffect(() => {
+    void leerRevisionDelServidor().then(setRevision)
+  }, [])
+  return (
+    <p className="acceso__version">
+      Idiky {VERSION_APP} · compilada el {FECHA_BUILD}
+      {revision ? (
+        <>
+          {' '}· servidor <span className="numerico">{revision}</span>
+        </>
+      ) : (
+        ' · demo en este dispositivo'
+      )}
+    </p>
+  )
+}
+
 /**
- * El atajo de demostracion, ahora donde le corresponde: **debajo y aparte**.
- *
- * Sigue haciendo falta —hay que poder mostrar la consola del administrador sin
- * teclear cedulas—, pero ya no es la pantalla de acceso. Entra directo y de paso
- * marca el dispositivo como conocido, para no pedirle un codigo a quien solo esta
- * mirando el demo.
+ * El atajo de demostración, **debajo y aparte**. Sigue haciendo falta —hay que
+ * poder mostrar la consola del administrador sin teclear cédulas—, pero no es
+ * la pantalla de acceso.
  */
 function AtajoDemo({ alSeleccionar }: { alSeleccionar: (personaId: string) => void }) {
   const { bd, reiniciarDemo } = useDatos()
@@ -380,19 +429,14 @@ function AtajoDemo({ alSeleccionar }: { alSeleccionar: (personaId: string) => vo
     <details className="acceso__demo">
       <summary>¿Estás viendo el demo?</summary>
       <p className="subtitulo" style={{ margin: 'var(--e3) 0' }}>
-        Entra directo con uno de estos perfiles, sin documento ni clave.
+        Entra directo con uno de estos perfiles, sin código.
       </p>
       <div className="lista">
         {bd.perfilesDemo.map((perfil) => (
           <button
             key={perfil.id}
             className="tarjeta tarjeta--plana tarjeta--accion"
-            onClick={() => {
-              // Entrar por el atajo cuenta como activar: si no, quien lo usa se
-              // queda sin poder volver a entrar con su documento.
-              activarCuenta(perfil.personaId)
-              alSeleccionar(perfil.personaId)
-            }}
+            onClick={() => alSeleccionar(perfil.personaId)}
           >
             <div className="fila">
               <div className="columna">

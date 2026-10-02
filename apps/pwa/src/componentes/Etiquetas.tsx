@@ -49,6 +49,7 @@ const RESERVA: Record<EstadoReserva, [string, Variante]> = {
   confirmada: ['Confirmada', 'exito'],
   rechazada: ['Rechazada', 'error'],
   cancelada: ['Cancelada', ''],
+  vencida: ['Vencida sin respuesta', ''],
 }
 
 export function ChipReserva({ estado }: { estado: EstadoReserva }) {
@@ -84,6 +85,7 @@ const COMUNICADO: Record<CategoriaComunicado, [string, Variante]> = {
   urgente: ['Urgente', 'error'],
   mantenimiento: ['Mantenimiento', 'alerta'],
   asamblea: ['Asamblea', 'marca'],
+  proyecto: ['Proyecto', 'info'],
 }
 
 export function ChipComunicado({ categoria }: { categoria: CategoriaComunicado }) {

@@ -33,6 +33,7 @@ import {
   generarActa,
   verificarActa,
   registrarPoder,
+  registrarGrabacionAsamblea,
   revocarPoder,
   validarPoder,
   rechazarPoder,
@@ -56,6 +57,9 @@ import {
   sumaCoeficientes,
   convocatoriaCompleta,
   definicionModalidad,
+  admiteGrabacion,
+  herramientaDeEnlace,
+  salvedadCanalDeUnaVia,
   etiquetaUnidad,
   faltaParaQuorum,
   hayQuorum,
@@ -108,8 +112,8 @@ export function AsambleasAdminPage() {
     <div className="pila">
       <div className="fila">
         <span className="subtitulo">
-          Idiky no transmite la asamblea: enlaza la reunión que ustedes ya hacen por Zoom o Meet
-          (ADR-0007). Lo que sí lleva es quién asiste y cuánto pesa.
+          Idiky no transmite la asamblea: enlaza la reunión o la transmisión que ustedes ya hacen
+          por Zoom, Meet, Teams o Vimeo (ADR-0007). Lo que sí lleva es quién asiste y cuánto pesa.
         </span>
         <button className="boton boton--primario" onClick={() => setConvocando(true)}>
           <Icono nombre="mas" tamano={16} />
@@ -209,6 +213,12 @@ export function AsambleasAdminPage() {
               'Acta levantada. Falta quién presidió y qué se dijo.',
             )
             if (creada) setViendoActa(creada.id)
+          }}
+          alRegistrarGrabacion={async (enlace) => {
+            await ejecutar(
+              (base) => registrarGrabacionAsamblea(base, { asambleaId: enDetalle.id, enlace }),
+              'Grabación enlazada. El acta la cita.',
+            )
           }}
           alRevocar={async (poderId) => {
             await ejecutar(
@@ -319,6 +329,7 @@ function DetalleAsamblea({
   alGenerarActa,
   alVerActa,
   alRevocar,
+  alRegistrarGrabacion,
   alCerrar,
 }: {
   asamblea: Asamblea
@@ -330,12 +341,16 @@ function DetalleAsamblea({
   alGenerarActa: (asambleaId: string) => Promise<void>
   alVerActa: (actaId: string) => void
   alRevocar: (poderId: string) => Promise<void>
+  alRegistrarGrabacion: (enlace: string) => Promise<void>
   alCerrar: () => void
 }) {
   const definicion = definicionModalidad(asamblea.modalidad)
   const asistencias = sel.asistenciasDeAsamblea(bd, asamblea.id)
   const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
   const poderes = sel.poderesDeAsambleaTodos(bd, asamblea.id)
+  const herramienta = herramientaDeEnlace(asamblea.enlaceTransmision)
+  const salvedad = salvedadCanalDeUnaVia(asamblea)
+  const [grabacion, setGrabacion] = useState(asamblea.enlaceGrabacion ?? '')
   const vigentes = poderes.filter(poderVigente)
   const porValidar = poderes.filter((p) => !p.revocadoEn && poderEsperandoValidacion(p))
   const copropiedad = sel.copropiedad(bd, asamblea.copropiedadId)
@@ -368,7 +383,11 @@ function DetalleAsamblea({
         )}
         {asamblea.enlaceTransmision && (
           <div className="fila fila-inicio">
-            <span className="subtitulo">Reunión</span>
+            {/* RN-98 — Se nombra la herramienta: no es lo mismo una reunión
+                que una transmisión, y quien convoca tiene que verlo. */}
+            <span className="subtitulo">
+              {herramienta?.unaVia ? `Transmisión (${herramienta.nombre})` : `Reunión${herramienta && herramienta.id !== 'otra' ? ` (${herramienta.nombre})` : ''}`}
+            </span>
             <a
               href={asamblea.enlaceTransmision}
               target="_blank"
@@ -379,12 +398,58 @@ function DetalleAsamblea({
             </a>
           </div>
         )}
+        {asamblea.enlaceGrabacion && (
+          <div className="fila fila-inicio">
+            <span className="subtitulo">Grabación</span>
+            <a
+              href={asamblea.enlaceGrabacion}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ textAlign: 'right', wordBreak: 'break-all' }}
+            >
+              {asamblea.enlaceGrabacion}
+            </a>
+          </div>
+        )}
         <div className="fila">
           <span className="subtitulo">Estado</span>
           <ChipAsamblea estado={asamblea.estado} />
         </div>
       </div>
 
+      {/* RN-98 — La salvedad de la transmisión de una vía. Se dice, no se
+          impide: quien convoca decide con la ley a la vista. */}
+      {salvedad && (
+        <p className="acceso__nota" style={{ marginTop: 'var(--e3)' }}>
+          {salvedad}
+        </p>
+      )}
+
+      {/* RN-99 — La grabación, cuando la sesión ya empezó y hubo transmisión.
+          Un enlace, no un archivo: la guarda la herramienta (ADR-0007). */}
+      {admiteGrabacion(asamblea) && (
+        <div className="campo" style={{ marginTop: 'var(--e3)' }}>
+          <label htmlFor="grabacion">Enlace de la grabación (opcional)</label>
+          <div className="fila" style={{ gap: 'var(--e2)' }}>
+            <input
+              id="grabacion"
+              value={grabacion}
+              onChange={(evento) => setGrabacion(evento.target.value)}
+              placeholder="https://vimeo.com/…"
+            />
+            <button
+              className="boton"
+              disabled={cargando || !grabacion.trim() || grabacion.trim() === asamblea.enlaceGrabacion}
+              onClick={() => void alRegistrarGrabacion(grabacion)}
+            >
+              Guardar
+            </button>
+          </div>
+          <span className="ayuda-campo">
+            El acta la cita como soporte. No reemplaza la asistencia ni los votos registrados aquí.
+          </span>
+        </div>
+      )}
       <div className="separador" />
       <span className="titulo-seccion">Orden del día</span>
       <ol className="lista lista--compacta" style={{ paddingLeft: 'var(--e4)' }}>
@@ -865,9 +930,19 @@ function FormularioConvocatoria({
               placeholder="https://meet.google.com/abc-defg-hij"
             />
             <span className="ayuda-campo">
-              El de Zoom, Meet o la herramienta que usen. Idiky no transmite: enlaza la reunión que
-              ustedes ya hacen (ADR-0007).
+              El de Zoom, Meet, Teams o Vimeo. Idiky no transmite: enlaza la reunión o la
+              transmisión que ustedes ya hacen (ADR-0007).
+              {herramientaDeEnlace(enlace) && herramientaDeEnlace(enlace)!.id !== 'otra'
+                ? ` Se reconoce ${herramientaDeEnlace(enlace)!.nombre}.`
+                : ''}
             </span>
+            {/* RN-98 — La salvedad, en el momento en que todavía se puede
+                cambiar de herramienta o de modalidad. */}
+            {salvedadCanalDeUnaVia({ modalidad: definicion.id, enlaceTransmision: enlace }) && (
+              <p className="acceso__nota" style={{ marginTop: 'var(--e2)' }}>
+                {salvedadCanalDeUnaVia({ modalidad: definicion.id, enlaceTransmision: enlace })}
+              </p>
+            )}
           </div>
         )}
 

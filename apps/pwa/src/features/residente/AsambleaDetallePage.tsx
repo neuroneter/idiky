@@ -42,6 +42,7 @@ import {
   formasDeAsistir,
   pesoDelVoto,
   poderEnCursoDeUnidad,
+  herramientaDeEnlace,
   poderEsperandoValidacion,
   poderVigente,
   ultimoPoderRechazadoDeUnidad,
@@ -395,7 +396,13 @@ export function AsambleaDetallePage() {
               rel="noopener noreferrer"
               style={{ marginTop: 'var(--e3)' }}
             >
-              Entrar a la reunión
+              {/* RN-98 — El botón dice a dónde va: a una reunión o a una
+                  transmisión, y de qué herramienta. */}
+              {(() => {
+                const h = herramientaDeEnlace(asamblea.enlaceTransmision)
+                if (!h || h.id === 'otra') return 'Entrar a la reunión'
+                return h.unaVia ? `Ver la transmisión en ${h.nombre}` : `Entrar a ${h.nombre}`
+              })()}
             </a>
           )}
 
@@ -500,8 +507,12 @@ export function AsambleaDetallePage() {
 
           {asamblea.enlaceTransmision && (
             <p className="acceso__nota" style={{ marginTop: 'var(--e3)' }}>
-              Las votaciones se hacen <strong>aquí</strong>, no en la reunión. Vuelve a esta
-              pantalla cuando se abra un punto a votación.
+              {/* RN-98 — Cómo intervenir cambia con la herramienta; dónde
+                  votar, no. */}
+              {herramientaDeEnlace(asamblea.enlaceTransmision)?.comoIntervenir}{' '}
+              Las votaciones se hacen <strong>aquí</strong>, no en la{' '}
+              {herramientaDeEnlace(asamblea.enlaceTransmision)?.unaVia ? 'transmisión' : 'reunión'}.
+              Vuelve a esta pantalla cuando se abra un punto a votación.
             </p>
           )}
         </div>

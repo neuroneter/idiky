@@ -95,9 +95,16 @@ export interface Persona {
  * porque no es un titulo: es la marca de sesion que llevan el propietario y el
  * arrendatario por igual (ver `RolUsuario`).
  */
-export type RolResidencia = 'propietario' | 'arrendatario' | 'autorizado'
+/**
+ * `familiar`: la familia o el acompañante de quien vive ahí (2026-10-02): vive en
+ * la unidad, no vota y no registra a nadie.
+ */
+export type RolResidencia = 'propietario' | 'arrendatario' | 'familiar' | 'autorizado'
 
 /** Vinculo entre una persona y una unidad. Define el rol efectivo (RN-02). */
+/** Por qué se inhabilita a alguien en una unidad. */
+export type MotivoCierreVinculo = 'cambio_propietario' | 'otro'
+
 export interface Residencia {
   id: string
   personaId: string
@@ -121,12 +128,45 @@ export interface Residencia {
   reside: boolean
   /** Registro que la origino, si nacio por CU-R-27. Las de la semilla no tienen. */
   registroId?: string
+  /**
+   * Por qué y quién cerró el vínculo (RN-61, RN-65). «Cambio de propietario» es
+   * la venta: el anterior sale y la administración registra al nuevo (RN-63).
+   */
+  /**
+   * Los cambios de condición o de fecha de salida, en orden (RN-68, 2026-10-02):
+   * «Cambiar» no repite el trámite, pero deja rastro de quién cambió qué.
+   */
+  cambios?: Array<{
+    condicionAntes: CondicionRegistro
+    condicion: CondicionRegistro
+    hastaAntes?: FechaISO
+    hasta?: FechaISO
+    por: string
+    aprobadoPor?: string
+    en: FechaHoraISO
+  }>
+  /**
+   * Un cambio que espera al propietario: el arrendatario alargó la estadía de su
+   * visitante a más de 7 días (RN-60).
+   */
+  cambioPendiente?: { condicion: CondicionRegistro; hasta?: FechaISO; pedidoPor: string; pedidoEn: FechaHoraISO }
+  /** La fecha de salida de la que ya se avisó, para no repetir el aviso. */
+  avisoFinPara?: FechaISO
+  /** El último cambio que el propietario no aprobó, con su motivo. */
+  cambioNoAprobado?: { hasta?: FechaISO; motivo: string; por: string; en: FechaHoraISO }
+  cierre?: {
+    motivo: MotivoCierreVinculo
+    detalle?: string
+    cerradoPor: string
+    cerradoEn: string
+  }
 }
 
 // ---------------------------------------------------------------------------
 // Cartera
 // ---------------------------------------------------------------------------
-export type TipoCuota = 'ordinaria' | 'extraordinaria' | 'interes' | 'sancion'
+/** `uso_zona`: el cobro por usar una zona comun, al cerrar la reserva (RN-119). */
+export type TipoCuota = 'ordinaria' | 'extraordinaria' | 'interes' | 'sancion' | 'uso_zona'
 
 /**
  * Estado de una cuota. `abonada` es el estado intermedio: ya recibio pagos
@@ -417,9 +457,107 @@ export interface ZonaComun {
   duracionBloqueHoras: number
   anticipacionMinimaHoras: number
   cupoMensualPorUnidad: number
+  /**
+   * Fotos de la zona, para reservar viendo como es (RN-104, Mary 2026-10-01).
+   * Configuracion, no registro: se agregan y se quitan desde la consola. Hasta
+   * cinco, reducidas (ADR-0009).
+   */
+  fotos?: Soporte[]
+  /**
+   * Especificaciones generales de la zona, en palabras del administrador
+   * (RN-104, Mary 2026-10-01): que incluye, que no, condiciones de uso.
+   * Texto libre, un renglon por punto; el residente lo ve al reservar.
+   */
+  especificaciones?: string
+  /**
+   * Si la zona recibe reservas (CU-A-10, RN-107). Ausente es activa: las zonas
+   * que ya existian no tienen que migrarse. Una zona no se borra, se desactiva:
+   * su historia de reservas sigue apuntandole.
+   */
+  activa?: boolean
+  desactivadaEn?: FechaHoraISO
+  /** Por que se desactivo; es la justificacion que les llega a quienes tenian reserva. */
+  motivoDesactivacion?: string
+  /**
+   * Cierres por mantenimiento (RN-108): la zona sigue activa pero no se
+   * reserva entre dos fechas. Se guardan todos, tambien los levantados: son la
+   * historia de la zona.
+   */
+  cierres?: CierreZona[]
+  /**
+   * Lo que cuesta usarla (RN-109): valor por reserva. Ausente o 0 es gratis.
+   */
+  valorUso?: Dinero
+  /** Deposito de garantia, reembolsable (RN-109). Ausente o 0 es que no aplica. */
+  deposito?: Dinero
+  /** El documento que autoriza el cobro y el deposito (RN-45, RN-109). */
+  respaldoCobro?: RespaldoCobroZona
+  /** La multa del catalogo que aplica si no se cancela a tiempo (RN-110). */
+  multaNoCancelar?: MultaNoCancelar
+  /**
+   * Como se usa (RN-111). `exclusivo`: el turno es de una sola unidad (el
+   * salon). `compartido`: varias unidades en el mismo turno hasta llenar el
+   * aforo (el gimnasio). Ausente es exclusivo, como funcionaba antes.
+   */
+  modoUso?: ModoUsoZona
+  /**
+   * Horario por dia de la semana (RN-114). Ausente: abre todos los dias con
+   * `horaInicio`–`horaFin`. Presente: solo abre los dias que estan, cada uno
+   * con su horario.
+   */
+  horarioSemanal?: HorarioDia[]
+  /**
+   * Hasta cuantas horas antes del turno se puede cancelar (RN-128). Ausente o
+   * 0: hasta que empiece. Despues de ese limite ya no se cancela.
+   */
+  horasLimiteCancelacion?: number
 }
 
-export type EstadoReserva = 'solicitada' | 'confirmada' | 'rechazada' | 'cancelada'
+/** Un dia de la semana en que abre la zona. `dia`: 0 domingo … 6 sabado. */
+export interface HorarioDia {
+  dia: number
+  horaInicio: Hora
+  horaFin: Hora
+}
+
+export type ModoUsoZona = 'exclusivo' | 'compartido'
+
+/** Que documento autoriza cobrar por usar la zona (RN-109). */
+export interface RespaldoCobroZona {
+  origen: OrigenRespaldo
+  referencia: string
+  /** Solo con `origen: 'otro'`: cual es el documento (RN-38). */
+  documento?: string
+}
+
+/**
+ * RN-110 — La multa por no cancelar sale del catalogo de multas (CU-A-22):
+ * el valor y el respaldo son los del concepto, no se escriben aqui.
+ */
+export interface MultaNoCancelar {
+  conceptoId: string
+  /** Hasta cuantas horas antes de la reserva se puede cancelar sin multa. */
+  horasParaCancelar: number
+}
+
+/** Un cierre temporal de una zona comun (RN-108). */
+export interface CierreZona {
+  id: string
+  desde: FechaISO
+  hasta: FechaISO
+  motivo: string
+  registradoEn: FechaHoraISO
+  /** Si la administracion lo termino antes de `hasta`: desde ese dia se reserva otra vez. */
+  levantadoEn?: FechaHoraISO
+  /** El comunicado con que se aviso a toda la copropiedad, si se escogio (RN-117). */
+  comunicadoId?: string
+}
+
+/**
+ * `vencida`: nadie la aprobo ni la rechazo antes de su turno (RN-122, CU-S-03).
+ * El turno se libera y al residente se le avisa.
+ */
+export type EstadoReserva = 'solicitada' | 'confirmada' | 'rechazada' | 'cancelada' | 'vencida'
 
 export interface Reserva {
   id: string
@@ -432,6 +570,71 @@ export interface Reserva {
   estado: EstadoReserva
   motivoRechazo?: string
   creadaEn: FechaHoraISO
+  /**
+   * Cuando la cancela la administracion y no el residente (RN-107): el motivo
+   * que se le mando. Sin el, «cancelada» no le dice a quien reservo por que.
+   */
+  motivoCancelacion?: string
+  canceladaEn?: FechaHoraISO
+  /**
+   * Cuantas personas van, contando a quien reserva (RN-113). En una zona
+   * compartida es lo que llena el turno (RN-111). Ausente cuenta como una.
+   */
+  personas?: number
+  /**
+   * El residente la cancelo dentro del plazo con multa, despues de ver el
+   * aviso (RN-112). No impone nada: es el dato con el que la administracion
+   * decide si abre el proceso.
+   */
+  canceladaFueraDePlazo?: boolean
+  /**
+   * Lo que costaba cuando se reservo (RN-118). Se copia de la zona al crear la
+   * reserva: si la administracion cambia el precio despues, lo pactado no cambia.
+   */
+  valorUso?: Dinero
+  deposito?: Dinero
+  /** Cuando la administracion recibio el deposito (RN-120). */
+  depositoRecibidoEn?: FechaHoraISO
+  /** Como termino: se uso o no se presento (RN-119 a RN-121). */
+  cierre?: CierreReserva
+  /** El proceso por la multa, si la administracion lo abrio (RN-121). */
+  sancionId?: string
+  /** Cuando vencio sin respuesta (RN-122). */
+  vencidaEn?: FechaHoraISO
+  /** Cuando se le recordo al residente (RN-125): una sola vez. */
+  recordatorioEnviadoEn?: FechaHoraISO
+  /**
+   * Las condiciones que el residente acepto al reservar, tal como las leyo
+   * (RN-124): valor, deposito y multa. Es la constancia si despues las reclama.
+   */
+  condicionesAceptadas?: { aceptadasEn: FechaHoraISO; texto: string }
+  /** Los nombres de los invitados, para porteria (RN-126). */
+  invitados?: string[]
+  /** El limite para cancelar con que se reservo, copiado de la zona (RN-128, RN-118). */
+  horasLimiteCancelacion?: number
+}
+
+/**
+ * El cierre de una reserva, despues del turno (RN-119). Es el momento en que
+ * la plata se mueve: el cobro por uso, el deposito y, si no se presento, la
+ * multa.
+ */
+export interface CierreReserva {
+  resultado: 'usada' | 'no_se_presento'
+  registradoEn: FechaHoraISO
+  registradoPor: string
+  /** Como quedo la zona al recibirla (RN-120). Solo si se uso. */
+  estadoZona?: 'bien' | 'con_novedades'
+  observaciones?: string
+  foto?: Soporte
+  /** La cuota del cobro por uso, en el estado de cuenta (RN-119). */
+  cuotaUsoId?: string
+  /** Lo que se devolvio y lo que se retuvo del deposito, con su motivo (RN-120). */
+  depositoDevuelto?: Dinero
+  depositoRetenido?: Dinero
+  motivoRetencion?: string
+  /** La cerró el sistema al terminar el turno: no movía plata (RN-129). */
+  automatico?: boolean
 }
 
 // ---------------------------------------------------------------------------
@@ -475,7 +678,7 @@ export interface Pqrs {
 // ---------------------------------------------------------------------------
 // Comunicados
 // ---------------------------------------------------------------------------
-export type CategoriaComunicado = 'general' | 'urgente' | 'mantenimiento' | 'asamblea'
+export type CategoriaComunicado = 'general' | 'urgente' | 'mantenimiento' | 'asamblea' | 'proyecto'
 
 export interface Comunicado {
   id: string
@@ -489,6 +692,8 @@ export interface Comunicado {
   autor: string
   /** Ids de persona que ya lo abrieron. */
   leidoPor: string[]
+  /** Si lo genero un avance de proyecto (RN-101): desde la cartelera se llega al tablero. */
+  proyectoId?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -511,9 +716,17 @@ export interface Correspondencia {
    */
   registradoPor: string
   estado: EstadoCorrespondencia
-  /** El residente que la recogio. */
+  /** El residente que la recogio, segun porteria. */
   recibidoPor?: string
   fechaEntrega?: FechaHoraISO
+  /**
+   * La confirmacion del residente desde su app: «Recibido» (RN-103, Mary
+   * 2026-10-01). Es la otra mitad de la entrega: porteria dice que lo
+   * entrego; quien lo recibio dice que lo recibio. Con las dos, la cadena de
+   * custodia cierra; con una sola, queda la palabra de porteria.
+   */
+  confirmadoPor?: string
+  confirmadoEn?: FechaHoraISO
 }
 
 // ---------------------------------------------------------------------------
@@ -533,6 +746,8 @@ export interface Visitante {
   /** Codigo que presenta el visitante en porteria (RN-16, RN-17). */
   codigo: string
   recurrente: boolean
+  /** El visitante frecuente: los días de la semana en que entra (0 = domingo). */
+  dias?: number[]
   estado: EstadoVisitante
   creadoEn: FechaHoraISO
   /** Registro que lo origino (CU-R-27). Los de la semilla no tienen. */
@@ -549,13 +764,29 @@ export interface Visitante {
 // ---------------------------------------------------------------------------
 
 /**
- * Que es la persona que se registra.
+ * **Quién es** la persona que se registra (Mary, 2026-10-02).
  *
- * La categoria no es una etiqueta: **decide la vigencia y lo que se crea al
- * autorizar**. Un residente queda vinculado a la unidad sin fecha de fin; un
- * residente temporal, con ella; un visitante no se vincula, obtiene un codigo.
+ * Antes la categoría mezclaba dos preguntas —quién es y cómo se queda— y por eso
+ * existía un «residente temporal» aparte. Ahora son dos datos: este, y la
+ * condición de abajo. «Con este cambio el usuario denominado residente temporal
+ * ya no va» (Mary, 2026-10-02).
  */
-export type CategoriaRegistro = 'residente' | 'residente_temporal' | 'visitante'
+/** El documento con que se identifica la persona. */
+export type TipoIdentificacion = 'cc' | 'ti' | 'rc' | 'ce' | 'pasaporte'
+
+export type CategoriaRegistro = 'propietario' | 'arrendatario' | 'familiar' | 'visitante'
+
+/**
+ * **Cómo se queda** en la unidad (RN-62, RN-68). Se escoge siempre, al crear a
+ * cualquiera: «cuando se crea a un propietario, arrendatario y/o visitante se
+ * debe seleccionar si es residente, no residente o residente temporal» (Mary,
+ * 2026-10-02). El visitante no puede ser residente: quien vive ahí no es visita.
+ */
+/**
+ * `frecuente`: solo el visitante que viene ciertos días de la semana —la
+ * empleada del servicio, la niñera, el conductor— hasta una fecha (2026-10-02).
+ */
+export type CondicionRegistro = 'residente' | 'no_residente' | 'temporal' | 'frecuente'
 
 /**
  * Los cinco estados por los que pasa un registro.
@@ -596,21 +827,30 @@ export interface RegistroPersona {
   unidadId: string
   /** Quien lo creo. Propietario para residentes; cualquier residente para visitantes. */
   creadoPor: string
+  /** Quién es: propietario, arrendatario o visitante. */
   categoria: CategoriaRegistro
-  /** Solo para las categorias de residente: con que rol queda vinculado. */
-  rol?: RolResidencia
+  /** Cómo se queda: residente, no residente o temporal (RN-62, RN-68). */
+  condicion: CondicionRegistro
   /**
-   * Si va a vivir en la unidad. Se pregunta **solo cuando el titulo es
-   * propietario**: el arrendatario arrienda para vivir ahi, y al temporal se le
-   * llama temporal justamente porque vive ahi un tiempo.
+   * RN-57 — A la visita de un día se le **pueden** pedir las fotos: lo decide
+   * quien la registra (Mary, 2026-10-02: «para el visitante también debe existir
+   * la opción de las fotos»). A los demás siempre se les piden.
    */
-  reside?: boolean
+  pedirFotos?: boolean
+  /** Días de la semana en que viene el visitante frecuente (0 = domingo). */
+  dias?: number[]
+  /**
+   * Menor de edad (2026-10-02): no se le exige celular ni correo, y su documento
+   * puede ser tarjeta de identidad o registro civil.
+   */
+  menorDeEdad?: boolean
+  tipoIdentificacion?: TipoIdentificacion
   nombres: string
   apellidos: string
   documento: string
   email: string
   telefono: string
-  /** Obligatoria salvo para el residente sin fecha de fin (RN-62). */
+  /** Obligatoria para el temporal y el visitante (RN-62). */
   vigenciaDesde?: FechaISO
   vigenciaHasta?: FechaISO
   placa?: string
@@ -641,6 +881,12 @@ export interface RegistroPersona {
    * que alguien tomo y el expediente tiene que decir quien.
    */
   soportesNoObligatorios?: { marcadoPor: string; marcadoEn: FechaHoraISO }
+  /**
+   * RN-60 — La estadía larga que registra un arrendatario: un visitante temporal
+   * de **más de 7 días** lo aprueba el propietario (Mary, 2026-10-02). Que
+   * exista significa que hace falta; `aprobadoPor` dice que ya se dio.
+   */
+  aprobacionPropietario?: { aprobadoPor?: string; aprobadoEn?: FechaHoraISO }
   estado: EstadoRegistro
   creadoEn: FechaHoraISO
   soportesEn?: FechaHoraISO
@@ -681,7 +927,18 @@ export interface AccesoSoporte {
 // recibi nada» es la discusion mas comun de una copropiedad.
 // ---------------------------------------------------------------------------
 
-export type MotivoMensaje = 'registro_autorizado' | 'registro_rechazado'
+export type MotivoMensaje =
+  | 'registro_autorizado'
+  | 'registro_rechazado'
+  | 'avance_proyecto'
+  | 'reserva_cancelada'
+  | 'cierre_zona'
+  | 'reserva_decidida'
+  | 'reserva_vencida'
+  | 'recordatorio_reserva'
+  | 'estadia_por_aprobar'
+  | 'estadia_decidida'
+  | 'fin_de_estadia'
 
 export interface Mensaje {
   id: string
@@ -692,7 +949,60 @@ export interface Mensaje {
   motivo: MotivoMensaje
   /** El registro que lo origino, para poder volver de uno al otro. */
   registroId?: string
+  /** El proyecto cuyo avance lo origino (RN-101). */
+  proyectoId?: string
+  /** La reserva cuya cancelacion lo origino (RN-107). */
+  reservaId?: string
+  /** La zona cuyo cierre por mantenimiento se aviso a todos (RN-117). */
+  zonaId?: string
   enviadoEn: FechaHoraISO
+}
+
+// ---------------------------------------------------------------------------
+// Proyectos de la copropiedad — CU-A-28, CU-R-32 · RN-100, RN-101
+//
+// «El administrador registra un proyecto y va registrando el avance; a los
+// propietarios les llega un mensaje con los avances y pueden entrar a ver un
+// tablero» (Mary, 2026-09-29). Una obra —la cubierta, el ascensor, la
+// fachada— es lo que mas plata mueve en una copropiedad y lo que menos se ve
+// desde un apartamento. El tablero existe para que el propietario que pago la
+// extraordinaria sepa en que va sin tener que preguntar.
+// ---------------------------------------------------------------------------
+
+/**
+ * Un avance del proyecto. **No se edita ni se borra**: si se registro mal, se
+ * registra otro que lo corrija (RN-100, RN-61). Cada uno queda con fecha,
+ * porcentaje y quien lo registro, que es lo que permite reconstruir la
+ * historia de la obra el dia que alguien la discuta.
+ */
+export interface AvanceProyecto {
+  id: string
+  fecha: FechaHoraISO
+  /** 0 a 100. Puede bajar respecto al anterior, pero entonces exige explicacion (RN-100). */
+  porcentaje: number
+  titulo: string
+  detalle: string
+  /** Una foto de la obra, si la hubo (ADR-0009). */
+  foto?: Soporte
+  registradoPor: string
+  /** El comunicado que se publico con este avance (RN-101). */
+  comunicadoId?: string
+}
+
+export interface Proyecto {
+  id: string
+  copropiedadId: string
+  nombre: string
+  descripcion: string
+  /** Quien ejecuta: el contratista, la empresa, el comite. Texto libre. */
+  responsable?: string
+  fechaInicio?: FechaISO
+  fechaFinPrevista?: FechaISO
+  presupuesto?: number
+  /** El estado **se deriva** de los avances (`estadoProyecto`); no se guarda. */
+  avances: AvanceProyecto[]
+  creadoPor: string
+  creadoEn: FechaHoraISO
 }
 
 // ---------------------------------------------------------------------------
@@ -761,7 +1071,22 @@ export interface Asamblea {
    */
   numeroConvocatoria: 1 | 2
   lugar?: string
+  /**
+   * El enlace de la reunion o de la transmision (ADR-0007). Idiky no
+   * transmite: enlaza. **De que herramienta es se deduce del enlace** (RN-98):
+   * Zoom, Meet o Teams son reuniones de dos vias; Vimeo o YouTube son
+   * transmisiones de una sola, y eso cambia como interviene quien esta
+   * conectado.
+   */
   enlaceTransmision?: string
+  /**
+   * La grabacion de la sesion, si la hubo — RN-99.
+   *
+   * Vimeo y las demas herramientas la guardan solas; aqui solo se enlaza, al
+   * cerrar la asamblea, para que el acta la cite. **No reemplaza nada**: la
+   * asistencia, los votos y el acta siguen siendo lo que prueba la asamblea.
+   */
+  enlaceGrabacion?: string
   ordenDelDia: PuntoOrdenDelDia[]
   estado: EstadoAsamblea
   /** Lo que convoca: numero y fecha del acta o de la citacion. */
@@ -1035,7 +1360,7 @@ export interface Voto {
 // ---------------------------------------------------------------------------
 // Documentos formales — CU-R-12
 // ---------------------------------------------------------------------------
-export type TipoDocumento = 'paz_y_salvo' | 'acta' | 'poder'
+export type TipoDocumento = 'paz_y_salvo' | 'acta' | 'poder' | 'estado_cuenta'
 
 export interface Documento {
   id: string
@@ -1066,7 +1391,42 @@ export interface Documento {
   cubiertoHasta?: FechaISO
   /** La asamblea a la que se refiere: el acta da fe de ella, el poder vale para ella. */
   asambleaId?: string
+  /**
+   * Solo en el estado de cuenta (CU-R-18, RN-127): lo que afirma, congelado al
+   * emitirlo. Reimprimirlo da el mismo papel aunque la cartera siga su curso.
+   */
+  estadoCuenta?: EstadoCuentaCongelado
+  /** Quien lo emitio: el residente desde su app (CU-R-12) o la administracion (CU-A-13). */
+  emitidoPor?: string
   estado: 'vigente' | 'anulado'
+  /** Un documento no se borra: se anula, con motivo (ADR-0006 §5, O3). */
+  anuladoEn?: FechaHoraISO
+  anuladoPor?: string
+  motivoAnulacion?: string
+}
+
+/** Un renglón del estado de cuenta: un cobro o un pago aplicado (RN-127). */
+export interface MovimientoCuenta {
+  fecha: FechaISO
+  tipo: 'cargo' | 'abono'
+  concepto: string
+  valor: Dinero
+  /** El saldo después de este movimiento. */
+  saldo: Dinero
+}
+
+export interface EstadoCuentaCongelado {
+  /** Periodos `AAAA-MM`, incluidos los dos. */
+  desde: Periodo
+  hasta: Periodo
+  saldoInicial: Dinero
+  movimientos: MovimientoCuenta[]
+  totalCargos: Dinero
+  totalAbonos: Dinero
+  /** Positivo: lo que se debe. Negativo: saldo a favor. */
+  saldoFinal: Dinero
+  /** Quien lo pidió. */
+  solicitadoPor: string
 }
 
 // ---------------------------------------------------------------------------
@@ -1133,6 +1493,7 @@ export interface BaseDatos {
   visitantes: Visitante[]
   registros: RegistroPersona[]
   mensajes: Mensaje[]
+  proyectos: Proyecto[]
   accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
   asistencias: Asistencia[]
@@ -1150,5 +1511,7 @@ export interface BaseDatos {
     acta: number
     /** Consecutivo del recibo de caja (RN-77). */
     recibo: number
+    /** Consecutivo del estado de cuenta (RN-36, CU-R-18). Ausente en bases viejas: empieza en 1. */
+    estadoCuenta?: number
   }
 }

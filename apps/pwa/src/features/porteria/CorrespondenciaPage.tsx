@@ -142,6 +142,12 @@ export function CorrespondenciaPage() {
                             a {registro.recibidoPor}
                           </div>
                         )}
+                        {/* RN-103 — La otra mitad: el residente confirmó desde su app. */}
+                        {registro.confirmadoEn && (
+                          <div className="subtitulo">
+                            <span className="chip chip--exito">Confirmado por el residente</span>
+                          </div>
+                        )}
                       </td>
                       <td style={{ textAlign: 'right' }}>
                         {registro.estado === 'en_porteria' && (

@@ -22,7 +22,7 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { etiquetaUnidad, residenciaVigente } from '../../dominio/reglas'
+import { etiquetaUnidad, residenciaVigente, puedeVerRostros } from '../../dominio/reglas'
 import { iniciales } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
@@ -32,7 +32,8 @@ export function ResidentesPage() {
   const { sesion } = useSesion()
   const [busqueda, setBusqueda] = useState('')
 
-  if (!sesion) return null
+  // RN-67 — La portería ve el rostro de quien vive aquí; el documento, nunca.
+  if (!sesion || !puedeVerRostros(sesion.rol)) return null
 
   const unidades = sel.unidadesDe(bd, sesion.copropiedadId)
   const porUnidad = new Map(unidades.map((unidad) => [unidad.id, unidad]))

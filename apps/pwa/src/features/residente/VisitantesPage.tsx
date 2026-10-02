@@ -11,7 +11,7 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { crearVisitante, revocarVisitante } from '../../datos/repositorio'
-import { estadoRealVisitante, hoyISO, sumarDias } from '../../dominio/reglas'
+import { NOMBRES_DIAS, estadoRealVisitante, hoyISO, puedeInhabilitar, sumarDias } from '../../dominio/reglas'
 import { formatearFecha } from '../../utilidades/formato'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
@@ -109,6 +109,7 @@ export function VisitantesPage() {
                       {visitante.vigenciaDesde === visitante.vigenciaHasta
                         ? formatearFecha(visitante.vigenciaDesde)
                         : `${formatearFecha(visitante.vigenciaDesde)} a ${formatearFecha(visitante.vigenciaHasta)}`}
+                      {visitante.dias?.length ? ` · ${visitante.dias.map((d) => NOMBRES_DIAS[d]).join(', ')}` : ''}
                     </span>
                   </div>
                   <div className="columna" style={{ alignItems: 'flex-end', gap: 'var(--e2)' }}>
@@ -205,18 +206,26 @@ export function VisitantesPage() {
             </div>
             <p className="subtitulo" style={{ marginTop: 'var(--e2)' }}>
               Valido hasta el {formatearFecha(visitanteEnDetalle.vigenciaHasta)}
+              {visitanteEnDetalle.dias?.length
+                ? `, solo los ${visitanteEnDetalle.dias.map((d) => NOMBRES_DIAS[d]).join(', ')}`
+                : ''}
             </p>
             <p className="ayuda-campo" style={{ marginTop: 'var(--e3)' }}>
               Demo: el patron es ilustrativo, porteria valida el codigo alfanumerico.
             </p>
-            {estadoRealVisitante(visitanteEnDetalle) === 'activo' && (
+            {estadoRealVisitante(visitanteEnDetalle) === 'activo' &&
+              puedeInhabilitar({
+                ...sel.responsablesDeVisita(bd, visitanteEnDetalle),
+                personaId: sesion.personaId,
+                rol: sesion.rol,
+              }) && (
               <button
                 className="boton boton--peligro boton--bloque"
                 style={{ marginTop: 'var(--e4)' }}
                 disabled={cargando}
                 onClick={async () => {
                   await ejecutar(
-                    (base) => revocarVisitante(base, visitanteEnDetalle.id),
+                    (base) => revocarVisitante(base, { visitanteId: visitanteEnDetalle.id, personaId: sesion.personaId }),
                     'Autorización revocada.',
                   )
                   setVerCodigo(null)

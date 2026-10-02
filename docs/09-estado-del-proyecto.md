@@ -20,9 +20,9 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
-| **Autenticación** | El **flujo** está dibujado —documento, clave de 4 números, código en dispositivo nuevo, activación y **huella**— pero **no autentica**: no se guarda ninguna clave. La huella sí es real (WebAuthn); falta el servidor que la comprobaría ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 71 documentados: 38 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes, 1 ⛔ retirado |
-| **Reglas de negocio** | 97 del demo (RN-01…RN-97; RN-41 retirada) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-97, de las asambleas y registros de Mary |
+| **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
+| **Casos de uso** | 75 documentados: 48 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 13 ⬜ pendientes, 3 ⛔ retirados |
+| **Reglas de negocio** | 129 del demo (RN-01…RN-129; RN-07, RN-11, RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-129, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -45,7 +45,10 @@ asistencia según la modalidad** (CU-R-21) · cartelera de comunicados · autori
 visitantes con código · consulta de correspondencia · consulta del coeficiente ·
 **el proceso sancionatorio de su unidad, con descargos e impugnación** (CU-R-29).
 
-**Consola del administrador:** **asambleas: convocar según la modalidad, instalar y ver la
+**Consola del administrador:** **zonas comunes: crearlas, cambiarles las reglas, cerrarlas por
+mantenimiento y desactivarlas, avisando con el motivo a quien tenía reserva, con su costo,
+depósito y multa por no cancelar** (CU-A-10) · **calendario de ocupación de cada zona** (CU-A-29) · **informe de uso de las zonas, descargable para
+Excel** (CU-A-30) · **asambleas: convocar según la modalidad, instalar y ver la
 asistencia con su coeficiente** (CU-A-12, CU-A-17) · **registro de propietarios**, con la tabla
 de quién registró a quién (CU-A-26) · **el acta de la asamblea, armada con lo que exige el artículo 47**
 (CU-A-20) · **catálogo de multas con su respaldo, y la reincidencia con el suyo** (CU-A-22) · **procesos sancionatorios con debido proceso completo** —notificar citando
@@ -107,6 +110,850 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-02 · Mary + IA (Claude) · Familia, menores, visitante frecuente, fotos en cadena y aviso de fin de estadía
+
+Mary: *«sí a las 5 propuestas»*. **Sin números nuevos** (revisiones de RN-60, RN-62 y RN-67).
+
+| # | Qué | Dónde |
+|---|---|---|
+| 1 | Tipo **Familiar o acompañante** (rol `familiar`): lo registran propietario y arrendatario; residente o temporal; no vota ni registra. Sale con el arrendatario | `dominio/tipos.ts`, `dominio/reglas.ts`, `componentes/Registro.tsx`, `cerrarLoQueDejo` |
+| 2 | **Menores de edad**: sin celular obligatorio; tarjeta de identidad o registro civil | `TIPOS_IDENTIFICACION`, `admiteMenor`, `faltaContacto` |
+| 3 | **Visitante frecuente**: días de la semana y fecha de fin, con fotos; la portería lo deja entrar solo esos días | `estadoRealVisitante`, `crearVisitanteDeRegistro`, `features/residente/VisitantesPage.tsx` |
+| 4 | **Fotos en cadena**: el propietario ve los soportes de lo que registró su arrendatario | `puedeVerSoportes`, `responsablesDeRegistro` |
+| 5 | **Aviso dos días antes** del fin de una estadía temporal, a quien la registró; «Termina pronto» en la lista | `avisarFinesDeEstadia`, `features/residente/PersonasPage.tsx` |
+
+**Pruebas:** nuevas `prueba-cinco` (19 casos) y `prueba-cinco-ui` (9, en pantalla). Las de
+usuarios siguen en verde. **Ojo:** `prueba-autocierre` y `prueba-seis` (reservas) fallan a esta
+hora del día **también con el código anterior** (se comprobó contra `569bd23`): dependen de que
+las reservas de hoy de la semilla todavía no hayan pasado. No las causó este cambio; conviene
+hacerlas independientes de la hora.
+
+---
+
+### 2026-10-02 · Mary + IA (Claude) · Inhabilitar en cadena, cambiar sin repetir el trámite y contacto obligatorio
+
+Mary respondió las preguntas abiertas sobre crear e inhabilitar usuarios: *«sí, 1, 3, 4 y 6»*,
+*«para el 2 debe inhabilitar el que lo creó o por orden ascendente el propietario o
+administrador según sea el caso»* y *«no existe un propietario temporal»*. **Sin números nuevos**:
+revisiones de RN-60, RN-65 y RN-68 en `docs/05-modelo-de-datos.md`.
+
+| # | Qué | Dónde |
+|---|---|---|
+| 1 | Al inhabilitar a un arrendatario salen sus visitantes (temporales y visitas por venir) y se anulan sus registros en curso | `datos/repositorio.ts` (`cerrarLoQueDejo`) |
+| 2 | Inhabilita quien registró o, subiendo, el propietario o la administración; también para revocar la visita de un día | `datos/selectores.ts` (`responsablesDelVinculo`, `responsablesDeVisita`), `revocarVisitante`, `features/residente/VisitantesPage.tsx` |
+| 3 y 4 | Botón **Cambiar**: condición o fecha de salida sin repetir el trámite; si el arrendatario alarga a su visitante a más de 7 días, aprueba el propietario | `componentes/CambiarEstadia.tsx`, `cambiarEstadia`, `decidirCambioComoPropietario`, `features/residente/PersonasPage.tsx`, `features/admin/UnidadesPage.tsx` |
+| 5 | Ya no hay propietario temporal: residente o no residente | `dominio/reglas.ts` (`condicionesPosibles`) |
+| 6 | Celular o correo obligatorio para propietario y arrendatario | `dominio/reglas.ts` (`faltaContacto`), formulario y repositorio |
+
+**Pruebas:** nuevas `prueba-cambios` (18 casos) y `prueba-cambios-ui` (7, en pantalla); las
+anteriores siguen en verde.
+
+---
+
+### 2026-10-02 · Mary + IA (Claude) · Quién es y cómo se queda: el registro con condición de residencia
+
+Mary: *«cuando se crea a un propietario, arrendatario y/o visitante se debe seleccionar si es
+residente, no residente o residente temporal»* y *«con este cambio el usuario denominado residente
+temporal ya no va»*. **No se gastaron números**: se revisaron RN-57, RN-60, RN-62 y RN-68 (con
+fecha, en `docs/05-modelo-de-datos.md`).
+
+**Lo que cambió en el registro** (`apps/pwa/src/componentes/Registro.tsx`):
+- Se escoge **quién es** (propietario, arrendatario o visitante) y **cómo se queda** (residente,
+  no residente o residente temporal). Solo se ofrece lo que aplica: **no residente, solo el
+  propietario** (*«el arrendatario no puede tener la categoría de no residente»*); el visitante,
+  **de un día o temporal**.
+- La **visita de un día puede llevar fotos** si quien la registra las pide (*«para el visitante
+  también debe existir la opción de las fotos»*). A todos los demás se les piden siempre.
+- **El arrendatario registra visitantes temporales**; si se quedan **más de 7 días**, el
+  propietario aprueba la estadía antes de que el arrendatario la autorice (*«si es más de una
+  semana debe ser aprobado por el propietario»*). Le llega un aviso; si no la aprueba, escribe
+  por qué y el registro queda rechazado.
+
+**Dónde:** `dominio/tipos.ts` (`CategoriaRegistro`, `CondicionRegistro`, `pedirFotos`,
+`aprobacionPropietario`), `dominio/reglas.ts` (`condicionesPosibles`, `marcaResidente`,
+`requiereAprobacionPropietario`, `esperaAlPropietario`), `datos/repositorio.ts`
+(`crearRegistroPersona`, `autorizarRegistro`, `decidirEstadiaComoPropietario`),
+`features/residente/PersonasPage.tsx` y `features/admin/RegistrosPage.tsx`.
+
+**Semilla v32:** las unidades 301 y 502, de las arrendatarias Sandra y Diana, ahora tienen
+propietario **no residente** (Gustavo Mejía y Beatriz Franco). Antes no tenían dueño, y no había
+a quién pedirle la aprobación. Al abrir el demo, los datos se reinician. **Gustavo está en la lista de perfiles del demo** (semilla v33), para entrar como él y aprobar la estadía.
+
+**Pruebas:** nuevas `prueba-condicion` (todas las combinaciones, la aprobación y las fotos
+opcionales) y `prueba-condicion-ui` (10 casos en pantalla); las 19 anteriores siguen en verde.
+
+---
+
+### 2026-10-02 · Mary + IA (Claude) · Revisión de la creación de usuarios y el cambio de propietario
+
+Mary: *«podemos revisar la creación de usuarios»*. Se probó el trámite completo y se ajustó a sus
+reglas: *«el propietario lo crea el Administrador de la Copropiedad, si hay más de un propietario
+los crea el usuario creado por el administrador»*, *«arrendatarios los crea el propietario»*,
+*«los visitantes los crea el propietario y/o arrendatario»* y *«para inhabilitar funciona de la
+misma manera»*. **No se gastaron números**: se hicieron cumplir RN-61, RN-63 y RN-65.
+
+**Lo que no se cumplía, y queda corregido:**
+
+| # | Falla | Arreglo | Dónde |
+|---|---|---|---|
+| 1 | La administración podía registrar un segundo propietario | Solo el primero; los demás los registra él | `datos/repositorio.ts`, `dominio/reglas.ts` (`motivoNoRegistraAdministracion`), `features/admin/RegistrosPage.tsx` |
+| 2 | La administración podía crear arrendatarios | El formulario de la consola ya no ofrece el título | `componentes/Registro.tsx` (`rolFijo`) |
+| 3 | «Vincular» en Unidades creaba a cualquiera sin fotos ni autorización de datos | Se quitó; queda un enlace a Registros | `features/admin/UnidadesPage.tsx` |
+| 4 | El residente temporal no podía entrar a la app | La puerta mira la vigencia, no si tiene fecha de fin | `features/auth/perfil.ts` |
+| 5 | La misma persona podía quedar dos veces en la unidad | Se impide al registrar y al autorizar | `datos/repositorio.ts` |
+| 6 | Quien se inhabilitaba seguía activo hasta el otro día | Deja de estar el mismo día | `datos/repositorio.ts` (`desvincularResidente`) |
+| 7 | Inhabilitar no revisaba quién lo pedía | RN-65 en el repositorio; nadie se inhabilita a sí mismo | `datos/repositorio.ts` |
+
+**El cambio de propietario** (idea de Mary: *«colocar una opción cuando se vaya a inhabilitar al
+propietario que sea por cambio de propietario»*). En **Unidades**, al inhabilitar a un
+propietario se escoge el motivo, con una explicación opcional (p. ej. la escritura). Si la unidad
+queda sin dueño, el sistema lleva a **Registros** con la unidad escogida. **Los arrendatarios
+siguen** (*«puede ser posible que continúe con los mismos arrendatarios»*) y **los hereda el nuevo
+propietario**: puede dejarlos o inhabilitarlos. Lo que el anterior dejó en curso se anula con ese
+motivo. El motivo queda guardado en el vínculo (`Residencia.cierre`).
+
+**Pruebas:** nuevas `prueba-usuarios` (13 casos), `prueba-venta` (7, en la pantalla) y
+`prueba-herencia` (4); las anteriores siguen en verde.
+
+---
+
+### 2026-10-02 · Mary + IA (Claude) · Auditoría de reglas y limpieza del código
+
+Mary: *«aprovechemos este tiempo para hacer esta auditoría al proyecto, así el código estará más
+limpio»* y *«sí, haz A, B y C»*. **No se gastaron números nuevos ni cambió lo que ve el usuario.**
+
+**A · Reglas repetidas o desactualizadas** (`docs/05-modelo-de-datos.md`):
+- **RN-07 retirada**: decía lo mismo que RN-77 (el pago se aplica a la cuota más antigua). Las
+  referencias en `casos-de-uso/residente.md` y `administrador.md` ahora citan RN-77.
+- **RN-11 retirada**: la reemplazaron RN-110, RN-112 y RN-128 (multa, horario y plazo para cancelar).
+- **RN-09 corregida**: el choque de horario solo aplica a zonas exclusivas; las compartidas tienen aforo (RN-111).
+- **RN-52 corregida**: la portería ve también las reservas del día y sus invitados (RN-116, RN-126).
+- RN-01, RN-31, RN-32 y RN-71 ya se cumplían, pero el código no lo decía: ahora lo cita.
+
+**B · RN-60 se cumple también por dentro** (`apps/pwa/src/datos/repositorio.ts`): antes solo la
+pantalla impedía que un arrendatario registrara a un residente; ahora el repositorio lo rechaza
+aunque se salte la pantalla. La administración sí puede registrar. Igual para RN-67: solo quien
+creó el registro o la administración ven los soportes.
+
+**C · Limpieza sin cambio de comportamiento:**
+- Se borraron funciones que nadie usaba: en `apps/pwa/src/dominio/reglas.ts` (`esperaAplicacion`,
+  `aclaratoriasDe`, `unidadesRepresentadas`, `sancionesPorResolver`, `registrosPorAutorizar`),
+  en `apps/pwa/src/datos/selectores.ts` (`pagoPorId`, `asambleaVigente`) y la interfaz
+  `Consentimiento` en `apps/pwa/src/dominio/consentimiento.ts`.
+- Lo repetido quedó en un solo lugar: `inicioDeReserva` y `finDeReserva` (8 copias de la misma
+  fecha), `avisarAPersona` en el repositorio (5 copias del aviso) y los selectores
+  `propietariosDeUnidad` y `administradorDe` (3 pantallas).
+- `apps/pwa/src/features/porteria/ResidentesPage.tsx`: además del menú, la pantalla misma
+  revisa que quien entra pueda ver rostros.
+
+**Pruebas:** las 15 pruebas del navegador en verde (incluida una nueva de RN-60 y RN-67) y las 36
+pantallas de los tres perfiles abren sin errores.
+
+**Queda recomendado, sin hacer:** partir `reglas.ts` y `repositorio.ts` por módulo, y guardar las
+pruebas del navegador en el repositorio (conversarlo con Daniel).
+
+---
+
+### 2026-10-02 · Mary + IA (Claude) · Puesta al día del catálogo de asambleas
+
+Mary: *«sí, empieza con el catálogo»*. Antes de construir las votaciones desde la consola
+(CU-A-18) se revisó cada caso de uso de asambleas contra el código. **No se escribió código ni se
+gastaron números.**
+
+**Lo que estaba desactualizado:**
+
+| CU | Decía | Queda | Por qué |
+|---|---|---|---|
+| CU-S-07 Quórum en vivo | ⬜ | ✅ | La consola ya muestra, en la asamblea instalada, unidades, coeficiente reunido (presentes y por poder) y cuánto falta (`hayQuorum`, `faltaParaQuorum`) |
+| CU-S-08 Resultado ponderado | ⬜ | 🟡 | Se calcula con la mayoría y la base de la ley (RN-74) y se ve en la app del residente y en el acta; falta en la consola mientras se vota, que llega con CU-A-18 |
+| CU-S-09 Vencer los poderes | ⬜ | ✅ | Por construcción (RN-31): cada poder está atado a una sola asamblea, y en una cerrada no se registra ni se otorga |
+| CU-R-22 Otorgar poder | ⬜ | ⛔ retirado | Lo cubren CU-R-23 (desde la app), CU-R-31 (foto) y CU-A-19 (papel); lo abierto es jurídico (§3 bis) |
+| CU-R-13 Votar | «✅ Hecho» | ✅ Demo | Se igualó la etiqueta; vota también el apoderado |
+
+**Un número repetido.** `casos-de-uso/residente.md` tenía **dos secciones CU-R-23**: la primera
+versión («recibir y ejercer poderes») y la construida («dar poder para que otro vote por mi
+unidad»). La primera quedó marcada como versión anterior, con lo que sí existe de ella (el
+apoderado vota por cada unidad) y lo que **no**: **aceptar o rechazar el poder recibido**. Mary
+distinguió los dos casos y decidió (**T-46**, por construir): *«si es usuario de Idiky lo debería
+aprobar y la administración debe darlo como recibido»*. Si el apoderado no usa Idiky, basta con
+que la administración lo reciba. A los dos les llega un aviso. Necesita una regla nueva: espera el
+rango.
+
+**Lo que sigue pendiente de verdad, confirmado en el código:**
+- **CU-A-18** (⬜): no existe forma de crear, abrir ni cerrar una votación desde la consola. Las
+  del demo vienen de la semilla. **Es lo siguiente**, con el rango nuevo de reglas.
+- **CU-R-20** (🟡): no se confirma la asistencia antes de la asamblea.
+- **CU-A-12** (🟡): falta el documento de citación.
+- **CU-A-21** (⬜): no se administran los coeficientes desde la consola.
+- **CU-A-19** (🟡): el tope de poderes espera la respuesta jurídica (RN-30, §3 bis).
+
+---
+
+### 2026-10-02 · Mary + IA (Claude) · Revisión de reservas: hasta cuándo se cancela y cierre automático (RN-128, RN-129)
+
+Mary: *«antes de esto quiero revisar si en reservas todo está bien o falta algo»*.
+
+**Cómo se revisó.** Las 10 pruebas de reservas (122 comprobaciones) pasaron; solo una había
+quedado vieja, porque contaba tres pestañas y desde el informe son cuatro. Además se probaron
+los casos límite llamando directamente al repositorio, y ahí salieron **dos errores reales**:
+1. Se podía cancelar una reserva con el turno ya pasado, si era del mismo día, o llamando al
+   repositorio. Así se esquivaban el cobro por uso y el «no se presentó».
+2. Una reserva ya cerrada se podía volver a cancelar. El cobro quedaba en el estado de cuenta y
+   la reserva decía «cancelada».
+
+**RN-128 — hasta cuándo se cancela.** Mary: *«debe ser posible cancelar antes, y el
+administrador debe tener un campo en el que parametrice este dato y que este se vea en la vista
+de la reserva al residente»*.
+- Cada zona tiene **«Se puede cancelar hasta (horas antes)»**; en 0, hasta que empiece.
+- El residente lo ve en la información de la zona y en cada reserva suya, con fecha y hora.
+- El límite se copia a la reserva al crearla y entra en las condiciones que acepta.
+- Mary confirmó: una reserva cerrada, rechazada o cancelada no se cancela, y tampoco una
+  vencida.
+- La administración cancela solo antes del turno (punto 3, aprobado); después, la cierra.
+- El cierre por mantenimiento y la desactivación ya no tocan reservas empezadas ni cerradas.
+- El repositorio lo revisa, no solo el botón.
+
+**RN-129 — cierre automático.** Mary: *«de acuerdo con el punto 4, las demás quedan cerradas»*.
+«Por cerrar» muestra solo las reservas que mueven plata. Las gratis se cierran solas como usadas
+al terminar el turno, sin cobro ni mensaje.
+
+**Semilla 31:** el salón se cancela hasta 12 horas antes.
+
+**Verificado:**
+- 10 comprobaciones del límite: los dos errores rechazados, la vencida, el límite al minuto, la
+  administración solo antes, el campo del administrador con su validación (0 a 720) y lo que ve
+  el residente.
+- 5 del cierre automático.
+- Las 13 pruebas anteriores, en verde (147 comprobaciones).
+
+`npm run build` y la ortografía, en verde.
+
+**Rango agotado.** Con RN-129 se acabó el rango de reglas de Mary (RN-98 a RN-129). **Antes de
+la próxima regla hay que pedirle a Daniel uno nuevo.**
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · El paz y salvo desde la consola (CU-A-13)
+
+El segundo de los pendientes cortos de la fase 1.
+
+**Qué hace.** En la consola, **Cartera** tiene ahora dos pestañas: «Cartera» y «Paz y salvo».
+El certificado se emite donde se ve si la unidad debe, sin agregar entradas al menú.
+- Se busca la unidad o el propietario y se ve el saldo **antes** de emitir.
+- Con saldo cero, se emite (`PS-AAAA-NNNN`, con código), a nombre de la administración, y se
+  imprime o se guarda en PDF.
+- Con saldo, no se ofrece emitir: se ofrece ver la deuda.
+- Todos los emitidos se listan, también los que sacó el propietario. Se pueden **anular con
+  motivo**: no se borran, y el propietario ve el anulado con su motivo en su app (ADR-0006 §5,
+  O3).
+
+**Sin regla nueva:** RN-26, RN-36 y ADR-0006. Queda **una sola regla del rango de Mary
+(RN-129)**: antes del próximo módulo hay que pedirle a Daniel un rango nuevo.
+
+**Verificado.** 10 comprobaciones con Playwright:
+- Las pestañas y el menú marcado.
+- El saldo antes de emitir.
+- La emisión con consecutivo y la hoja.
+- La unidad con deuda, que no deja emitir.
+- La anulación, que pide motivo, no se borra y la ve el propietario.
+
+Siguen en verde las del estado de cuenta, la plata de la reserva, los avisos, el informe y las
+zonas compartidas. `npm run build` y la ortografía, en verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · El estado de cuenta descargable (CU-R-18, RN-127)
+
+Mary escogió seguir con los dos pendientes cortos de la fase 1. El primero es el estado de
+cuenta.
+
+**Qué hace.** En «Estado de cuenta», el botón «Descargar estado de cuenta» abre una pantalla
+donde se escoge el rango de meses y se ve el resumen antes de emitir. El documento sale con
+número `EC-AAAA-NNNN` y código de verificación, y se imprime o se guarda en PDF desde el
+teléfono, igual que el paz y salvo (revisión de ADR-0006: sin servidor ni librerías). Los
+emitidos antes se vuelven a imprimir **tal como se emitieron**.
+
+**RN-127, cómo se cuenta:**
+- Saldo anterior.
+- Cargos: las cuotas del rango, de todo tipo.
+- Abonos: solo los pagos **aplicados**, nunca los informados sin aplicar (RN-79) ni los anulados
+  (RN-78).
+- Saldo final, con el saldo corrido en cada renglón.
+
+El documento guarda lo que afirmó y dice que no es un paz y salvo.
+
+**Lo que corrigió la prueba.** El rango por defecto terminaba en el mes actual, pero una unidad
+puede tener facturada la cuota del mes siguiente, y el «valor adeudado» la incluye (RN-26). Ahora
+el rango llega hasta el último mes facturado, y el documento cuadra con lo que la persona ve en
+pantalla.
+
+**De paso:** la lista «Emitidos antes» del paz y salvo mostraba todos los documentos de la
+unidad. Ahora muestra solo los paz y salvo.
+
+**Verificado.** 9 comprobaciones con Playwright, en celular:
+- El saldo final cuadra con el valor adeudado ($3.234.000).
+- El consecutivo, la tabla y el pie con el código.
+- Lo congelado en el documento.
+- El rango sin movimientos, que no se emite.
+- El paz y salvo, que no mezcla estados de cuenta.
+- La reimpresión.
+
+`npm run build` y la ortografía, en verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · El informe de uso de las zonas comunes (CU-A-30)
+
+Mary: *«me gusta la idea del informe del uso de las zonas comunes»*.
+
+**Qué es.** Reservas tiene una cuarta pestaña, **Informe**. Muestra:
+- Un periodo: este mes, el mes anterior u otras fechas.
+- Cuatro cifras: reservas tomadas, ocupación, cobrado y recaudado por uso, y cuántos no se
+  presentaron.
+- Una fila por zona.
+- Las unidades que más reservan.
+
+**«Descargar para Excel»** baja un CSV con punto y coma y la marca BOM, porque Excel en español
+lo necesita para abrirlo con columnas y tildes. Se hace sin dependencias
+(`utilidades/descarga.ts`). En el demo publicado, el visor de claude.ai no deja bajar archivos
+con un enlace: allí la descarga pasa por su capacidad `downloads`, que primero pide
+confirmación. Por eso el artefacto se publica declarándola.
+
+**Dónde se usa.** Mary: *«el reporte es para descargar en la versión web»*. Así quedó: vive en la
+consola web del administrador y baja directo en el navegador; la confirmación aparece solo en el
+visor de claude.ai. **Pendiente para BLOKY (T-45):** llevar allá las reservas y las zonas comunes,
+con este informe en la consola del administrador.
+
+**Sin regla nueva.** El informe suma lo que ya registran RN-107, RN-108, RN-112, RN-114, RN-115 y
+RN-119 (`informeDeUsoDeZonas`). No se gastó ningún número del rango de reglas, que ya casi se
+agota.
+
+**Verificado.** 9 comprobaciones con Playwright:
+- La pestaña y las cifras.
+- Lo cobrado del mes cuadra con las reservas cerradas ($110.000).
+- El ranking de unidades.
+- El CSV (BOM, punto y coma, tildes) y el nombre del archivo con el periodo.
+- Las fechas al revés, que se avisan.
+- El mes anterior.
+- En celular, sin desborde.
+
+`npm run build` y la ortografía, en verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · Las reglas de la reserva también se revisan por dentro
+
+Mary: *«sí, haz el 1»* (el punto 6 de la revisión de reservas). Hasta hoy la mora (RN-08), la
+anticipación (RN-10) y el cupo mensual solo los revisaba la pantalla del residente.
+`crearReserva` en `datos/repositorio.ts` confiaba en ella.
+
+Ahora `crearReserva` llama a `validarReserva`, la misma función que usa la pantalla, así que
+las dos revisiones dicen siempre lo mismo. Revisa:
+- que la zona esté activa y abra ese día (RN-107, RN-108, RN-114);
+- la mora (RN-08);
+- que el turno esté libre o tenga cupo (RN-09, RN-111, RN-113);
+- la anticipación (RN-10) y el cupo mensual.
+
+La hora de fin ya no se toma de quien llama: sale del turno de la zona. No hay regla nueva: es
+la defensa que pide ADR-0003 para que un backend real herede las reglas completas.
+
+**Verificado.** 5 comprobaciones llamando al repositorio directamente, sin la pantalla:
+- rechaza la mora, la anticipación, el cupo mensual y más personas que cupos;
+- crea la válida con el fin correcto.
+
+Las 104 de reservas anteriores siguen en verde. `npm run build` y la ortografía, en verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · Reservas: solicitudes que vencen, avisos, condiciones aceptadas e invitados (RN-122 a RN-126)
+
+Mary preguntó *«¿nos falta algo más de reservas?»* y aprobó los cinco puntos: *«implementar del 1
+al 5»*.
+
+1. **La solicitud sin respuesta vence en su turno (RN-122, CU-S-03 ✅).** El turno se libera y al
+   residente se le avisa, sin cobro. El tablero del administrador alerta las que vencen en menos
+   de 48 horas.
+2. **El residente recibe la respuesta (RN-123):** un mensaje al aprobar, o al rechazar con el
+   motivo.
+3. **Condiciones aceptadas (RN-124).** Si la zona cobra, pide depósito o tiene multa, el
+   residente marca que las acepta antes de reservar. Se guarda el texto tal como lo leyó, con la
+   hora, y cada condición con su respaldo. Los hechos de un proceso por la multa lo citan.
+4. **Recordatorio el día antes (RN-125),** una sola vez, con el depósito si falta.
+5. **Lista de invitados (RN-126).** El residente la escribe al reservar o después, hasta que
+   empieza el turno; caben las personas declaradas menos él. Portería la ve en las reservas de
+   hoy.
+
+**Cómo corre lo automático.** El demo no tiene servidor. El vencimiento y el recordatorio los
+aplica `aplicarProcesosDelSistema` (en `datos/repositorio.ts`) cada vez que se abre la app o se
+reinicia el demo. En la fase 2 lo hará un servidor a su hora.
+
+**Semilla 30:**
+- Una solicitud del salón ya pasada, que vence al abrir.
+- Una de la terraza para mañana, que sale en la alerta del tablero.
+- La reserva de hoy con tres invitados.
+
+**Verificado.** 13 comprobaciones con Playwright:
+- El vencimiento y su mensaje.
+- El recordatorio, una sola vez.
+- La alerta del tablero.
+- Los mensajes al aprobar y al rechazar.
+- Las condiciones, que sin aceptarlas no dejan reservar y quedan guardadas.
+- Que no caben más invitados que los declarados, que la lista se edita y que portería la ve.
+
+Las 91 de reservas anteriores siguen en verde. Además se corrigió la redacción de la aceptación,
+que atribuía la multa al artículo del reglamento del cobro: ahora cada condición cita su propio
+respaldo. `npm run build` y la ortografía, en verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · La plata de la reserva: cobro por uso, depósito y multa (RN-118 a RN-121)
+
+Mary: *«sigamos con el 8»*. Hasta hoy el cobro, el depósito y la multa se configuraban y se
+informaban, pero no pasaba nada con la plata.
+
+- **RN-118:** el valor y el depósito se copian a la reserva al crearla; un cambio de precio
+  posterior no cambia lo pactado.
+- **RN-119:** el cobro por uso se genera **al cerrar la reserva**, después del turno. Si se usó o
+  si no se presentó, va al estado de cuenta como cuota `uso_zona`, con su justificación y su
+  respaldo, y vence a los diez días. **Decisión de diseño:** cobrar al confirmar obligaría a
+  anular cuotas cuando alguien cancela, y eso toca las reglas de cartera que se comparten con la
+  contable. Cobrando al cerrar, una reserva cancelada nunca deja cobro.
+- **RN-120:** «Recibí el depósito». Al cerrar se anota cómo quedó la zona, con una foto opcional,
+  y se devuelve completo o se retiene una parte, con novedades descritas y un motivo que el
+  residente lee.
+- **RN-121:** si no se presentó o canceló fuera de plazo, la administración puede abrir el
+  proceso por la multa del catálogo, con los hechos ya redactados. Es un solo proceso por reserva
+  y sigue el debido proceso de siempre.
+
+**En la consola:** Reservas tiene el filtro nuevo «Por cerrar», los botones «Recibí el
+depósito», «Cerrar» y «Abrir proceso», y la hoja de cierre (`features/admin/CerrarReservaHoja.tsx`)
+muestra lo que se mueve antes de confirmar. **El residente** ve en «Mis reservas» el depósito
+por entregar, el cobro, lo que le devuelven o retienen, y el proceso si se abrió.
+
+**Aviso para Jeimy (T-17):** hay un tipo de cuota nuevo, `uso_zona`. Su cartera también tendrá
+que reconocerlo cuando se crucen los datos.
+
+**Semilla 29:** las reservas llevan sus valores, y hay dos turnos ya pasados por cerrar: el salón
+con el depósito recibido y la terraza.
+
+**Verificado.** 14 comprobaciones con Playwright:
+- Las validaciones del cierre: novedades sin describir, retener más que el depósito.
+- La retención de $90.000 sobre $200.000.
+- La cuota con su justificación y su respaldo, y el cobro en el estado de cuenta del residente.
+- El «no se presentó» con cobro.
+- El proceso por cancelar fuera de plazo, uno solo.
+
+Otras 3 cubren el «no se presentó» con proceso al cerrar. Las 74 anteriores de zonas comunes
+siguen en verde. `npm run build` y la ortografía, en verde.
+
+**Con esto se cierran los ocho puntos de la revisión de zonas comunes.**
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · El calendario de ocupación de las zonas (CU-A-29)
+
+Mary escogió el punto 7 de la revisión de zonas comunes: *«con el 7»*.
+
+**Qué es.** En la consola, Reservas tiene ahora tres pestañas: Reservas, **Calendario** y Zonas
+comunes. El calendario muestra la semana de una zona, con los días en columnas y los turnos en
+filas. Cada casilla dice en palabras qué hay: «Libre», la unidad con sus personas, «5 de 8» en
+el turno compartido, «Mantenimiento» o «—» si ese día no abre a esa hora. El color ayuda, pero
+nunca va solo. Una línea arriba resume la semana: turnos con reserva y, en la compartida, cupos
+usados. Al tocar una casilla reservada se ve quién la tiene. Se navega por semanas.
+
+**Por qué no hay regla nueva.** Es una vista: junta RN-09, RN-108, RN-111, RN-113 y RN-114, y la
+casilla sale de una sola función (`celdaCalendario` en `dominio/reglas.ts`).
+
+**Verificado.** 9 comprobaciones con Playwright:
+- La pestaña y el resumen de la semana.
+- La casilla del salón con la unidad y las personas, y su detalle.
+- El gimnasio en «5 de 8», y el domingo por la tarde en «—».
+- El cierre por mantenimiento de la cancha.
+- El cambio de semana.
+- En celular, la tabla se desliza sin desbordar la página.
+
+`npm run build` y la ortografía, en verde.
+
+**Lo que sigue:** ~~mover la plata (punto 8)~~ → hecho (RN-118 a RN-121).
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · Zonas compartidas, horario por día, aviso al cancelar, portería y aviso masivo (RN-111 a RN-117)
+
+Mary preguntó *«¿crees que nos falta algo más en zonas comunes?»* y aprobó los puntos 1 a 6 de
+la revisión. Después pidió el aviso masivo del cierre.
+
+1. **Uso exclusivo o compartido (RN-111).** Había un error de funcionamiento: una familia
+   apartaba el gimnasio (aforo 8) por dos horas. Ahora el administrador escoge en cada zona.
+   En la compartida, varias unidades toman el mismo turno hasta el aforo y el residente ve
+   «quedan N».
+2. **Aviso antes de cancelar fuera de plazo (RN-112).** La app muestra la multa, su valor y su
+   respaldo antes de confirmar. Si el residente cancela de todos modos, la reserva queda
+   marcada «fuera de plazo» y la consola lo ve. No se multa sola.
+3. **Cuántas personas van (RN-113),** en toda reserva: llena el turno compartido y no pasa del
+   aforo en la exclusiva.
+4. **Portería ve las reservas de hoy (RN-116)** en la pantalla del turno, sin costos.
+5. **La administración cancela una sola reserva (RN-115),** con motivo y mensaje.
+6. **Días y horario de cada día (RN-114),** que define el administrador (*«los horarios y días
+   los debe parametrizar el administrador»*).
+
+**El aviso masivo del cierre (RN-117).** Mary: *«es importante que el administrador tenga la
+opción, si el área común se cierra por mantenimiento, de seleccionar esta opción y que se
+genere un mensaje masivo… imagínate una copropiedad de 500 unidades enviar mensaje por
+propiedad»*. Al cerrar, la casilla «Avisar a toda la copropiedad» viene marcada. Con una sola
+acción publica un comunicado en la cartelera y deja un mensaje a cada residente vigente, uno
+por persona. A quien ya le cancelaron la reserva no le llega un segundo mensaje.
+
+**Cobro y depósito, «aplica o no».** Mary: *«no hay que coordinar, hay copropiedades que cobran
+el depósito; hay que dejar la opción para que el administrador seleccione si aplica o no»*. El
+formulario ya no pide los valores en 0 cuando no aplican. Tiene dos casillas, «Se cobra por
+usarla» y «Pide depósito de garantía», y al marcar una pide el valor; marcada sin valor no deja
+guardar (13 comprobaciones de costos en verde).
+
+**Semilla 28:** gimnasio y coworking compartidos; horario del gimnasio por día; reservas con
+personas; una de hoy (para portería), dos que comparten el gimnasio mañana y el salón de mañana
+de María Camila (para ver el aviso de multa).
+
+**Verificado:** 20 comprobaciones de los seis puntos y 8 del aviso masivo, con Playwright.
+Además siguen en verde las 24 de zonas (una ajustada: el gimnasio ahora dice «compartida hasta
+10 personas») y las 11 de costos. `npm run build` y la ortografía, en verde.
+
+**Lo que sigue:**
+- ~~Calendario de ocupación por zona~~ → hecho (CU-A-29).
+- Mover la plata: generar el cobro por uso en la cartera, registrar la devolución del depósito
+  y marcar «No se presentó».
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · Costo, depósito y multa por no cancelar en cada zona (RN-109, RN-110)
+
+Mary: *«incluir la opción para que cuando el administrador esté parametrizando las zonas comunes
+incluya el cobro por uso, el depósito si aplica y la multa por no cancelar»*, y *«de igual
+manera se debe ver en la información de cada zona común»*. Responde la pregunta abierta de
+`12-levantamiento-pendiente.md` §3.
+
+**En el formulario de la zona:**
+- **Valor por reserva** y **depósito de garantía**, los dos opcionales. Si alguno tiene valor,
+  se pide el documento que lo autoriza, como a todo cobro (RN-45 → **RN-109**).
+- **Multa por no cancelar**, escogida del **catálogo de multas**, que ya trae su valor y su
+  respaldo, con el plazo en horas para cancelar sin multa (**RN-110**). Si el catálogo no tiene
+  multas activas, el formulario lo dice y lleva a Multas.
+
+**Dónde se ve:** un solo componente (`componentes/CondicionesZona.tsx`) pinta lo mismo en la
+tarjeta de la consola y en la app del residente. El residente lo ve resumido en la lista y en
+detalle antes de escoger la fecha, incluido que la multa se impone con proceso sancionatorio.
+
+**Lo que no hace todavía:**
+- No genera el cobro en el estado de cuenta.
+- No registra la devolución del depósito.
+- No marca «No se presentó».
+
+Por ahora se parametriza y se informa.
+
+**Semilla 27:** el salón social cuesta $80.000, pide $200.000 de depósito (reglamento, art. 42)
+y tiene la multa nueva del catálogo, «Reserva no cancelada a tiempo» ($50.000, manual art. 25),
+con 48 horas para cancelar. La terraza cobra $30.000, sin depósito.
+
+**Verificado.** 11 comprobaciones con Playwright:
+- La tarjeta muestra el cobro, el respaldo y la multa.
+- El cobro sin respaldo se rechaza.
+- Agregar cobro y multa a una zona, o quitarle el cobro, queda guardado.
+- El residente ve el resumen en la lista y el detalle antes de la fecha.
+
+Las 24 de la entrada anterior siguen en verde. `npm run build` y la ortografía, en verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · Las zonas comunes, completas: crear, cerrar por mantenimiento y desactivar (CU-A-10, RN-105 a RN-108)
+
+Mary: *«terminemos de configurar zonas comunes»*. Hasta hoy el administrador solo cargaba fotos
+y especificaciones (RN-104); el nombre, el horario, el aforo y el cupo venían de los datos de
+ejemplo, y ninguna zona se podía crear ni cerrar.
+
+**Dónde vive.** Dentro de Reservas (*«lo de reservas va dentro de reservas»*): la consola tiene
+ahora dos pestañas, «Reservas» y «Zonas comunes» (`/admin/reservas/zonas`). Las fotos y las
+especificaciones se mudaron a la tarjeta de cada zona.
+
+**Las herramientas del administrador** (*«debemos darle al administrador todas las herramientas
+para gestionar de una forma fácil y rápida»*):
+
+- **Crear y editar** una zona, con los turnos a la vista tal como los verá el residente.
+  **RN-105** valida: nombre sin repetir, horario en horas en punto y turnos que caben exactos.
+  **RN-106**: cambiar las reglas no toca lo ya reservado.
+- **Cerrar por mantenimiento** entre dos fechas, con motivo (**RN-108**). Mary: *«me gusta lo de
+  mantenimiento, es una opción para el administrador»*. La zona se sigue viendo con el aviso,
+  no se reserva en esas fechas y vuelve sola al terminar; «Levantar» la abre antes.
+- **Desactivar** sin fecha de regreso (**RN-107**). Mary: *«le debe llegar un mensaje al que
+  reservó con la justificación de la cancelación»* y *«puede ser que no se vuelva a activar»*.
+  El motivo es obligatorio, desaparece para el residente, y «Reactivar» queda como opción.
+
+En los dos cierres, la consola muestra **antes de confirmar** qué reservas se cancelan y el
+mensaje exacto que le llega a cada persona. El mensaje queda escrito (RN-64, motivo nuevo
+`reserva_cancelada`) y el residente ve el motivo junto a su reserva en «Mis reservas». Nada se
+borra: la zona desactivada y los cierres levantados quedan en la historia.
+
+**Fuera, a propósito:** el depósito y la sanción por no cancelar siguen como pregunta abierta
+(`docs/12-levantamiento-pendiente.md`). La semilla no cambia de versión: los campos nuevos son
+opcionales.
+
+**Verificado.** 24 comprobaciones con Playwright: el turno que no cabe y el nombre repetido se
+rechazan; crear, editar, cerrar y desactivar funcionan; los dos mensajes quedan escritos; la
+tabla de la consola muestra el motivo. En la app del residente, la zona desactivada no aparece,
+el cierre se avisa en la lista y bloquea esas fechas, y la reserva cancelada muestra su motivo.
+También se probó levantar el cierre y reactivar la zona. `npm run build` y la ortografía en
+verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · Las fotos de la zona antes de reservar (RN-104)
+
+Mary: *«en reservas debe ser posible ver la foto o fotos de la zona que el residente quiere
+reservar»*. Hasta hoy la zona era un nombre, un horario y un aforo; se reservaba a ciegas.
+
+**RN-104.** Cada zona común lleva hasta cinco fotos, reducidas como todas (ADR-0009). El
+residente ve la primera en la lista de zonas —con «2 fotos» si hay más— y, al abrir la reserva,
+la galería completa antes de la fecha: se mira y después se reserva; al tocar una se amplía. El
+administrador las carga y las quita desde `Reservas` en la consola, en una sección nueva,
+porque la pantalla de zonas (CU-A-10) todavía no existe: queda 🟡, solo con las fotos. Son
+configuración, no registro: quitar una no borra ninguna historia.
+
+**Y las especificaciones generales**, que Mary pidió enseguida (*«incluir también unas
+especificaciones generales de cada zona, estas también las debe cargar el administrador»*):
+qué incluye, qué no y cómo se usa, en texto libre con un renglón por punto, hasta 1200
+caracteres. Texto libre a propósito: el salón tiene cocineta y el gimnasio horario de aseo, y
+un formulario de campos fijos dejaría fuera justo lo que importa. El administrador las escribe
+en la misma sección de la consola; el residente las lee como lista, bajo las fotos, antes de la
+fecha.
+
+**La semilla** (versión 26) trae fotos ilustrativas del salón, la terraza y el gimnasio —un
+dibujo rotulado «Foto ilustrativa del demo», no una fotografía, de menos de 1 KB cada uno— y
+sus especificaciones, para que la galería y la lista se vean con algo hasta que la
+administración cargue lo real. La sala de coworking queda sin nada a propósito, para mostrar el
+caso vacío.
+
+**Verificado.** 7 comprobaciones del repositorio (tope de cinco, la sexta se rechaza, quitar
+libera cupo), 10 con Playwright para las fotos (miniatura y conteo en la lista, galería y foto
+grande en la reserva, agregar y quitar desde la consola, el residente viendo la nueva) y 9 para
+las especificaciones (la lista en la reserva, el caso vacío, escribir desde la consola con el
+contador, y el residente viéndolas). `npm run build` y la
+ortografía en verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · El botón «Recibido»: la entrega la cierra quien recibe (RN-103)
+
+Mary: *«en la vista del propietario o arrendatario, en paquetes, incluir el botón Recibido»*.
+Hasta hoy la correspondencia en la app era de solo lectura: portería registraba y entregaba, y
+el residente miraba. Faltaba la otra mitad de la cadena de custodia (RN-52): que quien recibe
+lo diga.
+
+**RN-103.** En la app, cada paquete o carta trae el botón **Recibido** mientras el residente no
+haya confirmado. Si portería ya lo había entregado, la app dice «Entregado a X, según portería»
+hasta que confirme; si no lo había marcado, la confirmación **es** la entrega, con el nombre
+del residente. Puede confirmar cualquier residente vigente de la unidad —el paquete es de la
+unidad, y quien lo recogió puede no ser quien tiene la app en la mano—, una sola vez. Portería
+ve «Confirmado por el residente». Con las dos constancias, «a mí nunca me llegó» deja de ser
+una discusión.
+
+**Verificado.** 8 comprobaciones del repositorio (otra unidad no puede; pendiente confirmado
+queda entregado con el nombre de la residente; entregado confirmado conserva lo que anotó
+portería; no se confirma dos veces) y 8 con Playwright: los dos botones, el «según portería»,
+la confirmación, el contador en cero y portería viendo la confirmación. `npm run build` y la
+ortografía en verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · El ingreso sin clave: código por SMS o por correo (CU-R-01, RN-54)
+
+Mary, al repasar cómo entra un usuario: *«no, necesitamos que el ingreso sea con su correo
+autenticado o con SMS, como funciona ahora la mayoría de ingresos»*. Se rehízo la puerta.
+
+**Tres pasos y ninguna clave.** Quién eres —documento, celular o correo, **un solo campo**,
+porque la persona no tiene por qué saber con cuál la registraron—; por dónde recibes el código
+—SMS o correo, solo los canales registrados, enmascarados (···2233, m···a@gmail.com)—; y el
+código de 6 números, que vale 10 minutos y admite 5 intentos. La primera vez, eso activa la
+cuenta: **se retiran CU-R-25 y la clave de 4 números (RN-55)**, y con ellas «Activar mi
+cuenta» y «Olvidé mi clave». La huella (RN-56) sigue como atajo en el teléfono donde se
+registró y se ofrece ya adentro, con la identidad confirmada por el código. Si el teléfono
+recuerda a alguien, muestra su nombre y ofrece huella o «Enviarme un código».
+
+**Por qué está bien retirar la clave corta.** Lo que la sostenía —adultos mayores que no
+teclean contraseñas— lo cumple mejor un código que no hay que recordar. Y es lo mismo que BLOKY
+ya hace con el administrador (CU-B-01): las dos aplicaciones entran igual.
+
+**Lo que arrastra.** La marca «No obligatorio» (RN-97) ya no necesita el código de registro
+para entrar: esa persona entra como todos, y el detalle del registro lo dice. Y **cada persona
+necesita celular o correo registrados**; si no los tiene, la puerta se lo dice y le pide que
+quien la registró los agregue (RN-53).
+
+**Sigue simulado** (ADR-0004): el código se muestra en pantalla. En la versión real lo envía el
+servidor por el proveedor de T-18, que pasa a ser la puerta entera. Google y Microsoft con el
+correo llegan con el backend (ADR-0008); sin botones falsos mientras tanto.
+
+**Verificado** con Playwright: sin clave ni «activar»; desconocido con el mensaje de RN-53;
+documento con puntos; canales enmascarados según los datos; código malo con conteo de
+intentos; cinco fallos devuelven a pedir otro; entra; el teléfono la recuerda y ofrece «Enviarme
+un código»; «No soy yo»; por correo también; y las rutas viejas redirigen. `npm run build` y la
+ortografía en verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · La alerta del proyecto callado (RN-102)
+
+Mary pidió *«en el tablero del administrador, una alerta de reportar avance si han pasado dos
+semanas sin actualización»*. Es la otra mitad del tablero de proyectos: registrar avances
+sirve mientras alguien los registre, y un «40 %» de hace un mes no le dice al propietario si
+la obra sigue, se paró o se olvidó.
+
+**RN-102.** A los 14 días sin avance, el tablero de la copropiedad (`/admin`) abre con la
+alerta: cada proyecto callado con sus días y el botón «Reportar avance». La lista de proyectos
+marca la tarjeta y el detalle lo dice antes del botón de registrar. Se resuelve registrando un
+avance, aunque sea «sigue igual, esperando el material». Desde cuándo se cuenta: en marcha,
+desde el último avance; planeado con fecha de inicio ya pasada, desde esa fecha —debió empezar
+y no ha dicho nada—; planeado sin fecha o con fecha futura, nada; terminado, nunca. Es una
+alerta al administrador y no un aviso al propietario, porque quien puede resolverla es él.
+
+**La semilla** (versión 24) trae ahora una segunda obra, la pintura de fachadas, con tres
+semanas sin avance: el tablero del administrador abre con la alerta desde el primer ingreso
+(Mary pidió verla sin esperar los 14 días).
+
+**Verificado.** 8 comprobaciones de la regla (esbuild + node: el umbral exacto de 14, planeado
+con y sin fecha, terminado, orden) y 6 con Playwright: sin alerta con la semilla reciente, la
+alerta al envejecer los avances, el chip en la lista, la nota en el detalle y la alerta que
+desaparece al registrar un avance. `npm run build` y la ortografía en verde.
+
+---
+
+### 2026-10-01 · Mary + IA (Claude) · Cómo le llega una actualización al usuario
+
+Mary preguntó *«cuando hay una actualización en la app o en la web, para el usuario cómo va a
+funcionar»*. La respuesta quedó escrita en [`06-arquitectura.md`](./06-arquitectura.md), por
+cada forma de entrar: la consola en el navegador se actualiza al recargar; la PWA instalada baja
+la versión nueva sola al abrirse con internet (el *service worker* pide al servidor primero);
+las apps de las tiendas (fase 3) se actualizan por la tienda para el envoltorio y desde el
+servidor para el contenido; y los datos, en el producto, viven en el servidor y una
+actualización nunca los borra.
+
+**Dos cosas que faltaban y se construyeron** (`servicios/version.ts`): la app **muestra su
+versión** al pie de la pantalla de ingreso —paquete, día de compilación y la revisión que el
+servidor publicó en `revision.txt`—, y **avisa cuando sale una nueva** a quien la tiene abierta:
+compara la revisión del servidor cada diez minutos y al volver a la pestaña, y muestra «Hay una
+versión nueva» con el botón «Actualizar». No recarga sola. En el demo empaquetado y en
+desarrollo, sin servidor, el pie dice «demo en este dispositivo» y no hay aviso.
+
+**Verificado** con Playwright: el pie muestra la revisión del servidor, al cambiar
+`revision.txt` y volver a la pestaña aparece el aviso con la revisión nueva, «Actualizar»
+recarga y el pie la muestra, y el demo en un archivo dice que no hay servidor. `npm run build` y
+la ortografía en verde.
+
+---
+
+### 2026-09-30 · Mary + IA (Claude) · Los avances a la vista, y las fotos de obra se quedan
+
+Mary revisó el tablero: *«me gusta, pero ¿dónde veo los avances?»*. Estaban debajo del
+formulario en la consola y plegados en la app, o sea, escondidos. **Ahora son lo primero**: en
+la consola la sección «Avances (N)» va antes del formulario y la tarjeta dice cuántos hay; en la
+app la primera obra viene con sus avances abiertos; en el inicio se ve el último y cuántos van.
+
+Después preguntó si **las fotos pesan demasiado** y si convendría ir borrando las viejas. Con
+números: cada foto se guarda reducida a unos 60 KB (ADR-0009); en el demo, que vive en el
+navegador con unos 5 MB para todo, caben decenas; en el producto van a un archivo (R2, T-77) y el
+peso no importa. **Se decidió no borrarlas**: la foto de cada avance es la prueba de la obra ese
+día, no es dato personal y no tiene plazo. Quedó escrito en ADR-0009 y en RN-100, para que el
+proceso que un día borre las fotos de cédula no se lleve las de obra.
+
+Lo que sí se agregó: **un aviso en el demo** cuando el navegador va al 80 % de su capacidad
+(`ocupacionDelDemo`, medido sobre lo que se guardaría), porque hasta hoy al llenarse dejaba de
+guardar en silencio y al recargar se perdía lo último, que es lo peor que puede pasar en medio
+de una demostración.
+
+**Verificado.** Las 24 comprobaciones del tablero con Playwright, `npm run build` y la
+ortografía en verde.
+
+**Lo que sigue:** Mary no pudo abrir el enlace del demo publicado en claude.ai (de este lado
+carga sin errores; el artefacto es privado y solo abre con la cuenta que lo publicó). Quedó el
+demo como archivo `demo-idiky.html`, que se abre con doble clic. Y para verlo en el servidor,
+el responsable de integración lleva la rama a `main` y despliega `pwa`.
+
+---
+
+### 2026-09-29 · Mary + IA (Claude) · El tablero de proyectos: la obra, su avance y el aviso (CU-A-28, CU-R-32)
+
+Mary pidió *«un tablero para el administrador y los propietarios en la que el administrador
+registra un proyecto y va registrando el avance; a los propietarios les llega un mensaje con
+los avances y pueden entrar a ver un tablero»*. Es el módulo de las obras: lo que más plata
+mueve en una copropiedad y lo que menos se ve desde un apartamento.
+
+**Lo que se construyó.** En la consola, `Proyectos`: se crea la obra (nombre, qué se va a
+hacer, quién la ejecuta, fechas, presupuesto) y se le registran avances con el porcentaje de
+toda la obra, qué se hizo, un detalle y una foto. En la app, el tablero (`/app/proyectos`), la
+sección «Obras en marcha» del inicio y el enlace desde la cartelera. **Es el mismo tablero en
+las dos caras** (`componentes/TableroProyecto.tsx`), por la misma razón que la hoja del poder:
+un tablero común sobre el cual discutir.
+
+**Dos reglas, del rango de Mary.** RN-100: el avance es **el último registrado** —no un promedio
+ni el máximo—, retroceder se admite pero exige explicación, y nada se edita ni se borra: se
+corrige con otro avance. RN-101: **registrar un avance es publicarlo**: comunicado en la
+cartelera (categoría nueva, *Proyecto*, enlazado al tablero) y mensaje al celular de cada
+propietario vigente, uno por persona. La pantalla dice a cuántos les llegó y cuántos no tienen
+celular. No hay un paso aparte de «avisar» a propósito.
+
+**Lo que se reutilizó en vez de inventar.** La cartelera (CU-R-09) y los mensajes salientes
+(RN-64) ya existían; el proyecto solo les da un motivo nuevo. La foto usa `CapturaFoto`
+(ADR-0009). El estado del proyecto se deriva de los avances, como el del acta.
+
+**La semilla** (versión 23) trae la impermeabilización de cubiertas al 40 %: la misma obra de la
+cuota extraordinaria y de la asamblea en curso, para que el demo cuente una sola historia.
+
+**Verificado.** 18 comprobaciones directas sobre el repositorio (esbuild + node: validaciones
+del proyecto, RN-100 con retroceso sin y con explicación, terminado al 100, comunicado y
+mensajes sin repetidos) y 19 con Playwright recorriendo las dos caras: crear, registrar con
+foto, el aviso con el número de avisados, el bloqueo del retroceso, el inicio, el tablero y la
+cartelera del propietario. `npm run build` y la ortografía en verde.
+
+**Lo que sigue:** cruzar el presupuesto con lo recaudado y gastado en esa destinación es de la
+contable (T-17). Y cuando exista quién envíe mensajes (T-18), el aviso del avance sale por ahí.
+
+---
+
+### 2026-09-28 · Mary + IA (Claude) · Vimeo como opción, con sus salvedades (RN-98, RN-99)
+
+Mary retomó las asambleas: *«quiero incluir el tema de Vimeo como servicio para conectarse»*, y
+al oír las salvedades, *«incluyámoslo como una opción dejando las salvedades»*. Entra **sin
+tocar ADR-0007**: Idiky sigue enlazando, no transmitiendo; un enlace de Vimeo es un enlace.
+
+**Lo que sí cambia es que una transmisión no es una reunión** (RN-98). La herramienta se
+reconoce por el enlace —Zoom, Meet, Teams, Vimeo, YouTube— sin preguntarle nada al
+administrador. Zoom, Meet y Teams son de dos vías; **Vimeo y YouTube son de una sola**: los
+conectados ven y oyen, intervienen por el chat de la transmisión y votan en Idiky. La salvedad
+legal quedó escrita en las tres capas: el art. 42 de la Ley 675 exige que en la reunión no
+presencial los copropietarios puedan **deliberar**, y con una transmisión de una vía eso depende
+del chat. Quien convoca ve la salvedad en el formulario, cuando todavía puede cambiar de
+herramienta o de modalidad; el copropietario ve «Ver la transmisión en Vimeo» y cómo intervenir;
+y el acta dice por qué medio fue la sesión, «de una sola vía, con intervenciones por su chat».
+Se dice, no se impide (mismo criterio que el tope de poderes, RN-30), y **si el chat basta para
+deliberar quedó como pregunta para el abogado** (§3 bis).
+
+**Y la grabación dejó de ser pregunta** (RN-99). Vimeo la guarda sola; el administrador enlaza
+la grabación cuando la sesión ya empezó, y **el acta la cita como soporte**. No reemplaza la
+asistencia ni los votos: es soporte, no acta. Con eso se cierra lo que T-14 y CU-A-17 A2 tenían
+abierto desde el 10 de septiembre.
+
+**Numeración.** Primera sesión con el rango reservado de Mary (§0 del tablero): RN-98 y RN-99.
+Las reglas de la sesión anterior quedaron renumeradas por el integrador al entrar a `main`
+(RN-92 a RN-97).
+
+**Verificado.** 17 comprobaciones con Playwright: Meet no muestra salvedad y Vimeo sí, la
+salvedad desaparece al pasar a presencial, la asamblea se convoca con el enlace, el detalle
+nombra la transmisión, la grabación se rechaza sin `http` y se guarda con él, el propietario ve
+el botón y la nota de Vimeo, y el acta cita el medio y la grabación. `npm run build` y la
+ortografía en verde.
+
+**Lo que sigue:** la pregunta del abogado sobre el chat como deliberación se suma a las siete
+de datos personales; y CU-A-12 sigue 🟡 por el documento de citación, no por esto.
+
+---
 
 ### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Cómo se siente el primer día: «Arma tu copropiedad» (prototipo)
 
