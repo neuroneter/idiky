@@ -10,6 +10,7 @@
  */
 
 import type {
+  MotivoCierreVinculo,
   AccesoSoporte,
   AutorActuacion,
   BaseDatos,
@@ -94,6 +95,8 @@ import {
   validarReserva,
   fechaCorta,
   puedeRegistrar,
+  puedeInhabilitar,
+  motivoNoRegistraAdministracion,
   puedeVerSoportes,
   reservaOcupaFranja,
   sePuedeCancelar,
@@ -150,6 +153,7 @@ import {
 import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajeria'
 import { finDePeriodo, formatearDinero, formatearFecha } from '../utilidades/formato'
 import { guardar, leer, sembrar, ocupacion } from './almacen'
+import { responsablesDelVinculo, unidadTienePropietario } from './selectores'
 
 /** Resultado de una operacion: base de datos actualizada + lo que se creo. */
 export interface Resultado<T> {
@@ -1589,64 +1593,58 @@ export async function revocarVisitante(
 // CU-A-02 — Unidades y residentes
 // ---------------------------------------------------------------------------
 
-export async function vincularResidente(
+/** Cierra el vinculo de un residente sin borrar el historico (trazabilidad, O3). */
+export async function desvincularResidente(
   bdActual: BaseDatos,
   parametros: {
-    unidadId: string
-    nombres: string
-    apellidos: string
-    documento: string
-    email: string
-    telefono: string
-    rol: RolResidencia
+    residenciaId: string
+    personaId: string
+    /** «Cambio de propietario» solo aplica a un propietario. */
+    motivo?: MotivoCierreVinculo
+    detalle?: string
   },
 ): Promise<Resultado<Residencia>> {
   await esperar()
   const bd = clonar(bdActual)
-
-  let persona = bd.personas.find((p) => p.documento === parametros.documento)
-  if (!persona) {
-    persona = {
-      id: nuevoId('per'),
-      nombres: parametros.nombres,
-      apellidos: parametros.apellidos,
-      documento: parametros.documento,
-      email: parametros.email,
-      telefono: parametros.telefono,
-    }
-    bd.personas.push(persona)
-  }
-
-  const yaVinculada = bd.residencias.some(
-    (r) => r.unidadId === parametros.unidadId && r.personaId === persona!.id && !r.hasta,
-  )
-  if (yaVinculada) throw new ErrorDeNegocio('Esa persona ya esta vinculada a la unidad.')
-
-  const residencia: Residencia = {
-    id: nuevoId('res'),
-    personaId: persona.id,
-    unidadId: parametros.unidadId,
-    rol: parametros.rol,
-    desde: hoyISO(),
-    principal: false,
-    // Por la via directa del administrador se asume que vive ahi; el caso del
-    // propietario no residente se marca en el registro (CU-R-27).
-    reside: true,
-  }
-  bd.residencias.push(residencia)
-  return persistir(bd, residencia)
-}
-
-/** Cierra el vinculo de un residente sin borrar el historico (trazabilidad, O3). */
-export async function desvincularResidente(
-  bdActual: BaseDatos,
-  residenciaId: string,
-): Promise<Resultado<Residencia>> {
-  await esperar()
-  const bd = clonar(bdActual)
-  const residencia = bd.residencias.find((r) => r.id === residenciaId)
+  const residencia = bd.residencias.find((r) => r.id === parametros.residenciaId)
   if (!residencia) throw new ErrorDeNegocio('El vinculo no existe.')
-  residencia.hasta = hoyISO()
+  // RN-65 — Inhabilita quien registró, o la administración; nadie a sí mismo.
+  // Se revisa aquí y no solo en la pantalla, igual que RN-60 al registrar.
+  const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
+  const rol = unidad && esAdministracion(bd, parametros.personaId, unidad.copropiedadId) ? 'admin' : 'residente'
+  if (residencia.personaId === parametros.personaId) {
+    throw new ErrorDeNegocio('Nadie se inhabilita a sí mismo: la unidad quedaría sin quien responda por ella.')
+  }
+  const { creadoPor, heredadoPor } = responsablesDelVinculo(bd, residencia)
+  if (!puedeInhabilitar({ creadoPor, heredadoPor, personaId: parametros.personaId, rol })) {
+    throw new ErrorDeNegocio('A esta persona la inhabilita quien la registró o la administración (RN-65).')
+  }
+  const motivo = parametros.motivo ?? 'otro'
+  if (motivo === 'cambio_propietario' && residencia.rol !== 'propietario') {
+    throw new ErrorDeNegocio('El cambio de propietario solo aplica a un propietario.')
+  }
+  residencia.cierre = {
+    motivo,
+    detalle: parametros.detalle?.trim() || undefined,
+    cerradoPor: parametros.personaId,
+    cerradoEn: ahoraISO(),
+  }
+  // `hasta` es el último día vigente (RN-62): quien se inhabilita hoy deja de
+  // estar hoy mismo, así que su último día fue ayer.
+  residencia.hasta = sumarDias(hoyISO(), -1)
+  // Cambio de propietario: lo que el anterior dejó a medias en la unidad se
+  // cierra con el motivo, porque solo él podía autorizarlo (RN-59) y ya no está.
+  // Los vínculos autorizados —el arrendatario que sigue— no se tocan.
+  if (motivo === 'cambio_propietario') {
+    for (const registro of bd.registros) {
+      if (registro.unidadId === residencia.unidadId && registro.creadoPor === residencia.personaId && registroEnCurso(registro)) {
+        registro.estado = 'anulado'
+        registro.motivo = 'Cambio de propietario: quien hizo el registro ya no es propietario de la unidad.'
+        registro.decididoEn = ahoraISO()
+        registro.decididoPor = parametros.personaId
+      }
+    }
+  }
   return persistir(bd, residencia)
 }
 
@@ -2932,6 +2930,12 @@ function esAdministracion(bd: BaseDatos, personaId: string, copropiedadId: strin
   return bd.perfilesDemo.some((p) => p.rol === 'admin' && p.personaId === personaId && p.copropiedadId === copropiedadId)
 }
 
+/** Si la persona de ese documento ya tiene un vínculo vigente con la unidad (RN-61). */
+function yaVinculadaALaUnidad(bd: BaseDatos, documento: string, unidadId: string): boolean {
+  const persona = bd.personas.find((p) => p.documento === documento)
+  return !!persona && bd.residencias.some((r) => r.unidadId === unidadId && r.personaId === persona.id && residenciaVigente(r))
+}
+
 /**
  * Codigo con el que la persona registrada abre su registro para adjuntar.
  *
@@ -2976,7 +2980,15 @@ export async function crearRegistroPersona(
   // RN-60 — Quién registra a quién. Se revisa aquí y no solo en la pantalla: el
   // arrendatario que llame a esta función directamente tampoco registra a un
   // residente. La administración registra lo que su consola ofrece (RN-63).
-  if (!esAdministracion(bd, parametros.creadoPor, parametros.copropiedadId)) {
+  if (esAdministracion(bd, parametros.creadoPor, parametros.copropiedadId)) {
+    // RN-63 — La administración solo registra al primer propietario.
+    const motivo = motivoNoRegistraAdministracion(
+      parametros.categoria,
+      parametros.rol,
+      unidadTienePropietario(bd, parametros.unidadId),
+    )
+    if (motivo) throw new ErrorDeNegocio(motivo)
+  } else {
     const rolEnLaUnidad = bd.residencias.find(
       (r) => r.unidadId === parametros.unidadId && r.personaId === parametros.creadoPor && residenciaVigente(r),
     )?.rol
@@ -2997,6 +3009,13 @@ export async function crearRegistroPersona(
     throw new ErrorDeNegocio(
       'Una visita se autoriza por un día. Para varios días, registra a la persona como residente temporal.',
     )
+  }
+
+  // RN-61 — Quien ya está vinculado a la unidad no se registra otra vez: dos
+  // vínculos vigentes de la misma persona son dos verdades sobre quién es ahí.
+  // La visita no crea vínculo, así que no cuenta.
+  if (exigeSoportes(parametros.categoria) && yaVinculadaALaUnidad(bd, parametros.documento, parametros.unidadId)) {
+    throw new ErrorDeNegocio('Esa persona ya está vinculada a esta unidad. Si cambia su papel, inhabilítala primero.')
   }
 
   // Solo se bloquean los registros EN CURSO, no los cerrados, y eso es
@@ -3195,6 +3214,10 @@ export async function autorizarRegistro(
   if (registro.categoria === 'visitante') {
     registro.visitanteId = crearVisitanteDeRegistro(bd, registro).id
   } else {
+    // RN-61 — Entre crear y autorizar pudo vincularse por otro registro.
+    if (yaVinculadaALaUnidad(bd, registro.documento, registro.unidadId)) {
+      throw new ErrorDeNegocio('Esa persona ya está vinculada a esta unidad: cierra este registro.')
+    }
     const residencia: Residencia = {
       id: nuevoId('res'),
       personaId: persona.id,
@@ -3375,7 +3398,7 @@ export async function emitirVoto(
   } else {
     // RN-51: sin poder de por medio, vota el propietario.
     const residencia = bd.residencias.find(
-      (r) => r.unidadId === unidad.id && r.personaId === parametros.personaId && !r.hasta,
+      (r) => r.unidadId === unidad.id && r.personaId === parametros.personaId && residenciaVigente(r),
     )
     if (!puedeVotar(residencia?.rol)) {
       throw new ErrorDeNegocio('Solo el propietario de la unidad puede votar.')

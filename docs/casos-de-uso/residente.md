@@ -920,7 +920,12 @@ alguien encontró el camino corto.
 distintos para lo mismo acaban pidiendo cosas distintas).
 
 **Pendiente:** en el producto real el código viaja por mensaje; aquí se muestra en pantalla
-(misma honestidad que ADR-0004). Y falta avisarle a la persona cuando la autorizan.
+(misma honestidad que ADR-0004). El aviso al autorizar ya existe (RN-64).
+
+**Revisión 2026-10-02:** el residente temporal ya puede entrar a la app hasta su fecha de salida
+(antes la puerta solo dejaba entrar a quien no tenía fecha de fin); quien se inhabilita deja de
+estar ese mismo día; nadie queda vinculado dos veces a la unidad; y tras un cambio de
+propietario, el nuevo dueño hereda a los arrendatarios que siguen (RN-65).
 
 ---
 

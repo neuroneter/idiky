@@ -1674,8 +1674,15 @@ export function puedeInhabilitar(parametros: {
   personaId: string
   /** Su rol de sesion: el administrador esta por encima de cualquier propietario. */
   rol: RolUsuario
+  /**
+   * Los propietarios que heredan el vinculo porque quien lo creo ya no esta en
+   * la unidad: tras una venta, el arrendatario sigue y ahora responde por el el
+   * nuevo dueño (Mary, 2026-10-02).
+   */
+  heredadoPor?: readonly string[]
 }): boolean {
   if (parametros.rol === 'admin') return true
+  if (parametros.heredadoPor?.includes(parametros.personaId)) return true
   return !!parametros.creadoPor && parametros.creadoPor === parametros.personaId
 }
 
@@ -1746,6 +1753,31 @@ export function puedeRegistrar(
   categoria: CategoriaRegistro,
 ): boolean {
   return categoriasQuePuedeRegistrar(rol).includes(categoria)
+}
+
+/**
+ * RN-63 — Lo que registra la administración: **el primer propietario** de una
+ * unidad, y nada más.
+ *
+ * «El propietario lo crea el Administrador de la Copropiedad, si hay más de un
+ * propietario los crea el usuario creado por el administrador» y «arrendatarios
+ * los crea el propietario de la propiedad» (Mary, 2026-10-02). Si la unidad ya
+ * tiene propietario —vigente o con su registro en curso—, el siguiente lo
+ * registra él. Cuando se vende, la administración inhabilita al anterior y
+ * registra al nuevo: la unidad queda otra vez sin propietario.
+ */
+export function motivoNoRegistraAdministracion(
+  categoria: CategoriaRegistro,
+  rol: RolResidencia | undefined,
+  unidadTienePropietario: boolean,
+): string | undefined {
+  if (categoria !== 'residente' || rol !== 'propietario') {
+    return 'La administración registra al propietario; los arrendatarios, temporales y visitantes los registra él.'
+  }
+  if (unidadTienePropietario) {
+    return 'Esta unidad ya tiene propietario: los demás propietarios los registra él desde su app.'
+  }
+  return undefined
 }
 
 /**

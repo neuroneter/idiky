@@ -85,7 +85,7 @@ export function PersonasPage() {
 
   async function darDeBaja(residenciaId: string, nombre: string) {
     await ejecutar(
-      (base) => desvincularResidente(base, residenciaId),
+      (base) => desvincularResidente(base, { residenciaId, personaId: sesion!.personaId }),
       `${nombre} quedó inhabilitado en esta unidad.`,
     )
   }
@@ -169,7 +169,7 @@ export function PersonasPage() {
                         pudiera arreglarlo desde adentro. */}
                     {!soyYo &&
                       puedeInhabilitar({
-                        creadoPor: sel.registro(bd, residencia.registroId)?.creadoPor,
+                        ...sel.responsablesDelVinculo(bd, residencia),
                         personaId: sesion.personaId,
                         rol: sesion.rol,
                       }) && (

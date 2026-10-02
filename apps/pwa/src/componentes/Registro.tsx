@@ -108,17 +108,23 @@ export interface DatosRegistro {
 export function FormularioRegistro({
   categorias,
   unidades,
+  unidadInicial,
   categoriaInicial,
   permitirNoObligatorio = false,
+  rolFijo,
   alCrear,
   alCerrar,
 }: {
   categorias: readonly CategoriaRegistro[]
   /** Solo la consola del administrador: ahí hay que decir a qué unidad entra. */
   unidades?: Unidad[]
+  /** La unidad ya escogida, cuando se llega desde un cambio de propietario. */
+  unidadInicial?: string
   categoriaInicial?: CategoriaRegistro
   /** Solo el administrador puede eximir de los soportes (RN-97). */
   permitirNoObligatorio?: boolean
+  /** La consola registra solo propietarios (RN-63): ahí el título no se escoge. */
+  rolFijo?: RolResidencia
   alCrear: (datos: DatosRegistro) => Promise<void>
   alCerrar: () => void
 }) {
@@ -126,8 +132,10 @@ export function FormularioRegistro({
   const [categoria, setCategoria] = useState<CategoriaRegistro>(
     categoriaInicial && categorias.includes(categoriaInicial) ? categoriaInicial : categorias[0],
   )
-  const [unidadId, setUnidadId] = useState(unidades?.[0]?.id ?? '')
-  const [rol, setRol] = useState<RolResidencia>('arrendatario')
+  const [unidadId, setUnidadId] = useState(
+    unidadInicial && unidades?.some((u) => u.id === unidadInicial) ? unidadInicial : (unidades?.[0]?.id ?? ''),
+  )
+  const [rol, setRol] = useState<RolResidencia>(rolFijo ?? 'arrendatario')
   /** La marca de residente. Solo el propietario puede no llevarla. */
   const [reside, setReside] = useState(true)
   const [nombres, setNombres] = useState('')
@@ -242,7 +250,7 @@ export function FormularioRegistro({
           </div>
         </div>
 
-        {categoria === 'residente' && (
+        {categoria === 'residente' && !rolFijo && (
           <div className="campo">
             <label htmlFor="rol">¿Con qué título?</label>
             <select

@@ -98,6 +98,9 @@ export interface Persona {
 export type RolResidencia = 'propietario' | 'arrendatario' | 'autorizado'
 
 /** Vinculo entre una persona y una unidad. Define el rol efectivo (RN-02). */
+/** Por qué se inhabilita a alguien en una unidad. */
+export type MotivoCierreVinculo = 'cambio_propietario' | 'otro'
+
 export interface Residencia {
   id: string
   personaId: string
@@ -121,6 +124,16 @@ export interface Residencia {
   reside: boolean
   /** Registro que la origino, si nacio por CU-R-27. Las de la semilla no tienen. */
   registroId?: string
+  /**
+   * Por qué y quién cerró el vínculo (RN-61, RN-65). «Cambio de propietario» es
+   * la venta: el anterior sale y la administración registra al nuevo (RN-63).
+   */
+  cierre?: {
+    motivo: MotivoCierreVinculo
+    detalle?: string
+    cerradoPor: string
+    cerradoEn: string
+  }
 }
 
 // ---------------------------------------------------------------------------

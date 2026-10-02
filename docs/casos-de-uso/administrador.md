@@ -38,10 +38,19 @@
 1. El sistema lista las unidades con torre, número, coeficiente, residentes y saldo.
 2. El administrador puede buscar por torre, número o nombre de residente.
 3. Al abrir una unidad ve su ficha: datos, ocupantes, cartera y actividad reciente.
-4. Puede vincular una persona a la unidad indicando su rol (`propietario` | `arrendatario`).
+4. **Aquí no se crea a nadie** (2026-10-02). Si la unidad no tiene propietario, el botón
+   **Registrar propietario** lleva a Registros (CU-A-26) con la unidad escogida: el trámite con
+   soportes es el único camino (RN-63). Antes había un «Vincular» que creaba a cualquiera,
+   incluso arrendatarios, sin fotos ni autorización de datos; se quitó.
 
 **Flujos alternativos**
-- A1. Desvincular a un residente (queda en histórico, no se borra).
+- A1. **Inhabilitar** a un residente, con motivo (RN-61, RN-65). Queda en el histórico.
+- A1b. **Cambio de propietario** (se vendió la unidad): al inhabilitar a un propietario se escoge
+  ese motivo y, si la unidad queda sin dueño, el sistema lleva a registrar al nuevo. **Los
+  arrendatarios siguen**: los hereda el nuevo propietario. Lo que el anterior dejó en curso se
+  anula con ese motivo. Si queda otro propietario, se avisa que también hay que inhabilitarlo
+  si vendió. Mientras se registra al nuevo, la unidad está sin propietario: es la única excepción
+  a RN-20, y dura lo que dura el trámite.
 - A2. Crear una unidad nueva → *fase 2* (normalmente se cargan al constituir la copropiedad).
 
 **Reglas de negocio**
@@ -49,7 +58,7 @@
 - RN-20: una unidad debe tener siempre al menos un propietario.
 
 **Estado en el demo:** ✅ — `src/features/admin/UnidadesPage.tsx` (listar, buscar, ver ficha
-y vincular residente).
+e inhabilitar con motivo).
 
 ---
 
@@ -889,7 +898,8 @@ real que este caso de uso estaba tapando.
   registra a los demás de su unidad.
 
 **El segundo eslabón de RN-63.** El operador de Idiky crea al administrador; el administrador
-crea a los propietarios; el propietario crea a los demás de su unidad. Por eso aquí **la única
+crea **al primer propietario** de cada unidad —«si hay más de un propietario los crea el usuario
+creado por el administrador» (Mary, 2026-10-02)—; el propietario crea a los demás de su unidad. Por eso aquí **la única
 categoría es residente**, en la práctica propietario: que el administrador pudiera crear
 arrendatarios directamente parece un atajo cómodo y es lo que rompe la trazabilidad — el
 propietario dejaría de saber quién vive en su unidad.
@@ -898,7 +908,9 @@ propietario dejaría de saber quién vive en su unidad.
 1. El administrador abre **Registros**.
 2. Ve la tabla de toda la copropiedad, con **quién registró a quién**: es la cadena de RN-63
    hecha visible.
-3. Toca **Registrar propietario**, escoge la unidad y llena los datos.
+3. Toca **Registrar propietario**, escoge la unidad y llena los datos. **Solo aparecen las
+   unidades sin propietario**, y el título no se escoge: es propietario. Si todas tienen dueño,
+   el botón se apaga y la pantalla explica qué hacer cuando se vende una.
 4. El resto es igual que CU-R-27: la persona adjunta, el administrador autoriza.
 5. **Si la persona no quiere adjuntar** la foto ni el documento, el administrador marca el
    registro como **«No obligatorio»** (RN-97, equipo 2026-09-17) —en el formulario al crearlo, o

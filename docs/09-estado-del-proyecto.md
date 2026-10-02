@@ -111,6 +111,39 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-02 · Mary + IA (Claude) · Revisión de la creación de usuarios y el cambio de propietario
+
+Mary: *«podemos revisar la creación de usuarios»*. Se probó el trámite completo y se ajustó a sus
+reglas: *«el propietario lo crea el Administrador de la Copropiedad, si hay más de un propietario
+los crea el usuario creado por el administrador»*, *«arrendatarios los crea el propietario»*,
+*«los visitantes los crea el propietario y/o arrendatario»* y *«para inhabilitar funciona de la
+misma manera»*. **No se gastaron números**: se hicieron cumplir RN-61, RN-63 y RN-65.
+
+**Lo que no se cumplía, y queda corregido:**
+
+| # | Falla | Arreglo | Dónde |
+|---|---|---|---|
+| 1 | La administración podía registrar un segundo propietario | Solo el primero; los demás los registra él | `datos/repositorio.ts`, `dominio/reglas.ts` (`motivoNoRegistraAdministracion`), `features/admin/RegistrosPage.tsx` |
+| 2 | La administración podía crear arrendatarios | El formulario de la consola ya no ofrece el título | `componentes/Registro.tsx` (`rolFijo`) |
+| 3 | «Vincular» en Unidades creaba a cualquiera sin fotos ni autorización de datos | Se quitó; queda un enlace a Registros | `features/admin/UnidadesPage.tsx` |
+| 4 | El residente temporal no podía entrar a la app | La puerta mira la vigencia, no si tiene fecha de fin | `features/auth/perfil.ts` |
+| 5 | La misma persona podía quedar dos veces en la unidad | Se impide al registrar y al autorizar | `datos/repositorio.ts` |
+| 6 | Quien se inhabilitaba seguía activo hasta el otro día | Deja de estar el mismo día | `datos/repositorio.ts` (`desvincularResidente`) |
+| 7 | Inhabilitar no revisaba quién lo pedía | RN-65 en el repositorio; nadie se inhabilita a sí mismo | `datos/repositorio.ts` |
+
+**El cambio de propietario** (idea de Mary: *«colocar una opción cuando se vaya a inhabilitar al
+propietario que sea por cambio de propietario»*). En **Unidades**, al inhabilitar a un
+propietario se escoge el motivo, con una explicación opcional (p. ej. la escritura). Si la unidad
+queda sin dueño, el sistema lleva a **Registros** con la unidad escogida. **Los arrendatarios
+siguen** (*«puede ser posible que continúe con los mismos arrendatarios»*) y **los hereda el nuevo
+propietario**: puede dejarlos o inhabilitarlos. Lo que el anterior dejó en curso se anula con ese
+motivo. El motivo queda guardado en el vínculo (`Residencia.cierre`).
+
+**Pruebas:** nuevas `prueba-usuarios` (13 casos), `prueba-venta` (7, en la pantalla) y
+`prueba-herencia` (4); las anteriores siguen en verde.
+
+---
+
 ### 2026-10-02 · Mary + IA (Claude) · Auditoría de reglas y limpieza del código
 
 Mary: *«aprovechemos este tiempo para hacer esta auditoría al proyecto, así el código estará más

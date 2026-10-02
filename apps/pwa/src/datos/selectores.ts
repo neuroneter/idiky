@@ -29,7 +29,7 @@ import type {
   Voto,
   ZonaComun,
 } from '../dominio/tipos'
-import { hoyISO, ordenAsamblea, proyectosOrdenados, residenciaVigente } from '../dominio/reglas'
+import { hoyISO, ordenAsamblea, proyectosOrdenados, registroEnCurso, residenciaVigente } from '../dominio/reglas'
 
 // RN-01 — Todo se lee filtrado por copropiedad: un selector nunca mezcla dos.
 
@@ -70,6 +70,39 @@ export function registro(bd: BaseDatos, registroId?: string): RegistroPersona | 
 /** Vinculos vigentes de una unidad: sin fecha de fin, o con una que aun no llega. */
 export function residenciasDeUnidad(bd: BaseDatos, unidadId: string): Residencia[] {
   return bd.residencias.filter((r) => r.unidadId === unidadId && residenciaVigente(r))
+}
+
+/**
+ * Si la unidad ya tiene propietario: vigente, o con su registro en curso. Es lo
+ * que decide si la administración puede registrar uno (RN-63).
+ */
+export function unidadTienePropietario(bd: BaseDatos, unidadId: string): boolean {
+  return (
+    bd.residencias.some((r) => r.unidadId === unidadId && r.rol === 'propietario' && residenciaVigente(r)) ||
+    bd.registros.some(
+      (r) => r.unidadId === unidadId && r.categoria === 'residente' && r.rol === 'propietario' && registroEnCurso(r),
+    )
+  )
+}
+
+/**
+ * Quién responde por un vínculo para inhabilitarlo (RN-65): quien lo registró y,
+ * si ese propietario ya salió de la unidad —un cambio de propietario—, los
+ * propietarios de hoy, que heredan a los arrendatarios que siguen.
+ */
+export function responsablesDelVinculo(
+  bd: BaseDatos,
+  residencia: Residencia,
+): { creadoPor?: string; heredadoPor: string[] } {
+  const creadoPor = bd.registros.find((r) => r.id === residencia.registroId)?.creadoPor
+  const vigentes = residenciasDeUnidad(bd, residencia.unidadId)
+  const creadorSigue = vigentes.some((r) => r.personaId === creadoPor)
+  const creadorEsAdministracion = bd.perfilesDemo.some((p) => p.rol === 'admin' && p.personaId === creadoPor)
+  const heredadoPor =
+    creadoPor && !creadorSigue && !creadorEsAdministracion
+      ? vigentes.filter((r) => r.rol === 'propietario' && r.id !== residencia.id).map((r) => r.personaId)
+      : []
+  return { creadoPor, heredadoPor }
 }
 
 export function residenciasDePersona(bd: BaseDatos, personaId: string): Residencia[] {
