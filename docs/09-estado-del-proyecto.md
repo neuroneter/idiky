@@ -182,6 +182,13 @@ cuenta, con `prosodyctl` (la crea Daniel con su clave); **3)** una reunión de p
 personas y video, que es lo único que confirma de verdad el UDP a través de `slirp4netns`;
 **4)** la decisión de fondo frente a ADR-0007.
 
+**Mismo día, después:** Daniel creó la ruta `jitsi-dev.idiky.com` en el túnel. La primera vez
+quedó con servicio `https://` y el túnel respondía 502 (*«first record does not look like a TLS
+handshake»*): Jitsi habla HTTP dentro del servidor y el certificado lo pone Cloudflare. Con
+`http://10.0.2.2:8085`, `/salud`, `/config.js` y una sala responden 200 y el WebSocket de XMPP,
+101. Cuenta `daniel` creada con `prosodyctl` (la clave la puso Daniel en su terminal). **Queda
+la reunión de prueba con video.**
+
 ### 2026-10-02 · Integración · Sesión de IA (Claude) con Daniel · Lo que Mary dejó pendiente: la solicitud #3, su rango de reglas, T-43 y T-42
 
 **1. Solicitud #3 integrada** (`bf05bc6`, rama `claude/repository-review-c0p1wd` → `main`). Trae:
