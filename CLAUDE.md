@@ -97,6 +97,7 @@ npm run dev       # desarrollo en http://localhost:5173
 npm run build     # typecheck + build de producción
 npm run typecheck # solo verificación de tipos
 npm run empaquetar # deja dist/idiky-demo.html: el demo en un solo archivo
+npm run probar:navegador # pruebas de navegador (Playwright, reloj fijo; ADR-0020)
 ```
 
 Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.

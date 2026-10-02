@@ -355,7 +355,7 @@ Lo que hay que decidir antes de que esto salga a un servidor:
 | Pregunta | Por qué no se puede dejar para después | Respuesta |
 |---|---|---|
 | ¿Con qué **autorización** se recoge, y para qué? | El titular tiene que autorizar el tratamiento y saber el fin | **Respondida (2026-09-07)**: autorización informada, expresa y registrada con versión, antes de subir las fotos (RN-66). **Falta que la revise un abogado** — el texto es un borrador de trabajo |
-| ¿**Cuánto se conserva**? | La cédula de un arrendatario que se fue hace tres años no puede seguir ahí. Y un residente temporal que estuvo dos meses, menos | *(pendiente)* |
+| ¿**Cuánto se conserva**? | La cédula de un arrendatario que se fue hace tres años no puede seguir ahí. Y un residente temporal que estuvo dos meses, menos | *(pendiente — Mary lo reafirmó el 2026-10-02 como **pregunta jurídica**: es el punto 2 para el abogado, abajo. No se construye nada hasta tener el plazo)* |
 | ¿**Quién la ve**? | Cada respuesta es un permiso distinto en el modelo | **Respondida (Mary, 2026-09-07)**: quien registró y la administración ven las dos, y **después de autorizar queda constancia de quién las abre**; la portería ve **solo el rostro**, porque necesita reconocer a quien entra pero no tener su identidad (RN-67) |
 | Al **inhabilitar** a la persona, ¿la foto se borra? | RN-61 dice que nada se borra; un dato personal sí puede tener que borrarse | **Resuelto en principio (Mary, 2026-09-07)**: *«me refería a conservar el registro; la documentación se debe guardar el tiempo que la normatividad lo permita»*, y *«si el registro se habilita nuevamente y ya no tenemos los documentos se solicitan nuevamente»*. El registro queda, las fotos tienen plazo, y rehabilitar es volver a registrar. **Falta el plazo concreto que fija la norma y el proceso que borra las fotos al cumplirse** |
 | ¿**Dónde** se almacena? | Un servidor con las cédulas de un conjunto entero es un objetivo, no un archivo | *(pendiente)* |
@@ -401,6 +401,12 @@ texto o configuración.
   → ✅ **Respondido (Mary, 2026-10-01):** con cualquiera de los tres, en un solo campo, y entra
   con un código por SMS o por correo, sin clave (CU-R-01, RN-54).
 - ¿Un arrendatario ve la cartera de la unidad, o solo el propietario? → *(respuesta)*
+- **¿Las estadías largas de la familia del arrendatario y de su visitante frecuente necesitan
+  aprobación del propietario?** (abierta por Mary el 2026-10-02). Hoy RN-60 solo le pide
+  aprobación al propietario cuando el **visitante temporal** que registra un arrendatario se
+  queda más de 7 días. La familia del arrendatario y su visitante frecuente entran sin esa
+  aprobación. Si la respuesta es sí, cambia RN-60 y `requiereAprobacionPropietario`. → *(Mary
+  decide; no se construye nada todavía)*
 
 ## 5. Técnico
 

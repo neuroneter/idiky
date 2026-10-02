@@ -19,3 +19,7 @@ npm-debug.log*
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Pruebas de navegador (T-42): informes y resultados de cada corrida
+apps/pwa/pruebas/informe/
+apps/pwa/pruebas/resultados/

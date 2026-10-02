@@ -9,7 +9,9 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "empaquetar": "npm run build && node herramientas/empaquetar.mjs"
+    "empaquetar": "npm run build && node herramientas/empaquetar.mjs",
+    "probar:navegador": "playwright test",
+    "probar:navegador:instalar": "playwright install chromium"
   },
   "dependencies": {
     "react": "^18.3.1",
@@ -17,6 +19,7 @@
     "react-router-dom": "^6.26.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.2",

@@ -111,6 +111,41 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-02 · Integración · Sesión de IA (Claude) con Daniel · Lo que Mary dejó pendiente: la solicitud #3, su rango de reglas, T-43 y T-42
+
+**1. Solicitud #3 integrada** (`bf05bc6`, rama `claude/repository-review-c0p1wd` → `main`). Trae:
+cuando sale un **propietario** sale su familia, y su arrendatario y sus visitas los hereda el
+siguiente dueño (RN-65); el **familiar mayor de edad** registra visitas de un día, y el menor a
+nadie (RN-60). Revisado antes de integrar: la regla se comprueba en el repositorio
+(`crearRegistroPersona` llama a `puedeRegistrar` con la edad y la condición), no solo en la
+pantalla; el familiar queda limitado a «de un día» también frente al visitante frecuente y el
+temporal, que son otras condiciones; `05-modelo-de-datos.md` cambió con el código. A la rama le
+faltaban dos commits de `main` (solo documentación): la fusión se probó aparte, entró sin
+conflictos y **`npm run build` pasó sobre el resultado**.
+
+**2. Rango nuevo para Mary: RN-210 … RN-239**, para T-46 y CU-A-18 (el suyo, RN-98…129, se
+agotó). RN-190…209 es de Justo.
+
+**3. T-43 hecha:** la rama de Mary trajo `main` y quedó integrada.
+
+**4. T-42 decidida** ([ADR-0020](./adr/0020-pruebas-de-navegador-de-la-pwa.md)): las pruebas de
+navegador viven en `apps/pwa/pruebas/navegador/`, con **Playwright Test** como dependencia de
+desarrollo (1.63) y `npm run probar:navegador`; no entran en el build. **Ninguna prueba depende
+de la hora**: `base.ts` fija el reloj del navegador (viernes 2026-10-09, 10:00, Bogotá) y cada
+prueba puede pedir la suya con `test.use({ ahora })` —así se traen «autocierre» y «seis»—.
+Montado y probado: `humo.spec.ts`, 4 casos en 6 s. **Falta que Mary traiga sus ~25 suites.**
+
+**5. Dos preguntas de Mary, anotadas sin construir nada** en
+[`12-levantamiento-pendiente.md`](./12-levantamiento-pendiente.md): si las estadías largas de la
+familia del arrendatario y de su visitante frecuente necesitan aprobación del propietario (§4,
+nueva), y cuánto se guardan las fotos de los documentos (§3 sexies, ya estaba: es pregunta
+jurídica, punto 2 para el abogado).
+
+También se corrigió el índice de ADR: la fila del de repositorios decía «0017» y enlazaba al 0018.
+
+**Qué sigue:** Mary trae sus suites a `pruebas/navegador/` (T-42) y sigue con T-46 y CU-A-18 en
+su rango nuevo.
+
 ### 2026-10-02 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Un repositorio por sistema; `idiky` es el arnés (T-79, ADR-0018)
 
 **Lo que pidió Daniel:** que `idiky` sea el arnés y el contexto de todo el desarrollo, y que
