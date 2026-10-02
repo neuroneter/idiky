@@ -172,7 +172,15 @@ avisa si se abre en `main`), rango de identificadores para Justo (RN-190…209, 
 los cinco repos de desarrollo la rama `develop` (en GitHub), la sección Git Flow del `CLAUDE.md`
 y un aviso de rama propio. **Justo aparece por primera vez en la documentación.**
 
-**Qué sigue:** limpiar el disco del servidor y desplegar `bloky` (T-79); darle acceso a Justo;
+**Cierre del despliegue, el mismo día.** Daniel limpió las imágenes sin uso del usuario `idiky`
+(`podman image prune --all`; el disco pasó de 3,0 a 4,7 GB libres). Después se desplegó
+`bloky` (`e71c429.bloky-5766873`: API sana, `https://bloky-dev.idiky.com/api/salud` 200, la imagen
+ya sin `._`) y **se volvió a publicar `gestion`** para que BOB no siguiera con la imagen del
+primer intento, que llevaba esos archivos (`e71c429.gestion-bf7c9a6`, respaldo previo
+`gestion-predespliegue-2026-10-02_212646.sql.gz`). LangFlow: igual antes y después de cada uno.
+**T-79 queda cerrada.**
+
+**Qué sigue:** darle acceso a Justo;
 los ADR de ALICE en Flutter (T-80) y de los contratos inteligentes (T-81).
 
 ### 2026-10-02 · Mary + IA (Claude) · Familia, menores, visitante frecuente, fotos en cadena y aviso de fin de estadía
