@@ -10,6 +10,7 @@
  */
 
 import type {
+  Copropiedad,
   MotivoCierreVinculo,
   AccesoSoporte,
   AutorActuacion,
@@ -154,6 +155,7 @@ import {
   condicionesParaCambiar,
   faltaContacto,
   requiereAprobacionPropietario,
+  aprobacionPropietarioActiva,
   esperaAlPropietario,
   soloUnDia,
   soportesCompletos,
@@ -1752,12 +1754,16 @@ export async function cambiarEstadia(
   const ahora = ahoraISO()
   if (
     !esAdmin &&
-    requiereAprobacionPropietario(rolDeQuienCambia, {
-      categoria: categoriaDeResidencia(residencia),
-      condicion: parametros.condicion,
-      vigenciaDesde: residencia.desde,
-      vigenciaHasta: hasta,
-    })
+    requiereAprobacionPropietario(
+      rolDeQuienCambia,
+      {
+        categoria: categoriaDeResidencia(residencia),
+        condicion: parametros.condicion,
+        vigenciaDesde: residencia.desde,
+        vigenciaHasta: hasta,
+      },
+      aprobacionPropietarioActiva(bd.copropiedades.find((c) => c.id === unidad?.copropiedadId)),
+    )
   ) {
     residencia.cambioPendiente = { condicion: parametros.condicion, hasta, pedidoPor: parametros.personaId, pedidoEn: ahora }
     const persona = bd.personas.find((p) => p.id === residencia.personaId)
@@ -3231,7 +3237,7 @@ export async function crearRegistroPersona(
     )
     rolEnLaUnidad = suVinculo?.rol
     const esMenor = !!bd.registros.find((r) => r.id === suVinculo?.registroId)?.menorDeEdad
-    if (!puedeRegistrar(rolEnLaUnidad, parametros.categoria, esMenor, parametros.condicion)) {
+    if (!puedeRegistrar(rolEnLaUnidad, parametros.categoria, esMenor, parametros.condicion, suVinculo?.reside !== false)) {
       throw new ErrorDeNegocio('Tu papel en esta unidad no te permite registrar a esa clase de persona (RN-60).')
     }
   }
@@ -3318,7 +3324,13 @@ export async function crearRegistroPersona(
 
   // RN-60 — La estadía de más de una semana que registra un arrendatario la
   // aprueba el propietario. Se le avisa a cada uno.
-  if (requiereAprobacionPropietario(rolEnLaUnidad, registro)) {
+  if (
+    requiereAprobacionPropietario(
+      rolEnLaUnidad,
+      registro,
+      aprobacionPropietarioActiva(bd.copropiedades.find((c) => c.id === registro.copropiedadId)),
+    )
+  ) {
     registro.aprobacionPropietario = {}
     const unidad = bd.unidades.find((u) => u.id === registro.unidadId)
     for (const dueno of bd.residencias.filter(
@@ -3567,6 +3579,26 @@ export async function cerrarRegistro(
   // nadie mas; uno que se rechaza despues de que adjunto, si: estuvo esperando.
   if (!parametros.anular) avisar(bd, registro, 'registro_rechazado')
   return persistir(bd, registro)
+}
+
+/**
+ * RN-210 — La administración decide si en su edificio el propietario aprueba
+ * las estadías largas que registra el arrendatario. Lo ya pedido no cambia:
+ * apagar la opción no aprueba lo que estaba esperando.
+ */
+export async function configurarAprobacionPropietario(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; activa: boolean },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('Esta opción la cambia la administración del edificio (RN-210).')
+  }
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  copropiedad.aprobacionPropietario = parametros.activa
+  return persistir(bd, copropiedad)
 }
 
 /**

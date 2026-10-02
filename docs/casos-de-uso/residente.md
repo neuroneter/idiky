@@ -848,7 +848,9 @@ residente temporal ya no va»*. Son dos preguntas: **quién es** y **cómo se qu
 | **Visitante** | **No aplica**: quien vive ahí no es visita | **De un día** · fotos **opcionales** · sale con su código | Huésped de Airbnb, un familiar · fotos · fecha de salida · queda como `autorizado` |
 | **Familiar o acompañante** *(2026-10-02)* | Pareja, hijos, padres · fotos · sin fecha de fin | **No aplica** | Vive ahí un tiempo · fotos · fecha de salida |
 
-**Visitante frecuente** *(2026-10-02)*: la empleada del servicio, la niñera, el conductor. Se
+**Aprobación del propietario, según el edificio** (RN-210, 2026-10-02): la administración escoge en **Registros** si el propietario aprueba las estadías de más de 7 días que el arrendatario registra o alarga (familiar o visitante **temporal**). Viene activada.
+
+**Visitante frecuente** *(2026-10-02)*: la empleada del servicio, la niñera, el conductor. **Lo registra quien vive en la unidad** (el propietario residente o el arrendatario), sin aprobación del propietario. Se
 escogen **los días de la semana** en que viene y una fecha de fin; sube sus fotos y, autorizado,
 entra con su código **solo esos días** (en `Visitante` usa la marca `recurrente`, que existía sin
 usarse, y `dias`). No lleva la marca de residente: no vive ahí.

@@ -15,7 +15,7 @@ quien numera dentro de su rango** y, al agotarlo, pide el siguiente aquí. Los m
 
 | Quién | Reglas (RN) | Casos de uso | Tareas (T) | ADR |
 |---|---|---|---|---|
-| Mary (ALICE / PWA) | RN-98 … RN-129 (agotado) · **RN-210 … RN-239** (desde 2026-10-02, para T-46 y CU-A-18) | CU-R-32 … CU-R-49 · CU-A-28 … CU-A-39 | T-45 … T-59 | Se piden al integrador |
+| Mary (ALICE / PWA) | RN-98 … RN-129 (agotado) · **RN-210 … RN-239** (desde 2026-10-02, para T-46 y CU-A-18; usada: RN-210) | CU-R-32 … CU-R-49 · CU-A-28 … CU-A-39 | T-45 … T-59 | Se piden al integrador |
 | Jeimy (contable) | RN-130 … RN-159 | CU-A-40 … CU-A-49 | T-60 … T-74 | Se piden al integrador |
 | Integración (infra, BOB, BLOKY) | RN-160 … RN-189 (usadas: RN-160…167) | CU-S-10 … CU-S-29 · CU-P-04 … CU-P-09 · **CU-B-01 … CU-B-49** (BLOKY, usado: CU-B-01) | T-75 … T-89 (usados: T-75…T-82) | ADR-0013 en adelante (usados: 0013…0016, 0018 y 0020; **reservados: 0017 Google Maps y 0019 archivos en R2** —la bitácora del 2026-09-21 los anunció como 0016 y 0017, pero el 0016 lo tomó Jitsi—) |
 | Justo (APP / ALICE, `App-Idiky`) | RN-190 … RN-209 | Los CU los definen Mary y Jeimy; Justo los implementa | T-90 … T-104 | Se piden al integrador |

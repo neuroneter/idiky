@@ -26,11 +26,14 @@ import { nombreCompleto } from '../../datos/selectores'
 import {
   autorizarRegistro,
   cerrarRegistro,
+  configurarAprobacionPropietario,
   crearRegistroPersona,
   marcarSoportesNoObligatorios,
   registrarAccesoSoportes,
 } from '../../datos/repositorio'
 import {
+  DIAS_SIN_APROBACION_DEL_PROPIETARIO,
+  aprobacionPropietarioActiva,
   etiquetaUnidad,
   puedeAutorizar,
   registroEnCurso,
@@ -66,6 +69,7 @@ export function RegistrosPage() {
   const enCurso = registros.filter(registroEnCurso)
   const enDetalle = registros.find((registro) => registro.id === viendo)
   /** RN-63 — La administración registra al primer propietario; los demás, él. */
+  const aprobacionActiva = aprobacionPropietarioActiva(sel.copropiedad(bd, sesion.copropiedadId))
   const sinPropietario = unidades.filter((unidad) => !sel.unidadTienePropietario(bd, unidad.id))
 
   return (
@@ -84,6 +88,48 @@ export function RegistrosPage() {
           <Icono nombre="mas" tamano={16} />
           Registrar propietario
         </button>
+      </div>
+
+      {/* RN-210 — Cada edificio decide si el propietario aprueba las estadías
+          largas que registra su arrendatario (Mary, 2026-10-02). */}
+      <div className="tarjeta">
+        <div className="fila" style={{ flexWrap: 'wrap', gap: 'var(--e3)' }}>
+          <div className="columna" style={{ flex: '1 1 280px' }}>
+            <strong>Aprobación del propietario</strong>
+            <span className="subtitulo">
+              Cuando un arrendatario registra a un familiar o a un visitante <strong>temporal</strong> por
+              más de {DIAS_SIN_APROBACION_DEL_PROPIETARIO} días, ¿el propietario lo tiene que aprobar? Al
+              visitante frecuente lo registra quien vive en la unidad, sin aprobación.
+            </span>
+          </div>
+          <div className="segmentos">
+            {[
+              [true, 'Sí, lo aprueba'],
+              [false, 'No hace falta'],
+            ].map(([valor, texto]) => (
+              <button
+                key={String(valor)}
+                type="button"
+                className="segmento"
+                aria-current={aprobacionActiva === valor ? 'page' : undefined}
+                onClick={() =>
+                  aprobacionActiva !== valor &&
+                  void ejecutar(
+                    (base) =>
+                      configurarAprobacionPropietario(base, {
+                        copropiedadId: sesion.copropiedadId,
+                        personaId: sesion.personaId,
+                        activa: valor as boolean,
+                      }),
+                    valor ? 'Desde ahora el propietario aprueba las estadías largas.' : 'Desde ahora no se pide la aprobación del propietario.',
+                  )
+                }
+              >
+                {texto as string}
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       <div className="rejilla-indicadores">

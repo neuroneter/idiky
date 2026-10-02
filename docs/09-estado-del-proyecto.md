@@ -111,6 +111,28 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-02 · Mary + IA (Claude) · Cada edificio decide la aprobación del propietario (RN-210)
+
+Mary, sobre las preguntas abiertas de usuarios: *«voy a cambiar el tema de aprobación del familiar o
+visitante, dejemos una opción para que el administrador parametrice si en ese edificio se hace o
+no»* y, del visitante frecuente, *«lo hace quien reside en la propiedad»*. Primera regla del rango
+nuevo (RN-210 … RN-239).
+
+- **RN-210:** en **Registros** de la consola, la administración escoge «Sí, lo aprueba» o «No hace
+  falta». Activada (así viene), un familiar o visitante **temporal** de más de 7 días que el
+  arrendatario registra o alarga espera al propietario; apagada, no. Solo la cambia la administración.
+- **El visitante frecuente** lo registra quien vive en la unidad (propietario residente o
+  arrendatario), sin aprobación; el propietario no residente no lo registra.
+- Dónde: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/repositorio.ts`
+  (`configurarAprobacionPropietario`), `apps/pwa/src/features/admin/RegistrosPage.tsx`,
+  `apps/pwa/src/componentes/{Registro,CambiarEstadia}.tsx`, `apps/pwa/src/features/residente/PersonasPage.tsx`.
+- **Pruebas:** 3 nuevas en `apps/pwa/pruebas/navegador/usuarios.spec.ts`; **33 en verde**.
+
+**Lo único que queda de usuarios:** cuánto tiempo se guardan las fotos de los documentos (pregunta
+jurídica) y la delegación del administrador (T-08, con los perfiles de BLOKY).
+
+---
+
 ### 2026-10-02 · Mary + IA (Claude) · Las pruebas de navegador, dentro del repositorio (T-42)
 
 Mary: *«sí, haz el 1»* (traer sus pruebas al repositorio antes de que se pierdan con la sesión).

@@ -45,6 +45,7 @@ import {
 import {
   categoriasQuePuedeRegistrar,
   puedeAutorizar,
+  aprobacionPropietarioActiva,
   DIAS_AVISO_FIN_DE_ESTADIA,
   diasEntre,
   hoyISO,
@@ -95,6 +96,8 @@ export function PersonasPage() {
   const miRol = miVinculo?.rol
   const soyMenor = !!sel.registro(bd, miVinculo?.registroId)?.menorDeEdad
   const categorias = categoriasQuePuedeRegistrar(miRol, soyMenor)
+  /** RN-210 — Si este edificio pide la aprobación del propietario. */
+  const aprobacionActiva = aprobacionPropietarioActiva(sel.copropiedad(bd, sesion.copropiedadId))
 
   const residencias = sel.residenciasDeUnidad(bd, unidadId ?? '')
   const registros = sel.registrosDeUnidad(bd, unidadId)
@@ -327,6 +330,8 @@ export function PersonasPage() {
           categorias={categorias}
           registraArrendatario={miRol === 'arrendatario'}
           soloDeUnDia={miRol === 'familiar'}
+          resideAqui={miVinculo?.reside !== false}
+          aprobacionActiva={aprobacionActiva}
           categoriaInicial={pedida === 'visitante' ? 'visitante' : undefined}
           alCerrar={() => setRegistrando(false)}
           alCrear={async (datos) => {
@@ -362,6 +367,7 @@ export function PersonasPage() {
           residencia={enCambio}
           nombre={nombreCompleto(sel.persona(bd, enCambio.personaId))}
           registraArrendatario={miRol === 'arrendatario'}
+          aprobacionActiva={aprobacionActiva}
           alCerrar={() => setCambiando(null)}
           alGuardar={async (condicion, hasta) => {
             const hecho = await ejecutar(

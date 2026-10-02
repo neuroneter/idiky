@@ -124,6 +124,8 @@ export function FormularioRegistro({
   permitirNoObligatorio = false,
   registraArrendatario = false,
   soloDeUnDia = false,
+  resideAqui = true,
+  aprobacionActiva = true,
   alCrear,
   alCerrar,
 }: {
@@ -139,6 +141,10 @@ export function FormularioRegistro({
   registraArrendatario?: boolean
   /** Quien registra es un familiar: solo visitas de un día (Mary, 2026-10-02). */
   soloDeUnDia?: boolean
+  /** Al visitante frecuente lo registra quien vive en la unidad (2026-10-02). */
+  resideAqui?: boolean
+  /** RN-210 — Si el edificio pide la aprobación del propietario. */
+  aprobacionActiva?: boolean
   alCrear: (datos: DatosRegistro) => Promise<void>
   alCerrar: () => void
 }) {
@@ -165,7 +171,9 @@ export function FormularioRegistro({
   const [placa, setPlaca] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  const posibles: readonly CondicionRegistro[] = soloDeUnDia ? ['no_residente'] : condicionesPosibles(categoria)
+  const posibles: readonly CondicionRegistro[] = soloDeUnDia
+    ? ['no_residente']
+    : condicionesPosibles(categoria).filter((c) => resideAqui || c !== 'frecuente')
   const clase = { categoria, condicion, pedirFotos }
   const conVigencia = exigeVigencia(clase)
   /* Lo que se le promete a quien registra cambia con la clase, porque el
@@ -173,11 +181,11 @@ export function FormularioRegistro({
      visita de una tarde seria prometerle un paso que no va a existir. */
   const conSoportes = exigeSoportes(clase)
   const unDia = soloUnDia(clase)
-  const necesitaAlPropietario = requiereAprobacionPropietario(registraArrendatario ? 'arrendatario' : undefined, {
-    ...clase,
-    vigenciaDesde: desde,
-    vigenciaHasta: hasta,
-  })
+  const necesitaAlPropietario = requiereAprobacionPropietario(
+    registraArrendatario ? 'arrendatario' : undefined,
+    { ...clase, vigenciaDesde: desde, vigenciaHasta: hasta },
+    aprobacionActiva,
+  )
 
   /** Al cambiar quién es, la condición vuelve a una que le aplique (RN-68). */
   function escogerCategoria(opcion: CategoriaRegistro) {
