@@ -1819,6 +1819,36 @@ export function requiereAprobacionPropietario(
   )
 }
 
+/** Quién es, leído del vínculo: el `autorizado` es un visitante temporal. */
+export function categoriaDeResidencia(residencia: Pick<Residencia, 'rol'>): CategoriaRegistro {
+  return residencia.rol === 'autorizado' ? 'visitante' : residencia.rol
+}
+
+/** Cómo se queda hoy, leído del vínculo vigente (RN-62, RN-68). */
+export function condicionDeResidencia(residencia: Pick<Residencia, 'hasta' | 'reside'>): CondicionRegistro {
+  if (residencia.hasta) return 'temporal'
+  return residencia.reside ? 'residente' : 'no_residente'
+}
+
+/**
+ * RN-68 — Lo que se puede cambiar de un vínculo vigente sin repetir el trámite
+ * (Mary, 2026-10-02): la condición y la fecha de salida. Al visitante temporal
+ * solo se le cambia la fecha: «de un día» no aplica a quien ya está.
+ */
+export function condicionesParaCambiar(residencia: Pick<Residencia, 'rol'>): readonly CondicionRegistro[] {
+  const categoria = categoriaDeResidencia(residencia)
+  return categoria === 'visitante' ? ['temporal'] : condicionesPosibles(categoria)
+}
+
+/**
+ * RN-60 — Para entrar a la app hace falta a dónde mandar el código: al
+ * propietario y al arrendatario se les exige **celular o correo** (Mary,
+ * 2026-10-02). Al visitante no: entra con su código de portería.
+ */
+export function faltaContacto(categoria: CategoriaRegistro, telefono: string, email: string): boolean {
+  return categoria !== 'visitante' && !telefono.trim() && !email.trim()
+}
+
 /** El registro espera que el propietario apruebe la estadía (RN-60). */
 export function esperaAlPropietario(registro: RegistroPersona): boolean {
   return !!registro.aprobacionPropietario && !registro.aprobacionPropietario.aprobadoPor && registroEnCurso(registro)
@@ -1857,13 +1887,14 @@ export function esVisitaDeUnDia(clase: ClaseRegistro): boolean {
 
 /**
  * RN-68 — Las condiciones que se pueden escoger para cada quién (Mary,
- * 2026-10-02). Solo el propietario puede ser no residente —tiene la unidad
+ * 2026-10-02). El propietario no es temporal. Solo él puede ser no residente —tiene la unidad
  * arrendada o vacía—; «en el caso del arrendatario no puede tener la categoría
  * de no residente»: arrienda para vivir ahí. Y el visitante no es residente:
  * quien vive ahí no es una visita.
  */
 const CONDICIONES: Record<CategoriaRegistro, readonly CondicionRegistro[]> = {
-  propietario: ['residente', 'no_residente', 'temporal'],
+  // «No existe un propietario temporal» (Mary, 2026-10-02).
+  propietario: ['residente', 'no_residente'],
   arrendatario: ['residente', 'temporal'],
   visitante: ['no_residente', 'temporal'],
 }

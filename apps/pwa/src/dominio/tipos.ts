@@ -128,6 +128,26 @@ export interface Residencia {
    * Por qué y quién cerró el vínculo (RN-61, RN-65). «Cambio de propietario» es
    * la venta: el anterior sale y la administración registra al nuevo (RN-63).
    */
+  /**
+   * Los cambios de condición o de fecha de salida, en orden (RN-68, 2026-10-02):
+   * «Cambiar» no repite el trámite, pero deja rastro de quién cambió qué.
+   */
+  cambios?: Array<{
+    condicionAntes: CondicionRegistro
+    condicion: CondicionRegistro
+    hastaAntes?: FechaISO
+    hasta?: FechaISO
+    por: string
+    aprobadoPor?: string
+    en: FechaHoraISO
+  }>
+  /**
+   * Un cambio que espera al propietario: el arrendatario alargó la estadía de su
+   * visitante a más de 7 días (RN-60).
+   */
+  cambioPendiente?: { condicion: CondicionRegistro; hasta?: FechaISO; pedidoPor: string; pedidoEn: FechaHoraISO }
+  /** El último cambio que el propietario no aprobó, con su motivo. */
+  cambioNoAprobado?: { hasta?: FechaISO; motivo: string; por: string; en: FechaHoraISO }
   cierre?: {
     motivo: MotivoCierreVinculo
     detalle?: string
@@ -894,6 +914,7 @@ export type MotivoMensaje =
   | 'reserva_vencida'
   | 'recordatorio_reserva'
   | 'estadia_por_aprobar'
+  | 'estadia_decidida'
 
 export interface Mensaje {
   id: string

@@ -35,6 +35,8 @@ import { nombreCompleto } from '../../datos/selectores'
 import {
   autorizarRegistro,
   cerrarRegistro,
+  cambiarEstadia,
+  decidirCambioComoPropietario,
   decidirEstadiaComoPropietario,
   crearRegistroPersona,
   desvincularResidente,
@@ -43,6 +45,8 @@ import {
 import {
   categoriasQuePuedeRegistrar,
   puedeAutorizar,
+  categoriaDeResidencia,
+  condicionDeResidencia,
   esperaAlPropietario,
   puedeInhabilitar,
   registroEnCurso,
@@ -51,11 +55,15 @@ import {
 import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import {
   textoClase,
+  textoCondicion,
+  CATEGORIAS,
   DetalleRegistro,
   ESTADOS,
   FormularioRegistro,
 } from '../../componentes/Registro'
 import { BotonVolver } from '../../componentes/BotonVolver'
+import { CambiarEstadia } from '../../componentes/CambiarEstadia'
+import type { Residencia } from '../../dominio/tipos'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 
 export function PersonasPage() {
@@ -68,6 +76,10 @@ export function PersonasPage() {
   const pedida = parametros.get('nuevo')
   const [registrando, setRegistrando] = useState(pedida === 'visitante')
   const [viendo, setViendo] = useState<string | null>(null)
+  /** El vínculo al que se le cambia la condición o la fecha (RN-68). */
+  const [cambiando, setCambiando] = useState<string | null>(null)
+  const [noAprobando, setNoAprobando] = useState<string | null>(null)
+  const [motivoNo, setMotivoNo] = useState('')
   /** Registros cuyos soportes se abrieron en esta visita a la pantalla. */
   const [abiertos, setAbiertos] = useState<string[]>([])
 
@@ -84,6 +96,12 @@ export function PersonasPage() {
   const enCurso = registros.filter(registroEnCurso)
   const cerrados = registros.filter((registro) => !registroEnCurso(registro))
   const enDetalle = registros.find((registro) => registro.id === viendo)
+
+  /** RN-65 — Quien registró o, subiendo en la cadena, el propietario o la administración. */
+  function puedeResponder(residencia: Residencia) {
+    return puedeInhabilitar({ ...sel.responsablesDelVinculo(bd, residencia), personaId: sesion!.personaId, rol: sesion!.rol })
+  }
+  const enCambio = residencias.find((r) => r.id === cambiando)
 
   async function darDeBaja(residenciaId: string, nombre: string) {
     await ejecutar(
@@ -153,11 +171,8 @@ export function PersonasPage() {
                     <div className="columna">
                       <strong>{nombreCompleto(persona)}</strong>
                       <span className="subtitulo">
-                        {residencia.rol === 'propietario'
-                          ? 'Propietario'
-                          : residencia.rol === 'arrendatario'
-                            ? 'Arrendatario'
-                            : 'Residente temporal'}
+                        {CATEGORIAS[categoriaDeResidencia(residencia)].texto} ·{' '}
+                        {textoCondicion(categoriaDeResidencia(residencia), condicionDeResidencia(residencia))}
                         {' · desde '}
                         {formatearFecha(residencia.desde)}
                         {residencia.hasta ? ` hasta ${formatearFecha(residencia.hasta)}` : ''}
@@ -169,12 +184,15 @@ export function PersonasPage() {
                         ella. Y nadie se inhabilita a sí mismo: quedaría una
                         unidad sin quien responda por ella, y sin nadie que
                         pudiera arreglarlo desde adentro. */}
+                    <div className="grupo-botones">
+                      {(puedeResponder(residencia) || (soyYo && residencia.rol === 'propietario')) &&
+                        !residencia.cambioPendiente && (
+                          <button className="boton boton--pequeno" disabled={cargando} onClick={() => setCambiando(residencia.id)}>
+                            Cambiar
+                          </button>
+                        )}
                     {!soyYo &&
-                      puedeInhabilitar({
-                        ...sel.responsablesDelVinculo(bd, residencia),
-                        personaId: sesion.personaId,
-                        rol: sesion.rol,
-                      }) && (
+                      puedeResponder(residencia) && (
                         <button
                           className="boton boton--pequeno boton--peligro"
                           disabled={cargando}
@@ -183,7 +201,69 @@ export function PersonasPage() {
                           Inhabilitar
                         </button>
                       )}
+                    </div>
                   </div>
+                  {/* RN-60 — El cambio que pidió el arrendatario espera al propietario. */}
+                  {residencia.cambioPendiente && (
+                    <div className="pila" style={{ marginTop: 'var(--e2)' }}>
+                      <span className="chip chip--alerta">
+                        Pide quedarse hasta el {formatearFecha(residencia.cambioPendiente.hasta ?? '')}: espera al propietario
+                      </span>
+                      {miRol === 'propietario' && (
+                        <div className="grupo-botones">
+                          <button
+                            className="boton boton--pequeno boton--primario"
+                            disabled={cargando}
+                            onClick={() =>
+                              void ejecutar(
+                                (base) => decidirCambioComoPropietario(base, { residenciaId: residencia.id, personaId: sesion.personaId, aprobar: true }),
+                                'Cambio aprobado.',
+                              )
+                            }
+                          >
+                            Aprobar
+                          </button>
+                          <button className="boton boton--pequeno" disabled={cargando} onClick={() => setNoAprobando(residencia.id)}>
+                            No aprobar
+                          </button>
+                        </div>
+                      )}
+                      {noAprobando === residencia.id && (
+                        <div className="campo">
+                          <label htmlFor={`no-${residencia.id}`}>¿Por qué no lo apruebas? Tu arrendatario lo va a leer.</label>
+                          <textarea id={`no-${residencia.id}`} value={motivoNo} onChange={(e) => setMotivoNo(e.target.value)} />
+                          <button
+                            className="boton boton--pequeno boton--peligro"
+                            disabled={cargando || motivoNo.trim().length < 5}
+                            onClick={() =>
+                              void ejecutar(
+                                (base) =>
+                                  decidirCambioComoPropietario(base, {
+                                    residenciaId: residencia.id,
+                                    personaId: sesion.personaId,
+                                    aprobar: false,
+                                    motivo: motivoNo,
+                                  }),
+                                'Cambio no aprobado.',
+                              ).then((hecho) => {
+                                if (hecho) {
+                                  setNoAprobando(null)
+                                  setMotivoNo('')
+                                }
+                              })
+                            }
+                          >
+                            Enviar
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  {residencia.cambioNoAprobado && !residencia.cambioPendiente && (
+                    <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                      El propietario no aprobó alargar la estadía: {residencia.cambioNoAprobado.motivo}
+                    </span>
+                  )}
                 </div>
               )
             })}
@@ -257,6 +337,22 @@ export function PersonasPage() {
               if (creado.visitanteId) navegar('/app/visitantes')
               else setViendo(creado.id)
             }
+          }}
+        />
+      )}
+
+      {enCambio && (
+        <CambiarEstadia
+          residencia={enCambio}
+          nombre={nombreCompleto(sel.persona(bd, enCambio.personaId))}
+          registraArrendatario={miRol === 'arrendatario'}
+          alCerrar={() => setCambiando(null)}
+          alGuardar={async (condicion, hasta) => {
+            const hecho = await ejecutar(
+              (base) => cambiarEstadia(base, { residenciaId: enCambio.id, personaId: sesion.personaId, condicion, hasta }),
+              'Cambio guardado.',
+            )
+            if (hecho) setCambiando(null)
           }}
         />
       )}

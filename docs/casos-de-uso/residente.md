@@ -843,7 +843,7 @@ residente temporal ya no va»*. Son dos preguntas: **quién es** y **cómo se qu
 
 | | Residente | No residente | Residente temporal |
 |---|---|---|---|
-| **Propietario** | Vive en su apartamento · fotos · sin fecha de fin | Lo tiene arrendado o vacío · fotos · no aparece en portería | Vive ahí un tiempo · fotos · fecha de salida |
+| **Propietario** | Vive en su apartamento · fotos · sin fecha de fin | Lo tiene arrendado o vacío · fotos · no aparece en portería | **No aplica** (*«no existe un propietario temporal»*) |
 | **Arrendatario** | Vive en el apartamento · fotos · sin fecha de fin | **No aplica** (*«el arrendatario no puede tener la categoría de no residente»*) | Arriendo corto · fotos · fecha de salida |
 | **Visitante** | **No aplica**: quien vive ahí no es visita | **De un día** · fotos **opcionales** · sale con su código | Huésped de Airbnb, un familiar · fotos · fecha de salida · queda como `autorizado` |
 
@@ -853,6 +853,9 @@ de un día o temporales. **Si el visitante temporal del arrendatario se queda m�
 aprueba el propietario** (*«si es más de una semana debe ser aprobado por el propietario»*): le
 llega un aviso, lo aprueba o no desde **Personas de la unidad**, y solo entonces el arrendatario
 autoriza. En el demo, las unidades 301 y 502 tienen dueño no residente para probarlo.
+
+**Celular o correo obligatorio** para propietario y arrendatario: es a donde le llega el código
+para entrar a la app (2026-10-02). Al visitante no se le exige.
 
 **Las fotos de la visita de un día son opcionales** (*«para el visitante también debe existir la
 opción de las fotos»*): quien la registra marca «Pedirle las fotos» y la visita sigue el trámite
@@ -913,6 +916,17 @@ ahora lo reconoce de una.
   Idiky, por eso lo de inhabilitar nada más»* (Mary, 2026-09-07). Al registrarlo allá se le
   reconoce por su documento y llega con su historia, en vez de nacer de cero.
 - A6. Nadie se inhabilita a sí mismo: quedaría una unidad sin quien responda por ella.
+- A6b. **Quién inhabilita** (RN-65, Mary 2026-10-02): *«el que lo creó o por orden ascendente el
+  propietario o administrador según sea el caso»*. El visitante —de un día o temporal— que
+  registró un arrendatario lo pueden sacar él, el propietario o la administración.
+- A6c. **Sale el arrendatario → salen sus visitantes**: los temporales que registró y las visitas
+  de un día que aún no pasan. Sus registros en curso se anulan.
+- A7. **Cambiar** (2026-10-02): sin repetir el trámite, se cambia la condición (p. ej. el
+  propietario que se muda pasa a no residente) o la **fecha de salida** de un temporal. Lo
+  cambian quien registró a la persona, el propietario sobre sí mismo o la administración. **Si el
+  arrendatario alarga a su visitante a más de 7 días, el cambio espera al propietario**, que lo
+  aprueba o no desde Personas de la unidad; al arrendatario le llega la respuesta. Cada cambio
+  queda anotado en el vínculo, con quién lo hizo y quién lo aprobó.
 
 **Reglas de negocio**
 - RN-57 (dos soportes), RN-58 (los adjunta la persona), RN-59 (autoriza quien registró),

@@ -111,6 +111,26 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-02 · Mary + IA (Claude) · Inhabilitar en cadena, cambiar sin repetir el trámite y contacto obligatorio
+
+Mary respondió las preguntas abiertas sobre crear e inhabilitar usuarios: *«sí, 1, 3, 4 y 6»*,
+*«para el 2 debe inhabilitar el que lo creó o por orden ascendente el propietario o
+administrador según sea el caso»* y *«no existe un propietario temporal»*. **Sin números nuevos**:
+revisiones de RN-60, RN-65 y RN-68 en `docs/05-modelo-de-datos.md`.
+
+| # | Qué | Dónde |
+|---|---|---|
+| 1 | Al inhabilitar a un arrendatario salen sus visitantes (temporales y visitas por venir) y se anulan sus registros en curso | `datos/repositorio.ts` (`cerrarLoQueDejo`) |
+| 2 | Inhabilita quien registró o, subiendo, el propietario o la administración; también para revocar la visita de un día | `datos/selectores.ts` (`responsablesDelVinculo`, `responsablesDeVisita`), `revocarVisitante`, `features/residente/VisitantesPage.tsx` |
+| 3 y 4 | Botón **Cambiar**: condición o fecha de salida sin repetir el trámite; si el arrendatario alarga a su visitante a más de 7 días, aprueba el propietario | `componentes/CambiarEstadia.tsx`, `cambiarEstadia`, `decidirCambioComoPropietario`, `features/residente/PersonasPage.tsx`, `features/admin/UnidadesPage.tsx` |
+| 5 | Ya no hay propietario temporal: residente o no residente | `dominio/reglas.ts` (`condicionesPosibles`) |
+| 6 | Celular o correo obligatorio para propietario y arrendatario | `dominio/reglas.ts` (`faltaContacto`), formulario y repositorio |
+
+**Pruebas:** nuevas `prueba-cambios` (18 casos) y `prueba-cambios-ui` (7, en pantalla); las
+anteriores siguen en verde.
+
+---
+
 ### 2026-10-02 · Mary + IA (Claude) · Quién es y cómo se queda: el registro con condición de residencia
 
 Mary: *«cuando se crea a un propietario, arrendatario y/o visitante se debe seleccionar si es

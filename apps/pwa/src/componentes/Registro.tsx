@@ -27,6 +27,7 @@ import {
   condicionesPosibles,
   DIAS_SIN_APROBACION_DEL_PROPIETARIO,
   esperaAlPropietario,
+  faltaContacto,
   requiereAprobacionPropietario,
   etiquetaUnidad,
   exigeSoportes,
@@ -184,6 +185,11 @@ export function FormularioRegistro({
     }
     if (unDia && desde < hoyISO()) {
       setError('Esa fecha ya pasó. Escoge el día en que viene la visita.')
+      return
+    }
+    // RN-60 — Sin celular ni correo no hay a dónde mandarle el código de entrada.
+    if (faltaContacto(categoria, telefono, email)) {
+      setError('Escribe el celular o el correo: es a donde le llega el código para entrar a la app.')
       return
     }
     if (unidades && !unidadId) {

@@ -87,20 +87,40 @@ export function unidadTienePropietario(bd: BaseDatos, unidadId: string): boolean
 
 /**
  * Quién responde por un vínculo para inhabilitarlo (RN-65): quien lo registró y,
- * si ese propietario ya salió de la unidad —un cambio de propietario—, los
- * propietarios de hoy, que heredan a los arrendatarios que siguen.
+ * **subiendo en la cadena**, el propietario o la administración (Mary,
+ * 2026-10-02: «debe inhabilitar el que lo creó o por orden ascendente el
+ * propietario o administrador según sea el caso»). Los propietarios de hoy
+ * responden por lo que registró un arrendatario, y por lo que dejó un
+ * propietario que ya salió de la unidad (cambio de propietario).
  */
 export function responsablesDelVinculo(
   bd: BaseDatos,
   residencia: Residencia,
 ): { creadoPor?: string; heredadoPor: string[] } {
   const creadoPor = bd.registros.find((r) => r.id === residencia.registroId)?.creadoPor
-  const vigentes = residenciasDeUnidad(bd, residencia.unidadId)
+  return responsablesPorCreador(bd, residencia.unidadId, creadoPor, residencia.id)
+}
+
+/** Lo mismo para una visita de un día: la creó quien la autorizó (RN-65). */
+export function responsablesDeVisita(bd: BaseDatos, visitante: Visitante): { creadoPor?: string; heredadoPor: string[] } {
+  return responsablesPorCreador(bd, visitante.unidadId, visitante.personaId)
+}
+
+function responsablesPorCreador(
+  bd: BaseDatos,
+  unidadId: string,
+  creadoPor: string | undefined,
+  excluirResidenciaId?: string,
+): { creadoPor?: string; heredadoPor: string[] } {
+  const vigentes = residenciasDeUnidad(bd, unidadId)
   const creadorSigue = vigentes.some((r) => r.personaId === creadoPor)
   const creadorEsAdministracion = bd.perfilesDemo.some((p) => p.rol === 'admin' && p.personaId === creadoPor)
+  const creadoPorArrendatario = bd.residencias.some(
+    (r) => r.unidadId === unidadId && r.personaId === creadoPor && r.rol === 'arrendatario',
+  )
   const heredadoPor =
-    creadoPor && !creadorSigue && !creadorEsAdministracion
-      ? vigentes.filter((r) => r.rol === 'propietario' && r.id !== residencia.id).map((r) => r.personaId)
+    creadoPor && !creadorEsAdministracion && (!creadorSigue || creadoPorArrendatario)
+      ? vigentes.filter((r) => r.rol === 'propietario' && r.id !== excluirResidenciaId).map((r) => r.personaId)
       : []
   return { creadoPor, heredadoPor }
 }

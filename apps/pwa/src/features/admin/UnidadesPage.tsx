@@ -9,15 +9,19 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { desvincularResidente } from '../../datos/repositorio'
+import { cambiarEstadia, desvincularResidente } from '../../datos/repositorio'
+import { CambiarEstadia } from '../../componentes/CambiarEstadia'
+import { CATEGORIAS, textoCondicion } from '../../componentes/Registro'
 import {
   calcularSaldo,
+  categoriaDeResidencia,
+  condicionDeResidencia,
   diasDeMora,
   estaEnMora,
   etiquetaUnidad,
   sumaCoeficientes,
 } from '../../dominio/reglas'
-import { capitalizar, formatearDinero } from '../../utilidades/formato'
+import { capitalizar, formatearDinero, formatearFecha } from '../../utilidades/formato'
 import type { MotivoCierreVinculo, Residencia } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
@@ -30,6 +34,8 @@ export function UnidadesPage() {
   const [detalle, setDetalle] = useState<string | null>(null)
   /** El vínculo que se está inhabilitando, con su motivo (RN-65). */
   const [cerrando, setCerrando] = useState<Residencia | null>(null)
+  /** El vínculo al que se le cambia la condición o la fecha (RN-68). */
+  const [cambiando, setCambiando] = useState<Residencia | null>(null)
   const [motivo, setMotivo] = useState<MotivoCierreVinculo>('otro')
   const [explicacion, setExplicacion] = useState('')
   const navegar = useNavigate()
@@ -156,7 +162,22 @@ export function UnidadesPage() {
         )}
       </div>
 
-      {unidadDetalle && (
+      {cambiando && (
+        <CambiarEstadia
+          residencia={cambiando}
+          nombre={nombreCompleto(sel.persona(bd, cambiando.personaId))}
+          alCerrar={() => setCambiando(null)}
+          alGuardar={async (condicion, hasta) => {
+            const hecho = await ejecutar(
+              (base) => cambiarEstadia(base, { residenciaId: cambiando.id, personaId: sesion.personaId, condicion, hasta }),
+              'Cambio guardado.',
+            )
+            if (hecho) setCambiando(null)
+          }}
+        />
+      )}
+
+      {unidadDetalle && !cambiando && (
         <Modal
           titulo={etiquetaUnidad(unidadDetalle)}
           descripcion={`${capitalizar(unidadDetalle.tipo)} de ${unidadDetalle.area} m² · coeficiente ${unidadDetalle.coeficiente}%`}
@@ -202,12 +223,18 @@ export function UnidadesPage() {
                           {nombreCompleto(persona)}
                         </strong>
                         <span className="subtitulo">
-                          {capitalizar(residencia.rol)} · {persona?.telefono}
+                          {CATEGORIAS[categoriaDeResidencia(residencia)].texto} ·{' '}
+                          {textoCondicion(categoriaDeResidencia(residencia), condicionDeResidencia(residencia))}
+                          {residencia.hasta ? ` hasta el ${formatearFecha(residencia.hasta)}` : ''} · {persona?.telefono}
                         </span>
                       </div>
                       {/* La administracion puede inhabilitar cualquier vinculo de
                           la copropiedad, incluido el que registro un propietario:
                           esta por encima suyo en la cadena (RN-65). */}
+                      <div className="grupo-botones">
+                      <button className="boton boton--pequeno" disabled={cargando} onClick={() => setCambiando(residencia)}>
+                        Cambiar
+                      </button>
                       <button
                         className="boton boton--pequeno"
                         disabled={cargando}
@@ -219,6 +246,7 @@ export function UnidadesPage() {
                       >
                         Inhabilitar
                       </button>
+                      </div>
                     </div>
                   )
                 })}

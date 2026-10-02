@@ -144,6 +144,10 @@ import {
   esVisitaDeUnDia,
   condicionesPosibles,
   marcaResidente,
+  categoriaDeResidencia,
+  condicionDeResidencia,
+  condicionesParaCambiar,
+  faltaContacto,
   requiereAprobacionPropietario,
   esperaAlPropietario,
   soloUnDia,
@@ -160,7 +164,7 @@ import {
 import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajeria'
 import { finDePeriodo, formatearDinero, formatearFecha } from '../utilidades/formato'
 import { guardar, leer, sembrar, ocupacion } from './almacen'
-import { responsablesDelVinculo, unidadTienePropietario } from './selectores'
+import { responsablesDeVisita, responsablesDelVinculo, unidadTienePropietario } from './selectores'
 
 /** Resultado de una operacion: base de datos actualizada + lo que se creo. */
 export interface Resultado<T> {
@@ -1586,12 +1590,19 @@ export async function crearVisitante(
 
 export async function revocarVisitante(
   bdActual: BaseDatos,
-  visitanteId: string,
+  parametros: { visitanteId: string; personaId: string },
 ): Promise<Resultado<Visitante>> {
   await esperar()
   const bd = clonar(bdActual)
-  const visitante = bd.visitantes.find((v) => v.id === visitanteId)
+  const visitante = bd.visitantes.find((v) => v.id === parametros.visitanteId)
   if (!visitante) throw new ErrorDeNegocio('El visitante no existe.')
+  // RN-65 — Revoca quien lo autorizó o, subiendo en la cadena, el propietario o
+  // la administración (Mary, 2026-10-02).
+  const unidad = bd.unidades.find((u) => u.id === visitante.unidadId)
+  const rol = unidad && esAdministracion(bd, parametros.personaId, unidad.copropiedadId) ? 'admin' : 'residente'
+  if (!puedeInhabilitar({ ...responsablesDeVisita(bd, visitante), personaId: parametros.personaId, rol })) {
+    throw new ErrorDeNegocio('A esta visita la revoca quien la autorizó, el propietario o la administración (RN-65).')
+  }
   visitante.estado = 'revocado'
   return persistir(bd, visitante)
 }
@@ -1599,6 +1610,176 @@ export async function revocarVisitante(
 // ---------------------------------------------------------------------------
 // CU-A-02 — Unidades y residentes
 // ---------------------------------------------------------------------------
+
+/**
+ * Lo que deja quien sale de la unidad (RN-59, RN-61).
+ *
+ * - Sus registros **en curso** se anulan: solo él podía autorizarlos y ya no
+ *   está. Vale para todos, y con el motivo del cambio de propietario si lo es.
+ * - Si es **arrendatario**, salen con él los visitantes que registró: los
+ *   temporales y las visitas de un día que aún no pasan (Mary, 2026-10-02). Los
+ *   de un propietario, en cambio, los hereda el siguiente (RN-65).
+ */
+function cerrarLoQueDejo(bd: BaseDatos, residencia: Residencia, cerradoPor: string, motivo: MotivoCierreVinculo) {
+  const ahora = ahoraISO()
+  const ayer = sumarDias(hoyISO(), -1)
+  for (const registro of bd.registros) {
+    if (registro.unidadId === residencia.unidadId && registro.creadoPor === residencia.personaId && registroEnCurso(registro)) {
+      registro.estado = 'anulado'
+      registro.motivo =
+        motivo === 'cambio_propietario'
+          ? 'Cambio de propietario: quien hizo el registro ya no es propietario de la unidad.'
+          : 'Quien hizo el registro ya no está en la unidad.'
+      registro.decididoEn = ahora
+      registro.decididoPor = cerradoPor
+    }
+  }
+  if (residencia.rol !== 'arrendatario') return
+  const registrados = new Set(
+    bd.registros.filter((r) => r.unidadId === residencia.unidadId && r.creadoPor === residencia.personaId).map((r) => r.id),
+  )
+  for (const vinculo of bd.residencias) {
+    if (vinculo.rol === 'autorizado' && vinculo.registroId && registrados.has(vinculo.registroId) && residenciaVigente(vinculo)) {
+      vinculo.hasta = ayer
+      vinculo.cierre = { motivo: 'otro', detalle: 'Salió el arrendatario que lo registró.', cerradoPor, cerradoEn: ahora }
+    }
+  }
+  for (const visitante of bd.visitantes) {
+    if (
+      visitante.unidadId === residencia.unidadId &&
+      visitante.personaId === residencia.personaId &&
+      visitante.estado === 'activo' &&
+      visitante.vigenciaHasta >= hoyISO()
+    ) {
+      visitante.estado = 'revocado'
+    }
+  }
+}
+
+/**
+ * RN-68 — Cambiar la condición o la fecha de salida de un vínculo vigente, sin
+ * repetir el trámite (Mary, 2026-10-02). Lo cambia el propio propietario, quien
+ * responde por el vínculo (RN-65) o la administración. Si un arrendatario deja
+ * a su visitante más de 7 días, el cambio espera al propietario (RN-60).
+ */
+export async function cambiarEstadia(
+  bdActual: BaseDatos,
+  parametros: { residenciaId: string; personaId: string; condicion: CondicionRegistro; hasta?: FechaISO },
+): Promise<Resultado<Residencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const residencia = bd.residencias.find((r) => r.id === parametros.residenciaId)
+  if (!residencia || !residenciaVigente(residencia) || residencia.cierre) throw new ErrorDeNegocio('Ese vínculo ya no está vigente.')
+  const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
+  const esAdmin = !!unidad && esAdministracion(bd, parametros.personaId, unidad.copropiedadId)
+  const propio = residencia.personaId === parametros.personaId && residencia.rol === 'propietario'
+  const { creadoPor, heredadoPor } = responsablesDelVinculo(bd, residencia)
+  if (!propio && !puedeInhabilitar({ creadoPor, heredadoPor, personaId: parametros.personaId, rol: esAdmin ? 'admin' : 'residente' })) {
+    throw new ErrorDeNegocio('Esto lo cambia quien registró a la persona, el propietario sobre sí mismo o la administración.')
+  }
+  if (!condicionesParaCambiar(residencia).includes(parametros.condicion)) {
+    throw new ErrorDeNegocio(
+      residencia.rol === 'autorizado'
+        ? 'A un visitante temporal solo se le cambia la fecha de salida.'
+        : 'Esa condición no aplica a esta persona (RN-68).',
+    )
+  }
+  const hasta = parametros.condicion === 'temporal' ? parametros.hasta : undefined
+  if (parametros.condicion === 'temporal' && (!hasta || hasta < hoyISO())) {
+    throw new ErrorDeNegocio('Escoge una fecha de salida de hoy en adelante.')
+  }
+  const antes = condicionDeResidencia(residencia)
+  if (antes === parametros.condicion && residencia.hasta === hasta) throw new ErrorDeNegocio('No hay nada que cambiar.')
+
+  // RN-60 — El arrendatario que deja a su visitante más de una semana necesita
+  // al propietario, igual que al registrarlo.
+  const rolDeQuienCambia = bd.residencias.find(
+    (r) => r.unidadId === residencia.unidadId && r.personaId === parametros.personaId && residenciaVigente(r),
+  )?.rol
+  const ahora = ahoraISO()
+  if (
+    !esAdmin &&
+    requiereAprobacionPropietario(rolDeQuienCambia, {
+      categoria: categoriaDeResidencia(residencia),
+      condicion: parametros.condicion,
+      vigenciaDesde: residencia.desde,
+      vigenciaHasta: hasta,
+    })
+  ) {
+    residencia.cambioPendiente = { condicion: parametros.condicion, hasta, pedidoPor: parametros.personaId, pedidoEn: ahora }
+    const persona = bd.personas.find((p) => p.id === residencia.personaId)
+    for (const dueno of bd.residencias.filter(
+      (r) => r.unidadId === residencia.unidadId && r.rol === 'propietario' && residenciaVigente(r),
+    )) {
+      avisarAPersona(bd, {
+        copropiedadId: unidad?.copropiedadId ?? '',
+        personaId: dueno.personaId,
+        motivo: 'estadia_por_aprobar',
+        texto:
+          `Idiky: tu arrendatario quiere alargar la estadía de ${persona?.nombres ?? 'su visitante'} hasta el ` +
+          `${fechaCorta(hasta ?? '')}. Por ser más de una semana, necesita tu aprobación en la app.`,
+        ahora,
+      })
+    }
+    return persistir(bd, residencia)
+  }
+  aplicarCambio(residencia, parametros.condicion, hasta, parametros.personaId, ahora)
+  return persistir(bd, residencia)
+}
+
+function aplicarCambio(
+  residencia: Residencia,
+  condicion: CondicionRegistro,
+  hasta: FechaISO | undefined,
+  por: string,
+  ahora: string,
+  aprobadoPor?: string,
+) {
+  residencia.cambios = [
+    ...(residencia.cambios ?? []),
+    { condicionAntes: condicionDeResidencia(residencia), condicion, hastaAntes: residencia.hasta, hasta, por, aprobadoPor, en: ahora },
+  ]
+  residencia.reside = marcaResidente({ categoria: categoriaDeResidencia(residencia), condicion })
+  residencia.hasta = hasta
+  delete residencia.cambioPendiente
+}
+
+/** RN-60 — El propietario aprueba, o no, el cambio que pidió su arrendatario. */
+export async function decidirCambioComoPropietario(
+  bdActual: BaseDatos,
+  parametros: { residenciaId: string; personaId: string; aprobar: boolean; motivo?: string },
+): Promise<Resultado<Residencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const residencia = bd.residencias.find((r) => r.id === parametros.residenciaId)
+  const pendiente = residencia?.cambioPendiente
+  if (!residencia || !pendiente) throw new ErrorDeNegocio('No hay un cambio esperando aprobación.')
+  const esPropietario = bd.residencias.some(
+    (r) => r.unidadId === residencia.unidadId && r.personaId === parametros.personaId && r.rol === 'propietario' && residenciaVigente(r),
+  )
+  if (!esPropietario) throw new ErrorDeNegocio('El cambio lo aprueba un propietario de la unidad.')
+  const ahora = ahoraISO()
+  if (parametros.aprobar) {
+    aplicarCambio(residencia, pendiente.condicion, pendiente.hasta, pendiente.pedidoPor, ahora, parametros.personaId)
+  } else {
+    const motivo = (parametros.motivo ?? '').trim()
+    if (motivo.length < 5) throw new ErrorDeNegocio('Escribe por qué no lo apruebas: el arrendatario lo va a leer.')
+    residencia.cambioNoAprobado = { hasta: pendiente.hasta, motivo, por: parametros.personaId, en: ahora }
+    delete residencia.cambioPendiente
+  }
+  const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
+  const persona = bd.personas.find((p) => p.id === residencia.personaId)
+  avisarAPersona(bd, {
+    copropiedadId: unidad?.copropiedadId ?? '',
+    personaId: pendiente.pedidoPor,
+    motivo: 'estadia_decidida',
+    texto: parametros.aprobar
+      ? `Idiky: el propietario aprobó que ${persona?.nombres ?? 'tu visitante'} se quede hasta el ${fechaCorta(pendiente.hasta ?? '')}.`
+      : `Idiky: el propietario no aprobó alargar la estadía de ${persona?.nombres ?? 'tu visitante'}: ${(parametros.motivo ?? '').trim()}`,
+    ahora,
+  })
+  return persistir(bd, residencia)
+}
 
 /** Cierra el vinculo de un residente sin borrar el historico (trazabilidad, O3). */
 export async function desvincularResidente(
@@ -1639,19 +1820,8 @@ export async function desvincularResidente(
   // `hasta` es el último día vigente (RN-62): quien se inhabilita hoy deja de
   // estar hoy mismo, así que su último día fue ayer.
   residencia.hasta = sumarDias(hoyISO(), -1)
-  // Cambio de propietario: lo que el anterior dejó a medias en la unidad se
-  // cierra con el motivo, porque solo él podía autorizarlo (RN-59) y ya no está.
-  // Los vínculos autorizados —el arrendatario que sigue— no se tocan.
-  if (motivo === 'cambio_propietario') {
-    for (const registro of bd.registros) {
-      if (registro.unidadId === residencia.unidadId && registro.creadoPor === residencia.personaId && registroEnCurso(registro)) {
-        registro.estado = 'anulado'
-        registro.motivo = 'Cambio de propietario: quien hizo el registro ya no es propietario de la unidad.'
-        registro.decididoEn = ahoraISO()
-        registro.decididoPor = parametros.personaId
-      }
-    }
-  }
+  delete residencia.cambioPendiente
+  cerrarLoQueDejo(bd, residencia, parametros.personaId, motivo)
   return persistir(bd, residencia)
 }
 
@@ -3007,12 +3177,19 @@ export async function crearRegistroPersona(
     }
   }
 
+  // RN-60 — Sin celular ni correo no hay a dónde mandarle el código de entrada.
+  if (faltaContacto(parametros.categoria, parametros.telefono, parametros.email)) {
+    throw new ErrorDeNegocio('Escribe el celular o el correo: es a donde le llega el código para entrar a la app.')
+  }
+
   // RN-68 — El visitante no es residente: quien vive ahí no es una visita.
   if (!condicionesPosibles(parametros.categoria).includes(parametros.condicion)) {
     throw new ErrorDeNegocio(
       parametros.categoria === 'visitante'
         ? 'Un visitante es de un día o temporal; no puede ser residente.'
-        : 'El arrendatario es residente o temporal: arrienda para vivir ahí.',
+        : parametros.categoria === 'propietario'
+          ? 'El propietario es residente o no residente: no existe un propietario temporal.'
+          : 'El arrendatario es residente o temporal: arrienda para vivir ahí.',
     )
   }
 
