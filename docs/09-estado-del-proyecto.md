@@ -130,8 +130,8 @@ gastaron números.**
 **Un número repetido.** `casos-de-uso/residente.md` tenía **dos secciones CU-R-23**: la primera
 versión («recibir y ejercer poderes») y la construida («dar poder para que otro vote por mi
 unidad»). La primera quedó marcada como versión anterior, con lo que sí existe de ella (el
-apoderado vota por cada unidad) y lo que **no**: **aceptar o rechazar el poder recibido**. Si
-hace falta, es una decisión de Mary.
+apoderado vota por cada unidad) y lo que **no**: **aceptar o rechazar el poder recibido**. Mary
+lo decidió: *«está bien así»*. El poder vale sin que el apoderado lo acepte.
 
 **Lo que sigue pendiente de verdad, confirmado en el código:**
 - **CU-A-18** (⬜): no existe forma de crear, abrir ni cerrar una votación desde la consola. Las

@@ -662,7 +662,8 @@ curso es **mixta**, así que se ven las dos formas de asistir.
 > para que otro vote por mi unidad»** (más abajo en este documento), que es lo que se construyó.
 > De esta versión, el apoderado **sí** vota por cada unidad que representa (`emitirVoto`, RN-29) y
 > se le muestra el acumulado (CU-A-19). Lo que **no** existe es el paso de **aceptar o rechazar**
-> el poder recibido: el diseño construido no lo pide. Si hace falta, es una decisión de Mary.
+> el poder recibido: el diseño construido no lo pide. **Decisión de Mary (2026-10-02): «está bien
+> así»** — el poder vale sin que el apoderado lo acepte.
 > Se conserva abajo como estaba, por trazabilidad.
 
 - **Actor principal:** Copropietario apoderado
