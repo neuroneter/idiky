@@ -108,6 +108,41 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-02 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Un repositorio por sistema; `idiky` es el arnés (T-79, ADR-0017)
+
+**Lo que pidió Daniel:** que `idiky` sea el arnés y el contexto de todo el desarrollo, y que
+alcance los cinco repositorios que se crearon para cada sistema: `App-Idiky`,
+`SmartContrat-Idiky`, `Jitsi-Streaming-Idiky`, `Bloky-Idiky` y `BOB-Idiky`.
+
+**Lo que se encontró:** `App-Idiky` es la plantilla de Flutter para ALICE, con un buen README que
+ya apunta a `idiky`; `SmartContrat-Idiky` tiene código real (login ERC-4337 en Polygon, con
+pruebas); los otros tres **estaban vacíos** mientras su código seguía aquí. Ningún documento de
+`idiky` los nombraba.
+
+**Lo que se hizo:**
+
+- Antes de mover nada se hizo commit del trabajo de Jitsi que estaba sin guardar (T-78).
+- **BLOKY y BOB se mudaron con su historial** (`git filter-repo`): `Bloky-Idiky` recibe
+  `apps/bloky`, `apps/bloky-api` e `infra/bloky` (18 commits); `BOB-Idiky`, `apps/gestion` e
+  `infra/gestion` (13). `infra/jitsi` pasó a `Jitsi-Streaming-Idiky` en un commit. **Las rutas
+  son las mismas que tenían aquí**, para no tocar `levantar.sh`.
+- **`infra/desplegar.sh`** arma la carpeta del despliegue con `idiky` y, encima, las rutas del
+  repositorio de cada servicio externo, traído de GitHub a `~/.cache/idiky/repos/`. Sale de su
+  `origin/main` (o de `IDIKY_REF_<SERVICIO>`); el candado de BOB mira el `main` de `BOB-Idiky`.
+  **Probado con un `ssh` falso**: lo que llega al servidor es idéntico, archivo por archivo, a
+  lo que llegaba antes; desplegar `pwa` no toca los repos externos; un commit que no existe se
+  rechaza antes de subir nada.
+- Documentación: [ADR-0017](./adr/0017-un-repositorio-por-sistema-e-idiky-como-arnes.md), el
+  [mapa de repositorios](./16-mapa-de-repositorios.md), `CLAUDE.md`, `README.md`, `06`, las guías
+  de `infra/` y las rutas de los documentos vivos. La bitácora y los ADR anteriores **no se
+  reescribieron**: sus rutas son historia y se leen dentro de cada repositorio.
+- Cada repositorio de sistema recibió un `CLAUDE.md` que manda a leer `idiky` primero, y los
+  enlaces de sus README apuntan a `idiky` en GitHub.
+- Los seis repositorios están clonados juntos en `~/Documents/WorkSapce/` en la máquina de Daniel.
+
+**Qué sigue:** el primer despliegue real de `bloky` y `gestion` desde sus repositorios (T-79);
+los ADR de ALICE en Flutter (T-80) y de los contratos inteligentes (T-81).
+
 ### 2026-09-26 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Jitsi escrito y apagado: falta un puerto UDP que no es nuestro (T-78, ADR-0016)
 
 **Lo que pidió Daniel:** otro contenedor en el servidor, para instalar

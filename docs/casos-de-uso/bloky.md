@@ -57,7 +57,7 @@ creen. BLOKY no crea a nadie por su cuenta.
 - La clave de cuatro números y la huella del demo (ADR-0004) son de ALICE, la app del
   propietario; BLOKY no las usa.
 
-**Estado en BLOKY Dev:** ✅ — `apps/bloky/src/features/acceso/` y `apps/bloky-api/src/acceso/`.
+**Estado en BLOKY Dev:** ✅ — en el repo `Bloky-Idiky`: `apps/bloky/src/features/acceso/` y `apps/bloky-api/src/acceso/`.
 Probado el flujo por SMS contra un BOB simulado (`apps/bloky-api/pruebas/humo.ts`) y, el
 2026-09-21, la identificación contra el BOB real en el servidor de desarrollo (bitácora). **Google y
 Microsoft probados con cuentas reales el 2026-09-21** en `https://bloky-dev.idiky.com`

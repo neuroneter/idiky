@@ -133,7 +133,7 @@ Todo lo de los §2, §3 y §5 que pertenece a BOB ya existe en Strapi: tipos de 
 servicios adicionales, copropiedades (con ubicación y resumen de bienes), personas,
 asignaciones de Administrador y Delegado, contrataciones y solicitudes. **Las reglas de este
 documento se cumplen en el servidor**, no solo en los formularios. El detalle, los archivos y
-cómo probarlo están en [`apps/gestion/README.md`](../apps/gestion/README.md#qué-hay-en-bob).
+cómo probarlo están en [`apps/gestion/README.md`](https://github.com/neuroneter/BOB-Idiky/blob/main/apps/gestion/README.md#qué-hay-en-bob) (repo `BOB-Idiky`).
 
 Decisiones de implementación que conviene conocer:
 

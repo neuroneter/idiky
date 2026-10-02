@@ -138,6 +138,11 @@ propia (`servicios/plataforma.ts`) con dos implementaciones. Ver
 
 ## 6. Backend
 
+> **El código de BLOKY y BOB vive en su propio repositorio** (`Bloky-Idiky`, `BOB-Idiky`) desde el
+> 2026-10-02, con las mismas rutas que se citan aquí ([ADR-0017](./adr/0017-un-repositorio-por-sistema-e-idiky-como-arnes.md),
+> [`16-mapa-de-repositorios.md`](./16-mapa-de-repositorios.md)). ALICE es una app Flutter en
+> `App-Idiky`, y los contratos inteligentes están en `SmartContrat-Idiky`.
+
 **Decidido el 2026-09-21** ([ADR-0008](./adr/0008-backend-de-bloky.md)): BLOKY tiene su propia
 API en `apps/bloky-api/` (Node 22 + TypeScript + Fastify) con PostgreSQL. **Lee BOB y no lo
 escribe**: la copropiedad y sus perfiles raíz nacen en BOB (ADR-0012).

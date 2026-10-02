@@ -939,7 +939,7 @@ auxiliares debajo. En una copropiedad ese detalle es lo que quiere ver la asambl
 ## Reglas del ingreso a BLOKY (CU-B-01) — rango de la integración
 
 Definidas el 2026-09-21 con el primer módulo de BLOKY Dev ([ADR-0008](./adr/0008-backend-de-bloky.md)).
-Viven en `apps/bloky-api/src/dominio/reglas.ts` como funciones puras.
+Viven en `apps/bloky-api/src/dominio/reglas.ts` del repo `Bloky-Idiky` como funciones puras.
 
 | ID | Regla | Dónde se implementa |
 |---|---|---|

@@ -17,6 +17,11 @@ Estado actual: **Demo funcional v0.1 (PWA)** — datos simulados, sin backend re
 | [`apps/contable/`](./apps/contable/README.md) | Aplicación contable del administrador: cartera, pagos y recibos de caja. HTML plano, **se abre con doble clic**. |
 | [`CLAUDE.md`](./CLAUDE.md) | Instrucciones de contexto para agentes de IA que trabajen en el repo. |
 
+> **Este repositorio es el arnés de todo IDIKY**: reglas, casos de uso, decisiones y demos. El
+> código de cada sistema vive en su propio repositorio —`Bloky-Idiky` (BLOKY), `BOB-Idiky` (BOB),
+> `Jitsi-Streaming-Idiky` (Jitsi), `App-Idiky` (ALICE, Flutter) y `SmartContrat-Idiky`
+> (contratos inteligentes)—. Ver el [mapa de repositorios](./docs/16-mapa-de-repositorios.md).
+
 > Son **dos productos distintos** que comparten las reglas del dominio, no el código.
 > La PWA la construye Mary; la contable, Jeimy. Ver [`docs/10`](./docs/10-equipo-y-orquestacion.md).
 

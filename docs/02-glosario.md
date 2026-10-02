@@ -10,7 +10,7 @@ IDIKY**, y todo se presenta como aplicaciones de IDIKY.
 
 | Nombre | Qué es | Quién entra | Cómo entra | Dónde está |
 |---|---|---|---|---|
-| **BOB** | El *back office* de la empresa IDIKY: clientes, planes, servicios adicionales, contratos, y el alta del Administrador y el Delegado de cada copropiedad | El equipo de IDIKY (el *operador*) | El login de Strapi. **No usa Twilio** | `apps/gestion/` (ADR-0012) |
+| **BOB** | El *back office* de la empresa IDIKY: clientes, planes, servicios adicionales, contratos, y el alta del Administrador y el Delegado de cada copropiedad | El equipo de IDIKY (el *operador*) | El login de Strapi. **No usa Twilio** | Repo `BOB-Idiky`, `apps/gestion/` (ADR-0012) |
 | **BLOKY** | El sistema de las copropiedades: estructura y unidades, propietarios, cartera, asambleas. Su nombre sale de «bloque» y de la terminación de IDIKY | El Administrador, el Delegado y los perfiles que ellos creen | Un código por SMS o por correo (Twilio Verify), o Google o Microsoft con el correo registrado | Por construir (backend: ADR-0008). Su precursor es la consola del administrador del demo, en `apps/pwa/` |
 | **ALICE** | La app del propietario y residente | Propietarios y residentes | La que defina el equipo; hoy, el demo con documento y clave | Hoy, el demo de `apps/pwa/` |
 

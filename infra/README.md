@@ -15,9 +15,9 @@ que **no puede verse afectado**. Las decisiones y sus porqués están en
 |---|---|---|---|---|---|
 | PWA | `infra/pwa/` | contenedor `idiky-pwa` | `8080` | Clave del entorno | Compila `apps/pwa` con `npm run build` y la sirve con nginx. **Demo** |
 | Contable | `infra/contable/` | contenedor `idiky-contable` | `8081` | Clave del entorno | Copia `apps/contable` **tal cual** (ADR-0010) y la sirve con nginx. **Demo** |
-| **BOB** | `infra/gestion/` | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082`, y por nombre **`https://bob-dev.idiky.com`** (ruta del mismo túnel, ADR-0014) | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`apps/gestion`, ADR-0012) |
-| **BLOKY Dev** | `infra/bloky/` | **pod** `idiky-bloky`: nginx + API de BLOKY + PostgreSQL | `8083`, y por nombre **`https://bloky-dev.idiky.com`** (túnel, ADR-0014). El ingreso solo funciona por el nombre | Clave del entorno, y luego **el ingreso de BLOKY** (código SMS, Google o Microsoft, con lo registrado en BOB) | El sistema de las copropiedades, construido de cero (`apps/bloky`, `apps/bloky-api`; ADR-0008, ADR-0013) |
-| **Jitsi** *(sin desplegar)* | `infra/jitsi/` | **pod** `idiky-jitsi`: nginx + web + prosody + jicofo + videobridge | `8085`, y **`10000/udp` para el video** | Cuenta de Jitsi para **abrir** una sala; el enlace basta para entrar | Las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md), [`jitsi/README.md`](./jitsi/README.md)). **Apagado hasta que Azure deje pasar `10000/udp`**: sin eso la sala abre y no hay ni audio ni video |
+| **BOB** | `infra/gestion/` *(repo `BOB-Idiky`)* | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082`, y por nombre **`https://bob-dev.idiky.com`** (ruta del mismo túnel, ADR-0014) | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`BOB-Idiky/apps/gestion`, ADR-0012) |
+| **BLOKY Dev** | `infra/bloky/` *(repo `Bloky-Idiky`)* | **pod** `idiky-bloky`: nginx + API de BLOKY + PostgreSQL | `8083`, y por nombre **`https://bloky-dev.idiky.com`** (túnel, ADR-0014). El ingreso solo funciona por el nombre | Clave del entorno, y luego **el ingreso de BLOKY** (código SMS, Google o Microsoft, con lo registrado en BOB) | El sistema de las copropiedades, construido de cero (`Bloky-Idiky`: `apps/bloky`, `apps/bloky-api`; ADR-0008, ADR-0013) |
+| **Jitsi** *(sin desplegar)* | `infra/jitsi/` *(repo `Jitsi-Streaming-Idiky`)* | **pod** `idiky-jitsi`: nginx + web + prosody + jicofo + videobridge | `8085`, y **`10000/udp` para el video** | Cuenta de Jitsi para **abrir** una sala; el enlace basta para entrar | Las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md), `infra/jitsi/README.md` en su repo). **Apagado hasta que Azure deje pasar `10000/udp`**: sin eso la sala abre y no hay ni audio ni video |
 | **Túnel** | `infra/tunel/` | contenedor `idiky-tunel` (`cloudflared`) | ninguno hacia internet; `/ready` en `127.0.0.1:8084` | — | Publica BLOKY Dev en `https://bloky-dev.idiky.com` con certificado de Cloudflare, sin abrir puertos ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)). Su token: `infra/tunel/secretos.sh` |
 
 ## 1. La regla del servidor
@@ -38,7 +38,10 @@ Y **antes y después de cualquier cambio** se verifica que LangFlow siga igual (
 Tu máquina                                    Servidor · usuario idiky · sin root
 ──────────                                    ───────────────────────────────────
 infra/desplegar.sh
-  git archive <commit> ───── ssh ─────▶  ~/despliegues/<fecha>-<commit>/   copia exacta del commit
+  git archive <commit> de idiky
+  + encima, para bloky/gestion/jitsi,
+    git archive de su repo (origin/main)
+  ─────────────────────────── ssh ─────▶  ~/despliegues/<fecha>-<commit>/   la carpeta armada
   (solo los servicios que se nombran)      flock: un despliegue a la vez
                                            │
                                            ▼
@@ -58,6 +61,13 @@ infra/desplegar.sh
 
 - **Se publica lo que está en git**, no la carpeta de trabajo. Los cambios sin commit no suben,
   y el script avisa si los hay.
+- **BLOKY, BOB y Jitsi tienen su propio repositorio** ([ADR-0017](../docs/adr/0017-un-repositorio-por-sistema-e-idiky-como-arnes.md)),
+  con las mismas rutas que tenían aquí (`apps/bloky…`, `infra/gestion/`…). `desplegar.sh` los
+  trae de GitHub a `~/.cache/idiky/repos/` (una copia sin carpeta de trabajo), toma su
+  `origin/main` —u otro commit con `IDIKY_REF_BLOKY`, `IDIKY_REF_GESTION` o `IDIKY_REF_JITSI`— y
+  pone sus rutas encima de la copia de `idiky`. `levantar.sh` ve la carpeta de siempre. La
+  revisión publicada nombra los dos commits: `549fc7e.bloky-f33796e`. Desplegar `pwa` o
+  `contable` no los toca.
 - **Se construye todo antes de detener nada**: si una construcción falla, lo publicado sigue
   en pie.
 - Un despliegue completo tarda **unos 3 minutos**; casi todo es Strapi (`npm ci` 29 s y el
@@ -195,6 +205,7 @@ Las seis imágenes suman 1,3 GB; la mayor parte es Strapi.
 |---|---|---|
 | `pwa/Containerfile`, `pwa/nginx.conf` | Construcción | El servicio que compila: ejemplo si el nuevo servicio compila algo |
 | `contable/Containerfile`, `contable/nginx.conf` | Construcción | El más simple: ejemplo si solo sirve archivos |
+| `gestion/…` *(repo `BOB-Idiky`)* | | Todo lo de BOB, abajo, vive en su repositorio y llega con el despliegue |
 | `gestion/Containerfile` | Construcción | Strapi, en una etapa |
 | `gestion/proxy.Containerfile`, `gestion/nginx.conf` | Construcción | El nginx del pod |
 | `gestion/arrancar.sh` | Dentro del contenedor de Strapi | Espera a PostgreSQL y arranca Strapi |
@@ -205,7 +216,7 @@ Las seis imágenes suman 1,3 GB; la mayor parte es Strapi.
 | `servidor/clave-acceso.sh` | Servidor, como `idiky` | Pone una clave al azar a la PWA y la contable |
 | `servidor/cargar-integraciones.sh` | Tu máquina | Sube las credenciales de BLOKY (Twilio; luego Google y Microsoft) desde `.env.integraciones.local` al servidor |
 | `servidor/verificar-vecino.sh` | Servidor, como `idiky` | Foto de LangFlow antes y comparación después (§8) |
-| `desplegar.sh` | Tu máquina | Sube un commit y publica **solo los servicios que se nombran** |
+| `desplegar.sh` | Tu máquina | Arma la carpeta (idiky + el repo de cada servicio externo), la sube y publica **solo los servicios que se nombran** |
 | `guia-de-despliegue.md` | — | Quién despliega qué, desde dónde y cómo verificarlo |
 | `servidor/autorizar-llave.sh` | Tu máquina | Da acceso de despliegue a una persona, con su llave pública |
 | `nuevo-servicio.md` | — | La receta para agregar un servicio |
@@ -222,7 +233,9 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/m
 
 - **Solo se tocan los servicios que se nombran.** Los demás siguen con su revisión, y cada uno
   sirve la suya en `/revision.txt`.
-- **`gestion` (BOB) solo desde commits que ya estén en `origin/main`.** Strapi borra de la base
+- **`bloky`, `gestion` y `jitsi` salen del `origin/main` de su repositorio**, no de `idiky`. Para
+  probar otro commit: `IDIKY_REF_BLOKY=<commit> infra/desplegar.sh origin/main bloky`.
+- **`gestion` (BOB) solo desde commits que ya estén en el `origin/main` de `BOB-Idiky`.** Strapi borra de la base
   las tablas y columnas que el código con el que arranca no tenga. Forzarlo exige
   `IDIKY_GESTION_FUERA_DE_MAIN=si`, y solo lo hace el responsable de integración. Además,
   `levantar.sh` **respalda la base antes de recrear el pod**, y si el respaldo falla no sigue.
@@ -235,7 +248,7 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/m
 repositorio**; la tiene el responsable de integración.
 
 **En un servidor nuevo**, antes del primer despliegue, van los secretos de gestión, una vez:
-`ssh idiky@<ip> 'sh -s' < infra/gestion/secretos.sh`. Sin ellos `levantar.sh` se detiene antes
+`ssh idiky@<ip> 'sh -s' < infra/gestion/secretos.sh`, desde una copia de `BOB-Idiky`. Sin ellos `levantar.sh` se detiene antes
 de tocar nada.
 
 ## 5. Entrar
@@ -356,9 +369,9 @@ poner:
 |---|---|---|
 | `~idiky/.config/idiky/entorno` | `IDIKY_HOST=0.0.0.0` (abierto a internet) | A mano |
 | `~idiky/.config/idiky/nginx/acceso.conf` y `htpasswd` | La clave del entorno | `clave-acceso.sh` o el comando del §6 |
-| `~idiky/.config/idiky/secretos/gestion-*.env` | Secretos de Strapi y PostgreSQL (600) | `infra/gestion/secretos.sh` |
+| `~idiky/.config/idiky/secretos/gestion-*.env` | Secretos de Strapi y PostgreSQL (600) | `infra/gestion/secretos.sh` (repo `BOB-Idiky`) |
 | `~idiky/.config/idiky/secretos/integraciones.env` | Credenciales de Twilio Verify (600). **Todavía no las usa ningún servicio**: son para **BLOKY**, el sistema de las copropiedades (ADR-0008), que las recibirá con `--env-file`. **BOB no las usa** | `servidor/cargar-integraciones.sh`, desde la máquina de quien tiene los valores |
-| `~idiky/.config/idiky/secretos/jitsi.env` | Claves internas de Jitsi, su `PUBLIC_URL` y **`JVB_ADVERTISE_IPS`** (600) | `infra/jitsi/secretos.sh`, y dos valores a mano |
+| `~idiky/.config/idiky/secretos/jitsi.env` | Claves internas de Jitsi, su `PUBLIC_URL` y **`JVB_ADVERTISE_IPS`** (600) | `infra/jitsi/secretos.sh` (repo `Jitsi-Streaming-Idiky`), y dos valores a mano |
 | `~idiky/datos/jitsi/prosody/` | **Las cuentas de quien puede abrir salas** en Jitsi | prosody, al primer arranque |
 | `~idiky/datos/gestion/postgres/` | **La base de datos del sistema de gestión** | PostgreSQL, al primer arranque |
 | `~idiky/datos/gestion/uploads/` | Archivos subidos a Strapi | Strapi |

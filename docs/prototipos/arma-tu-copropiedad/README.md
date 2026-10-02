@@ -4,7 +4,7 @@
 día de un administrador en BLOKY: armar la estructura de su copropiedad sin formularios. Se
 hicieron el 2026-09-21 con el responsable de integración, que quiere algo «sencillo, novedoso e
 interactivo, como un juego». **No son código de producto**: son para mirar, tocar y decidir. Lo
-que se apruebe pasa al caso de uso y, de ahí, a `apps/bloky/` en React.
+que se apruebe pasa al caso de uso y, de ahí, a `apps/bloky/` en React (repo `Bloky-Idiky`).
 
 **Cómo se abren:** doble clic en el archivo. `tokens.css` es una copia de
 `apps/bloky/src/estilos/tokens.css` para que abran solos.

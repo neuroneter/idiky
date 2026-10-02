@@ -10,14 +10,18 @@ demás ni el servidor que compartimos. Si vas a **crear** un servicio nuevo, la 
 |---|---|---|---|---|
 | `pwa` | **La maqueta de Mary**: la PWA (app del propietario y consola del administrador) | Mary | `origin/main` | 8080 |
 | `contable` | **La maqueta de Jeimy**: la aplicación contable | Jeimy | `origin/main` | 8081 |
-| `gestion` | **BOB**, el *back office* de IDIKY (Strapi + PostgreSQL) | **Solo el responsable de integración** | `origin/main`, **y nada más** | 8082 |
-| `bloky` | **BLOKY Dev**: el sistema de las copropiedades, construido de cero (app + API + PostgreSQL) | **El responsable de integración** | `origin/main` | 8083 |
-| `jitsi` | **Jitsi** para las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md)). **Todavía no se ha desplegado**: espera una regla UDP en Azure | **Solo el responsable de integración** | `origin/main` | 8085 y **10000/udp** |
+| `gestion` | **BOB**, el *back office* de IDIKY (Strapi + PostgreSQL) | **Solo el responsable de integración** | `origin/main` **de `BOB-Idiky`, y nada más** | 8082 |
+| `bloky` | **BLOKY Dev**: el sistema de las copropiedades, construido de cero (app + API + PostgreSQL) | **El responsable de integración** | `origin/main` de `Bloky-Idiky` | 8083 |
+| `jitsi` | **Jitsi** para las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md)). **Todavía no se ha desplegado**: espera una regla UDP en Azure | **Solo el responsable de integración** | `origin/main` de `Jitsi-Streaming-Idiky` | 8085 y **10000/udp** |
 | `tunel` | **El túnel de Cloudflare** que publica BLOKY Dev en `https://bloky-dev.idiky.com` ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)) | **Solo el responsable de integración** | `origin/main` | ninguno hacia internet (`/ready` en 127.0.0.1:8084) |
 
 > **Las maquetas no son los espacios de desarrollo.** BLOKY (el sistema de las copropiedades)
-> y ALICE (la app del propietario y residente) **todavía no tienen espacio**. Cuando se creen,
-> tendrán su propio servicio, puerto y responsable, y se agregan a esta tabla.
+> ya tiene el suyo (`bloky`, 8083). ALICE (la app del propietario y residente) **todavía no**:
+> es una app Flutter en `App-Idiky`. Cuando tenga espacio se agrega a esta tabla.
+>
+> **`gestion`, `bloky` y `jitsi` tienen su propio repositorio** (ADR-0017). El comando es el
+> mismo y se corre desde `idiky`; `desplegar.sh` trae solo el código de ese servicio desde
+> GitHub. Mary y Jeimy no necesitan acceso a esos repositorios.
 
 **Por qué BOB es distinto.** Strapi ajusta la base de datos al código con el que arranca: con un
 código que no tiene sus tipos de contenido, **borra las tablas y columnas que falten, y con ellas

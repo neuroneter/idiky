@@ -285,12 +285,12 @@ echo "==> Servicios de este despliegue: $IDIKY_SERVICIOS"
 
 # Los secretos del sistema de gestion no estan en git. Se comprueba antes de detener nada.
 if incluye gestion && { [ ! -f "$SECRETOS/gestion-postgres.env" ] || [ ! -f "$SECRETOS/gestion-strapi.env" ]; }; then
-  echo "Faltan los secretos del sistema de gestion. Se crean una vez: ssh idiky@<ip> 'sh -s' < infra/gestion/secretos.sh" >&2
+  echo "Faltan los secretos del sistema de gestion. Se crean una vez, desde BOB-Idiky: ssh idiky@<ip> 'sh -s' < infra/gestion/secretos.sh" >&2
   exit 1
 fi
 
 if incluye bloky && { [ ! -f "$SECRETOS/bloky-postgres.env" ] || [ ! -f "$SECRETOS/bloky-api.env" ]; }; then
-  echo "Faltan los secretos de BLOKY. Se crean una vez: ssh idiky@<ip> 'sh -s' < infra/bloky/secretos.sh" >&2
+  echo "Faltan los secretos de BLOKY. Se crean una vez, desde Bloky-Idiky: ssh idiky@<ip> 'sh -s' < infra/bloky/secretos.sh" >&2
   exit 1
 fi
 if incluye bloky && grep -q 'CAMBIAR-POR' "$SECRETOS/bloky-api.env"; then
@@ -298,7 +298,7 @@ if incluye bloky && grep -q 'CAMBIAR-POR' "$SECRETOS/bloky-api.env"; then
   exit 1
 fi
 if incluye jitsi && [ ! -f "$SECRETOS/jitsi.env" ]; then
-  echo "Faltan los secretos de Jitsi. Se crean una vez: ssh idiky@<ip> 'sh -s' < infra/jitsi/secretos.sh" >&2
+  echo "Faltan los secretos de Jitsi. Se crean una vez, desde Jitsi-Streaming-Idiky: ssh idiky@<ip> 'sh -s' < infra/jitsi/secretos.sh" >&2
   exit 1
 fi
 if incluye jitsi && grep -q 'CAMBIAR-POR' "$SECRETOS/jitsi.env"; then

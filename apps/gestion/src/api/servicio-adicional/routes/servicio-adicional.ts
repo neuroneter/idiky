@@ -1,7 +1,0 @@
-/**
- * servicio-adicional router (BOB · T-37)
- */
-
-import { factories } from '@strapi/strapi';
-
-export default factories.createCoreRouter('api::servicio-adicional.servicio-adicional');

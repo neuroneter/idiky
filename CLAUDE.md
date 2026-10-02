@@ -7,31 +7,50 @@
 
 Plataforma de gestión de **propiedad horizontal** (conjuntos residenciales).
 
-Son **dos productos distintos, en el mismo repositorio**, y confundirlos es el error más
+**Este repositorio es el arnés de todo el desarrollo** ([ADR-0017](./docs/adr/0017-un-repositorio-por-sistema-e-idiky-como-arnes.md)):
+aquí viven las reglas, los casos de uso, las decisiones (ADR), la bitácora, los prototipos y los
+demos con los que se entiende lo que se construye. **Cada sistema vive en su propio
+repositorio**, y todos vienen aquí a leer qué construir:
+
+| Repositorio | Sistema | Stack |
+|---|---|---|
+| **`idiky`** (este) | El arnés: `docs/`, el demo `apps/pwa/` (Mary), la contable `apps/contable/` (Jeimy) y la orquestación del entorno (`infra/`) | Markdown · React + Vite · HTML/JS sin compilar |
+| `Bloky-Idiky` | **BLOKY**: `apps/bloky/` + `apps/bloky-api/` + `infra/bloky/` | React + Vite · Node 22 + Fastify + PostgreSQL |
+| `BOB-Idiky` | **BOB**: `apps/gestion/` + `infra/gestion/` | Strapi 5 + PostgreSQL 17 |
+| `Jitsi-Streaming-Idiky` | **Jitsi** para las asambleas virtuales: `infra/jitsi/` | Imágenes de Jitsi + nginx |
+| `App-Idiky` | **ALICE**, la app del propietario y residente | Flutter + Dart |
+| `SmartContrat-Idiky` | Contratos inteligentes (login ERC-4337) | Solidity + Foundry · Polygon |
+
+El detalle, cómo se relacionan y qué va dónde: [`docs/16-mapa-de-repositorios.md`](./docs/16-mapa-de-repositorios.md).
+En la máquina del responsable de integración están todos juntos en `~/Documents/WorkSapce/`.
+**El código de BLOKY, BOB y Jitsi ya no se edita aquí** (se mudó el 2026-10-02); sus casos de
+uso, reglas y ADR sí.
+
+Dentro de este repositorio quedan **dos productos distintos**, y confundirlos es el error más
 caro que puedes cometer aquí:
 
 | Producto | Qué es | Stack | Responsable |
 |---|---|---|---|
 | `apps/pwa/` | App móvil del residente + consola web del administrador | React + TS + Vite | **Mary** |
 | `apps/contable/` | Aplicación contable: Cartera · Contabilidad (recaudos, pagos, ajustes, PUC) · Reportes | HTML + CSS + JS **sin compilar** | **Jeimy** |
-| `apps/gestion/` *(en construcción)* | **BOB**, el *back office* de la empresa IDIKY: clientes, planes, contratos; crea al Administrador y al Delegado de cada copropiedad. **No es de las copropiedades** | Strapi 5 + PostgreSQL 17 ([ADR-0012](./docs/adr/0012-sistema-de-gestion-strapi.md)) | Por definir |
-| `apps/bloky/` + `apps/bloky-api/` *(en construcción)* | **BLOKY Dev**, el sistema real de las copropiedades, construido de cero módulo por módulo **sin tocar el demo** ([ADR-0013](./docs/adr/0013-bloky-dev-separada-del-demo.md)). Hoy: el ingreso (CU-B-01) | React + Vite; API Node 22 + Fastify + PostgreSQL ([ADR-0008](./docs/adr/0008-backend-de-bloky.md)) | Responsable de integración |
 
 **Las aplicaciones de IDIKY tienen nombre** (2026-09-10). Úsalos al hablar y al escribir, para no
 confundir sistemas que se parecen:
 
 | Nombre | Qué es | Quién entra y cómo | Dónde está |
 |---|---|---|---|
-| **BOB** | El *back office* de IDIKY | El equipo de IDIKY, con el login de Strapi. **No usa Twilio** | `apps/gestion/` |
-| **BLOKY** | El sistema de las copropiedades: estructura y unidades, propietarios, cartera, asambleas | Administrador, Delegado y los perfiles que ellos creen: **código por SMS al celular de BOB, o Google/Microsoft con el correo de BOB** | **En construcción en `apps/bloky/` + `apps/bloky-api/`** (ADR-0008, ADR-0013). Su precursor es la consola del administrador del demo, en `apps/pwa/`, que sigue siendo la maqueta |
-| **ALICE** | La app del propietario y residente | Propietarios y residentes | Hoy, el demo de `apps/pwa/` |
+| **BOB** | El *back office* de IDIKY | El equipo de IDIKY, con el login de Strapi. **No usa Twilio** | Repo `BOB-Idiky` (`apps/gestion/`) |
+| **BLOKY** | El sistema de las copropiedades: estructura y unidades, propietarios, cartera, asambleas | Administrador, Delegado y los perfiles que ellos creen: **código por SMS al celular de BOB, o Google/Microsoft con el correo de BOB** | **En construcción en el repo `Bloky-Idiky`** (`apps/bloky/` + `apps/bloky-api/`; ADR-0008, ADR-0013). Su precursor es la consola del administrador del demo, en `apps/pwa/`, que sigue siendo la maqueta |
+| **ALICE** | La app del propietario y residente | Propietarios y residentes | El producto, en el repo `App-Idiky` (Flutter, recién empezado). Su maqueta es el demo de `apps/pwa/` |
 
 La contable de Jeimy conserva su nombre. La página web pública será **IDIKY**, y todo se presenta
 como aplicaciones de IDIKY.
 
-No comparten código. Comparten **las reglas del dominio**, traducidas a los dos lenguajes.
+La PWA y la contable no comparten código. Comparten **las reglas del dominio**, traducidas a los
+dos lenguajes.
 
-Estado: **demo v0.1**, sin backend, con datos simulados en los dos.
+Estado de los dos demos: **v0.1**, sin backend, con datos simulados. El producto real
+(BLOKY, BOB, ALICE) se construye en sus repositorios.
 
 ## 2. Lo primero que debes hacer en una sesión nueva
 
@@ -43,7 +62,9 @@ Estado: **demo v0.1**, sin backend, con datos simulados en los dos.
    detente y pídeles que le avisen al responsable de integración (Daniel).
 1. Leer [`docs/09-estado-del-proyecto.md`](./docs/09-estado-del-proyecto.md) — la bitácora dice dónde quedó todo.
 2. Leer el caso de uso a implementar en [`docs/04-casos-de-uso.md`](./docs/04-casos-de-uso.md).
-3. Leer [`docs/06-arquitectura.md`](./docs/06-arquitectura.md) — dónde va cada cosa.
+3. Leer [`docs/06-arquitectura.md`](./docs/06-arquitectura.md) — dónde va cada cosa — y, si la
+   tarea toca BLOKY, BOB, Jitsi, ALICE o los contratos,
+   [`docs/16-mapa-de-repositorios.md`](./docs/16-mapa-de-repositorios.md): el código va en su repositorio.
 
 ## 3. Reglas que no se negocian
 
@@ -80,11 +101,11 @@ npm run empaquetar # deja dist/idiky-demo.html: el demo en un solo archivo
 
 Antes de dar por terminado un cambio en la PWA: **`npm run build` debe pasar**.
 
-**`apps/bloky/` y `apps/bloky-api/`** (BLOKY Dev): ver sus README. La API corre con `npm run dev`
-y, sin variables, simula el SMS y guarda en memoria; la app con `npm run dev` manda `/api` al 3000.
-`npm run probar` en la API recorre CU-B-01 contra un BOB de mentira. **Antes de dar por terminado
-un cambio: `npm run build` en las dos.** Las reglas nuevas de BLOKY van en
-`apps/bloky-api/src/dominio/reglas.ts`, numeradas desde RN-160 (rango de la integración).
+**BLOKY, BOB, Jitsi, ALICE y los contratos** tienen sus comandos en el README y el `CLAUDE.md`
+de su repositorio ([`docs/16`](./docs/16-mapa-de-repositorios.md)). Si la tarea es de uno de
+ellos, el código se cambia **allá**; aquí se actualizan el caso de uso, las reglas, el ADR y la
+bitácora. Las reglas nuevas de BLOKY se definen en `docs/05-modelo-de-datos.md` y se implementan
+en `Bloky-Idiky/apps/bloky-api/src/dominio/reglas.ts`, numeradas desde RN-160.
 
 **`infra/`** — entorno de desarrollo en contenedores ([ADR-0011](./docs/adr/0011-entorno-de-desarrollo-en-contenedores.md),
 [`infra/README.md`](./infra/README.md)):
@@ -97,11 +118,11 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/m
 pie de la letra: **solo el servicio de quien lo pide** (`pwa` Mary, `contable` Jeimy, `bloky` y
 `gestion` el responsable de integración), **solo desde `origin/main`**, y
 `infra/servidor/verificar-vecino.sh` antes y después. Lo que Mary y Jeimy despliegan hoy son
-**maquetas**; BLOKY Dev es el producto real y vive en el 8083.
+**maquetas**; BLOKY Dev es el producto real y vive en el 8083. Para `bloky`, `gestion` y `jitsi`,
+`desplegar.sh` trae el `origin/main` de **su** repositorio (ADR-0017).
 
-**`apps/gestion/`** (Strapi): ver [`apps/gestion/README.md`](./apps/gestion/README.md). **El modelo de
-datos se diseña en local con `npm run develop` y va a git**; en el servidor Strapi corre en modo
-producción y lo creado ahí se pierde.
+**BOB** (Strapi, repo `BOB-Idiky`): **el modelo de datos se diseña en local con `npm run develop`
+y va a git**; en el servidor Strapi corre en modo producción y lo creado ahí se pierde.
 
 **Si la tarea es crear o cambiar un servicio del entorno**, lee primero
 [`infra/README.md`](./infra/README.md) (cómo está armado, incluido lo que no está en git) y
