@@ -26,7 +26,7 @@ nueva o una sesión de IA distinta.
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
-| **Despliegue** | La contable se publica copiando la carpeta ([`14`](./14-despliegue-de-la-contable.md)). `infra/` está en la rama de infraestructura, no en `main` |
+| **Despliegue** | Desde `origin/main`, un servicio por persona: `infra/desplegar.sh origin/main contable` ([`infra/guia-de-despliegue.md`](../infra/guia-de-despliegue.md)). Lo propio de la contable, en [`14`](./14-despliegue-de-la-contable.md) |
 
 ### Lo que funciona hoy
 

@@ -56,19 +56,22 @@ cuadrando, servida bajo `/idiky/contable/`.*
 ### a) Contenedor (es la del servidor de desarrollo)
 
 Es la forma prevista para el servidor compartido: nginx dentro de un contenedor que copia la
-carpeta tal cual y la publica en un puerto. La receta —`Containerfile`, `nginx.conf` y el
-script que despliega desde un commit— vive en `infra/` y se despliega con una sola orden
-desde la máquina de quien publica:
+carpeta tal cual y la publica en el puerto **8081**. La receta —`Containerfile`, `nginx.conf` y
+el script que despliega desde un commit— vive en `infra/`, y publicar es una sola orden desde
+la máquina de quien despliega:
 
 ```sh
-IDIKY_SERVIDOR=idiky@<ip> infra/desplegar.sh <rama-o-commit>
+infra/desplegar.sh origin/main contable
 ```
 
-Sube el commit indicado, construye la imagen en el servidor y levanta el contenedor. **Se
-publica lo que está en git, no la carpeta de trabajo:** lo que no esté commiteado no sube.
+Sube ese commit al servidor, construye **solo ese servicio**, lo levanta y espera a que
+responda. Los demás servicios no se tocan, y si la construcción falla, lo publicado sigue en
+pie. **Se publica lo que está en git, no la carpeta de trabajo.**
 
-> `infra/` todavía no está en `main` — llega desde la rama de infraestructura
-> (`claude/infra-podman-1wkn5z`). Ver §7.
+> **El procedimiento completo es [`infra/guia-de-despliegue.md`](../infra/guia-de-despliegue.md)**,
+> y hay que seguirlo: la llave de acceso, las variables `IDIKY_SERVIDOR` e `IDIKY_LLAVE`, qué
+> servicio publica cada persona, y la verificación de LangFlow —el otro servicio del
+> servidor— antes y después. Este documento solo cubre lo propio de la contable.
 
 ### b) Copiar la carpeta a un servidor web que ya exista
 
@@ -163,18 +166,22 @@ Idiky.contabilidad.situacionFinanciera(Idiky.repo.datosContables(), Idiky.domini
 
 ## 7. De qué rama se despliega
 
-La contable está en **`main`**, al día. Lo que **todavía no está en `main`** es `infra/`: vive
-en la rama de infraestructura (`claude/infra-podman-1wkn5z`), junto con ADR-0011 (el
-entorno en contenedores) y ADR-0012 (BOB, el back office). Por eso esos dos ADR todavía no
-aparecen en `docs/adr/`.
+**De `origin/main`, siempre.** Tanto la contable como `infra/` están ahí, así que el servidor
+se publica con lo que está integrado y con nada más. `main` la actualiza el responsable de
+integración; el trabajo de cada quien llega por su rama.
 
-Así que hoy hay dos caminos:
+Dos cosas propias de esta aplicación:
 
-- **Con contenedor** (§3a): hay que integrar antes esa rama en `main` y desplegar `main`
-  (T-35). Es la forma prevista, y la que da `revision.txt` y el `no-cache` ya puesto.
-- **Sin esperar a eso** (§3b): copiar `apps/contable/` de `main` a cualquier servidor de
-  archivos y agregarle el `no-cache` de §4. Funciona igual; lo que se pierde es saber qué
-  commit está publicado.
+- **El servicio que le toca a la contable es `contable`** (puerto 8081). Cada persona publica
+  solo el suyo.
+- **Desplegar pide `git`, `ssh` y una terminal.** Si el computador de quien desarrolla la
+  contable no permite instalar nada —el caso del [ADR-0010](./adr/0010-stack-aplicacion-contable.md),
+  que es la razón de ser de esta aplicación—, el despliegue se le **pide al responsable de
+  integración** diciendo servicio y commit, hasta que exista el despliegue automático (T-35).
+  No hace falta instalar nada para que la contable esté publicada.
+
+Y queda siempre el camino de §3b: copiar `apps/contable/` a cualquier servidor de archivos.
+Funciona igual; lo que se pierde es saber qué commit está publicado.
 
 ## 8. Lo que hay que decir de este despliegue
 
