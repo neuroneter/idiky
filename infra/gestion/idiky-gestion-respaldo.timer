@@ -1,0 +1,12 @@
+# Una vez al dia (T-37 · ADR-0012). El servidor esta en UTC: 08:30 UTC son las 03:30 en
+# Colombia, cuando menos trafico tiene el otro servicio del servidor.
+[Unit]
+Description=Respaldo diario del sistema de gestion de Idiky
+
+[Timer]
+OnCalendar=*-*-* 08:30:00
+RandomizedDelaySec=10m
+Persistent=true
+
+[Install]
+WantedBy=timers.target

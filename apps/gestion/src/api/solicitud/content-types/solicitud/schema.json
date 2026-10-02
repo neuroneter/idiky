@@ -1,0 +1,71 @@
+{
+  "kind": "collectionType",
+  "collectionName": "solicitudes",
+  "info": {
+    "singularName": "solicitud",
+    "pluralName": "solicitudes",
+    "displayName": "Solicitud",
+    "description": "Pedidos de cambio o bloqueo de los perfiles raíz, con su soporte y su resolución (docs/13 §3)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "titulo": {
+      "type": "string"
+    },
+    "copropiedad": {
+      "type": "relation",
+      "relation": "manyToOne",
+      "target": "api::copropiedad.copropiedad",
+      "inversedBy": "solicitudes"
+    },
+    "tipo": {
+      "type": "enumeration",
+      "enum": ["cambio_delegado", "cambio_administrador", "bloqueo_administrador"],
+      "required": true,
+      "default": "cambio_administrador"
+    },
+    "canal": {
+      "type": "enumeration",
+      "enum": ["correo_operaciones", "bloky"],
+      "required": true,
+      "default": "correo_operaciones"
+    },
+    "solicitante": {
+      "type": "string",
+      "required": true
+    },
+    "correoSolicitante": {
+      "type": "email"
+    },
+    "fechaRecepcion": {
+      "type": "datetime"
+    },
+    "motivo": {
+      "type": "text",
+      "required": true
+    },
+    "tipoSoporte": {
+      "type": "enumeration",
+      "enum": ["acta_asamblea", "acta_consejo", "otro"]
+    },
+    "soporte": {
+      "type": "media",
+      "multiple": false,
+      "allowedTypes": ["files", "images"]
+    },
+    "estado": {
+      "type": "enumeration",
+      "enum": ["recibida", "en_revision", "aprobada", "rechazada"],
+      "required": true,
+      "default": "recibida"
+    },
+    "resolucion": {
+      "type": "text"
+    },
+    "fechaResolucion": {
+      "type": "datetime"
+    }
+  }
+}

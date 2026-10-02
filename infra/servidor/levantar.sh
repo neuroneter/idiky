@@ -1,0 +1,296 @@
+#!/bin/sh
+# Construye las imagenes de Idiky y (re)crea sus contenedores como servicios del usuario.
+# T-35 · ADR-0011 · ADR-0012.
+#
+# Corre EN EL SERVIDOR, como el usuario `idiky` (nunca como root), desde la raiz de una
+# copia del repositorio. Normalmente lo llama infra/desplegar.sh.
+#
+#   REVISION=abc1234 IDIKY_SERVICIOS="pwa contable" sh infra/servidor/levantar.sh
+#
+# IDIKY_SERVICIOS dice cuales se publican (pwa, contable, gestion, bloky, tunel); los demas no se
+# tocan. Sin la variable se publican los cuatro de siempre (el tunel solo si se nombra).
+#
+# Configuracion opcional, fuera del repositorio, en ~/.config/idiky/entorno:
+#   IDIKY_HOST=127.0.0.1         # 0.0.0.0 para publicar hacia la red
+#   IDIKY_PUERTO_PWA=8080
+#   IDIKY_PUERTO_CONTABLE=8081
+#   IDIKY_PUERTO_GESTION=8082
+#   IDIKY_PUERTO_BLOKY=8083
+#   IDIKY_PUERTO_TUNEL=8084      # solo /ready del tunel, y solo en 127.0.0.1 (ADR-0014)
+#   IDIKY_DATOS=$HOME/datos      # lo que persiste: PostgreSQL, archivos subidos, respaldos
+#   IDIKY_MINIMO_DISCO_MB=3000   # con menos espacio libre no se construye nada
+set -eu
+
+[ "$(id -u)" -ne 0 ] || { echo "No se corre como root: los contenedores de Idiky van sin privilegios (ADR-0011)." >&2; exit 1; }
+
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/entorno"
+# shellcheck disable=SC1090
+[ ! -f "$CONFIG" ] || . "$CONFIG"
+
+REVISION="${REVISION:-sin-revision}"
+IDIKY_SERVICIOS="${IDIKY_SERVICIOS:-pwa contable gestion bloky}"
+IDIKY_HOST="${IDIKY_HOST:-127.0.0.1}"
+IDIKY_PUERTO_PWA="${IDIKY_PUERTO_PWA:-8080}"
+IDIKY_PUERTO_CONTABLE="${IDIKY_PUERTO_CONTABLE:-8081}"
+IDIKY_PUERTO_GESTION="${IDIKY_PUERTO_GESTION:-8082}"
+IDIKY_PUERTO_BLOKY="${IDIKY_PUERTO_BLOKY:-8083}"
+IDIKY_PUERTO_TUNEL="${IDIKY_PUERTO_TUNEL:-8084}"
+IDIKY_DATOS="${IDIKY_DATOS:-$HOME/datos}"
+IDIKY_MINIMO_DISCO_MB="${IDIKY_MINIMO_DISCO_MB:-3000}"
+UNIDADES="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
+SECRETOS="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/secretos"
+
+for servicio in $IDIKY_SERVICIOS; do
+  case "$servicio" in
+    pwa | contable | gestion | bloky | tunel) ;;
+    *) echo "Servicio desconocido: $servicio. Son pwa, contable, gestion, bloky y tunel." >&2; exit 2 ;;
+  esac
+done
+incluye() {
+  case " $IDIKY_SERVICIOS " in *" $1 "*) return 0 ;; esac
+  return 1
+}
+
+# Clave de acceso del entorno (clave-acceso.sh). Si la carpeta no existe, no se monta nada.
+ACCESO="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/nginx"
+MONTAJE=""
+[ ! -d "$ACCESO" ] || MONTAJE="--volume $ACCESO:/etc/nginx/idiky:ro"
+
+LOCAL="$IDIKY_HOST"
+[ "$LOCAL" != "0.0.0.0" ] || LOCAL=127.0.0.1
+
+# El disco lo comparte la base de datos del otro servicio del servidor: si se llena, se cae.
+# Con menos del minimo no se construye nada, y lo publicado sigue en pie.
+disco_suficiente() {
+  libre=$(df -Pm "$HOME" | awk 'NR == 2 {print $4}')
+  if [ "$libre" -lt "$IDIKY_MINIMO_DISCO_MB" ]; then
+    echo "Quedan $libre MB libres y el minimo es $IDIKY_MINIMO_DISCO_MB: no se construye nada. Lo publicado sigue en pie." >&2
+    exit 1
+  fi
+}
+
+# El servidor es compartido: construir cede la CPU (nice) y tiene tope de memoria.
+#   construir <nombre> [archivo dentro de infra/] [memoria]
+construir() {
+  disco_suficiente
+  echo "==> Construyendo idiky-$1 ($REVISION)"
+  nice -n 15 podman build --memory "${3:-2g}" --build-arg "REVISION=$REVISION" \
+    --tag "localhost/idiky-$1:actual" --file "infra/${2:-$1/Containerfile}" .
+}
+
+# Un contenedor por servicio web, publicado en IDIKY_HOST. La unidad de systemd la genera
+# podman a partir del contenedor; con ella el servicio vuelve solo tras un reinicio.
+levantar() {
+  nombre="idiky-$1"
+  echo "==> Levantando $nombre en $IDIKY_HOST:$2"
+  systemctl --user stop "container-$nombre.service" 2>/dev/null || true
+  podman rm --force --ignore "$nombre" >/dev/null
+  # shellcheck disable=SC2086
+  podman create --name "$nombre" --memory 256m --pids-limit 256 $MONTAJE \
+    --publish "$IDIKY_HOST:$2:80" "localhost/$nombre:actual" >/dev/null
+  mkdir -p "$UNIDADES"
+  (cd "$UNIDADES" && podman generate systemd --new --files --name "$nombre" >/dev/null)
+  podman rm "$nombre" >/dev/null
+  systemctl --user daemon-reload
+  systemctl --user enable --now "container-$nombre.service"
+}
+
+# Antes de recrear el pod de BOB se respalda su base, si esta corriendo. Si el respaldo falla,
+# no se toca el pod: sin respaldo no se arriesga la base.
+respaldar_gestion() {
+  if podman container exists idiky-gestion-postgres \
+    && [ "$(podman inspect --format '{{.State.Running}}' idiky-gestion-postgres)" = "true" ]; then
+    echo "==> Respaldando la base de BOB antes de recrear el pod"
+    sh infra/gestion/respaldo.sh predespliegue
+  fi
+}
+
+# El sistema de gestion es un pod: nginx, Strapi y PostgreSQL comparten la red del pod y se
+# hablan por localhost. Solo el pod publica puerto, y ese puerto llega a nginx; Strapi y
+# PostgreSQL no son alcanzables desde fuera del pod (ADR-0012).
+# port_handler=slirp4netns conserva la IP real de quien llega: el login de Strapi limita
+# intentos por IP, y sin esto todos llegarian desde la misma.
+levantar_gestion() {
+  pod="idiky-gestion"
+  echo "==> Levantando el pod $pod en $IDIKY_HOST:$1"
+  mkdir -p "$IDIKY_DATOS/gestion/postgres" "$IDIKY_DATOS/gestion/uploads"
+  chmod 700 "$IDIKY_DATOS" "$IDIKY_DATOS/gestion"
+  # Strapi corre como el usuario `node` (uid 1000 dentro del contenedor), no como root: la
+  # carpeta de archivos subidos se le entrega dentro del espacio de usuarios de podman.
+  # PostgreSQL no lo necesita: su imagen ajusta los permisos de su carpeta al arrancar.
+  podman unshare chown 1000:1000 "$IDIKY_DATOS/gestion/uploads"
+  systemctl --user stop "pod-$pod.service" 2>/dev/null || true
+  podman pod rm --force --ignore "$pod" >/dev/null
+  podman pod create --name "$pod" --network slirp4netns:port_handler=slirp4netns \
+    --publish "$IDIKY_HOST:$1:80" >/dev/null
+  podman create --pod "$pod" --name "$pod-postgres" --memory 512m --pids-limit 256 \
+    --env-file "$SECRETOS/gestion-postgres.env" \
+    --volume "$IDIKY_DATOS/gestion/postgres:/var/lib/postgresql/data" \
+    docker.io/library/postgres:17-alpine >/dev/null
+  podman create --pod "$pod" --name "$pod-strapi" --memory 1536m --pids-limit 512 \
+    --env-file "$SECRETOS/gestion-strapi.env" \
+    --volume "$IDIKY_DATOS/gestion/uploads:/opt/app/public/uploads" \
+    "localhost/idiky-gestion:actual" >/dev/null
+  podman create --pod "$pod" --name "$pod-proxy" --memory 64m --pids-limit 64 \
+    "localhost/idiky-gestion-proxy:actual" >/dev/null
+  mkdir -p "$UNIDADES"
+  (cd "$UNIDADES" && podman generate systemd --new --files --name "$pod" >/dev/null)
+  podman pod rm --force "$pod" >/dev/null
+  systemctl --user daemon-reload
+  systemctl --user enable --now "pod-$pod.service"
+}
+
+# BLOKY es un pod como el de BOB: nginx (sirve la app y reenvia /api), la API de BLOKY y su
+# PostgreSQL, que no publica puerto (ADR-0008, ADR-0013). La API lee BOB por la red del host.
+levantar_bloky() {
+  pod="idiky-bloky"
+  echo "==> Levantando el pod $pod en $IDIKY_HOST:$1"
+  mkdir -p "$IDIKY_DATOS/bloky/postgres"
+  chmod 700 "$IDIKY_DATOS" "$IDIKY_DATOS/bloky"
+  systemctl --user stop "pod-$pod.service" 2>/dev/null || true
+  podman pod rm --force --ignore "$pod" >/dev/null
+  podman pod create --name "$pod" --network slirp4netns:port_handler=slirp4netns \
+    --publish "$IDIKY_HOST:$1:80" >/dev/null
+  podman create --pod "$pod" --name "$pod-postgres" --memory 384m --pids-limit 256 \
+    --env-file "$SECRETOS/bloky-postgres.env" \
+    --volume "$IDIKY_DATOS/bloky/postgres:/var/lib/postgresql/data" \
+    docker.io/library/postgres:17-alpine >/dev/null
+  podman create --pod "$pod" --name "$pod-api" --memory 384m --pids-limit 256 \
+    --env-file "$SECRETOS/bloky-api.env" \
+    "localhost/idiky-bloky-api:actual" >/dev/null
+  # shellcheck disable=SC2086
+  podman create --pod "$pod" --name "$pod-app" --memory 64m --pids-limit 64 $MONTAJE \
+    "localhost/idiky-bloky-app:actual" >/dev/null
+  mkdir -p "$UNIDADES"
+  (cd "$UNIDADES" && podman generate systemd --new --files --name "$pod" >/dev/null)
+  podman pod rm --force "$pod" >/dev/null
+  systemctl --user daemon-reload
+  systemctl --user enable --now "pod-$pod.service"
+}
+
+# El tunel de Cloudflare (ADR-0014): un contenedor sin puertos publicados que solo sale hacia
+# Cloudflare. Lo unico que se publica, y solo en 127.0.0.1, es /ready de sus metricas, para que
+# `esperar` sepa que se conecto. El nombre publico y a que puerto del servidor apunta se
+# definen en el panel de Cloudflare, no aqui: `http://10.0.2.2:8083`. Probado el 2026-09-21:
+# 10.0.2.2 solo llega al servidor con allow_host_loopback=true; sin eso, «Network unreachable».
+# La IP privada de la VM (hostname -I) llega con cualquier red y sirve de alternativa.
+levantar_tunel() {
+  nombre="idiky-tunel"
+  echo "==> Levantando $nombre (sin puertos; /ready en 127.0.0.1:$1)"
+  systemctl --user stop "container-$nombre.service" 2>/dev/null || true
+  podman rm --force --ignore "$nombre" >/dev/null
+  podman create --name "$nombre" --memory 128m --pids-limit 128 \
+    --network slirp4netns:allow_host_loopback=true \
+    --env-file "$SECRETOS/tunel.env" \
+    --publish "127.0.0.1:$1:2000" "localhost/$nombre:actual" >/dev/null
+  mkdir -p "$UNIDADES"
+  (cd "$UNIDADES" && podman generate systemd --new --files --name "$nombre" >/dev/null)
+  podman rm "$nombre" >/dev/null
+  systemctl --user daemon-reload
+  systemctl --user enable --now "container-$nombre.service"
+}
+
+# Respaldo diario de la base (infra/gestion/respaldo.sh). Se copia fuera de la carpeta del
+# despliegue porque esa carpeta se reemplaza en cada despliegue.
+instalar_respaldo_gestion() {
+  mkdir -p "$HOME/.local/bin" "$UNIDADES"
+  install -m 755 infra/gestion/respaldo.sh "$HOME/.local/bin/idiky-gestion-respaldo"
+  cp infra/gestion/idiky-gestion-respaldo.service infra/gestion/idiky-gestion-respaldo.timer "$UNIDADES/"
+  systemctl --user daemon-reload
+  systemctl --user enable --now idiky-gestion-respaldo.timer >/dev/null 2>&1
+}
+
+#   esperar <nombre> <puerto> [ruta] [segundos]
+esperar() {
+  ruta="${3:-/salud}"
+  limite="${4:-30}"
+  intentos=0
+  until curl -fsS --max-time 2 "http://$LOCAL:$2$ruta" >/dev/null 2>&1; do
+    intentos=$((intentos + 1))
+    if [ "$intentos" -ge "$limite" ]; then
+      echo "idiky-$1 no respondio $ruta en $LOCAL:$2 en $limite s" >&2
+      systemctl --user status "container-idiky-$1.service" "pod-idiky-$1.service" --no-pager >&2 2>/dev/null || true
+      exit 1
+    fi
+    sleep 1
+  done
+  if [ "$ruta" = "/salud" ]; then
+    echo "    idiky-$1 responde en $IDIKY_HOST:$2 con la revision $(curl -fsS "http://$LOCAL:$2/revision.txt")"
+  else
+    echo "    idiky-$1 responde $ruta (tras $intentos s)"
+  fi
+}
+
+echo "==> Servicios de este despliegue: $IDIKY_SERVICIOS"
+
+# Los secretos del sistema de gestion no estan en git. Se comprueba antes de detener nada.
+if incluye gestion && { [ ! -f "$SECRETOS/gestion-postgres.env" ] || [ ! -f "$SECRETOS/gestion-strapi.env" ]; }; then
+  echo "Faltan los secretos del sistema de gestion. Se crean una vez: ssh idiky@<ip> 'sh -s' < infra/gestion/secretos.sh" >&2
+  exit 1
+fi
+
+if incluye bloky && { [ ! -f "$SECRETOS/bloky-postgres.env" ] || [ ! -f "$SECRETOS/bloky-api.env" ]; }; then
+  echo "Faltan los secretos de BLOKY. Se crean una vez: ssh idiky@<ip> 'sh -s' < infra/bloky/secretos.sh" >&2
+  exit 1
+fi
+if incluye bloky && grep -q 'CAMBIAR-POR' "$SECRETOS/bloky-api.env"; then
+  echo "Los secretos de BLOKY tienen valores sin completar (CAMBIAR-POR...): editar $SECRETOS/bloky-api.env" >&2
+  exit 1
+fi
+if incluye tunel && [ ! -f "$SECRETOS/tunel.env" ]; then
+  echo "Falta el token del tunel. Se crea una vez con infra/tunel/secretos.sh (ver su encabezado: el script se copia y el token va por stdin)" >&2
+  exit 1
+fi
+
+# Se construye (y se descarga) todo antes de detener nada: si algo falla, sigue en pie lo anterior.
+if incluye pwa; then construir pwa; fi
+if incluye contable; then construir contable; fi
+if incluye gestion; then
+  construir gestion gestion/Containerfile 3g
+  construir gestion-proxy gestion/proxy.Containerfile
+  podman pull --quiet docker.io/library/postgres:17-alpine >/dev/null
+  respaldar_gestion
+fi
+if incluye bloky; then
+  construir bloky-api bloky/api.Containerfile
+  construir bloky-app bloky/app.Containerfile
+  podman pull --quiet docker.io/library/postgres:17-alpine >/dev/null
+fi
+if incluye tunel; then construir tunel tunel/Containerfile 512m; fi
+
+if incluye pwa; then levantar pwa "$IDIKY_PUERTO_PWA"; fi
+if incluye contable; then levantar contable "$IDIKY_PUERTO_CONTABLE"; fi
+if incluye gestion; then
+  levantar_gestion "$IDIKY_PUERTO_GESTION"
+  instalar_respaldo_gestion
+fi
+if incluye bloky; then levantar_bloky "$IDIKY_PUERTO_BLOKY"; fi
+if incluye tunel; then levantar_tunel "$IDIKY_PUERTO_TUNEL"; fi
+
+if incluye pwa; then esperar pwa "$IDIKY_PUERTO_PWA"; fi
+if incluye contable; then esperar contable "$IDIKY_PUERTO_CONTABLE"; fi
+if incluye gestion; then
+  esperar gestion "$IDIKY_PUERTO_GESTION"
+  # Strapi tarda en arrancar, y la primera vez crea todas sus tablas.
+  esperar gestion "$IDIKY_PUERTO_GESTION" /_health 240
+fi
+if incluye bloky; then
+  esperar bloky "$IDIKY_PUERTO_BLOKY"
+  # La API espera a PostgreSQL y aplica sus migraciones la primera vez.
+  esperar bloky "$IDIKY_PUERTO_BLOKY" /api/salud 120
+fi
+if incluye tunel; then
+  # /ready responde 200 cuando hay al menos una conexion viva con Cloudflare.
+  esperar tunel "$IDIKY_PUERTO_TUNEL" /ready 60
+fi
+
+# El disco del servidor es compartido y escaso: se borra toda imagen que no use un
+# contenedor en marcha, incluidos Node y las capas de construccion. Lo publicado queda; el
+# costo es volver a bajar las imagenes base en el siguiente despliegue.
+podman image prune --all --force >/dev/null
+
+echo "==> Lo que queda publicado (cada servicio con su revision)"
+for par in "pwa:$IDIKY_PUERTO_PWA" "contable:$IDIKY_PUERTO_CONTABLE" "gestion:$IDIKY_PUERTO_GESTION" "bloky:$IDIKY_PUERTO_BLOKY"; do
+  printf '    %-9s %s\n' "${par%%:*}" "$(curl -fsS --max-time 3 "http://$LOCAL:${par#*:}/revision.txt" 2>/dev/null || echo 'no responde')"
+done
+df -h "$HOME" | tail -1

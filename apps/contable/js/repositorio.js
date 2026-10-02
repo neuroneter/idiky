@@ -1,0 +1,1049 @@
+/**
+ * Repositorio: la unica puerta de acceso a los datos.
+ *
+ * Ninguna pantalla lee ni escribe `localStorage` directamente, ni recorre las
+ * listas por su cuenta: todo pasa por aqui. El dia que exista un servidor de
+ * verdad, se cambia el cuerpo de estas funciones y las pantallas no se tocan.
+ *
+ * Las operaciones que escriben devuelven lo que crearon o modificaron, y
+ * lanzan un `Error` con un mensaje entendible cuando la operacion no es valida
+ * segun las reglas del dominio.
+ */
+var Idiky = window.Idiky || (window.Idiky = {})
+
+Idiky.repo = (function () {
+  'use strict'
+
+  var d = Idiky.dominio
+  var bd = null
+
+  function cargar() {
+    if (!bd) bd = Idiky.datos.leer()
+    return bd
+  }
+
+  function guardar() {
+    Idiky.datos.guardar(bd)
+  }
+
+  function reiniciar() {
+    bd = Idiky.datos.sembrar()
+    return bd
+  }
+
+  function nuevoId(prefijo) {
+    return prefijo + '-' + Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4)
+  }
+
+  // -------------------------------------------------------------------------
+  // Consultas
+  // -------------------------------------------------------------------------
+
+  function unidades() {
+    return cargar().unidades.slice().sort(function (a, b) {
+      return a.etiqueta.localeCompare(b.etiqueta)
+    })
+  }
+
+  function unidad(unidadId) {
+    return cargar().unidades.filter(function (u) { return u.id === unidadId })[0]
+  }
+
+  function propietarioDe(unidadId) {
+    return cargar().propietarios.filter(function (p) { return p.unidadId === unidadId })[0]
+  }
+
+  function nombrePropietario(unidadId) {
+    var propietario = propietarioDe(unidadId)
+    return propietario ? propietario.nombre : 'Sin registrar'
+  }
+
+  function etiquetaUnidad(unidadId) {
+    var u = unidad(unidadId)
+    return u ? u.etiqueta : unidadId
+  }
+
+  /** Cuotas de una unidad, de la mas reciente a la mas antigua. */
+  function cuotasDeUnidad(unidadId) {
+    return cargar().cuotas
+      .filter(function (c) { return c.unidadId === unidadId })
+      .sort(function (a, b) { return b.fechaVencimiento.localeCompare(a.fechaVencimiento) })
+  }
+
+  function todasLasCuotas() {
+    return cargar().cuotas
+  }
+
+  function pagosDeUnidad(unidadId) {
+    return cargar().pagos
+      .filter(function (p) { return p.unidadId === unidadId })
+      .sort(porFechaDescendente)
+  }
+
+  /** Abonos que los propietarios informaron y aun nadie concilio (RN-79). */
+  function abonosReportados() {
+    return cargar().pagos
+      .filter(function (p) { return p.estado === 'reportado' })
+      .sort(function (a, b) { return a.fecha.localeCompare(b.fecha) })
+  }
+
+  /** Libro de recibos de caja: incluye los anulados, porque el libro no se filtra. */
+  function recibos() {
+    return cargar().pagos
+      .filter(function (p) { return p.estado !== 'reportado' })
+      .sort(porFechaDescendente)
+  }
+
+  function pagoPorId(pagoId) {
+    return cargar().pagos.filter(function (p) { return p.id === pagoId })[0]
+  }
+
+  /** Recibos aplicados que abonaron a una cuota concreta. */
+  function pagosDeCuota(cuotaId) {
+    return cargar().pagos.filter(function (p) {
+      return p.estado === 'aplicado' && p.imputaciones.some(function (l) {
+        return l.cuotaId === cuotaId
+      })
+    }).sort(porFechaDescendente)
+  }
+
+  function porFechaDescendente(a, b) {
+    return b.fecha.localeCompare(a.fecha)
+  }
+
+  /** Resumen de cartera de todas las unidades: la tabla principal. */
+  function estadoDeCartera() {
+    var contables = datosContables()
+    return unidades().map(function (u) {
+      var cuotas = cuotasDeUnidad(u.id)
+      // Los ajustes que tocan la cartera de esta unidad (intereses de mora,
+      // por ejemplo) no son cuotas, pero el propietario los debe igual.
+      var ajuste = Idiky.contabilidad.ajusteDeCarteraDeUnidad(contables, u.id, null)
+      return {
+        unidad: u,
+        propietario: nombrePropietario(u.id),
+        cuotas: cuotas,
+        ajuste: ajuste,
+        saldo: d.calcularSaldo(cuotas) + ajuste,
+        vencido: d.calcularSaldoVencido(cuotas),
+        mora: d.diasDeMora(cuotas),
+        enMora: d.estaEnMora(cuotas),
+      }
+    })
+  }
+
+  // -------------------------------------------------------------------------
+  // Operaciones sobre pagos y recibos de caja
+  // -------------------------------------------------------------------------
+
+  /** Aplica el reparto sobre las cuotas. Con `signo` -1 lo revierte (RN-78). */
+  function moverSaldos(imputaciones, signo) {
+    imputaciones.forEach(function (linea) {
+      var cuota = bd.cuotas.filter(function (c) { return c.id === linea.cuotaId })[0]
+      if (!cuota) return
+      cuota.saldo = Math.min(cuota.valor, Math.max(0, cuota.saldo - linea.valor * signo))
+      cuota.estado = d.estadoRealCuota(cuota)
+    })
+  }
+
+  /** Toma el siguiente numero de recibo y avanza el consecutivo (RN-77). */
+  function emitirRecibo() {
+    var consecutivo = bd.consecutivos.recibo
+    bd.consecutivos.recibo = consecutivo + 1
+    return d.numeroRecibo(consecutivo)
+  }
+
+  /**
+   * Deja solo las lineas con valor y le pone a cada una la cuenta de cartera
+   * de su cuota. Asi el recibo guarda contra que cuenta del PUC se abono, y
+   * no hay que volver a deducirlo cuando se arme un reporte.
+   */
+  function limpiarImputaciones(imputaciones) {
+    return imputaciones
+      .filter(function (linea) { return linea.valor > 0 })
+      .map(function (linea) {
+        var cuota = bd.cuotas.filter(function (c) { return c.id === linea.cuotaId })[0]
+        return {
+          cuotaId: linea.cuotaId,
+          valor: linea.valor,
+          cuenta: (cuota && cuota.cuentaCartera) || bd.parametros.cartera.ordinaria,
+        }
+      })
+  }
+
+  /**
+   * Registra un pago que ya se recibio y lo aplica de una vez, emitiendo el
+   * recibo de caja. Es el camino del pago que llega por consignacion o en
+   * efectivo y que nadie informo previamente.
+   */
+  function registrarPago(parametros) {
+    cargar()
+    var cuotas = bd.cuotas.filter(function (c) { return c.unidadId === parametros.unidadId })
+    var imputaciones = parametros.imputaciones || d.imputarPago(cuotas, parametros.valor)
+
+    var validacion = d.validarImputacion(parametros.valor, imputaciones, cuotas)
+    if (!validacion.valido) throw new Error(validacion.motivo)
+
+    var ahora = d.ahoraISO()
+    var pago = {
+      id: nuevoId('pag'),
+      unidadId: parametros.unidadId,
+      valor: parametros.valor,
+      medio: parametros.medio,
+      referencia: (parametros.referencia || '').trim() || 'SIN-REFERENCIA',
+      fecha: ahora,
+      estado: 'aplicado',
+      origen: 'administracion',
+      conceptoInformado: parametros.conceptoInformado || '',
+      recibo: emitirRecibo(),
+      cuentaCaja: bd.parametros.caja,
+      cuentaAnticipos: bd.parametros.anticipos,
+      imputaciones: limpiarImputaciones(imputaciones),
+      saldoAFavor: d.saldoAFavorDelPago(parametros.valor, imputaciones),
+      fechaAplicacion: ahora,
+      registradoPor: bd.usuario,
+    }
+
+    moverSaldos(pago.imputaciones, 1)
+    bd.pagos.unshift(pago)
+    guardar()
+    return pago
+  }
+
+  /**
+   * Concilia un abono que el propietario informo: lo reparte entre cuotas y le
+   * asigna el numero de recibo de caja. Aqui es donde el pago entra a la cartera.
+   */
+  function aplicarPago(parametros) {
+    cargar()
+    var pago = pagoPorId(parametros.pagoId)
+    if (!pago) throw new Error('El pago no existe.')
+    if (pago.estado !== 'reportado') {
+      throw new Error('Solo se pueden aplicar los abonos que estan por conciliar.')
+    }
+
+    var cuotas = bd.cuotas.filter(function (c) { return c.unidadId === pago.unidadId })
+    var imputaciones = parametros.imputaciones || d.imputarPago(cuotas, pago.valor)
+
+    var validacion = d.validarImputacion(pago.valor, imputaciones, cuotas)
+    if (!validacion.valido) throw new Error(validacion.motivo)
+
+    pago.imputaciones = limpiarImputaciones(imputaciones)
+    pago.saldoAFavor = d.saldoAFavorDelPago(pago.valor, imputaciones)
+    pago.cuentaCaja = bd.parametros.caja
+    pago.cuentaAnticipos = bd.parametros.anticipos
+    pago.estado = 'aplicado'
+    pago.recibo = emitirRecibo()
+    pago.fechaAplicacion = d.ahoraISO()
+    pago.aplicadoPor = bd.usuario
+
+    moverSaldos(pago.imputaciones, 1)
+    guardar()
+    return pago
+  }
+
+  /**
+   * Anula un recibo de caja (RN-78).
+   *
+   * No se borra el registro: se marca anulado con su motivo y el saldo vuelve
+   * a las cuotas. El numero de recibo queda quemado, no se reutiliza — eso es
+   * justamente lo que hace auditable el consecutivo.
+   */
+  function anularPago(parametros) {
+    cargar()
+    var pago = pagoPorId(parametros.pagoId)
+    if (!pago) throw new Error('El pago no existe.')
+    var motivo = (parametros.motivo || '').trim()
+    if (!motivo) throw new Error('Escribe el motivo de la anulacion.')
+    if (pago.estado === 'anulado') throw new Error('Ese recibo ya esta anulado.')
+
+    if (pago.estado === 'aplicado') moverSaldos(pago.imputaciones, -1)
+
+    pago.estado = 'anulado'
+    pago.motivoAnulacion = motivo
+    pago.fechaAnulacion = d.ahoraISO()
+    pago.anuladoPor = bd.usuario
+    guardar()
+    return pago
+  }
+
+  // -------------------------------------------------------------------------
+  // Gastos
+  // -------------------------------------------------------------------------
+
+  var CATEGORIAS_GASTO = [
+    'Vigilancia',
+    'Aseo',
+    'Servicios publicos',
+    'Mantenimiento',
+    'Administracion',
+    'Seguros',
+    'Reparaciones',
+    'Otros',
+  ]
+
+  function gastos() {
+    return cargar().gastos.slice().sort(function (a, b) {
+      return b.fecha.localeCompare(a.fecha)
+    })
+  }
+
+  function gastoPorId(gastoId) {
+    return cargar().gastos.filter(function (g) { return g.id === gastoId })[0]
+  }
+
+  function registrarGasto(parametros) {
+    cargar()
+    if (!(parametros.valor > 0)) throw new Error('El valor del gasto debe ser mayor que cero.')
+    if (!(parametros.concepto || '').trim()) throw new Error('Escribe el concepto del gasto.')
+    if (!parametros.fecha) throw new Error('Indica la fecha de causacion del gasto.')
+
+    var consecutivo = bd.consecutivos.gasto
+    bd.consecutivos.gasto = consecutivo + 1
+
+    var gasto = {
+      id: 'gas-' + consecutivo,
+      fecha: parametros.fecha,
+      concepto: parametros.concepto.trim(),
+      categoria: parametros.categoria || 'Otros',
+      valor: parametros.valor,
+      proveedorId: parametros.proveedorId || null,
+      proveedor: proveedorPorId(parametros.proveedorId)
+        ? proveedorPorId(parametros.proveedorId).razonSocial
+        : '',
+      // Un gasto SIEMPRE nace por pagar. Pagarlo es emitir un comprobante de
+      // egreso, que es un documento aparte con su beneficiario y sus
+      // retenciones — no una casilla en este formulario.
+      estado: 'por_pagar',
+      fechaPago: undefined,
+      egresoId: null,
+      cuenta: parametros.cuenta
+        || (proveedorPorId(parametros.proveedorId) || {}).cuentaGasto
+        || bd.parametros.gasto[parametros.categoria]
+        || '5195',
+      cuentaPorPagar: bd.parametros.porPagar,
+      cuentaCaja: bd.parametros.caja,
+      registradoPor: bd.usuario,
+    }
+
+    bd.gastos.unshift(gasto)
+    guardar()
+    return gasto
+  }
+
+  /** Como con los recibos: un gasto no se borra, se anula con su motivo. */
+  function anularGasto(parametros) {
+    cargar()
+    var gasto = gastoPorId(parametros.gastoId)
+    if (!gasto) throw new Error('El gasto no existe.')
+    var motivo = (parametros.motivo || '').trim()
+    if (!motivo) throw new Error('Escribe el motivo de la anulacion.')
+    if (gasto.estado === 'anulado') throw new Error('Ese gasto ya esta anulado.')
+
+    gasto.estado = 'anulado'
+    gasto.motivoAnulacion = motivo
+    gasto.fechaAnulacion = d.ahoraISO()
+    guardar()
+    return gasto
+  }
+
+  /**
+   * Datos que consumen los reportes. Los gastos anulados no entran: dejaron de
+   * ser un hecho economico, aunque el registro se conserve.
+   */
+  function datosContables() {
+    var base = cargar()
+    return {
+      cuotas: base.cuotas,
+      pagos: base.pagos,
+      gastos: base.gastos.filter(function (g) { return g.estado !== 'anulado' }),
+      egresos: base.egresos,
+      comprobantes: base.comprobantes,
+      plan: base.plan,
+    }
+  }
+
+  /** Extracto de movimientos de una unidad entre dos fechas. */
+  function movimientosDeUnidad(unidadId, desde, hasta) {
+    return Idiky.contabilidad.movimientosDeUnidad(datosContables(), unidadId, desde, hasta)
+  }
+
+  /** Libro auxiliar de una cuenta del plan. */
+  function auxiliarDeCuenta(codigo, desde, hasta) {
+    return Idiky.contabilidad.auxiliarDeCuenta(datosContables(), codigo, desde, hasta)
+  }
+
+  // -------------------------------------------------------------------------
+  // Comprobantes de ajuste
+  // -------------------------------------------------------------------------
+
+  // -------------------------------------------------------------------------
+  // Proveedores
+  // -------------------------------------------------------------------------
+
+  function proveedores() {
+    return cargar().proveedores.slice().sort(function (a, b) {
+      return a.razonSocial.localeCompare(b.razonSocial)
+    })
+  }
+
+  function proveedorPorId(id) {
+    return cargar().proveedores.filter(function (p) { return p.id === id })[0]
+  }
+
+  function proveedorPorNit(nit) {
+    var limpio = Idiky.proveedores.limpiarNit(nit)
+    return cargar().proveedores.filter(function (p) { return p.nit === limpio })[0]
+  }
+
+  function buscarProveedores(texto) {
+    return Idiky.proveedores.buscar(proveedores().filter(function (p) { return p.activo }), texto)
+  }
+
+  /**
+   * Consulta un NIT. Hoy busca en el directorio propio; el dia que haya
+   * backend, esta es la unica funcion que cambia.
+   */
+  function consultarNit(texto) {
+    return Idiky.proveedores.consultarNit(texto, cargar().proveedores)
+  }
+
+  function guardarProveedor(datos) {
+    cargar()
+    var validacion = Idiky.proveedores.validarNit(datos.nit)
+    if (!validacion.valido) throw new Error(validacion.motivo)
+    if (!(datos.razonSocial || '').trim()) throw new Error('Escribe la razon social del proveedor.')
+
+    var existente = datos.id ? proveedorPorId(datos.id) : proveedorPorNit(validacion.nit)
+    if (!datos.id && existente) {
+      throw new Error('Ya existe un proveedor con el NIT ' + validacion.nit + ': ' + existente.razonSocial + '.')
+    }
+
+    var proveedor = existente || {
+      id: nuevoId('prv'),
+      activo: true,
+    }
+
+    proveedor.nit = validacion.nit
+    proveedor.dv = validacion.dv
+    proveedor.razonSocial = datos.razonSocial.trim()
+    proveedor.nombreComercial = (datos.nombreComercial || '').trim() || proveedor.razonSocial
+    proveedor.tipoPersona = datos.tipoPersona || 'juridica'
+    proveedor.responsableIva = !!datos.responsableIva
+    proveedor.direccion = (datos.direccion || '').trim()
+    proveedor.ciudad = (datos.ciudad || '').trim()
+    proveedor.telefono = (datos.telefono || '').trim()
+    proveedor.email = (datos.email || '').trim()
+    proveedor.cuentaGasto = datos.cuentaGasto || '5195'
+    proveedor.tarifaRetefuente = Number(datos.tarifaRetefuente) || 0
+    proveedor.tarifaReteIca = Number(datos.tarifaReteIca) || 0
+    if (datos.activo != null) proveedor.activo = !!datos.activo
+
+    if (!existente) bd.proveedores.push(proveedor)
+    guardar()
+    return proveedor
+  }
+
+  function desactivarProveedor(id) {
+    cargar()
+    var proveedor = proveedorPorId(id)
+    if (!proveedor) throw new Error('El proveedor no existe.')
+    proveedor.activo = false
+    guardar()
+    return proveedor
+  }
+
+  // -------------------------------------------------------------------------
+  // Egresos — la plata que sale
+  // -------------------------------------------------------------------------
+
+  function egresos() {
+    return cargar().egresos.slice().sort(function (a, b) {
+      return b.fecha.localeCompare(a.fecha) || b.numero.localeCompare(a.numero)
+    })
+  }
+
+  function egresoPorId(id) {
+    return cargar().egresos.filter(function (e) { return e.id === id })[0]
+  }
+
+  /** Gastos causados de un proveedor que todavia nadie ha pagado. */
+  function gastosPorPagarDe(proveedorId) {
+    return cargar().gastos.filter(function (g) {
+      return g.estado === 'por_pagar' && g.proveedorId === proveedorId
+    }).sort(function (a, b) { return a.fecha.localeCompare(b.fecha) })
+  }
+
+  /** Lo que se le debe a cada proveedor, para la pantalla de pagos. */
+  function saldosPorProveedor() {
+    return proveedores().map(function (proveedor) {
+      var pendientes = gastosPorPagarDe(proveedor.id)
+      return {
+        proveedor: proveedor,
+        pendientes: pendientes,
+        saldo: pendientes.reduce(function (t, g) { return t + g.valor }, 0),
+      }
+    })
+  }
+
+  function calcularRetenciones(proveedor, bruto) {
+    var retefuente = Math.round((bruto * (proveedor.tarifaRetefuente || 0)) / 100)
+    // El ICA se expresa por mil, no por ciento.
+    var reteica = Math.round((bruto * (proveedor.tarifaReteIca || 0)) / 1000)
+    return { retefuente: retefuente, reteica: reteica, neto: bruto - retefuente - reteica }
+  }
+
+  /**
+   * Emite un comprobante de egreso: le paga a un proveedor uno o varios
+   * gastos causados, descontando las retenciones que le apliquen.
+   */
+  function registrarEgreso(datos) {
+    cargar()
+    var proveedor = proveedorPorId(datos.proveedorId)
+    if (!proveedor) throw new Error('Elige el proveedor al que se le va a pagar.')
+    if (!datos.fecha) throw new Error('Indica la fecha del pago.')
+
+    var gastos = (datos.gastoIds || []).map(function (id) {
+      return bd.gastos.filter(function (g) { return g.id === id })[0]
+    }).filter(Boolean)
+
+    if (gastos.length === 0) {
+      throw new Error('Selecciona al menos un gasto por pagar de este proveedor.')
+    }
+    var yaPagado = gastos.filter(function (g) { return g.estado !== 'por_pagar' })[0]
+    if (yaPagado) throw new Error('El gasto "' + yaPagado.concepto + '" ya fue pagado.')
+
+    var bruto = gastos.reduce(function (t, g) { return t + g.valor }, 0)
+    var retenciones = calcularRetenciones(proveedor, bruto)
+
+    var consecutivo = bd.consecutivos.egreso
+    bd.consecutivos.egreso = consecutivo + 1
+
+    var egreso = {
+      id: nuevoId('egr'),
+      numero: 'CE-' + String(consecutivo).padStart(5, '0'),
+      fecha: datos.fecha,
+      proveedorId: proveedor.id,
+      proveedorNit: proveedor.nit,
+      proveedorNombre: proveedor.razonSocial,
+      concepto: (datos.concepto || '').trim() || 'Pago a ' + proveedor.razonSocial,
+      gastoIds: gastos.map(function (g) { return g.id }),
+      valorBruto: bruto,
+      retefuente: retenciones.retefuente,
+      reteica: retenciones.reteica,
+      valorNeto: retenciones.neto,
+      medio: datos.medio || 'transferencia',
+      referencia: (datos.referencia || '').trim(),
+      cuentaCaja: bd.parametros.caja,
+      cuentaPorPagar: bd.parametros.porPagar,
+      cuentaRetefuente: bd.parametros.retefuente,
+      cuentaReteica: bd.parametros.reteica,
+      estado: 'registrado',
+      registradoPor: bd.usuario,
+    }
+
+    gastos.forEach(function (g) {
+      g.estado = 'pagado'
+      g.fechaPago = datos.fecha
+      g.egresoId = egreso.id
+      g.medio = egreso.medio
+    })
+
+    bd.egresos.unshift(egreso)
+    guardar()
+    return egreso
+  }
+
+  /** Anular un egreso devuelve los gastos a "por pagar". */
+  function anularEgreso(datos) {
+    cargar()
+    var egreso = egresoPorId(datos.egresoId)
+    if (!egreso) throw new Error('El egreso no existe.')
+    var motivo = (datos.motivo || '').trim()
+    if (!motivo) throw new Error('Escribe el motivo de la anulacion.')
+    if (egreso.estado === 'anulado') throw new Error('Ese egreso ya esta anulado.')
+
+    egreso.gastoIds.forEach(function (id) {
+      var gasto = bd.gastos.filter(function (g) { return g.id === id })[0]
+      if (!gasto) return
+      gasto.estado = 'por_pagar'
+      gasto.fechaPago = undefined
+      gasto.egresoId = null
+    })
+
+    egreso.estado = 'anulado'
+    egreso.motivoAnulacion = motivo
+    egreso.fechaAnulacion = d.ahoraISO()
+    guardar()
+    return egreso
+  }
+
+  // -------------------------------------------------------------------------
+  // Tipos de comprobante
+  // -------------------------------------------------------------------------
+
+  function tipos() {
+    return cargar().tipos.slice()
+  }
+
+  /** Los que el administrador puede registrar a mano. */
+  function tiposRegistrables() {
+    return tipos().filter(function (t) { return !t.sistema && t.activo })
+  }
+
+  function tipoPorId(id) {
+    return cargar().tipos.filter(function (t) { return t.id === id })[0]
+  }
+
+  /**
+   * Resuelve las cuentas de un tipo. Una linea puede traer la cuenta fija o
+   * apuntar a un parametro; en el segundo caso se resuelve contra la
+   * configuracion vigente, que es lo que permite que "Recibo de caja" siga
+   * siendo correcto aunque se cambie la cuenta de bancos.
+   */
+  function cuentasDelTipo(tipo, contexto) {
+    contexto = contexto || {}
+    var p = parametros()
+    return tipo.lineas.map(function (linea) {
+      var codigo = linea.cuenta
+      if (!codigo && linea.parametro) {
+        var valor = p[linea.parametro]
+        // Los parametros de cartera, ingreso y gasto dependen del documento;
+        // sin ese dato se muestra el de la cuota ordinaria como representativo.
+        if (valor && typeof valor === 'object') {
+          codigo = valor[contexto.tipoCuota || 'ordinaria']
+            || valor[contexto.categoria]
+            || valor[Object.keys(valor)[0]]
+        } else {
+          codigo = valor
+        }
+      }
+      return {
+        cuenta: codigo,
+        nombre: nombreDeCuenta(codigo),
+        lado: linea.lado,
+        porcentaje: linea.porcentaje,
+        concepto: linea.concepto,
+        usaUnidad: linea.usaUnidad,
+        desdeParametro: !linea.cuenta && !!linea.parametro,
+      }
+    })
+  }
+
+  /**
+   * Registra un comprobante a partir de un tipo: el administrador solo pone la
+   * fecha, el valor y —si el tipo lo pide— la unidad. El asiento lo arma el
+   * sistema con las cuentas del tipo.
+   */
+  function registrarComprobanteDeTipo(datos) {
+    cargar()
+    var tipo = tipoPorId(datos.tipoId)
+    if (!tipo) throw new Error('Ese tipo de comprobante no existe.')
+    if (tipo.sistema) {
+      throw new Error('"' + tipo.nombre + '" lo genera el sistema; no se registra a mano.')
+    }
+    if (!datos.fecha) throw new Error('Indica la fecha del comprobante.')
+    if (!(datos.valor > 0)) throw new Error('El valor debe ser mayor que cero.')
+    if (tipo.pideUnidad && !datos.unidadId) {
+      throw new Error('Este comprobante va contra un propietario: elige la unidad.')
+    }
+
+    var resueltas = cuentasDelTipo(tipo)
+    var lineas = resueltas.map(function (linea) {
+      var valor = Math.round((datos.valor * (linea.porcentaje || 100)) / 100)
+      return {
+        cuenta: linea.cuenta,
+        unidadId: linea.usaUnidad ? datos.unidadId || null : null,
+        debe: linea.lado === 'debe' ? valor : 0,
+        haber: linea.lado === 'haber' ? valor : 0,
+        descripcion: linea.concepto,
+      }
+    })
+
+    var comprobante = registrarComprobante({
+      fecha: datos.fecha,
+      concepto: datos.concepto || tipo.nombre,
+      detalle: datos.detalle,
+      lineas: lineas,
+      tipo: tipo,
+    })
+    return comprobante
+  }
+
+  function comprobantes() {
+    return cargar().comprobantes.slice().sort(function (a, b) {
+      return b.fecha.localeCompare(a.fecha) || b.numero.localeCompare(a.numero)
+    })
+  }
+
+  function comprobantePorId(id) {
+    return cargar().comprobantes.filter(function (c) { return c.id === id })[0]
+  }
+
+  /**
+   * Registra un comprobante de ajuste.
+   *
+   * No mueve plata: mueve cuentas. Por eso lo unico que se valida es que
+   * cuadre — si el debe no es igual al haber, la contabilidad se rompe, y es
+   * mejor rechazarlo que dejar un descuadre para que alguien lo descubra
+   * despues en el balance.
+   */
+  function registrarComprobante(parametros) {
+    cargar()
+    if (!parametros.fecha) throw new Error('Indica la fecha del comprobante.')
+    if (!(parametros.concepto || '').trim()) throw new Error('Escribe el concepto del comprobante.')
+
+    var validacion = Idiky.contabilidad.validarComprobante(parametros.lineas)
+    if (!validacion.valido) throw new Error(validacion.motivo)
+
+    // Cada tipo lleva su propio consecutivo, como en cualquier libro contable:
+    // NI-00001 son los intereses, NP-00001 las provisiones.
+    var tipo = parametros.tipo || null
+    var prefijo = tipo ? tipo.codigo : 'CA'
+    var consecutivo
+    if (tipo) {
+      consecutivo = tipo.consecutivo
+      tipo.consecutivo = consecutivo + 1
+    } else {
+      consecutivo = bd.consecutivos.comprobante
+      bd.consecutivos.comprobante = consecutivo + 1
+    }
+
+    var comprobante = {
+      id: nuevoId('cmp'),
+      numero: prefijo + '-' + String(consecutivo).padStart(5, '0'),
+      tipoCodigo: prefijo,
+      tipoNombre: tipo ? tipo.nombre : 'Comprobante libre',
+      valor: parametros.valor || validacion.total,
+      unidadId: parametros.unidadId || null,
+      fecha: parametros.fecha,
+      concepto: parametros.concepto.trim(),
+      detalle: (parametros.detalle || '').trim(),
+      estado: 'registrado',
+      registradoPor: bd.usuario,
+      lineas: validacion.lineas.map(function (linea) {
+        return {
+          cuenta: linea.cuenta,
+          unidadId: linea.unidadId || null,
+          debe: linea.debe || 0,
+          haber: linea.haber || 0,
+          descripcion: (linea.descripcion || '').trim() || parametros.concepto.trim(),
+        }
+      }),
+    }
+
+    bd.comprobantes.unshift(comprobante)
+    guardar()
+    return comprobante
+  }
+
+  /**
+   * Anula un comprobante. Como con los recibos, no se borra: se marca anulado
+   * y deja de contar en los estados. El numero queda quemado.
+   */
+  function anularComprobante(parametros) {
+    cargar()
+    var comprobante = comprobantePorId(parametros.comprobanteId)
+    if (!comprobante) throw new Error('El comprobante no existe.')
+    var motivo = (parametros.motivo || '').trim()
+    if (!motivo) throw new Error('Escribe el motivo de la anulacion.')
+    if (comprobante.estado === 'anulado') throw new Error('Ese comprobante ya esta anulado.')
+
+    comprobante.estado = 'anulado'
+    comprobante.motivoAnulacion = motivo
+    comprobante.fechaAnulacion = d.ahoraISO()
+    guardar()
+    return comprobante
+  }
+
+  // -------------------------------------------------------------------------
+  // Facturacion
+  // -------------------------------------------------------------------------
+
+  /** Muestra lo que se generaria, sin escribir nada. */
+  function previsualizarCuotas(parametros) {
+    return unidades().map(function (u) {
+      return {
+        unidadId: u.id,
+        etiqueta: u.etiqueta,
+        valor:
+          parametros.tipo === 'extraordinaria'
+            ? d.prorratearPorCoeficiente(parametros.valor, u.coeficiente)
+            : Math.round(u.coeficiente * parametros.valor),
+      }
+    })
+  }
+
+  function generarCuotas(parametros) {
+    cargar()
+
+    // RN-22: no se generan dos veces las cuotas ordinarias del mismo periodo.
+    if (parametros.tipo === 'ordinaria') {
+      var yaExiste = bd.cuotas.some(function (c) {
+        return c.periodo === parametros.periodo && c.tipo === 'ordinaria'
+      })
+      if (yaExiste) {
+        throw new Error('Las cuotas ordinarias de ' + parametros.periodo + ' ya fueron generadas.')
+      }
+    }
+
+    var nuevas = previsualizarCuotas(parametros).map(function (linea) {
+      return {
+        id: nuevoId('cuo'),
+        unidadId: linea.unidadId,
+        periodo: parametros.periodo,
+        tipo: parametros.tipo,
+        concepto: parametros.concepto,
+        valor: linea.valor,
+        saldo: linea.valor,
+        fechaVencimiento: d.vencimientoDelPeriodo(parametros.periodo),
+        estado: 'pendiente',
+        // La cuenta queda guardada en la cuota: si manana se cambia el
+        // parametro, estas cuotas siguen donde estan.
+        cuentaCartera: bd.parametros.cartera[parametros.tipo] || bd.parametros.cartera.ordinaria,
+        cuentaIngreso: bd.parametros.ingreso[parametros.tipo] || bd.parametros.ingreso.ordinaria,
+      }
+    })
+
+    bd.cuotas = bd.cuotas.concat(nuevas)
+    guardar()
+    return nuevas
+  }
+
+  // -------------------------------------------------------------------------
+  // Plan de cuentas y parametros
+  // -------------------------------------------------------------------------
+
+  function plan() {
+    return cargar().plan.slice().sort(function (a, b) {
+      return a.codigo.localeCompare(b.codigo)
+    })
+  }
+
+  /** Solo las cuentas que reciben asientos y estan activas. */
+  function cuentasDeMovimiento() {
+    return plan().filter(function (c) { return c.movimiento && c.activa })
+  }
+
+  function cuentaPorCodigo(codigo) {
+    return cargar().plan.filter(function (c) { return c.codigo === codigo })[0]
+  }
+
+  function nombreDeCuenta(codigo) {
+    var c = cuentaPorCodigo(codigo)
+    return c ? c.nombre : codigo
+  }
+
+  function etiquetaDeCuenta(codigo) {
+    return codigo + ' — ' + nombreDeCuenta(codigo)
+  }
+
+  function parametros() {
+    return cargar().parametros
+  }
+
+  /** Cuentas que algun parametro esta usando: no se pueden desactivar. */
+  function cuentasEnUso() {
+    var p = parametros()
+    var usadas = [p.caja, p.anticipos, p.porPagar, p.excedentes]
+    Object.keys(p.cartera).forEach(function (k) { usadas.push(p.cartera[k]) })
+    Object.keys(p.ingreso).forEach(function (k) { usadas.push(p.ingreso[k]) })
+    Object.keys(p.gasto).forEach(function (k) { usadas.push(p.gasto[k]) })
+    return usadas
+  }
+
+  function guardarCuenta(parametrosCuenta) {
+    cargar()
+    var codigo = String(parametrosCuenta.codigo || '').trim()
+    var nombre = String(parametrosCuenta.nombre || '').trim()
+
+    if (!Idiky.puc.esValido(codigo)) {
+      throw new Error('El codigo debe ser numerico y de 1, 2, 4, 6 u 8 digitos.')
+    }
+    if (!nombre) throw new Error('Escribe el nombre de la cuenta.')
+
+    // Una cuenta suelta no sirve: si no cuelga de nada, no suma en ningun
+    // total del estado financiero.
+    var codigoPadre = Idiky.puc.padreDe(codigo)
+    var padre = codigoPadre ? cuentaPorCodigo(codigoPadre) : null
+    if (codigoPadre && !padre) {
+      throw new Error('Falta la cuenta padre ' + codigoPadre + '. Creala primero.')
+    }
+
+    var existente = cuentaPorCodigo(codigo)
+    if (existente) {
+      existente.nombre = nombre
+      if (parametrosCuenta.movimiento != null) existente.movimiento = !!parametrosCuenta.movimiento
+      if (parametrosCuenta.activa != null) existente.activa = !!parametrosCuenta.activa
+      guardar()
+      return existente
+    }
+
+    // Abrirle una subcuenta a una cuenta transaccional la convierte en titulo:
+    // el movimiento pasa al nivel de abajo. Si un parametro la esta usando hay
+    // que arreglarlo antes, o los documentos nuevos irian a un titulo.
+    if (padre && padre.movimiento) {
+      if (cuentasEnUso().indexOf(padre.codigo) !== -1) {
+        throw new Error(
+          'La cuenta ' + padre.codigo + ' es transaccional y un parametro la esta usando. '
+          + 'Cambia ese parametro antes de abrirle una subcuenta.',
+        )
+      }
+      padre.movimiento = false
+    }
+
+    var cuenta = {
+      codigo: codigo,
+      nombre: nombre,
+      movimiento: parametrosCuenta.movimiento != null ? !!parametrosCuenta.movimiento : true,
+      activa: true,
+    }
+    bd.plan.push(cuenta)
+    guardar()
+    return cuenta
+  }
+
+  /** Cuentas hijas directas de un codigo. */
+  function hijasDe(codigo) {
+    return cargar().plan.filter(function (c) {
+      return Idiky.puc.padreDe(c.codigo) === codigo
+    })
+  }
+
+  /** Cuentas de un nivel, para armar los selectores en cascada. */
+  function cuentasDeNivel(idNivel, prefijo) {
+    return plan().filter(function (c) {
+      if (Idiky.puc.nivelDe(c.codigo) !== idNivel) return false
+      if (prefijo && c.codigo.indexOf(prefijo) !== 0) return false
+      return c.activa
+    })
+  }
+
+  /**
+   * Las cuentas no se borran: se desactivan. Una cuenta que ya tiene asientos
+   * no puede desaparecer sin romper la contabilidad de meses anteriores.
+   */
+  function desactivarCuenta(codigo) {
+    cargar()
+    var cuenta = cuentaPorCodigo(codigo)
+    if (!cuenta) throw new Error('La cuenta no existe.')
+    if (cuentasEnUso().indexOf(codigo) !== -1) {
+      throw new Error('Esa cuenta la esta usando un parametro del modulo. Cambia el parametro primero.')
+    }
+    cuenta.activa = false
+    guardar()
+    return cuenta
+  }
+
+  function activarCuenta(codigo) {
+    cargar()
+    var cuenta = cuentaPorCodigo(codigo)
+    if (!cuenta) throw new Error('La cuenta no existe.')
+    cuenta.activa = true
+    guardar()
+    return cuenta
+  }
+
+  /**
+   * Cambia a que cuenta va un tipo de documento.
+   * No toca los documentos ya registrados: cada uno guarda la suya.
+   */
+  function fijarParametro(ruta, codigo) {
+    cargar()
+    var cuenta = cuentaPorCodigo(codigo)
+    if (!cuenta) throw new Error('Esa cuenta no existe en el plan.')
+    if (!cuenta.movimiento) throw new Error('Esa cuenta es un titulo: no recibe movimientos.')
+    if (!cuenta.activa) throw new Error('Esa cuenta esta inactiva.')
+
+    var partes = ruta.split('.')
+    if (partes.length === 1) {
+      bd.parametros[partes[0]] = codigo
+    } else {
+      bd.parametros[partes[0]][partes[1]] = codigo
+    }
+    guardar()
+    return bd.parametros
+  }
+
+  function balanceDePrueba(desde, hasta) {
+    return Idiky.contabilidad.balanceDePrueba(datosContables(), desde, hasta)
+  }
+
+  function copropiedad() {
+    return cargar().copropiedad
+  }
+
+  function usuario() {
+    return cargar().usuario
+  }
+
+  return {
+    cargar: cargar,
+    reiniciar: reiniciar,
+    copropiedad: copropiedad,
+    usuario: usuario,
+    unidades: unidades,
+    unidad: unidad,
+    propietarioDe: propietarioDe,
+    nombrePropietario: nombrePropietario,
+    etiquetaUnidad: etiquetaUnidad,
+    cuotasDeUnidad: cuotasDeUnidad,
+    todasLasCuotas: todasLasCuotas,
+    pagosDeUnidad: pagosDeUnidad,
+    abonosReportados: abonosReportados,
+    recibos: recibos,
+    pagoPorId: pagoPorId,
+    pagosDeCuota: pagosDeCuota,
+    estadoDeCartera: estadoDeCartera,
+    registrarPago: registrarPago,
+    aplicarPago: aplicarPago,
+    anularPago: anularPago,
+    previsualizarCuotas: previsualizarCuotas,
+    generarCuotas: generarCuotas,
+    CATEGORIAS_GASTO: CATEGORIAS_GASTO,
+    gastos: gastos,
+    gastoPorId: gastoPorId,
+    registrarGasto: registrarGasto,
+    anularGasto: anularGasto,
+    datosContables: datosContables,
+    movimientosDeUnidad: movimientosDeUnidad,
+    auxiliarDeCuenta: auxiliarDeCuenta,
+    plan: plan,
+    cuentasDeMovimiento: cuentasDeMovimiento,
+    cuentaPorCodigo: cuentaPorCodigo,
+    nombreDeCuenta: nombreDeCuenta,
+    etiquetaDeCuenta: etiquetaDeCuenta,
+    parametros: parametros,
+    cuentasEnUso: cuentasEnUso,
+    guardarCuenta: guardarCuenta,
+    hijasDe: hijasDe,
+    cuentasDeNivel: cuentasDeNivel,
+    desactivarCuenta: desactivarCuenta,
+    activarCuenta: activarCuenta,
+    fijarParametro: fijarParametro,
+    balanceDePrueba: balanceDePrueba,
+    proveedores: proveedores,
+    proveedorPorId: proveedorPorId,
+    proveedorPorNit: proveedorPorNit,
+    buscarProveedores: buscarProveedores,
+    consultarNit: consultarNit,
+    guardarProveedor: guardarProveedor,
+    desactivarProveedor: desactivarProveedor,
+    egresos: egresos,
+    egresoPorId: egresoPorId,
+    gastosPorPagarDe: gastosPorPagarDe,
+    saldosPorProveedor: saldosPorProveedor,
+    calcularRetenciones: calcularRetenciones,
+    registrarEgreso: registrarEgreso,
+    anularEgreso: anularEgreso,
+    tipos: tipos,
+    tiposRegistrables: tiposRegistrables,
+    tipoPorId: tipoPorId,
+    cuentasDelTipo: cuentasDelTipo,
+    registrarComprobanteDeTipo: registrarComprobanteDeTipo,
+    comprobantes: comprobantes,
+    comprobantePorId: comprobantePorId,
+    registrarComprobante: registrarComprobante,
+    anularComprobante: anularComprobante,
+  }
+})()

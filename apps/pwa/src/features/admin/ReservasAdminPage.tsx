@@ -69,7 +69,7 @@ export function ReservasAdminPage() {
       {reservas.length === 0 ? (
         <EstadoVacio
           titulo="No hay reservas en este filtro"
-          detalle="Las solicitudes de los residentes apareceran aqui."
+          detalle="Las solicitudes de los residentes aparecerán aquí."
         />
       ) : (
         <div className="tarjeta" style={{ padding: 0 }}>
@@ -142,7 +142,7 @@ export function ReservasAdminPage() {
       {rechazando && (
         <Modal
           titulo="Rechazar reserva"
-          descripcion="El residente vera el motivo en su aplicacion."
+          descripcion="El residente verá el motivo en su aplicación."
           onCerrar={() => setRechazando(null)}
         >
           <div className="campo">
@@ -151,7 +151,7 @@ export function ReservasAdminPage() {
               id="motivo-rechazo"
               value={motivo}
               onChange={(evento) => setMotivo(evento.target.value)}
-              placeholder="Ej: la zona esta en mantenimiento ese dia."
+              placeholder="Ej: la zona está en mantenimiento ese día."
             />
           </div>
           <button className="boton boton--peligro boton--bloque" disabled={cargando} onClick={rechazar}>

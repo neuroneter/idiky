@@ -10,6 +10,7 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { formatearFechaHora } from '../../utilidades/formato'
 import { capitalizar } from '../../utilidades/formato'
+import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipCorrespondencia } from '../../componentes/Etiquetas'
 
@@ -25,13 +26,17 @@ export function CorrespondenciaPage() {
     return (
       <EstadoVacio
         titulo="Sin correspondencia"
-        detalle="Cuando llegue un paquete o carta a tu nombre, aparecera aqui."
+        detalle="Cuando llegue un paquete o carta a tu nombre, aparecera aquí."
       />
     )
   }
 
   return (
     <>
+      <div className="encabezado-pagina">
+        <BotonVolver />
+      </div>
+
       <div className="tarjeta tarjeta--marca">
         <span className="subtitulo">Te espera en porteria</span>
         <div className="dato-grande" style={{ marginTop: 'var(--e1)' }}>

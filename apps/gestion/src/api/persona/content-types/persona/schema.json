@@ -1,0 +1,47 @@
+{
+  "kind": "collectionType",
+  "collectionName": "personas",
+  "info": {
+    "singularName": "persona",
+    "pluralName": "personas",
+    "displayName": "Persona",
+    "description": "Quien ocupa un perfil raíz. Existe una sola vez y tiene asignaciones por copropiedad (docs/13 §3)."
+  },
+  "options": {
+    "draftAndPublish": false
+  },
+  "attributes": {
+    "nombre": {
+      "type": "string",
+      "required": true
+    },
+    "tipoDocumento": {
+      "type": "enumeration",
+      "enum": ["CC", "CE", "PA", "PPT", "TI"],
+      "required": true,
+      "default": "CC"
+    },
+    "numeroDocumento": {
+      "type": "string",
+      "required": true,
+      "regex": "^[A-Za-z0-9]{3,20}$"
+    },
+    "celular": {
+      "type": "string",
+      "required": true
+    },
+    "correo": {
+      "type": "email",
+      "required": true
+    },
+    "notas": {
+      "type": "text"
+    },
+    "asignaciones": {
+      "type": "relation",
+      "relation": "oneToMany",
+      "target": "api::asignacion.asignacion",
+      "mappedBy": "persona"
+    }
+  }
+}

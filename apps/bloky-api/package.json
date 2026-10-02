@@ -1,0 +1,27 @@
+{
+  "name": "idiky-bloky-api",
+  "private": true,
+  "version": "0.1.0",
+  "description": "API de BLOKY, el sistema de las copropiedades de IDIKY (ADR-0008)",
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "dev": "tsx watch src/servidor.ts",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "node dist/servidor.js",
+    "probar": "tsx pruebas/humo.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "^11.0.2",
+    "fastify": "^5.3.2",
+    "jose": "^6.0.11",
+    "pg": "^8.16.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/pg": "^8.15.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.6.3"
+  }
+}

@@ -21,15 +21,60 @@
   color: var(--color-texto-inverso);
   padding: calc(env(safe-area-inset-top, 0px) + var(--e4)) var(--e4) var(--e4);
 }
+
+/* ------------------------------------------------- Zona de marca del inicio */
+.app-movil--marca {
+  position: relative;
+}
+/* Fija a la pantalla, no al contenido. Si el degradado se estirara con el alto de
+   la pagina, el color de cada punto dependeria de cuantos datos tenga la persona:
+   con tres comunicados y dos reservas, la misma zona seria de otro color. Fija,
+   la marca es una constante y el contenido pasa por encima. */
+.zona-marca {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: var(--ancho-movil);
+  background: var(--degradado-marca);
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+.zona-marca__siluetas {
+  position: absolute;
+  right: -28px;
+  bottom: calc(var(--alto-nav-inferior) + var(--e4));
+  width: 300px;
+  height: auto;
+  color: #fff;
+  opacity: 0.09;
+}
+/* Sobre la zona, la barra pierde su fondo. Deja de ser pegajosa a proposito: una
+   barra transparente y pegajosa dejaria pasar el contenido por debajo. */
+.app-movil--marca .barra-superior {
+  position: relative;
+  background: none;
+  z-index: 1;
+}
+/* Sin `z-index`: con el, este contenedor creaba un contexto de apilamiento y los
+   modales de las pantallas quedaban encerrados dentro. Su `z-index: 60` dejaba de
+   competir con la barra inferior (30) y la barra les tapaba el boton de confirmar
+   —y se quedaba con el toque—. `position: relative` sin `z-index` basta para
+   quedar sobre la zona de marca, porque el orden del DOM decide. */
+.app-movil--marca .contenido-movil {
+  position: relative;
+}
 .barra-superior__fila {
   display: flex;
-  align-items: center;
+  /* Alineados abajo y no al centro: la unidad y el avatar quedan a la altura del
+     titulo de la pantalla, que es la linea que la persona lee. Centrados
+     flotaban entre el logotipo y el titulo, sin pertenecer a ninguno. */
+  align-items: flex-end;
   justify-content: space-between;
   gap: var(--e3);
-}
-.barra-superior__saludo {
-  font-size: var(--texto-xs);
-  color: rgba(255, 255, 255, 0.72);
 }
 .barra-superior__titulo {
   font-size: var(--texto-lg);
@@ -49,9 +94,10 @@
   font-weight: 600;
 }
 .avatar {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
+  /* 44 px es el area minima recomendada para tocar con el dedo. */
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
   border-radius: 50%;
   display: grid;
   place-items: center;
@@ -60,11 +106,26 @@
   font-size: var(--texto-sm);
   font-weight: 700;
 }
+/* Dentro de la hoja de perfil el avatar va sobre superficie clara. */
+.avatar--perfil {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  background: var(--color-marca-suave);
+  border-color: transparent;
+  color: var(--color-marca);
+  font-size: var(--texto-base);
+}
 
 .contenido-movil {
   flex: 1;
   padding: var(--e4);
-  padding-bottom: calc(var(--alto-nav-inferior) + var(--e6));
+  /* La barra inferior mide alto + safe-area; el hueco de abajo tiene que
+     descontar las dos cosas o en un telefono con muesca el ultimo bloque queda
+     pegado a la barra. */
+  padding-bottom: calc(
+    var(--alto-nav-inferior) + env(safe-area-inset-bottom, 0px) + var(--e6)
+  );
   display: flex;
   flex-direction: column;
   gap: var(--e4);
@@ -91,7 +152,12 @@
   align-items: center;
   justify-content: center;
   gap: 2px;
-  font-size: 0.66rem;
+  /* Crece con la preferencia, pero **hasta el 125 %**: son cinco celdas fijas
+     en una barra que no puede reflujar, y al 150 % «Solicitudes» y
+     «Asambleas» quedaban pegadas una a otra. Es el unico texto de la app
+     con tope, y se lo puede permitir porque nunca va solo: cada etiqueta
+     tiene su icono encima y su destino se reconoce por los dos. */
+  font-size: calc(0.66rem * min(var(--escala-texto), 1.25));
   font-weight: 600;
   color: var(--color-texto-tenue);
 }
@@ -113,12 +179,26 @@
   display: inline-flex;
   align-items: center;
   gap: var(--e1);
-  border: none;
-  background: none;
+  /* 44 px es el area minima recomendada para tocar con el dedo. Antes esto tenia
+     `padding: 0` y medida unos 21 px de alto. */
+  min-height: 44px;
+  padding: 0 var(--e3) 0 var(--e2);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-completo);
+  background: var(--color-superficie);
   color: var(--color-marca);
   font-size: var(--texto-sm);
   font-weight: 600;
-  padding: 0;
+  box-shadow: var(--sombra-1);
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+.boton-volver:hover {
+  background: var(--color-marca-suave);
+  border-color: var(--color-marca-suave);
+}
+.boton-volver:focus-visible {
+  outline: 2px solid var(--color-marca);
+  outline-offset: 2px;
 }
 
 /* ======================================================== Consola de admin */
@@ -129,7 +209,12 @@
 .lateral {
   width: var(--ancho-lateral);
   flex: 0 0 var(--ancho-lateral);
-  background: var(--color-marca);
+  /* La lateral es la unica superficie de marca de la consola: lleva el mismo
+     degradado azul -> fucsia que `.tarjeta--marca` en la app del residente, para
+     que las dos caras del producto se lean como la misma familia. La version
+     vertical mantiene el azul mas tiempo: es una barra que el administrador tiene
+     delante todo el dia. El balance se ajusta en tokens.css. */
+  background: var(--degradado-marca-vertical);
   color: var(--color-texto-inverso);
   padding: var(--e5) var(--e3);
   display: flex;
@@ -140,17 +225,15 @@
   height: 100vh;
 }
 .lateral__marca {
-  font-size: var(--texto-xl);
-  font-weight: 700;
-  letter-spacing: -0.03em;
   padding: 0 var(--e3);
 }
-.lateral__marca span {
+/* Clase propia y no `span` a secas: el Logotipo renderiza spans por dentro. */
+.lateral__marca-sub {
   display: block;
+  margin-top: var(--e1);
   font-size: var(--texto-xs);
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.65);
-  letter-spacing: 0;
+  color: rgba(255, 255, 255, 0.7);
 }
 .lateral__nav {
   display: flex;
@@ -260,29 +343,54 @@
 }
 
 /* ==================================================== Pantalla de acceso */
+/* La puerta lleva el degradado de la marca, igual que la app por dentro: es la
+   primera pantalla que ve alguien y la unica oportunidad de que la marca se vea
+   antes de que empiece a leer datos. La tarjeta blanca encima sostiene el
+   formulario. */
+.acceso-fondo {
+  position: relative;
+  min-height: 100%;
+  background: var(--degradado-marca-vertical);
+  background-attachment: fixed;
+  overflow: hidden;
+}
+/* Las torres se apoyan en el borde de abajo, como dentro de la app. Van fijas
+   para que no se despeguen si el teclado empuja la pantalla al escribir. */
+.acceso-fondo__siluetas {
+  position: fixed;
+  right: -28px;
+  bottom: 0;
+  width: 300px;
+  height: auto;
+  color: #fff;
+  opacity: 0.09;
+  pointer-events: none;
+}
 .acceso {
   min-height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   gap: var(--e5);
-  padding: var(--e6) var(--e4);
+  padding: calc(var(--e6) + env(safe-area-inset-top)) var(--e4)
+    calc(var(--e6) + env(safe-area-inset-bottom));
   max-width: 460px;
   margin: 0 auto;
 }
 .acceso__marca {
   text-align: center;
 }
-.acceso__logo {
-  font-size: var(--texto-3xl);
-  font-weight: 720;
-  letter-spacing: -0.045em;
-  color: var(--color-marca);
-}
 .acceso__lema {
-  color: var(--color-texto-suave);
+  color: rgba(255, 255, 255, 0.82);
   font-size: var(--texto-sm);
   margin-top: var(--e1);
+}
+.acceso__lema strong {
+  color: var(--color-texto-inverso);
+}
+/* Sobre el degradado, los botones sueltos van en blanco. */
+.acceso .boton--fantasma {
+  color: var(--color-texto-inverso);
 }
 .acceso__nota {
   background: var(--color-alerta-suave);
@@ -292,6 +400,161 @@
   font-size: var(--texto-xs);
   line-height: 1.45;
 }
+.acceso__error {
+  background: var(--color-error-suave);
+  color: var(--color-error);
+  border-radius: var(--radio-sm);
+  padding: var(--e3);
+  font-size: var(--texto-sm);
+  line-height: 1.45;
+  margin-bottom: var(--e3);
+}
+.acceso__enlaces {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--e3);
+  margin-top: var(--e4);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+  color: var(--color-marca);
+}
+/* --- Tamano de la letra (CU-R-26) ---
+   Vive en dos sitios: plegado en la puerta, y desplegado dentro de la hoja de
+   perfil. Por eso las opciones (`.opciones-tamano`) no traen fondo propio: lo
+   pone quien las contiene. */
+.tamano-letra {
+  align-self: flex-end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--e2);
+}
+.tamano-letra__boton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e2);
+  /* 44 px de alto: es el minimo que se acierta con el dedo, y quien necesita
+     agrandar la letra suele necesitar tambien el blanco donde tocar. */
+  min-height: 44px;
+  padding: 0 var(--e4);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  border-radius: var(--radio-completo);
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--color-texto-inverso);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+.tamano-letra__boton:hover {
+  background: rgba(255, 255, 255, 0.26);
+}
+.tamano-letra__boton:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+/* La tarjeta blanca que sostiene las opciones sobre el degradado de la puerta. */
+.tamano-letra__panel {
+  width: 100%;
+  padding: var(--e3);
+  border-radius: var(--radio);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-2);
+}
+.opciones-tamano {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+.opcion-tamano {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  min-height: 52px;
+  padding: var(--e2) var(--e3);
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie);
+  text-align: left;
+}
+.opcion-tamano[aria-pressed='true'] {
+  border-color: var(--color-acento);
+  background: var(--color-acento-suave);
+}
+/* La muestra ocupa siempre el mismo ancho para que las tres A queden alineadas
+   y la diferencia de tamano se vea de un vistazo. */
+.opcion-tamano__muestra {
+  flex: 0 0 2.6rem;
+  text-align: center;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--color-marca);
+}
+.opcion-tamano__nombre {
+  flex: 1;
+  font-size: var(--texto-sm);
+  font-weight: 650;
+}
+.opcion-tamano__porcentaje {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+}
+.opcion-tamano[aria-pressed='true'] .opcion-tamano__nombre,
+.opcion-tamano[aria-pressed='true'] .opcion-tamano__muestra {
+  color: var(--color-acento);
+}
+
+/* El atajo de demostracion va plegado: hace falta para mostrar la consola sin
+   teclear cedulas, pero no es la pantalla de acceso y no debe parecerlo. */
+.acceso__demo > summary {
+  cursor: pointer;
+  font-size: var(--texto-sm);
+  font-weight: 650;
+  /* Blanco: va sobre el degradado, y en gris se perdia. */
+  color: rgba(255, 255, 255, 0.88);
+  padding: var(--e3) 0;
+}
+/* Los tres pasos del tramite. Saber cuanto falta es lo que evita que se
+   abandone a la mitad. */
+.pasos {
+  display: flex;
+  gap: var(--e2);
+  counter-reset: paso;
+}
+/* Van sobre el degradado, asi que el paso activo se marca en blanco y el fucsia
+   de la marca hace de subrayado: el violeta de los botones se pierde contra el
+   azul, y el azul marino no se ve en absoluto. */
+.pasos li {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--e2);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  padding-top: var(--e2);
+  border-top: 3px solid rgba(255, 255, 255, 0.28);
+}
+.pasos li.activo {
+  color: var(--color-texto-inverso);
+  border-top-color: var(--color-marca-claro);
+}
+.pasos li::before {
+  counter-increment: paso;
+  content: counter(paso);
+  display: grid;
+  place-items: center;
+  flex: 0 0 calc(18px * var(--escala-texto));
+  width: calc(18px * var(--escala-texto));
+  height: calc(18px * var(--escala-texto));
+  border-radius: var(--radio-completo);
+  background: rgba(255, 255, 255, 0.24);
+  color: var(--color-texto-inverso);
+  font-size: calc(0.62rem * var(--escala-texto));
+}
+.pasos li.activo::before {
+  background: var(--color-marca-claro);
+  color: var(--color-texto-inverso);
+}
+
 .perfil {
   display: flex;
   align-items: center;
@@ -316,11 +579,181 @@
   color: var(--color-acento);
 }
 
+/* ------------------------------------------------ Cartera sobre la marca */
+.cartera-inicio {
+  display: block;
+  color: var(--color-texto-inverso);
+  padding: var(--e2) 0 var(--e6);
+}
+.cartera-inicio__etiqueta {
+  display: block;
+  font-size: var(--texto-sm);
+  color: rgba(255, 255, 255, 0.78);
+}
+.cartera-inicio__monto {
+  font-size: calc(2.4rem * var(--escala-texto));
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: var(--e1) 0 var(--e2);
+}
+/* Pastilla BLANCA SOLIDA con el rojo dentro, no translucida. Translucida se veia
+   igual que los enlaces "Ver cartelera", y el dato mas alarmante de la app
+   terminaba vestido de enlace. El blanco solido le devuelve al rojo un fondo
+   donde si se lee, y la distingue de los controles. */
+.cartera-inicio__alerta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--e1);
+  background: var(--color-superficie);
+  color: var(--color-error);
+  border-radius: var(--radio-completo);
+  padding: 0.3rem 0.85rem;
+  font-size: var(--texto-sm);
+  font-weight: 700;
+  box-shadow: var(--sombra-1);
+}
+
+/* Sobre el degradado, todo lo que va suelto —sin tarjeta— tiene que ser claro.
+   Los titulos de seccion en mayusculas y los parrafos de ayuda de cada pantalla
+   quedaban en gris oscuro, ilegibles sobre el color. */
+.app-movil--marca .titulo-seccion {
+  color: rgba(255, 255, 255, 0.82);
+}
+.app-movil--marca .contenido-movil > .pila > .subtitulo,
+.app-movil--marca .contenido-movil > .subtitulo,
+.app-movil--marca .pila > p.subtitulo {
+  color: rgba(255, 255, 255, 0.84);
+}
+.app-movil--marca .contenido-movil > .tenue {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* --------------------------------------------- Encabezado de cada seccion */
+/* Antes todas las secciones eran la misma etiqueta gris en mayusculas, y eso es
+   lo que hacia que la pantalla se leyera como una lista de rotulos. Ahora el
+   titulo tiene peso y, donde hay mas que ver, la accion vive en el encabezado. */
+.encabezado-seccion {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--e3);
+}
+.encabezado-seccion h2 {
+  font-size: var(--texto-lg);
+  font-weight: 680;
+  letter-spacing: -0.015em;
+  color: var(--color-texto);
+}
+.encabezado-seccion a {
+  font-size: var(--texto-sm);
+  font-weight: 650;
+  color: var(--color-marca);
+  white-space: nowrap;
+}
+/* Sobre el degradado el titulo va en blanco. El enlace, ademas, dentro de una
+   pastilla: en blanco plano se confundiria con el titulo y dejaria de decir que
+   se puede tocar. */
+.app-movil--marca .encabezado-seccion h2 {
+  color: var(--color-texto-inverso);
+}
+.app-movil--marca .encabezado-seccion a,
+.app-movil--marca .encabezado-seccion .enlace {
+  color: var(--color-texto-inverso);
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.26);
+  border-radius: var(--radio-completo);
+  padding: 0.18rem 0.7rem;
+}
+
+/* Dentro de una hoja el fondo es blanco, no el degradado.
+   Las reglas de arriba pintan los titulos en blanco porque en la app van sobre
+   el degradado; un modal es hijo de la misma app y las heredaba, asi que sus
+   titulos salian blancos sobre blanco — invisibles. Paso dos veces (la hoja de
+   perfil y la de un registro) antes de arreglarlo aqui, que es donde se arregla
+   una sola vez. Misma especificidad que las de arriba, y va despues. */
+.modal .titulo-seccion {
+  color: var(--color-texto-tenue);
+}
+.modal .encabezado-seccion h2 {
+  color: var(--color-texto);
+}
+
+/* ------------------------------------------- Distintivos de cada tarjeta */
+/* Distintivo + contenido, pegados a la izquierda. No sirve `.fila`, que reparte
+   con space-between y dejaria el texto flotando en el centro. */
+.tarjeta__cuerpo {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--e3);
+  flex: 1;
+  min-width: 0;
+}
+
+/* Cuatro tarjetas iguales se leen como una sola mancha. Cada seccion lleva su
+   propio distintivo para reconocerse sin leer el titulo. */
+.marca-tarjeta {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border-radius: var(--radio-sm);
+  background: var(--color-marca-suave);
+  color: var(--color-marca);
+}
+.marca-tarjeta--acento {
+  background: var(--color-acento-suave);
+  color: var(--color-acento);
+}
+.bloque-fecha {
+  display: grid;
+  place-items: center;
+  width: calc(40px * var(--escala-texto));
+  height: calc(40px * var(--escala-texto));
+  flex: 0 0 calc(40px * var(--escala-texto));
+  border-radius: var(--radio-sm);
+  background: var(--color-marca);
+  color: var(--color-texto-inverso);
+  line-height: 1;
+}
+.bloque-fecha__dia {
+  font-size: var(--texto-base);
+  font-weight: 700;
+}
+.bloque-fecha__mes {
+  font-size: calc(0.6rem * var(--escala-texto));
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.82;
+}
+/* El comunicado es texto editorial: se distingue por el borde, no por un icono
+   que competiria con el chip de categoria. */
+.tarjeta--comunicado {
+  border-left: 3px solid var(--color-marca);
+}
+/* Superficie de accion: algo te espera y todavia no lo has resuelto. El fucsia
+   aqui no decora, significa lo mismo que en el resto de la app. */
+/* "Algo te espera y no lo has resuelto". Sobre el degradado no puede avisar con
+   superficie fucsia —desapareceria contra el fondo—, asi que lo hace con el filo,
+   igual que el comunicado lo hace con el suyo. */
+.tarjeta--pendiente {
+  border-left: 3px solid var(--color-acento);
+}
+
 /* ======================================================= Accesos directos */
 .accesos {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--e2);
+}
+
+/* Con la letra al 150 % los cuatro accesos dejan de caber en fila: «Solicitudes»
+   ocupa la celda entera y los rotulos se tocan. En vez de encoger la letra —que
+   es justo lo que la persona pidio que no pasara— se parten en dos filas de dos.
+   Quedan mas grandes, no mas pequenos, que es la respuesta correcta. */
+:root[data-texto='mayor'] .accesos {
+  grid-template-columns: repeat(2, 1fr);
 }
 .acceso-directo {
   display: flex;
@@ -328,10 +761,11 @@
   align-items: center;
   gap: var(--e1);
   padding: var(--e3) var(--e1);
-  border: 1px solid var(--color-borde);
+  border: 1px solid transparent;
   border-radius: var(--radio);
   background: var(--color-superficie);
-  font-size: 0.68rem;
+  box-shadow: var(--sombra-1);
+  font-size: calc(0.68rem * var(--escala-texto));
   font-weight: 600;
   color: var(--color-texto-suave);
   text-align: center;
@@ -340,18 +774,187 @@
 .acceso-directo svg {
   color: var(--color-marca);
 }
+/* El icono dentro de un circulo: da ritmo y quita la sensacion de caja vacia. */
+.acceso-directo__icono {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--color-marca-suave);
+}
 .acceso-directo__contador {
   position: absolute;
   top: 6px;
   right: 10px;
-  min-width: 17px;
-  height: 17px;
+  min-width: calc(17px * var(--escala-texto));
+  height: calc(17px * var(--escala-texto));
   padding: 0 4px;
   border-radius: var(--radio-completo);
   background: var(--color-acento);
   color: #fff;
-  font-size: 0.6rem;
-  line-height: 17px;
+  font-size: calc(0.6rem * var(--escala-texto));
+  line-height: calc(17px * var(--escala-texto));
+}
+
+/* --- Rostros para la porteria (CU-P-03, RN-67) --- */
+/* Tarjetas anchas y foto grande: se miran de pie, de reojo, con alguien
+   esperando del otro lado del vidrio. */
+.rejilla-rostros {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--e3);
+}
+.rostro {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+}
+.rostro__foto,
+.rostro__sin-foto {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+  border-radius: var(--radio);
+  object-fit: cover;
+  background: var(--color-marca-suave);
+}
+.rostro__sin-foto {
+  display: grid;
+  place-items: center;
+  color: var(--color-marca);
+  font-weight: 700;
+}
+
+/* --- Autorizacion de tratamiento de datos (RN-66) --- */
+.politica {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e2);
+}
+.politica__detalle > summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-size: var(--texto-sm);
+  font-weight: 650;
+  color: var(--color-marca);
+}
+.politica__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+  padding: var(--e3);
+  margin-top: var(--e2);
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie-2);
+  border: 1px solid var(--color-borde);
+}
+
+/* ============================== Registro de personas (CU-R-27, CU-R-28) */
+/* La zona de captura es grande a proposito: se toca de pie, con una mano, y a
+   veces con el telefono en la otra apuntando a una cedula. */
+.captura {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+}
+.captura__zona {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--e2);
+  min-height: 132px;
+  padding: var(--e4);
+  border: 2px dashed var(--color-borde-fuerte);
+  border-radius: var(--radio);
+  background: var(--color-superficie-2);
+  color: var(--color-texto-suave);
+  font-size: var(--texto-sm);
+  font-weight: 600;
+}
+.captura__zona:hover:not(:disabled) {
+  border-color: var(--color-acento);
+  color: var(--color-acento);
+}
+.captura__hecha {
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+}
+.captura__vista {
+  width: 100%;
+  max-height: 240px;
+  object-fit: contain;
+  border-radius: var(--radio);
+  background: var(--color-superficie-2);
+  border: 1px solid var(--color-borde);
+}
+/* Los dos soportes lado a lado: quien autoriza compara la cara con el documento,
+   y compararlos exige verlos juntos. */
+.soportes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--e3);
+  margin-top: var(--e3);
+}
+.soporte {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+}
+.soporte img {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radio-sm);
+  border: 1px solid var(--color-borde);
+  background: var(--color-superficie-2);
+}
+.soporte figcaption {
+  font-size: var(--texto-xs);
+  color: var(--color-texto-tenue);
+  text-align: center;
+}
+/* El codigo se dicta por telefono: separado, grande y en tabular. */
+.codigo-registro {
+  display: inline-block;
+  align-self: flex-start;
+  padding: var(--e2) var(--e4);
+  border-radius: var(--radio-sm);
+  background: var(--color-marca-suave);
+  color: var(--color-marca);
+  font-size: var(--texto-xl);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+.opcion-categoria {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--e3);
+  min-height: 56px;
+  padding: var(--e3);
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie);
+  text-align: left;
+}
+.opcion-categoria[aria-pressed='true'] {
+  border-color: var(--color-acento);
+  background: var(--color-acento-suave);
+}
+.opcion-categoria[aria-pressed='true'] strong {
+  color: var(--color-acento);
+}
+.historial > summary {
+  cursor: pointer;
+  font-size: var(--texto-sm);
+  font-weight: 650;
+  color: var(--color-marca);
+  padding: var(--e2) 0;
 }
 
 /* ============================================================ Indicadores */
@@ -427,4 +1030,68 @@
   font-size: var(--texto-xs);
   color: var(--color-texto-tenue);
   margin-bottom: var(--e1);
+}
+
+/* ============================================ Expediente sancionatorio
+   La linea de tiempo del debido proceso (CU-A-23, CU-R-29). Se dibuja con
+   una linea vertical y un punto por actuacion: lo que importa de un
+   expediente es que se vea que hubo una secuencia, no cada caja por
+   separado. El color del punto dice quien actuo — que es exactamente lo
+   que se revisa si la sancion se controvierte. */
+.actuaciones {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 var(--e4);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e3);
+}
+.actuaciones::before {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  background: var(--color-borde);
+}
+.actuacion {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.actuacion::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--e4) * -1 + 1px);
+  top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radio-completo);
+  background: var(--color-superficie);
+  border: 2px solid var(--color-borde-fuerte);
+}
+.actuacion--administracion::before {
+  border-color: var(--color-marca);
+}
+.actuacion--copropietario::before {
+  border-color: var(--color-acento);
+}
+.actuacion > .fila {
+  align-items: baseline;
+  gap: var(--e2);
+}
+
+/* El respaldo de una cuota, en su propia linea del estado de cuenta (RN-47).
+   Cerrado por defecto: quien viene a ver cuanto debe no necesita leer el acta,
+   pero quien se pregunta «¿y esto que es?» tiene que encontrarla sin salir de
+   la pantalla. */
+.respaldo-cuota > summary {
+  cursor: pointer;
+  font-size: var(--texto-xs);
+  font-weight: 650;
+  color: var(--color-marca);
+  padding: var(--e1) 0;
 }

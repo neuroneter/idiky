@@ -44,7 +44,7 @@ export function ComunicadosAdminPage() {
           categoria,
           fijado,
           vigenteHasta: vigenteHasta || undefined,
-          autor: 'Administracion',
+          autor: 'Administración',
         }),
       'Comunicado publicado.',
     )

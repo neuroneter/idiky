@@ -13,6 +13,7 @@ aquí antes o junto con el código.
 | 04 | [Catálogo de casos de uso](./04-casos-de-uso.md) | Índice maestro de CU con estado | En cada iteración |
 | 04a | [CU — Residente](./casos-de-uso/residente.md) | Detalle de los CU de la app móvil | En cada iteración |
 | 04b | [CU — Administrador](./casos-de-uso/administrador.md) | Detalle de los CU de la consola | En cada iteración |
+| 04c | [CU — BLOKY](./casos-de-uso/bloky.md) | Los CU propios del sistema real de las copropiedades (ámbito `B`) | En cada módulo de BLOKY Dev |
 | 05 | [Modelo de datos](./05-modelo-de-datos.md) | Entidades, relaciones y tipos | Al agregar entidades |
 | 06 | [Arquitectura](./06-arquitectura.md) | Estructura del código y decisiones técnicas | Al cambiar estructura |
 | 07 | [Roadmap](./07-roadmap.md) | Fases, entregables y criterios de salida | Al cerrar una fase |
@@ -21,7 +22,13 @@ aquí antes o junto con el código.
 | 10 | [Equipo y orquestación](./10-equipo-y-orquestacion.md) | **Cómo trabajamos Jeimy, Mary y Daniel en paralelo** | Al cambiar la forma de trabajo |
 | 11 | [Tablero de trabajo](./11-tablero-de-trabajo.md) | Tareas en curso, quién las tiene y en qué estado | Todos los días |
 | 12 | [Levantamiento pendiente](./12-levantamiento-pendiente.md) | **Preguntas abiertas del producto, por responder** | Hasta cerrarlo |
+| 13 | [BOB: cómo entra una copropiedad](./13-bob-copropiedades-y-contratos.md) | Planes y contrato, perfiles raíz, ficha, jerarquía e ingreso a BLOKY | Mientras dure el refinamiento (T-39) |
+| 14 | [Desplegar la contable](./14-despliegue-de-la-contable.md) | Cómo se publica `apps/contable/` en el servidor de desarrollo | Al cambiar la forma de publicar |
+| 15 | [Resumen de la rama de Mary](./15-resumen-de-la-rama-de-mary.md) | **Corte transversal**: qué contiene la rama hoy, qué se verificó contra la ley y qué está abierto — para revisarla sin leer 91 commits | Es un snapshot fechado: se rehace, no se mantiene |
 | — | [ADR](./adr/) | Decisiones de arquitectura con su justificación | Al tomar una decisión relevante |
+
+> El **13** está reservado para el sistema de gestión (BOB), que llega desde la rama de
+> infraestructura. Por eso el despliegue de la contable quedó en el 14 y no en el 13.
 
 > ⚠️ **Antes de construir funcionalidad nueva:** el demo v0.1 se hizo sobre supuestos, no
 > sobre el alcance definitivo. Hay que cerrar primero

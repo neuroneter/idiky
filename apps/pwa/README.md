@@ -16,6 +16,42 @@ npm run dev      # http://localhost:5173
 | `npm run build` | Verifica tipos y compila a `dist/` |
 | `npm run preview` | Sirve `dist/` (aquí sí se activa el service worker) |
 | `npm run typecheck` | Solo verificación de tipos |
+| `npm run empaquetar` | Genera `dist/idiky-demo.html`: **el demo entero en un solo archivo** |
+
+### Mostrar el demo a alguien que no tiene Node
+
+`npm run empaquetar` deja un único `dist/idiky-demo.html` con el CSS y el JS
+adentro. Ese archivo se abre **con doble clic** — sin Node, sin npm, sin servidor —
+y se puede mandar por correo o WhatsApp. Es la forma de que el equipo vea el demo
+sin instalar nada.
+
+Solo quien compila necesita Node. Quien mira, no.
+
+## Herramientas
+
+Scripts de apoyo en `herramientas/`. Son de librería estándar de Python a propósito: el
+proyecto no agrega dependencias sin ADR ([`CLAUDE.md`](../../CLAUDE.md)).
+
+| Script | Qué hace |
+|---|---|
+| `python3 herramientas/generar-iconos.py` | Regenera los PNG del manifest (192, 512 y maskable) desde la geometría del logo. **Correr si cambia el logo.** |
+| `python3 herramientas/empaquetar-demo.py` | Empaqueta `dist/` en un solo HTML autocontenido para compartir el demo |
+| `python3 herramientas/revisar-ortografia.py` | Revisa que el texto visible lleve sus tildes. **Correr antes de subir**; sale con código 1 si encuentra algo |
+
+### Compartir el demo con alguien que no tiene el repositorio
+
+```bash
+npm run build
+python3 herramientas/empaquetar-demo.py     # -> dist/demo-idiky.html
+```
+
+Ese archivo se abre con doble clic, se manda por correo o se sube a cualquier hosting
+estático. No pide servidor porque el demo no tiene backend: los datos viven en
+`localStorage` y la navegación usa `HashRouter`.
+
+**Cada persona que lo abra tiene su propia copia de los datos**, en su navegador. Nadie ve lo
+que hace el otro — para una demostración eso es una ventaja, pero no sirve para trabajar
+sobre los mismos datos.
 
 ## Perfiles del demo
 
@@ -24,9 +60,9 @@ acceso eliges:
 
 | Perfil | Para probar |
 |---|---|
-| **María Camila Restrepo** — Torre 1, 402 | Residente al día: pagar, reservar, PQRS, visitantes |
-| **Andrés Felipe Gómez** — Torre 2, 901 | Residente en mora: reservas bloqueadas (RN-08) |
-| **Olga Lucía Henao** | Consola de administración completa |
+| **María Camila Restrepo** — Torre 1, 402 | Residente al día: pagar, informar abonos, reservar, PQRS, visitantes. Tiene una cuota **abonada a medias** |
+| **Andrés Felipe Gómez** — Torre 2, 901 | Residente en mora: reservas bloqueadas (RN-08) y un abono informado sin conciliar |
+| **Olga Lucía Henao** | Consola de administración completa. En **Pagos** arrancan dos abonos esperando conciliación |
 
 Los datos se guardan en `localStorage`. El botón **"Reiniciar demo"** (en la pantalla de
 acceso y en la consola) devuelve todo a su estado inicial.
@@ -42,7 +78,7 @@ src/
 ├── estilos/       tokens.css (identidad visual) · base.css · layout.css
 └── features/
     ├── auth/       CU-R-01
-    ├── residente/  CU-R-02 … CU-R-11
+    ├── residente/  CU-R-02 … CU-R-11 y CU-R-24
     └── admin/      CU-A-01 … CU-A-09
 ```
 

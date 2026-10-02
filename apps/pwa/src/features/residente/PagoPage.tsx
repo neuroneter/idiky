@@ -13,16 +13,26 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
 import { registrarPago } from '../../datos/repositorio'
-import { cuotaPendiente, estadoRealCuota } from '../../dominio/reglas'
+import { cuotasPorAntiguedad, estadoRealCuota } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import type { MedioPago, Pago } from '../../dominio/tipos'
+import { BotonVolver } from '../../componentes/BotonVolver'
 import { Icono } from '../../componentes/Icono'
 import { ChipCuota } from '../../componentes/Etiquetas'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 
-const MEDIOS: Array<{ id: MedioPago; texto: string }> = [
-  { id: 'pse', texto: 'PSE / debito a cuenta' },
-  { id: 'tarjeta', texto: 'Tarjeta de credito' },
+/**
+ * `ayuda` no es decoracion: Bre-B es nuevo y mucha gente no sabe todavia que es
+ * ni que necesita una llave. Un medio de pago que hay que adivinar no se usa.
+ */
+const MEDIOS: Array<{ id: MedioPago; texto: string; ayuda: string }> = [
+  { id: 'pse', texto: 'PSE / débito a cuenta', ayuda: 'Te lleva al portal de tu banco' },
+  {
+    id: 'bre_b',
+    texto: 'Bre-B',
+    ayuda: 'Pago inmediato con tu llave, desde la app de tu banco',
+  },
+  { id: 'tarjeta', texto: 'Tarjeta de crédito', ayuda: 'Visa, Mastercard o American Express' },
 ]
 
 export function PagoPage() {
@@ -39,26 +49,25 @@ export function PagoPage() {
 
   /** Pendientes de la mas antigua a la mas reciente: el orden de imputacion (RN-06). */
   const pendientes = useMemo(
-    () =>
-      sel
-        .cuotasDeUnidad(bd, sesion.unidadActivaId)
-        .filter(cuotaPendiente)
-        .sort((a, b) => a.fechaVencimiento.localeCompare(b.fechaVencimiento)),
+    () => cuotasPorAntiguedad(sel.cuotasDeUnidad(bd, sesion.unidadActivaId)),
     [bd, sesion.unidadActivaId],
   )
 
   // Por defecto se paga todo; al tocar una cuota se paga hasta ella (y las anteriores).
   const corte = hasta ?? pendientes.length - 1
   const seleccionadas = pendientes.slice(0, corte + 1)
-  const total = seleccionadas.reduce((suma, cuota) => suma + cuota.valor, 0)
+  // Se paga el saldo, no el valor facturado: la cuota puede venir abonada.
+  const total = seleccionadas.reduce((suma, cuota) => suma + cuota.saldo, 0)
 
   async function pagar() {
     const pago = await ejecutar(
       (base) =>
         registrarPago(base, {
           unidadId: sesion!.unidadActivaId!,
-          cuotaIds: seleccionadas.map((cuota) => cuota.id),
+          valor: total,
           medio,
+          origen: 'residente',
+          imputaciones: seleccionadas.map((cuota) => ({ cuotaId: cuota.id, valor: cuota.saldo })),
           registradoPor: nombreCompleto(persona),
         }),
       'Pago registrado correctamente.',
@@ -89,8 +98,8 @@ export function PagoPage() {
           <div className="separador" />
           <div className="lista lista--compacta" style={{ textAlign: 'left' }}>
             <div className="fila">
-              <span className="subtitulo">Comprobante</span>
-              <strong>{comprobante.comprobante}</strong>
+              <span className="subtitulo">Recibo de caja</span>
+              <strong>{comprobante.recibo}</strong>
             </div>
             <div className="fila">
               <span className="subtitulo">Valor</span>
@@ -106,7 +115,7 @@ export function PagoPage() {
             </div>
             <div className="fila">
               <span className="subtitulo">Cuotas cubiertas</span>
-              <span>{comprobante.cuotaIds.length}</span>
+              <span>{comprobante.imputaciones.length}</span>
             </div>
           </div>
         </div>
@@ -120,7 +129,7 @@ export function PagoPage() {
   if (pendientes.length === 0) {
     return (
       <div className="pila">
-        <EstadoVacio titulo="No tienes cuotas por pagar" detalle="Tu unidad esta al dia." />
+        <EstadoVacio titulo="No tienes cuotas por pagar" detalle="Tu unidad está al día." />
         <Link to="/app/cuenta" className="boton boton--bloque">
           Volver
         </Link>
@@ -131,16 +140,13 @@ export function PagoPage() {
   return (
     <div className="pila">
       <div className="encabezado-pagina">
-        <Link to="/app/cuenta" className="boton-volver">
-          <Icono nombre="volver" tamano={16} />
-          Mi cuenta
-        </Link>
+        <BotonVolver a="/app/cuenta" texto="Mi cuenta" />
       </div>
 
       <div className="pila">
-        <span className="titulo-seccion">Que vas a pagar</span>
+        <span className="titulo-seccion">Qué vas a pagar</span>
         <p className="subtitulo">
-          Los pagos se aplican primero a la deuda mas antigua. Toca una cuota para pagar hasta
+          Los pagos se aplican primero a la deuda más antigua. Toca una cuota para pagar hasta
           esa fecha.
         </p>
         <div className="lista lista--compacta">
@@ -161,7 +167,7 @@ export function PagoPage() {
                     </span>
                   </div>
                   <div className="columna" style={{ alignItems: 'flex-end' }}>
-                    <strong className="numerico">{formatearDinero(cuota.valor)}</strong>
+                    <strong className="numerico">{formatearDinero(cuota.saldo)}</strong>
                     {incluida ? (
                       <span className="chip chip--marca">Incluida</span>
                     ) : (
@@ -186,7 +192,10 @@ export function PagoPage() {
               onClick={() => setMedio(opcion.id)}
             >
               <div className="fila">
-                <span>{opcion.texto}</span>
+                <div className="columna">
+                  <span>{opcion.texto}</span>
+                  <span className="subtitulo">{opcion.ayuda}</span>
+                </div>
                 {medio === opcion.id && <Icono nombre="check" tamano={16} />}
               </div>
             </button>

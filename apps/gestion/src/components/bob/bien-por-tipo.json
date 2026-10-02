@@ -1,0 +1,22 @@
+{
+  "collectionName": "components_bob_bienes_por_tipo",
+  "info": {
+    "displayName": "Bien por tipo",
+    "icon": "apps",
+    "description": "Cuántos bienes de un tipo tiene la copropiedad. El árbol completo vive en BLOKY (docs/13 §1)."
+  },
+  "options": {},
+  "attributes": {
+    "tipoDeBien": {
+      "type": "relation",
+      "relation": "oneToOne",
+      "target": "api::tipo-de-bien.tipo-de-bien"
+    },
+    "cantidad": {
+      "type": "integer",
+      "required": true,
+      "min": 0,
+      "default": 0
+    }
+  }
+}

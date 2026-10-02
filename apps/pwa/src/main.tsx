@@ -8,9 +8,15 @@ import { HashRouter } from 'react-router-dom'
 import { App } from './App'
 import { ProveedorDatos } from './estado/DatosContext'
 import { ProveedorSesion } from './estado/SesionContext'
+import { aplicarTamanoTexto, tamanoTexto } from './estado/preferencias'
 import './estilos/tokens.css'
 import './estilos/base.css'
 import './estilos/layout.css'
+
+// El tamano de la letra se aplica ANTES de dibujar (CU-R-26): si se aplicara
+// dentro de un efecto de React, la primera pantalla apareceria en tamano normal y
+// daria un salto — justo delante de la persona que la escogio grande.
+aplicarTamanoTexto(tamanoTexto())
 
 // HashRouter: el demo debe funcionar servido desde cualquier subruta (GitHub Pages,
 // un subdirectorio o el WebView de Capacitor) sin configurar el servidor.

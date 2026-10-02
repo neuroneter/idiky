@@ -1,0 +1,16 @@
+# Lo que no viaja al construir las imagenes de infra/ (ADR-0011).
+# Podman y Docker leen este mismo archivo.
+.git
+**/node_modules
+**/dist
+
+# Sistema de gestion (Strapi): los secretos locales nunca entran a una imagen, y lo que Strapi
+# genera se vuelve a generar al construir.
+**/.env
+**/.env.*
+!**/.env.example
+**/.tmp
+**/.strapi
+**/build
+apps/gestion/public/uploads/*
+!apps/gestion/public/uploads/.gitkeep

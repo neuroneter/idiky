@@ -40,3 +40,29 @@ Leyenda: `L` leer · `E` escribir · `A` aprobar · `—` sin acceso
 
 > En el demo v0.1 la identidad se simula: se elige un perfil de una lista, sin contraseña.
 > Ver [ADR-0004](./adr/0004-autenticacion-demo.md).
+
+---
+
+## Operador de Idiky — el actor que falta
+
+**Quién es:** quien opera la plataforma, por encima de cualquier copropiedad. No vive en
+ninguna, no paga cuota y no vota.
+
+**Qué hace, y es lo único que hace en el modelo:** **crea a los administradores de las
+copropiedades**. Es el primer eslabón de RN-63 —el operador crea al administrador, el
+administrador crea a los propietarios, el propietario crea a los demás de su unidad— y sin él
+la cadena no tiene principio: alguien tiene que dar de alta al primer administrador de un
+conjunto nuevo.
+
+**No existe todavía en el demo.** Su consola es trabajo de otra fase; aquí queda escrito el
+eslabón (`CADENA_DE_REGISTRO` en `dominio/reglas.ts`) para que el modelo no lo olvide.
+
+> **Actualización (2026-09-10).** El operador es **el equipo de IDIKY trabajando en BOB**, el
+> *back office* ([glosario](./02-glosario.md#las-aplicaciones-de-idiky)). Y ya no crea solo
+> administradores: **crea los dos perfiles raíz de cada copropiedad, el Administrador y el
+> Delegado**, que son quienes entran a BLOKY y crean los demás perfiles. Qué perfiles crea cada
+> uno de los dos sigue sin decidir, y cuando se decida **cambia RN-63**.
+
+**Lo que hay que decidir cuando llegue:** si puede entrar a los datos de una copropiedad —y con
+qué justificación—, y qué ve de las cédulas que guardan los registros
+([ADR-0009](./adr/0009-soportes-fotograficos.md)).

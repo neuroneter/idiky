@@ -1,0 +1,47 @@
+/*
+ * Marca de IDIKY en el panel de Strapi (T-37 · ADR-0012): lo que Strapi no deja configurar.
+ * Colores de apps/pwa/src/estilos/tokens.css; composicion de la puerta de la PWA
+ * (.acceso-fondo en apps/pwa/src/estilos/layout.css).
+ *
+ * Depende del marcado de Strapi 5.53 (sus clases son generadas, por eso se usa la
+ * estructura). Si al subir de version el login se ve raro, se empieza por aqui.
+ */
+
+/* Pantallas de acceso (login, recuperar contrasena): el degradado vertical de la marca, el
+   mismo de la puerta de la PWA. app.tsx marca el <html> con data-idiky-acceso en esas rutas. */
+html[data-idiky-acceso] body {
+  background: linear-gradient(176deg, #1d2e7a 0%, #1d2e7a 48%, #c41e8c 130%) fixed !important;
+}
+
+/* La silueta de las torres (apps/pwa/src/componentes/SiluetaTorres.tsx), en blanco y casi
+   transparente, apoyada en el borde de abajo. */
+html[data-idiky-acceso] body::after {
+  content: '';
+  position: fixed;
+  right: -28px;
+  bottom: 0;
+  width: 300px;
+  height: 141px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 150' fill='none'%3E%3Cg stroke='white' stroke-width='3' stroke-linejoin='round' stroke-linecap='round'%3E%3Cpath d='M12 150V54l30-20 30 20v96M42 150v-30h18v30'/%3E%3Cpath d='M96 150V78l26-17 26 17v72M122 150v-24h14v24'/%3E%3Cpath d='M172 150V42l34-22 34 22v108M206 150v-34h20v34'/%3E%3Cpath d='M260 150V88l24-16 24 16v62'/%3E%3Cpath d='M0 150h320'/%3E%3C/g%3E%3C/svg%3E")
+    no-repeat bottom right / contain;
+  opacity: 0.09;
+  pointer-events: none;
+}
+
+/* La tarjeta del formulario, redondeada y con la sombra de las tarjetas de la PWA. */
+html[data-idiky-acceso] main > div:first-child {
+  border-radius: 20px !important;
+  box-shadow: 0 12px 32px rgba(23, 25, 53, 0.16) !important;
+}
+
+/* El boton principal en pildora, como .boton--primario. */
+html[data-idiky-acceso] main button[type='submit'] {
+  border-radius: 999px !important;
+}
+
+/* Los enlaces sueltos que quedan sobre el degradado, en blanco. */
+html[data-idiky-acceso] main > div:not(:first-child) a,
+html[data-idiky-acceso] main > div:not(:first-child) a span {
+  color: #ffffff !important;
+  font-weight: 600;
+}

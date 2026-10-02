@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipo · Arma tu copropiedad</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  *{box-sizing:border-box} body{margin:0;font-family:var(--fuente);color:var(--color-texto);background:var(--color-fondo)}
+  .arma{min-height:100vh;display:grid;grid-template-columns:1fr 1fr}
+  .arma__dibujo{position:relative;background:var(--degradado-marca-vertical);color:#fff;display:flex;flex-direction:column;padding:32px 40px;overflow:hidden}
+  .arma__cabecera{display:flex;align-items:center;justify-content:space-between}
+  .arma__producto{font-weight:800;letter-spacing:.06em}
+  .arma__avance{display:flex;align-items:center;gap:12px;font-size:14px}
+  .anillo{width:44px;height:44px;border-radius:50%;background:conic-gradient(var(--color-marca-claro) var(--p,0%), rgba(255,255,255,.2) 0);display:grid;place-items:center}
+  .anillo span{width:34px;height:34px;border-radius:50%;background:var(--color-marca);display:grid;place-items:center;font-size:11px;font-weight:700}
+  .arma__nombre{margin-top:28px;font-size:26px;font-weight:700}
+  .arma__resumen{opacity:.85;margin-top:6px}
+  .arma__escena{position:absolute;left:0;right:0;bottom:0;height:62%;display:flex;align-items:flex-end;justify-content:center;gap:22px;padding:0 40px 48px}
+  .torre{width:96px;display:flex;flex-direction:column-reverse;gap:3px;transition:all .3s}
+  .piso{height:22px;border:2px solid rgba(255,255,255,.75);border-radius:3px;background:rgba(255,255,255,.12);display:flex;gap:3px;padding:2px;animation:sube .35s ease-out both}
+  .piso i{flex:1;background:rgba(255,255,255,.35);border-radius:1px}
+  .piso--local i{background:var(--color-marca-claro)}
+  .techo{height:14px;border-left:2px solid rgba(255,255,255,.75);border-right:2px solid rgba(255,255,255,.75);border-top:2px solid rgba(255,255,255,.75);border-radius:8px 8px 0 0;width:60%;margin:0 auto}
+  .torre__nombre{text-align:center;font-size:11px;opacity:.85;margin-top:6px;order:-1}
+  .suelo{position:absolute;left:0;right:0;bottom:44px;height:2px;background:rgba(255,255,255,.5)}
+  @keyframes sube{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+  .arma__panel{padding:40px 56px;display:flex;flex-direction:column;justify-content:center;background:var(--color-superficie)}
+  .paso{font-size:13px;font-weight:600;color:var(--color-texto-tenue)}
+  h1{font-size:30px;margin:6px 0 4px}
+  .ayuda{color:var(--color-texto-suave);margin:0 0 24px}
+  .tarjetas{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .tarjeta{border:2px solid var(--color-borde);border-radius:var(--radio);padding:18px;background:var(--color-superficie-2);text-align:left;cursor:pointer;display:flex;gap:14px;align-items:center;font:inherit;color:inherit}
+  .tarjeta:hover{border-color:var(--color-marca);background:var(--color-marca-suave)}
+  .tarjeta[aria-pressed=true]{border-color:var(--color-acento);background:var(--color-acento-suave)}
+  .tarjeta svg{width:52px;height:52px;flex:0 0 52px;stroke:var(--color-marca);fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .tarjeta strong{display:block;font-size:16px}.tarjeta span{font-size:13px;color:var(--color-texto-suave)}
+  .contadores{display:flex;flex-direction:column;gap:18px}
+  .contador{display:flex;align-items:center;justify-content:space-between;border:1px solid var(--color-borde);border-radius:var(--radio);padding:14px 18px;background:var(--color-superficie-2)}
+  .contador strong{display:block}.contador span{font-size:13px;color:var(--color-texto-suave)}
+  .stepper{display:flex;align-items:center;gap:10px}
+  .stepper button{width:44px;height:44px;border-radius:50%;border:1px solid var(--color-borde-fuerte);background:#fff;font-size:22px;cursor:pointer;color:var(--color-marca)}
+  .stepper output{min-width:44px;text-align:center;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums}
+  .interruptor{display:flex;align-items:center;gap:10px;font-size:14px;color:var(--color-texto-suave);margin-top:4px}
+  .interruptor b{width:40px;height:22px;border-radius:999px;background:var(--color-acento);position:relative}
+  .interruptor b::after{content:"";position:absolute;right:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff}
+  .vista{margin-top:14px;padding:12px 16px;border-radius:var(--radio-sm);background:var(--color-info-suave);color:var(--color-info);font-size:14px}
+  .acciones{display:flex;justify-content:space-between;align-items:center;margin-top:28px}
+  .boton{min-height:48px;padding:0 22px;border-radius:var(--radio-sm);border:1px solid var(--color-borde-fuerte);background:#fff;font:inherit;font-weight:600;cursor:pointer}
+  .boton--primario{background:var(--color-acento);border-color:var(--color-acento);color:#fff}
+  .boton--fantasma{border-color:transparent;background:transparent;color:var(--color-marca)}
+  .listo{text-align:center}
+  .listo .grande{font-size:56px;font-weight:800;color:var(--color-marca);line-height:1}
+  .checklist{list-style:none;padding:0;margin:20px 0 0;display:grid;gap:8px;text-align:left}
+  .checklist li{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:var(--radio-sm);background:var(--color-superficie-2);border:1px solid var(--color-borde);font-size:14px}
+  .checklist li.ok{border-color:var(--color-exito);color:var(--color-exito);background:var(--color-exito-suave)}
+  .punto{width:20px;height:20px;border-radius:50%;border:2px solid currentColor;display:grid;place-items:center;font-size:12px}
+</style>
+</head>
+<body>
+<div class="arma">
+  <aside class="arma__dibujo">
+    <div class="arma__cabecera">
+      <span class="arma__producto">BLOKY</span>
+      <span class="arma__avance"><span class="anillo" id="anillo"><span id="pct">0 %</span></span> Tu copropiedad</span>
+    </div>
+    <div class="arma__nombre" id="nombre">Conjunto Residencial Altos del Bosque</div>
+    <div class="arma__resumen" id="resumen">Todavía no hay nada construido. Empieza a la derecha.</div>
+    <div class="suelo"></div>
+    <div class="arma__escena" id="escena"></div>
+  </aside>
+  <main class="arma__panel" id="panel"></main>
+</div>
+<script>
+const estado = { paso: 1, tipo: null, torres: 0, pisos: 6, porPiso: 4, localesPB: false };
+const PASOS = 4;
+const $ = (s) => document.querySelector(s);
+const ICONO = {
+  edificio: '<svg viewBox="0 0 24 24"><path d="M6 21V5l6-3 6 3v16M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1M3 21h18"/></svg>',
+  torres: '<svg viewBox="0 0 24 24"><path d="M3 21V9l3-2 3 2v12M9 21V6l3-2 3 2v15M15 21V11l3-2 3 2v10M1 21h22"/></svg>',
+  casas: '<svg viewBox="0 0 24 24"><path d="M2 21v-7l4-3 4 3v7M10 21v-8l4-3 4 3v8M1 21h22M5 21v-3h2v3M13 21v-3h2v3"/></svg>',
+  mixto: '<svg viewBox="0 0 24 24"><path d="M4 21V8l5-3 5 3v13M14 21v-9l3-2 3 2v9M2 21h20M6 21v-4h6v4"/></svg>',
+};
+function dibujar() {
+  const e = $('#escena'); e.innerHTML = '';
+  const n = estado.tipo ? Math.max(estado.torres, estado.tipo === 'edificio' ? 1 : 0) : 0;
+  for (let t = 0; t < n; t++) {
+    const torre = document.createElement('div'); torre.className = 'torre';
+    const pisos = estado.tipo === 'casas' ? 2 : estado.pisos;
+    for (let p = 0; p < pisos; p++) {
+      const piso = document.createElement('div'); piso.className = 'piso' + (p === 0 && estado.localesPB ? ' piso--local' : '');
+      piso.style.animationDelay = (t * 60 + p * 40) + 'ms';
+      for (let u = 0; u < Math.min(estado.porPiso, 6); u++) piso.appendChild(document.createElement('i'));
+      torre.appendChild(piso);
+    }
+    const techo = document.createElement('div'); techo.className = 'techo'; torre.appendChild(techo);
+    const nom = document.createElement('div'); nom.className = 'torre__nombre'; nom.textContent = (estado.tipo === 'casas' ? 'Manzana ' : 'Torre ') + (t + 1); torre.appendChild(nom);
+    e.appendChild(torre);
+  }
+  const unidades = n * (estado.tipo === 'casas' ? 8 : estado.pisos * estado.porPiso);
+  $('#resumen').textContent = !estado.tipo ? 'Todavía no hay nada construido. Empieza a la derecha.'
+    : n === 0 ? 'Elegiste ' + ({edificio:'un edificio', torres:'un conjunto de torres', casas:'un conjunto de casas', mixto:'una copropiedad mixta'})[estado.tipo] + '. Ahora dinos cuántas.'
+    : `${n} ${estado.tipo === 'casas' ? 'manzanas' : 'torres'} · ${unidades} ${estado.tipo === 'casas' ? 'casas' : 'apartamentos'}${estado.localesPB ? ' · locales en el primer piso' : ''}`;
+  const pct = Math.round(((estado.paso - 1) / PASOS) * 60);
+  $('#anillo').style.setProperty('--p', pct + '%'); $('#pct').textContent = pct + ' %';
+}
+function render() {
+  const p = $('#panel');
+  if (estado.paso === 1) p.innerHTML = `
+    <div class="paso">Paso 1 de ${PASOS} · Puedes cambiarlo después</div>
+    <h1>¿Qué es tu copropiedad?</h1>
+    <p class="ayuda">Toca la que más se parezca. Con eso sabemos cómo dibujarla.</p>
+    <div class="tarjetas">
+      ${[['edificio','Un edificio','Una sola torre con pisos'],['torres','Conjunto de torres','Varias torres, cada una con pisos'],['casas','Conjunto de casas','Casas en manzanas o calles'],['mixto','Mixto con locales','Vivienda y comercio en el mismo lugar']].map(([id,t,s]) =>
+        `<button class="tarjeta" aria-pressed="${estado.tipo===id}" onclick="estado.tipo='${id}';estado.torres=${id==='edificio'?1:estado.torres};dibujar();render()">${ICONO[id]}<div><strong>${t}</strong><span>${s}</span></div></button>`).join('')}
+    </div>
+    <div class="acciones"><span></span><button class="boton boton--primario" ${estado.tipo?'':'disabled'} onclick="estado.paso=2;dibujar();render()">Continuar</button></div>`;
+  else if (estado.paso === 2) p.innerHTML = `
+    <div class="paso">Paso 2 de ${PASOS} · Puedes cambiarlo después</div>
+    <h1>${estado.tipo==='casas'?'¿Cuántas manzanas y casas?':'¿Cuántas torres y pisos?'}</h1>
+    <p class="ayuda">Cada número que cambies se dibuja a la izquierda al instante.</p>
+    <div class="contadores">
+      ${estado.tipo==='edificio'?'':cont('torres', estado.tipo==='casas'?'Manzanas':'Torres', 'Se llamarán Torre 1, Torre 2… (se puede cambiar)', 1, 12)}
+      ${estado.tipo==='casas'?cont('porPiso','Casas por manzana','', 1, 40):cont('pisos','Pisos por torre','Todas las torres iguales por ahora', 1, 30)}
+      ${estado.tipo==='casas'?'':cont('porPiso','Apartamentos por piso','Se llamarán 101, 102… por piso', 1, 12)}
+    </div>
+    ${estado.tipo==='casas'?'':`<label class="interruptor" onclick="estado.localesPB=!estado.localesPB;dibujar();render()"><b style="background:${estado.localesPB?'var(--color-acento)':'#c9cbdf'}"></b> El primer piso tiene locales comerciales</label>`}
+    <div class="vista">Vista previa: <strong>${previa()}</strong></div>
+    <div class="acciones"><button class="boton boton--fantasma" onclick="estado.paso=1;dibujar();render()">Atrás</button><button class="boton boton--primario" onclick="estado.paso=3;dibujar();render()">Construir</button></div>`;
+  else p.innerHTML = `
+    <div class="paso">Paso 3 de ${PASOS}</div>
+    <div class="listo">
+      <div class="grande">${total()}</div>
+      <h1>${estado.tipo==='casas'?'casas creadas':'apartamentos creados'}</h1>
+      <p class="ayuda">Tu copropiedad ya tiene estructura. Lo que sigue lo puedes hacer ahora o después.</p>
+      <ul class="checklist">
+        <li class="ok"><span class="punto">✓</span> Estructura: ${estado.torres} ${estado.tipo==='casas'?'manzanas':'torres'}, ${total()} unidades</li>
+        <li><span class="punto">2</span> Parqueaderos y depósitos</li>
+        <li><span class="punto">3</span> Coeficientes (desde el reglamento o desde Excel)</li>
+        <li><span class="punto">4</span> Ubicación en el mapa</li>
+        <li><span class="punto">5</span> Fotos de la copropiedad</li>
+      </ul>
+    </div>
+    <div class="acciones"><button class="boton boton--fantasma" onclick="estado.paso=2;dibujar();render()">Ajustar</button><button class="boton boton--primario">Seguir con parqueaderos</button></div>`;
+}
+function cont(clave, titulo, ayuda, min, max) {
+  return `<div class="contador"><div><strong>${titulo}</strong><span>${ayuda}</span></div><div class="stepper"><button onclick="estado.${clave}=Math.max(${min},estado.${clave}-1);dibujar();render()">−</button><output>${estado[clave]}</output><button onclick="estado.${clave}=Math.min(${max},estado.${clave}+1);dibujar();render()">+</button></div></div>`;
+}
+function total(){ return estado.tipo==='casas' ? estado.torres*estado.porPiso : estado.torres*estado.pisos*estado.porPiso; }
+function previa(){ return estado.tipo==='casas' ? `Manzana 1 · Casa 1 … Manzana ${estado.torres} · Casa ${estado.porPiso}` : `Torre 1 · Apto 101 … Torre ${estado.torres} · Apto ${estado.pisos}${String(estado.porPiso).padStart(2,'0')}`; }
+if (location.hash === '#2') { estado.tipo='torres'; estado.torres=4; estado.paso=2; }
+if (location.hash === '#3') { estado.tipo='torres'; estado.torres=4; estado.localesPB=true; estado.paso=3; }
+dibujar(); render();
+</script>
+</body>
+</html>

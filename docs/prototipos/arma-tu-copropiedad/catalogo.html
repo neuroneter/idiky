@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prototipo · Arma tu copropiedad (catálogo)</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+  *{box-sizing:border-box} body{margin:0;font-family:var(--fuente);color:var(--color-texto);background:var(--color-fondo)}
+  .arma{min-height:100vh;display:grid;grid-template-columns:1.15fr .85fr}
+  .lienzo{position:relative;background:var(--degradado-marca-vertical);color:#fff;padding:28px 36px;overflow:hidden;display:flex;flex-direction:column}
+  .cab{display:flex;align-items:center;justify-content:space-between}
+  .producto{font-weight:800;letter-spacing:.06em}
+  .avance{display:flex;align-items:center;gap:12px;font-size:14px}
+  .anillo{width:44px;height:44px;border-radius:50%;background:conic-gradient(var(--color-marca-claro) var(--p,0%), rgba(255,255,255,.2) 0);display:grid;place-items:center}
+  .anillo span{width:34px;height:34px;border-radius:50%;background:var(--color-marca);display:grid;place-items:center;font-size:11px;font-weight:700}
+  .nombre{margin-top:22px;font-size:24px;font-weight:700}
+  .resumen{opacity:.85;margin-top:4px;font-size:14px}
+  .escena{position:absolute;left:0;right:0;bottom:0;height:64%;display:flex;align-items:flex-end;justify-content:center;gap:20px;padding:0 36px 72px}
+  .torre{width:92px;display:flex;flex-direction:column-reverse;gap:3px;cursor:pointer;position:relative;border-radius:6px;padding:4px}
+  .torre:hover,.torre.sel{outline:2px dashed rgba(255,255,255,.7);outline-offset:4px}
+  .piso{height:20px;border:2px solid rgba(255,255,255,.75);border-radius:3px;background:rgba(255,255,255,.12);display:flex;gap:3px;padding:2px;animation:sube .35s ease-out both}
+  .piso i{flex:1;background:rgba(255,255,255,.35);border-radius:1px}
+  .piso--local i{background:var(--color-marca-claro)}
+  .techo{height:14px;border-left:2px solid rgba(255,255,255,.75);border-right:2px solid rgba(255,255,255,.75);border-top:2px solid rgba(255,255,255,.75);border-radius:8px 8px 0 0;width:60%;margin:0 auto}
+  .torre__nombre{text-align:center;font-size:11px;opacity:.9;margin-top:6px;order:-1;white-space:nowrap}
+  .torre__resumen{text-align:center;font-size:10px;opacity:.7;order:-2}
+  .casa{width:60px;height:46px;border:2px solid rgba(255,255,255,.75);border-radius:4px 4px 2px 2px;position:relative;background:rgba(255,255,255,.12)}
+  .casa::before{content:"";position:absolute;left:-2px;right:-2px;top:-16px;height:16px;border-left:2px solid rgba(255,255,255,.75);border-right:2px solid rgba(255,255,255,.75);border-top:2px solid rgba(255,255,255,.75);border-radius:10px 10px 0 0}
+  .espacios{position:absolute;left:36px;right:36px;bottom:18px;display:flex;gap:10px;flex-wrap:wrap}
+  .espacio{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.14);font-size:12px;cursor:pointer}
+  .espacio:hover{background:rgba(255,255,255,.26)}
+  .suelo{position:absolute;left:0;right:0;bottom:62px;height:2px;background:rgba(255,255,255,.5)}
+  .vacio{position:absolute;inset:auto 36px 40% 36px;text-align:center;opacity:.75;font-size:15px}
+  @keyframes sube{from{transform:translateY(8px);opacity:0}to{transform:none;opacity:1}}
+  .panel{background:var(--color-superficie);display:flex;flex-direction:column;min-height:100vh}
+  .pestanas{display:flex;border-bottom:1px solid var(--color-borde);padding:0 24px}
+  .pestanas button{flex:1;padding:18px 8px 14px;border:0;background:none;font:inherit;font-weight:600;color:var(--color-texto-suave);border-bottom:3px solid transparent;cursor:pointer}
+  .pestanas button[aria-selected=true]{color:var(--color-marca);border-bottom-color:var(--color-marca-claro)}
+  .catalogo{padding:22px 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .objeto{border:1.5px solid var(--color-borde);border-radius:var(--radio);padding:14px 10px 12px;background:var(--color-superficie-2);text-align:center;cursor:pointer;font:inherit;color:inherit;display:flex;flex-direction:column;align-items:center;gap:8px}
+  .objeto:hover{border-color:var(--color-marca);background:var(--color-marca-suave)}
+  .objeto svg{width:44px;height:44px;stroke:var(--color-marca);fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+  .objeto strong{font-size:13px}.objeto span{font-size:11px;color:var(--color-texto-tenue)}
+  .objeto .mas{position:relative;top:-2px;width:22px;height:22px;border-radius:50%;background:var(--color-acento);color:#fff;font-size:14px;display:grid;place-items:center;font-weight:700}
+  .ayuda{padding:0 24px 14px;color:var(--color-texto-suave);font-size:14px}
+  .inspector{margin:auto 24px 24px;border:1px solid var(--color-borde);border-radius:var(--radio);padding:16px 18px;background:var(--color-superficie-2);box-shadow:var(--sombra-1)}
+  .inspector h2{margin:0 0 4px;font-size:16px}
+  .inspector .sub{font-size:12px;color:var(--color-texto-tenue);margin-bottom:12px}
+  .fila{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid var(--color-borde);font-size:14px}
+  .stepper{display:flex;align-items:center;gap:8px}
+  .stepper button{width:34px;height:34px;border-radius:50%;border:1px solid var(--color-borde-fuerte);background:#fff;font-size:18px;cursor:pointer;color:var(--color-marca)}
+  .stepper output{min-width:30px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+  .interruptor{width:36px;height:20px;border-radius:999px;background:#c9cbdf;position:relative;cursor:pointer;border:0}
+  .interruptor[aria-checked=true]{background:var(--color-acento)}
+  .interruptor::after{content:"";position:absolute;left:3px;top:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left .15s}
+  .interruptor[aria-checked=true]::after{left:19px}
+  .acciones{display:flex;gap:8px;margin-top:12px}
+  .boton{min-height:40px;padding:0 14px;border-radius:var(--radio-sm);border:1px solid var(--color-borde-fuerte);background:#fff;font:inherit;font-weight:600;cursor:pointer;font-size:13px}
+  .boton--primario{background:var(--color-acento);border-color:var(--color-acento);color:#fff}
+  .boton--peligro{color:var(--color-error);border-color:var(--color-error-suave);background:var(--color-error-suave)}
+  .pie{padding:14px 24px 22px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--color-borde);font-size:13px;color:var(--color-texto-suave)}
+</style>
+</head>
+<body>
+<div class="arma">
+  <aside class="lienzo">
+    <div class="cab"><span class="producto">BLOKY</span><span class="avance"><span class="anillo" id="anillo"><span id="pct">0 %</span></span> Tu copropiedad</span></div>
+    <div class="nombre">Conjunto Residencial Altos del Bosque</div>
+    <div class="resumen" id="resumen"></div>
+    <div class="vacio" id="vacio">Tu copropiedad está vacía. Toca un objeto del catálogo para agregarlo.</div>
+    <div class="suelo"></div>
+    <div class="escena" id="escena"></div>
+    <div class="espacios" id="espacios"></div>
+  </aside>
+  <main class="panel">
+    <div class="pestanas" id="pestanas"></div>
+    <p class="ayuda" id="ayuda"></p>
+    <div class="catalogo" id="catalogo"></div>
+    <div id="inspector"></div>
+    <div class="pie"><span id="conteo"></span><span>¿Ya lo tienes en Excel? <a href="#" style="color:var(--color-marca);font-weight:600">Importar</a></span></div>
+  </main>
+</div>
+<script>
+const I = {
+  torre:'<svg viewBox="0 0 24 24"><path d="M6 21V5l6-3 6 3v16M9 9h1M14 9h1M9 13h1M14 13h1M9 17h1M14 17h1M3 21h18"/></svg>',
+  manzana:'<svg viewBox="0 0 24 24"><path d="M2 21v-7l4-3 4 3v7M10 21v-8l4-3 4 3v8M1 21h22M5 21v-3h2v3M13 21v-3h2v3"/></svg>',
+  etapa:'<svg viewBox="0 0 24 24"><path d="M3 21V11l3-2 3 2v10M9 21V7l3-2 3 2v14M15 21v-8l3-2 3 2v8M1 21h22M2 4h20"/></svg>',
+  apto:'<svg viewBox="0 0 24 24"><path d="M4 21V8h16v13M8 12h2M14 12h2M8 16h2M14 16h2M2 21h20M4 8l8-4 8 4"/></svg>',
+  local:'<svg viewBox="0 0 24 24"><path d="M3 10h18v11H3zM3 10l2-5h14l2 5M9 21v-6h6v6M6 10v2M12 10v2M18 10v2"/></svg>',
+  oficina:'<svg viewBox="0 0 24 24"><path d="M5 21V4h14v17M9 8h2M13 8h2M9 12h2M13 12h2M9 16h2M13 16h2M2 21h20"/></svg>',
+  parqueadero:'<svg viewBox="0 0 24 24"><path d="M4 21V3h16v18M9 16V8h4a2.5 2.5 0 0 1 0 5H9"/></svg>',
+  deposito:'<svg viewBox="0 0 24 24"><path d="M3 9l9-5 9 5v12H3zM9 21v-8h6v8M12 13v8"/></svg>',
+  porteria:'<svg viewBox="0 0 24 24"><path d="M5 21V9l7-5 7 5v12M10 21v-6h4v6M2 21h20M12 8v2"/></svg>',
+  salon:'<svg viewBox="0 0 24 24"><path d="M3 21V9h18v12M3 9l9-5 9 5M7 15h10M7 18h10"/></svg>',
+  piscina:'<svg viewBox="0 0 24 24"><path d="M2 15c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 19c2-2 4-2 6 0s4 2 6 0 4-2 6 0M8 12V5a2 2 0 0 1 4 0M14 12V5a2 2 0 0 1 4 0"/></svg>',
+  gimnasio:'<svg viewBox="0 0 24 24"><path d="M2 12h3M19 12h3M5 8v8M19 8v8M8 6v12M16 6v12M8 12h8"/></svg>',
+  parque:'<svg viewBox="0 0 24 24"><path d="M12 21v-6M12 15l-5-4 5-8 5 8zM3 21h18"/></svg>',
+  ascensor:'<svg viewBox="0 0 24 24"><path d="M5 21V3h14v18M9 3v18M15 3v18M12 7l-2 2M12 7l2 2M12 17l-2-2M12 17l2-2"/></svg>',
+};
+const CATALOGO = {
+  Estructura: { ayuda:'Lo grande primero: agrega torres, manzanas o etapas.', objetos:[
+    ['torre','Torre','con pisos'],['manzana','Manzana','de casas'],['etapa','Etapa','agrupa torres'] ]},
+  Unidades: { ayuda:'Toca una torre en el dibujo para decir qué tiene por piso.', objetos:[
+    ['apto','Apartamento','por piso'],['local','Local','primer piso'],['oficina','Oficina','por piso'] ]},
+  Espacios: { ayuda:'Parqueaderos, depósitos y zonas comunes. Se agregan con su cantidad.', objetos:[
+    ['parqueadero','Parqueaderos','cantidad'],['deposito','Depósitos','cantidad'],['porteria','Portería',''],['salon','Salón social',''],['piscina','Piscina',''],['gimnasio','Gimnasio',''],['parque','Parque infantil',''],['ascensor','Ascensores','por torre'] ]},
+};
+const estado = { pestana:'Estructura', torres:[], manzanas:[], espacios:[], sel:null };
+const $ = (s)=>document.querySelector(s);
+function agregar(id){
+  if (id==='torre') { estado.torres.push({ nombre:'Torre '+(estado.torres.length+1), pisos:6, porPiso:4, locales:false }); estado.sel=estado.torres.length-1; }
+  else if (id==='manzana') { estado.manzanas.push({ nombre:'Manzana '+(estado.manzanas.length+1), casas:8 }); }
+  else if (id==='etapa') { alert('Prototipo: una etapa agruparía las torres que elijas.'); }
+  else if (id==='local') { if (estado.sel!==null) estado.torres[estado.sel].locales=true; else alert('Toca primero una torre en el dibujo.'); }
+  else if (id==='apto'||id==='oficina') { if (estado.sel!==null) estado.torres[estado.sel].porPiso++; else alert('Toca primero una torre en el dibujo.'); }
+  else { const e=estado.espacios.find(x=>x.id===id); if (e) e.n++; else estado.espacios.push({ id, n: (id==='parqueadero'||id==='deposito')? 20 : 1 }); }
+  render();
+}
+function unidades(){ return estado.torres.reduce((a,t)=>a+t.pisos*t.porPiso,0) + estado.manzanas.reduce((a,m)=>a+m.casas,0); }
+function render(){
+  // pestañas y catálogo
+  $('#pestanas').innerHTML = Object.keys(CATALOGO).map(k=>`<button role="tab" aria-selected="${estado.pestana===k}" onclick="estado.pestana='${k}';render()">${k}</button>`).join('');
+  $('#ayuda').textContent = CATALOGO[estado.pestana].ayuda;
+  $('#catalogo').innerHTML = CATALOGO[estado.pestana].objetos.map(([id,t,s])=>`<button class="objeto" onclick="agregar('${id}')">${I[id]}<strong>${t}</strong><span>${s||'&nbsp;'}</span><span class="mas">+</span></button>`).join('');
+  // escena
+  const e=$('#escena'); e.innerHTML='';
+  estado.torres.forEach((t,i)=>{
+    const d=document.createElement('div'); d.className='torre'+(estado.sel===i?' sel':''); d.onclick=()=>{estado.sel=i;render();};
+    const visibles=Math.min(t.pisos,8);
+    for(let p=0;p<visibles;p++){ const piso=document.createElement('div'); piso.className='piso'+(p===0&&t.locales?' piso--local':''); piso.style.animationDelay=(p*30)+'ms'; for(let u=0;u<Math.min(t.porPiso,6);u++) piso.appendChild(document.createElement('i')); d.appendChild(piso); }
+    const techo=document.createElement('div'); techo.className='techo'; d.appendChild(techo);
+    const n=document.createElement('div'); n.className='torre__nombre'; n.textContent=t.nombre; d.appendChild(n);
+    const r=document.createElement('div'); r.className='torre__resumen'; r.textContent=`${t.pisos} pisos × ${t.porPiso}`; d.appendChild(r);
+    e.appendChild(d);
+  });
+  estado.manzanas.forEach((m)=>{ const d=document.createElement('div'); d.className='torre'; const c=document.createElement('div'); c.className='casa'; d.appendChild(c); const n=document.createElement('div'); n.className='torre__nombre'; n.textContent=`${m.nombre} · ${m.casas} casas`; d.appendChild(n); e.appendChild(d); });
+  $('#espacios').innerHTML = estado.espacios.map(x=>`<span class="espacio" onclick="agregar('${x.id}')">${I[x.id].replace('<svg','<svg width=16 height=16 style="stroke:#fff"')} ${nombre(x.id)}${x.n>1?' · '+x.n:''}</span>`).join('');
+  $('#vacio').style.display = (estado.torres.length||estado.manzanas.length||estado.espacios.length)?'none':'block';
+  const u=unidades(); $('#resumen').textContent = u? `${estado.torres.length?estado.torres.length+' torres':''}${estado.torres.length&&estado.manzanas.length?' · ':''}${estado.manzanas.length?estado.manzanas.length+' manzanas':''} · ${u} unidades` : '';
+  const pct=Math.min(60, Math.round(u>0?20+Math.min(40,u/3):0)); $('#anillo').style.setProperty('--p',pct+'%'); $('#pct').textContent=pct+' %';
+  $('#conteo').textContent = u? `${u} unidades hasta ahora` : 'Nada todavía';
+  // inspector
+  const t = estado.sel!==null ? estado.torres[estado.sel] : null;
+  $('#inspector').innerHTML = t ? `<div class="inspector"><h2>${t.nombre}</h2><div class="sub">Toca otra torre para editarla. Puedes cambiarlo después.</div>
+    <div class="fila"><span>Pisos</span><span class="stepper"><button onclick="estado.torres[${estado.sel}].pisos=Math.max(1,${t.pisos}-1);render()">−</button><output>${t.pisos}</output><button onclick="estado.torres[${estado.sel}].pisos=${t.pisos}+1;render()">+</button></span></div>
+    <div class="fila"><span>Apartamentos por piso</span><span class="stepper"><button onclick="estado.torres[${estado.sel}].porPiso=Math.max(1,${t.porPiso}-1);render()">−</button><output>${t.porPiso}</output><button onclick="estado.torres[${estado.sel}].porPiso=${t.porPiso}+1;render()">+</button></span></div>
+    <div class="fila"><span>Locales en el primer piso</span><button class="interruptor" role="switch" aria-checked="${t.locales}" onclick="estado.torres[${estado.sel}].locales=!${t.locales};render()"></button></div>
+    <div class="acciones"><button class="boton" onclick="estado.torres.push({...estado.torres[${estado.sel}], nombre:'Torre '+(estado.torres.length+1)});estado.sel=estado.torres.length-1;render()">Duplicar torre</button><button class="boton" onclick="const n=prompt('Nombre de la torre',estado.torres[${estado.sel}].nombre); if(n){estado.torres[${estado.sel}].nombre=n;render()}">Renombrar</button><button class="boton boton--peligro" onclick="estado.torres.splice(${estado.sel},1);estado.sel=null;render()">Quitar</button></div></div>` : '';
+}
+function nombre(id){ return {parqueadero:'Parqueaderos',deposito:'Depósitos',porteria:'Portería',salon:'Salón social',piscina:'Piscina',gimnasio:'Gimnasio',parque:'Parque infantil',ascensor:'Ascensores'}[id]; }
+if (location.hash==='#demo') { estado.torres=[{nombre:'Torre 1',pisos:6,porPiso:4,locales:true},{nombre:'Torre 2',pisos:6,porPiso:4,locales:false},{nombre:'Torre 3',pisos:8,porPiso:3,locales:false}]; estado.espacios=[{id:'parqueadero',n:96},{id:'deposito',n:40},{id:'porteria',n:1},{id:'salon',n:1},{id:'piscina',n:1}]; estado.sel=2; estado.pestana='Espacios'; }
+render();
+</script>
+</body>
+</html>

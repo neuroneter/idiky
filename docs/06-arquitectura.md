@@ -72,26 +72,56 @@ apps/pwa/
 | Todo acceso a datos pasa por `useDatos()` (que usa el repositorio). | Un solo punto de cambio hacia el backend. |
 | Cada pantalla declara en un comentario el/los `CU-` que implementa. | Trazabilidad documentación ↔ código. |
 
+## 3.1 Los dos productos del repositorio
+
+| Carpeta | Producto | Stack | Responsable |
+|---|---|---|---|
+| `apps/pwa/` | App del residente + consola web | React + TypeScript + Vite ([ADR-0001](./adr/0001-stack-tecnologico.md)) | Mary |
+| `apps/contable/` | Aplicación contable de escritorio | HTML + CSS + JS sin compilar ([ADR-0010](./adr/0010-stack-aplicacion-contable.md)) | Jeimy |
+
+No comparten código. Comparten **las reglas del dominio**, traducidas a los dos lenguajes —
+ver [`10-equipo-y-orquestacion.md`](./10-equipo-y-orquestacion.md) §2.1.
+
 ## 4. Rutas de la aplicación
 
 | Ruta | Pantalla | CU |
 |---|---|---|
-| `/acceso` | Selección de perfil demo | CU-R-01 |
+| `/acceso` | Ingreso con documento y contraseña | CU-R-01 |
+| `/acceso/activar` | Activar la cuenta | CU-R-25 |
+| `/acceso/recuperar` | Recuperar la contraseña | CU-R-25 |
 | `/app` | Inicio residente | CU-R-02 |
 | `/app/cuenta` | Estado de cuenta | CU-R-03 |
 | `/app/cuenta/pagar` | Pago | CU-R-04 |
-| `/app/reservas` | Zonas comunes y reservas | CU-R-05, CU-R-06 |
-| `/app/pqrs` | PQRS | CU-R-07, CU-R-08 |
+| `/app/cuenta/informar` | Informar un abono ya consignado | CU-R-30 |
+| `/app/solicitudes` | Redirige a reservas | — |
+| `/app/solicitudes/reservas` | Zonas comunes y reservas | CU-R-05, CU-R-06 |
+| `/app/solicitudes/pqrs` | PQRS | CU-R-07, CU-R-08 |
+| `/app/solicitudes/paz-y-salvo` | Paz y salvo | CU-R-12 |
+| `/app/asambleas` | Asambleas de la copropiedad | CU-R-20 |
+| `/app/asambleas/:id` | Sala: cómo asistir, asistencia y votaciones | CU-R-13, CU-R-20, CU-R-21 |
 | `/app/comunicados` | Cartelera | CU-R-09 |
+| `/app/reservas`, `/app/pqrs` | Redirigen a `/app/solicitudes/…` | — |
 | `/app/visitantes` | Visitantes y códigos | CU-R-10 |
 | `/app/correspondencia` | Correspondencia | CU-R-11 |
+| `/app/procesos` | Procesos sancionatorios de mi unidad | CU-R-29 |
+| `/app/unidad` | Mi coeficiente | CU-R-24 |
+| `/app/unidad/personas` | Personas de mi unidad | CU-R-27 |
 | `/admin` | Tablero | CU-A-01 |
+| `/admin/registros` | Registro de personas | CU-A-26 |
 | `/admin/unidades` | Unidades y residentes | CU-A-02 |
-| `/admin/cartera` | Cartera, pagos y generación | CU-A-03, CU-A-04, CU-A-05 |
+| `/admin/cartera` | Cartera: estados de cuenta y generación de cuotas | CU-A-03, CU-A-05 |
+| `/admin/pagos` | Pagos: conciliación de abonos y recibos de caja | CU-A-04, CU-A-27 |
+| `/admin/multas` | Catálogo de multas (parametrizar) | CU-A-22 |
+| `/admin/sanciones` | Procesos sancionatorios (imponer y resolver) | CU-A-23 |
+| `/admin/asambleas` | Convocar, instalar y llevar la asistencia | CU-A-12, CU-A-17 |
 | `/admin/reservas` | Aprobación de reservas | CU-A-06 |
 | `/admin/pqrs` | Bandeja de PQRS | CU-A-07 |
 | `/admin/comunicados` | Publicación de comunicados | CU-A-08 |
 | `/admin/correspondencia` | Registro de correspondencia | CU-A-09 |
+| `/porteria` | El turno: lo pendiente y las dos acciones | CU-P-01, CU-P-02 |
+| `/porteria/visitantes` | Validar el código de un visitante | CU-P-02 |
+| `/porteria/residentes` | Reconocer a quien vive aquí | CU-P-03 |
+| `/porteria/correspondencia` | Registrar y entregar | CU-P-01 |
 
 ## 5. Estrategia multiplataforma
 
@@ -106,14 +136,50 @@ Cuando se necesite cámara, notificaciones push o biometría, se hará detrás d
 propia (`servicios/plataforma.ts`) con dos implementaciones. Ver
 [ADR-0002](./adr/0002-estrategia-multiplataforma.md).
 
-## 6. Backend (fase 2, aún no existe)
+## 6. Backend
 
-Diseño previsto para no bloquear decisiones hoy:
+**Decidido el 2026-09-21** ([ADR-0008](./adr/0008-backend-de-bloky.md)): BLOKY tiene su propia
+API en `apps/bloky-api/` (Node 22 + TypeScript + Fastify) con PostgreSQL. **Lee BOB y no lo
+escribe**: la copropiedad y sus perfiles raíz nacen en BOB (ADR-0012).
 
-- API REST `/{copropiedadId}/...` con autenticación por token.
-- Multi-tenant por `copropiedadId` en todas las consultas (RN-01).
-- Los tipos de `dominio/tipos.ts` se comparten como paquete `packages/dominio`.
-- El adaptador `datos/adaptadorApi.ts` implementa la misma interfaz que el local.
+```
+apps/bloky/          la app (React + Vite)      ──/api──▶  apps/bloky-api/  ──token solo lectura──▶  BOB (Strapi)
+                                                            │
+                                                            └── PostgreSQL `bloky`: lo propio de BLOKY
+```
 
-La elección concreta de tecnología del backend se documentará en un ADR cuando se tome.
-**No está decidida.**
+- La app solo habla con la API por `src/datos/api.ts` (ADR-0003). La sesión es una cookie
+  httpOnly.
+- Multi-tenant por `copropiedadId` (RN-01): el `id` es el `documentId` de la copropiedad en BOB.
+  **Cada copropiedad tiene su propio esquema de PostgreSQL**, estructuralmente idéntico, aprovisionado
+  desde BOB ([ADR-0015](./adr/0015-capa-de-datos-de-bloky-un-esquema-por-copropiedad.md)). El
+  repositorio se abre por copropiedad (`repositorio.para(copropiedadId)`); el esquema sale del
+  catálogo, nunca de la petición.
+- Las reglas de negocio de BLOKY viven en `apps/bloky-api/src/dominio/reglas.ts`, puras y
+  numeradas (RN-160 en adelante). El paquete compartido `packages/dominio` se creará cuando haya
+  dos consumidores del mismo código.
+- BLOKY Dev se construye **aparte del demo**, módulo por módulo ([ADR-0013](./adr/0013-bloky-dev-separada-del-demo.md)).
+  El demo sigue con su adaptador local; no se convierte en BLOKY.
+
+## 7. Entorno de desarrollo
+
+Desde el 2026-09-10 los dos productos se publican en contenedores, cada uno en el suyo
+([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), carpeta
+[`infra/`](../infra/README.md)):
+
+```
+servidor compartido ─ usuario idiky (Podman sin root)
+├── idiky-pwa       nginx + apps/pwa compilada          → :8080, con clave
+├── idiky-contable  nginx + apps/contable tal cual      → :8081, con clave
+├── idiky-gestion   pod: nginx + Strapi + PostgreSQL 17 → :8082, login de Strapi (ADR-0012)
+└── idiky-bloky     pod: nginx + API de BLOKY + PostgreSQL 17 → :8083, ingreso de BLOKY (ADR-0008, ADR-0013)
+                    la API lee BOB (:8082) con un token de solo lectura
+```
+
+Los contenedores **solo publican lo que ya existe**: no agregan compilación a la contable ni
+dependencias a la PWA. El servidor lo comparte otro servicio que no puede verse afectado,
+así que **todo lo de Idiky vive dentro del usuario `idiky`** y no toca nginx, firewall ni
+puertos ajenos.
+
+Para agregar un servicio (una API, una base de datos, otra app): el contrato que debe cumplir
+y la receta paso a paso están en [`infra/nuevo-servicio.md`](../infra/nuevo-servicio.md).

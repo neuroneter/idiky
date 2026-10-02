@@ -1,0 +1,47 @@
+{
+  "collectionName": "components_bob_ubicaciones",
+  "info": {
+    "displayName": "Ubicación",
+    "icon": "pinMap",
+    "description": "Dirección, DIVIPOLA y geolocalización de una copropiedad (docs/13 §5)."
+  },
+  "options": {},
+  "attributes": {
+    "pais": {
+      "type": "string",
+      "required": true,
+      "default": "CO",
+      "regex": "^[A-Z]{2}$"
+    },
+    "divipola": {
+      "type": "string",
+      "regex": "^\\d{8}$"
+    },
+    "departamento": {
+      "type": "string"
+    },
+    "municipio": {
+      "type": "string"
+    },
+    "centroPoblado": {
+      "type": "string"
+    },
+    "barrio": {
+      "type": "string"
+    },
+    "direccion": {
+      "type": "string",
+      "required": true
+    },
+    "latitud": {
+      "type": "decimal",
+      "min": -90,
+      "max": 90
+    },
+    "longitud": {
+      "type": "decimal",
+      "min": -180,
+      "max": 180
+    }
+  }
+}
