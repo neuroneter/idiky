@@ -111,6 +111,40 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-02 · Mary + IA (Claude) · Quién es y cómo se queda: el registro con condición de residencia
+
+Mary: *«cuando se crea a un propietario, arrendatario y/o visitante se debe seleccionar si es
+residente, no residente o residente temporal»* y *«con este cambio el usuario denominado residente
+temporal ya no va»*. **No se gastaron números**: se revisaron RN-57, RN-60, RN-62 y RN-68 (con
+fecha, en `docs/05-modelo-de-datos.md`).
+
+**Lo que cambió en el registro** (`apps/pwa/src/componentes/Registro.tsx`):
+- Se escoge **quién es** (propietario, arrendatario o visitante) y **cómo se queda** (residente,
+  no residente o residente temporal). Solo se ofrece lo que aplica: **no residente, solo el
+  propietario** (*«el arrendatario no puede tener la categoría de no residente»*); el visitante,
+  **de un día o temporal**.
+- La **visita de un día puede llevar fotos** si quien la registra las pide (*«para el visitante
+  también debe existir la opción de las fotos»*). A todos los demás se les piden siempre.
+- **El arrendatario registra visitantes temporales**; si se quedan **más de 7 días**, el
+  propietario aprueba la estadía antes de que el arrendatario la autorice (*«si es más de una
+  semana debe ser aprobado por el propietario»*). Le llega un aviso; si no la aprueba, escribe
+  por qué y el registro queda rechazado.
+
+**Dónde:** `dominio/tipos.ts` (`CategoriaRegistro`, `CondicionRegistro`, `pedirFotos`,
+`aprobacionPropietario`), `dominio/reglas.ts` (`condicionesPosibles`, `marcaResidente`,
+`requiereAprobacionPropietario`, `esperaAlPropietario`), `datos/repositorio.ts`
+(`crearRegistroPersona`, `autorizarRegistro`, `decidirEstadiaComoPropietario`),
+`features/residente/PersonasPage.tsx` y `features/admin/RegistrosPage.tsx`.
+
+**Semilla v32:** las unidades 301 y 502, de las arrendatarias Sandra y Diana, ahora tienen
+propietario **no residente** (Gustavo Mejía y Beatriz Franco). Antes no tenían dueño, y no había
+a quién pedirle la aprobación. Al abrir el demo, los datos se reinician.
+
+**Pruebas:** nuevas `prueba-condicion` (todas las combinaciones, la aprobación y las fotos
+opcionales) y `prueba-condicion-ui` (10 casos en pantalla); las 19 anteriores siguen en verde.
+
+---
+
 ### 2026-10-02 · Mary + IA (Claude) · Revisión de la creación de usuarios y el cambio de propietario
 
 Mary: *«podemos revisar la creación de usuarios»*. Se probó el trámite completo y se ajustó a sus

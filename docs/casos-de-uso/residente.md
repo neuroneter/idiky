@@ -835,13 +835,38 @@ categoría, y ahí sí duerme, usa las zonas comunes y la portería lo ve a diar
 **El visitante sigue dejando registro.** Aunque su trámite sea de un toque, queda escrito quién
 lo dejó entrar y cuándo: aliviar el requisito no es renunciar al rastro.
 
-**Las categorías** (RN-62)
+**Quién es y cómo se queda** (RN-62, RN-68 — revisión 2026-10-02)
+
+Mary: *«cuando se crea a un propietario, arrendatario y/o visitante se debe seleccionar si es
+residente, no residente o residente temporal»*, y *«con este cambio el usuario denominado
+residente temporal ya no va»*. Son dos preguntas: **quién es** y **cómo se queda**.
+
+| | Residente | No residente | Residente temporal |
+|---|---|---|---|
+| **Propietario** | Vive en su apartamento · fotos · sin fecha de fin | Lo tiene arrendado o vacío · fotos · no aparece en portería | Vive ahí un tiempo · fotos · fecha de salida |
+| **Arrendatario** | Vive en el apartamento · fotos · sin fecha de fin | **No aplica** (*«el arrendatario no puede tener la categoría de no residente»*) | Arriendo corto · fotos · fecha de salida |
+| **Visitante** | **No aplica**: quien vive ahí no es visita | **De un día** · fotos **opcionales** · sale con su código | Huésped de Airbnb, un familiar · fotos · fecha de salida · queda como `autorizado` |
+
+**Quién registra a quién** (RN-60, RN-63): la administración, al primer propietario; el
+propietario, a los demás propietarios, arrendatarios y visitantes; el arrendatario, a visitantes
+de un día o temporales. **Si el visitante temporal del arrendatario se queda más de 7 días, lo
+aprueba el propietario** (*«si es más de una semana debe ser aprobado por el propietario»*): le
+llega un aviso, lo aprueba o no desde **Personas de la unidad**, y solo entonces el arrendatario
+autoriza. En el demo, las unidades 301 y 502 tienen dueño no residente para probarlo.
+
+**Las fotos de la visita de un día son opcionales** (*«para el visitante también debe existir la
+opción de las fotos»*): quien la registra marca «Pedirle las fotos» y la visita sigue el trámite
+completo; sin la marca, sale con su código de una vez, como antes.
+
+<details><summary>Versión anterior (hasta 2026-10-01): tres categorías</summary>
 
 | Categoría | Quién es, en concreto | ¿Fotos? | ¿Marca de residente? | Vigencia | Qué se crea al autorizar |
 |---|---|---|---|---|---|
 | Residente | El dueño, quien le arrienda, su familia | **Sí** | Al **propietario se le pregunta** (puede tenerla arrendada); el arrendatario la trae | Sin fecha de fin | Una residencia como propietario o arrendatario |
-| **Residente temporal** | **Un huésped de Airbnb, un familiar unos meses** | **Sí** | Por defecto **sí** | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
-| Visitante | **Quien viene una tarde** | **No** | **No** | **Un solo día** | Un visitante con su código, de una vez |
+| Residente temporal | Un huésped de Airbnb, un familiar unos meses | **Sí** | Por defecto **sí** | **Exige** fecha de fin | Una residencia como `autorizado`, con fecha de salida |
+| Visitante | Quien viene una tarde | **No** | **No** | **Un solo día** | Un visitante con su código, de una vez |
+
+</details>
 
 **El visitante es de un solo día** (Mary, 2026-09-07). No se registra un rango: se escoge el día
 en que viene, y ese día entra y sale. **Ese día puede ser futuro** —una visita del sábado se
@@ -860,11 +885,10 @@ ahora lo reconoce de una.
 
 **Flujo principal**
 1. El residente abre **Mi unidad → Personas de la unidad**.
-2. Toca **Registrar** y escoge la categoría. Lo que se pregunta después depende de ella:
-   pedirle fecha de salida a quien compró un apartamento no tiene sentido. **La marca de
-   residente se ve en las cuatro categorías —para saber qué va a quedar— pero solo se cambia
-   en el propietario** (RN-68), que es el único que puede tener la unidad arrendada o vacía.
-   La marca se escoge **aquí y solo aquí**: en las demás vistas no aporta nada.
+2. Toca **Registrar**, escoge **quién es** (propietario, arrendatario o visitante) y **cómo se
+   queda** (residente, no residente o residente temporal; solo se ofrecen las que le aplican).
+   Lo que se pregunta después depende de eso: la fecha de salida, solo al temporal y a la visita
+   de un día; la casilla de fotos, solo a la visita de un día (2026-10-02).
 3. El sistema crea el registro en `esperando_soportes` y muestra **el código**.
 4. El residente le pasa el código a la persona (en el producto real se lo manda un mensaje).
 5. La persona adjunta (CU-R-28) y el registro pasa a `esperando_autorizacion`.
@@ -931,7 +955,8 @@ propietario, el nuevo dueño hereda a los arrendatarios que siguen (RN-65).
 
 ## CU-R-28 — Adjuntar mis documentos a un registro
 
-- **Actor principal:** La persona que están registrando **como residente o residente temporal**.
+- **Actor principal:** La persona que están registrando —propietario, arrendatario, visitante
+  temporal, o visita de un día a la que se le pidieron las fotos—.
   **Todavía no tiene cuenta.** Un visitante no llega aquí: no lleva fotos (RN-57).
 - **Precondiciones:** Alguien la registró y le pasó el código.
 - **Disparador:** Le llega el código.

@@ -736,13 +736,22 @@ export interface Visitante {
 // ---------------------------------------------------------------------------
 
 /**
- * Que es la persona que se registra.
+ * **Quién es** la persona que se registra (Mary, 2026-10-02).
  *
- * La categoria no es una etiqueta: **decide la vigencia y lo que se crea al
- * autorizar**. Un residente queda vinculado a la unidad sin fecha de fin; un
- * residente temporal, con ella; un visitante no se vincula, obtiene un codigo.
+ * Antes la categoría mezclaba dos preguntas —quién es y cómo se queda— y por eso
+ * existía un «residente temporal» aparte. Ahora son dos datos: este, y la
+ * condición de abajo. «Con este cambio el usuario denominado residente temporal
+ * ya no va» (Mary, 2026-10-02).
  */
-export type CategoriaRegistro = 'residente' | 'residente_temporal' | 'visitante'
+export type CategoriaRegistro = 'propietario' | 'arrendatario' | 'visitante'
+
+/**
+ * **Cómo se queda** en la unidad (RN-62, RN-68). Se escoge siempre, al crear a
+ * cualquiera: «cuando se crea a un propietario, arrendatario y/o visitante se
+ * debe seleccionar si es residente, no residente o residente temporal» (Mary,
+ * 2026-10-02). El visitante no puede ser residente: quien vive ahí no es visita.
+ */
+export type CondicionRegistro = 'residente' | 'no_residente' | 'temporal'
 
 /**
  * Los cinco estados por los que pasa un registro.
@@ -783,21 +792,22 @@ export interface RegistroPersona {
   unidadId: string
   /** Quien lo creo. Propietario para residentes; cualquier residente para visitantes. */
   creadoPor: string
+  /** Quién es: propietario, arrendatario o visitante. */
   categoria: CategoriaRegistro
-  /** Solo para las categorias de residente: con que rol queda vinculado. */
-  rol?: RolResidencia
+  /** Cómo se queda: residente, no residente o temporal (RN-62, RN-68). */
+  condicion: CondicionRegistro
   /**
-   * Si va a vivir en la unidad. Se pregunta **solo cuando el titulo es
-   * propietario**: el arrendatario arrienda para vivir ahi, y al temporal se le
-   * llama temporal justamente porque vive ahi un tiempo.
+   * RN-57 — A la visita de un día se le **pueden** pedir las fotos: lo decide
+   * quien la registra (Mary, 2026-10-02: «para el visitante también debe existir
+   * la opción de las fotos»). A los demás siempre se les piden.
    */
-  reside?: boolean
+  pedirFotos?: boolean
   nombres: string
   apellidos: string
   documento: string
   email: string
   telefono: string
-  /** Obligatoria salvo para el residente sin fecha de fin (RN-62). */
+  /** Obligatoria para el temporal y el visitante (RN-62). */
   vigenciaDesde?: FechaISO
   vigenciaHasta?: FechaISO
   placa?: string
@@ -828,6 +838,12 @@ export interface RegistroPersona {
    * que alguien tomo y el expediente tiene que decir quien.
    */
   soportesNoObligatorios?: { marcadoPor: string; marcadoEn: FechaHoraISO }
+  /**
+   * RN-60 — La estadía larga que registra un arrendatario: un visitante temporal
+   * de **más de 7 días** lo aprueba el propietario (Mary, 2026-10-02). Que
+   * exista significa que hace falta; `aprobadoPor` dice que ya se dio.
+   */
+  aprobacionPropietario?: { aprobadoPor?: string; aprobadoEn?: FechaHoraISO }
   estado: EstadoRegistro
   creadoEn: FechaHoraISO
   soportesEn?: FechaHoraISO
@@ -877,6 +893,7 @@ export type MotivoMensaje =
   | 'reserva_decidida'
   | 'reserva_vencida'
   | 'recordatorio_reserva'
+  | 'estadia_por_aprobar'
 
 export interface Mensaje {
   id: string

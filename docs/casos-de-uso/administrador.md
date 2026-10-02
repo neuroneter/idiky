@@ -908,8 +908,9 @@ propietario dejaría de saber quién vive en su unidad.
 1. El administrador abre **Registros**.
 2. Ve la tabla de toda la copropiedad, con **quién registró a quién**: es la cadena de RN-63
    hecha visible.
-3. Toca **Registrar propietario**, escoge la unidad y llena los datos. **Solo aparecen las
-   unidades sin propietario**, y el título no se escoge: es propietario. Si todas tienen dueño,
+3. Toca **Registrar propietario**, escoge la unidad, **cómo se queda** (residente, no residente
+   o residente temporal; RN-68, 2026-10-02) y llena los datos. **Solo aparecen las unidades sin
+   propietario**, y quién es no se escoge: es propietario. Si todas tienen dueño,
    el botón se apaga y la pantalla explica qué hacer cuando se vende una.
 4. El resto es igual que CU-R-27: la persona adjunta, el administrador autoriza.
 5. **Si la persona no quiere adjuntar** la foto ni el documento, el administrador marca el

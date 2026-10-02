@@ -20,6 +20,7 @@ import type {
   ModalidadAsamblea,
   Poder,
   CategoriaRegistro,
+  CondicionRegistro,
   ConceptoSancion,
   EstadoSancion,
   OrigenRespaldo,
@@ -1737,7 +1738,7 @@ export const CADENA_DE_REGISTRO: ReadonlyArray<{
  * cadena sin dueno.
  */
 const CATEGORIAS_POR_ROL: Record<RolResidencia, readonly CategoriaRegistro[]> = {
-  propietario: ['residente', 'residente_temporal', 'visitante'],
+  propietario: ['propietario', 'arrendatario', 'visitante'],
   arrendatario: ['visitante'],
   autorizado: [],
 }
@@ -1768,10 +1769,9 @@ export function puedeRegistrar(
  */
 export function motivoNoRegistraAdministracion(
   categoria: CategoriaRegistro,
-  rol: RolResidencia | undefined,
   unidadTienePropietario: boolean,
 ): string | undefined {
-  if (categoria !== 'residente' || rol !== 'propietario') {
+  if (categoria !== 'propietario') {
     return 'La administración registra al propietario; los arrendatarios, temporales y visitantes los registra él.'
   }
   if (unidadTienePropietario) {
@@ -1789,24 +1789,87 @@ export function motivoNoRegistraAdministracion(
  * y autorizar es decir «los vi y son quien dice ser».
  */
 export function puedeAutorizar(registro: RegistroPersona, personaId: string): boolean {
-  return registro.creadoPor === personaId && registro.estado === 'esperando_autorizacion'
+  return (
+    registro.creadoPor === personaId &&
+    registro.estado === 'esperando_autorizacion' &&
+    !esperaAlPropietario(registro)
+  )
+}
+
+/**
+ * RN-60 — El arrendatario registra visitantes, también temporales; **si la
+ * estadía pasa de una semana, la aprueba el propietario** (Mary, 2026-10-02:
+ * «el arrendatario puede registrar un visitante temporal de un par de días; si
+ * es más de una semana debe ser aprobado por el propietario»). Quien se queda
+ * más de una semana ya casi vive ahí, y eso lo decide el dueño.
+ */
+export const DIAS_SIN_APROBACION_DEL_PROPIETARIO = 7
+
+export function requiereAprobacionPropietario(
+  rolDeQuienRegistra: RolResidencia | undefined,
+  registro: Pick<RegistroPersona, 'categoria' | 'condicion' | 'vigenciaDesde' | 'vigenciaHasta'>,
+): boolean {
+  return (
+    rolDeQuienRegistra === 'arrendatario' &&
+    registro.categoria === 'visitante' &&
+    registro.condicion === 'temporal' &&
+    !!registro.vigenciaDesde &&
+    !!registro.vigenciaHasta &&
+    diasEntre(registro.vigenciaDesde, registro.vigenciaHasta) > DIAS_SIN_APROBACION_DEL_PROPIETARIO
+  )
+}
+
+/** El registro espera que el propietario apruebe la estadía (RN-60). */
+export function esperaAlPropietario(registro: RegistroPersona): boolean {
+  return !!registro.aprobacionPropietario && !registro.aprobacionPropietario.aprobadoPor && registroEnCurso(registro)
 }
 
 /**
  * RN-57 — Los soportes se le exigen **a quien se queda a dormir**.
  *
  * «El tramite le corresponde a quien se queda a dormir» (Mary, 2026-09-07). El
- * residente y el residente temporal —el huesped de Airbnb, el familiar unos
- * meses— usan las zonas comunes y la porteria los ve a diario: ahi las dos fotos
- * y la autorizacion valen lo que cuestan. El visitante de una tarde, no.
+ * propietario, el arrendatario y el visitante temporal —el huesped de Airbnb, el
+ * familiar unas semanas— usan las zonas comunes o la app, y la porteria los ve:
+ * ahi las dos fotos y la autorizacion valen lo que cuestan. La visita de una
+ * tarde (visitante no residente), no.
  *
  * No es una comodidad, es seguridad: **pedirle cedula fotografiada a quien viene
  * a almorzar es el requisito que hace que la gente deje de registrar visitas y
  * las meta sin avisar**. Un tramite que se evade protege menos que uno liviano
  * que se cumple.
  */
-export function exigeSoportes(categoria: CategoriaRegistro): boolean {
-  return categoria !== 'visitante'
+export function exigeSoportes(clase: ClaseRegistro): boolean {
+  return !esVisitaDeUnDia(clase) || !!clase.pedirFotos
+}
+
+/** Quién es y cómo se queda: lo que decide el trámite (RN-57, RN-62). */
+export type ClaseRegistro = Pick<RegistroPersona, 'categoria' | 'condicion' | 'pedirFotos'>
+
+/**
+ * La visita de un día: visitante **no residente**. Es la única que no lleva
+ * fotos y sale con su código de una vez (RN-57). El visitante **temporal** —el
+ * huésped de Airbnb, el familiar unas semanas— se queda a dormir y lleva el
+ * trámite completo.
+ */
+export function esVisitaDeUnDia(clase: ClaseRegistro): boolean {
+  return clase.categoria === 'visitante' && clase.condicion === 'no_residente'
+}
+
+/**
+ * RN-68 — Las condiciones que se pueden escoger para cada quién (Mary,
+ * 2026-10-02). Solo el propietario puede ser no residente —tiene la unidad
+ * arrendada o vacía—; «en el caso del arrendatario no puede tener la categoría
+ * de no residente»: arrienda para vivir ahí. Y el visitante no es residente:
+ * quien vive ahí no es una visita.
+ */
+const CONDICIONES: Record<CategoriaRegistro, readonly CondicionRegistro[]> = {
+  propietario: ['residente', 'no_residente', 'temporal'],
+  arrendatario: ['residente', 'temporal'],
+  visitante: ['no_residente', 'temporal'],
+}
+
+export function condicionesPosibles(categoria: CategoriaRegistro): readonly CondicionRegistro[] {
+  return CONDICIONES[categoria]
 }
 
 // ---------------------------------------------------------------------------
@@ -1827,12 +1890,12 @@ export function exigeSoportes(categoria: CategoriaRegistro): boolean {
 
 /** Si a este registro se le pueden eximir los soportes: solo a quien los debe. */
 export function admiteMarcaNoObligatorio(registro: RegistroPersona): boolean {
-  return exigeSoportes(registro.categoria) && registroEnCurso(registro)
+  return exigeSoportes(registro) && registroEnCurso(registro)
 }
 
 /** Este registro lleva la marca y por eso no trae fotos. */
 export function sinSoportesPorMarca(registro: RegistroPersona): boolean {
-  return exigeSoportes(registro.categoria) && !!registro.soportesNoObligatorios
+  return exigeSoportes(registro) && !!registro.soportesNoObligatorios
 }
 
 /**
@@ -1840,47 +1903,52 @@ export function sinSoportesPorMarca(registro: RegistroPersona): boolean {
  * salvo que el administrador lo haya marcado como no obligatorio (RN-97).
  */
 export function soportesCompletos(registro: RegistroPersona): boolean {
-  if (!exigeSoportes(registro.categoria)) return true
+  if (!exigeSoportes(registro)) return true
   if (registro.soportesNoObligatorios) return true
   return !!registro.fotoDocumento && !!registro.fotoPersona
 }
 
 
 /**
- * RN-62 — La vigencia depende de la categoria, no del capricho de quien registra.
+ * RN-62 — La vigencia depende de la condición, no del capricho de quien registra.
  *
- * El residente se queda hasta que lo desvinculen: ponerle fecha de fin a quien
- * compro un apartamento no tiene sentido. Las otras dos **exigen** fecha de fin,
- * y esa es justamente la diferencia entre un residente temporal y un residente.
+ * El residente y el no residente se quedan hasta que los inhabiliten: ponerle
+ * fecha de fin a quien compró un apartamento no tiene sentido. El **temporal**
+ * —sea propietario, arrendatario o visitante— **exige** fecha de salida, y la
+ * visita de un día también (es su único día).
  */
-export function exigeVigencia(categoria: CategoriaRegistro): boolean {
-  return categoria !== 'residente'
+export function exigeVigencia(clase: ClaseRegistro): boolean {
+  return clase.condicion === 'temporal' || esVisitaDeUnDia(clase)
 }
 
 /**
  * RN-62 — **El visitante es de un solo dia** (Mary, 2026-09-07).
  *
  * No se registra un rango: se registra el dia en que viene, y ese dia entra y
- * sale. Es lo que mantiene separadas las dos categorias de estadia — una
- * autorizacion de visitante «del 5 al 20» es un residente temporal sin sus
- * soportes, y por ahi se cuela justo lo que RN-57 pide para quien se queda a
+ * sale. Es lo que mantiene separadas las dos formas de visita — una
+ * autorizacion de visitante no residente «del 5 al 20» es un visitante temporal
+ * sin sus soportes, y por ahi se cuela justo lo que RN-57 pide para quien se queda a
  * dormir.
  *
  * Tambien es lo que hace barato no pedirle fotos: una autorizacion que caduca
  * esta misma noche no es una llave.
  */
-export function soloUnDia(categoria: CategoriaRegistro): boolean {
-  return categoria === 'visitante'
+export function soloUnDia(clase: ClaseRegistro): boolean {
+  return esVisitaDeUnDia(clase)
 }
 
-/** El rol con el que queda vinculada la persona; el visitante no se vincula. */
-export function rolDeCategoria(
-  categoria: CategoriaRegistro,
-  rolPedido?: RolResidencia,
-): RolResidencia | undefined {
-  if (categoria === 'visitante') return undefined
-  if (categoria === 'residente_temporal') return 'autorizado'
-  return rolPedido ?? 'arrendatario'
+/**
+ * El rol con el que queda vinculada la persona. La visita de un día no se
+ * vincula: sale con su código. El visitante temporal queda como `autorizado`.
+ */
+export function rolDeRegistro(clase: ClaseRegistro): RolResidencia | undefined {
+  if (esVisitaDeUnDia(clase)) return undefined
+  return clase.categoria === 'visitante' ? 'autorizado' : clase.categoria
+}
+
+/** RN-68 — La marca de residente: la lleva quien no es «no residente». */
+export function marcaResidente(clase: ClaseRegistro): boolean {
+  return clase.condicion !== 'no_residente'
 }
 
 /** Un registro sigue vivo mientras espera algo de alguien. */

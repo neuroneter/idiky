@@ -64,7 +64,11 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      que vence mañana, para la alerta del tablero; invitados en la de hoy (RN-126).
 // 31 — el salón se cancela hasta 12 horas antes del turno (RN-128), y sus
 //      reservas llevan ese límite copiado.
-export const VERSION_ESQUEMA = 31
+// 32 — el registro separa quién es (propietario, arrendatario, visitante) de cómo
+//      se queda (residente, no residente, temporal); el residente temporal deja
+//      de ser una categoría (Mary, 2026-10-02). Las unidades 301 y 502 tienen
+//      propietario no residente.
+export const VERSION_ESQUEMA = 32
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -139,7 +143,7 @@ const MORA_POR_UNIDAD: Record<string, number> = {
 // ---------------------------------------------------------------------------
 // Personas y residencias
 // ---------------------------------------------------------------------------
-const DEFINICION_PERSONAS: Array<[nombres: string, apellidos: string, unidad: string, rol: Residencia['rol']]> = [
+const DEFINICION_PERSONAS: Array<[nombres: string, apellidos: string, unidad: string, rol: Residencia['rol'], reside?: boolean]> = [
   ['Maria Camila', 'Restrepo Ossa', 'uni-torre1-402', 'propietario'],
   ['Andres Felipe', 'Gomez Lara', 'uni-torre2-901', 'propietario'],
   ['Luisa Fernanda', 'Marin Castro', 'uni-torre1-201', 'propietario'],
@@ -152,6 +156,10 @@ const DEFINICION_PERSONAS: Array<[nombres: string, apellidos: string, unidad: st
   ['Mauricio', 'Bermudez Silva', 'uni-torre2-601', 'propietario'],
   ['Angela Maria', 'Trujillo Pardo', 'uni-torre2-602', 'propietario'],
   ['Hernan Dario', 'Quintero Arias', 'uni-torre2-902', 'propietario'],
+  // Los dueños de las unidades arrendadas: propietarios **no residentes**
+  // (RN-68). Aprueban las estadías largas de sus arrendatarias (RN-60).
+  ['Gustavo Adolfo', 'Mejia Toro', 'uni-torre1-301', 'propietario', false],
+  ['Beatriz Elena', 'Franco Rios', 'uni-torre2-502', 'propietario', false],
 ]
 
 const personas: Persona[] = DEFINICION_PERSONAS.map(([nombres, apellidos], i) => ({
@@ -163,16 +171,15 @@ const personas: Persona[] = DEFINICION_PERSONAS.map(([nombres, apellidos], i) =>
   telefono: `+57 31${i % 10} ${200 + i} ${4000 + i * 7}`,
 }))
 
-const residencias: Residencia[] = DEFINICION_PERSONAS.map(([, , unidadId, rol], i) => ({
+const residencias: Residencia[] = DEFINICION_PERSONAS.map(([, , unidadId, rol, reside], i) => ({
   id: `res-${i + 1}`,
   personaId: `per-${i + 1}`,
   unidadId,
   rol,
   desde: `${new Date().getFullYear() - 2}-03-01`,
   principal: true,
-  // Todos los de la semilla viven en su unidad: es el caso comun, y el
-  // propietario no residente se crea desde el registro cuando alguien lo marca.
-  reside: true,
+  // Casi todos viven en su unidad; los dueños de las arrendadas, no.
+  reside: reside ?? true,
 }))
 
 /**

@@ -80,7 +80,7 @@ export function unidadTienePropietario(bd: BaseDatos, unidadId: string): boolean
   return (
     bd.residencias.some((r) => r.unidadId === unidadId && r.rol === 'propietario' && residenciaVigente(r)) ||
     bd.registros.some(
-      (r) => r.unidadId === unidadId && r.categoria === 'residente' && r.rol === 'propietario' && registroEnCurso(r),
+      (r) => r.unidadId === unidadId && r.categoria === 'propietario' && registroEnCurso(r),
     )
   )
 }

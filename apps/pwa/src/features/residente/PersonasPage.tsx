@@ -35,6 +35,7 @@ import { nombreCompleto } from '../../datos/selectores'
 import {
   autorizarRegistro,
   cerrarRegistro,
+  decidirEstadiaComoPropietario,
   crearRegistroPersona,
   desvincularResidente,
   registrarAccesoSoportes,
@@ -42,13 +43,14 @@ import {
 import {
   categoriasQuePuedeRegistrar,
   puedeAutorizar,
+  esperaAlPropietario,
   puedeInhabilitar,
   registroEnCurso,
   verSoportesDejaConstancia,
 } from '../../dominio/reglas'
 import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import {
-  CATEGORIAS,
+  textoClase,
   DetalleRegistro,
   ESTADOS,
   FormularioRegistro,
@@ -121,7 +123,7 @@ export function PersonasPage() {
                     {registro.nombres} {registro.apellidos}
                   </strong>
                   <span className="subtitulo">
-                    {CATEGORIAS[registro.categoria].texto} · {formatearFechaHora(registro.creadoEn)}
+                    {textoClase(registro)} · {formatearFechaHora(registro.creadoEn)}
                   </span>
                 </div>
                 <span className={ESTADOS[registro.estado].chip}>
@@ -204,7 +206,7 @@ export function PersonasPage() {
                     <strong>
                       {registro.nombres} {registro.apellidos}
                     </strong>
-                    <span className="subtitulo">{CATEGORIAS[registro.categoria].texto}</span>
+                    <span className="subtitulo">{textoClase(registro)}</span>
                   </div>
                   <span className={ESTADOS[registro.estado].chip}>
                     {ESTADOS[registro.estado].texto}
@@ -228,6 +230,7 @@ export function PersonasPage() {
       {registrando && (
         <FormularioRegistro
           categorias={categorias}
+          registraArrendatario={miRol === 'arrendatario'}
           categoriaInicial={pedida === 'visitante' ? 'visitante' : undefined}
           alCerrar={() => setRegistrando(false)}
           alCrear={async (datos) => {
@@ -241,7 +244,7 @@ export function PersonasPage() {
                   unidadId: unidadId!,
                   creadoPor: sesion.personaId,
                 }),
-              datos.categoria === 'visitante'
+              datos.categoria === 'visitante' && datos.condicion === 'no_residente' && !datos.pedirFotos
                 ? 'Registro creado.'
                 : 'Registro creado. Ahora la persona adjunta sus fotos.',
             )
@@ -251,7 +254,7 @@ export function PersonasPage() {
               // necesita enseguida es el codigo de entrada, que vive en la
               // pantalla de visitantes. Mostrarle el detalle del registro seria
               // dejarla a un toque de lo que vino a buscar.
-              if (creado.categoria === 'visitante') navegar('/app/visitantes')
+              if (creado.visitanteId) navegar('/app/visitantes')
               else setViendo(creado.id)
             }
           }}
@@ -281,6 +284,23 @@ export function PersonasPage() {
             )
           }}
           puedoAutorizar={puedeAutorizar(enDetalle, sesion.personaId)}
+          alDecidirEstadia={
+            miRol === 'propietario' && esperaAlPropietario(enDetalle)
+              ? async (aprobar, motivo) => {
+                  const hecho = await ejecutar(
+                    (base) =>
+                      decidirEstadiaComoPropietario(base, {
+                        registroId: enDetalle.id,
+                        personaId: sesion.personaId,
+                        aprobar,
+                        motivo,
+                      }),
+                    aprobar ? 'Estadía aprobada. Ahora tu arrendatario la autoriza.' : 'Estadía no aprobada.',
+                  )
+                  if (hecho && !aprobar) setViendo(null)
+                }
+              : undefined
+          }
           esMio={enDetalle.creadoPor === sesion.personaId}
           alCerrar={() => setViendo(null)}
           alAutorizar={async () => {

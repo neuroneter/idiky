@@ -39,7 +39,7 @@ import {
 } from '../../dominio/reglas'
 import { formatearFechaHora } from '../../utilidades/formato'
 import {
-  CATEGORIAS,
+  textoClase,
   DetalleRegistro,
   ESTADOS,
   FormularioRegistro,
@@ -139,7 +139,7 @@ export function RegistrosPage() {
                         <div className="subtitulo numerico">{registro.documento}</div>
                       </td>
                       <td className="suave">{unidad ? etiquetaUnidad(unidad) : '—'}</td>
-                      <td className="suave">{CATEGORIAS[registro.categoria].texto}</td>
+                      <td className="suave">{textoClase(registro)}</td>
                       {/* Quién registró a quién es el dato que hace útil esta
                           tabla: es la cadena de RN-63 hecha visible. */}
                       <td className="suave">
@@ -180,10 +180,9 @@ export function RegistrosPage() {
 
       {registrando && (
         <FormularioRegistro
-          categorias={['residente']}
+          categorias={['propietario']}
           unidades={sinPropietario}
           unidadInicial={unidadDelCambio}
-          rolFijo="propietario"
           permitirNoObligatorio
           alCerrar={() => setRegistrando(false)}
           alCrear={async (datos) => {
@@ -194,8 +193,7 @@ export function RegistrosPage() {
                   unidadId: datos.unidadId!,
                   creadoPor: sesion.personaId,
                   categoria: datos.categoria,
-                  rol: datos.rol,
-                  reside: datos.reside,
+                  condicion: datos.condicion,
                   nombres: datos.nombres,
                   apellidos: datos.apellidos,
                   documento: datos.documento,

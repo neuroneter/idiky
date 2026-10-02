@@ -31,6 +31,8 @@ import type {
   OrigenRespaldo,
   Reincidencia,
   CategoriaRegistro,
+  CondicionRegistro,
+  RolResidencia,
   CategoriaPqrs,
   CierreZona,
   Comunicado,
@@ -52,7 +54,6 @@ import type {
   Reserva,
   Residencia,
   Sancion,
-  RolResidencia,
   TipoCorrespondencia,
   TipoPqrs,
   Visitante,
@@ -94,6 +95,7 @@ import {
   reservasQueCancelaCierre,
   validarReserva,
   fechaCorta,
+  etiquetaUnidad,
   puedeRegistrar,
   puedeInhabilitar,
   motivoNoRegistraAdministracion,
@@ -138,7 +140,12 @@ import {
   formasDeAsistir,
   respaldoCompleto,
   respaldoDeCuotaCompleto,
-  rolDeCategoria,
+  rolDeRegistro,
+  esVisitaDeUnDia,
+  condicionesPosibles,
+  marcaResidente,
+  requiereAprobacionPropietario,
+  esperaAlPropietario,
   soloUnDia,
   soportesCompletos,
   registroEnCurso,
@@ -2902,6 +2909,7 @@ function avisarAPersona(
     reservaId?: string
     zonaId?: string
     proyectoId?: string
+    registroId?: string
     ahora?: string
   },
 ): boolean {
@@ -2915,6 +2923,7 @@ function avisarAPersona(
     reservaId: aviso.reservaId,
     zonaId: aviso.zonaId,
     proyectoId: aviso.proyectoId,
+    registroId: aviso.registroId,
     ahora: aviso.ahora ?? ahoraISO(),
   })
   if (!mensaje) return false
@@ -2959,9 +2968,10 @@ export async function crearRegistroPersona(
     unidadId: string
     creadoPor: string
     categoria: CategoriaRegistro
-    rol?: RolResidencia
-    /** La marca de residente (RN-68). */
-    reside?: boolean
+    /** Residente, no residente o temporal (RN-62, RN-68). */
+    condicion: CondicionRegistro
+    /** Solo la visita de un día: si quien registra le pide las fotos (RN-57). */
+    pedirFotos?: boolean
     nombres: string
     apellidos: string
     documento: string
@@ -2980,16 +2990,16 @@ export async function crearRegistroPersona(
   // RN-60 — Quién registra a quién. Se revisa aquí y no solo en la pantalla: el
   // arrendatario que llame a esta función directamente tampoco registra a un
   // residente. La administración registra lo que su consola ofrece (RN-63).
+  let rolEnLaUnidad: RolResidencia | undefined
   if (esAdministracion(bd, parametros.creadoPor, parametros.copropiedadId)) {
     // RN-63 — La administración solo registra al primer propietario.
     const motivo = motivoNoRegistraAdministracion(
       parametros.categoria,
-      parametros.rol,
       unidadTienePropietario(bd, parametros.unidadId),
     )
     if (motivo) throw new ErrorDeNegocio(motivo)
   } else {
-    const rolEnLaUnidad = bd.residencias.find(
+    rolEnLaUnidad = bd.residencias.find(
       (r) => r.unidadId === parametros.unidadId && r.personaId === parametros.creadoPor && residenciaVigente(r),
     )?.rol
     if (!puedeRegistrar(rolEnLaUnidad, parametros.categoria)) {
@@ -2997,24 +3007,33 @@ export async function crearRegistroPersona(
     }
   }
 
-  // RN-62: la vigencia no es opcional donde la categoria la exige. Se valida aqui
+  // RN-68 — El visitante no es residente: quien vive ahí no es una visita.
+  if (!condicionesPosibles(parametros.categoria).includes(parametros.condicion)) {
+    throw new ErrorDeNegocio(
+      parametros.categoria === 'visitante'
+        ? 'Un visitante es de un día o temporal; no puede ser residente.'
+        : 'El arrendatario es residente o temporal: arrienda para vivir ahí.',
+    )
+  }
+
+  // RN-62: la vigencia no es opcional donde la condición la exige. Se valida aqui
   // y no solo en el formulario: el formulario es una comodidad, la regla es esto.
-  if (exigeVigencia(parametros.categoria) && !parametros.vigenciaHasta) {
-    throw new ErrorDeNegocio('Un registro temporal o de visitante necesita fecha de fin.')
+  if (exigeVigencia(parametros) && !parametros.vigenciaHasta) {
+    throw new ErrorDeNegocio('Un registro temporal o una visita necesita fecha de salida.')
   }
 
   // RN-62: la visita es de un solo dia. Se valida aqui y no solo en el
   // formulario, porque el formulario es una comodidad y esto es la regla.
-  if (soloUnDia(parametros.categoria) && parametros.vigenciaDesde !== parametros.vigenciaHasta) {
+  if (soloUnDia(parametros) && parametros.vigenciaDesde !== parametros.vigenciaHasta) {
     throw new ErrorDeNegocio(
-      'Una visita se autoriza por un día. Para varios días, registra a la persona como residente temporal.',
+      'Una visita de un día se autoriza por un día. Para varios días, escoge «temporal».',
     )
   }
 
   // RN-61 — Quien ya está vinculado a la unidad no se registra otra vez: dos
   // vínculos vigentes de la misma persona son dos verdades sobre quién es ahí.
   // La visita no crea vínculo, así que no cuenta.
-  if (exigeSoportes(parametros.categoria) && yaVinculadaALaUnidad(bd, parametros.documento, parametros.unidadId)) {
+  if (!esVisitaDeUnDia(parametros) && yaVinculadaALaUnidad(bd, parametros.documento, parametros.unidadId)) {
     throw new ErrorDeNegocio('Esa persona ya está vinculada a esta unidad. Si cambia su papel, inhabilítala primero.')
   }
 
@@ -3036,29 +3055,52 @@ export async function crearRegistroPersona(
   }
 
   const ahora = ahoraISO()
-  const { soportesNoObligatorios, ...datos } = parametros
+  const { soportesNoObligatorios, pedirFotos, ...datos } = parametros
   const registro: RegistroPersona = {
     id: nuevoId('reg'),
     ...datos,
+    ...(pedirFotos && esVisitaDeUnDia(parametros) ? { pedirFotos: true } : {}),
     codigo: nuevoCodigoRegistro(),
     estado: 'esperando_soportes',
     creadoEn: ahora,
   }
   bd.registros.unshift(registro)
 
+  // RN-60 — La estadía de más de una semana que registra un arrendatario la
+  // aprueba el propietario. Se le avisa a cada uno.
+  if (requiereAprobacionPropietario(rolEnLaUnidad, registro)) {
+    registro.aprobacionPropietario = {}
+    const unidad = bd.unidades.find((u) => u.id === registro.unidadId)
+    for (const dueno of bd.residencias.filter(
+      (r) => r.unidadId === registro.unidadId && r.rol === 'propietario' && residenciaVigente(r),
+    )) {
+      avisarAPersona(bd, {
+        copropiedadId: registro.copropiedadId,
+        personaId: dueno.personaId,
+        motivo: 'estadia_por_aprobar',
+        registroId: registro.id,
+        texto:
+          `Idiky: tu arrendatario registró a ${registro.nombres} ${registro.apellidos} en ` +
+          `${unidad ? etiquetaUnidad(unidad) : 'tu unidad'} del ${fechaCorta(registro.vigenciaDesde ?? '')} ` +
+          `al ${fechaCorta(registro.vigenciaHasta ?? '')}. Por ser más de una semana, necesita tu aprobación en la app.`,
+        ahora,
+      })
+    }
+  }
+
   // RN-97: con la marca, no hay soportes que esperar. Queda quien la puso.
-  if (soportesNoObligatorios && exigeSoportes(registro.categoria)) {
+  if (soportesNoObligatorios && exigeSoportes(registro)) {
     registro.soportesNoObligatorios = { marcadoPor: registro.creadoPor, marcadoEn: ahora }
     registro.estado = 'esperando_autorizacion'
   }
 
-  // RN-57: al visitante no se le piden soportes, asi que su registro no espera
+  // RN-57: a la visita de un día no se le piden soportes, asi que su registro no espera
   // nada de nadie — se resuelve aqui mismo y sale con su codigo.
   //
   // **Sigue siendo un registro**, y esa es la parte que importa: aunque el
   // tramite sea de un toque, queda escrito quien dejo entrar a quien y cuando.
   // Aliviar el requisito no es renunciar al rastro.
-  if (!exigeSoportes(registro.categoria)) {
+  if (!exigeSoportes(registro)) {
     const visitante = crearVisitanteDeRegistro(bd, registro)
     registro.visitanteId = visitante.id
     registro.estado = 'autorizado'
@@ -3106,7 +3148,7 @@ export async function marcarSoportesNoObligatorios(
   const bd = clonar(bdActual)
   const registro = bd.registros.find((r) => r.id === parametros.registroId)
   if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
-  if (!exigeSoportes(registro.categoria)) {
+  if (!exigeSoportes(registro)) {
     throw new ErrorDeNegocio('A un visitante no se le piden soportes: no hay nada que eximir.')
   }
   if (!registroEnCurso(registro)) {
@@ -3181,6 +3223,9 @@ export async function autorizarRegistro(
   const bd = clonar(bdActual)
   const registro = bd.registros.find((r) => r.id === parametros.registroId)
   if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  if (esperaAlPropietario(registro)) {
+    throw new ErrorDeNegocio('Falta que el propietario apruebe esta estadía de más de una semana (RN-60).')
+  }
   if (!puedeAutorizar(registro, parametros.personaId)) {
     throw new ErrorDeNegocio('Solo quien creó el registro puede autorizarlo.')
   }
@@ -3211,7 +3256,7 @@ export async function autorizarRegistro(
     bd.personas.push(persona)
   }
 
-  if (registro.categoria === 'visitante') {
+  if (esVisitaDeUnDia(registro)) {
     registro.visitanteId = crearVisitanteDeRegistro(bd, registro).id
   } else {
     // RN-61 — Entre crear y autorizar pudo vincularse por otro registro.
@@ -3222,14 +3267,14 @@ export async function autorizarRegistro(
       id: nuevoId('res'),
       personaId: persona.id,
       unidadId: registro.unidadId,
-      rol: rolDeCategoria(registro.categoria, registro.rol) ?? 'arrendatario',
+      // El visitante temporal queda como `autorizado`: duerme ahí, pero no
+      // registra a nadie (RN-60).
+      rol: rolDeRegistro(registro) ?? 'autorizado',
       desde: registro.vigenciaDesde ?? hoyISO(),
-      hasta: registro.vigenciaHasta,
+      hasta: registro.condicion === 'temporal' ? registro.vigenciaHasta : undefined,
       principal: false,
-      // Solo el propietario puede no residir; el arrendatario arrienda para
-      // vivir ahi y al temporal se le llama temporal porque vive ahi un tiempo
-      // (Mary, 2026-09-07). De ahi que la ausencia del dato signifique «si».
-      reside: registro.reside ?? true,
+      // RN-68 — La marca de residente sale de la condición escogida al registrar.
+      reside: marcaResidente(registro),
       registroId: registro.id,
     }
     bd.residencias.push(residencia)
@@ -3269,6 +3314,38 @@ export async function cerrarRegistro(
   // Un registro que se anula antes de que la persona haga nada no le interesa a
   // nadie mas; uno que se rechaza despues de que adjunto, si: estuvo esperando.
   if (!parametros.anular) avisar(bd, registro, 'registro_rechazado')
+  return persistir(bd, registro)
+}
+
+/**
+ * RN-60 — El propietario aprueba, o no, la estadía de más de una semana que
+ * registró su arrendatario. Aprobada, el arrendatario autoriza como siempre
+ * (RN-59); no aprobada, el registro queda rechazado con el motivo.
+ */
+export async function decidirEstadiaComoPropietario(
+  bdActual: BaseDatos,
+  parametros: { registroId: string; personaId: string; aprobar: boolean; motivo?: string },
+): Promise<Resultado<RegistroPersona>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const registro = bd.registros.find((r) => r.id === parametros.registroId)
+  if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  if (!esperaAlPropietario(registro)) throw new ErrorDeNegocio('Ese registro no espera la aprobación del propietario.')
+  const esPropietario = bd.residencias.some(
+    (r) => r.unidadId === registro.unidadId && r.personaId === parametros.personaId && r.rol === 'propietario' && residenciaVigente(r),
+  )
+  if (!esPropietario) throw new ErrorDeNegocio('La estadía la aprueba un propietario de la unidad.')
+  const ahora = ahoraISO()
+  if (parametros.aprobar) {
+    registro.aprobacionPropietario = { aprobadoPor: parametros.personaId, aprobadoEn: ahora }
+  } else {
+    const motivo = (parametros.motivo ?? '').trim()
+    if (motivo.length < 5) throw new ErrorDeNegocio('Escribe por qué no la apruebas: el arrendatario lo va a leer.')
+    registro.estado = 'rechazado'
+    registro.motivo = `El propietario no aprobó la estadía: ${motivo}`
+    registro.decididoEn = ahora
+    registro.decididoPor = parametros.personaId
+  }
   return persistir(bd, registro)
 }
 
