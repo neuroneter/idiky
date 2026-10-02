@@ -69,7 +69,9 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      de ser una categoría (Mary, 2026-10-02). Las unidades 301 y 502 tienen
 //      propietario no residente.
 // 33 — Gustavo, dueño no residente de la 301, en la lista de perfiles del demo.
-export const VERSION_ESQUEMA = 33
+// 34 — cada votación dice si es de contenido económico, y la asamblea en curso
+//      trae una que no lo es (mascotas), que se cuenta por unidad (RN-211).
+export const VERSION_ESQUEMA = 34
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1070,6 +1072,16 @@ const asambleas: Asamblea[] = [
           'Tres propuestas recibidas. La ganadora ejecuta la obra bajo supervisión del consejo.',
         seVota: true,
       },
+      {
+        // RN-211 — Una decisión que **no** es económica: en un conjunto de
+        // vivienda se vota una unidad, un voto (C-522 de 2002).
+        id: 'pun-ex-4',
+        orden: 4,
+        titulo: 'Mascotas en las zonas comunes',
+        descripcion:
+          'Propuesta del consejo: las mascotas pueden circular por las zonas comunes con traílla, salvo en la piscina y el gimnasio.',
+        seVota: true,
+      },
     ],
   },
   {
@@ -1143,6 +1155,7 @@ const votaciones: Votacion[] = [
     asambleaId: ASAMBLEA_EN_CURSO,
     puntoId: 'pun-ex-2',
     pregunta: '¿Aprueba la cuota extraordinaria para impermeabilizar la cubierta?',
+    contenidoEconomico: true,
     opciones: [
       { id: 'op-si', texto: 'A favor' },
       { id: 'op-no', texto: 'En contra' },
@@ -1156,6 +1169,7 @@ const votaciones: Votacion[] = [
     asambleaId: ASAMBLEA_EN_CURSO,
     puntoId: 'pun-ex-3',
     pregunta: '¿Cuál propuesta debe ejecutar la obra?',
+    contenidoEconomico: true,
     opciones: [
       { id: 'op-a', texto: 'Impermeabilizados del Norte' },
       { id: 'op-b', texto: 'Construcciones Andinas' },
@@ -1165,10 +1179,25 @@ const votaciones: Votacion[] = [
     abiertaEn: fechaHoraRelativa(0, '19:40'),
   },
   {
+    id: 'vta-ex-4',
+    asambleaId: ASAMBLEA_EN_CURSO,
+    puntoId: 'pun-ex-4',
+    pregunta: '¿Aprueba la regla de mascotas en las zonas comunes?',
+    contenidoEconomico: false,
+    opciones: [
+      { id: 'op-si', texto: 'A favor' },
+      { id: 'op-no', texto: 'En contra' },
+      { id: 'op-abs', texto: 'Me abstengo' },
+    ],
+    estado: 'abierta',
+    abiertaEn: fechaHoraRelativa(0, '19:50'),
+  },
+  {
     id: 'vta-or-2',
     asambleaId: ASAMBLEA_CONVOCADA,
     puntoId: 'pun-or-2',
     pregunta: '¿Aprueba los estados financieros del periodo?',
+    contenidoEconomico: true,
     opciones: [
       { id: 'op-si', texto: 'A favor' },
       { id: 'op-no', texto: 'En contra' },
@@ -1181,6 +1210,7 @@ const votaciones: Votacion[] = [
     asambleaId: ASAMBLEA_CERRADA,
     puntoId: 'pun-an-1',
     pregunta: '¿Aprueba el presupuesto presentado?',
+    contenidoEconomico: true,
     opciones: [
       { id: 'op-si', texto: 'A favor' },
       { id: 'op-no', texto: 'En contra' },

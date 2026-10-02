@@ -38,6 +38,8 @@ import {
   herramientaDeEnlace,
   mayoriaDelPunto,
   resultadoVotacion,
+  baseDeVoto,
+  unidadesNecesarias,
   resumenAsistencia,
   verificacionVigente,
   verificadoresFueraDePlazo,
@@ -61,6 +63,7 @@ export function HojaActa({
   presidente,
   secretario,
   coeficienteEdificio,
+  unidadesEdificio = 0,
   quorumMinimo,
   actaOriginal,
 }: {
@@ -76,6 +79,8 @@ export function HojaActa({
   presidente?: Persona
   secretario?: Persona
   coeficienteEdificio: number
+  /** Unidades del edificio, para la calificada de una decisión no económica (RN-211). */
+  unidadesEdificio?: number
   quorumMinimo: number
   /** Si esta acta aclara otra, la original — para citarla. */
   actaOriginal?: Acta
@@ -240,12 +245,19 @@ export function HojaActa({
         // reporta «se APRUEBA» una decisión nula es la prueba escrita de la
         // nulidad, y la firman el presidente y el secretario.
         const admisible = decisionAdmisibleEnLaSesion(asamblea, punto)
+        // RN-211 — Por coeficiente si es económica; si no, en vivienda, por unidad.
+        const base = baseDeVoto(copropiedad, votacion)
+        const porUnidad = base === 'unidad'
         const resultado = resultadoVotacion({
           conteo,
           mayoria,
           coeficienteRepresentado: resumen.coeficiente,
           coeficienteEdificio,
+          baseDeVoto: base,
+          unidadesRepresentadas: resumen.unidades,
+          unidadesEdificio,
         })
+        const votos_ = (n: number) => `${n} ${n === 1 ? 'voto' : 'votos'}`
         return (
           <div key={punto.id}>
             <p>
@@ -256,15 +268,24 @@ export function HojaActa({
               {conteo.unidadesVotantes === 1 ? 'unidad' : 'unidades'}, que representan{' '}
               {porcentaje(conteo.coeficienteVotante)} de coeficiente, así:{' '}
               {conteo.porOpcion
-                .map((opcion) => `${opcion.texto}, ${porcentaje(opcion.coeficiente)}`)
+                .map((opcion) => `${opcion.texto}, ${porUnidad ? votos_(opcion.unidades) : porcentaje(opcion.coeficiente)}`)
                 .join('; ')}
-              .
+              .{' '}
+              {porUnidad
+                ? 'Por no ser una decisión de contenido económico, se contó un voto por unidad privada (Corte Constitucional, sentencia C-522 de 2002).'
+                : votacion.contenidoEconomico
+                  ? 'Por ser una decisión de contenido económico, cada voto se ponderó por el coeficiente de la unidad (Ley 675 de 2001, artículo 37).'
+                  : 'Conforme al reglamento, la decisión se contó por coeficiente.'}
             </p>
             <p>
               Exigiendo este punto{' '}
-              {mayoria === 'calificada'
-                ? `mayoría calificada del 70 % de los coeficientes que integran el conjunto (Ley 675 de 2001, artículo 46), esto es ${porcentaje(resultado.umbral)}`
-                : `mayoría de la mitad más uno de los coeficientes representados en la sesión (Ley 675 de 2001, artículo 45), esto es más de ${porcentaje(resultado.umbral)}`}
+              {porUnidad
+                ? mayoria === 'calificada'
+                  ? `mayoría calificada del 70 % de las unidades que integran el conjunto (Ley 675 de 2001, artículo 46), esto es al menos ${votos_(unidadesNecesarias(resultado.umbral, mayoria))}`
+                  : `mayoría de la mitad más uno de las unidades representadas en la sesión (Ley 675 de 2001, artículo 45), esto es al menos ${votos_(unidadesNecesarias(resultado.umbral, mayoria))}`
+                : mayoria === 'calificada'
+                  ? `mayoría calificada del 70 % de los coeficientes que integran el conjunto (Ley 675 de 2001, artículo 46), esto es ${porcentaje(resultado.umbral)}`
+                  : `mayoría de la mitad más uno de los coeficientes representados en la sesión (Ley 675 de 2001, artículo 45), esto es más de ${porcentaje(resultado.umbral)}`}
               ,{' '}
               <strong>
                 {!quorum

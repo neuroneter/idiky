@@ -49,6 +49,12 @@ export interface Copropiedad {
    */
   aprobacionPropietario?: boolean
   /**
+   * RN-211 — Cómo se votan las decisiones **no económicas** en un edificio
+   * **mixto**, según su reglamento. En el residencial es un voto por unidad y en
+   * el comercial, por coeficiente: ahí no se escoge.
+   */
+  votoNoEconomicoMixto?: BaseDeVoto
+  /**
    * Meses que un antecedente en firme sigue agravando la multa (RN-72).
    *
    * Parametro por la misma razon que los plazos del debido proceso: **la
@@ -1342,11 +1348,21 @@ export interface OpcionVotacion {
   texto: string
 }
 
+/** Sobre qué se cuenta una votación (RN-211). */
+export type BaseDeVoto = 'coeficiente' | 'unidad'
+
 export interface Votacion {
   id: string
   asambleaId: string
   puntoId: string
   pregunta: string
+  /**
+   * RN-211 — Si la decisión es **de contenido económico**. Decide cómo se cuenta:
+   * las económicas, por coeficiente; las demás, en un conjunto de vivienda, un
+   * voto por unidad (Corte Constitucional, C-522 de 2002). La administración lo
+   * escoge siempre al crear la votación (Mary, 2026-10-02).
+   */
+  contenidoEconomico: boolean
   opciones: OpcionVotacion[]
   estado: EstadoVotacion
   abiertaEn?: FechaHoraISO

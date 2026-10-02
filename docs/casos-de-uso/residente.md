@@ -441,7 +441,9 @@ administrador con su cédula y sus datos de contacto.
 **Flujo principal**
 1. El sistema notifica que hay una votación abierta y muestra la pregunta y sus opciones.
 2. El sistema muestra con cuánto peso vota: su coeficiente, más el de las unidades que
-   representa por poder (CU-R-23).
+   representa por poder (CU-R-23). **Si la decisión no es económica y el conjunto es de
+   vivienda, cada unidad vale un voto** (RN-211, C-522 de 2002), y la pantalla lo dice antes
+   de votar.
 3. El copropietario elige una opción y confirma.
 4. El sistema registra un voto por cada unidad que le corresponde (RN-29) y confirma.
 5. Al cerrarse la votación (CU-A-18), el copropietario ve el resultado consolidado.
