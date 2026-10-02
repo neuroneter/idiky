@@ -25,6 +25,7 @@ export function CambiarEstadia({
   residencia,
   nombre,
   registraArrendatario = false,
+  aprobacionActiva = true,
   alGuardar,
   alCerrar,
 }: {
@@ -32,6 +33,8 @@ export function CambiarEstadia({
   nombre: string
   /** Quien cambia es arrendatario: más de 7 días espera al propietario. */
   registraArrendatario?: boolean
+  /** RN-210 — Si el edificio pide la aprobación del propietario. */
+  aprobacionActiva?: boolean
   alGuardar: (condicion: CondicionRegistro, hasta?: string) => Promise<void>
   alCerrar: () => void
 }) {
@@ -40,12 +43,11 @@ export function CambiarEstadia({
   const [condicion, setCondicion] = useState<CondicionRegistro>(condicionDeResidencia(residencia))
   const [hasta, setHasta] = useState(residencia.hasta ?? sumarDias(hoyISO(), 30))
   const temporal = condicion === 'temporal'
-  const esperaAlPropietario = requiereAprobacionPropietario(registraArrendatario ? 'arrendatario' : undefined, {
-    categoria,
-    condicion,
-    vigenciaDesde: residencia.desde,
-    vigenciaHasta: temporal ? hasta : undefined,
-  })
+  const esperaAlPropietario = requiereAprobacionPropietario(
+    registraArrendatario ? 'arrendatario' : undefined,
+    { categoria, condicion, vigenciaDesde: residencia.desde, vigenciaHasta: temporal ? hasta : undefined },
+    aprobacionActiva,
+  )
 
   return (
     <Modal titulo={`Cambiar a ${nombre}`} descripcion="Sin repetir el registro: queda anotado quién lo cambió." onCerrar={alCerrar}>

@@ -510,3 +510,77 @@ test("la familia sale con el propietario y el familiar adulto registra visitas (
   expect.soft(tipos==='Visitante' && conds==='De un día', 'la hija solo registra visitas de un día: ' + tipos + ' ' + conds).toBeTruthy()
   expect.soft(errores, 'sin errores de página').toEqual([])
 })
+
+test('el edificio decide si el propietario aprueba las estadías largas del arrendatario (RN-210)', async ({ page }) => {
+  await page.goto('/')
+  const r = await page.evaluate(async () => {
+    const repo = await import('/src/datos/repositorio.ts')
+    let bd = await repo.cargar()
+    const hoy = new Date().toISOString().slice(0, 10)
+    const en = (d: number) => new Date(Date.now() + d * 864e5).toISOString().slice(0, 10)
+    const base = { copropiedadId: 'cop-1', unidadId: 'uni-torre1-301', nombres: 'N', apellidos: 'P', email: '', telefono: '3001' }
+    const registrar = async (extra: Record<string, unknown>) => {
+      const res = await repo.crearRegistroPersona(bd, { ...base, ...extra } as never)
+      bd = res.bd
+      return res.datos
+    }
+    const out: Record<string, unknown> = {}
+    // Activada (así viene el demo): la familia y el visitante temporal de más de 7 días esperan al propietario.
+    out.visitanteLargoActiva = !!(await registrar({ creadoPor: 'per-5', categoria: 'visitante', condicion: 'temporal', documento: '5001', vigenciaDesde: hoy, vigenciaHasta: en(10) })).aprobacionPropietario
+    out.familiarLargoActiva = !!(await registrar({ creadoPor: 'per-5', categoria: 'familiar', condicion: 'temporal', documento: '5002', vigenciaDesde: hoy, vigenciaHasta: en(10) })).aprobacionPropietario
+    out.familiarCortoActiva = !!(await registrar({ creadoPor: 'per-5', categoria: 'familiar', condicion: 'temporal', documento: '5003', vigenciaDesde: hoy, vigenciaHasta: en(5) })).aprobacionPropietario
+    // Solo la administración la cambia.
+    try { await repo.configurarAprobacionPropietario(bd, { copropiedadId: 'cop-1', personaId: 'per-1', activa: false }); out.propietarioCambia = 'permitido' } catch { out.propietarioCambia = 'bloqueado' }
+    const res = await repo.configurarAprobacionPropietario(bd, { copropiedadId: 'cop-1', personaId: 'per-admin', activa: false })
+    bd = res.bd
+    out.visitanteLargoApagada = !!(await registrar({ creadoPor: 'per-5', categoria: 'visitante', condicion: 'temporal', documento: '5004', vigenciaDesde: hoy, vigenciaHasta: en(10) })).aprobacionPropietario
+    return out
+  })
+  expect(r).toEqual({
+    visitanteLargoActiva: true,
+    familiarLargoActiva: true,
+    familiarCortoActiva: false,
+    propietarioCambia: 'bloqueado',
+    visitanteLargoApagada: false,
+  })
+})
+
+test('al visitante frecuente lo registra quien vive en la unidad, sin aprobación (RN-60, RN-210)', async ({ page }) => {
+  await page.goto('/')
+  const r = await page.evaluate(async () => {
+    const repo = await import('/src/datos/repositorio.ts')
+    let bd = await repo.cargar()
+    const hoy = new Date().toISOString().slice(0, 10)
+    const en = (d: number) => new Date(Date.now() + d * 864e5).toISOString().slice(0, 10)
+    const frecuente = (creadoPor: string, unidadId: string, documento: string) => ({
+      copropiedadId: 'cop-1', unidadId, creadoPor, nombres: 'Empleada', apellidos: 'Frecuente', email: '', telefono: '',
+      categoria: 'visitante', condicion: 'frecuente', dias: [1, 2, 3, 4, 5], documento, vigenciaDesde: hoy, vigenciaHasta: en(90),
+    })
+    const intento = async (p: Record<string, unknown>) => {
+      try { const res = await repo.crearRegistroPersona(bd, p as never); bd = res.bd; return res.datos.aprobacionPropietario ? 'espera al propietario' : 'sin aprobación' } catch { return 'bloqueado' }
+    }
+    return {
+      arrendatariaQueViveAhi: await intento(frecuente('per-5', 'uni-torre1-301', '6001')),
+      propietariaQueViveAhi: await intento(frecuente('per-1', 'uni-torre1-402', '6002')),
+      propietarioNoResidente: await intento(frecuente('per-13', 'uni-torre1-301', '6003')),
+    }
+  })
+  expect(r).toEqual({
+    arrendatariaQueViveAhi: 'sin aprobación',
+    propietariaQueViveAhi: 'sin aprobación',
+    propietarioNoResidente: 'bloqueado',
+  })
+})
+
+test('la administradora ve y cambia la opción en Registros (RN-210)', async ({ page }) => {
+  await page.goto('/')
+  await page.getByText('¿Estás viendo el demo?').click()
+  await page.getByText('Olga Lucia Henao', { exact: true }).click()
+  await page.goto('/#/admin/registros')
+  const tarjeta = page.locator('.tarjeta', { hasText: 'Aprobación del propietario' })
+  await expect(tarjeta.getByRole('button', { name: 'Sí, lo aprueba' })).toHaveAttribute('aria-current', 'page')
+  await tarjeta.getByRole('button', { name: 'No hace falta' }).click()
+  await expect(tarjeta.getByRole('button', { name: 'No hace falta' })).toHaveAttribute('aria-current', 'page')
+  const guardado = await page.evaluate(() => JSON.parse(localStorage.getItem('idiky.demo.bd') ?? '{}').copropiedades[0].aprobacionPropietario)
+  expect(guardado).toBe(false)
+})

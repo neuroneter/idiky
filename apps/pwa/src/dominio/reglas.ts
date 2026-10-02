@@ -1767,12 +1767,19 @@ export function categoriasQuePuedeRegistrar(
   return rol ? CATEGORIAS_POR_ROL[rol] : []
 }
 
-/** Lo que cada quien puede escoger en «cómo se queda»: el familiar, solo «de un día». */
+/**
+ * Lo que cada quien puede escoger en «cómo se queda»: el familiar, solo «de un
+ * día». **Al visitante frecuente lo registra quien vive en la unidad** (Mary,
+ * 2026-10-02): el propietario no residente no, porque no es su casa.
+ */
 export function condicionesQuePuedeRegistrar(
   rol: RolResidencia | undefined,
   categoria: CategoriaRegistro,
+  resideAqui = true,
 ): readonly CondicionRegistro[] {
-  return rol === 'familiar' ? ['no_residente'] : condicionesPosibles(categoria)
+  if (rol === 'familiar') return ['no_residente']
+  const posibles = condicionesPosibles(categoria)
+  return resideAqui ? posibles : posibles.filter((c) => c !== 'frecuente')
 }
 
 export function puedeRegistrar(
@@ -1780,9 +1787,10 @@ export function puedeRegistrar(
   categoria: CategoriaRegistro,
   esMenor = false,
   condicion?: CondicionRegistro,
+  resideAqui = true,
 ): boolean {
   if (!categoriasQuePuedeRegistrar(rol, esMenor).includes(categoria)) return false
-  return !condicion || condicionesQuePuedeRegistrar(rol, categoria).includes(condicion)
+  return !condicion || condicionesQuePuedeRegistrar(rol, categoria, resideAqui).includes(condicion)
 }
 
 /**
@@ -1826,6 +1834,14 @@ export function puedeAutorizar(registro: RegistroPersona, personaId: string): bo
 }
 
 /**
+ * RN-210 — Si el edificio lo tiene activado, ¿esta copropiedad pide la
+ * aprobación del propietario? Sin el dato, sí.
+ */
+export function aprobacionPropietarioActiva(copropiedad: { aprobacionPropietario?: boolean } | undefined): boolean {
+  return copropiedad?.aprobacionPropietario !== false
+}
+
+/**
  * RN-60 — El arrendatario registra visitantes, también temporales; **si la
  * estadía pasa de una semana, la aprueba el propietario** (Mary, 2026-10-02:
  * «el arrendatario puede registrar un visitante temporal de un par de días; si
@@ -1837,10 +1853,16 @@ export const DIAS_SIN_APROBACION_DEL_PROPIETARIO = 7
 export function requiereAprobacionPropietario(
   rolDeQuienRegistra: RolResidencia | undefined,
   registro: Pick<RegistroPersona, 'categoria' | 'condicion' | 'vigenciaDesde' | 'vigenciaHasta'>,
+  /** RN-210 — Lo que escogió la administración del edificio. */
+  activa = true,
 ): boolean {
   return (
+    activa &&
     rolDeQuienRegistra === 'arrendatario' &&
-    registro.categoria === 'visitante' &&
+    // RN-210 — Las estadías temporales de la familia y de los visitantes. El
+    // visitante frecuente no: lo registra quien vive ahí, sin aprobación
+    // (Mary, 2026-10-02).
+    (registro.categoria === 'visitante' || registro.categoria === 'familiar') &&
     registro.condicion === 'temporal' &&
     !!registro.vigenciaDesde &&
     !!registro.vigenciaHasta &&

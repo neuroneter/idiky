@@ -41,6 +41,14 @@ export interface Copropiedad {
   diasDescargos: number
   diasImpugnacion: number
   /**
+   * RN-210 — Si en este edificio el propietario aprueba las estadías de más de
+   * 7 días que registra su arrendatario (familia o visitantes). Lo decide la
+   * administración (Mary, 2026-10-02: «dejemos una opción para que el
+   * administrador parametrice si en ese edificio se hace o no»). Sin el dato,
+   * se aprueba: es lo que el demo hacía antes de existir la opción.
+   */
+  aprobacionPropietario?: boolean
+  /**
    * Meses que un antecedente en firme sigue agravando la multa (RN-72).
    *
    * Parametro por la misma razon que los plazos del debido proceso: **la
