@@ -89,6 +89,11 @@ personas creen el mismo botón dos veces:
 
 ## 4. Flujo de git
 
+> **Desde el 2026-10-02 mandan las reglas de [`17-reglas-de-trabajo.md`](./17-reglas-de-trabajo.md):**
+> Mary y Jeimy trabajan en `idiky`, cada una en su rama, y al terminar la IA hace el merge a
+> `main`; Justo (la APP) y Daniel (BLOKY) usan Git Flow en los repositorios de desarrollo. Lo
+> que sigue en esta sección es el flujo anterior y queda como referencia.
+
 ### Ramas
 
 ```

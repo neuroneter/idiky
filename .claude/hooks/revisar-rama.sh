@@ -26,6 +26,15 @@ detras_remoto=$(git rev-list --count "HEAD..origin/$rama" 2>/dev/null || echo 0)
 detras_main=$(git rev-list --count HEAD..origin/main 2>/dev/null || echo 0)
 sin_guardar=$(git status --porcelain 2>/dev/null | wc -l | tr -d ' ')
 
+# Reglas de trabajo (docs/17): Mary y Jeimy trabajan en su rama propia, nunca en main. En main
+# solo escribe el responsable de integracion; si no lo es, la IA cambia a la rama de la persona.
+if [ "$rama" = "main" ] || [ "$rama" = "HEAD" ]; then
+  quien=$(git config user.name 2>/dev/null || echo "")
+  json "Idiky · estás en main. Mary y Jeimy trabajan en su rama propia: Claude te va a llevar a la tuya antes de empezar." \
+       "LA PERSONA ESTÁ EN main (git user.name: '$quien', commits de main que faltan: $detras_remoto, cambios sin guardar: $sin_guardar). Regla de docs/17-reglas-de-trabajo.md: Mary trabaja en claude/repository-review-c0p1wd y Jeimy en claude/repository-review-1fbujq; en main solo escribe el responsable de integración (Daniel). Si no es Daniel —y si no sabes quién es, pregúntale su nombre—, antes de cualquier tarea cámbiala a su rama (git switch <su rama>; si hay cambios sin guardar, llévalos con ella: git stash, git switch, git stash pop) y trae origin/main a esa rama. Al terminar su trabajo, haz tú el merge de su rama a main (docs/17 §3.1). Explícaselo en palabras sencillas, sin jerga de git."
+  exit 0
+fi
+
 if [ "$detras_remoto" -gt 0 ]; then
   json "Idiky · tu rama ($rama) tiene $detras_remoto cambio(s) nuevos en GitHub que todavía no están en tu computador. Antes de trabajar, ejecuta:  git pull" \
        "LA RAMA ESTÁ ATRASADA: hay $detras_remoto commits en origin/$rama que no están en el computador de la persona (cambios sin guardar localmente: $sin_guardar). Antes de cualquier otra cosa, dile a la persona con palabras sencillas que hay que traer los cambios nuevos y que eso se hace con \`git pull\`; ofrécete a ejecutarlo tú. Si hay cambios sin guardar, primero haz commit de ellos. Si git pull reporta conflictos, no los resuelvas a ciegas: detente y dile que le avise al responsable de integración (Daniel). No empieces ninguna tarea hasta que la rama esté al día."

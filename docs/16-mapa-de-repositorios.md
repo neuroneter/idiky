@@ -21,6 +21,14 @@ viven juntos en `~/Documents/WorkSapce/`.
 | [`App-Idiky`](https://github.com/neuroneter/App-Idiky) | **ALICE**, la app del propietario y residente | Proyecto Flutter (`lib/`, `android/`, `ios/`…) | Flutter + Dart 3 | Privada | Plantilla recién creada: aún no hay pantallas. Su referencia de producto es el demo `apps/pwa` (rutas `/app/...`) y los CU-R |
 | [`SmartContrat-Idiky`](https://github.com/neuroneter/SmartContrat-Idiky) | **Contratos inteligentes** | `contracts/login/` (cuentas ERC-4337, fábrica, *paymaster*), pruebas, `docs/SEGURIDAD.md` | Solidity 0.8 + Foundry · Polygon PoS / Amoy | Privada | Login con cuentas ERC-4337: Idiky paga el gas, salida a direcciones externas con doble firma. Pendientes KMS, multisig y auditoría |
 
+## 1 bis. Quién trabaja en cuál
+
+**Mary y Jeimy** trabajan siempre en `idiky` (definen demos y casos de uso), cada una en su
+rama. **Justo** desarrolla principalmente la APP (`App-Idiky`) y **Daniel** BLOKY
+(`Bloky-Idiky`); los dos pueden tocar cualquier repositorio de desarrollo, con Git Flow
+(`main`, `develop`, `feature/*`, `release/*`, `hotfix/*`). Detalle:
+[`17-reglas-de-trabajo.md`](./17-reglas-de-trabajo.md).
+
 ## 2. Cómo se relacionan
 
 ```

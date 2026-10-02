@@ -143,7 +143,36 @@ pruebas); los otros tres **estaban vacíos** mientras su código seguía aquí. 
   enlaces de sus README apuntan a `idiky` en GitHub.
 - Los seis repositorios están clonados juntos en `~/Documents/WorkSapce/` en la máquina de Daniel.
 
-**Qué sigue:** el primer despliegue real de `bloky` y `gestion` desde sus repositorios (T-79);
+**El despliegue desde los repositorios nuevos, el mismo día (T-79).** Antes se comprobó que el
+código publicado y el de los repos eran el mismo (en BOB, solo cambian el README y el script de
+siembra manual; el modelo de Strapi es idéntico, así que la base no corría riesgo). Foto de
+LangFlow antes, y después: **«el vecino sigue igual»**.
+
+- **BOB (`gestion`) quedó publicado desde `BOB-Idiky`** y sano: `cd35dd8.gestion-23d978e…`.
+- **BLOKY (`bloky`) quedó caído, por dos causas:**
+  1. **Un error del cambio de `desplegar.sh`:** el `tar` de macOS agrega un archivo `._<nombre>`
+     por cada archivo con metadatos del sistema. En la imagen apareció `._001-inicial.sql`, la
+     API lo corrió como migración y PostgreSQL respondió `08P01 invalid message format`. La
+     migración falló dentro de su transacción: **la base no se tocó**. Se reprodujo en un pod de
+     prueba aparte y se corrigió con `COPYFILE_DISABLE=1` (commit `75f9a8f`); el paquete sale
+     ahora sin ningún `._`. La prueba con `ssh` falso no lo vio porque se extrajo en la misma Mac.
+  2. **El disco:** el intento fallido no llegó a la limpieza de imágenes del final, y el segundo
+     despliegue se detuvo con 3,0 GB libres (el mínimo es 3 GB). **Falta limpiar las imágenes
+     sin uso del usuario `idiky` y volver a desplegar `bloky`**; la IA no tuvo permiso para
+     limpiar.
+- Quedó una carpeta de despliegue con archivos `._` en `~/despliegues/20261002-210714-…`; se
+  borra sola cuando haya tres despliegues más nuevos.
+
+**Reglas de trabajo (T-82, [`17`](./17-reglas-de-trabajo.md)).** Daniel fijó quién trabaja
+dónde: **Mary y Jeimy siempre en `idiky`**, cada una en su rama, y al terminar la IA hace el merge
+a `main` (si choca, se aborta y se avisa a Daniel); **Justo** se encarga principalmente de la
+APP (`App-Idiky`) y **Daniel** de BLOKY, los dos con **Git Flow** en cualquier repositorio de
+desarrollo. Hecho: `docs/17`, `CLAUDE.md` §5, el aviso de inicio de sesión de `idiky` (ahora
+avisa si se abre en `main`), rango de identificadores para Justo (RN-190…209, T-90…104), y en
+los cinco repos de desarrollo la rama `develop` (en GitHub), la sección Git Flow del `CLAUDE.md`
+y un aviso de rama propio. **Justo aparece por primera vez en la documentación.**
+
+**Qué sigue:** limpiar el disco del servidor y desplegar `bloky` (T-79); darle acceso a Justo;
 los ADR de ALICE en Flutter (T-80) y de los contratos inteligentes (T-81).
 
 ### 2026-10-02 · Mary + IA (Claude) · Familia, menores, visitante frecuente, fotos en cadena y aviso de fin de estadía

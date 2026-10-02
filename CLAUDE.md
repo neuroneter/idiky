@@ -130,24 +130,40 @@ sigue [`infra/nuevo-servicio.md`](./infra/nuevo-servicio.md) (el contrato y la r
 Antes y después de tocar el servidor, `infra/servidor/verificar-vecino.sh` tiene que decir que
 LangFlow sigue igual.
 
-## 5. Git
+## 5. Git y quién trabaja dónde
 
-- **`main` es la base de todo.** Se creó el 2026-09-10 a partir de la rama de integración
-  `claude/idiky-work-review-ugp3xj`, donde se juntaron las ramas de Mary y de Jeimy. Nadie
-  escribe directo en ella: la actualiza el responsable de integración.
-- **Mary y Jeimy trabajan cada una en su rama de larga vida** (`claude/repository-review-c0p1wd`
-  Mary, `claude/repository-review-1fbujq` Jeimy). Esas ramas **no se borran ni se reemplazan**.
-  El ciclo es: **al empezar cada sesión, traer `main` a la rama** (`git fetch origin && git merge
-  origin/main`, resolver lo que choque, `npm run build`); al terminar, `push` a la misma rama; el
-  responsable de integración lleva la rama a `main` cuando corresponde.
-- Rama de trabajo asignada por sesión (p. ej. `claude/demo-copropiedad-app-*`).
-- Commits: `tipo(ámbito): descripción (CU-X-NN)` — ver `docs/08-convenciones.md`.
+**Las reglas completas están en [`docs/17-reglas-de-trabajo.md`](./docs/17-reglas-de-trabajo.md)**
+(Daniel, 2026-10-02). En corto:
+
+| Persona | Dónde trabaja | Ramas |
+|---|---|---|
+| **Mary** | Siempre en `idiky`: define demos y casos de uso (PWA, `docs/`) | Su rama propia: `claude/repository-review-c0p1wd` |
+| **Jeimy** | Siempre en `idiky`: define demos y casos de uso (contable, `docs/`) | Su rama propia: `claude/repository-review-1fbujq` |
+| **Justo** | Principalmente la APP (ALICE, `App-Idiky`); cualquier repo de desarrollo | **Git Flow** en sus repos |
+| **Daniel** | Principalmente BLOKY (`Bloky-Idiky`); responsable de integración | **Git Flow** en los repos de desarrollo; en `idiky`, `main` |
+
+**Si quien abre la sesión en `idiky` es Mary o Jeimy:**
+
+1. **Verifica que está en su rama propia** (el aviso de inicio de sesión lo dice). Si está en
+   `main` o en una rama ajena, cámbiala a la suya antes de tocar nada; si no sabes quién es,
+   pregúntale su nombre. No le expliques git: resuélvelo con ella.
+2. **Trae `main` a su rama** (`git fetch origin && git merge origin/main`).
+3. Al terminar: verifica (`npm run build` en `apps/pwa`; la contable abre sin errores), `push`
+   de su rama y **haz tú el merge a `main`** (`git switch main && git pull && git merge --no-ff
+   <su rama> && git push origin main`), y vuelve a su rama.
+4. **Si el merge choca**: `git merge --abort`, su trabajo queda a salvo en su rama, y dile que le
+   avise a Daniel. Nunca resuelvas conflictos a ciegas.
+
+**Siempre:**
+
 - **Nunca trabajes sobre una rama que no tenga el último `main` adentro.** Las dos
   renumeraciones (2026-09-10 y 2026-09-21) pasaron porque una rama siguió avanzando sin traer
   `main`: lo que allí se numeró ya existía con otro significado.
+- Commits: `tipo(ámbito): descripción (CU-X-NN)` — ver `docs/08-convenciones.md`.
 - **Los identificadores nuevos** (`RN-xx`, `CU-X-NN`, `T-xx`, `ADR-NNNN`) se toman **del rango
   reservado a cada persona** en `docs/11-tablero-de-trabajo.md` §0, nunca del "siguiente
-  número que veo". Si el rango se agota, se pide otro al responsable de integración.
+  número que veo". Si el rango se agota, se pide otro al responsable de integración. Valen
+  para todos los repositorios.
 
 ## 6. Qué NO hacer
 
