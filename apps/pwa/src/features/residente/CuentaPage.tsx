@@ -1,5 +1,5 @@
 /**
- * CU-R-03 — Consultar estado de cuenta.
+ * CU-R-03 — Consultar estado de cuenta. Desde aqui se descarga (CU-R-18).
  * Doc: docs/casos-de-uso/residente.md#cu-r-03
  */
 
@@ -89,6 +89,11 @@ export function CuentaPage() {
         >
           <Icono nombre="cuenta" tamano={16} />
           Ya pague por fuera: informar abono
+        </Link>
+        {/* CU-R-18 — El soporte para un trámite: se emite y se guarda en PDF. */}
+        <Link to="/app/cuenta/estado" className="boton boton--bloque" style={{ marginTop: 'var(--e2)' }}>
+          <Icono nombre="certificado" tamano={16} />
+          Descargar estado de cuenta
         </Link>
       </div>
 

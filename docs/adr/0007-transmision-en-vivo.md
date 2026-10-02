@@ -120,6 +120,18 @@ Si se reabre, la primera pregunta no es cuál proveedor sino **si el video debe 
 bidireccional para todos** o solo para quien tiene la palabra: es lo que separa un costo
 manejable de uno que no lo es.
 
+## Nota del 2026-09-28 — Vimeo, y la diferencia entre reunión y transmisión
+
+Mary pidió incluir **Vimeo** como opción (*«incluyámoslo como una opción, dejando las
+salvedades»*). Entra sin cambiar la decisión: un enlace es un enlace, y la herramienta se
+reconoce por él (RN-98). Lo que sí quedó escrito es la salvedad: **Vimeo es una transmisión de
+una sola vía**, no una reunión. Los conectados ven y oyen, intervienen por el chat de la
+transmisión y votan en Idiky. El art. 42 de la Ley 675 exige que en la reunión no presencial
+los copropietarios puedan deliberar; si el chat basta para eso es una pregunta para el abogado
+(§3 bis). Idiky lo dice al convocar y lo deja en el acta, sin impedirlo. De paso, la grabación
+—que Vimeo guarda sola— se enlaza y el acta la cita como soporte (RN-99), lo que cierra el
+punto de abajo.
+
 ## Lo que este ADR **no** decide
 
 - ~~**El quórum**~~ → **resuelto el 2026-09-10**, y por los dos lados. El umbral se verificó
@@ -129,4 +141,5 @@ manejable de uno que no lo es.
   artículo. Lo que sigue abierto en
   [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md) §3 bis es de este
   reglamento, no de la ley.
-- **Si la grabación es soporte del acta** (CU-A-17 A2).
+- ~~**Si la grabación es soporte del acta** (CU-A-17 A2).~~ → **Resuelto el 2026-09-28:** es
+  soporte, no acta. Se enlaza y el acta la cita (RN-99).

@@ -2,11 +2,10 @@
  * CU-R-12 — Obtener el paz y salvo de mi unidad.
  * Doc: docs/casos-de-uso/residente.md#cu-r-12
  *
- * Lo que si esta decidido se implementa: **cuando se puede emitir** (RN-26, saldo
- * cero) y el **consecutivo unico** del certificado (RN-36). Lo que falta es el
- * PDF —generarlo es ADR-0006, todavia sin escribir—, asi que el certificado se
- * emite, queda guardado y se muestra en pantalla; lo unico en deuda es la
- * descarga, y la pantalla lo dice en vez de simularla.
+ * Se emite cuando se puede (RN-26, saldo cero), con consecutivo unico y codigo
+ * de verificacion (RN-36), y se imprime o se guarda en PDF desde el telefono,
+ * sin servidor (ADR-0006, revision del 2026-08-28). La administracion tambien
+ * lo emite y lo anula desde la consola (CU-A-13); aqui se ven los dos.
  */
 
 import { useState } from 'react'
@@ -37,12 +36,8 @@ export function PazYSalvoPage() {
   const vencido = calcularSaldoVencido(cuotas)
   const vigente = sel.ultimoPazYSalvo(bd, sesion.unidadActivaId)
   // Un paz y salvo se expide a nombre de los propietarios, que pueden ser varios.
-  const propietarios = sel
-    .residenciasDeUnidad(bd, sesion.unidadActivaId ?? '')
-    .filter((residencia) => residencia.rol === 'propietario')
-    .map((residencia) => sel.persona(bd, residencia.personaId))
-    .filter((p): p is NonNullable<typeof p> => !!p)
-  const administrador = bd.perfilesDemo.find((perfil) => perfil.rol === 'admin')
+  const propietarios = sel.propietariosDeUnidad(bd, sesion.unidadActivaId)
+  const administrador = sel.administradorDe(bd)
   const alDia = saldo === 0
 
   async function emitir() {
@@ -186,11 +181,11 @@ export function PazYSalvoPage() {
 
       <div className="pila">
         <span className="titulo-seccion">Emitidos antes</span>
-        {sel.documentosDeUnidad(bd, sesion.unidadActivaId).length === 0 ? (
+        {sel.documentosDeUnidad(bd, sesion.unidadActivaId).filter((d) => d.tipo === 'paz_y_salvo').length === 0 ? (
           <p className="subtitulo">Todavía no has emitido ningún certificado.</p>
         ) : (
           <div className="lista">
-            {sel.documentosDeUnidad(bd, sesion.unidadActivaId).map((documento) => (
+            {sel.documentosDeUnidad(bd, sesion.unidadActivaId).filter((d) => d.tipo === 'paz_y_salvo').map((documento) => (
               <div key={documento.id} className="tarjeta tarjeta--plana">
                 <div className="fila">
                   <div className="columna">
@@ -198,6 +193,12 @@ export function PazYSalvoPage() {
                     <span className="subtitulo">
                       Expedido el {formatearFecha(documento.emitidoEn)}
                     </span>
+                    {/* ADR-0006 §5 — Un anulado sigue en la lista y dice que no vale. */}
+                    {documento.estado === 'anulado' && (
+                      <span className="tenue" style={{ fontSize: 'var(--texto-xs)', color: 'var(--color-error)' }}>
+                        Anulado por la administración: {documento.motivoAnulacion}
+                      </span>
+                    )}
                   </div>
                   {/* Sin chip de «vencido»: el certificado no caduca solo. Dice
                       hasta cuando la unidad estaba al dia, y eso sigue siendo
@@ -226,7 +227,7 @@ export function PazYSalvoPage() {
             copropiedad={copropiedad}
             unidad={unidad}
             propietarios={propietarios}
-            administrador={sel.persona(bd, administrador?.personaId)}
+            administrador={administrador}
           />
         </div>
       )}

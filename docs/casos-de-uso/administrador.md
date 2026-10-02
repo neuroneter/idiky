@@ -38,10 +38,19 @@
 1. El sistema lista las unidades con torre, número, coeficiente, residentes y saldo.
 2. El administrador puede buscar por torre, número o nombre de residente.
 3. Al abrir una unidad ve su ficha: datos, ocupantes, cartera y actividad reciente.
-4. Puede vincular una persona a la unidad indicando su rol (`propietario` | `arrendatario`).
+4. **Aquí no se crea a nadie** (2026-10-02). Si la unidad no tiene propietario, el botón
+   **Registrar propietario** lleva a Registros (CU-A-26) con la unidad escogida: el trámite con
+   soportes es el único camino (RN-63). Antes había un «Vincular» que creaba a cualquiera,
+   incluso arrendatarios, sin fotos ni autorización de datos; se quitó.
 
 **Flujos alternativos**
-- A1. Desvincular a un residente (queda en histórico, no se borra).
+- A1. **Inhabilitar** a un residente, con motivo (RN-61, RN-65). Queda en el histórico.
+- A1b. **Cambio de propietario** (se vendió la unidad): al inhabilitar a un propietario se escoge
+  ese motivo y, si la unidad queda sin dueño, el sistema lleva a registrar al nuevo. **Los
+  arrendatarios siguen**: los hereda el nuevo propietario. Lo que el anterior dejó en curso se
+  anula con ese motivo. Si queda otro propietario, se avisa que también hay que inhabilitarlo
+  si vendió. Mientras se registra al nuevo, la unidad está sin propietario: es la única excepción
+  a RN-20, y dura lo que dura el trámite.
 - A2. Crear una unidad nueva → *fase 2* (normalmente se cargan al constituir la copropiedad).
 
 **Reglas de negocio**
@@ -49,7 +58,7 @@
 - RN-20: una unidad debe tener siempre al menos un propietario.
 
 **Estado en el demo:** ✅ — `src/features/admin/UnidadesPage.tsx` (listar, buscar, ver ficha
-y vincular residente).
+e inhabilitar con motivo).
 
 ---
 
@@ -85,7 +94,7 @@ y vincular residente).
 3. Confirma; el sistema registra el `Pago` y actualiza la cartera.
 
 **Reglas de negocio**
-- RN-06 (imputación a la deuda más antigua), RN-07 (comprobante único).
+- RN-06 (imputación a la deuda más antigua), RN-77 (recibo de caja con consecutivo único; antes RN-07).
 
 **Estado en el demo:** ✅ — `src/features/admin/CarteraPage.tsx` (acción "Registrar pago").
 
@@ -154,12 +163,42 @@ cuenta, plegado bajo «¿Por qué se cobra?».
 - **Resultado esperado:** La reserva queda `confirmada` o `rechazada` y el residente se entera.
 
 **Flujo principal**
-1. El sistema lista las reservas pendientes, las más próximas primero.
+1. El sistema lista las reservas pendientes, las más próximas primero. El tablero avisa las que
+   vencen en menos de 48 horas (RN-122).
 2. El administrador aprueba o rechaza; al rechazar indica el motivo.
-3. El sistema actualiza el estado y libera la franja si fue rechazada.
+3. El sistema actualiza el estado, libera la franja si fue rechazada y le deja un mensaje al
+   residente, con el motivo si es un rechazo (RN-123).
+4. Si nadie contesta y llega la hora del turno, la solicitud vence sola (RN-122, CU-S-03).
+
+La tabla muestra también si el residente aceptó las condiciones (RN-124) y cuántos invitados
+tiene en lista (RN-126).
+
+**Flujo alternativo — cancelar una reserva confirmada (RN-115)**
+- A1. En una reserva confirmada **cuyo turno no ha empezado** (RN-128), «Cancelar» pide el motivo, que es
+  obligatorio, y muestra el mensaje que le llegará a quien reservó.
+- A2. Confirma: la reserva queda cancelada, con el motivo, y el mensaje queda escrito.
+
+**Flujo alternativo — la plata de la reserva (RN-118 a RN-121)**
+- A3. Si la reserva pide depósito, «Recibí el depósito» deja constancia de que se recibió.
+- A4. Después del turno, **si mueve plata** (cobro, depósito o multa), la reserva aparece en
+  «Por cerrar»; las demás se cierran solas como usadas al terminar el turno (RN-129). «Cerrar»
+  pregunta qué pasó:
+  - **Se usó:** cómo quedó la zona (bien, o con daños o faltantes descritos) y una foto
+    opcional. Si hubo novedades y se recibió el depósito, cuánto se retiene y por qué.
+  - **No se presentó:** el depósito se devuelve completo. Si la zona tiene multa, la
+    administración puede marcar «Abrir el proceso por la multa».
+- A5. Antes de confirmar, la consola muestra lo que se mueve: el cobro por uso al estado de
+  cuenta y el depósito que se devuelve o se retiene. Al cerrar, se genera la cuota `uso_zona` y
+  queda el registro.
+- A6. En una reserva cancelada fuera de plazo, «Abrir proceso» abre el proceso por la multa del
+  catálogo, con los hechos ya redactados. Hay un solo proceso por reserva.
+
+La tabla muestra cuántas personas van (RN-113), el depósito y el cierre de cada reserva, y
+marca las que el residente canceló fuera de plazo (RN-112).
 
 **Reglas de negocio**
-- RN-09 (una sola reserva confirmada por franja), RN-08 (mora bloquea).
+- RN-09 (una sola reserva confirmada por franja en la zona exclusiva; en la compartida, hasta
+  el aforo, RN-111), RN-08 (mora bloquea), RN-112, RN-113, RN-115, RN-118 a RN-124, RN-126.
 
 **Estado en el demo:** ✅ — `src/features/admin/ReservasAdminPage.tsx`.
 
@@ -253,7 +292,7 @@ cuenta, plegado bajo «¿Por qué se cobra?».
    | Modalidad | Se exige | El copropietario ve |
    |---|---|---|
    | Presencial | **Lugar** | Dónde es y a qué hora |
-   | Virtual | **Enlace** de Zoom, Meet o lo que usen | El botón para entrar a la reunión |
+   | Virtual | **Enlace** de Zoom, Meet, Teams o Vimeo | El botón para entrar a la reunión, o ver la transmisión |
    | Mixta | **Lugar y enlace** | Los dos, y escoge cómo asiste |
 
    Después: tipo (ordinaria | extraordinaria), fecha, hora y qué la convoca.
@@ -267,6 +306,13 @@ cuenta, plegado bajo «¿Por qué se cobra?».
   convoca por segunda vez **(?)**.
 - A2. Se modifica el orden del día antes de la asamblea → se reemite la citación.
 - A3. Se cancela la asamblea → estado `cancelada`, con motivo. No se borra (trazabilidad).
+
+**Vimeo, y la salvedad** (RN-98, Mary 2026-09-28). Idiky reconoce la herramienta por el enlace
+y, si es una **transmisión de una sola vía** (Vimeo, YouTube) en una asamblea virtual o mixta,
+muestra la salvedad al convocar: los conectados ven y oyen, intervienen por el chat de la
+transmisión y votan en Idiky; si eso basta para deliberar (Ley 675, art. 42) lo responde el
+abogado. Se dice, no se impide. Ya instalada la asamblea, el administrador puede **enlazar la
+grabación** y el acta la cita como soporte (RN-99).
 
 **Reglas de negocio**
 - RN-33: antelación mínima de la convocatoria **(?)**.
@@ -299,10 +345,26 @@ día y **la modalidad manda**: el botón queda deshabilitado diciendo qué falta
 - A1. La unidad tiene saldo → no se puede emitir; el sistema muestra la deuda.
 - A2. Anular un certificado emitido → se marca `anulado` con motivo; **no se borra** (O3).
 
-**Reglas de negocio**
-- RN-26, RN-36.
+**Cómo quedó (2026-10-01).** En la consola, **Cartera** tiene dos pestañas: «Cartera» y
+**«Paz y salvo»**. Se emite donde se ve si la unidad debe, sin agregar una entrada al menú.
+- El administrador busca por unidad o por propietario y filtra por al día o con saldo.
+- Cada unidad muestra su saldo («Al día» o lo que debe) y su último paz y salvo.
+- **Con saldo cero:** «Emitir paz y salvo» lo emite con número `PS-AAAA-NNNN` y código, a nombre
+  de la administración, y muestra la hoja para «Imprimir o guardar en PDF».
+- **Con saldo:** no se ofrece emitir; se ofrece «Ver la deuda» (A1).
+- **La lista de emitidos** incluye también los que el propietario sacó desde su app. Cada uno se
+  ve, se imprime o se anula: «Anular» pide un motivo de al menos 10 caracteres, el certificado
+  queda `anulado` con fecha, quién y por qué, y **el propietario lo ve así en su lista** (A2).
+- Lo que emite la administración lo ve también el propietario en su app (CU-R-12).
 
-**Estado en el demo:** ⬜ — requiere ADR-0006.
+La pregunta que sigue abierta en ADR-0006 —si el paz y salvo lo saca el propietario solo o
+necesita autorización previa— no cambia: hoy pueden emitirlo los dos.
+
+**Reglas de negocio**
+- RN-26, RN-36; ADR-0006 §5 (se anula, no se borra).
+
+**Estado en el demo:** ✅ — `src/features/admin/PazYSalvoAdminPage.tsx`, ruta
+`/admin/cartera/paz-y-salvo`.
 
 ---
 
@@ -836,7 +898,8 @@ real que este caso de uso estaba tapando.
   registra a los demás de su unidad.
 
 **El segundo eslabón de RN-63.** El operador de Idiky crea al administrador; el administrador
-crea a los propietarios; el propietario crea a los demás de su unidad. Por eso aquí **la única
+crea **al primer propietario** de cada unidad —«si hay más de un propietario los crea el usuario
+creado por el administrador» (Mary, 2026-10-02)—; el propietario crea a los demás de su unidad. Por eso aquí **la única
 categoría es residente**, en la práctica propietario: que el administrador pudiera crear
 arrendatarios directamente parece un atajo cómodo y es lo que rompe la trazabilidad — el
 propietario dejaría de saber quién vive en su unidad.
@@ -845,7 +908,10 @@ propietario dejaría de saber quién vive en su unidad.
 1. El administrador abre **Registros**.
 2. Ve la tabla de toda la copropiedad, con **quién registró a quién**: es la cadena de RN-63
    hecha visible.
-3. Toca **Registrar propietario**, escoge la unidad y llena los datos.
+3. Toca **Registrar propietario**, escoge la unidad, **cómo se queda** (residente, no residente
+   o residente temporal; RN-68, 2026-10-02) y llena los datos. **Solo aparecen las unidades sin
+   propietario**, y quién es no se escoge: es propietario. Si todas tienen dueño,
+   el botón se apaga y la pantalla explica qué hacer cuando se vende una.
 4. El resto es igual que CU-R-27: la persona adjunta, el administrador autoriza.
 5. **Si la persona no quiere adjuntar** la foto ni el documento, el administrador marca el
    registro como **«No obligatorio»** (RN-97, equipo 2026-09-17) —en el formulario al crearlo, o
@@ -898,3 +964,205 @@ es un actor por encima de la copropiedad y no existe todavía en el demo. Está 
   RN-77 (consecutivo del recibo), RN-78 (anulación con traza), RN-79 (lo reportado espera).
 
 **Estado en el demo:** ✅ — `src/features/admin/PagosPage.tsx`.
+
+---
+
+### CU-A-28
+## CU-A-28 — Registrar un proyecto y sus avances, y contárselos a los propietarios
+
+- **Actor principal:** Administrador
+- **Precondiciones:** Hay una obra o un trabajo de la copropiedad que los propietarios van a
+  seguir. Normalmente, lo que paga una cuota extraordinaria.
+- **Disparador:** Arranca la obra, o hay algo nuevo que contar de ella.
+- **Resultado esperado:** El proyecto existe con su avance al día, cada avance quedó publicado
+  en la cartelera y cada propietario recibió un mensaje.
+
+> Mary, 2026-09-29: *«el administrador registra un proyecto y va registrando el avance del
+> proyecto»*. Registrar un avance **es** publicarlo: no hay un paso aparte de «avisar», porque un
+> avance que la administración conoce y el propietario no es exactamente lo que este módulo
+> existe para evitar (RN-101).
+
+**Flujo principal**
+1. En **Proyectos**, «Nuevo proyecto»: nombre, qué se va a hacer (en palabras de propietario),
+   quién lo ejecuta, fechas y presupuesto. Solo el nombre y la descripción son obligatorios.
+   Nace **planeado**, sin avances.
+2. En el tablero del proyecto, «Registrar un avance»: el **porcentaje de toda la obra**, qué se
+   hizo, un detalle y una foto si la hay. El formulario dice en qué va hoy y por qué no se puede
+   registrar, si no se puede (RN-100).
+3. «Registrar y avisar» hace tres cosas de una vez: el avance queda en la historia, se publica un
+   **comunicado** de categoría *Proyecto* con enlace al tablero, y sale un **mensaje** al celular
+   de cada propietario vigente. La pantalla dice a cuántos les llegó y cuántos no tienen celular.
+4. Al 100 % el proyecto queda **terminado** y no admite más avances: si hay algo más que hacer,
+   es otro proyecto.
+
+**Flujos alternativos**
+- A1. El porcentaje **baja** respecto al anterior → se admite, pero el detalle es obligatorio.
+  Un tablero que baja del 60 al 40 sin decir por qué es peor que uno que no se actualiza.
+- A2. Se registró mal un avance → **no se edita ni se borra**: se registra otro que lo corrija
+  (RN-61). La historia completa es lo que permite reconstruir la obra el día que alguien la
+  discuta.
+- A3. Un propietario tiene varias unidades → recibe **un solo** mensaje: se avisa a personas, no
+  a unidades.
+- A4. **Pasan dos semanas sin avance** → el tablero de la copropiedad (`/admin`) muestra la
+  alerta «proyectos sin avance reportado» con los días de cada uno y el botón «Reportar
+  avance»; la lista y el detalle del proyecto lo marcan también (RN-102). Se resuelve registrando
+  un avance, aunque sea «sigue igual».
+
+**Decisiones de interfaz**
+- **El estado se deriva de los avances** (planeado, en marcha, terminado) y no se guarda: un
+  estado guardado que depende de otros campos tarde o temprano los contradice.
+- **La foto va en el avance, no en el proyecto**: es la prueba de ese momento de la obra.
+- **El presupuesto es un dato, no una cuenta.** Lo recaudado y lo gastado en esa destinación es
+  de la contable de Jeimy (T-17); aquí solo se dice cuánto cuesta.
+
+**Reglas de negocio**
+- RN-100, RN-101, RN-64 (los mensajes quedan guardados con su texto exacto), RN-61.
+
+**Estado en el demo:** ✅ — `/admin/proyectos`. La semilla trae la impermeabilización de
+cubiertas al 40 %, la misma obra de la cuota extraordinaria y de la asamblea en curso, y la
+pintura de fachadas con tres semanas sin avance, para que la alerta de RN-102 se vea al entrar.
+
+---
+
+### CU-A-10
+## CU-A-10 — Configurar zonas comunes y sus reglas
+
+- **Actor principal:** Administrador
+- **Precondiciones:** Sesión de administrador en la consola.
+- **Disparador:** Entra a `Reservas → Zonas comunes`.
+- **Resultado esperado:** Las zonas existen con sus reglas, fotos y especificaciones; el
+  administrador las cierra o las desactiva cuando hace falta, y quien tenía reserva se entera
+  del porqué.
+
+Todo lo de una zona vive dentro de Reservas, en su propia pestaña (Mary, 2026-10-01: *«lo de
+reservas va dentro de reservas»*), para que el administrador lo gestione de forma fácil y
+rápida.
+
+**Flujo principal — crear o editar**
+1. El administrador toca «Nueva zona» (o «Editar reglas» en una existente).
+2. Escribe nombre y descripción corta, y **hasta cuántas horas antes del turno se puede
+   cancelar** (RN-128; en 0, hasta que empiece). Escoge los **días y el horario**: todos los días igual,
+   o día por día con sus horas (RN-114). Luego la duración del turno, el aforo, las horas de
+   anticipación, las reservas al mes por unidad, si el turno es **exclusivo o compartido**
+   (RN-111) y si la administración aprueba cada reserva.
+3. El sistema le muestra los turnos como los verá el residente.
+4. Guarda. El sistema valida (RN-105). Una zona nueva nace activa; en una editada, los
+   cambios valen para las reservas nuevas y las ya hechas se respetan (RN-106).
+5. Marca si **se cobra por usarla** y si **pide depósito de garantía** —cada copropiedad decide—;
+   marcada, escribe el valor, con el
+   documento que los autoriza (RN-109). Si hay **multa por no cancelar**, la escoge del
+   catálogo de multas y fija el plazo en horas para cancelar sin multa (RN-110).
+6. En la misma tarjeta agrega fotos y escribe las especificaciones (RN-104). La tarjeta muestra
+   los costos y la multa tal como los lee el residente.
+
+**Flujo alternativo — cerrar por mantenimiento (RN-108)**
+- A1. Toca «Cerrar por mantenimiento», escoge desde y hasta cuándo y escribe el motivo.
+- A2. El sistema le muestra las reservas que caen en esas fechas y el mensaje exacto que le
+  llegará a cada persona.
+- A3. «Avisar a toda la copropiedad» viene marcada: publica un comunicado en la cartelera y
+  deja un mensaje a cada residente, de una vez; la consola muestra a cuántas personas y el
+  texto (RN-117). Se puede desmarcar.
+- A3 bis. Confirma: se cancelan esas reservas con aviso y la zona queda cerrada en esas fechas.
+  Al terminar vuelve sola; «Levantar» la abre antes.
+
+**Flujo alternativo — desactivar (RN-107)**
+- A4. Toca «Desactivar» y escribe el motivo, que es obligatorio. El sistema le muestra las
+  reservas de hoy en adelante que se cancelarán y el mensaje.
+- A5. Confirma: se cancelan con aviso, la zona deja de aparecer para el residente y queda en
+  la consola como «Desactivada», con su motivo. «Reactivar» la devuelve, sin revivir las
+  reservas canceladas.
+
+**Reglas de negocio**
+- RN-104 (fotos y especificaciones), RN-105 (una zona válida), RN-106 (cambiar las reglas
+  no toca lo ya reservado), RN-107 (desactivar cancela con mensaje), RN-108 (cierre por
+  mantenimiento), RN-109 (cobro por uso y depósito, con respaldo), RN-110 (multa por no
+  cancelar, del catálogo), RN-111 (uso exclusivo o compartido), RN-114 (días y horario de cada
+  día), RN-117 (aviso masivo del cierre).
+
+**La plata se mueve desde CU-A-06** (2026-10-01): el cobro por uso al cerrar la reserva, el
+depósito recibido y devuelto o retenido, y el proceso por la multa (RN-118 a RN-121). El
+calendario de ocupación es CU-A-29.
+
+**Estado en el demo:** ✅ — `src/features/admin/ZonasAdminPage.tsx` (pestaña «Zonas
+comunes» de `ReservasAdminPage.tsx`, ruta `/admin/reservas/zonas`).
+
+---
+
+### CU-A-29
+## CU-A-29 — Ver la ocupación de las zonas comunes en un calendario
+
+- **Actor principal:** Administrador
+- **Precondiciones:** Hay al menos una zona activa.
+- **Disparador:** Entra a `Reservas → Calendario`.
+- **Resultado esperado:** Ve la semana de una zona de un vistazo: qué turnos están libres,
+  cuáles reservados y por quién, cuánto lleva el turno compartido, qué días no abre y cuáles
+  están cerrados por mantenimiento.
+
+Mary, 2026-10-01, al pedir el punto 7 de la revisión de zonas comunes: *«con el 7»*. Sirve para
+ver cuándo se llena el salón, qué días nadie usa la cancha y dónde cabe un mantenimiento sin
+cancelarle la reserva a nadie.
+
+**Flujo principal**
+1. El administrador escoge la zona. El sistema muestra la semana en curso, de lunes a domingo:
+   los días en columnas, los turnos en filas y el día de hoy marcado.
+2. Cada casilla dice en palabras, además del color, qué hay:
+   - «Libre».
+   - En la zona exclusiva, la unidad y las personas, por ejemplo «T1 · 402 · 20 p.», con «por
+     aprobar» si todavía no se ha aprobado.
+   - En la compartida, «5 de 8».
+   - «Mantenimiento».
+   - «—» si ese día no abre a esa hora.
+3. Arriba, una línea resume la semana: cuántos turnos tienen reserva y, en la compartida,
+   cuántos cupos se usaron del total.
+4. Al tocar una casilla reservada ve quién la tiene: unidad, persona, cuántas personas van y el
+   estado de la reserva.
+5. «Anterior», «Esta semana» y «Siguiente» cambian de semana. Los días pasados se ven más
+   tenues.
+
+**Reglas de negocio:** ninguna nueva; la vista junta RN-09, RN-108, RN-111, RN-113 y RN-114.
+
+**Estado en el demo:** ✅ — `src/features/admin/CalendarioZonasPage.tsx`, ruta
+`/admin/reservas/calendario`.
+
+---
+
+### CU-A-30
+## CU-A-30 — Ver y descargar el informe de uso de las zonas comunes
+
+- **Actor principal:** Administrador
+- **Disparador:** Entra a `Reservas → Informe`.
+- **Resultado esperado:** Sabe cuánto se usa cada zona en un periodo, quién no llegó, cuánto se
+  cobró y cuánto se recaudó, y lo descarga para llevarlo al consejo o a la asamblea.
+
+Mary, 2026-10-01: *«me gusta la idea del informe del uso de las zonas comunes»*.
+
+**Flujo principal**
+1. Escoge el periodo: este mes (completo, incluidas las reservas ya tomadas para los próximos
+   días), el mes anterior u otras fechas.
+2. Arriba ve cuatro cifras: reservas tomadas y personas; ocupación, es decir, turnos con
+   reserva sobre turnos abiertos; cobrado por uso y lo recaudado de eso; y cuántos no se
+   presentaron, con el depósito retenido.
+3. Debajo, una fila por zona: tomadas, usadas, no se presentó, canceladas (con cuántas fuera de
+   plazo), rechazadas y vencidas, personas, ocupación, cobrado y recaudado. Una zona
+   desactivada solo aparece si tuvo movimiento en el periodo.
+4. Al final, las cinco unidades que más turnos tomaron, con cuántas veces no se presentaron.
+5. «Descargar para Excel» baja un CSV con todo lo anterior y el desglose completo de
+   cancelaciones, depósitos y procesos. Usa punto y coma y la marca BOM, que es lo que Excel en
+   español necesita para abrirlo con columnas y tildes. En el demo publicado en claude.ai el
+   archivo lo entrega el visor, que primero pide confirmación (capacidad `downloads`).
+
+**Cómo se cuenta.** No hay regla nueva: el informe suma lo que ya está registrado con las
+reglas que existen (`informeDeUsoDeZonas` en `dominio/reglas.ts`).
+- Tomadas: las confirmadas.
+- Usadas y «no se presentó»: salen del cierre (RN-119).
+- Canceladas: se separan por quién y cuándo (RN-107, RN-108, RN-112, RN-115).
+- Ocupación: con los días y los cierres de cada zona (RN-108, RN-114).
+- Cobrado y recaudado: de las cuotas de uso (RN-75, RN-119).
+
+**Dónde se usa (Mary, 2026-10-01):** el informe es para **descargar en la versión web**, desde la
+consola del administrador; la app del residente no lo tiene. Se ve también en el celular, para
+mirar una cifra o reenviar el archivo, pero su lugar es el escritorio. **En BLOKY** debe vivir en la
+consola del administrador (T-45).
+
+**Estado en el demo:** ✅ — `src/features/admin/InformeZonasPage.tsx`, ruta
+`/admin/reservas/informe`; la descarga en `src/utilidades/descarga.ts`.

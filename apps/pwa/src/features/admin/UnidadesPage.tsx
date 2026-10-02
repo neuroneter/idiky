@@ -4,20 +4,25 @@
  */
 
 import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { desvincularResidente, vincularResidente } from '../../datos/repositorio'
+import { cambiarEstadia, desvincularResidente } from '../../datos/repositorio'
+import { CambiarEstadia } from '../../componentes/CambiarEstadia'
+import { CATEGORIAS, textoCondicion } from '../../componentes/Registro'
 import {
   calcularSaldo,
+  categoriaDeResidencia,
+  condicionDeResidencia,
   diasDeMora,
   estaEnMora,
   etiquetaUnidad,
   sumaCoeficientes,
 } from '../../dominio/reglas'
-import { capitalizar, formatearDinero } from '../../utilidades/formato'
-import type { RolResidencia } from '../../dominio/tipos'
+import { capitalizar, formatearDinero, formatearFecha } from '../../utilidades/formato'
+import type { MotivoCierreVinculo, Residencia } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
@@ -27,16 +32,13 @@ export function UnidadesPage() {
   const { sesion } = useSesion()
   const [busqueda, setBusqueda] = useState('')
   const [detalle, setDetalle] = useState<string | null>(null)
-  const [vinculando, setVinculando] = useState(false)
-  const [formulario, setFormulario] = useState({
-    nombres: '',
-    apellidos: '',
-    documento: '',
-    email: '',
-    telefono: '',
-    rol: 'arrendatario' as RolResidencia,
-  })
-
+  /** El vínculo que se está inhabilitando, con su motivo (RN-65). */
+  const [cerrando, setCerrando] = useState<Residencia | null>(null)
+  /** El vínculo al que se le cambia la condición o la fecha (RN-68). */
+  const [cambiando, setCambiando] = useState<Residencia | null>(null)
+  const [motivo, setMotivo] = useState<MotivoCierreVinculo>('otro')
+  const [explicacion, setExplicacion] = useState('')
+  const navegar = useNavigate()
   if (!sesion) return null
 
   const unidades = sel.unidadesDe(bd, sesion.copropiedadId)
@@ -55,30 +57,35 @@ export function UnidadesPage() {
   })
 
   const unidadDetalle = unidades.find((unidad) => unidad.id === detalle)
-  const coeficienteTotal = sumaCoeficientes(unidades)
 
-  async function guardarVinculo() {
-    if (!unidadDetalle) return
-    if (formulario.nombres.trim().length < 2 || formulario.documento.trim().length < 4) {
-      mostrarAviso('Nombre y documento son obligatorios.', 'error')
-      return
-    }
-    const creado = await ejecutar(
-      (base) => vincularResidente(base, { unidadId: unidadDetalle.id, ...formulario }),
-      'Residente vinculado a la unidad.',
+  async function inhabilitar() {
+    if (!cerrando) return
+    const unidadId = cerrando.unidadId
+    const quedaOtroPropietario = sel
+      .residenciasDeUnidad(bd, unidadId)
+      .some((r) => r.id !== cerrando.id && r.rol === 'propietario')
+    const hecho = await ejecutar(
+      (base) =>
+        desvincularResidente(base, {
+          residenciaId: cerrando.id,
+          personaId: sesion!.personaId,
+          motivo,
+          detalle: explicacion,
+        }),
+      motivo === 'cambio_propietario' ? 'Propietario anterior inhabilitado.' : 'Vínculo cerrado. Queda en el histórico.',
     )
-    if (creado) {
-      setVinculando(false)
-      setFormulario({
-        nombres: '',
-        apellidos: '',
-        documento: '',
-        email: '',
-        telefono: '',
-        rol: 'arrendatario',
-      })
+    if (!hecho) return
+    setCerrando(null)
+    // Cambio de propietario: si la unidad quedó sin dueño, se registra el nuevo
+    // de una vez (RN-63). Si queda otro copropietario, el nuevo lo registra él.
+    if (motivo === 'cambio_propietario' && !quedaOtroPropietario) {
+      navegar(`/admin/registros?unidad=${unidadId}`)
+    } else if (motivo === 'cambio_propietario') {
+      mostrarAviso('La unidad todavía tiene otro propietario. Si también vendió, inhabilítalo con el mismo motivo y registrarás al nuevo.', 'info')
     }
   }
+  const coeficienteTotal = sumaCoeficientes(unidades)
+
 
   return (
     <>
@@ -155,13 +162,28 @@ export function UnidadesPage() {
         )}
       </div>
 
-      {unidadDetalle && (
+      {cambiando && (
+        <CambiarEstadia
+          residencia={cambiando}
+          nombre={nombreCompleto(sel.persona(bd, cambiando.personaId))}
+          alCerrar={() => setCambiando(null)}
+          alGuardar={async (condicion, hasta) => {
+            const hecho = await ejecutar(
+              (base) => cambiarEstadia(base, { residenciaId: cambiando.id, personaId: sesion.personaId, condicion, hasta }),
+              'Cambio guardado.',
+            )
+            if (hecho) setCambiando(null)
+          }}
+        />
+      )}
+
+      {unidadDetalle && !cambiando && (
         <Modal
           titulo={etiquetaUnidad(unidadDetalle)}
           descripcion={`${capitalizar(unidadDetalle.tipo)} de ${unidadDetalle.area} m² · coeficiente ${unidadDetalle.coeficiente}%`}
           onCerrar={() => {
             setDetalle(null)
-            setVinculando(false)
+            setCerrando(null)
           }}
         >
           <div className="pila">
@@ -182,10 +204,14 @@ export function UnidadesPage() {
             <div>
               <div className="fila">
                 <span className="titulo-seccion">Residentes</span>
-                <button className="boton boton--pequeno" onClick={() => setVinculando(true)}>
+                {/* RN-63 — Aquí no se crea a nadie: el propietario se registra en
+                    Registros, con sus soportes, y él registra a los demás. */}
+                {!sel.unidadTienePropietario(bd, unidadDetalle.id) && (
+                <Link to={`/admin/registros?unidad=${unidadDetalle.id}`} className="boton boton--pequeno">
                   <Icono nombre="mas" tamano={13} />
-                  Vincular
-                </button>
+                  Registrar propietario
+                </Link>
+                )}
               </div>
               <div className="lista lista--compacta" style={{ marginTop: 'var(--e2)' }}>
                 {sel.residenciasDeUnidad(bd, unidadDetalle.id).map((residencia) => {
@@ -197,24 +223,30 @@ export function UnidadesPage() {
                           {nombreCompleto(persona)}
                         </strong>
                         <span className="subtitulo">
-                          {capitalizar(residencia.rol)} · {persona?.telefono}
+                          {CATEGORIAS[categoriaDeResidencia(residencia)].texto} ·{' '}
+                          {textoCondicion(categoriaDeResidencia(residencia), condicionDeResidencia(residencia))}
+                          {residencia.hasta ? ` hasta el ${formatearFecha(residencia.hasta)}` : ''} · {persona?.telefono}
                         </span>
                       </div>
                       {/* La administracion puede inhabilitar cualquier vinculo de
                           la copropiedad, incluido el que registro un propietario:
                           esta por encima suyo en la cadena (RN-65). */}
+                      <div className="grupo-botones">
+                      <button className="boton boton--pequeno" disabled={cargando} onClick={() => setCambiando(residencia)}>
+                        Cambiar
+                      </button>
                       <button
                         className="boton boton--pequeno"
                         disabled={cargando}
-                        onClick={() =>
-                          ejecutar(
-                            (base) => desvincularResidente(base, residencia.id),
-                            'Vínculo cerrado. Queda en el histórico.',
-                          )
-                        }
+                        onClick={() => {
+                          setCerrando(residencia)
+                          setMotivo(residencia.rol === 'propietario' ? 'cambio_propietario' : 'otro')
+                          setExplicacion('')
+                        }}
                       >
                         Inhabilitar
                       </button>
+                      </div>
                     </div>
                   )
                 })}
@@ -224,89 +256,43 @@ export function UnidadesPage() {
               </div>
             </div>
 
-            {vinculando && (
+            {cerrando && (
               <div className="tarjeta tarjeta--plana">
-                <span className="titulo-seccion">Nuevo residente</span>
-                <div className="fila-campos" style={{ marginTop: 'var(--e3)' }}>
-                  <div className="campo">
-                    <label htmlFor="nombres">Nombres</label>
-                    <input
-                      id="nombres"
-                      value={formulario.nombres}
-                      onChange={(evento) =>
-                        setFormulario({ ...formulario, nombres: evento.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="campo">
-                    <label htmlFor="apellidos">Apellidos</label>
-                    <input
-                      id="apellidos"
-                      value={formulario.apellidos}
-                      onChange={(evento) =>
-                        setFormulario({ ...formulario, apellidos: evento.target.value })
-                      }
-                    />
-                  </div>
-                </div>
-                <div className="fila-campos">
-                  <div className="campo">
-                    <label htmlFor="documento">Documento</label>
-                    <input
-                      id="documento"
-                      value={formulario.documento}
-                      onChange={(evento) =>
-                        setFormulario({ ...formulario, documento: evento.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="campo">
-                    <label htmlFor="rol">Rol</label>
+                <span className="titulo-seccion">
+                  Inhabilitar a {nombreCompleto(sel.persona(bd, cerrando.personaId))}
+                </span>
+                {cerrando.rol === 'propietario' && (
+                  <div className="campo" style={{ marginTop: 'var(--e3)' }}>
+                    <label htmlFor="motivo-cierre">Motivo</label>
                     <select
-                      id="rol"
-                      value={formulario.rol}
-                      onChange={(evento) =>
-                        setFormulario({ ...formulario, rol: evento.target.value as RolResidencia })
-                      }
+                      id="motivo-cierre"
+                      value={motivo}
+                      onChange={(evento) => setMotivo(evento.target.value as MotivoCierreVinculo)}
                     >
-                      <option value="propietario">Propietario</option>
-                      <option value="arrendatario">Arrendatario</option>
-                      <option value="autorizado">Autorizado</option>
+                      <option value="cambio_propietario">Cambio de propietario (se vendió la unidad)</option>
+                      <option value="otro">Otro motivo</option>
                     </select>
                   </div>
-                </div>
-                <div className="fila-campos">
-                  <div className="campo">
-                    <label htmlFor="email">Correo</label>
-                    <input
-                      id="email"
-                      type="email"
-                      value={formulario.email}
-                      onChange={(evento) =>
-                        setFormulario({ ...formulario, email: evento.target.value })
-                      }
-                    />
-                  </div>
-                  <div className="campo">
-                    <label htmlFor="telefono">Teléfono</label>
-                    <input
-                      id="telefono"
-                      value={formulario.telefono}
-                      onChange={(evento) =>
-                        setFormulario({ ...formulario, telefono: evento.target.value })
-                      }
-                    />
-                  </div>
+                )}
+                {motivo === 'cambio_propietario' && (
+                  <p className="subtitulo">
+                    Después de inhabilitarlo vas a registrar al nuevo propietario de esta unidad.
+                  </p>
+                )}
+                <div className="campo">
+                  <label htmlFor="detalle-cierre">Explicación (opcional)</label>
+                  <textarea
+                    id="detalle-cierre"
+                    value={explicacion}
+                    onChange={(evento) => setExplicacion(evento.target.value)}
+                    placeholder={motivo === 'cambio_propietario' ? 'Ej: escritura 1234 de la Notaría 5' : 'Ej: se mudó'}
+                  />
                 </div>
                 <div className="grupo-botones">
-                  <button
-                    className="boton boton--primario"
-                    disabled={cargando}
-                    onClick={guardarVinculo}
-                  >
-                    Guardar
+                  <button className="boton boton--peligro" disabled={cargando} onClick={() => void inhabilitar()}>
+                    {motivo === 'cambio_propietario' ? 'Inhabilitar y registrar al nuevo' : 'Inhabilitar'}
                   </button>
-                  <button className="boton" onClick={() => setVinculando(false)}>
+                  <button className="boton" onClick={() => setCerrando(null)}>
                     Cancelar
                   </button>
                 </div>

@@ -10,6 +10,7 @@
  */
 
 import type {
+  MotivoCierreVinculo,
   AccesoSoporte,
   AutorActuacion,
   BaseDatos,
@@ -30,12 +31,19 @@ import type {
   OrigenRespaldo,
   Reincidencia,
   CategoriaRegistro,
+  CondicionRegistro,
+  TipoIdentificacion,
+  RolResidencia,
   CategoriaPqrs,
+  CierreZona,
   Comunicado,
   Correspondencia,
   Cuota,
   Documento,
   FechaISO,
+  ZonaComun,
+  Proyecto,
+  AvanceProyecto,
   MedioPago,
   MotivoMensaje,
   Imputacion,
@@ -47,7 +55,6 @@ import type {
   Reserva,
   Residencia,
   Sancion,
-  RolResidencia,
   TipoCorrespondencia,
   TipoPqrs,
   Visitante,
@@ -76,6 +83,52 @@ import {
   convocatoriaCompleta,
   faltaEnActa,
   limiteVerificacionActa,
+  MAXIMO_FOTOS_ZONA,
+  MAXIMO_ESPECIFICACIONES,
+  puedeAgregarFotoZona,
+  motivoZonaInvalida,
+  reservasQueCancelaDesactivar,
+  textoReservaCancelada,
+  zonaActiva,
+  MINIMO_MOTIVO_DESACTIVACION,
+  motivoCierreInvalido,
+  motivoDeCierre,
+  reservasQueCancelaCierre,
+  validarReserva,
+  fechaCorta,
+  etiquetaUnidad,
+  puedeRegistrar,
+  puedeInhabilitar,
+  motivoNoRegistraAdministracion,
+  puedeVerSoportes,
+  reservaOcupaFranja,
+  sePuedeCancelar,
+  estadoDeCuenta,
+  motivoEstadoCuentaInvalido,
+  franjasDeZona,
+  multaAlCancelar,
+  puedeCancelarLaAdministracion,
+  textoCierreZona,
+  valoresDeLaReserva,
+  debeCerrarseSola,
+  solicitudVencida,
+  textoReservaVencida,
+  textoReservaDecidida,
+  condicionesDeLaZona,
+  debeRecordarse,
+  textoRecordatorioReserva,
+  motivoInvitadosInvalido,
+  puedeEditarInvitados,
+  justificacionCobroUso,
+  motivoCierreReservaInvalido,
+  puedeAbrirProcesoPorReserva,
+  hechosDeLaReserva,
+  DIAS_PARA_PAGAR_USO,
+  type DatosZona,
+  puedeConfirmarRecepcion,
+  admiteGrabacion,
+  motivoAvanceInvalido,
+  textoAvanceProyecto,
   comisionVencida,
   motivoPlazoComisionInvalido,
   puedeGenerarActa,
@@ -88,7 +141,20 @@ import {
   formasDeAsistir,
   respaldoCompleto,
   respaldoDeCuotaCompleto,
-  rolDeCategoria,
+  rolDeRegistro,
+  esVisitaDeUnDia,
+  condicionesPosibles,
+  marcaResidente,
+  debeAvisarseFinDeEstadia,
+  saleConCodigo,
+  admiteMenor,
+  TIPOS_IDENTIFICACION,
+  categoriaDeResidencia,
+  condicionDeResidencia,
+  condicionesParaCambiar,
+  faltaContacto,
+  requiereAprobacionPropietario,
+  esperaAlPropietario,
   soloUnDia,
   soportesCompletos,
   registroEnCurso,
@@ -102,7 +168,8 @@ import {
 } from '../dominio/reglas'
 import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajeria'
 import { finDePeriodo, formatearDinero, formatearFecha } from '../utilidades/formato'
-import { guardar, leer, sembrar } from './almacen'
+import { guardar, leer, sembrar, ocupacion } from './almacen'
+import { responsablesDeRegistro, responsablesDeVisita, responsablesDelVinculo, unidadTienePropietario } from './selectores'
 
 /** Resultado de una operacion: base de datos actualizada + lo que se creo. */
 export interface Resultado<T> {
@@ -145,13 +212,93 @@ function nuevoId(prefijo: string): string {
 
 export async function cargar(): Promise<BaseDatos> {
   await esperar()
-  return leer()
+  const bd = leer()
+  if (aplicarProcesosDelSistema(bd)) guardar(bd)
+  return bd
+}
+
+/**
+ * Los procesos que en la fase 2 correrá un servidor a su hora, y que el demo
+ * aplica al abrir la app: vencer las solicitudes que nadie contestó (RN-122,
+ * CU-S-03), recordar las reservas de hoy y de mañana (RN-125) y cerrar las que
+ * no mueven plata cuando termina su turno (RN-129). Devuelve si
+ * cambió algo, para guardar solo entonces.
+ */
+function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boolean {
+  let cambio = false
+  const momento = ahora.toISOString()
+  for (const reserva of bd.reservas) {
+    const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+    if (!zona) continue
+    const copropiedad = bd.copropiedades.find((c) => c.id === zona.copropiedadId)?.nombre ?? 'La copropiedad'
+    // RN-129 — La que no mueve plata se cierra sola al terminar su turno, sin mensaje.
+    if (debeCerrarseSola(reserva, zona, ahora)) {
+      reserva.cierre = { resultado: 'usada', registradoEn: momento, registradoPor: 'Cierre automático', automatico: true }
+      cambio = true
+      continue
+    }
+    let texto: string | null = null
+    let motivo: MotivoMensaje | null = null
+    if (solicitudVencida(reserva, ahora)) {
+      reserva.estado = 'vencida'
+      reserva.vencidaEn = momento
+      texto = textoReservaVencida(reserva, zona, copropiedad)
+      motivo = 'reserva_vencida'
+    } else if (debeRecordarse(reserva, ahora)) {
+      reserva.recordatorioEnviadoEn = momento
+      texto = textoRecordatorioReserva(reserva, zona, copropiedad)
+      motivo = 'recordatorio_reserva'
+    }
+    if (!texto || !motivo) continue
+    cambio = true
+    avisarAPersona(bd, {
+      copropiedadId: zona.copropiedadId,
+      personaId: reserva.personaId,
+      texto,
+      motivo,
+      reservaId: reserva.id,
+      ahora: momento,
+    })
+  }
+  if (avisarFinesDeEstadia(bd, momento)) cambio = true
+  return cambio
+}
+
+/**
+ * Dos días antes de que termine una estadía temporal, se le avisa a quien
+ * registró a la persona, para que la alargue si hace falta (Mary, 2026-10-02).
+ * Una vez por fecha de salida: si la alargan, el aviso vuelve a tocar.
+ */
+function avisarFinesDeEstadia(bd: BaseDatos, momento: string): boolean {
+  let cambio = false
+  for (const residencia of bd.residencias) {
+    if (!residencia.hasta || residencia.cierre || !residenciaVigente(residencia)) continue
+    if (!debeAvisarseFinDeEstadia(residencia)) continue
+    const registro = bd.registros.find((r) => r.id === residencia.registroId)
+    const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
+    const persona = bd.personas.find((p) => p.id === residencia.personaId)
+    if (!registro || !unidad) continue
+    residencia.avisoFinPara = residencia.hasta
+    cambio = true
+    avisarAPersona(bd, {
+      copropiedadId: unidad.copropiedadId,
+      personaId: registro.creadoPor,
+      motivo: 'fin_de_estadia',
+      texto:
+        `Idiky: la estadía de ${persona?.nombres ?? 'tu residente temporal'} en ${etiquetaUnidad(unidad)} termina el ` +
+        `${fechaCorta(residencia.hasta)}. Si se queda más tiempo, cámbiale la fecha de salida en la app.`,
+      ahora: momento,
+    })
+  }
+  return cambio
 }
 
 /** Devuelve el demo a su estado inicial. */
 export async function reiniciar(): Promise<BaseDatos> {
   await esperar()
-  return sembrar()
+  const bd = sembrar()
+  if (aplicarProcesosDelSistema(bd)) guardar(bd)
+  return bd
 }
 
 // ---------------------------------------------------------------------------
@@ -465,12 +612,43 @@ export async function crearReserva(
     fecha: string
     horaInicio: string
     horaFin: string
+    /** RN-111 — En una zona compartida, cuantas personas van. */
+    personas?: number
+    /** RN-124 — Marcó que acepta las condiciones de la zona. */
+    aceptaCondiciones?: boolean
+    /** RN-126 — Los nombres de sus invitados. */
+    invitados?: string[]
   },
 ): Promise<Resultado<Reserva>> {
   await esperar()
   const bd = clonar(bdActual)
   const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
   if (!zona) throw new ErrorDeNegocio('La zona comun no existe.')
+  const franja = franjasDeZona(zona, parametros.fecha).find((f) => f.inicio === parametros.horaInicio)
+  if (!franja) throw new ErrorDeNegocio('Ese turno no existe ese día en esta zona.')
+  // Las reglas de la reserva se revisan otra vez aquí, con la misma función que
+  // usa la pantalla: zona activa y abierta ese día (RN-107, RN-108, RN-114),
+  // mora (RN-08), turno libre o con cupo (RN-09, RN-111, RN-113), anticipación
+  // (RN-10) y cupo mensual. La pantalla avisa antes; esto es lo que no se salta
+  // nadie, y lo que hereda un backend real (ADR-0003).
+  const validacion = validarReserva({
+    zona,
+    fecha: parametros.fecha,
+    horaInicio: parametros.horaInicio,
+    unidadId: parametros.unidadId,
+    cuotasDeLaUnidad: cuotasDe(bd, parametros.unidadId),
+    reservas: bd.reservas,
+    personas: parametros.personas ?? 1,
+  })
+  if (!validacion.valido) throw new ErrorDeNegocio(validacion.motivo ?? 'No se puede reservar ese turno.')
+  // RN-124 — Si la zona tiene condiciones, se aceptan antes de reservar.
+  const condiciones = condicionesDeLaZona(zona, bd.conceptosSancion)
+  if (condiciones && !parametros.aceptaCondiciones) {
+    throw new ErrorDeNegocio('Para reservar esta zona hay que aceptar sus condiciones.')
+  }
+  const invitados = parametros.invitados ?? []
+  const motivoInvitados = motivoInvitadosInvalido(invitados, parametros.personas ?? 1)
+  if (motivoInvitados) throw new ErrorDeNegocio(motivoInvitados)
 
   const reserva: Reserva = {
     id: nuevoId('rsv'),
@@ -479,10 +657,16 @@ export async function crearReserva(
     personaId: parametros.personaId,
     fecha: parametros.fecha,
     horaInicio: parametros.horaInicio,
-    horaFin: parametros.horaFin,
+    // El fin sale del turno de la zona, no de lo que diga quien llama.
+    horaFin: franja.fin,
     // Si la zona no requiere aprobacion, la reserva nace confirmada.
     estado: zona.requiereAprobacion ? 'solicitada' : 'confirmada',
     creadaEn: ahoraISO(),
+    personas: parametros.personas ?? 1,
+    // RN-118 — Lo que cuesta se fija al reservar.
+    ...valoresDeLaReserva(zona),
+    ...(condiciones ? { condicionesAceptadas: { aceptadasEn: ahoraISO(), texto: condiciones } } : {}),
+    ...(invitados.length ? { invitados } : {}),
   }
 
   bd.reservas.push(reserva)
@@ -497,7 +681,21 @@ export async function cancelarReserva(
   const bd = clonar(bdActual)
   const reserva = bd.reservas.find((r) => r.id === reservaId)
   if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  // RN-128 — Solo activa, sin cerrar y antes de su límite. Lo revisa el
+  // repositorio, no solo el botón: así nadie esquiva el cobro ni el cierre.
+  if (!sePuedeCancelar(reserva, zona)) {
+    throw new ErrorDeNegocio(
+      reserva.cierre || !reservaOcupaFranja(reserva)
+        ? 'Esa reserva ya no se puede cancelar.'
+        : 'Ya pasó el límite para cancelar esta reserva.',
+    )
+  }
+  // RN-112 — Si cancela dentro del plazo con multa, queda anotado; no se multa aqui.
+  const conceptos = zona ? conceptosDe(bd, zona.copropiedadId) : []
+  if (multaAlCancelar(reserva, zona, conceptos)) reserva.canceladaFueraDePlazo = true
   reserva.estado = 'cancelada'
+  reserva.canceladaEn = ahoraISO()
   return persistir(bd, reserva)
 }
 
@@ -516,7 +714,172 @@ export async function decidirReserva(
   }
   reserva.estado = decision
   if (decision === 'rechazada') reserva.motivoRechazo = motivoRechazo || 'Sin motivo registrado'
+  // RN-123 — Al residente le llega la respuesta.
+  const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  if (zona) {
+    const copropiedad = bd.copropiedades.find((c) => c.id === zona.copropiedadId)?.nombre ?? 'La copropiedad'
+    avisarAPersona(bd, {
+      copropiedadId: zona.copropiedadId,
+      personaId: reserva.personaId,
+      texto: textoReservaDecidida(reserva, zona, decision, reserva.motivoRechazo, copropiedad),
+      motivo: 'reserva_decidida',
+      reservaId: reserva.id,
+    })
+  }
   return persistir(bd, reserva)
+}
+
+/** RN-126 — Quien reservó cambia la lista de invitados, hasta que empiece el turno. */
+export async function editarInvitados(
+  bdActual: BaseDatos,
+  parametros: { reservaId: string; invitados: string[] },
+): Promise<Resultado<Reserva>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const reserva = bd.reservas.find((r) => r.id === parametros.reservaId)
+  if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  if (!puedeEditarInvitados(reserva)) throw new ErrorDeNegocio('La lista se cambia hasta que empiece el turno.')
+  const motivo = motivoInvitadosInvalido(parametros.invitados, reserva.personas ?? 1)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  reserva.invitados = parametros.invitados.length ? parametros.invitados : undefined
+  return persistir(bd, reserva)
+}
+
+// ---------------------------------------------------------------------------
+// La plata de la reserva — RN-119 a RN-121
+// ---------------------------------------------------------------------------
+
+/** RN-120 — La administración recibió el depósito. */
+export async function registrarDepositoRecibido(
+  bdActual: BaseDatos,
+  reservaId: string,
+): Promise<Resultado<Reserva>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const reserva = bd.reservas.find((r) => r.id === reservaId)
+  if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  if (!reserva.deposito) throw new ErrorDeNegocio('Esa reserva no pide depósito.')
+  if (reserva.depositoRecibidoEn) throw new ErrorDeNegocio('El depósito ya estaba recibido.')
+  if (reserva.estado !== 'confirmada') throw new ErrorDeNegocio('Solo se recibe el depósito de una reserva confirmada.')
+  reserva.depositoRecibidoEn = ahoraISO()
+  return persistir(bd, reserva)
+}
+
+/**
+ * RN-119 a RN-121 — Cierra la reserva después del turno: genera el cobro por
+ * uso, devuelve o retiene el depósito y, si se pide, abre el proceso.
+ */
+export async function cerrarReserva(
+  bdActual: BaseDatos,
+  parametros: {
+    reservaId: string
+    resultado: 'usada' | 'no_se_presento'
+    estadoZona?: 'bien' | 'con_novedades'
+    observaciones?: string
+    foto?: string
+    retener?: number
+    motivoRetencion?: string
+    registradoPor: string
+    abrirProceso?: boolean
+  },
+): Promise<Resultado<{ reserva: Reserva; cuota?: Cuota; sancion?: Sancion }>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const reserva = bd.reservas.find((r) => r.id === parametros.reservaId)
+  if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  if (!zona) throw new ErrorDeNegocio('La zona de esa reserva no existe.')
+  const invalido = motivoCierreReservaInvalido(reserva, parametros)
+  if (invalido) throw new ErrorDeNegocio(invalido)
+
+  const ahora = ahoraISO()
+  const noSePresento = parametros.resultado === 'no_se_presento'
+
+  // RN-119 — El cobro por uso, en el estado de cuenta.
+  let cuota: Cuota | undefined
+  if (reserva.valorUso) {
+    const hoy = hoyISO()
+    const origen = zona.respaldoCobro?.origen
+    cuota = {
+      id: nuevoId('cuo'),
+      unidadId: reserva.unidadId,
+      periodo: hoy.slice(0, 7),
+      tipo: 'uso_zona',
+      concepto: `Uso de ${zona.nombre} · ${fechaCorta(reserva.fecha)}`,
+      valor: reserva.valorUso,
+      saldo: reserva.valorUso,
+      fechaVencimiento: sumarDias(hoy, DIAS_PARA_PAGAR_USO),
+      estado: 'pendiente',
+      ...(origen === 'reglamento' || origen === 'asamblea' ? { origen } : {}),
+      ...(zona.respaldoCobro ? { referencia: zona.respaldoCobro.referencia } : {}),
+      justificacion: justificacionCobroUso(reserva, zona, noSePresento),
+    }
+    bd.cuotas.push(cuota)
+  }
+
+  // RN-120 — El depósito: completo si no se usó o quedó bien; si no, lo que se retiene.
+  const recibido = reserva.depositoRecibidoEn ? (reserva.deposito ?? 0) : 0
+  const retenido = noSePresento ? 0 : Math.min(parametros.retener ?? 0, recibido)
+  reserva.cierre = {
+    resultado: parametros.resultado,
+    registradoEn: ahora,
+    registradoPor: parametros.registradoPor,
+    ...(noSePresento
+      ? {}
+      : {
+          estadoZona: parametros.estadoZona,
+          ...(parametros.observaciones?.trim() ? { observaciones: parametros.observaciones.trim() } : {}),
+          ...(parametros.foto ? { foto: { imagen: parametros.foto, adjuntadoEn: ahora } } : {}),
+        }),
+    ...(cuota ? { cuotaUsoId: cuota.id } : {}),
+    ...(recibido
+      ? {
+          depositoDevuelto: recibido - retenido,
+          ...(retenido ? { depositoRetenido: retenido, motivoRetencion: parametros.motivoRetencion!.trim() } : {}),
+        }
+      : {}),
+  }
+
+  if (!parametros.abrirProceso) return persistir(bd, { reserva, cuota })
+
+  // RN-121 — El proceso por la multa, con el mismo camino que cualquier sanción.
+  const conProceso = await abrirProcesoPorReservaEn(bd, reserva.id, parametros.registradoPor)
+  return persistir(conProceso.bd, {
+    reserva: conProceso.bd.reservas.find((r) => r.id === reserva.id)!,
+    cuota,
+    sancion: conProceso.datos,
+  })
+}
+
+/** RN-121 — Abre el proceso por la multa de una reserva (no se presentó o canceló fuera de plazo). */
+export async function abrirProcesoPorReserva(
+  bdActual: BaseDatos,
+  parametros: { reservaId: string; impuestaPor: string },
+): Promise<Resultado<Sancion>> {
+  return abrirProcesoPorReservaEn(clonar(bdActual), parametros.reservaId, parametros.impuestaPor)
+}
+
+async function abrirProcesoPorReservaEn(
+  bd: BaseDatos,
+  reservaId: string,
+  impuestaPor: string,
+): Promise<Resultado<Sancion>> {
+  const reserva = bd.reservas.find((r) => r.id === reservaId)
+  if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  if (!zona || !puedeAbrirProcesoPorReserva(reserva, zona)) {
+    throw new ErrorDeNegocio('Esa reserva no tiene un proceso por abrir.')
+  }
+  const resultado = await imponerSancion(bd, {
+    copropiedadId: zona.copropiedadId,
+    unidadId: reserva.unidadId,
+    conceptoId: zona.multaNoCancelar!.conceptoId,
+    hechos: hechosDeLaReserva(reserva, zona),
+    impuestaPor,
+  })
+  const enLaNueva = resultado.bd.reservas.find((r) => r.id === reservaId)!
+  enLaNueva.sancionId = resultado.datos.id
+  return persistir(resultado.bd, resultado.datos)
 }
 
 // ---------------------------------------------------------------------------
@@ -641,6 +1004,152 @@ export async function publicarComunicado(
   return persistir(bd, comunicado)
 }
 
+/**
+ * Cuanto del almacenamiento del demo va ocupado, para avisar antes de que se
+ * llene (ADR-0009). Solo tiene sentido mientras los datos vivan en el
+ * navegador: con backend, las fotos van a un archivo y esto desaparece.
+ */
+export function ocupacionDelDemo(bd: BaseDatos): { porcentaje: number; usadoKB: number; limiteKB: number } {
+  const o = ocupacion(bd)
+  return { porcentaje: o.porcentaje, usadoKB: Math.round(o.usado / 1024), limiteKB: Math.round(o.limite / 1024) }
+}
+
+// ---------------------------------------------------------------------------
+// Proyectos — CU-A-28 · RN-100, RN-101
+// ---------------------------------------------------------------------------
+
+/** CU-A-28 — El administrador registra un proyecto. Nace planeado, sin avances. */
+export async function crearProyecto(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    nombre: string
+    descripcion: string
+    responsable?: string
+    fechaInicio?: FechaISO
+    fechaFinPrevista?: FechaISO
+    presupuesto?: number
+    creadoPor: string
+  },
+): Promise<Resultado<Proyecto>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (parametros.nombre.trim().length < 3) throw new ErrorDeNegocio('Ponle nombre al proyecto.')
+  if (parametros.descripcion.trim().length < 10) {
+    throw new ErrorDeNegocio('Describe el proyecto: es lo primero que lee el propietario.')
+  }
+  if (
+    parametros.fechaInicio &&
+    parametros.fechaFinPrevista &&
+    parametros.fechaFinPrevista < parametros.fechaInicio
+  ) {
+    throw new ErrorDeNegocio('La fecha prevista de fin no puede ser anterior al inicio.')
+  }
+  if (parametros.presupuesto !== undefined && parametros.presupuesto < 0) {
+    throw new ErrorDeNegocio('El presupuesto no puede ser negativo.')
+  }
+  const proyecto: Proyecto = {
+    id: nuevoId('pro'),
+    copropiedadId: parametros.copropiedadId,
+    nombre: parametros.nombre.trim(),
+    descripcion: parametros.descripcion.trim(),
+    responsable: parametros.responsable?.trim() || undefined,
+    fechaInicio: parametros.fechaInicio || undefined,
+    fechaFinPrevista: parametros.fechaFinPrevista || undefined,
+    presupuesto: parametros.presupuesto,
+    avances: [],
+    creadoPor: parametros.creadoPor,
+    creadoEn: ahoraISO(),
+  }
+  bd.proyectos.unshift(proyecto)
+  return persistir(bd, proyecto)
+}
+
+/**
+ * CU-A-28 — Registrar un avance, y **contarlo** (RN-101).
+ *
+ * Tres cosas pasan de una vez, y por eso viven en una sola operacion: el
+ * avance queda en el proyecto (RN-100: no se edita, se corrige con otro); se
+ * publica un comunicado en la cartelera, enlazado al tablero; y sale un
+ * mensaje al celular de cada propietario que lo tenga. Los que no tengan
+ * celular no reciben mensaje, y se dice cuantos fueron.
+ */
+export async function registrarAvanceProyecto(
+  bdActual: BaseDatos,
+  parametros: {
+    proyectoId: string
+    porcentaje: number
+    titulo: string
+    detalle: string
+    foto?: string
+    registradoPor: string
+  },
+): Promise<Resultado<{ proyecto: Proyecto; avance: AvanceProyecto; avisados: number; sinCelular: number }>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const proyecto = bd.proyectos.find((p) => p.id === parametros.proyectoId)
+  if (!proyecto) throw new ErrorDeNegocio('Ese proyecto no existe.')
+  const motivo = motivoAvanceInvalido(proyecto, parametros)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+
+  const ahora = ahoraISO()
+  const copropiedad = bd.copropiedades.find((c) => c.id === proyecto.copropiedadId)
+  const nombreCopropiedad = copropiedad?.nombre ?? 'La copropiedad'
+
+  // El comunicado: mismo canal que todo lo demas que dice la administracion.
+  const comunicado: Comunicado = {
+    id: nuevoId('com'),
+    copropiedadId: proyecto.copropiedadId,
+    titulo: `${proyecto.nombre}: ${parametros.porcentaje} %`,
+    cuerpo: `${parametros.titulo.trim()}${parametros.detalle.trim() ? `. ${parametros.detalle.trim()}` : '.'}`,
+    categoria: 'proyecto',
+    fijado: false,
+    fechaPublicacion: ahora,
+    autor: 'Administración',
+    leidoPor: [],
+    proyectoId: proyecto.id,
+  }
+  bd.comunicados.unshift(comunicado)
+
+  const avance: AvanceProyecto = {
+    id: nuevoId('avn'),
+    fecha: ahora,
+    porcentaje: parametros.porcentaje,
+    titulo: parametros.titulo.trim(),
+    detalle: parametros.detalle.trim(),
+    foto: parametros.foto ? { imagen: parametros.foto, adjuntadoEn: ahora } : undefined,
+    registradoPor: parametros.registradoPor,
+    comunicadoId: comunicado.id,
+  }
+  proyecto.avances.push(avance)
+
+  // El mensaje, a cada propietario vigente con celular. Un propietario con
+  // varias unidades recibe uno solo: se avisa a personas, no a unidades.
+  const unidades = new Set(bd.unidades.filter((u) => u.copropiedadId === proyecto.copropiedadId).map((u) => u.id))
+  const propietarios = new Set(
+    bd.residencias
+      .filter((r) => unidades.has(r.unidadId) && r.rol === 'propietario' && residenciaVigente(r))
+      .map((r) => r.personaId),
+  )
+  const texto = textoAvanceProyecto(proyecto, avance, nombreCopropiedad)
+  let avisados = 0
+  let sinCelular = 0
+  for (const personaId of propietarios) {
+    const avisado = avisarAPersona(bd, {
+      copropiedadId: proyecto.copropiedadId,
+      personaId,
+      texto,
+      motivo: 'avance_proyecto',
+      proyectoId: proyecto.id,
+      ahora,
+    })
+    if (avisado) avisados += 1
+    else sinCelular += 1
+  }
+
+  return persistir(bd, { proyecto, avance, avisados, sinCelular })
+}
+
 export async function marcarComunicadoLeido(
   bdActual: BaseDatos,
   comunicadoId: string,
@@ -702,6 +1211,378 @@ export async function entregarCorrespondencia(
   return persistir(bd, registro)
 }
 
+/**
+ * CU-R-11 — El residente confirma que recibio el paquete (RN-103).
+ *
+ * Si porteria ya lo habia entregado, queda confirmado. Si no, la confirmacion
+ * **es** la entrega: el residente lo tiene, y `recibidoPor` queda con su
+ * nombre. La correspondencia entregada no se edita (RN-25); esto no la edita,
+ * la cierra.
+ */
+export async function confirmarRecepcionCorrespondencia(
+  bdActual: BaseDatos,
+  parametros: { correspondenciaId: string; personaId: string },
+): Promise<Resultado<Correspondencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const registro = bd.correspondencia.find((c) => c.id === parametros.correspondenciaId)
+  if (!registro) throw new ErrorDeNegocio('El registro no existe.')
+  if (registro.confirmadoEn) throw new ErrorDeNegocio('Ya confirmaste que lo recibiste.')
+  if (!puedeConfirmarRecepcion(registro, bd.residencias, parametros.personaId)) {
+    throw new ErrorDeNegocio('Solo un residente de esa unidad puede confirmar que lo recibio.')
+  }
+  const ahora = ahoraISO()
+  const persona = bd.personas.find((p) => p.id === parametros.personaId)
+  if (registro.estado !== 'entregada') {
+    registro.estado = 'entregada'
+    registro.recibidoPor = persona ? `${persona.nombres} ${persona.apellidos}` : 'El residente'
+    registro.fechaEntrega = ahora
+  }
+  registro.confirmadoPor = parametros.personaId
+  registro.confirmadoEn = ahora
+  return persistir(bd, registro)
+}
+
+// ---------------------------------------------------------------------------
+// Zonas comunes: sus fotos — CU-A-10 (parcial) · RN-104
+// ---------------------------------------------------------------------------
+
+export async function agregarFotoZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; imagen: string },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  if (!parametros.imagen) throw new ErrorDeNegocio('Falta la foto.')
+  if (!puedeAgregarFotoZona(zona)) {
+    throw new ErrorDeNegocio(`Una zona lleva hasta ${MAXIMO_FOTOS_ZONA} fotos. Quita una para agregar otra.`)
+  }
+  zona.fotos = [...(zona.fotos ?? []), { imagen: parametros.imagen, adjuntadoEn: ahoraISO() }]
+  return persistir(bd, zona)
+}
+
+/** CU-A-10 (parcial) — Las especificaciones generales de la zona (RN-104). */
+export async function editarEspecificacionesZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; especificaciones: string },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  const texto = parametros.especificaciones.trim()
+  if (texto.length > MAXIMO_ESPECIFICACIONES) {
+    throw new ErrorDeNegocio(`Las especificaciones caben en ${MAXIMO_ESPECIFICACIONES} caracteres: lo que el residente alcanza a leer antes de reservar.`)
+  }
+  zona.especificaciones = texto || undefined
+  return persistir(bd, zona)
+}
+
+/** Las fotos son configuracion: quitar una no borra ninguna historia (RN-104). */
+export async function quitarFotoZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; adjuntadoEn: string },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  const antes = zona.fotos?.length ?? 0
+  zona.fotos = (zona.fotos ?? []).filter((f) => f.adjuntadoEn !== parametros.adjuntadoEn)
+  if (zona.fotos.length === antes) throw new ErrorDeNegocio('Esa foto ya no está.')
+  return persistir(bd, zona)
+}
+
+// ---------------------------------------------------------------------------
+// Zonas comunes: crearlas, cambiarlas, desactivarlas — CU-A-10 · RN-105 a RN-107
+// ---------------------------------------------------------------------------
+
+/**
+ * Lo que se guarda: sin espacios sobrantes, y sin cobro, depósito ni respaldo
+ * cuando no aplican (RN-109). Las claves van siempre, aunque vacías, para que
+ * editar una zona también pueda quitarle el cobro o la multa.
+ */
+function datosZonaLimpios(datos: DatosZona): DatosZona {
+  const valorUso = datos.valorUso || undefined
+  const deposito = datos.deposito || undefined
+  const respaldo = datos.respaldoCobro
+  return {
+    ...datos,
+    nombre: datos.nombre.trim(),
+    descripcion: datos.descripcion.trim(),
+    valorUso,
+    deposito,
+    respaldoCobro:
+      (valorUso || deposito) && respaldo
+        ? {
+            origen: respaldo.origen,
+            referencia: respaldo.referencia.trim(),
+            ...(respaldo.origen === 'otro' ? { documento: respaldo.documento?.trim() } : {}),
+          }
+        : undefined,
+    multaNoCancelar: datos.multaNoCancelar,
+  }
+}
+
+function conceptosDe(bd: BaseDatos, copropiedadId: string) {
+  return bd.conceptosSancion.filter((c) => c.copropiedadId === copropiedadId)
+}
+
+/** CU-A-10 — Una zona nueva, que nace activa y recibe reservas de una vez (RN-105). */
+export async function crearZona(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; datos: DatosZona },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zonas = bd.zonasComunes.filter((z) => z.copropiedadId === parametros.copropiedadId)
+  const motivo = motivoZonaInvalida(parametros.datos, zonas, undefined, conceptosDe(bd, parametros.copropiedadId))
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const zona: ZonaComun = {
+    id: nuevoId('zon'),
+    copropiedadId: parametros.copropiedadId,
+    icono: 'zona',
+    ...datosZonaLimpios(parametros.datos),
+  }
+  bd.zonasComunes.push(zona)
+  return persistir(bd, zona)
+}
+
+/**
+ * CU-A-10 — Cambia las reglas de una zona. RN-106: no recorre las reservas;
+ * las ya hechas se respetan tal como se pidieron.
+ */
+export async function editarZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; datos: DatosZona },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  const zonas = bd.zonasComunes.filter((z) => z.copropiedadId === zona.copropiedadId)
+  const motivo = motivoZonaInvalida(parametros.datos, zonas, zona.id, conceptosDe(bd, zona.copropiedadId))
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  Object.assign(zona, datosZonaLimpios(parametros.datos))
+  return persistir(bd, zona)
+}
+
+/**
+ * RN-107 — Desactiva la zona: cancela sus reservas de hoy en adelante y a cada
+ * persona que reservo le deja el mensaje con la justificacion. La zona no se
+ * borra; su historia sigue.
+ */
+export async function desactivarZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; motivo: string },
+): Promise<Resultado<{ zona: ZonaComun } & ResumenCancelacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  if (!zonaActiva(zona)) throw new ErrorDeNegocio('Esa zona ya está desactivada.')
+  const motivo = parametros.motivo.trim()
+  if (motivo.length < MINIMO_MOTIVO_DESACTIVACION) {
+    throw new ErrorDeNegocio('Escribe el motivo: es lo que le llega a quien tenía reserva.')
+  }
+
+  const ahora = ahoraISO()
+  const aviso = cancelarConAviso(bd, zona, reservasQueCancelaDesactivar(zona.id, bd.reservas), motivo, ahora)
+  zona.activa = false
+  zona.desactivadaEn = ahora
+  zona.motivoDesactivacion = motivo
+  return persistir(bd, { zona, ...aviso })
+}
+
+/** Lo que cuenta la consola despues de cancelar con aviso (RN-107, RN-108). */
+export interface ResumenCancelacion {
+  canceladas: number
+  avisados: number
+  sinCelular: number
+}
+
+/**
+ * RN-107 / RN-108 — Cancela las reservas y le deja a cada persona que reservo
+ * el mensaje con la justificacion. Un solo lugar, para que el cierre y la
+ * desactivacion digan lo mismo de la misma manera.
+ */
+function cancelarConAviso(
+  bd: BaseDatos,
+  zona: ZonaComun,
+  afectadas: Reserva[],
+  motivo: string,
+  ahora: string,
+): ResumenCancelacion {
+  const nombreCopropiedad =
+    bd.copropiedades.find((c) => c.id === zona.copropiedadId)?.nombre ?? 'La copropiedad'
+  let avisados = 0
+  let sinCelular = 0
+  for (const reserva of afectadas) {
+    reserva.estado = 'cancelada'
+    reserva.motivoCancelacion = motivo
+    reserva.canceladaEn = ahora
+    const avisado = avisarAPersona(bd, {
+      copropiedadId: zona.copropiedadId,
+      personaId: reserva.personaId,
+      texto: textoReservaCancelada(reserva, zona, motivo, nombreCopropiedad),
+      motivo: 'reserva_cancelada',
+      reservaId: reserva.id,
+      ahora,
+    })
+    if (avisado) avisados += 1
+    else sinCelular += 1
+  }
+  return { canceladas: afectadas.length, avisados, sinCelular }
+}
+
+/** RN-115 — La administración cancela una reserva, con motivo y mensaje. */
+export async function cancelarReservaPorAdministracion(
+  bdActual: BaseDatos,
+  parametros: { reservaId: string; motivo: string },
+): Promise<Resultado<{ reserva: Reserva } & ResumenCancelacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const reserva = bd.reservas.find((r) => r.id === parametros.reservaId)
+  if (!reserva) throw new ErrorDeNegocio('La reserva no existe.')
+  if (!puedeCancelarLaAdministracion(reserva)) {
+    throw new ErrorDeNegocio('Solo se cancela una reserva confirmada de hoy en adelante.')
+  }
+  const motivo = parametros.motivo.trim()
+  if (motivo.length < MINIMO_MOTIVO_DESACTIVACION) {
+    throw new ErrorDeNegocio('Escribe el motivo: es lo que le llega a quien reservó.')
+  }
+  const zona = bd.zonasComunes.find((z) => z.id === reserva.zonaId)
+  if (!zona) throw new ErrorDeNegocio('La zona de esa reserva no existe.')
+  const aviso = cancelarConAviso(bd, zona, [reserva], motivo, ahoraISO())
+  return persistir(bd, { reserva, ...aviso })
+}
+
+/**
+ * RN-108 — Cierra la zona por mantenimiento entre dos fechas: cancela con
+ * aviso las reservas que caen dentro y la zona vuelve sola al terminar.
+ */
+export async function cerrarZonaPorMantenimiento(
+  bdActual: BaseDatos,
+  parametros: {
+    zonaId: string
+    desde: string
+    hasta: string
+    motivo: string
+    /** RN-117 — Avisar a toda la copropiedad: comunicado y mensaje a cada persona. */
+    avisarATodos?: boolean
+  },
+): Promise<Resultado<{ zona: ZonaComun; masivo?: { avisados: number; sinCelular: number } } & ResumenCancelacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  const invalido = motivoCierreInvalido(zona, parametros)
+  if (invalido) throw new ErrorDeNegocio(invalido)
+
+  const ahora = ahoraISO()
+  const cierre: CierreZona = {
+    id: nuevoId('cie'),
+    desde: parametros.desde,
+    hasta: parametros.hasta,
+    motivo: parametros.motivo.trim(),
+    registradoEn: ahora,
+  }
+  zona.cierres = [...(zona.cierres ?? []), cierre]
+  const afectadas = reservasQueCancelaCierre(zona.id, bd.reservas, cierre.desde, cierre.hasta)
+  const aviso = cancelarConAviso(bd, zona, afectadas, motivoDeCierre(cierre), ahora)
+  const masivo = parametros.avisarATodos
+    ? avisarCierreATodos(bd, zona, cierre, new Set(afectadas.map((r) => r.personaId)), ahora)
+    : undefined
+  return persistir(bd, { zona, ...aviso, masivo })
+}
+
+/**
+ * RN-117 — El aviso masivo del cierre: un comunicado de mantenimiento en la
+ * cartelera y un mensaje a cada persona con residencia vigente, salvo a quien
+ * ya se le aviso la cancelacion de su reserva.
+ */
+function avisarCierreATodos(
+  bd: BaseDatos,
+  zona: ZonaComun,
+  cierre: CierreZona,
+  yaAvisados: Set<string>,
+  ahora: string,
+): { avisados: number; sinCelular: number } {
+  const nombreCopropiedad =
+    bd.copropiedades.find((c) => c.id === zona.copropiedadId)?.nombre ?? 'La copropiedad'
+  const texto = textoCierreZona(zona, cierre, nombreCopropiedad)
+  const comunicado: Comunicado = {
+    id: nuevoId('com'),
+    copropiedadId: zona.copropiedadId,
+    titulo: `${zona.nombre}: cerrada por mantenimiento`,
+    cuerpo: texto.slice(texto.indexOf(':') + 2),
+    categoria: 'mantenimiento',
+    fijado: false,
+    fechaPublicacion: ahora,
+    vigenteHasta: cierre.hasta,
+    autor: 'Administración',
+    leidoPor: [],
+  }
+  bd.comunicados.unshift(comunicado)
+  cierre.comunicadoId = comunicado.id
+
+  const unidades = new Set(bd.unidades.filter((u) => u.copropiedadId === zona.copropiedadId).map((u) => u.id))
+  const personas = new Set(
+    bd.residencias.filter((r) => unidades.has(r.unidadId) && residenciaVigente(r)).map((r) => r.personaId),
+  )
+  let avisados = 0
+  let sinCelular = 0
+  for (const personaId of personas) {
+    if (yaAvisados.has(personaId)) continue
+    const avisado = avisarAPersona(bd, {
+      copropiedadId: zona.copropiedadId,
+      personaId,
+      texto,
+      motivo: 'cierre_zona',
+      zonaId: zona.id,
+      ahora,
+    })
+    if (avisado) avisados += 1
+    else sinCelular += 1
+  }
+  return { avisados, sinCelular }
+}
+
+/**
+ * RN-108 — Termina un cierre antes de tiempo: la zona se reserva otra vez desde
+ * ya. El cierre no se borra; queda levantado, en la historia de la zona.
+ */
+export async function levantarCierreZona(
+  bdActual: BaseDatos,
+  parametros: { zonaId: string; cierreId: string },
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === parametros.zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  const cierre = zona.cierres?.find((c) => c.id === parametros.cierreId)
+  if (!cierre || cierre.levantadoEn) throw new ErrorDeNegocio('Ese cierre ya no está vigente.')
+  cierre.levantadoEn = ahoraISO()
+  return persistir(bd, zona)
+}
+
+/** RN-107 — La zona vuelve a recibir reservas; las canceladas no reviven. */
+export async function reactivarZona(
+  bdActual: BaseDatos,
+  zonaId: string,
+): Promise<Resultado<ZonaComun>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const zona = bd.zonasComunes.find((z) => z.id === zonaId)
+  if (!zona) throw new ErrorDeNegocio('Esa zona no existe.')
+  zona.activa = true
+  delete zona.desactivadaEn
+  delete zona.motivoDesactivacion
+  return persistir(bd, zona)
+}
+
 // ---------------------------------------------------------------------------
 // CU-R-10 — Visitantes
 // ---------------------------------------------------------------------------
@@ -744,12 +1625,19 @@ export async function crearVisitante(
 
 export async function revocarVisitante(
   bdActual: BaseDatos,
-  visitanteId: string,
+  parametros: { visitanteId: string; personaId: string },
 ): Promise<Resultado<Visitante>> {
   await esperar()
   const bd = clonar(bdActual)
-  const visitante = bd.visitantes.find((v) => v.id === visitanteId)
+  const visitante = bd.visitantes.find((v) => v.id === parametros.visitanteId)
   if (!visitante) throw new ErrorDeNegocio('El visitante no existe.')
+  // RN-65 — Revoca quien lo autorizó o, subiendo en la cadena, el propietario o
+  // la administración (Mary, 2026-10-02).
+  const unidad = bd.unidades.find((u) => u.id === visitante.unidadId)
+  const rol = unidad && esAdministracion(bd, parametros.personaId, unidad.copropiedadId) ? 'admin' : 'residente'
+  if (!puedeInhabilitar({ ...responsablesDeVisita(bd, visitante), personaId: parametros.personaId, rol })) {
+    throw new ErrorDeNegocio('A esta visita la revoca quien la autorizó, el propietario o la administración (RN-65).')
+  }
   visitante.estado = 'revocado'
   return persistir(bd, visitante)
 }
@@ -758,64 +1646,223 @@ export async function revocarVisitante(
 // CU-A-02 — Unidades y residentes
 // ---------------------------------------------------------------------------
 
-export async function vincularResidente(
+/**
+ * Lo que deja quien sale de la unidad (RN-59, RN-61).
+ *
+ * - Sus registros **en curso** se anulan: solo él podía autorizarlos y ya no
+ *   está. Vale para todos, y con el motivo del cambio de propietario si lo es.
+ * - Si es **arrendatario**, salen con él su familia y los visitantes que
+ *   registró: los temporales, los frecuentes y las visitas que aún no pasan
+ *   (Mary, 2026-10-02). Los
+ *   de un propietario, en cambio, los hereda el siguiente (RN-65).
+ */
+function cerrarLoQueDejo(bd: BaseDatos, residencia: Residencia, cerradoPor: string, motivo: MotivoCierreVinculo) {
+  const ahora = ahoraISO()
+  const ayer = sumarDias(hoyISO(), -1)
+  for (const registro of bd.registros) {
+    if (registro.unidadId === residencia.unidadId && registro.creadoPor === residencia.personaId && registroEnCurso(registro)) {
+      registro.estado = 'anulado'
+      registro.motivo =
+        motivo === 'cambio_propietario'
+          ? 'Cambio de propietario: quien hizo el registro ya no es propietario de la unidad.'
+          : 'Quien hizo el registro ya no está en la unidad.'
+      registro.decididoEn = ahora
+      registro.decididoPor = cerradoPor
+    }
+  }
+  if (residencia.rol !== 'arrendatario') return
+  const registrados = new Set(
+    bd.registros.filter((r) => r.unidadId === residencia.unidadId && r.creadoPor === residencia.personaId).map((r) => r.id),
+  )
+  for (const vinculo of bd.residencias) {
+    if (
+      (vinculo.rol === 'autorizado' || vinculo.rol === 'familiar') &&
+      vinculo.registroId &&
+      registrados.has(vinculo.registroId) &&
+      residenciaVigente(vinculo)
+    ) {
+      vinculo.hasta = ayer
+      vinculo.cierre = { motivo: 'otro', detalle: 'Salió el arrendatario que lo registró.', cerradoPor, cerradoEn: ahora }
+    }
+  }
+  for (const visitante of bd.visitantes) {
+    if (
+      visitante.unidadId === residencia.unidadId &&
+      visitante.personaId === residencia.personaId &&
+      visitante.estado === 'activo' &&
+      visitante.vigenciaHasta >= hoyISO()
+    ) {
+      visitante.estado = 'revocado'
+    }
+  }
+}
+
+/**
+ * RN-68 — Cambiar la condición o la fecha de salida de un vínculo vigente, sin
+ * repetir el trámite (Mary, 2026-10-02). Lo cambia el propio propietario, quien
+ * responde por el vínculo (RN-65) o la administración. Si un arrendatario deja
+ * a su visitante más de 7 días, el cambio espera al propietario (RN-60).
+ */
+export async function cambiarEstadia(
   bdActual: BaseDatos,
-  parametros: {
-    unidadId: string
-    nombres: string
-    apellidos: string
-    documento: string
-    email: string
-    telefono: string
-    rol: RolResidencia
-  },
+  parametros: { residenciaId: string; personaId: string; condicion: CondicionRegistro; hasta?: FechaISO },
 ): Promise<Resultado<Residencia>> {
   await esperar()
   const bd = clonar(bdActual)
+  const residencia = bd.residencias.find((r) => r.id === parametros.residenciaId)
+  if (!residencia || !residenciaVigente(residencia) || residencia.cierre) throw new ErrorDeNegocio('Ese vínculo ya no está vigente.')
+  const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
+  const esAdmin = !!unidad && esAdministracion(bd, parametros.personaId, unidad.copropiedadId)
+  const propio = residencia.personaId === parametros.personaId && residencia.rol === 'propietario'
+  const { creadoPor, heredadoPor } = responsablesDelVinculo(bd, residencia)
+  if (!propio && !puedeInhabilitar({ creadoPor, heredadoPor, personaId: parametros.personaId, rol: esAdmin ? 'admin' : 'residente' })) {
+    throw new ErrorDeNegocio('Esto lo cambia quien registró a la persona, el propietario sobre sí mismo o la administración.')
+  }
+  if (!condicionesParaCambiar(residencia).includes(parametros.condicion)) {
+    throw new ErrorDeNegocio(
+      residencia.rol === 'autorizado'
+        ? 'A un visitante temporal solo se le cambia la fecha de salida.'
+        : 'Esa condición no aplica a esta persona (RN-68).',
+    )
+  }
+  const hasta = parametros.condicion === 'temporal' ? parametros.hasta : undefined
+  if (parametros.condicion === 'temporal' && (!hasta || hasta < hoyISO())) {
+    throw new ErrorDeNegocio('Escoge una fecha de salida de hoy en adelante.')
+  }
+  const antes = condicionDeResidencia(residencia)
+  if (antes === parametros.condicion && residencia.hasta === hasta) throw new ErrorDeNegocio('No hay nada que cambiar.')
 
-  let persona = bd.personas.find((p) => p.documento === parametros.documento)
-  if (!persona) {
-    persona = {
-      id: nuevoId('per'),
-      nombres: parametros.nombres,
-      apellidos: parametros.apellidos,
-      documento: parametros.documento,
-      email: parametros.email,
-      telefono: parametros.telefono,
+  // RN-60 — El arrendatario que deja a su visitante más de una semana necesita
+  // al propietario, igual que al registrarlo.
+  const rolDeQuienCambia = bd.residencias.find(
+    (r) => r.unidadId === residencia.unidadId && r.personaId === parametros.personaId && residenciaVigente(r),
+  )?.rol
+  const ahora = ahoraISO()
+  if (
+    !esAdmin &&
+    requiereAprobacionPropietario(rolDeQuienCambia, {
+      categoria: categoriaDeResidencia(residencia),
+      condicion: parametros.condicion,
+      vigenciaDesde: residencia.desde,
+      vigenciaHasta: hasta,
+    })
+  ) {
+    residencia.cambioPendiente = { condicion: parametros.condicion, hasta, pedidoPor: parametros.personaId, pedidoEn: ahora }
+    const persona = bd.personas.find((p) => p.id === residencia.personaId)
+    for (const dueno of bd.residencias.filter(
+      (r) => r.unidadId === residencia.unidadId && r.rol === 'propietario' && residenciaVigente(r),
+    )) {
+      avisarAPersona(bd, {
+        copropiedadId: unidad?.copropiedadId ?? '',
+        personaId: dueno.personaId,
+        motivo: 'estadia_por_aprobar',
+        texto:
+          `Idiky: tu arrendatario quiere alargar la estadía de ${persona?.nombres ?? 'su visitante'} hasta el ` +
+          `${fechaCorta(hasta ?? '')}. Por ser más de una semana, necesita tu aprobación en la app.`,
+        ahora,
+      })
     }
-    bd.personas.push(persona)
+    return persistir(bd, residencia)
   }
+  aplicarCambio(residencia, parametros.condicion, hasta, parametros.personaId, ahora)
+  return persistir(bd, residencia)
+}
 
-  const yaVinculada = bd.residencias.some(
-    (r) => r.unidadId === parametros.unidadId && r.personaId === persona!.id && !r.hasta,
+function aplicarCambio(
+  residencia: Residencia,
+  condicion: CondicionRegistro,
+  hasta: FechaISO | undefined,
+  por: string,
+  ahora: string,
+  aprobadoPor?: string,
+) {
+  residencia.cambios = [
+    ...(residencia.cambios ?? []),
+    { condicionAntes: condicionDeResidencia(residencia), condicion, hastaAntes: residencia.hasta, hasta, por, aprobadoPor, en: ahora },
+  ]
+  residencia.reside = marcaResidente({ categoria: categoriaDeResidencia(residencia), condicion })
+  residencia.hasta = hasta
+  delete residencia.cambioPendiente
+}
+
+/** RN-60 — El propietario aprueba, o no, el cambio que pidió su arrendatario. */
+export async function decidirCambioComoPropietario(
+  bdActual: BaseDatos,
+  parametros: { residenciaId: string; personaId: string; aprobar: boolean; motivo?: string },
+): Promise<Resultado<Residencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const residencia = bd.residencias.find((r) => r.id === parametros.residenciaId)
+  const pendiente = residencia?.cambioPendiente
+  if (!residencia || !pendiente) throw new ErrorDeNegocio('No hay un cambio esperando aprobación.')
+  const esPropietario = bd.residencias.some(
+    (r) => r.unidadId === residencia.unidadId && r.personaId === parametros.personaId && r.rol === 'propietario' && residenciaVigente(r),
   )
-  if (yaVinculada) throw new ErrorDeNegocio('Esa persona ya esta vinculada a la unidad.')
-
-  const residencia: Residencia = {
-    id: nuevoId('res'),
-    personaId: persona.id,
-    unidadId: parametros.unidadId,
-    rol: parametros.rol,
-    desde: hoyISO(),
-    principal: false,
-    // Por la via directa del administrador se asume que vive ahi; el caso del
-    // propietario no residente se marca en el registro (CU-R-27).
-    reside: true,
+  if (!esPropietario) throw new ErrorDeNegocio('El cambio lo aprueba un propietario de la unidad.')
+  const ahora = ahoraISO()
+  if (parametros.aprobar) {
+    aplicarCambio(residencia, pendiente.condicion, pendiente.hasta, pendiente.pedidoPor, ahora, parametros.personaId)
+  } else {
+    const motivo = (parametros.motivo ?? '').trim()
+    if (motivo.length < 5) throw new ErrorDeNegocio('Escribe por qué no lo apruebas: el arrendatario lo va a leer.')
+    residencia.cambioNoAprobado = { hasta: pendiente.hasta, motivo, por: parametros.personaId, en: ahora }
+    delete residencia.cambioPendiente
   }
-  bd.residencias.push(residencia)
+  const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
+  const persona = bd.personas.find((p) => p.id === residencia.personaId)
+  avisarAPersona(bd, {
+    copropiedadId: unidad?.copropiedadId ?? '',
+    personaId: pendiente.pedidoPor,
+    motivo: 'estadia_decidida',
+    texto: parametros.aprobar
+      ? `Idiky: el propietario aprobó que ${persona?.nombres ?? 'tu visitante'} se quede hasta el ${fechaCorta(pendiente.hasta ?? '')}.`
+      : `Idiky: el propietario no aprobó alargar la estadía de ${persona?.nombres ?? 'tu visitante'}: ${(parametros.motivo ?? '').trim()}`,
+    ahora,
+  })
   return persistir(bd, residencia)
 }
 
 /** Cierra el vinculo de un residente sin borrar el historico (trazabilidad, O3). */
 export async function desvincularResidente(
   bdActual: BaseDatos,
-  residenciaId: string,
+  parametros: {
+    residenciaId: string
+    personaId: string
+    /** «Cambio de propietario» solo aplica a un propietario. */
+    motivo?: MotivoCierreVinculo
+    detalle?: string
+  },
 ): Promise<Resultado<Residencia>> {
   await esperar()
   const bd = clonar(bdActual)
-  const residencia = bd.residencias.find((r) => r.id === residenciaId)
+  const residencia = bd.residencias.find((r) => r.id === parametros.residenciaId)
   if (!residencia) throw new ErrorDeNegocio('El vinculo no existe.')
-  residencia.hasta = hoyISO()
+  // RN-65 — Inhabilita quien registró, o la administración; nadie a sí mismo.
+  // Se revisa aquí y no solo en la pantalla, igual que RN-60 al registrar.
+  const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
+  const rol = unidad && esAdministracion(bd, parametros.personaId, unidad.copropiedadId) ? 'admin' : 'residente'
+  if (residencia.personaId === parametros.personaId) {
+    throw new ErrorDeNegocio('Nadie se inhabilita a sí mismo: la unidad quedaría sin quien responda por ella.')
+  }
+  const { creadoPor, heredadoPor } = responsablesDelVinculo(bd, residencia)
+  if (!puedeInhabilitar({ creadoPor, heredadoPor, personaId: parametros.personaId, rol })) {
+    throw new ErrorDeNegocio('A esta persona la inhabilita quien la registró o la administración (RN-65).')
+  }
+  const motivo = parametros.motivo ?? 'otro'
+  if (motivo === 'cambio_propietario' && residencia.rol !== 'propietario') {
+    throw new ErrorDeNegocio('El cambio de propietario solo aplica a un propietario.')
+  }
+  residencia.cierre = {
+    motivo,
+    detalle: parametros.detalle?.trim() || undefined,
+    cerradoPor: parametros.personaId,
+    cerradoEn: ahoraISO(),
+  }
+  // `hasta` es el último día vigente (RN-62): quien se inhabilita hoy deja de
+  // estar hoy mismo, así que su último día fue ayer.
+  residencia.hasta = sumarDias(hoyISO(), -1)
+  delete residencia.cambioPendiente
+  cerrarLoQueDejo(bd, residencia, parametros.personaId, motivo)
   return persistir(bd, residencia)
 }
 
@@ -1262,6 +2309,31 @@ export async function convocarAsamblea(
  * abrir votaciones. Cerrar no deshace nada — la asamblea cerrada conserva su
  * asistencia y sus votos, que es de lo que sale el acta.
  */
+/**
+ * RN-99 — Enlazar la grabacion de la sesion, para que el acta la cite.
+ *
+ * Se guarda como se guarda el enlace de la transmision: es una direccion en
+ * la herramienta de un tercero, no un archivo de Idiky (ADR-0007).
+ */
+export async function registrarGrabacionAsamblea(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; enlace: string },
+): Promise<Resultado<Asamblea>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (!admiteGrabacion(asamblea)) {
+    throw new ErrorDeNegocio('La grabación se enlaza cuando la sesión ya empezó y hubo transmisión.')
+  }
+  const enlace = parametros.enlace.trim()
+  if (!/^https?:\/\//i.test(enlace)) {
+    throw new ErrorDeNegocio('El enlace de la grabación tiene que empezar por http:// o https://.')
+  }
+  asamblea.enlaceGrabacion = enlace
+  return persistir(bd, asamblea)
+}
+
 export async function cambiarEstadoAsamblea(
   bdActual: BaseDatos,
   parametros: { asambleaId: string; estado: EstadoAsamblea },
@@ -1575,6 +2647,7 @@ function prepararPoder(
 ): { asamblea: Asamblea; unidad: Unidad; apoderado: Persona; otorgadoPor: string } {
   const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
   if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  // RN-31 — El poder vale para una sola asamblea: en una que terminó no hay poder nuevo.
   if (asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') {
     throw new ErrorDeNegocio('Esa asamblea ya terminó: no admite poderes nuevos.')
   }
@@ -2032,6 +3105,58 @@ function avisar(
 }
 
 /**
+ * Deja escrito el mensaje para una persona, a su celular (RN-64). Un solo lugar
+ * para los avisos de reservas, cierres de zonas y avances de obra: así todos
+ * se guardan igual. Devuelve `false` si la persona no tiene celular: sin destino
+ * no hay mensaje, y quien llama decide cómo contarlo.
+ */
+function avisarAPersona(
+  bd: BaseDatos,
+  aviso: {
+    copropiedadId: string
+    personaId: string
+    texto: string
+    motivo: MotivoMensaje
+    reservaId?: string
+    zonaId?: string
+    proyectoId?: string
+    registroId?: string
+    ahora?: string
+  },
+): boolean {
+  const persona = bd.personas.find((p) => p.id === aviso.personaId)
+  const mensaje = redactar({
+    id: nuevoId('msj'),
+    copropiedadId: aviso.copropiedadId,
+    destino: persona?.telefono ?? '',
+    texto: aviso.texto,
+    motivo: aviso.motivo,
+    reservaId: aviso.reservaId,
+    zonaId: aviso.zonaId,
+    proyectoId: aviso.proyectoId,
+    registroId: aviso.registroId,
+    ahora: aviso.ahora ?? ahoraISO(),
+  })
+  if (!mensaje) return false
+  bd.mensajes.unshift(mensaje)
+  return true
+}
+
+/**
+ * Si la persona es la administración de esa copropiedad. En el demo lo dice su
+ * perfil; en BLOKY vendrá de las asignaciones de BOB (RN-161).
+ */
+function esAdministracion(bd: BaseDatos, personaId: string, copropiedadId: string): boolean {
+  return bd.perfilesDemo.some((p) => p.rol === 'admin' && p.personaId === personaId && p.copropiedadId === copropiedadId)
+}
+
+/** Si la persona de ese documento ya tiene un vínculo vigente con la unidad (RN-61). */
+function yaVinculadaALaUnidad(bd: BaseDatos, documento: string, unidadId: string): boolean {
+  const persona = bd.personas.find((p) => p.documento === documento)
+  return !!persona && bd.residencias.some((r) => r.unidadId === unidadId && r.personaId === persona.id && residenciaVigente(r))
+}
+
+/**
  * Codigo con el que la persona registrada abre su registro para adjuntar.
  *
  * Mismo alfabeto sin ambiguedades que los documentos formales: se dicta por
@@ -2054,9 +3179,14 @@ export async function crearRegistroPersona(
     unidadId: string
     creadoPor: string
     categoria: CategoriaRegistro
-    rol?: RolResidencia
-    /** La marca de residente (RN-68). */
-    reside?: boolean
+    /** Residente, no residente o temporal (RN-62, RN-68). */
+    condicion: CondicionRegistro
+    /** Solo la visita de un día: si quien registra le pide las fotos (RN-57). */
+    pedirFotos?: boolean
+    /** Solo el visitante frecuente: los días de la semana en que viene. */
+    dias?: number[]
+    menorDeEdad?: boolean
+    tipoIdentificacion?: TipoIdentificacion
     nombres: string
     apellidos: string
     documento: string
@@ -2072,18 +3202,74 @@ export async function crearRegistroPersona(
   await esperar()
   const bd = clonar(bdActual)
 
-  // RN-62: la vigencia no es opcional donde la categoria la exige. Se valida aqui
+  // RN-60 — Quién registra a quién. Se revisa aquí y no solo en la pantalla: el
+  // arrendatario que llame a esta función directamente tampoco registra a un
+  // residente. La administración registra lo que su consola ofrece (RN-63).
+  let rolEnLaUnidad: RolResidencia | undefined
+  if (esAdministracion(bd, parametros.creadoPor, parametros.copropiedadId)) {
+    // RN-63 — La administración solo registra al primer propietario.
+    const motivo = motivoNoRegistraAdministracion(
+      parametros.categoria,
+      unidadTienePropietario(bd, parametros.unidadId),
+    )
+    if (motivo) throw new ErrorDeNegocio(motivo)
+  } else {
+    rolEnLaUnidad = bd.residencias.find(
+      (r) => r.unidadId === parametros.unidadId && r.personaId === parametros.creadoPor && residenciaVigente(r),
+    )?.rol
+    if (!puedeRegistrar(rolEnLaUnidad, parametros.categoria)) {
+      throw new ErrorDeNegocio('Tu papel en esta unidad no te permite registrar a esa clase de persona (RN-60).')
+    }
+  }
+
+  // RN-60 — Sin celular ni correo no hay a dónde mandarle el código de entrada.
+  // Menores de edad (2026-10-02): solo familia o visitas, y con tarjeta de
+  // identidad o registro civil solo si son menores.
+  if (parametros.menorDeEdad && !admiteMenor(parametros.categoria)) {
+    throw new ErrorDeNegocio('El propietario y el arrendatario son mayores de edad.')
+  }
+  if (parametros.tipoIdentificacion && TIPOS_IDENTIFICACION[parametros.tipoIdentificacion].soloMenores && !parametros.menorDeEdad) {
+    throw new ErrorDeNegocio('La tarjeta de identidad y el registro civil son documentos de menores de edad.')
+  }
+  // El visitante frecuente dice qué días viene.
+  if (parametros.condicion === 'frecuente' && !(parametros.dias && parametros.dias.length > 0)) {
+    throw new ErrorDeNegocio('Escoge los días de la semana en que viene.')
+  }
+  if (faltaContacto(parametros.categoria, parametros.telefono, parametros.email, parametros.menorDeEdad)) {
+    throw new ErrorDeNegocio('Escribe el celular o el correo: es a donde le llega el código para entrar a la app.')
+  }
+
+  // RN-68 — El visitante no es residente: quien vive ahí no es una visita.
+  if (!condicionesPosibles(parametros.categoria).includes(parametros.condicion)) {
+    throw new ErrorDeNegocio(
+      {
+        visitante: 'Un visitante es de un día, frecuente o temporal; no puede ser residente.',
+        propietario: 'El propietario es residente o no residente: no existe un propietario temporal.',
+        arrendatario: 'El arrendatario es residente o temporal: arrienda para vivir ahí.',
+        familiar: 'El familiar o acompañante vive ahí: es residente o temporal.',
+      }[parametros.categoria],
+    )
+  }
+
+  // RN-62: la vigencia no es opcional donde la condición la exige. Se valida aqui
   // y no solo en el formulario: el formulario es una comodidad, la regla es esto.
-  if (exigeVigencia(parametros.categoria) && !parametros.vigenciaHasta) {
-    throw new ErrorDeNegocio('Un registro temporal o de visitante necesita fecha de fin.')
+  if (exigeVigencia(parametros) && !parametros.vigenciaHasta) {
+    throw new ErrorDeNegocio('Un registro temporal o una visita necesita fecha de salida.')
   }
 
   // RN-62: la visita es de un solo dia. Se valida aqui y no solo en el
   // formulario, porque el formulario es una comodidad y esto es la regla.
-  if (soloUnDia(parametros.categoria) && parametros.vigenciaDesde !== parametros.vigenciaHasta) {
+  if (soloUnDia(parametros) && parametros.vigenciaDesde !== parametros.vigenciaHasta) {
     throw new ErrorDeNegocio(
-      'Una visita se autoriza por un día. Para varios días, registra a la persona como residente temporal.',
+      'Una visita de un día se autoriza por un día. Para varios días, escoge «temporal».',
     )
+  }
+
+  // RN-61 — Quien ya está vinculado a la unidad no se registra otra vez: dos
+  // vínculos vigentes de la misma persona son dos verdades sobre quién es ahí.
+  // La visita no crea vínculo, así que no cuenta.
+  if (!saleConCodigo(parametros) && yaVinculadaALaUnidad(bd, parametros.documento, parametros.unidadId)) {
+    throw new ErrorDeNegocio('Esa persona ya está vinculada a esta unidad. Si cambia su papel, inhabilítala primero.')
   }
 
   // Solo se bloquean los registros EN CURSO, no los cerrados, y eso es
@@ -2104,29 +3290,53 @@ export async function crearRegistroPersona(
   }
 
   const ahora = ahoraISO()
-  const { soportesNoObligatorios, ...datos } = parametros
+  const { soportesNoObligatorios, pedirFotos, ...datos } = parametros
   const registro: RegistroPersona = {
     id: nuevoId('reg'),
     ...datos,
+    ...(pedirFotos && esVisitaDeUnDia(parametros) ? { pedirFotos: true } : {}),
+    ...(parametros.condicion !== 'frecuente' ? { dias: undefined } : {}),
     codigo: nuevoCodigoRegistro(),
     estado: 'esperando_soportes',
     creadoEn: ahora,
   }
   bd.registros.unshift(registro)
 
+  // RN-60 — La estadía de más de una semana que registra un arrendatario la
+  // aprueba el propietario. Se le avisa a cada uno.
+  if (requiereAprobacionPropietario(rolEnLaUnidad, registro)) {
+    registro.aprobacionPropietario = {}
+    const unidad = bd.unidades.find((u) => u.id === registro.unidadId)
+    for (const dueno of bd.residencias.filter(
+      (r) => r.unidadId === registro.unidadId && r.rol === 'propietario' && residenciaVigente(r),
+    )) {
+      avisarAPersona(bd, {
+        copropiedadId: registro.copropiedadId,
+        personaId: dueno.personaId,
+        motivo: 'estadia_por_aprobar',
+        registroId: registro.id,
+        texto:
+          `Idiky: tu arrendatario registró a ${registro.nombres} ${registro.apellidos} en ` +
+          `${unidad ? etiquetaUnidad(unidad) : 'tu unidad'} del ${fechaCorta(registro.vigenciaDesde ?? '')} ` +
+          `al ${fechaCorta(registro.vigenciaHasta ?? '')}. Por ser más de una semana, necesita tu aprobación en la app.`,
+        ahora,
+      })
+    }
+  }
+
   // RN-97: con la marca, no hay soportes que esperar. Queda quien la puso.
-  if (soportesNoObligatorios && exigeSoportes(registro.categoria)) {
+  if (soportesNoObligatorios && exigeSoportes(registro)) {
     registro.soportesNoObligatorios = { marcadoPor: registro.creadoPor, marcadoEn: ahora }
     registro.estado = 'esperando_autorizacion'
   }
 
-  // RN-57: al visitante no se le piden soportes, asi que su registro no espera
+  // RN-57: a la visita de un día no se le piden soportes, asi que su registro no espera
   // nada de nadie — se resuelve aqui mismo y sale con su codigo.
   //
   // **Sigue siendo un registro**, y esa es la parte que importa: aunque el
   // tramite sea de un toque, queda escrito quien dejo entrar a quien y cuando.
   // Aliviar el requisito no es renunciar al rastro.
-  if (!exigeSoportes(registro.categoria)) {
+  if (!exigeSoportes(registro)) {
     const visitante = crearVisitanteDeRegistro(bd, registro)
     registro.visitanteId = visitante.id
     registro.estado = 'autorizado'
@@ -2150,7 +3360,9 @@ function crearVisitanteDeRegistro(bd: BaseDatos, registro: RegistroPersona): Vis
     vigenciaDesde: registro.vigenciaDesde ?? hoyISO(),
     vigenciaHasta: registro.vigenciaHasta ?? hoyISO(),
     codigo: generarCodigoVisitante(),
-    recurrente: false,
+    // El frecuente entra los días escogidos hasta su fecha (2026-10-02).
+    recurrente: registro.condicion === 'frecuente',
+    dias: registro.condicion === 'frecuente' ? registro.dias : undefined,
     estado: 'activo',
     creadoEn: ahoraISO(),
     registroId: registro.id,
@@ -2174,7 +3386,7 @@ export async function marcarSoportesNoObligatorios(
   const bd = clonar(bdActual)
   const registro = bd.registros.find((r) => r.id === parametros.registroId)
   if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
-  if (!exigeSoportes(registro.categoria)) {
+  if (!exigeSoportes(registro)) {
     throw new ErrorDeNegocio('A un visitante no se le piden soportes: no hay nada que eximir.')
   }
   if (!registroEnCurso(registro)) {
@@ -2249,6 +3461,9 @@ export async function autorizarRegistro(
   const bd = clonar(bdActual)
   const registro = bd.registros.find((r) => r.id === parametros.registroId)
   if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  if (esperaAlPropietario(registro)) {
+    throw new ErrorDeNegocio('Falta que el propietario apruebe esta estadía de más de una semana (RN-60).')
+  }
   if (!puedeAutorizar(registro, parametros.personaId)) {
     throw new ErrorDeNegocio('Solo quien creó el registro puede autorizarlo.')
   }
@@ -2279,21 +3494,25 @@ export async function autorizarRegistro(
     bd.personas.push(persona)
   }
 
-  if (registro.categoria === 'visitante') {
+  if (saleConCodigo(registro)) {
     registro.visitanteId = crearVisitanteDeRegistro(bd, registro).id
   } else {
+    // RN-61 — Entre crear y autorizar pudo vincularse por otro registro.
+    if (yaVinculadaALaUnidad(bd, registro.documento, registro.unidadId)) {
+      throw new ErrorDeNegocio('Esa persona ya está vinculada a esta unidad: cierra este registro.')
+    }
     const residencia: Residencia = {
       id: nuevoId('res'),
       personaId: persona.id,
       unidadId: registro.unidadId,
-      rol: rolDeCategoria(registro.categoria, registro.rol) ?? 'arrendatario',
+      // El visitante temporal queda como `autorizado`: duerme ahí, pero no
+      // registra a nadie (RN-60).
+      rol: rolDeRegistro(registro) ?? 'autorizado',
       desde: registro.vigenciaDesde ?? hoyISO(),
-      hasta: registro.vigenciaHasta,
+      hasta: registro.condicion === 'temporal' ? registro.vigenciaHasta : undefined,
       principal: false,
-      // Solo el propietario puede no residir; el arrendatario arrienda para
-      // vivir ahi y al temporal se le llama temporal porque vive ahi un tiempo
-      // (Mary, 2026-09-07). De ahi que la ausencia del dato signifique «si».
-      reside: registro.reside ?? true,
+      // RN-68 — La marca de residente sale de la condición escogida al registrar.
+      reside: marcaResidente(registro),
       registroId: registro.id,
     }
     bd.residencias.push(residencia)
@@ -2337,6 +3556,38 @@ export async function cerrarRegistro(
 }
 
 /**
+ * RN-60 — El propietario aprueba, o no, la estadía de más de una semana que
+ * registró su arrendatario. Aprobada, el arrendatario autoriza como siempre
+ * (RN-59); no aprobada, el registro queda rechazado con el motivo.
+ */
+export async function decidirEstadiaComoPropietario(
+  bdActual: BaseDatos,
+  parametros: { registroId: string; personaId: string; aprobar: boolean; motivo?: string },
+): Promise<Resultado<RegistroPersona>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const registro = bd.registros.find((r) => r.id === parametros.registroId)
+  if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  if (!esperaAlPropietario(registro)) throw new ErrorDeNegocio('Ese registro no espera la aprobación del propietario.')
+  const esPropietario = bd.residencias.some(
+    (r) => r.unidadId === registro.unidadId && r.personaId === parametros.personaId && r.rol === 'propietario' && residenciaVigente(r),
+  )
+  if (!esPropietario) throw new ErrorDeNegocio('La estadía la aprueba un propietario de la unidad.')
+  const ahora = ahoraISO()
+  if (parametros.aprobar) {
+    registro.aprobacionPropietario = { aprobadoPor: parametros.personaId, aprobadoEn: ahora }
+  } else {
+    const motivo = (parametros.motivo ?? '').trim()
+    if (motivo.length < 5) throw new ErrorDeNegocio('Escribe por qué no la apruebas: el arrendatario lo va a leer.')
+    registro.estado = 'rechazado'
+    registro.motivo = `El propietario no aprobó la estadía: ${motivo}`
+    registro.decididoEn = ahora
+    registro.decididoPor = parametros.personaId
+  }
+  return persistir(bd, registro)
+}
+
+/**
  * Deja constancia de que alguien miro los soportes de un registro (RN-67).
  *
  * Se llama al **abrirlos**, no al entrar a la pantalla: entrar no es mirar, y una
@@ -2350,6 +3601,12 @@ export async function registrarAccesoSoportes(
   const bd = clonar(bdActual)
   const registro = bd.registros.find((r) => r.id === parametros.registroId)
   if (!registro) throw new ErrorDeNegocio('Ese registro no existe.')
+  // RN-67 — Ve los soportes quien creó el registro, el propietario por encima (RN-65) o la administración.
+  const rol = esAdministracion(bd, parametros.personaId, registro.copropiedadId) ? 'admin' : 'residente'
+  const { heredadoPor } = responsablesDeRegistro(bd, registro)
+  if (!puedeVerSoportes({ creadoPor: registro.creadoPor, heredadoPor, personaId: parametros.personaId, rol })) {
+    throw new ErrorDeNegocio('Los soportes los ven quien creó el registro, el propietario o la administración.')
+  }
 
   const acceso: AccesoSoporte = {
     id: nuevoId('acc'),
@@ -2429,7 +3686,8 @@ export async function emitirVoto(
   const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
   if (!unidad) throw new ErrorDeNegocio('La unidad no existe.')
 
-  // **Quien puede votar por esta unidad: el propietario, o su apoderado.**
+  // **Quien puede votar por esta unidad: el propietario, o su apoderado.** Si hay
+  // poder, vota solo el apoderado: quien lo otorgó ya no vota esa unidad (RN-32).
   //
   // Las dos comprobaciones van juntas porque son una sola pregunta, y separarlas
   // fue lo que rompio el flujo del apoderado la primera vez: un apoderado **no
@@ -2456,7 +3714,7 @@ export async function emitirVoto(
   } else {
     // RN-51: sin poder de por medio, vota el propietario.
     const residencia = bd.residencias.find(
-      (r) => r.unidadId === unidad.id && r.personaId === parametros.personaId && !r.hasta,
+      (r) => r.unidadId === unidad.id && r.personaId === parametros.personaId && residenciaVigente(r),
     )
     if (!puedeVotar(residencia?.rol)) {
       throw new ErrorDeNegocio('Solo el propietario de la unidad puede votar.')
@@ -2499,9 +3757,49 @@ export async function emitirVoto(
  * de ADR-0006, que sigue pendiente. Por eso el certificado se guarda y se muestra
  * en pantalla, y la descarga es lo unico que queda en deuda.
  */
+/**
+ * CU-R-18 — Emite el estado de cuenta de la unidad para un rango de periodos
+ * (RN-127): lo calcula, lo congela en el documento y le da su consecutivo y su
+ * código (RN-36, ADR-0006). Se imprime desde la app, como el paz y salvo.
+ */
+export async function emitirEstadoCuenta(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; unidadId: string; desde: string; hasta: string; solicitadoPor: string },
+): Promise<Resultado<Documento>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
+  if (!unidad) throw new ErrorDeNegocio('La unidad no existe.')
+  const estado = estadoDeCuenta(
+    cuotasDe(bd, unidad.id),
+    bd.pagos.filter((p) => p.unidadId === unidad.id),
+    parametros.desde,
+    parametros.hasta,
+  )
+  const invalido = motivoEstadoCuentaInvalido(parametros.desde, parametros.hasta, estado)
+  if (invalido) throw new ErrorDeNegocio(invalido)
+
+  const hoy = hoyISO()
+  const consecutivo = bd.consecutivos.estadoCuenta ?? 1
+  const documento: Documento = {
+    id: nuevoId('doc'),
+    tipo: 'estado_cuenta',
+    numero: `EC-${hoy.slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`,
+    codigoVerificacion: nuevoCodigoVerificacion(),
+    copropiedadId: parametros.copropiedadId,
+    unidadId: unidad.id,
+    emitidoEn: hoy,
+    estadoCuenta: { ...estado, solicitadoPor: parametros.solicitadoPor },
+    estado: 'vigente',
+  }
+  bd.documentos.push(documento)
+  bd.consecutivos.estadoCuenta = consecutivo + 1
+  return persistir(bd, documento)
+}
+
 export async function emitirPazYSalvo(
   bdActual: BaseDatos,
-  parametros: { copropiedadId: string; unidadId: string },
+  parametros: { copropiedadId: string; unidadId: string; emitidoPor?: string },
 ): Promise<Resultado<Documento>> {
   await esperar()
   const bd = clonar(bdActual)
@@ -2537,9 +3835,33 @@ export async function emitirPazYSalvo(
     unidadId: unidad.id,
     emitidoEn: hoy,
     cubiertoHasta: finDePeriodo(ultimoPeriodo),
+    ...(parametros.emitidoPor ? { emitidoPor: parametros.emitidoPor } : {}),
     estado: 'vigente',
   }
   bd.documentos.push(documento)
   bd.consecutivos.pazYSalvo = consecutivo + 1
+  return persistir(bd, documento)
+}
+
+/**
+ * CU-A-13 — Anula un documento emitido. No se borra (ADR-0006 §5, O3): queda
+ * con su motivo, y quien lo reciba en papel puede confirmar con la
+ * administración que ya no vale.
+ */
+export async function anularDocumento(
+  bdActual: BaseDatos,
+  parametros: { documentoId: string; motivo: string; anuladoPor: string },
+): Promise<Resultado<Documento>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const documento = bd.documentos.find((d) => d.id === parametros.documentoId)
+  if (!documento) throw new ErrorDeNegocio('Ese documento no existe.')
+  if (documento.estado === 'anulado') throw new ErrorDeNegocio('Ese documento ya estaba anulado.')
+  const motivo = parametros.motivo.trim()
+  if (motivo.length < 10) throw new ErrorDeNegocio('Escribe por qué se anula: es lo que se responde si alguien presenta el papel.')
+  documento.estado = 'anulado'
+  documento.anuladoEn = ahoraISO()
+  documento.anuladoPor = parametros.anuladoPor
+  documento.motivoAnulacion = motivo
   return persistir(bd, documento)
 }

@@ -19,7 +19,7 @@ demás ni el servidor que compartimos. Si vas a **crear** un servicio nuevo, la 
 > ya tiene el suyo (`bloky`, 8083). ALICE (la app del propietario y residente) **todavía no**:
 > es una app Flutter en `App-Idiky`. Cuando tenga espacio se agrega a esta tabla.
 >
-> **`gestion`, `bloky` y `jitsi` tienen su propio repositorio** (ADR-0017). El comando es el
+> **`gestion`, `bloky` y `jitsi` tienen su propio repositorio** (ADR-0018). El comando es el
 > mismo y se corre desde `idiky`; `desplegar.sh` trae solo el código de ese servicio desde
 > GitHub. Mary y Jeimy no necesitan acceso a esos repositorios.
 

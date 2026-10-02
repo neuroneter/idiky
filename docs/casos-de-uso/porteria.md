@@ -7,6 +7,11 @@ administrador.
 > **Construido el 2026-08-28**, después de aprobar la propuesta: el puesto tiene tres
 > pantallas —el turno, validar visitantes y correspondencia— y su propio perfil en el demo.
 > Lo que sigue pendiente es la **minuta**: registrar el ingreso, no solo validarlo.
+>
+> **Desde el 2026-10-01 el turno muestra las reservas de hoy** (RN-116): zona, horario, unidad,
+> quién reservó y cuántas personas van, para dejar entrar a los invitados sin llamar a nadie.
+> Sin costos ni multas (RN-52). Si quien reservó escribió la lista de invitados, portería la
+> ve con sus nombres (RN-126).
 
 **Por qué tiene rol propio y no la cuenta del administrador**
 
@@ -33,7 +38,9 @@ administrador.
 1. Registra unidad destino, tipo, remitente y observaciones. El sistema guarda **quién lo
    recibió** (`registradoPor`) y la hora.
 2. El registro queda `en_porteria` y el residente lo ve en su app (CU-R-11).
-3. Al entregarlo, se registra quién lo retiró y la fecha → `entregada` (RN-25).
+3. Al entregarlo, se registra quién lo retiró y la fecha → `entregada` (RN-25). El residente
+   confirma desde su app con **Recibido** (CU-R-11, RN-103), y la lista lo muestra como
+   «Confirmado por el residente»: es la otra mitad de la cadena de custodia.
 
 **Estado:** 🟡 — `src/features/porteria/CorrespondenciaPage.tsx`. Registra, entrega y guarda
 quién recibió del mensajero (RN-52). El administrador entra a la misma pantalla desde su

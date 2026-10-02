@@ -18,12 +18,21 @@ import { useState } from 'react'
 import { formatearFecha, formatearFechaHora } from '../utilidades/formato'
 import type {
   CategoriaRegistro,
+  CondicionRegistro,
+  TipoIdentificacion,
   Mensaje,
   RegistroPersona,
-  RolResidencia,
   Unidad,
 } from '../dominio/tipos'
 import {
+  condicionesPosibles,
+  DIAS_SIN_APROBACION_DEL_PROPIETARIO,
+  esperaAlPropietario,
+  faltaContacto,
+  admiteMenor,
+  NOMBRES_DIAS,
+  TIPOS_IDENTIFICACION,
+  requiereAprobacionPropietario,
   etiquetaUnidad,
   exigeSoportes,
   exigeVigencia,
@@ -36,40 +45,40 @@ import {
 import { Modal } from './Modal'
 import { Icono } from './Icono'
 
-/**
- * La marca de residente segun la categoria (RN-68, Mary 2026-09-07).
- *
- *   propietario  -> la escoge quien registra: puede tener la unidad arrendada
- *   arrendatario -> si, arrienda para vivir ahi
- *   temporal     -> si, vive ahi un tiempo
- *   visitante    -> no, viene de visita
- *
- * En un solo sitio para que no se conteste distinto en cada pantalla.
- */
-export function marcaResidente(
-  categoria: CategoriaRegistro,
-  rol: RolResidencia | undefined,
-  escogida: boolean,
-): boolean {
-  if (categoria === 'visitante') return false
-  if (categoria === 'residente' && rol === 'propietario') return escogida
-  return true
-}
-
-/** Cómo se llama cada categoría delante de quien la escoge, y qué significa. */
+/** Cómo se llama cada quién delante de quien lo escoge, y qué significa. */
 export const CATEGORIAS: Record<CategoriaRegistro, { texto: string; ayuda: string }> = {
-  residente: {
-    texto: 'Residente',
-    ayuda: 'Vive aquí de forma permanente. Enseguida escoges si es propietario o arrendatario.',
+  propietario: {
+    texto: 'Propietario',
+    ayuda: 'Dueño o copropietario de la unidad: vota, recibe la cuota y registra a los demás.',
   },
-  residente_temporal: {
-    texto: 'Residente temporal',
-    ayuda: 'Se queda a dormir un tiempo: un huésped de Airbnb, un familiar unos meses.',
+  arrendatario: {
+    texto: 'Arrendatario',
+    ayuda: 'Arrienda la unidad para vivir en ella.',
+  },
+  familiar: {
+    texto: 'Familiar o acompañante',
+    ayuda: 'Vive con el propietario o el arrendatario: pareja, hijos, padres. No vota ni registra a nadie.',
   },
   visitante: {
     texto: 'Visitante',
-    ayuda: 'Viene de visita, una tarde o unos días. Entra con un código para la portería.',
+    ayuda: 'Viene de visita: una tarde, ciertos días de la semana (empleada, niñera) o se queda unos días.',
   },
+}
+
+/**
+ * Cómo se queda (RN-62, RN-68). El texto del visitante no residente es «de un
+ * día», porque eso es lo que es: entra y sale el mismo día.
+ */
+export function textoCondicion(categoria: CategoriaRegistro, condicion: CondicionRegistro): string {
+  if (condicion === 'residente') return 'Residente'
+  if (condicion === 'temporal') return 'Residente temporal'
+  if (condicion === 'frecuente') return 'Frecuente'
+  return categoria === 'visitante' ? 'De un día' : 'No residente'
+}
+
+/** «Propietario · No residente», para las listas y el detalle. */
+export function textoClase(registro: Pick<RegistroPersona, 'categoria' | 'condicion'>): string {
+  return `${CATEGORIAS[registro.categoria].texto} · ${textoCondicion(registro.categoria, registro.condicion)}`
 }
 
 export const ESTADOS: Record<RegistroPersona['estado'], { texto: string; chip: string }> = {
@@ -82,7 +91,11 @@ export const ESTADOS: Record<RegistroPersona['estado'], { texto: string; chip: s
 
 export interface DatosRegistro {
   categoria: CategoriaRegistro
-  rol?: RolResidencia
+  condicion: CondicionRegistro
+  pedirFotos?: boolean
+  dias?: number[]
+  menorDeEdad?: boolean
+  tipoIdentificacion?: TipoIdentificacion
   nombres: string
   apellidos: string
   documento: string
@@ -91,8 +104,6 @@ export interface DatosRegistro {
   vigenciaDesde?: string
   vigenciaHasta?: string
   placa?: string
-  /** La marca de residente (RN-68). */
-  reside?: boolean
   /** Solo cuando quien registra puede escoger unidad (el administrador). */
   unidadId?: string
   /** La marca «No obligatorio», solo desde la consola del administrador (RN-97). */
@@ -108,17 +119,23 @@ export interface DatosRegistro {
 export function FormularioRegistro({
   categorias,
   unidades,
+  unidadInicial,
   categoriaInicial,
   permitirNoObligatorio = false,
+  registraArrendatario = false,
   alCrear,
   alCerrar,
 }: {
   categorias: readonly CategoriaRegistro[]
   /** Solo la consola del administrador: ahí hay que decir a qué unidad entra. */
   unidades?: Unidad[]
+  /** La unidad ya escogida, cuando se llega desde un cambio de propietario. */
+  unidadInicial?: string
   categoriaInicial?: CategoriaRegistro
   /** Solo el administrador puede eximir de los soportes (RN-97). */
   permitirNoObligatorio?: boolean
+  /** Quien registra es arrendatario: la estadía larga la aprueba el propietario (RN-60). */
+  registraArrendatario?: boolean
   alCrear: (datos: DatosRegistro) => Promise<void>
   alCerrar: () => void
 }) {
@@ -126,10 +143,15 @@ export function FormularioRegistro({
   const [categoria, setCategoria] = useState<CategoriaRegistro>(
     categoriaInicial && categorias.includes(categoriaInicial) ? categoriaInicial : categorias[0],
   )
-  const [unidadId, setUnidadId] = useState(unidades?.[0]?.id ?? '')
-  const [rol, setRol] = useState<RolResidencia>('arrendatario')
-  /** La marca de residente. Solo el propietario puede no llevarla. */
-  const [reside, setReside] = useState(true)
+  const [unidadId, setUnidadId] = useState(
+    unidadInicial && unidades?.some((u) => u.id === unidadInicial) ? unidadInicial : (unidades?.[0]?.id ?? ''),
+  )
+  const [condicion, setCondicion] = useState<CondicionRegistro>(condicionesPosibles(categoria)[0])
+  const [pedirFotos, setPedirFotos] = useState(false)
+  /** El visitante frecuente: qué días viene (0 = domingo). */
+  const [dias, setDias] = useState<number[]>([1, 2, 3, 4, 5])
+  const [menor, setMenor] = useState(false)
+  const [tipoIdentificacion, setTipoIdentificacion] = useState<TipoIdentificacion>('cc')
   const [nombres, setNombres] = useState('')
   const [apellidos, setApellidos] = useState('')
   const [documento, setDocumento] = useState('')
@@ -140,16 +162,29 @@ export function FormularioRegistro({
   const [placa, setPlaca] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  const conVigencia = exigeVigencia(categoria)
-  /* Lo que se le promete a quien registra cambia con la categoria, porque el
+  const posibles = condicionesPosibles(categoria)
+  const clase = { categoria, condicion, pedirFotos }
+  const conVigencia = exigeVigencia(clase)
+  /* Lo que se le promete a quien registra cambia con la clase, porque el
      tramite cambia con ella (RN-57): anunciarle fotos a quien registra una
      visita de una tarde seria prometerle un paso que no va a existir. */
-  const conSoportes = exigeSoportes(categoria)
-  const unDia = soloUnDia(categoria)
-  /** Solo el propietario tiene algo que decidir aquí (RN-68). */
-  const marcaEditable = categoria === 'residente' && rol === 'propietario'
-  /** Lo que va a quedar: lo escogido si se puede escoger, o lo que manda la regla. */
-  const marca = marcaResidente(categoria, rol, reside)
+  const conSoportes = exigeSoportes(clase)
+  const unDia = soloUnDia(clase)
+  const necesitaAlPropietario = requiereAprobacionPropietario(registraArrendatario ? 'arrendatario' : undefined, {
+    ...clase,
+    vigenciaDesde: desde,
+    vigenciaHasta: hasta,
+  })
+
+  /** Al cambiar quién es, la condición vuelve a una que le aplique (RN-68). */
+  function escogerCategoria(opcion: CategoriaRegistro) {
+    setCategoria(opcion)
+    if (!condicionesPosibles(opcion).includes(condicion)) setCondicion(condicionesPosibles(opcion)[0])
+    if (!admiteMenor(opcion)) {
+      setMenor(false)
+      if (TIPOS_IDENTIFICACION[tipoIdentificacion].soloMenores) setTipoIdentificacion('cc')
+    }
+  }
 
   function enviar(evento: React.FormEvent) {
     evento.preventDefault()
@@ -172,14 +207,30 @@ export function FormularioRegistro({
       setError('Esa fecha ya pasó. Escoge el día en que viene la visita.')
       return
     }
+    // RN-60 — Sin celular ni correo no hay a dónde mandarle el código de entrada.
+    if (condicion === 'frecuente' && dias.length === 0) {
+      setError('Escoge los días de la semana en que viene.')
+      return
+    }
+    if (TIPOS_IDENTIFICACION[tipoIdentificacion].soloMenores && !menor) {
+      setError('La tarjeta de identidad y el registro civil son documentos de menores de edad.')
+      return
+    }
+    if (faltaContacto(categoria, telefono, email, menor)) {
+      setError('Escribe el celular o el correo: es a donde le llega el código para entrar a la app.')
+      return
+    }
     if (unidades && !unidadId) {
       setError('Escoge la unidad a la que entra.')
       return
     }
     void alCrear({
       categoria,
-      rol: categoria === 'residente' ? rol : undefined,
-      reside: marca,
+      condicion,
+      pedirFotos: unDia ? pedirFotos : undefined,
+      dias: condicion === 'frecuente' ? dias : undefined,
+      menorDeEdad: menor || undefined,
+      tipoIdentificacion,
       nombres: nombres.trim(),
       apellidos: apellidos.trim(),
       documento: documento.trim(),
@@ -223,7 +274,7 @@ export function FormularioRegistro({
         )}
 
         <div className="campo">
-          <label>¿Qué es esta persona?</label>
+          <label>{categorias.length > 1 ? '¿Quién es esta persona?' : 'Quién es'}</label>
           <div className="pila" style={{ gap: 'var(--e2)' }}>
             {categorias.map((opcion) => (
               <button
@@ -231,7 +282,7 @@ export function FormularioRegistro({
                 type="button"
                 className="opcion-categoria"
                 aria-pressed={categoria === opcion}
-                onClick={() => setCategoria(opcion)}
+                onClick={() => escogerCategoria(opcion)}
               >
                 <span className="columna">
                   <strong>{CATEGORIAS[opcion].texto}</strong>
@@ -242,59 +293,34 @@ export function FormularioRegistro({
           </div>
         </div>
 
-        {categoria === 'residente' && (
-          <div className="campo">
-            <label htmlFor="rol">¿Con qué título?</label>
-            <select
-              id="rol"
-              value={rol}
-              onChange={(evento) => setRol(evento.target.value as RolResidencia)}
-            >
-              <option value="propietario">Propietario</option>
-              <option value="arrendatario">Arrendatario</option>
-            </select>
-          </div>
-        )}
-
-        {/* La marca **se ve siempre y solo se cambia en el propietario** (Mary,
-            2026-09-07). Se ve siempre porque quien registra tiene que saber qué
-            marca va a quedar antes de crear a la persona; se cambia solo en el
-            propietario porque en los demás no hay nada que decidir: el
-            arrendatario arrienda para vivir ahí, al temporal se le llama
-            temporal porque vive ahí un tiempo, y el visitante viene de visita.
-            Un propietario, en cambio, puede tener su apartamento arrendado o
-            vacío y sigue siendo propietario —vota, recibe la cuota y registra
-            gente—; lo que cambia es que la portería no tiene que reconocerlo. */}
+        {/* RN-68 — Cómo se queda: se escoge siempre (Mary, 2026-10-02). Solo
+            se ofrece lo que le aplica a quien es: el arrendatario no es «no
+            residente» y el visitante no es residente. */}
         <div className="campo">
-          <label>¿Vive en la unidad?</label>
+          <label>¿Cómo se queda?</label>
           <div className="segmentos">
-            <button
-              type="button"
-              className="segmento"
-              aria-current={marca ? 'page' : undefined}
-              disabled={!marcaEditable}
-              onClick={() => setReside(true)}
-            >
-              Sí, vive aquí
-            </button>
-            <button
-              type="button"
-              className="segmento"
-              aria-current={!marca ? 'page' : undefined}
-              disabled={!marcaEditable}
-              onClick={() => setReside(false)}
-            >
-              No vive aquí
-            </button>
+            {posibles.map((opcion) => (
+              <button
+                key={opcion}
+                type="button"
+                className="segmento"
+                aria-current={condicion === opcion ? 'page' : undefined}
+                onClick={() => setCondicion(opcion)}
+              >
+                {textoCondicion(categoria, opcion)}
+              </button>
+            ))}
           </div>
           <span className="ayuda-campo">
-            {!marcaEditable
-              ? categoria === 'visitante'
-                ? 'Un visitante no vive aquí. No se puede cambiar.'
-                : 'Quien entra con este título vive en la unidad. No se puede cambiar.'
-              : marca
-                ? 'Lleva la marca de residente: la portería lo va a reconocer en la entrada.'
-                : 'Tiene la unidad arrendada o vacía. Sigue siendo propietario —vota, recibe la cuota y registra gente—, pero no aparece en la lista de la portería.'}
+            {condicion === 'temporal'
+              ? 'Vive aquí un tiempo, con fecha de salida. Lleva la marca de residente mientras esté.'
+              : condicion === 'residente'
+                ? 'Vive aquí. Lleva la marca de residente: la portería lo reconoce en la entrada.'
+                : condicion === 'frecuente'
+                  ? 'Viene ciertos días de la semana hasta una fecha. Sube sus fotos y entra con su código esos días.'
+                  : categoria === 'visitante'
+                  ? 'Viene un solo día y entra con un código para la portería.'
+                  : 'Tiene la unidad arrendada o vacía. Sigue siendo propietario —vota, recibe la cuota y registra gente—, pero no aparece en la lista de la portería.'}
           </span>
         </div>
 
@@ -315,6 +341,35 @@ export function FormularioRegistro({
 
         <div className="campo">
           <label htmlFor="documento">Documento de identidad</label>
+          {/* Menores de edad (2026-10-02): tarjeta de identidad o registro
+              civil, y sin celular obligatorio. */}
+          {admiteMenor(categoria) && (
+            <label className="fila" style={{ gap: 'var(--e2)', cursor: 'pointer', marginBottom: 'var(--e2)' }}>
+              <input
+                type="checkbox"
+                checked={menor}
+                onChange={(e) => {
+                  setMenor(e.target.checked)
+                  if (!e.target.checked && TIPOS_IDENTIFICACION[tipoIdentificacion].soloMenores) setTipoIdentificacion('cc')
+                }}
+              />
+              <span>Es menor de edad</span>
+            </label>
+          )}
+          <select
+            aria-label="Tipo de documento"
+            value={tipoIdentificacion}
+            onChange={(e) => setTipoIdentificacion(e.target.value as TipoIdentificacion)}
+            style={{ marginBottom: 'var(--e2)' }}
+          >
+            {(Object.keys(TIPOS_IDENTIFICACION) as TipoIdentificacion[])
+              .filter((tipo) => menor || !TIPOS_IDENTIFICACION[tipo].soloMenores)
+              .map((tipo) => (
+                <option key={tipo} value={tipo}>
+                  {TIPOS_IDENTIFICACION[tipo].texto}
+                </option>
+              ))}
+          </select>
           <input
             id="documento"
             inputMode="numeric"
@@ -392,6 +447,50 @@ export function FormularioRegistro({
           </div>
         )}
 
+        {/* El visitante frecuente: los días en que entra (2026-10-02). */}
+        {condicion === 'frecuente' && (
+          <div className="campo">
+            <label>¿Qué días viene?</label>
+            <div className="segmentos" style={{ flexWrap: 'wrap' }}>
+              {NOMBRES_DIAS.map((nombre, dia) => (
+                <button
+                  key={nombre}
+                  type="button"
+                  className="segmento"
+                  aria-current={dias.includes(dia) ? 'page' : undefined}
+                  onClick={() => setDias((antes) => (antes.includes(dia) ? antes.filter((d) => d !== dia) : [...antes, dia].sort()))}
+                >
+                  {nombre}
+                </button>
+              ))}
+            </div>
+            <span className="ayuda-campo">Entra con su código solo esos días, hasta la fecha de fin.</span>
+          </div>
+        )}
+
+        {/* RN-57 — La visita de un día no lleva fotos, salvo que quien la
+            registra las pida (Mary, 2026-10-02). */}
+        {unDia && (
+          <div className="campo">
+            <label className="fila" style={{ gap: 'var(--e2)', cursor: 'pointer' }}>
+              <input type="checkbox" checked={pedirFotos} onChange={(e) => setPedirFotos(e.target.checked)} />
+              <span>Pedirle las fotos del documento y de su cara</span>
+            </label>
+            <span className="ayuda-campo">
+              {pedirFotos
+                ? 'La persona las sube desde su teléfono y tú autorizas; ahí recibe su código.'
+                : 'Sin fotos, sale con su código para la portería de una vez.'}
+            </span>
+          </div>
+        )}
+
+        {necesitaAlPropietario && (
+          <p className="ayuda-campo" style={{ color: "var(--color-alerta)" }}>
+            Son más de {DIAS_SIN_APROBACION_DEL_PROPIETARIO} días: el propietario tiene que aprobar la
+            estadía antes de que la autorices (RN-60). Le llega un aviso.
+          </p>
+        )}
+
         {categoria === 'visitante' && (
           <div className="campo">
             <label htmlFor="placa">Placa del vehículo (opcional)</label>
@@ -418,8 +517,8 @@ export function FormularioRegistro({
               </span>
             </label>
             <span className="ayuda-campo">
-              El registro pasa directo a autorizar y la persona entra con el código que Idiky le
-              asigna. Queda escrito que lo eximió la administración (RN-97).
+              El registro pasa directo a autorizar y la persona entra como todos, con un código a su
+              celular o correo. Queda escrito que lo eximió la administración (RN-97).
             </span>
           </div>
         )}
@@ -453,6 +552,7 @@ export function DetalleRegistro({
   alRechazar,
   alCerrar,
   alMarcarNoObligatorio,
+  alDecidirEstadia,
 }: {
   registro: RegistroPersona
   /** El mensaje que se le mandó a la persona, si hubo (RN-64). */
@@ -469,6 +569,8 @@ export function DetalleRegistro({
   alCerrar: () => void
   /** Solo la consola del administrador: poner o quitar la marca (RN-97). */
   alMarcarNoObligatorio?: (marcar: boolean) => Promise<void>
+  /** Solo el propietario, cuando la estadía larga del arrendatario lo espera (RN-60). */
+  alDecidirEstadia?: (aprobar: boolean, motivo: string) => Promise<void>
 }) {
   const [motivo, setMotivo] = useState('')
   const [rechazando, setRechazando] = useState(false)
@@ -477,7 +579,7 @@ export function DetalleRegistro({
   return (
     <Modal
       titulo={`${registro.nombres} ${registro.apellidos}`}
-      descripcion={CATEGORIAS[registro.categoria].texto}
+      descripcion={textoClase(registro)}
       onCerrar={alCerrar}
     >
       <div className="lista lista--compacta">
@@ -495,6 +597,18 @@ export function DetalleRegistro({
           <span className="subtitulo">Estado</span>
           <span className={ESTADOS[registro.estado].chip}>{ESTADOS[registro.estado].texto}</span>
         </div>
+        {registro.aprobacionPropietario && (
+          <div className="fila">
+            <span className="subtitulo">Estadía de más de una semana</span>
+            {registro.aprobacionPropietario.aprobadoPor ? (
+              <span className="chip chip--exito">Aprobada por el propietario</span>
+            ) : esperaAlPropietario(registro) ? (
+              <span className="chip chip--alerta">Espera al propietario</span>
+            ) : (
+              <span className="chip">Sin aprobar</span>
+            )}
+          </div>
+        )}
         {marcado && (
           <div className="fila">
             <span className="subtitulo">Soportes</span>
@@ -513,8 +627,8 @@ export function DetalleRegistro({
             <strong>Soportes no obligatorios</strong>
             <span className="subtitulo">
               {marcado
-                ? `La administración eximió a esta persona de adjuntar la foto y el documento el ${formatearFechaHora(registro.soportesNoObligatorios!.marcadoEn)}. Se autoriza sin soportes y entra con su código.`
-                : 'Si esta persona no quiere adjuntar la foto ni el documento, márcala: el registro pasa directo a autorizar y entra con el código que Idiky le asignó.'}
+                ? `La administración eximió a esta persona de adjuntar la foto y el documento el ${formatearFechaHora(registro.soportesNoObligatorios!.marcadoEn)}. Se autoriza sin soportes y entra como todos, con un código a su celular o correo.`
+                : 'Si esta persona no quiere adjuntar la foto ni el documento, márcala: el registro pasa directo a autorizar y la persona entra como todos, con un código a su celular o correo.'}
             </span>
             {alMarcarNoObligatorio && admiteMarcaNoObligatorio(registro) && (
               <button
@@ -528,18 +642,22 @@ export function DetalleRegistro({
         </>
       )}
 
-      {/* Con la marca, el código ya no es para adjuntar: es para entrar (RN-97). */}
+      {/* Con la marca no hay soportes que adjuntar, así que el código de
+          registro no hace falta para nada: la persona entra a Idiky como todos,
+          con un código a su celular o correo (CU-R-01, RN-97). Se le dice a
+          quien la registró, que es quien se lo iba a dictar. */}
       {marcado && registro.estado !== 'rechazado' && registro.estado !== 'anulado' && (
         <>
           <div className="separador" />
           <div className="columna" style={{ gap: 'var(--e2)' }}>
-            <strong>Pásale este código</strong>
+            <strong>No necesita ningún código</strong>
             <span className="subtitulo">
-              Es la clave que Idiky le asignó: con su documento y este código{' '}
-              <strong>activa su cuenta</strong> en la pantalla de ingreso
-              {registro.estado === 'autorizado' ? '.' : ', en cuanto el registro quede autorizado.'}
+              Entra a Idiky con su documento, celular o correo, y el código que le llega por SMS o
+              correo{registro.estado === 'autorizado' ? '.' : ', en cuanto el registro quede autorizado.'}{' '}
+              {!registro.telefono && !registro.email
+                ? 'Ojo: este registro no tiene celular ni correo, y sin eso no puede entrar.'
+                : ''}
             </span>
-            <span className="codigo-registro numerico">{registro.codigo}</span>
           </div>
         </>
       )}
@@ -663,6 +781,30 @@ export function DetalleRegistro({
           <span className="mensaje__meta">Motivo</span>
           {registro.motivo}
         </p>
+      )}
+
+      {alDecidirEstadia && esperaAlPropietario(registro) && !rechazando && (
+        <>
+          <div className="separador" />
+          <p className="subtitulo">
+            Tu arrendatario registró esta estadía de más de una semana. Si la apruebas, él la autoriza.
+          </p>
+          <button className="boton boton--primario boton--bloque" onClick={() => void alDecidirEstadia(true, '')}>
+            <Icono nombre="check" tamano={18} />
+            Aprobar la estadía
+          </button>
+          <div className="campo" style={{ marginTop: 'var(--e3)' }}>
+            <label htmlFor="motivo-estadia">Si no la apruebas, ¿por qué?</label>
+            <textarea id="motivo-estadia" value={motivo} onChange={(e) => setMotivo(e.target.value)} />
+          </div>
+          <button
+            className="boton boton--bloque"
+            disabled={motivo.trim().length < 5}
+            onClick={() => void alDecidirEstadia(false, motivo)}
+          >
+            No aprobar
+          </button>
+        </>
       )}
 
       {puedoAutorizar && !rechazando && (

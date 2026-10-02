@@ -40,6 +40,25 @@ intentos.
 El **atajo de perfiles sigue existiendo**, plegado debajo del formulario: hace falta para
 mostrar la consola del administrador sin teclear cédulas. Ya no es la pantalla de acceso.
 
+## Nota del 2026-10-01 — Sin clave: código por SMS o por correo
+
+Mary: *«necesitamos que el ingreso sea con su correo autenticado o con SMS, como funciona ahora
+la mayoría de ingresos»*. **Se retira la clave de 4 números** (RN-55) y con ella la activación
+y la recuperación (CU-R-25). El ingreso queda en tres pasos: quién eres (documento, celular o
+correo, un solo campo), por dónde recibes el código (SMS o correo, solo los canales
+registrados, enmascarados) y el código de 6 números (10 minutos, 5 intentos). La primera vez,
+eso activa la cuenta. La huella (RN-56) sigue como atajo en el teléfono donde se registró, y se
+ofrece ya adentro, con la identidad confirmada por el código.
+
+Lo que sostenía la clave corta —adultos mayores que no teclean contraseñas— lo cumple mejor un
+código que no hay que recordar. Y es lo mismo que BLOKY ya hace con el administrador (CU-B-01),
+así que las dos aplicaciones entran igual.
+
+**Lo que sigue simulado:** el código se genera en el navegador y se muestra en pantalla. En la
+versión real lo genera y lo envía el servidor por el proveedor de T-18 (SMS, WhatsApp o correo).
+**Google y Microsoft con el correo** —«correo autenticado»— exigen credenciales reales y HTTPS y
+llegan con el backend (ADR-0008); no se muestran botones falsos mientras tanto.
+
 ## Consecuencias
 
 - El demo **no debe exponerse públicamente con datos reales de una copropiedad.** Los datos

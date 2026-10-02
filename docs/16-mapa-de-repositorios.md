@@ -2,7 +2,7 @@
 
 > `idiky` es **el arnés**: aquí están las reglas, los casos de uso, las decisiones y los demos
 > con los que se entiende lo que se construye. Cada sistema vive en su propio repositorio
-> ([ADR-0017](./adr/0017-un-repositorio-por-sistema-e-idiky-como-arnes.md)).
+> ([ADR-0018](./adr/0018-un-repositorio-por-sistema-e-idiky-como-arnes.md)).
 >
 > **Si vienes de otro repositorio:** lee primero este archivo, después
 > [`09-estado-del-proyecto.md`](./09-estado-del-proyecto.md) y el caso de uso que vas a tocar.
@@ -78,5 +78,5 @@ de cada repositorio citan el CU o la tarea igual que aquí (`docs/08-convencione
 
 `infra/desplegar.sh` sigue siendo el único punto de entrada. Para `bloky`, `gestion` y `jitsi`
 trae el `origin/main` de su repositorio y lo pone encima de la copia de `idiky`
-([ADR-0017](./adr/0017-un-repositorio-por-sistema-e-idiky-como-arnes.md), [`infra/README.md`](../infra/README.md)).
+([ADR-0018](./adr/0018-un-repositorio-por-sistema-e-idiky-como-arnes.md), [`infra/README.md`](../infra/README.md)).
 ALICE y los contratos no se despliegan en el entorno de desarrollo.

@@ -7,7 +7,7 @@
 
 Plataforma de gestión de **propiedad horizontal** (conjuntos residenciales).
 
-**Este repositorio es el arnés de todo el desarrollo** ([ADR-0017](./docs/adr/0017-un-repositorio-por-sistema-e-idiky-como-arnes.md)):
+**Este repositorio es el arnés de todo el desarrollo** ([ADR-0018](./docs/adr/0018-un-repositorio-por-sistema-e-idiky-como-arnes.md)):
 aquí viven las reglas, los casos de uso, las decisiones (ADR), la bitácora, los prototipos y los
 demos con los que se entiende lo que se construye. **Cada sistema vive en su propio
 repositorio**, y todos vienen aquí a leer qué construir:
@@ -119,7 +119,7 @@ pie de la letra: **solo el servicio de quien lo pide** (`pwa` Mary, `contable` J
 `gestion` el responsable de integración), **solo desde `origin/main`**, y
 `infra/servidor/verificar-vecino.sh` antes y después. Lo que Mary y Jeimy despliegan hoy son
 **maquetas**; BLOKY Dev es el producto real y vive en el 8083. Para `bloky`, `gestion` y `jitsi`,
-`desplegar.sh` trae el `origin/main` de **su** repositorio (ADR-0017).
+`desplegar.sh` trae el `origin/main` de **su** repositorio (ADR-0018).
 
 **BOB** (Strapi, repo `BOB-Idiky`): **el modelo de datos se diseña en local con `npm run develop`
 y va a git**; en el servidor Strapi corre en modo producción y lo creado ahí se pierde.

@@ -15,7 +15,7 @@ secciones 2, 4 y 6 aplican igual.
 - [ ] **¿Trae una tecnología nueva** (un backend, una base de datos, un lenguaje)? Entonces
       primero va un ADR. El backend, en particular, es **ADR-0008**, que sigue pendiente.
       `CLAUDE.md` no permite dependencias sin ADR.
-- [ ] **¿Su código vive en otro repositorio?** (como BLOKY, BOB y Jitsi, ADR-0017). Entonces
+- [ ] **¿Su código vive en otro repositorio?** (como BLOKY, BOB y Jitsi, ADR-0018). Entonces
       ese repositorio usa las mismas rutas que tendría aquí (`apps/<nombre>/`,
       `infra/<nombre>/`), y el servicio se registra en `repositorio_de` y `ref_de` de
       `infra/desplegar.sh`. `levantar.sh` se registra igual que siempre, aquí.
@@ -200,7 +200,7 @@ antes de recrearlo, y piensa desde qué ramas es seguro desplegarlo.
 ## 5. Un servicio con datos, varias piezas o que no es nginx: copia el sistema de gestión
 
 **Probado el 2026-09-10** con `infra/gestion/` (Strapi + PostgreSQL), que hoy vive en el repo
-`BOB-Idiky` con la misma ruta (ADR-0017). Es el ejemplo a copiar:
+`BOB-Idiky` con la misma ruta (ADR-0018). Es el ejemplo a copiar:
 
 | Necesidad | Cómo quedó resuelto | Dónde verlo |
 |---|---|---|

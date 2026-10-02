@@ -66,6 +66,19 @@ navegador de quien las sube**, y la pantalla de adjuntar lo dice en voz alta.
 **Esta pregunta queda abierta en el levantamiento** (`docs/12-levantamiento-pendiente.md`).
 No bloquea el demo; bloquea salir a producción.
 
+## Nota del 2026-09-30 — Las fotos de obra no tienen plazo de borrado
+
+Los avances de los proyectos (CU-A-28) llevan foto y usan la misma captura reducida (720 px,
+JPEG al 60 %, unos 60 KB). Mary preguntó si las fotos pesan demasiado y si convendría ir
+borrando las viejas a medida que avanza la obra. **Se decidió que no**: la foto de cada avance es
+la prueba de en qué estado estaba la obra cada día que se pagó un corte, y **no es un dato
+personal**, así que no tiene el plazo de conservación que sí tienen las fotos de cédula. Cuando
+exista el proceso que borra las fotos de cédula al cumplirse el plazo (§3 sexies del
+levantamiento), **las fotos de obra quedan fuera**. Una foto por avance, a ese tamaño: en el demo
+caben decenas; en el producto van a un archivo (R2, T-77) y el peso deja de importar. Lo que sí
+se agregó es un **aviso en el demo** cuando el navegador va al 80 % de su capacidad, para que no
+deje de guardar en silencio en medio de una demostración (`ocupacionDelDemo`).
+
 ## Consecuencias
 
 - El registro de personas funciona de punta a punta sin backend y sin dependencias nuevas.

@@ -11,7 +11,7 @@
 #
 # Servicios: pwa (8080), contable (8081), gestion (8082, BOB), bloky (8083), tunel (ADR-0014) y
 # jitsi (8085 y 10000/udp, ADR-0016). El codigo de gestion, bloky y jitsi vive en su propio
-# repositorio y se trae de su origin/main (ADR-0017). Los que no se nombran siguen como estaban. `todo` NO
+# repositorio y se trae de su origin/main (ADR-0018). Los que no se nombran siguen como estaban. `todo` NO
 # incluye el tunel ni jitsi: los publica solo el responsable de integracion, nombrandolos.
 # La direccion del servidor no va en el repositorio a proposito.
 set -eu
@@ -48,7 +48,7 @@ if [ "$REF" = "HEAD" ] && [ -n "$(git status --porcelain)" ]; then
   echo "Aviso: hay cambios sin commit; no se publican. Se publica $REVISION." >&2
 fi
 
-# BLOKY, BOB y Jitsi tienen su propio repositorio (ADR-0017), con las mismas rutas que tenian
+# BLOKY, BOB y Jitsi tienen su propio repositorio (ADR-0018), con las mismas rutas que tenian
 # aqui. Su codigo se trae de GitHub y se pone encima de la copia de idiky, asi levantar.sh ve la
 # carpeta de siempre. El de cada uno sale de su origin/main, salvo que se pida otro commit con
 # IDIKY_REF_BLOKY, IDIKY_REF_GESTION o IDIKY_REF_JITSI.

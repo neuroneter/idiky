@@ -531,6 +531,26 @@ textarea {
   font-size: var(--texto-sm);
   animation: aparecer 0.18s ease;
 }
+.aviso--version {
+  display: flex;
+  align-items: center;
+  gap: var(--e3);
+  bottom: auto;
+  top: calc(env(safe-area-inset-top, 0px) + var(--e3));
+  background: var(--color-marca);
+}
+.aviso--version .boton {
+  background: var(--color-superficie);
+  border-color: transparent;
+  color: var(--color-marca);
+}
+.acceso__version {
+  text-align: center;
+  font-size: var(--texto-xs);
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: var(--e4);
+}
+
 .aviso--exito {
   background: var(--color-exito);
 }
@@ -792,4 +812,62 @@ textarea {
   place-items: center;
   background: var(--color-exito-suave);
   color: var(--color-exito);
+}
+
+/* Fotos de las zonas comunes (RN-104): tira de miniaturas y foto grande al tocar. */
+.fotos-zona {
+  display: flex;
+  gap: var(--e2);
+  overflow-x: auto;
+  padding-bottom: var(--e1);
+}
+.fotos-zona__miniatura {
+  position: relative;
+  flex: 0 0 auto;
+}
+.fotos-zona__miniatura > button:first-child {
+  display: block;
+  padding: 0;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-sm);
+  background: var(--color-superficie-2);
+  overflow: hidden;
+}
+.fotos-zona__miniatura img {
+  display: block;
+  width: 112px;
+  height: 84px;
+  object-fit: cover;
+}
+.fotos-zona__quitar {
+  position: absolute;
+  right: var(--e1);
+  bottom: var(--e1);
+}
+.fotos-zona__grande {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio);
+  background: var(--color-superficie-2);
+  overflow: hidden;
+}
+.fotos-zona__grande img {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: contain;
+}
+
+/* Especificaciones de una zona (RN-104): lista corta, legible en el celular. */
+.especificaciones {
+  margin: 0;
+  padding-left: 1.2em;
+  list-style: disc;
+  display: flex;
+  flex-direction: column;
+  gap: var(--e1);
+  font-size: var(--texto-sm);
+  color: var(--color-texto-suave);
 }

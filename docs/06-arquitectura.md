@@ -139,7 +139,7 @@ propia (`servicios/plataforma.ts`) con dos implementaciones. Ver
 ## 6. Backend
 
 > **El código de BLOKY y BOB vive en su propio repositorio** (`Bloky-Idiky`, `BOB-Idiky`) desde el
-> 2026-10-02, con las mismas rutas que se citan aquí ([ADR-0017](./adr/0017-un-repositorio-por-sistema-e-idiky-como-arnes.md),
+> 2026-10-02, con las mismas rutas que se citan aquí ([ADR-0018](./adr/0018-un-repositorio-por-sistema-e-idiky-como-arnes.md),
 > [`16-mapa-de-repositorios.md`](./16-mapa-de-repositorios.md)). ALICE es una app Flutter en
 > `App-Idiky`, y los contratos inteligentes están en `SmartContrat-Idiky`.
 
@@ -188,3 +188,27 @@ puertos ajenos.
 
 Para agregar un servicio (una API, una base de datos, otra app): el contrato que debe cumplir
 y la receta paso a paso están en [`infra/nuevo-servicio.md`](../infra/nuevo-servicio.md).
+
+## Cómo le llega una actualización al usuario
+
+Mary preguntó (2026-10-01) qué pasa con el usuario cuando sale una versión nueva. Depende de por
+dónde entre:
+
+| Por dónde entra | Cómo le llega la versión nueva |
+|---|---|
+| **Consola en el navegador** | En la siguiente visita o al recargar. `index.html` y `sw.js` se sirven sin caché (`infra/pwa/nginx.conf`); los archivos de código llevan un hash en el nombre y cambian con cada versión |
+| **App instalada en el celular (PWA)** | El *service worker* (`public/sw.js`) pide la página al servidor primero y usa la copia guardada solo sin conexión: al abrirla con internet baja la versión nueva sola. Sin tienda, sin reinstalar |
+| **Apps en las tiendas (fase 3, Capacitor)** | El envoltorio nativo (cámara, push, permisos) se actualiza por Google Play y App Store; el contenido web puede seguir llegando desde el servidor. Qué va por cada vía se decide en esa fase |
+| **Los datos de la persona** | En el demo viven en el navegador y se reinician cuando cambia la estructura (`VERSION_ESQUEMA`). **En el producto no**: están en el servidor, se migran allá y una actualización nunca borra nada |
+
+Dos cosas que la app hace para que esto no dependa de la suerte (`servicios/version.ts`):
+
+- **Muestra su versión** al pie de la pantalla de ingreso: versión del paquete, día de
+  compilación y, si hay servidor, la revisión que este publicó (`revision.txt`, escrita por
+  `infra/servidor/levantar.sh`). Es lo primero que hay que saber cuando alguien dice «a mí no me
+  sale».
+- **Avisa cuando sale una nueva** a quien tiene la app abierta: cada diez minutos y cada vez que
+  la persona vuelve a la pestaña, compara la revisión del servidor con la que tenía al abrir; si
+  cambió, muestra «Hay una versión nueva» con un botón «Actualizar». No recarga sola, porque
+  podría estar a mitad de un formulario. Sin `revision.txt` (desarrollo o el demo en un solo
+  archivo) no hay nada que vigilar.

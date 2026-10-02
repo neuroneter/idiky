@@ -9,6 +9,8 @@
  */
 
 import type {
+  Soporte,
+  Proyecto,
   Asamblea,
   Asistencia,
   BaseDatos,
@@ -51,7 +53,23 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      imputaciones y recibo de caja, y hay abonos por conciliar (RN-75 a RN-79).
 // 22 — poderes enviados en foto por el propietario y marca «No obligatorio» en el
 //      registro (Mary, 2026-09-17; su rama tambien llamo 21 a ese cambio).
-export const VERSION_ESQUEMA = 22
+// 27 — zonas comunes con cobro por uso, deposito y multa por no cancelar
+//      (RN-109, RN-110), y la multa «Reserva no cancelada a tiempo» en el catalogo.
+// 28 — zonas compartidas (gimnasio y coworking, RN-111), personas por reserva
+//      (RN-113), horario por dia del gimnasio (RN-114) y reservas de hoy y de
+//      mañana para ver portería (RN-116) y el aviso al cancelar (RN-112).
+// 29 — la plata de la reserva: valores copiados al reservar (RN-118) y dos
+//      reservas pasadas por cerrar, una con deposito recibido (RN-119 a RN-121).
+// 30 — una solicitud sin respuesta ya pasada, que vence al abrir (RN-122); otra
+//      que vence mañana, para la alerta del tablero; invitados en la de hoy (RN-126).
+// 31 — el salón se cancela hasta 12 horas antes del turno (RN-128), y sus
+//      reservas llevan ese límite copiado.
+// 32 — el registro separa quién es (propietario, arrendatario, visitante) de cómo
+//      se queda (residente, no residente, temporal); el residente temporal deja
+//      de ser una categoría (Mary, 2026-10-02). Las unidades 301 y 502 tienen
+//      propietario no residente.
+// 33 — Gustavo, dueño no residente de la 301, en la lista de perfiles del demo.
+export const VERSION_ESQUEMA = 33
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -126,7 +144,7 @@ const MORA_POR_UNIDAD: Record<string, number> = {
 // ---------------------------------------------------------------------------
 // Personas y residencias
 // ---------------------------------------------------------------------------
-const DEFINICION_PERSONAS: Array<[nombres: string, apellidos: string, unidad: string, rol: Residencia['rol']]> = [
+const DEFINICION_PERSONAS: Array<[nombres: string, apellidos: string, unidad: string, rol: Residencia['rol'], reside?: boolean]> = [
   ['Maria Camila', 'Restrepo Ossa', 'uni-torre1-402', 'propietario'],
   ['Andres Felipe', 'Gomez Lara', 'uni-torre2-901', 'propietario'],
   ['Luisa Fernanda', 'Marin Castro', 'uni-torre1-201', 'propietario'],
@@ -139,6 +157,10 @@ const DEFINICION_PERSONAS: Array<[nombres: string, apellidos: string, unidad: st
   ['Mauricio', 'Bermudez Silva', 'uni-torre2-601', 'propietario'],
   ['Angela Maria', 'Trujillo Pardo', 'uni-torre2-602', 'propietario'],
   ['Hernan Dario', 'Quintero Arias', 'uni-torre2-902', 'propietario'],
+  // Los dueños de las unidades arrendadas: propietarios **no residentes**
+  // (RN-68). Aprueban las estadías largas de sus arrendatarias (RN-60).
+  ['Gustavo Adolfo', 'Mejia Toro', 'uni-torre1-301', 'propietario', false],
+  ['Beatriz Elena', 'Franco Rios', 'uni-torre2-502', 'propietario', false],
 ]
 
 const personas: Persona[] = DEFINICION_PERSONAS.map(([nombres, apellidos], i) => ({
@@ -150,16 +172,15 @@ const personas: Persona[] = DEFINICION_PERSONAS.map(([nombres, apellidos], i) =>
   telefono: `+57 31${i % 10} ${200 + i} ${4000 + i * 7}`,
 }))
 
-const residencias: Residencia[] = DEFINICION_PERSONAS.map(([, , unidadId, rol], i) => ({
+const residencias: Residencia[] = DEFINICION_PERSONAS.map(([, , unidadId, rol, reside], i) => ({
   id: `res-${i + 1}`,
   personaId: `per-${i + 1}`,
   unidadId,
   rol,
   desde: `${new Date().getFullYear() - 2}-03-01`,
   principal: true,
-  // Todos los de la semilla viven en su unidad: es el caso comun, y el
-  // propietario no residente se crea desde el registro cuando alguien lo marca.
-  reside: true,
+  // Casi todos viven en su unidad; los dueños de las arrendadas, no.
+  reside: reside ?? true,
 }))
 
 /**
@@ -190,6 +211,28 @@ const administrador: Persona = {
 // ---------------------------------------------------------------------------
 // Zonas comunes
 // ---------------------------------------------------------------------------
+
+/**
+ * Una «foto» ilustrativa para el demo (RN-104): un SVG con un color, unas
+ * formas y el rotulo «Foto ilustrativa del demo». No es una fotografia y lo
+ * dice; existe para que la galeria se vea con algo antes de que la
+ * administracion cargue las fotos reales. Pesa menos de 1 KB.
+ */
+function fotoIlustrativa(titulo: string, colorA: string, colorB: string, adjuntadoEn: string): Soporte {
+  const svg =
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">` +
+    `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${colorA}"/><stop offset="1" stop-color="${colorB}"/></linearGradient></defs>` +
+    `<rect width="800" height="600" fill="url(#g)"/>` +
+    `<rect x="60" y="380" width="680" height="120" rx="12" fill="rgba(255,255,255,0.22)"/>` +
+    `<rect x="120" y="300" width="160" height="80" rx="10" fill="rgba(255,255,255,0.35)"/>` +
+    `<rect x="520" y="280" width="200" height="100" rx="10" fill="rgba(255,255,255,0.3)"/>` +
+    `<circle cx="660" cy="120" r="48" fill="rgba(255,255,255,0.45)"/>` +
+    `<text x="400" y="200" text-anchor="middle" font-family="sans-serif" font-size="44" font-weight="700" fill="#fff">${titulo}</text>` +
+    `<text x="400" y="560" text-anchor="middle" font-family="sans-serif" font-size="22" fill="rgba(255,255,255,0.85)">Foto ilustrativa del demo</text>` +
+    `</svg>`
+  return { imagen: `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`, adjuntadoEn }
+}
+
 const zonasComunes: ZonaComun[] = [
   {
     id: 'zon-salon',
@@ -197,6 +240,12 @@ const zonasComunes: ZonaComun[] = [
     nombre: 'Salón social',
     descripcion: 'Salón para reuniones y celebraciones, con cocineta y baño.',
     icono: 'salon',
+    fotos: [
+      fotoIlustrativa('Salón social', '#1d2e7a', '#4b5fb8', '2026-09-01T10:00:00.000Z'),
+      fotoIlustrativa('Cocineta y baño', '#812485', '#c41e8c', '2026-09-01T10:05:00.000Z'),
+    ],
+    especificaciones:
+      'Incluye 8 mesas y 40 sillas\nCocineta con nevera, microondas y estufa de dos puestos\nBaño para invitados\nSonido y decoración los pone el residente\nSe entrega limpio y se devuelve limpio antes de las 9:00 p. m.',
     aforo: 40,
     requiereAprobacion: true,
     horaInicio: '09:00',
@@ -204,6 +253,13 @@ const zonasComunes: ZonaComun[] = [
     duracionBloqueHoras: 4,
     anticipacionMinimaHoras: 48,
     cupoMensualPorUnidad: 2,
+    // RN-109, RN-110 — El salon es la zona que en casi todos los conjuntos cuesta.
+    valorUso: 80000,
+    deposito: 200000,
+    respaldoCobro: { origen: 'reglamento', referencia: 'Artículo 42' },
+    multaNoCancelar: { conceptoId: 'cs-6', horasParaCancelar: 48 },
+    // RN-128 — Hasta 12 horas antes se cancela (con multa si faltan menos de 48); después, no.
+    horasLimiteCancelacion: 12,
   },
   {
     id: 'zon-bbq',
@@ -211,6 +267,9 @@ const zonasComunes: ZonaComun[] = [
     nombre: 'Terraza BBQ',
     descripcion: 'Zona de asados en la terraza de la Torre 2.',
     icono: 'bbq',
+    fotos: [fotoIlustrativa('Terraza BBQ', '#a6620a', '#e0a04a', '2026-09-01T10:10:00.000Z')],
+    especificaciones:
+      'Asador a carbón y mesón de trabajo\nDos mesas con parasol\nEl carbón lo trae el residente\nSin música después de las 10:00 p. m.',
     aforo: 12,
     requiereAprobacion: true,
     horaInicio: '11:00',
@@ -218,6 +277,9 @@ const zonasComunes: ZonaComun[] = [
     duracionBloqueHoras: 4,
     anticipacionMinimaHoras: 24,
     cupoMensualPorUnidad: 3,
+    // Cobra el uso pero no pide deposito: las dos cosas son independientes.
+    valorUso: 30000,
+    respaldoCobro: { origen: 'reglamento', referencia: 'Artículo 42' },
   },
   {
     id: 'zon-gimnasio',
@@ -225,6 +287,9 @@ const zonasComunes: ZonaComun[] = [
     nombre: 'Gimnasio',
     descripcion: 'Equipos cardiovasculares y de fuerza. Aforo controlado.',
     icono: 'gimnasio',
+    fotos: [fotoIlustrativa('Gimnasio', '#0f7a52', '#3fb98a', '2026-09-01T10:15:00.000Z')],
+    especificaciones:
+      'Dos caminadoras, una elíptica y una bicicleta\nMancuernas de 2 a 20 kg y multifuerza\nToalla obligatoria; se limpia cada equipo al terminar\nMenores de 14 años solo con un adulto',
     aforo: 8,
     requiereAprobacion: false,
     horaInicio: '05:00',
@@ -232,6 +297,13 @@ const zonasComunes: ZonaComun[] = [
     duracionBloqueHoras: 2,
     anticipacionMinimaHoras: 2,
     cupoMensualPorUnidad: 12,
+    // RN-111 — Varias unidades por turno, hasta ocho personas.
+    modoUso: 'compartido',
+    // RN-114 — De lunes a sabado de 5 a 9; el domingo, solo la mañana.
+    horarioSemanal: [
+      ...[1, 2, 3, 4, 5, 6].map((dia) => ({ dia, horaInicio: '05:00', horaFin: '21:00' })),
+      { dia: 0, horaInicio: '07:00', horaFin: '13:00' },
+    ],
   },
   {
     id: 'zon-coworking',
@@ -246,6 +318,7 @@ const zonasComunes: ZonaComun[] = [
     duracionBloqueHoras: 2,
     anticipacionMinimaHoras: 2,
     cupoMensualPorUnidad: 10,
+     modoUso: 'compartido',
   },
   {
     id: 'zon-cancha',
@@ -475,6 +548,10 @@ function construirReservas(): Reserva[] {
       horaFin: '17:00',
       estado: 'confirmada',
       creadaEn: `${sumarDias(hoy, -2)}T18:20:00.000Z`,
+      personas: 30,
+      valorUso: 80000,
+      deposito: 200000,
+      horasLimiteCancelacion: 12,
     },
     {
       id: 'rsv-2',
@@ -486,6 +563,7 @@ function construirReservas(): Reserva[] {
       horaFin: '19:00',
       estado: 'solicitada',
       creadaEn: `${sumarDias(hoy, -1)}T20:05:00.000Z`,
+      valorUso: 30000,
     },
     {
       id: 'rsv-3',
@@ -497,6 +575,9 @@ function construirReservas(): Reserva[] {
       horaFin: '21:00',
       estado: 'solicitada',
       creadaEn: `${sumarDias(hoy, -1)}T08:40:00.000Z`,
+      valorUso: 80000,
+      deposito: 200000,
+      horasLimiteCancelacion: 12,
     },
     {
       id: 'rsv-4',
@@ -508,6 +589,123 @@ function construirReservas(): Reserva[] {
       horaFin: '11:00',
       estado: 'confirmada',
       creadaEn: `${sumarDias(hoy, -8)}T11:00:00.000Z`,
+    },
+    // RN-116 — Una de hoy, para que portería vea a quién dejar entrar.
+    {
+      id: 'rsv-5',
+      zonaId: 'zon-bbq',
+      unidadId: 'uni-torre1-202',
+      personaId: 'per-4',
+      fecha: hoy,
+      horaInicio: '19:00',
+      horaFin: '23:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -3)}T10:00:00.000Z`,
+      personas: 10,
+      valorUso: 30000,
+      invitados: ['Ana María Gómez', 'Carlos Ruiz', 'Lucía Pardo'],
+    },
+    // RN-111 — Dos unidades comparten el gimnasio mañana a las 7: quedan 3 cupos.
+    {
+      id: 'rsv-6',
+      zonaId: 'zon-gimnasio',
+      unidadId: 'uni-torre1-202',
+      personaId: 'per-4',
+      fecha: sumarDias(hoy, 1),
+      horaInicio: '07:00',
+      horaFin: '09:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -1)}T19:00:00.000Z`,
+      personas: 2,
+    },
+    {
+      id: 'rsv-7',
+      zonaId: 'zon-gimnasio',
+      unidadId: 'uni-torre2-501',
+      personaId: 'per-8',
+      fecha: sumarDias(hoy, 1),
+      horaInicio: '07:00',
+      horaFin: '09:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -1)}T21:30:00.000Z`,
+      personas: 3,
+    },
+    // RN-112 — El salón mañana: cancelarla hoy está dentro de las 48 horas con multa.
+    {
+      id: 'rsv-8',
+      zonaId: 'zon-salon',
+      unidadId: 'uni-torre1-402',
+      personaId: 'per-1',
+      fecha: sumarDias(hoy, 1),
+      horaInicio: '17:00',
+      horaFin: '21:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -10)}T09:00:00.000Z`,
+      personas: 20,
+      valorUso: 80000,
+      deposito: 200000,
+      horasLimiteCancelacion: 12,
+    },
+    // RN-119 a RN-121 — Dos turnos ya pasados, para cerrar desde la consola:
+    // el salón, con el depósito recibido; la terraza, para el «no se presentó».
+    {
+      id: 'rsv-9',
+      zonaId: 'zon-salon',
+      unidadId: 'uni-torre1-202',
+      personaId: 'per-4',
+      fecha: sumarDias(hoy, -2),
+      horaInicio: '13:00',
+      horaFin: '17:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -12)}T15:00:00.000Z`,
+      personas: 25,
+      valorUso: 80000,
+      deposito: 200000,
+      horasLimiteCancelacion: 12,
+      depositoRecibidoEn: `${sumarDias(hoy, -3)}T16:00:00.000Z`,
+    },
+    {
+      id: 'rsv-10',
+      zonaId: 'zon-bbq',
+      unidadId: 'uni-torre2-501',
+      personaId: 'per-8',
+      fecha: sumarDias(hoy, -3),
+      horaInicio: '15:00',
+      horaFin: '19:00',
+      estado: 'confirmada',
+      creadaEn: `${sumarDias(hoy, -9)}T12:00:00.000Z`,
+      personas: 8,
+      valorUso: 30000,
+    },
+    // RN-122 — Nadie la contestó y su turno ya pasó: vence al abrir el demo.
+    {
+      id: 'rsv-11',
+      zonaId: 'zon-salon',
+      unidadId: 'uni-torre2-501',
+      personaId: 'per-8',
+      fecha: sumarDias(hoy, -1),
+      horaInicio: '09:00',
+      horaFin: '13:00',
+      estado: 'solicitada',
+      creadaEn: `${sumarDias(hoy, -6)}T14:00:00.000Z`,
+      personas: 15,
+      valorUso: 80000,
+      deposito: 200000,
+      horasLimiteCancelacion: 12,
+    },
+    // RN-122 — Por aprobar y a menos de 48 horas: sale en la alerta del tablero.
+    {
+      id: 'rsv-12',
+      zonaId: 'zon-bbq',
+      unidadId: 'uni-torre1-402',
+      personaId: 'per-1',
+      fecha: sumarDias(hoy, 1),
+      horaInicio: '11:00',
+      horaFin: '15:00',
+      estado: 'solicitada',
+      creadaEn: `${sumarDias(hoy, -1)}T09:00:00.000Z`,
+      personas: 6,
+      valorUso: 30000,
     },
   ]
 }
@@ -597,6 +795,76 @@ function construirPqrs(): { pqrs: Pqrs[]; consecutivo: number } {
     },
   ]
   return { pqrs, consecutivo: pqrs.length + 1 }
+}
+
+/**
+ * 18 — proyectos: la obra que paga la extraordinaria, con su avance (CU-A-28).
+ *
+ * Es la misma cubierta de la cuota extraordinaria y de la asamblea en curso:
+ * el demo cuenta una sola historia, y el tablero es donde el propietario ve
+ * en que se esta yendo su plata.
+ */
+function construirProyectos(): Proyecto[] {
+  const hoy = hoyISO()
+  return [
+    {
+      id: 'pro-cubierta',
+      copropiedadId: COPROPIEDAD_ID,
+      nombre: 'Impermeabilización de cubiertas',
+      descripcion:
+        'Retiro del manto deteriorado, reparación de las grietas de la placa y aplicación de manto asfáltico nuevo en las cubiertas de las dos torres. Se financia con la cuota extraordinaria aprobada por la asamblea.',
+      responsable: 'Impermeabilizaciones del Norte S. A. S.',
+      fechaInicio: sumarDias(hoy, -20),
+      fechaFinPrevista: sumarDias(hoy, 40),
+      presupuesto: 40000000,
+      avances: [
+        {
+          id: 'avn-1',
+          fecha: `${sumarDias(hoy, -18)}T15:30:00.000Z`,
+          porcentaje: 15,
+          titulo: 'Retiro del manto viejo en la Torre 1',
+          detalle: 'Se retiró el manto deteriorado de la cubierta de la Torre 1 y se limpió la placa.',
+          registradoPor: 'per-admin',
+        },
+        {
+          id: 'avn-2',
+          fecha: `${sumarDias(hoy, -6)}T16:10:00.000Z`,
+          porcentaje: 40,
+          titulo: 'Reparación de grietas y sellado de juntas',
+          detalle:
+            'Se repararon las grietas de la placa de la Torre 1 y se selló la junta de dilatación. La semana entrante empieza la Torre 2.',
+          registradoPor: 'per-admin',
+        },
+      ],
+      creadoPor: 'per-admin',
+      creadoEn: `${sumarDias(hoy, -22)}T14:00:00.000Z`,
+    },
+    // La obra callada: tres semanas sin avance, para que el tablero del
+    // administrador abra con la alerta de RN-102 (Mary, 2026-10-01).
+    {
+      id: 'pro-fachada',
+      copropiedadId: COPROPIEDAD_ID,
+      nombre: 'Pintura de fachadas',
+      descripcion:
+        'Lavado, resane y pintura de las fachadas de las dos torres, con el color aprobado por el consejo. Se paga con el fondo de imprevistos.',
+      responsable: 'Pinturas y Acabados Ltda.',
+      fechaInicio: sumarDias(hoy, -35),
+      fechaFinPrevista: sumarDias(hoy, 25),
+      presupuesto: 18000000,
+      avances: [
+        {
+          id: 'avn-3',
+          fecha: `${sumarDias(hoy, -21)}T14:20:00.000Z`,
+          porcentaje: 30,
+          titulo: 'Lavado y resane de la fachada norte de la Torre 1',
+          detalle: 'Se lavó a presión la fachada norte y se resanaron las fisuras. Falta la pintura.',
+          registradoPor: 'per-admin',
+        },
+      ],
+      creadoPor: 'per-admin',
+      creadoEn: `${sumarDias(hoy, -36)}T09:00:00.000Z`,
+    },
+  ]
 }
 
 function construirComunicados(): Comunicado[] {
@@ -1032,6 +1300,18 @@ const conceptosSancion: ConceptoSancion[] = [
     creadoEn: fechaHoraRelativa(-540, '11:00'),
     inactivoDesde: sumarDias(hoyISO(), -60),
   },
+  {
+    id: 'cs-6',
+    copropiedadId: COPROPIEDAD_ID,
+    nombre: 'Reserva no cancelada a tiempo',
+    descripcion:
+      'No usar una zona común reservada sin haber cancelado la reserva dentro del plazo que fija la zona.',
+    valor: 50000,
+    origen: 'manual',
+    referencia: 'Artículo 25',
+    activo: true,
+    creadoEn: fechaHoraRelativa(-320, '09:40'),
+  },
 ]
 
 /**
@@ -1186,6 +1466,7 @@ export function crearSemilla(): BaseDatos {
     reservas: construirReservas(),
     pqrs,
     comunicados: construirComunicados(),
+    proyectos: construirProyectos(),
     correspondencia: construirCorrespondencia(),
     visitantes: construirVisitantes(),
     // Sin registros de ejemplo: llevan fotos, y una foto en la semilla es peso
@@ -1250,6 +1531,17 @@ export function crearSemilla(): BaseDatos {
         unidadId: 'uni-torre1-301',
       },
       {
+        id: 'perfil-propietario-no-residente',
+        etiqueta: 'Gustavo Adolfo Mejia',
+        // El dueño de la 301, donde vive Sandra: propietario no residente
+        // (RN-68). Es quien aprueba las estadías largas que ella registra (RN-60).
+        descripcion: 'Propietario no residente · Torre 1 · 301',
+        rol: 'residente',
+        personaId: 'per-13',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre1-301',
+      },
+      {
         id: 'perfil-porteria',
         etiqueta: 'Jairo Alberto Pineda',
         descripcion: 'Portería · turno de la mañana',
@@ -1273,6 +1565,7 @@ export function crearSemilla(): BaseDatos {
       poder: 1,
       acta: 1,
       recibo: consecutivoRecibo,
+      estadoCuenta: 1,
     },
   }
 }

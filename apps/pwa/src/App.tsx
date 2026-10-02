@@ -10,7 +10,6 @@ import { LayoutResidente } from './componentes/LayoutResidente'
 import { LayoutAdmin } from './componentes/LayoutAdmin'
 import { LayoutPorteria } from './componentes/LayoutPorteria'
 import { AccesoPage } from './features/auth/AccesoPage'
-import { ActivarPage } from './features/auth/ActivarPage'
 import { AdjuntarPage } from './features/auth/AdjuntarPage'
 import { InicioPage } from './features/residente/InicioPage'
 import { MiUnidadPage } from './features/residente/MiUnidadPage'
@@ -19,9 +18,11 @@ import { PersonasPage } from './features/residente/PersonasPage'
 import { CuentaPage } from './features/residente/CuentaPage'
 import { PagoPage } from './features/residente/PagoPage'
 import { InformarAbonoPage } from './features/residente/InformarAbonoPage'
+import { EstadoCuentaPage } from './features/residente/EstadoCuentaPage'
 import { ReservasPage } from './features/residente/ReservasPage'
 import { PqrsPage } from './features/residente/PqrsPage'
 import { ComunicadosPage } from './features/residente/ComunicadosPage'
+import { ProyectosPage } from './features/residente/ProyectosPage'
 import { SolicitudesPage } from './features/residente/SolicitudesPage'
 import { PazYSalvoPage } from './features/residente/PazYSalvoPage'
 import { AsambleasPage } from './features/residente/AsambleasPage'
@@ -31,18 +32,24 @@ import { CorrespondenciaPage } from './features/residente/CorrespondenciaPage'
 import { TableroPage } from './features/admin/TableroPage'
 import { UnidadesPage } from './features/admin/UnidadesPage'
 import { RegistrosPage } from './features/admin/RegistrosPage'
-import { CarteraPage } from './features/admin/CarteraPage'
+import { CarteraPage, CarteraSeccionAdmin } from './features/admin/CarteraPage'
+import { PazYSalvoAdminPage } from './features/admin/PazYSalvoAdminPage'
 import { CatalogoMultasPage } from './features/admin/CatalogoMultasPage'
 import { SancionesPage } from './features/admin/SancionesPage'
 import { AsambleasAdminPage } from './features/admin/AsambleasAdminPage'
 import { PagosPage } from './features/admin/PagosPage'
-import { ReservasAdminPage } from './features/admin/ReservasAdminPage'
+import { ReservasAdminPage, ReservasSeccionAdmin } from './features/admin/ReservasAdminPage'
+import { ZonasAdminPage } from './features/admin/ZonasAdminPage'
+import { CalendarioZonasPage } from './features/admin/CalendarioZonasPage'
+import { InformeZonasPage } from './features/admin/InformeZonasPage'
 import { PqrsAdminPage } from './features/admin/PqrsAdminPage'
 import { ComunicadosAdminPage } from './features/admin/ComunicadosAdminPage'
+import { ProyectosAdminPage } from './features/admin/ProyectosAdminPage'
 import { CorrespondenciaPage as CorrespondenciaGestionPage } from './features/porteria/CorrespondenciaPage'
 import { TurnoPage } from './features/porteria/TurnoPage'
 import { ValidarVisitantePage } from './features/porteria/ValidarVisitantePage'
 import { ResidentesPage } from './features/porteria/ResidentesPage'
+import { AvisoVersionNueva } from './componentes/AvisoVersionNueva'
 
 /** Deja pasar solo si hay sesion con el rol esperado (ADR-0004). */
 function Protegida({
@@ -62,12 +69,14 @@ export function App() {
   const { sesion } = useSesion()
 
   return (
+    <>
+    <AvisoVersionNueva />
     <Routes>
       <Route path="/acceso" element={<AccesoPage />} />
-      {/* Activar y recuperar son el mismo tramite en tres pasos; cambia el texto,
-          no el flujo (CU-R-25). */}
-      <Route path="/acceso/activar" element={<ActivarPage modo="activar" />} />
-      <Route path="/acceso/recuperar" element={<ActivarPage modo="recuperar" />} />
+      {/* Activar y recuperar ya no existen: se entra con un codigo al celular o
+          al correo, y la primera vez eso activa la cuenta (CU-R-01, 2026-10-01). */}
+      <Route path="/acceso/activar" element={<Navigate to="/acceso" replace />} />
+      <Route path="/acceso/recuperar" element={<Navigate to="/acceso" replace />} />
       {/* Fuera de la sesion: quien adjunta todavia no tiene cuenta (CU-R-28). */}
       <Route path="/acceso/adjuntar" element={<AdjuntarPage />} />
 
@@ -84,6 +93,7 @@ export function App() {
         <Route path="cuenta" element={<CuentaPage />} />
         <Route path="cuenta/pagar" element={<PagoPage />} />
         <Route path="cuenta/informar" element={<InformarAbonoPage />} />
+        <Route path="cuenta/estado" element={<EstadoCuentaPage />} />
         {/* Solicitudes: reservar, radicar una PQRS y pedir el paz y salvo viven
             bajo un mismo icono (Mary, 2026-08-27). Cada una conserva su ruta
             propia para poder enlazarla desde el inicio y para que "atras"
@@ -101,6 +111,7 @@ export function App() {
         <Route path="asambleas" element={<AsambleasPage />} />
         <Route path="asambleas/:asambleaId" element={<AsambleaDetallePage />} />
         <Route path="comunicados" element={<ComunicadosPage />} />
+        <Route path="proyectos" element={<ProyectosPage />} />
         <Route path="visitantes" element={<VisitantesPage />} />
         <Route path="correspondencia" element={<CorrespondenciaPage />} />
         <Route path="procesos" element={<ProcesosPage />} />
@@ -120,14 +131,25 @@ export function App() {
         <Route index element={<TableroPage />} />
         <Route path="unidades" element={<UnidadesPage />} />
         <Route path="registros" element={<RegistrosPage />} />
-        <Route path="cartera" element={<CarteraPage />} />
+        <Route path="cartera" element={<CarteraSeccionAdmin />}>
+          <Route index element={<CarteraPage />} />
+          <Route path="paz-y-salvo" element={<PazYSalvoAdminPage />} />
+        </Route>
         <Route path="multas" element={<CatalogoMultasPage />} />
         <Route path="sanciones" element={<SancionesPage />} />
         <Route path="asambleas" element={<AsambleasAdminPage />} />
         <Route path="pagos" element={<PagosPage />} />
-        <Route path="reservas" element={<ReservasAdminPage />} />
+        {/* Reservas y zonas comunes van juntas: lo de reservas va dentro de
+            reservas (Mary, 2026-10-01). */}
+        <Route path="reservas" element={<ReservasSeccionAdmin />}>
+          <Route index element={<ReservasAdminPage />} />
+          <Route path="calendario" element={<CalendarioZonasPage />} />
+          <Route path="informe" element={<InformeZonasPage />} />
+          <Route path="zonas" element={<ZonasAdminPage />} />
+        </Route>
         <Route path="pqrs" element={<PqrsAdminPage />} />
         <Route path="comunicados" element={<ComunicadosAdminPage />} />
+        <Route path="proyectos" element={<ProyectosAdminPage />} />
         <Route path="correspondencia" element={<CorrespondenciaGestionPage />} />
       </Route>
 
@@ -151,5 +173,6 @@ export function App() {
         element={<Navigate to={sesion ? rutaInicial(sesion.rol) : '/acceso'} replace />}
       />
     </Routes>
+    </>
   )
 }

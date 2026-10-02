@@ -1,4 +1,4 @@
-# ADR-0017 — Un repositorio por sistema, e `idiky` como el arnés de todos
+# ADR-0018 — Un repositorio por sistema, e `idiky` como el arnés de todos
 
 - **Estado:** Aceptada
 - **Fecha:** 2026-10-02

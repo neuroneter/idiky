@@ -18,6 +18,7 @@
  */
 
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
@@ -38,7 +39,7 @@ import {
 } from '../../dominio/reglas'
 import { formatearFechaHora } from '../../utilidades/formato'
 import {
-  CATEGORIAS,
+  textoClase,
   DetalleRegistro,
   ESTADOS,
   FormularioRegistro,
@@ -49,7 +50,10 @@ import { EstadoVacio } from '../../componentes/EstadoVacio'
 export function RegistrosPage() {
   const { bd, ejecutar, mostrarAviso } = useDatos()
   const { sesion } = useSesion()
-  const [registrando, setRegistrando] = useState(false)
+  const [parametrosUrl] = useSearchParams()
+  /** Se llega con `?unidad=` desde Unidades, tras un cambio de propietario. */
+  const unidadDelCambio = parametrosUrl.get('unidad') ?? undefined
+  const [registrando, setRegistrando] = useState(!!unidadDelCambio)
   const [viendo, setViendo] = useState<string | null>(null)
   /** Registros cuyos soportes se abrieron en esta visita a la pantalla. */
   const [abiertos, setAbiertos] = useState<string[]>([])
@@ -61,17 +65,22 @@ export function RegistrosPage() {
   const registros = bd.registros.filter((registro) => deLaCopropiedad.has(registro.unidadId))
   const enCurso = registros.filter(registroEnCurso)
   const enDetalle = registros.find((registro) => registro.id === viendo)
+  /** RN-63 — La administración registra al primer propietario; los demás, él. */
+  const sinPropietario = unidades.filter((unidad) => !sel.unidadTienePropietario(bd, unidad.id))
 
   return (
     <div className="pila">
       <div className="fila">
         <div className="columna">
           <span className="subtitulo">
-            El administrador registra propietarios. Los demás los registra el propietario desde su
-            unidad (RN-63).
+            El administrador registra al primer propietario de cada unidad. Los demás propietarios,
+            arrendatarios y temporales los registra ese propietario desde su app (RN-63).
+            {sinPropietario.length === 0
+              ? ' Hoy todas las unidades tienen propietario: si se vende una, inhabilita al anterior en Unidades y registra aquí al nuevo.'
+              : ` ${sinPropietario.length === 1 ? 'Hay 1 unidad' : `Hay ${sinPropietario.length} unidades`} sin propietario.`}
           </span>
         </div>
-        <button className="boton boton--primario" onClick={() => setRegistrando(true)}>
+        <button className="boton boton--primario" disabled={sinPropietario.length === 0} onClick={() => setRegistrando(true)}>
           <Icono nombre="mas" tamano={16} />
           Registrar propietario
         </button>
@@ -130,7 +139,7 @@ export function RegistrosPage() {
                         <div className="subtitulo numerico">{registro.documento}</div>
                       </td>
                       <td className="suave">{unidad ? etiquetaUnidad(unidad) : '—'}</td>
-                      <td className="suave">{CATEGORIAS[registro.categoria].texto}</td>
+                      <td className="suave">{textoClase(registro)}</td>
                       {/* Quién registró a quién es el dato que hace útil esta
                           tabla: es la cadena de RN-63 hecha visible. */}
                       <td className="suave">
@@ -171,8 +180,9 @@ export function RegistrosPage() {
 
       {registrando && (
         <FormularioRegistro
-          categorias={['residente']}
-          unidades={unidades}
+          categorias={['propietario']}
+          unidades={sinPropietario}
+          unidadInicial={unidadDelCambio}
           permitirNoObligatorio
           alCerrar={() => setRegistrando(false)}
           alCrear={async (datos) => {
@@ -183,8 +193,7 @@ export function RegistrosPage() {
                   unidadId: datos.unidadId!,
                   creadoPor: sesion.personaId,
                   categoria: datos.categoria,
-                  rol: datos.rol,
-                  reside: datos.reside,
+                  condicion: datos.condicion,
                   nombres: datos.nombres,
                   apellidos: datos.apellidos,
                   documento: datos.documento,

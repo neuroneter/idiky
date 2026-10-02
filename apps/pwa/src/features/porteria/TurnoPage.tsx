@@ -15,6 +15,9 @@
  *  - **Todo queda a nombre de quien está en el turno** (RN-52). Por eso el
  *    nombre encabeza la pantalla: no es un saludo, es de quién es la
  *    responsabilidad de lo que se registre en la próxima hora.
+ *  - **Las reservas de hoy** (RN-116): quién tiene qué zona, a qué hora y con
+ *    cuántas personas, para dejar entrar a los invitados sin llamar a nadie;
+ *    con la lista de sus nombres si quien reservó la escribió (RN-126).
  */
 
 import { Link } from 'react-router-dom'
@@ -22,7 +25,7 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { estadoRealVisitante, etiquetaUnidad, hoyISO } from '../../dominio/reglas'
+import { estadoRealVisitante, etiquetaUnidad, hoyISO, reservasDeHoyParaPorteria } from '../../dominio/reglas'
 import { formatearFechaHora } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
 
@@ -35,6 +38,8 @@ export function TurnoPage() {
   const pendientes = sel.correspondenciaPendiente(bd, sesion.copropiedadId)
   const hoy = hoyISO()
   const autorizados = bd.visitantes.filter((v) => estadoRealVisitante(v, hoy) === 'activo')
+  const zonas = sel.zonasDe(bd, sesion.copropiedadId)
+  const reservasHoy = reservasDeHoyParaPorteria(bd.reservas, zonas, hoy)
 
   return (
     <div className="pila">
@@ -103,6 +108,55 @@ export function TurnoPage() {
                 Ver los {pendientes.length}
               </Link>
             )}
+          </div>
+        )}
+      </div>
+
+      {/* RN-116 — Las reservas de hoy: sin costos ni saldos, solo lo que la entrada necesita. */}
+      <div className="pila">
+        <span className="titulo-seccion">Reservas de hoy</span>
+        {reservasHoy.length === 0 ? (
+          <p className="subtitulo">Hoy nadie tiene zonas reservadas.</p>
+        ) : (
+          <div className="lista lista--compacta">
+            {reservasHoy.map((reserva) => {
+              const zona = sel.zona(bd, reserva.zonaId)
+              const unidad = sel.unidad(bd, reserva.unidadId)
+              return (
+                <div key={reserva.id} className="tarjeta tarjeta--plana">
+                  <div className="fila fila-inicio">
+                    <div className="columna">
+                      <strong>
+                        {zona?.nombre} · {reserva.horaInicio} a {reserva.horaFin}
+                      </strong>
+                      <span className="subtitulo">
+                        {unidad ? etiquetaUnidad(unidad) : 'Unidad'} · {nombreCompleto(sel.persona(bd, reserva.personaId))}
+                      </span>
+                    </div>
+                    <span className="chip chip--marca">
+                      {reserva.personas ?? 1} {(reserva.personas ?? 1) === 1 ? 'persona' : 'personas'}
+                    </span>
+                  </div>
+                  {/* RN-126 — Los invitados que escribió quien reservó. Se pide el documento en la entrada. */}
+                  {reserva.invitados?.length ? (
+                    <details style={{ marginTop: 'var(--e2)' }}>
+                      <summary className="subtitulo" style={{ cursor: 'pointer' }}>
+                        Invitados ({reserva.invitados.length})
+                      </summary>
+                      <ul className="especificaciones" style={{ marginTop: 'var(--e1)' }}>
+                        {reserva.invitados.map((nombre) => (
+                          <li key={nombre}>{nombre}</li>
+                        ))}
+                      </ul>
+                    </details>
+                  ) : (
+                    <span className="tenue" style={{ fontSize: 'var(--texto-xs)', display: 'block', marginTop: 'var(--e1)' }}>
+                      Sin lista de invitados.
+                    </span>
+                  )}
+                </div>
+              )
+            })}
           </div>
         )}
       </div>

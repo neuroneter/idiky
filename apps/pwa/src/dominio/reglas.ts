@@ -8,6 +8,10 @@
 
 import type {
   Acta,
+  Correspondencia,
+  Residencia,
+  AvanceProyecto,
+  Proyecto,
   VerificacionActa,
   Asamblea,
   Asistencia,
@@ -16,6 +20,8 @@ import type {
   ModalidadAsamblea,
   Poder,
   CategoriaRegistro,
+  CondicionRegistro,
+  TipoIdentificacion,
   ConceptoSancion,
   EstadoSancion,
   OrigenRespaldo,
@@ -25,10 +31,18 @@ import type {
   EstadoCuota,
   FechaISO,
   Imputacion,
+  EstadoCuentaCongelado,
+  MovimientoCuenta,
   Pago,
   Periodo,
   Pqrs,
   RegistroPersona,
+  CierreZona,
+  HorarioDia,
+  ModoUsoZona,
+  MultaNoCancelar,
+  RespaldoCobroZona,
+  Hora,
   Reserva,
   RolResidencia,
   TipoCuota,
@@ -180,7 +194,11 @@ export function diasDeMora(cuotas: Cuota[], hoy: FechaISO = hoyISO()): number {
   return diasEntre(vencidas[0], hoy)
 }
 
-/** Una unidad esta en mora si tiene al menos una cuota vencida. */
+/**
+ * Una unidad esta en mora si tiene al menos una cuota vencida. RN-71: no
+ * distingue el origen —ordinaria, extraordinaria, multa en firme o uso de
+ * zona—; la vencida pesa igual.
+ */
 export function estaEnMora(cuotas: Cuota[], hoy: FechaISO = hoyISO()): boolean {
   return cuotas.some((cuota) => estadoRealCuota(cuota, hoy) === 'vencida')
 }
@@ -270,11 +288,6 @@ export function sePuedeAnular(pago: Pago): boolean {
   return pago.estado === 'aplicado'
 }
 
-/** RN-79 — Un abono informado por el propietario espera a que se aplique. */
-export function esperaAplicacion(pago: Pago): boolean {
-  return pago.estado === 'reportado'
-}
-
 /**
  * RN-18 — Porcentaje de recaudo sobre lo facturado en un periodo.
  * Cuenta lo efectivamente abonado, no solo las cuotas saldadas: un abono
@@ -296,6 +309,16 @@ export function vencimientoDelPeriodo(periodo: Periodo): FechaISO {
 // ---------------------------------------------------------------------------
 // Reservas
 // ---------------------------------------------------------------------------
+
+/** El momento en que empieza el turno de una reserva, en milisegundos. */
+export function inicioDeReserva(reserva: Pick<Reserva, 'fecha' | 'horaInicio'>): number {
+  return new Date(`${reserva.fecha}T${reserva.horaInicio}:00`).getTime()
+}
+
+/** El momento en que termina el turno de una reserva, en milisegundos. */
+export function finDeReserva(reserva: Pick<Reserva, 'fecha' | 'horaFin'>): number {
+  return new Date(`${reserva.fecha}T${reserva.horaFin}:00`).getTime()
+}
 
 export function reservaOcupaFranja(reserva: Reserva): boolean {
   return reserva.estado === 'solicitada' || reserva.estado === 'confirmada'
@@ -324,7 +347,7 @@ export function cumpleAnticipacion(
   horaInicio: string,
   ahora: Date = new Date(),
 ): boolean {
-  const inicio = new Date(`${fecha}T${horaInicio}:00`).getTime()
+  const inicio = inicioDeReserva({ fecha, horaInicio })
   const horasDeMargen = (inicio - ahora.getTime()) / 3_600_000
   return horasDeMargen >= zona.anticipacionMinimaHoras
 }
@@ -357,18 +380,33 @@ export function validarReserva(parametros: {
   cuotasDeLaUnidad: Cuota[]
   reservas: Reserva[]
   ahora?: Date
+  /** En una zona compartida, cuantas personas van (RN-111). */
+  personas?: number
 }): ResultadoValidacion {
   const { zona, fecha, horaInicio, unidadId, cuotasDeLaUnidad, reservas, ahora } = parametros
+  const personas = parametros.personas ?? 1
 
+  if (!zonaActiva(zona)) {
+    return { valido: false, motivo: 'Esta zona no está recibiendo reservas.' }
+  }
+  if (!horarioDelDia(zona, fecha)) {
+    return { valido: false, motivo: `${zona.nombre} no abre los ${NOMBRES_DIA[diaDeLaSemana(fecha)]}.` }
+  }
+  const cierre = cierreEnFecha(zona, fecha)
+  if (cierre) {
+    return {
+      valido: false,
+      motivo: `La zona está cerrada por mantenimiento del ${fechaCorta(cierre.desde)} al ${fechaCorta(cierre.hasta)}.`,
+    }
+  }
   if (estaEnMora(cuotasDeLaUnidad)) {
     return {
       valido: false,
       motivo: 'La unidad tiene cuotas vencidas. Ponte al dia para reservar zonas comunes.',
     }
   }
-  if (franjaOcupada(reservas, zona.id, fecha, horaInicio)) {
-    return { valido: false, motivo: 'Esa franja ya esta reservada.' }
-  }
+  const motivoFranja = motivoFranjaNoDisponible(zona, reservas, fecha, horaInicio, unidadId, personas)
+  if (motivoFranja) return { valido: false, motivo: motivoFranja }
   if (!cumpleAnticipacion(zona, fecha, horaInicio, ahora)) {
     return {
       valido: false,
@@ -385,10 +423,16 @@ export function validarReserva(parametros: {
 }
 
 /** Franjas horarias reservables de una zona, segun su ventana y duracion de bloque. */
-export function franjasDeZona(zona: ZonaComun): Array<{ inicio: string; fin: string }> {
+export function franjasDeZona(
+  zona: Pick<ZonaComun, 'horaInicio' | 'horaFin' | 'duracionBloqueHoras' | 'horarioSemanal'>,
+  fecha?: FechaISO,
+): Array<{ inicio: string; fin: string }> {
   const franjas: Array<{ inicio: string; fin: string }> = []
-  const [horaInicio] = zona.horaInicio.split(':').map(Number)
-  const [horaFin] = zona.horaFin.split(':').map(Number)
+  // RN-114 — Con fecha, el horario de ese dia; un dia que no abre no tiene franjas.
+  const horario = fecha ? horarioDelDia(zona, fecha) : zona
+  if (!horario) return franjas
+  const [horaInicio] = horario.horaInicio.split(':').map(Number)
+  const [horaFin] = horario.horaFin.split(':').map(Number)
   for (let h = horaInicio; h + zona.duracionBloqueHoras <= horaFin; h += zona.duracionBloqueHoras) {
     franjas.push({
       inicio: `${String(h).padStart(2, '0')}:00`,
@@ -398,9 +442,53 @@ export function franjasDeZona(zona: ZonaComun): Array<{ inicio: string; fin: str
   return franjas
 }
 
-/** Una reserva futura y activa se puede cancelar (CU-R-06). */
-export function sePuedeCancelar(reserva: Reserva, hoy: FechaISO = hoyISO()): boolean {
-  return reservaOcupaFranja(reserva) && reserva.fecha >= hoy
+/**
+ * RN-128 — **Una reserva se cancela solo antes de su límite, nunca después del
+ * turno.**
+ *
+ * «Debe ser posible cancelar antes, y el administrador debe tener un campo en
+ * el que parametrice este dato y que este se vea en la vista de la reserva al
+ * residente» (Mary, 2026-10-02). Hasta hoy se podía cancelar cualquier reserva
+ * del día, aunque el turno ya hubiera pasado, y así se esquivaban el cobro por
+ * uso y el «no se presentó» (RN-119, RN-121); y una reserva ya cerrada se podía
+ * volver a cancelar.
+ *
+ * Ahora cada zona dice **hasta cuántas horas antes del turno** se puede
+ * cancelar (0: hasta que empiece). El límite se copia a la reserva al crearla,
+ * como su precio (RN-118), y el residente lo ve al reservar y en cada reserva
+ * suya, con la fecha y la hora exactas. Pasado el límite ya no se cancela: si no
+ * va, la administración cierra la reserva como «no se presentó».
+ *
+ * Es distinto del plazo para cancelar **sin multa** (RN-110): se puede cancelar
+ * con multa entre los dos. La administración cancela solo antes de que empiece
+ * el turno (RN-115); después, lo que corresponde es cerrarla. Una reserva
+ * cerrada, rechazada, vencida o ya cancelada no se cancela.
+ */
+export const MAXIMO_HORAS_LIMITE_CANCELACION = 720
+
+/** Si el turno de la reserva ya empezó. */
+export function yaEmpezo(reserva: Reserva, ahora: Date = new Date()): boolean {
+  return inicioDeReserva(reserva) <= ahora.getTime()
+}
+
+export function horasLimiteCancelacion(reserva: Reserva, zona?: Pick<ZonaComun, 'horasLimiteCancelacion'>): number {
+  return reserva.horasLimiteCancelacion ?? zona?.horasLimiteCancelacion ?? 0
+}
+
+/** El momento hasta el que se puede cancelar: el inicio del turno menos el límite. */
+export function limiteParaCancelar(reserva: Reserva, zona?: Pick<ZonaComun, 'horasLimiteCancelacion'>): Date {
+  const inicio = inicioDeReserva(reserva)
+  return new Date(inicio - horasLimiteCancelacion(reserva, zona) * 3_600_000)
+}
+
+/** RN-128 — El residente puede cancelar: activa, sin cerrar y antes de su límite (CU-R-06). */
+export function sePuedeCancelar(
+  reserva: Reserva,
+  zona?: Pick<ZonaComun, 'horasLimiteCancelacion'>,
+  ahora: Date = new Date(),
+): boolean {
+  if (!reservaOcupaFranja(reserva) || reserva.cierre) return false
+  return ahora.getTime() < limiteParaCancelar(reserva, zona).getTime()
 }
 
 // ---------------------------------------------------------------------------
@@ -444,6 +532,11 @@ export function estadoRealVisitante(
   if (visitante.estado === 'revocado') return 'revocado'
   if (visitante.vigenciaHasta < hoy) return 'vencido'
   if (visitante.vigenciaDesde > hoy) return 'programado'
+  // El visitante frecuente solo entra los días escogidos (2026-10-02).
+  if (visitante.dias && visitante.dias.length > 0) {
+    const dia = new Date(`${hoy}T12:00:00`).getDay()
+    if (!visitante.dias.includes(dia)) return 'programado'
+  }
   return 'activo'
 }
 
@@ -584,7 +677,7 @@ export const MODALIDADES: ReadonlyArray<{
   {
     id: 'virtual',
     texto: 'Virtual',
-    detalle: 'Se reúnen por Zoom, Meet o la herramienta que usen. Idiky enlaza esa reunión.',
+    detalle: 'Se reúnen por Zoom, Meet, Teams o Vimeo. Idiky enlaza esa reunión o transmisión.',
     exigeLugar: false,
     exigeEnlace: true,
   },
@@ -602,6 +695,88 @@ export const MODALIDADES: ReadonlyArray<{
 
 export function definicionModalidad(modalidad: ModalidadAsamblea) {
   return MODALIDADES.find((m) => m.id === modalidad)!
+}
+
+// ---------------------------------------------------------------------------
+// RN-98 — La herramienta se reconoce por el enlace, y **una transmision no es
+// una reunion**.
+//
+// «Incluyamos Vimeo como una opcion, dejando las salvedades» (Mary,
+// 2026-09-28). Entra sin tocar ADR-0007: un enlace es un enlace. Lo que si
+// cambia es **como interviene quien esta conectado**: en Zoom, Meet o Teams
+// habla; en Vimeo o YouTube ve y oye, e interviene por el chat de la
+// transmision. Y eso importa por la ley: el art. 42 de la Ley 675 admite la
+// reunion no presencial cuando los copropietarios pueden **deliberar** por
+// un medio de comunicacion simultanea o sucesiva. Con una transmision de una
+// sola via, la deliberacion depende de ese chat.
+//
+// Idiky **lo dice, no lo impide** (mismo criterio que el tope de poderes,
+// RN-30): quien convoca ve la salvedad y decide; el copropietario conectado
+// sabe por donde intervenir; y queda como pregunta para el abogado si el
+// chat basta para deliberar (§3 bis).
+// ---------------------------------------------------------------------------
+
+export type HerramientaTransmision = 'zoom' | 'meet' | 'teams' | 'vimeo' | 'youtube' | 'otra'
+
+export const HERRAMIENTAS_TRANSMISION: ReadonlyArray<{
+  id: HerramientaTransmision
+  nombre: string
+  /** Fragmentos del dominio que la identifican. */
+  dominios: string[]
+  /** `true`: transmision de una sola via — se ve, no se habla. */
+  unaVia: boolean
+  /** Como interviene quien esta conectado. Se le dice al copropietario. */
+  comoIntervenir: string
+}> = [
+  { id: 'zoom', nombre: 'Zoom', dominios: ['zoom.us', 'zoom.com'], unaVia: false, comoIntervenir: 'Pides la palabra en la reunión.' },
+  { id: 'meet', nombre: 'Meet', dominios: ['meet.google.com'], unaVia: false, comoIntervenir: 'Pides la palabra en la reunión.' },
+  { id: 'teams', nombre: 'Teams', dominios: ['teams.microsoft.com', 'teams.live.com'], unaVia: false, comoIntervenir: 'Pides la palabra en la reunión.' },
+  { id: 'vimeo', nombre: 'Vimeo', dominios: ['vimeo.com'], unaVia: true, comoIntervenir: 'Ves y oyes la asamblea; intervienes por el chat de la transmisión.' },
+  { id: 'youtube', nombre: 'YouTube', dominios: ['youtube.com', 'youtu.be'], unaVia: true, comoIntervenir: 'Ves y oyes la asamblea; intervienes por el chat de la transmisión.' },
+  { id: 'otra', nombre: 'la reunión', dominios: [], unaVia: false, comoIntervenir: 'Pides la palabra en la reunión.' },
+]
+
+/** Que herramienta hay detras del enlace. Sin enlace, nada. */
+export function herramientaDeEnlace(enlace?: string) {
+  if (!enlace?.trim()) return undefined
+  let host = ''
+  try {
+    host = new URL(enlace.trim()).hostname.toLowerCase()
+  } catch {
+    host = enlace.trim().toLowerCase()
+  }
+  return (
+    HERRAMIENTAS_TRANSMISION.find((h) => h.dominios.some((d) => host === d || host.endsWith('.' + d))) ??
+    HERRAMIENTAS_TRANSMISION[HERRAMIENTAS_TRANSMISION.length - 1]
+  )
+}
+
+/**
+ * RN-98 — La salvedad que ve quien convoca, o `null` si no hace falta: solo
+ * cuando hay gente conectada (virtual o mixta) y el canal es de una via.
+ */
+export function salvedadCanalDeUnaVia(asamblea: {
+  modalidad: ModalidadAsamblea
+  enlaceTransmision?: string
+}): string | null {
+  if (asamblea.modalidad === 'presencial') return null
+  const herramienta = herramientaDeEnlace(asamblea.enlaceTransmision)
+  if (!herramienta?.unaVia) return null
+  return (
+    `${herramienta.nombre} es una transmisión de una sola vía: los conectados ven y oyen, pero no hablan. ` +
+    'Intervienen por el chat de la transmisión y votan en Idiky. La Ley 675 (art. 42) exige que en la reunión ' +
+    'no presencial los copropietarios puedan deliberar; si el chat basta para eso es una pregunta para el abogado.'
+  )
+}
+
+/**
+ * RN-99 — La grabacion se enlaza y el acta la cita; no reemplaza nada.
+ *
+ * Solo tiene sentido cuando hubo transmision y la asamblea ya empezo: antes no
+ * hay nada grabado.
+ */
+export function admiteGrabacion(asamblea: Asamblea): boolean {
+  return asamblea.modalidad !== 'presencial' && asamblea.estado !== 'convocada' && asamblea.estado !== 'cancelada'
 }
 
 /**
@@ -988,13 +1163,6 @@ export function actaDeAsamblea(actas: Acta[], asambleaId: string): Acta | undefi
   return actas.find((acta) => acta.asambleaId === asambleaId && !acta.aclaraActaId)
 }
 
-/** Las aclaratorias de un acta, de la mas vieja a la mas nueva. */
-export function aclaratoriasDe(actas: Acta[], actaId: string): Acta[] {
-  return actas
-    .filter((acta) => acta.aclaraActaId === actaId)
-    .sort((a, b) => a.creadaEn.localeCompare(b.creadaEn))
-}
-
 /** La mayoria que exige un punto. Sin decir nada, la general de la ley. */
 export function mayoriaDelPunto(punto: { mayoria?: MayoriaExigida }): MayoriaExigida {
   return punto.mayoria ?? 'simple'
@@ -1133,17 +1301,6 @@ export function poderDeUnidad(
   unidadId: string,
 ): Poder | undefined {
   return poderesDeAsamblea(poderes, asambleaId).find((poder) => poder.unidadId === unidadId)
-}
-
-/** Las unidades que una persona representa en esta asamblea (RN-29, RN-30). */
-export function unidadesRepresentadas(
-  poderes: Poder[],
-  asambleaId: string,
-  apoderadoId: string,
-): Poder[] {
-  return poderesDeAsamblea(poderes, asambleaId).filter(
-    (poder) => poder.apoderadoId === apoderadoId,
-  )
 }
 
 /**
@@ -1290,13 +1447,6 @@ export function diasDePlazo(sancion: Sancion, hoy: FechaISO = hoyISO()): number 
     return diasEntre(hoy, sancion.limiteImpugnacion)
   }
   return null
-}
-
-/** Lo que le toca a la administracion resolver ahora. */
-export function sancionesPorResolver(sanciones: Sancion[]): Sancion[] {
-  return sanciones.filter(
-    (sancion) => sancion.estado === 'en_estudio' || sancion.estado === 'impugnada',
-  )
 }
 
 // ---------------------------------------------------------------------------
@@ -1483,8 +1633,14 @@ export function puedeVerSoportes(parametros: {
   creadoPor: string
   personaId: string
   rol: RolUsuario
+  /**
+   * La misma cadena de RN-65 (Mary, 2026-10-02): el propietario ve los soportes
+   * de lo que registró su arrendatario, porque también responde por ello.
+   */
+  heredadoPor?: readonly string[]
 }): boolean {
   if (parametros.rol === 'admin') return true
+  if (parametros.heredadoPor?.includes(parametros.personaId)) return true
   return parametros.creadoPor === parametros.personaId
 }
 
@@ -1531,8 +1687,15 @@ export function puedeInhabilitar(parametros: {
   personaId: string
   /** Su rol de sesion: el administrador esta por encima de cualquier propietario. */
   rol: RolUsuario
+  /**
+   * Los propietarios que heredan el vinculo porque quien lo creo ya no esta en
+   * la unidad: tras una venta, el arrendatario sigue y ahora responde por el el
+   * nuevo dueño (Mary, 2026-10-02).
+   */
+  heredadoPor?: readonly string[]
 }): boolean {
   if (parametros.rol === 'admin') return true
+  if (parametros.heredadoPor?.includes(parametros.personaId)) return true
   return !!parametros.creadoPor && parametros.creadoPor === parametros.personaId
 }
 
@@ -1587,8 +1750,10 @@ export const CADENA_DE_REGISTRO: ReadonlyArray<{
  * cadena sin dueno.
  */
 const CATEGORIAS_POR_ROL: Record<RolResidencia, readonly CategoriaRegistro[]> = {
-  propietario: ['residente', 'residente_temporal', 'visitante'],
-  arrendatario: ['visitante'],
+  propietario: ['propietario', 'arrendatario', 'familiar', 'visitante'],
+  // El arrendatario registra a su familia y a sus visitas (2026-10-02).
+  arrendatario: ['familiar', 'visitante'],
+  familiar: [],
   autorizado: [],
 }
 
@@ -1606,6 +1771,30 @@ export function puedeRegistrar(
 }
 
 /**
+ * RN-63 — Lo que registra la administración: **el primer propietario** de una
+ * unidad, y nada más.
+ *
+ * «El propietario lo crea el Administrador de la Copropiedad, si hay más de un
+ * propietario los crea el usuario creado por el administrador» y «arrendatarios
+ * los crea el propietario de la propiedad» (Mary, 2026-10-02). Si la unidad ya
+ * tiene propietario —vigente o con su registro en curso—, el siguiente lo
+ * registra él. Cuando se vende, la administración inhabilita al anterior y
+ * registra al nuevo: la unidad queda otra vez sin propietario.
+ */
+export function motivoNoRegistraAdministracion(
+  categoria: CategoriaRegistro,
+  unidadTienePropietario: boolean,
+): string | undefined {
+  if (categoria !== 'propietario') {
+    return 'La administración registra al propietario; los arrendatarios, temporales y visitantes los registra él.'
+  }
+  if (unidadTienePropietario) {
+    return 'Esta unidad ya tiene propietario: los demás propietarios los registra él desde su app.'
+  }
+  return undefined
+}
+
+/**
  * RN-59 — Quien autoriza es quien responde por la unidad.
  *
  * «El propietario o arrendatario segun sea el caso» (Mary, 2026-09-07): quien
@@ -1614,24 +1803,168 @@ export function puedeRegistrar(
  * y autorizar es decir «los vi y son quien dice ser».
  */
 export function puedeAutorizar(registro: RegistroPersona, personaId: string): boolean {
-  return registro.creadoPor === personaId && registro.estado === 'esperando_autorizacion'
+  return (
+    registro.creadoPor === personaId &&
+    registro.estado === 'esperando_autorizacion' &&
+    !esperaAlPropietario(registro)
+  )
+}
+
+/**
+ * RN-60 — El arrendatario registra visitantes, también temporales; **si la
+ * estadía pasa de una semana, la aprueba el propietario** (Mary, 2026-10-02:
+ * «el arrendatario puede registrar un visitante temporal de un par de días; si
+ * es más de una semana debe ser aprobado por el propietario»). Quien se queda
+ * más de una semana ya casi vive ahí, y eso lo decide el dueño.
+ */
+export const DIAS_SIN_APROBACION_DEL_PROPIETARIO = 7
+
+export function requiereAprobacionPropietario(
+  rolDeQuienRegistra: RolResidencia | undefined,
+  registro: Pick<RegistroPersona, 'categoria' | 'condicion' | 'vigenciaDesde' | 'vigenciaHasta'>,
+): boolean {
+  return (
+    rolDeQuienRegistra === 'arrendatario' &&
+    registro.categoria === 'visitante' &&
+    registro.condicion === 'temporal' &&
+    !!registro.vigenciaDesde &&
+    !!registro.vigenciaHasta &&
+    diasEntre(registro.vigenciaDesde, registro.vigenciaHasta) > DIAS_SIN_APROBACION_DEL_PROPIETARIO
+  )
+}
+
+/** Quién es, leído del vínculo: el `autorizado` es un visitante temporal. */
+export function categoriaDeResidencia(residencia: Pick<Residencia, 'rol'>): CategoriaRegistro {
+  return residencia.rol === 'autorizado' ? 'visitante' : residencia.rol
+}
+
+/**
+ * El visitante que no se vincula sino que sale con un código: el de un día y el
+ * frecuente (2026-10-02). El frecuente entra los días escogidos hasta su fecha.
+ */
+export function saleConCodigo(clase: Pick<RegistroPersona, 'categoria' | 'condicion'>): boolean {
+  return clase.categoria === 'visitante' && (clase.condicion === 'no_residente' || clase.condicion === 'frecuente')
+}
+
+/** Cómo se queda hoy, leído del vínculo vigente (RN-62, RN-68). */
+export function condicionDeResidencia(residencia: Pick<Residencia, 'hasta' | 'reside'>): CondicionRegistro {
+  if (residencia.hasta) return 'temporal'
+  return residencia.reside ? 'residente' : 'no_residente'
+}
+
+/**
+ * RN-68 — Lo que se puede cambiar de un vínculo vigente sin repetir el trámite
+ * (Mary, 2026-10-02): la condición y la fecha de salida. Al visitante temporal
+ * solo se le cambia la fecha: «de un día» no aplica a quien ya está.
+ */
+export function condicionesParaCambiar(residencia: Pick<Residencia, 'rol'>): readonly CondicionRegistro[] {
+  const categoria = categoriaDeResidencia(residencia)
+  return categoria === 'visitante' ? ['temporal'] : condicionesPosibles(categoria)
+}
+
+/**
+ * RN-60 — Para entrar a la app hace falta a dónde mandar el código: al
+ * propietario y al arrendatario se les exige **celular o correo** (Mary,
+ * 2026-10-02). Al visitante no: entra con su código de portería.
+ */
+export function faltaContacto(
+  categoria: CategoriaRegistro,
+  telefono: string,
+  email: string,
+  menorDeEdad = false,
+): boolean {
+  // Al menor no se le exige (2026-10-02): muchas veces no tiene celular ni correo.
+  if (menorDeEdad) return false
+  return categoria !== 'visitante' && !telefono.trim() && !email.trim()
+}
+
+/**
+ * Los documentos de identidad que se aceptan. La tarjeta de identidad y el
+ * registro civil solo para menores de edad (2026-10-02).
+ */
+export const TIPOS_IDENTIFICACION: Record<TipoIdentificacion, { texto: string; soloMenores: boolean }> = {
+  cc: { texto: 'Cédula de ciudadanía', soloMenores: false },
+  ce: { texto: 'Cédula de extranjería', soloMenores: false },
+  pasaporte: { texto: 'Pasaporte', soloMenores: false },
+  ti: { texto: 'Tarjeta de identidad', soloMenores: true },
+  rc: { texto: 'Registro civil', soloMenores: true },
+}
+
+/** Quién puede ser menor de edad: la familia y las visitas, no el titular. */
+export function admiteMenor(categoria: CategoriaRegistro): boolean {
+  return categoria === 'familiar' || categoria === 'visitante'
+}
+
+/** El visitante frecuente necesita al menos un día de la semana. */
+export const NOMBRES_DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'] as const
+
+/** Cuántos días antes de la salida se avisa a quien registró (2026-10-02). */
+export const DIAS_AVISO_FIN_DE_ESTADIA = 2
+
+/** Si toca avisar que una estadía temporal termina pronto, y no se ha avisado. */
+export function debeAvisarseFinDeEstadia(
+  residencia: Pick<Residencia, 'hasta' | 'avisoFinPara'>,
+  hoy: FechaISO = hoyISO(),
+): boolean {
+  if (!residencia.hasta || residencia.avisoFinPara === residencia.hasta) return false
+  const faltan = diasEntre(hoy, residencia.hasta)
+  return faltan >= 0 && faltan <= DIAS_AVISO_FIN_DE_ESTADIA
+}
+
+/** El registro espera que el propietario apruebe la estadía (RN-60). */
+export function esperaAlPropietario(registro: RegistroPersona): boolean {
+  return !!registro.aprobacionPropietario && !registro.aprobacionPropietario.aprobadoPor && registroEnCurso(registro)
 }
 
 /**
  * RN-57 — Los soportes se le exigen **a quien se queda a dormir**.
  *
  * «El tramite le corresponde a quien se queda a dormir» (Mary, 2026-09-07). El
- * residente y el residente temporal —el huesped de Airbnb, el familiar unos
- * meses— usan las zonas comunes y la porteria los ve a diario: ahi las dos fotos
- * y la autorizacion valen lo que cuestan. El visitante de una tarde, no.
+ * propietario, el arrendatario y el visitante temporal —el huesped de Airbnb, el
+ * familiar unas semanas— usan las zonas comunes o la app, y la porteria los ve:
+ * ahi las dos fotos y la autorizacion valen lo que cuestan. La visita de una
+ * tarde (visitante no residente), no.
  *
  * No es una comodidad, es seguridad: **pedirle cedula fotografiada a quien viene
  * a almorzar es el requisito que hace que la gente deje de registrar visitas y
  * las meta sin avisar**. Un tramite que se evade protege menos que uno liviano
  * que se cumple.
  */
-export function exigeSoportes(categoria: CategoriaRegistro): boolean {
-  return categoria !== 'visitante'
+export function exigeSoportes(clase: ClaseRegistro): boolean {
+  return !esVisitaDeUnDia(clase) || !!clase.pedirFotos
+}
+
+/** Quién es y cómo se queda: lo que decide el trámite (RN-57, RN-62). */
+export type ClaseRegistro = Pick<RegistroPersona, 'categoria' | 'condicion' | 'pedirFotos'>
+
+/**
+ * La visita de un día: visitante **no residente**. Es la única que no lleva
+ * fotos y sale con su código de una vez (RN-57). El visitante **temporal** —el
+ * huésped de Airbnb, el familiar unas semanas— se queda a dormir y lleva el
+ * trámite completo.
+ */
+export function esVisitaDeUnDia(clase: ClaseRegistro): boolean {
+  return clase.categoria === 'visitante' && clase.condicion === 'no_residente'
+}
+
+/**
+ * RN-68 — Las condiciones que se pueden escoger para cada quién (Mary,
+ * 2026-10-02). El propietario no es temporal. Solo él puede ser no residente —tiene la unidad
+ * arrendada o vacía—; «en el caso del arrendatario no puede tener la categoría
+ * de no residente»: arrienda para vivir ahí. Y el visitante no es residente:
+ * quien vive ahí no es una visita.
+ */
+const CONDICIONES: Record<CategoriaRegistro, readonly CondicionRegistro[]> = {
+  // «No existe un propietario temporal» (Mary, 2026-10-02).
+  propietario: ['residente', 'no_residente'],
+  arrendatario: ['residente', 'temporal'],
+  // La familia o el acompañante vive ahí, siempre o un tiempo (2026-10-02).
+  familiar: ['residente', 'temporal'],
+  visitante: ['no_residente', 'frecuente', 'temporal'],
+}
+
+export function condicionesPosibles(categoria: CategoriaRegistro): readonly CondicionRegistro[] {
+  return CONDICIONES[categoria]
 }
 
 // ---------------------------------------------------------------------------
@@ -1646,18 +1979,18 @@ export function exigeSoportes(categoria: CategoriaRegistro): boolean {
 // fotos (RN-57).
 //
 // Con la marca, el registro no tiene nada que esperar de la persona: pasa a la
-// autorizacion de quien lo creo, y la persona **entra con el codigo que Idiky
-// le asigno al crearla** — es la clave que dijo el equipo.
+// autorizacion de quien lo creo, y la persona entra a Idiky como todos, con un
+// codigo a su celular o correo (CU-R-01, desde el 2026-10-01).
 // ---------------------------------------------------------------------------
 
 /** Si a este registro se le pueden eximir los soportes: solo a quien los debe. */
 export function admiteMarcaNoObligatorio(registro: RegistroPersona): boolean {
-  return exigeSoportes(registro.categoria) && registroEnCurso(registro)
+  return exigeSoportes(registro) && registroEnCurso(registro)
 }
 
 /** Este registro lleva la marca y por eso no trae fotos. */
 export function sinSoportesPorMarca(registro: RegistroPersona): boolean {
-  return exigeSoportes(registro.categoria) && !!registro.soportesNoObligatorios
+  return exigeSoportes(registro) && !!registro.soportesNoObligatorios
 }
 
 /**
@@ -1665,82 +1998,58 @@ export function sinSoportesPorMarca(registro: RegistroPersona): boolean {
  * salvo que el administrador lo haya marcado como no obligatorio (RN-97).
  */
 export function soportesCompletos(registro: RegistroPersona): boolean {
-  if (!exigeSoportes(registro.categoria)) return true
+  if (!exigeSoportes(registro)) return true
   if (registro.soportesNoObligatorios) return true
   return !!registro.fotoDocumento && !!registro.fotoPersona
 }
 
-/**
- * RN-97 — El codigo del registro sirve para activar la cuenta.
- *
- * Es «la contrasena que le asigna Idiky cuando el administrador o propietario
- * lo crea» (equipo, 2026-09-17). Vale el de un registro **autorizado** de ese
- * documento: antes de autorizarlo no hay cuenta que activar.
- */
-export function codigoDeRegistroValido(
-  registros: RegistroPersona[],
-  documento: string,
-  codigo: string,
-): boolean {
-  const limpio = (valor: string) => valor.replace(/[\s.,-]/g, '').toUpperCase()
-  const buscado = codigo.trim().toUpperCase()
-  if (!buscado) return false
-  return registros.some(
-    (registro) =>
-      registro.estado === 'autorizado' &&
-      limpio(registro.documento) === limpio(documento) &&
-      registro.codigo.toUpperCase() === buscado,
-  )
-}
 
 /**
- * RN-62 — La vigencia depende de la categoria, no del capricho de quien registra.
+ * RN-62 — La vigencia depende de la condición, no del capricho de quien registra.
  *
- * El residente se queda hasta que lo desvinculen: ponerle fecha de fin a quien
- * compro un apartamento no tiene sentido. Las otras dos **exigen** fecha de fin,
- * y esa es justamente la diferencia entre un residente temporal y un residente.
+ * El residente y el no residente se quedan hasta que los inhabiliten: ponerle
+ * fecha de fin a quien compró un apartamento no tiene sentido. El **temporal**
+ * —sea propietario, arrendatario o visitante— **exige** fecha de salida, y la
+ * visita de un día también (es su único día).
  */
-export function exigeVigencia(categoria: CategoriaRegistro): boolean {
-  return categoria !== 'residente'
+export function exigeVigencia(clase: ClaseRegistro): boolean {
+  return clase.condicion === 'temporal' || clase.condicion === 'frecuente' || esVisitaDeUnDia(clase)
 }
 
 /**
  * RN-62 — **El visitante es de un solo dia** (Mary, 2026-09-07).
  *
  * No se registra un rango: se registra el dia en que viene, y ese dia entra y
- * sale. Es lo que mantiene separadas las dos categorias de estadia — una
- * autorizacion de visitante «del 5 al 20» es un residente temporal sin sus
- * soportes, y por ahi se cuela justo lo que RN-57 pide para quien se queda a
+ * sale. Es lo que mantiene separadas las dos formas de visita — una
+ * autorizacion de visitante no residente «del 5 al 20» es un visitante temporal
+ * sin sus soportes, y por ahi se cuela justo lo que RN-57 pide para quien se queda a
  * dormir.
  *
  * Tambien es lo que hace barato no pedirle fotos: una autorizacion que caduca
  * esta misma noche no es una llave.
  */
-export function soloUnDia(categoria: CategoriaRegistro): boolean {
-  return categoria === 'visitante'
+export function soloUnDia(clase: ClaseRegistro): boolean {
+  return esVisitaDeUnDia(clase)
 }
 
-/** El rol con el que queda vinculada la persona; el visitante no se vincula. */
-export function rolDeCategoria(
-  categoria: CategoriaRegistro,
-  rolPedido?: RolResidencia,
-): RolResidencia | undefined {
-  if (categoria === 'visitante') return undefined
-  if (categoria === 'residente_temporal') return 'autorizado'
-  return rolPedido ?? 'arrendatario'
+/**
+ * El rol con el que queda vinculada la persona. La visita de un día no se
+ * vincula: sale con su código. El visitante temporal queda como `autorizado`.
+ */
+export function rolDeRegistro(clase: ClaseRegistro): RolResidencia | undefined {
+  if (esVisitaDeUnDia(clase)) return undefined
+  if (clase.categoria === 'visitante') return clase.condicion === 'temporal' ? 'autorizado' : undefined
+  return clase.categoria
+}
+
+/** RN-68 — La marca de residente: la lleva quien no es «no residente». */
+export function marcaResidente(clase: ClaseRegistro): boolean {
+  return clase.condicion !== 'no_residente'
 }
 
 /** Un registro sigue vivo mientras espera algo de alguien. */
 export function registroEnCurso(registro: RegistroPersona): boolean {
   return registro.estado === 'esperando_soportes' || registro.estado === 'esperando_autorizacion'
-}
-
-/** Lo que le toca a **esta** persona, que es lo unico que hay que mostrarle. */
-export function registrosPorAutorizar(
-  registros: RegistroPersona[],
-  personaId: string,
-): RegistroPersona[] {
-  return registros.filter((registro) => puedeAutorizar(registro, personaId))
 }
 
 /**
@@ -1781,4 +2090,1321 @@ export function puede(rol: RolUsuario | undefined, permiso: string): boolean {
 /** A donde entra cada rol al iniciar sesion. */
 export function rutaInicial(rol: RolUsuario): string {
   return { residente: '/app', admin: '/admin', porteria: '/porteria' }[rol]
+}
+
+// ---------------------------------------------------------------------------
+// Proyectos — RN-100, RN-101 · CU-A-28, CU-R-32
+// ---------------------------------------------------------------------------
+
+export type EstadoProyecto = 'planeado' | 'en_curso' | 'terminado'
+
+/** Los avances del mas viejo al mas nuevo. */
+export function avancesDelProyecto(proyecto: Proyecto): AvanceProyecto[] {
+  return [...proyecto.avances].sort((a, b) => a.fecha.localeCompare(b.fecha))
+}
+
+export function ultimoAvance(proyecto: Proyecto): AvanceProyecto | undefined {
+  const avances = avancesDelProyecto(proyecto)
+  return avances[avances.length - 1]
+}
+
+/**
+ * RN-100 — **El avance del proyecto es el ultimo avance registrado.**
+ *
+ * No un promedio, no el mayor: el ultimo. Si la obra retrocedio —se
+ * desmonto lo hecho, se cambio el contratista— el tablero tiene que decirlo,
+ * no esconderlo detras del maximo alcanzado.
+ */
+export function porcentajeProyecto(proyecto: Proyecto): number {
+  return ultimoAvance(proyecto)?.porcentaje ?? 0
+}
+
+/**
+ * En que va el proyecto. **Se deriva, no se guarda** (mismo criterio que el
+ * estado del acta): sin avances esta planeado; con avances, en curso; al
+ * 100 %, terminado.
+ */
+export function estadoProyecto(proyecto: Proyecto): EstadoProyecto {
+  if (proyecto.avances.length === 0) return 'planeado'
+  return porcentajeProyecto(proyecto) >= 100 ? 'terminado' : 'en_curso'
+}
+
+/**
+ * RN-100 — Por que no se puede registrar este avance, o `null` si se puede.
+ *
+ * El porcentaje es un entero entre 0 y 100. **Puede ser menor que el
+ * anterior** —las obras retroceden— pero entonces el detalle es obligatorio:
+ * un tablero que baja del 60 al 40 sin decir por que es peor que uno que no
+ * se actualiza. Se devuelve el motivo, no un booleano, para que el
+ * formulario lo muestre tal cual y el repositorio lo lance tal cual.
+ */
+export function motivoAvanceInvalido(
+  proyecto: Proyecto,
+  avance: { porcentaje: number; titulo: string; detalle: string },
+): string | null {
+  if (!Number.isInteger(avance.porcentaje) || avance.porcentaje < 0 || avance.porcentaje > 100) {
+    return 'El avance es un número entero entre 0 y 100.'
+  }
+  if (avance.titulo.trim().length < 3) return 'Escribe qué se hizo: es lo que le llega al propietario.'
+  const anterior = porcentajeProyecto(proyecto)
+  if (avance.porcentaje < anterior && avance.detalle.trim().length < 10) {
+    return `El proyecto iba en ${anterior} %. Si retrocede, explica por qué en el detalle.`
+  }
+  if (estadoProyecto(proyecto) === 'terminado') {
+    return 'El proyecto ya está terminado. Si hay algo más que hacer, es otro proyecto.'
+  }
+  return null
+}
+
+/** Los proyectos de una copropiedad, primero los que estan en marcha. */
+export function proyectosOrdenados(proyectos: Proyecto[], copropiedadId: string): Proyecto[] {
+  const orden: Record<EstadoProyecto, number> = { en_curso: 0, planeado: 1, terminado: 2 }
+  return proyectos
+    .filter((p) => p.copropiedadId === copropiedadId)
+    .sort((a, b) => {
+      const porEstado = orden[estadoProyecto(a)] - orden[estadoProyecto(b)]
+      if (porEstado !== 0) return porEstado
+      const ua = ultimoAvance(a)?.fecha ?? a.creadoEn
+      const ub = ultimoAvance(b)?.fecha ?? b.creadoEn
+      return ub.localeCompare(ua)
+    })
+}
+
+/**
+ * RN-101 — **Cada avance se les cuenta a los propietarios**, por dos vias:
+ * un comunicado en la cartelera y un mensaje al celular de cada propietario.
+ * Este es el texto del mensaje. Corto, con el nombre del proyecto, el
+ * porcentaje y a donde entrar: es lo que cabe en un SMS.
+ */
+export function textoAvanceProyecto(
+  proyecto: Proyecto,
+  avance: { porcentaje: number; titulo: string },
+  copropiedad: string,
+): string {
+  return (
+    `${copropiedad}: ${proyecto.nombre} va en ${avance.porcentaje} %. ${avance.titulo.trim()}. ` +
+    'Mira el tablero del proyecto en Idiky.'
+  )
+}
+
+/**
+ * RN-102 — **El silencio de una obra también se reporta.**
+ *
+ * «Una alerta de reportar avance si han pasado dos semanas sin actualización»
+ * (Mary, 2026-10-01). Un tablero que dice «40 %» desde hace un mes no informa:
+ * el propietario no sabe si la obra sigue, se paró o se olvidó actualizarla.
+ * Por eso la alerta es para el administrador, que es quien puede resolverla
+ * con un avance —aunque sea «sigue igual, esperando el material».
+ *
+ * Desde cuándo se cuenta: en una obra **en marcha**, desde el último avance;
+ * en una **planeada** cuya fecha de inicio ya pasó, desde esa fecha (debió
+ * empezar y no ha dicho nada); una planeada sin fecha, o con fecha futura, no
+ * debe nada todavía; una **terminada**, nunca.
+ */
+export const DIAS_SIN_AVANCE_ALERTA = 14
+
+export function diasSinAvance(proyecto: Proyecto, hoy: FechaISO = hoyISO()): number | null {
+  const estado = estadoProyecto(proyecto)
+  if (estado === 'terminado') return null
+  if (estado === 'en_curso') return diasEntre(ultimoAvance(proyecto)!.fecha, hoy)
+  if (proyecto.fechaInicio && proyecto.fechaInicio <= hoy) return diasEntre(proyecto.fechaInicio, hoy)
+  return null
+}
+
+/** Los proyectos que deben un avance, del más callado al menos. */
+export function proyectosSinAvanceReciente(
+  proyectos: Proyecto[],
+  copropiedadId: string,
+  hoy: FechaISO = hoyISO(),
+): Array<{ proyecto: Proyecto; dias: number }> {
+  return proyectos
+    .filter((p) => p.copropiedadId === copropiedadId)
+    .map((proyecto) => ({ proyecto, dias: diasSinAvance(proyecto, hoy) }))
+    .filter((x): x is { proyecto: Proyecto; dias: number } => x.dias !== null && x.dias >= DIAS_SIN_AVANCE_ALERTA)
+    .sort((a, b) => b.dias - a.dias)
+}
+
+/**
+ * RN-103 — **La entrega la cierra quien recibe.**
+ *
+ * «En la vista del propietario o arrendatario, en paquetes, incluir el boton
+ * Recibido» (Mary, 2026-10-01). Porteria registra a quien se lo entrego; eso
+ * es la palabra de porteria. La confirmacion del residente desde su app es la
+ * otra mitad: con las dos, la cadena de custodia (RN-52) cierra de punta a
+ * punta, y «a mi nunca me llego» deja de ser una discusion.
+ *
+ * Puede confirmar **cualquier residente vigente de la unidad**, no solo a
+ * quien porteria anoto: el paquete es de la unidad, y quien lo recogio puede
+ * no ser quien tiene la app en la mano. Si porteria todavia no lo marco como
+ * entregado, la confirmacion vale como entrega: el residente lo tiene.
+ * Se confirma una sola vez.
+ */
+export function puedeConfirmarRecepcion(
+  registro: Correspondencia,
+  residencias: Residencia[],
+  personaId: string,
+): boolean {
+  if (registro.confirmadoEn) return false
+  return residencias.some(
+    (r) => r.unidadId === registro.unidadId && r.personaId === personaId && residenciaVigente(r),
+  )
+}
+
+/**
+ * RN-104 — **La zona se reserva viendo como es.**
+ *
+ * «En reservas debe ser posible ver la foto o fotos de la zona que el
+ * residente quiere reservar» (Mary, 2026-10-01). Hasta cinco fotos por zona:
+ * bastan para un salon, una terraza o un gimnasio, y en el demo, que vive en
+ * el navegador, cinco por zona no lo llenan (ADR-0009). Son configuracion, no
+ * registro: el administrador las agrega y las quita desde la consola, y
+ * quitar una no borra ninguna historia.
+ */
+export const MAXIMO_FOTOS_ZONA = 5
+
+export function puedeAgregarFotoZona(zona: { fotos?: unknown[] }): boolean {
+  return (zona.fotos?.length ?? 0) < MAXIMO_FOTOS_ZONA
+}
+
+/** Tope de las especificaciones: cabe una hoja, no un reglamento entero. */
+export const MAXIMO_ESPECIFICACIONES = 1200
+
+/**
+ * RN-104 — Las especificaciones, como lista: un renglon por punto. Se escriben
+ * en texto libre porque cada zona es distinta —el salon tiene cocineta, el
+ * gimnasio tiene horario de aseo— y un formulario con campos fijos dejaria
+ * fuera justo lo que importa.
+ */
+export function puntosDeEspecificaciones(zona: { especificaciones?: string }): string[] {
+  return (zona.especificaciones ?? '')
+    .split('\n')
+    .map((linea) => linea.replace(/^[-•*]\s*/, '').trim())
+    .filter((linea) => linea.length > 0)
+}
+
+// ---------------------------------------------------------------------------
+// Zonas comunes: crearlas, cambiarlas y desactivarlas — CU-A-10 · RN-105 a RN-107
+// ---------------------------------------------------------------------------
+
+/** Lo que el administrador define de una zona: sus reglas de reserva. */
+export interface DatosZona {
+  nombre: string
+  descripcion: string
+  aforo: number
+  requiereAprobacion: boolean
+  horaInicio: Hora
+  horaFin: Hora
+  duracionBloqueHoras: number
+  anticipacionMinimaHoras: number
+  cupoMensualPorUnidad: number
+  /** RN-109 — Cobro por uso y deposito, con su respaldo. */
+  valorUso?: number
+  deposito?: number
+  respaldoCobro?: RespaldoCobroZona
+  /** RN-110 — La multa del catalogo si no se cancela a tiempo. */
+  multaNoCancelar?: MultaNoCancelar
+  /** RN-111 — Exclusiva o compartida hasta el aforo. */
+  modoUso?: ModoUsoZona
+  /** RN-114 — Horario por dia de la semana. */
+  horarioSemanal?: HorarioDia[]
+  /** RN-128 — Hasta cuantas horas antes del turno se puede cancelar. */
+  horasLimiteCancelacion?: number
+}
+
+/** Los turnos que se ofrecen: de una a doce horas. */
+export const DURACIONES_TURNO = [1, 2, 3, 4, 6, 12]
+
+/** Una descripcion es la linea bajo el nombre, no las especificaciones (RN-104). */
+export const MAXIMO_DESCRIPCION_ZONA = 140
+
+/** Una zona que no dice lo contrario esta activa (las que ya existian no se migran). */
+export function zonaActiva(zona: ZonaComun): boolean {
+  return zona.activa !== false
+}
+
+function horaEntera(hora: string): number | null {
+  const coincide = /^(\d{2}):00$/.exec(hora)
+  if (!coincide) return null
+  const valor = Number(coincide[1])
+  return valor >= 0 && valor <= 24 ? valor : null
+}
+
+/**
+ * RN-105 — **Una zona se reserva por turnos que caben exactos en su horario.**
+ *
+ * «Terminemos de configurar zonas comunes» (Mary, 2026-10-01). Hasta hoy las
+ * reglas de cada zona venian de los datos de ejemplo; desde CU-A-10 las
+ * escribe el administrador, y por eso se validan: el nombre no se repite en la
+ * copropiedad (dos «Salón social» confunden al que reserva), el horario va en
+ * horas en punto y termina despues de empezar, el turno divide el horario sin
+ * sobrar (un horario de 9 a 21 con turnos de 5 horas deja dos horas que nadie
+ * puede reservar), y aforo y cupo son de al menos 1.
+ *
+ * Devuelve el motivo por el que no se puede guardar, o `null` si se puede.
+ */
+export function motivoZonaInvalida(
+  datos: DatosZona,
+  zonasDeLaCopropiedad: ZonaComun[],
+  zonaId?: string,
+  conceptosSancion: ConceptoSancion[] = [],
+): string | null {
+  const nombre = datos.nombre.trim()
+  if (!nombre) return 'La zona necesita un nombre.'
+  const repetida = zonasDeLaCopropiedad.some(
+    (z) => z.id !== zonaId && z.nombre.trim().toLocaleLowerCase('es') === nombre.toLocaleLowerCase('es'),
+  )
+  if (repetida) return `Ya hay una zona que se llama «${nombre}».`
+  if (datos.descripcion.trim().length > MAXIMO_DESCRIPCION_ZONA) {
+    return `La descripción cabe en ${MAXIMO_DESCRIPCION_ZONA} caracteres; el detalle va en las especificaciones.`
+  }
+  const inicio = horaEntera(datos.horaInicio)
+  const fin = horaEntera(datos.horaFin)
+  if (inicio === null || fin === null) return 'El horario va en horas en punto.'
+  if (fin <= inicio) return 'El horario tiene que terminar después de empezar.'
+  if (!DURACIONES_TURNO.includes(datos.duracionBloqueHoras)) return 'Escoge la duración del turno.'
+  if ((fin - inicio) % datos.duracionBloqueHoras !== 0) {
+    return `Con turnos de ${datos.duracionBloqueHoras} horas, el horario de ${fin - inicio} horas deja un pedazo que nadie puede reservar.`
+  }
+  const motivoSemana = motivoHorarioSemanalInvalido(datos.horarioSemanal, datos.duracionBloqueHoras)
+  if (motivoSemana) return motivoSemana
+  if (!Number.isInteger(datos.aforo) || datos.aforo < 1) return 'El aforo es de al menos una persona.'
+  if (!Number.isInteger(datos.cupoMensualPorUnidad) || datos.cupoMensualPorUnidad < 1) {
+    return 'Cada unidad debe poder reservar al menos una vez al mes.'
+  }
+  if (!Number.isInteger(datos.anticipacionMinimaHoras) || datos.anticipacionMinimaHoras < 0) {
+    return 'La anticipación va en horas, desde 0.'
+  }
+  const limite = datos.horasLimiteCancelacion ?? 0
+  if (!Number.isInteger(limite) || limite < 0 || limite > MAXIMO_HORAS_LIMITE_CANCELACION) {
+    return 'El límite para cancelar va en horas, de 0 a 720 (30 días).'
+  }
+  return motivoCobroZonaInvalido(datos, conceptosSancion)
+}
+
+/**
+ * RN-106 — **Cambiar las reglas de una zona no toca las reservas ya hechas.**
+ *
+ * El nuevo horario, turno, aforo o cupo vale para las reservas que se hagan
+ * desde ese momento. La que ya estaba se respeta tal como se pidio: el
+ * residente reservo con las reglas que habia, y cambiarselas despues es
+ * quitarle algo sin decirle. Si la administracion necesita la zona, la
+ * desactiva, y eso si cancela con aviso (RN-107).
+ *
+ * No necesita funcion propia: la garantiza que editar una zona no recorra
+ * `bd.reservas`. Queda escrita aqui para que nadie lo «arregle».
+ */
+
+/**
+ * RN-107 — **Desactivar una zona cancela sus reservas futuras, y a cada quien
+ * que reservo le llega un mensaje con la justificacion.**
+ *
+ * Decision de Mary (2026-10-01): «le debe llegar un mensaje al que reservó con
+ * la justificación de la cancelación». Se cancelan las reservas activas
+ * (solicitadas o confirmadas) de hoy en adelante; las pasadas quedan como
+ * fueron. El motivo es obligatorio porque es lo que se le manda: «cancelada»
+ * sin porque es la queja que sigue. El mensaje va a la persona que hizo la
+ * reserva, no a toda la unidad, y el residente ademas lo ve en su app, junto a
+ * la reserva. La zona no se borra: se reactiva cuando vuelva a estar lista, y
+ * las reservas canceladas no reviven.
+ */
+export const MINIMO_MOTIVO_DESACTIVACION = 10
+
+export function reservasQueCancelaDesactivar(
+  zonaId: string,
+  reservas: Reserva[],
+  hoy: FechaISO = hoyISO(),
+): Reserva[] {
+  return reservas
+    // RN-128 — Ni las ya cerradas ni las que ya empezaron: esas se cierran, no se cancelan.
+    .filter((r) => r.zonaId === zonaId && reservaOcupaFranja(r) && !r.cierre && r.fecha >= hoy && !yaEmpezo(r))
+    .sort((a, b) => `${a.fecha}${a.horaInicio}`.localeCompare(`${b.fecha}${b.horaInicio}`))
+}
+
+/** RN-107 — El texto del mensaje: que se cancelo, cuando era, por que, y que hacer. */
+export function textoReservaCancelada(
+  reserva: Reserva,
+  zona: ZonaComun,
+  motivo: string,
+  copropiedad: string,
+): string {
+  const porque = motivo.trim().replace(/[.\s]+$/, '')
+  return (
+    `${copropiedad}: la administración canceló tu reserva de ${zona.nombre} del ` +
+    `${fechaCorta(reserva.fecha)} de ${reserva.horaInicio} a ${reserva.horaFin}. ` +
+    `Motivo: ${porque}. Puedes reservar otra zona en Idiky.`
+  )
+}
+
+/**
+ * RN-108 — **Una zona se puede cerrar por mantenimiento entre dos fechas.**
+ *
+ * «Me gusta lo de mantenimiento, es una opción para el administrador» (Mary,
+ * 2026-10-01). La piscina en reparación o el salón en pintura no dejan de
+ * existir: se cierran unos días. El cierre lleva fechas y motivo; mientras
+ * dura, nadie reserva en esas fechas y la zona se sigue viendo, con el aviso
+ * del cierre, para que el residente sepa cuándo vuelve. Al pasar la fecha
+ * final vuelve sola, sin que nadie tenga que acordarse de reabrirla.
+ *
+ * Como en RN-107, las reservas activas que caen dentro del cierre se cancelan
+ * y a quien reservó le llega el mensaje con la justificación. Dos cierres de
+ * la misma zona no se cruzan; el cierre empieza hoy o después. La
+ * administración lo puede levantar antes: desde ese día se reserva otra vez.
+ * Nada se borra: el cierre levantado queda en la historia de la zona.
+ */
+export function cierreVigente(cierre: CierreZona, hoy: FechaISO = hoyISO()): boolean {
+  if (cierre.levantadoEn) return false
+  return cierre.hasta >= hoy
+}
+
+/** El cierre que cubre esa fecha, si hay uno. */
+export function cierreEnFecha(zona: ZonaComun, fecha: FechaISO): CierreZona | undefined {
+  return (zona.cierres ?? []).find(
+    (c) => !c.levantadoEn && c.desde <= fecha && fecha <= c.hasta,
+  )
+}
+
+/** Los cierres que todavía no terminan, del más próximo al más lejano. */
+export function cierresPendientes(zona: ZonaComun, hoy: FechaISO = hoyISO()): CierreZona[] {
+  return (zona.cierres ?? [])
+    .filter((c) => cierreVigente(c, hoy))
+    .sort((a, b) => a.desde.localeCompare(b.desde))
+}
+
+export const MINIMO_MOTIVO_CIERRE = MINIMO_MOTIVO_DESACTIVACION
+
+/** RN-108 — Por qué no se puede registrar ese cierre, o `null` si se puede. */
+export function motivoCierreInvalido(
+  zona: ZonaComun,
+  cierre: { desde: FechaISO; hasta: FechaISO; motivo: string },
+  hoy: FechaISO = hoyISO(),
+): string | null {
+  if (!zonaActiva(zona)) return 'La zona está desactivada: no hay nada que cerrar.'
+  if (!cierre.desde || !cierre.hasta) return 'Escoge desde y hasta cuándo se cierra.'
+  if (cierre.desde < hoy) return 'El cierre empieza hoy o después.'
+  if (cierre.hasta < cierre.desde) return 'La fecha final va después de la inicial.'
+  if (cierre.motivo.trim().length < MINIMO_MOTIVO_CIERRE) {
+    return 'Escribe el motivo: es lo que le llega a quien tenía reserva.'
+  }
+  const cruzado = cierresPendientes(zona, hoy).find(
+    (c) => c.desde <= cierre.hasta && cierre.desde <= c.hasta,
+  )
+  if (cruzado) return `Ya hay un cierre del ${fechaCorta(cruzado.desde)} al ${fechaCorta(cruzado.hasta)}.`
+  return null
+}
+
+/** RN-108 — Las reservas activas que caen dentro del cierre. */
+export function reservasQueCancelaCierre(
+  zonaId: string,
+  reservas: Reserva[],
+  desde: FechaISO,
+  hasta: FechaISO,
+): Reserva[] {
+  return reservas
+    .filter((r) => r.zonaId === zonaId && reservaOcupaFranja(r) && !r.cierre && !yaEmpezo(r) && r.fecha >= desde && r.fecha <= hasta)
+    .sort((a, b) => `${a.fecha}${a.horaInicio}`.localeCompare(`${b.fecha}${b.horaInicio}`))
+}
+
+/** `2026-10-05` → `05/10/2026`: lo que cabe en un SMS y se lee igual en todos lados. */
+export function fechaCorta(fecha: FechaISO): string {
+  const [anio, mes, dia] = fecha.slice(0, 10).split('-')
+  return `${dia}/${mes}/${anio}`
+}
+
+/** El motivo que viaja en el mensaje de un cierre: las fechas primero, después el porqué. */
+export function motivoDeCierre(cierre: { desde: FechaISO; hasta: FechaISO; motivo: string }): string {
+  const fechas =
+    cierre.desde === cierre.hasta
+      ? `el ${fechaCorta(cierre.desde)}`
+      : `del ${fechaCorta(cierre.desde)} al ${fechaCorta(cierre.hasta)}`
+  return `la zona estará cerrada por mantenimiento ${fechas}: ${cierre.motivo.trim()}`
+}
+
+/**
+ * RN-109 — **Usar una zona puede costar, y el cobro necesita respaldo.**
+ *
+ * «Incluir la opción para que cuando el administrador esté parametrizando las
+ * zonas comunes incluya el cobro por uso, el depósito si aplica y la multa por
+ * no cancelar» (Mary, 2026-10-01). El **cobro por uso** es lo que vale reservar
+ * (el salón, $80.000); el **depósito** es una garantía que se devuelve si la
+ * zona queda bien. Los dos son opcionales: en 0, la zona es gratis o no pide
+ * depósito.
+ *
+ * Como todo cobro que no es la cuota ordinaria (RN-45), el que tiene valor
+ * necesita el documento que lo autoriza: el artículo del reglamento o del
+ * manual, o el acta que lo aprobó; «otro» exige además el nombre del
+ * documento (RN-38). Un cobro que no se puede explicar termina en una PQRS.
+ *
+ * **Si aplican o no lo escoge el administrador**, zona por zona: «Se cobra
+ * por usarla» y «Pide depósito de garantía» (Mary: «hay copropiedades que
+ * cobran el depósito… hay que dejar la opción para que el administrador
+ * seleccione si aplica o no»). Marcada, pide el valor.
+ *
+ * Hoy el cobro y el depósito se **parametrizan y se informan**: el residente
+ * los ve antes de reservar. Generar el cobro en el estado de cuenta y registrar
+ * la devolución del depósito es lo que sigue.
+ */
+export function tieneCobroZona(zona: { valorUso?: number; deposito?: number }): boolean {
+  return (zona.valorUso ?? 0) > 0 || (zona.deposito ?? 0) > 0
+}
+
+/**
+ * RN-110 — **La multa por no cancelar sale del catálogo de multas.**
+ *
+ * La zona no inventa una multa: escoge un concepto **activo** del catálogo
+ * (CU-A-22), que ya trae su valor y su respaldo (RN-37, RN-38), y fija hasta
+ * cuántas horas antes de la reserva se puede cancelar sin multa. El residente
+ * lo ve antes de reservar. La multa **no se cobra sola**: como toda multa, se
+ * impone con el proceso sancionatorio, con descargos e impugnación, y la cuota
+ * nace solo cuando queda firme (RN-39, RN-69).
+ */
+export function motivoCobroZonaInvalido(
+  datos: Pick<DatosZona, 'valorUso' | 'deposito' | 'respaldoCobro' | 'multaNoCancelar'>,
+  conceptosSancion: ConceptoSancion[],
+): string | null {
+  for (const [valor, nombre] of [
+    [datos.valorUso, 'El cobro por uso'],
+    [datos.deposito, 'El depósito'],
+  ] as const) {
+    if (valor !== undefined && (!Number.isInteger(valor) || valor < 0)) {
+      return `${nombre} va en pesos, sin decimales, desde 0.`
+    }
+  }
+  if (tieneCobroZona(datos)) {
+    if (!datos.respaldoCobro || !respaldoCompleto(datos.respaldoCobro)) {
+      return 'Un cobro necesita su respaldo: el artículo del reglamento o el acta que lo autoriza.'
+    }
+  }
+  const multa = datos.multaNoCancelar
+  if (multa) {
+    const concepto = conceptosSancion.find((c) => c.id === multa.conceptoId)
+    if (!concepto) return 'Escoge la multa del catálogo de multas.'
+    if (!concepto.activo) return `«${concepto.nombre}» ya no está activa en el catálogo.`
+    if (!Number.isInteger(multa.horasParaCancelar) || multa.horasParaCancelar < 1) {
+      return 'El plazo para cancelar sin multa va en horas, desde 1.'
+    }
+  }
+  return null
+}
+
+/**
+ * RN-111 — **Una zona se usa de forma exclusiva o compartida.**
+ *
+ * «Si una familia reserva el gimnasio de 6 a 8, nadie más puede entrar a esa
+ * hora» era el comportamiento de RN-09 para todas las zonas, y está bien para
+ * el salón pero no para el gimnasio, que tiene aforo 8. Desde el 2026-10-01
+ * (Mary: «arranca con 1 y 2») el administrador escoge en cada zona:
+ *
+ * - **Exclusiva** (el salón, la terraza): el turno es de una sola unidad. Es
+ *   RN-09 tal como estaba, y es lo que vale cuando la zona no dice nada.
+ * - **Compartida** (el gimnasio, el coworking): varias unidades reservan el
+ *   mismo turno, cada una diciendo cuántas personas van, hasta llenar el aforo.
+ *   Una unidad tiene una sola reserva por turno: si van más, se cancela y se
+ *   vuelve a pedir con el número nuevo.
+ *
+ * El cupo mensual por unidad (uso justo) aplica igual en las dos.
+ *
+ * RN-113 — **Quien reserva dice cuántas personas van**, en las dos clases de
+ * zona, contándose a sí mismo. En la compartida es lo que llena el turno; en la
+ * exclusiva no puede pasar del aforo, y es el dato con el que portería deja
+ * entrar a los invitados («el 402 tiene el salón con 30 personas»).
+ */
+export function zonaCompartida(zona: ZonaComun): boolean {
+  return zona.modoUso === 'compartido'
+}
+
+/** Las personas que ya tienen el turno, sumando las reservas activas. */
+export function personasEnFranja(
+  reservas: Reserva[],
+  zonaId: string,
+  fecha: FechaISO,
+  horaInicio: string,
+): number {
+  return reservas
+    .filter(
+      (r) => r.zonaId === zonaId && r.fecha === fecha && r.horaInicio === horaInicio && reservaOcupaFranja(r),
+    )
+    .reduce((total, r) => total + (r.personas ?? 1), 0)
+}
+
+/** RN-111 — Cuántos cupos le quedan al turno de una zona compartida. */
+export function cuposLibres(zona: ZonaComun, reservas: Reserva[], fecha: FechaISO, horaInicio: string): number {
+  return Math.max(0, zona.aforo - personasEnFranja(reservas, zona.id, fecha, horaInicio))
+}
+
+/** RN-09 / RN-111 — Por qué no se puede tomar ese turno, o `null` si se puede. */
+export function motivoFranjaNoDisponible(
+  zona: ZonaComun,
+  reservas: Reserva[],
+  fecha: FechaISO,
+  horaInicio: string,
+  unidadId: string,
+  personas = 1,
+): string | null {
+  if (!Number.isInteger(personas) || personas < 1) return 'Di cuántas personas van, desde una.'
+  if (!zonaCompartida(zona)) {
+    if (franjaOcupada(reservas, zona.id, fecha, horaInicio)) return 'Esa franja ya esta reservada.'
+    // RN-113 — En la exclusiva, lo declarado no pasa del aforo.
+    if (personas > zona.aforo) return `El aforo de ${zona.nombre} es de ${zona.aforo} personas.`
+    return null
+  }
+  const yaTiene = reservas.some(
+    (r) =>
+      r.zonaId === zona.id &&
+      r.fecha === fecha &&
+      r.horaInicio === horaInicio &&
+      r.unidadId === unidadId &&
+      reservaOcupaFranja(r),
+  )
+  if (yaTiene) return 'Tu unidad ya tiene ese turno. Si van más personas, cancela y vuelve a reservar.'
+  const libres = cuposLibres(zona, reservas, fecha, horaInicio)
+  if (libres === 0) return 'Ese turno ya está lleno.'
+  if (personas > libres) return `En ese turno quedan ${libres} ${libres === 1 ? 'cupo' : 'cupos'}.`
+  return null
+}
+
+/**
+ * RN-112 — **Antes de cancelar fuera de plazo, el residente sabe que hay multa.**
+ *
+ * Si la zona tiene multa por no cancelar (RN-110) y faltan menos horas que el
+ * plazo, la app lo advierte antes de confirmar, con el valor, el concepto y
+ * su respaldo. Solo cuenta para la reserva **confirmada**: la que la
+ * administración todavía no aprobó no le ha quitado el turno a nadie.
+ *
+ * Avisar no es multar: si cancela de todos modos, la reserva queda marcada
+ * «fuera de plazo» y la administración decide si abre el proceso
+ * sancionatorio, con descargos e impugnación (RN-39, RN-69).
+ *
+ * Devuelve las horas que faltan y el concepto, o `null` si cancelar no tiene
+ * multa.
+ */
+export function multaAlCancelar(
+  reserva: Reserva,
+  zona: ZonaComun | undefined,
+  conceptosSancion: ConceptoSancion[],
+  ahora: Date = new Date(),
+): { horasRestantes: number; concepto: ConceptoSancion; plazo: number } | null {
+  if (!zona?.multaNoCancelar || reserva.estado !== 'confirmada') return null
+  const concepto = conceptosSancion.find((c) => c.id === zona.multaNoCancelar!.conceptoId)
+  if (!concepto) return null
+  const inicio = inicioDeReserva(reserva)
+  const horasRestantes = (inicio - ahora.getTime()) / 3_600_000
+  const plazo = zona.multaNoCancelar.horasParaCancelar
+  if (horasRestantes >= plazo) return null
+  return { horasRestantes: Math.max(0, Math.floor(horasRestantes)), concepto, plazo }
+}
+
+/**
+ * RN-114 — **Cada zona puede tener un horario distinto según el día.**
+ *
+ * El gimnasio cierra los domingos; el salón solo se alquila de viernes a
+ * domingo; la cancha abre más tarde el sábado. Sin horario semanal, la zona
+ * abre todos los días con su horario general, como antes. Con horario
+ * semanal, abre solo los días marcados, cada uno con sus horas. El turno es el
+ * mismo toda la semana y cada día tiene que dividirse en turnos exactos
+ * (RN-105). Un día que no abre no ofrece franjas y no se puede reservar.
+ */
+export const NOMBRES_DIA = ['domingos', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábados']
+export const DIAS_CORTOS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
+/** De lunes a domingo, como se lee una semana en Colombia. */
+export const ORDEN_SEMANA = [1, 2, 3, 4, 5, 6, 0]
+
+export function diaDeLaSemana(fecha: FechaISO): number {
+  return new Date(`${fecha}T12:00:00`).getDay()
+}
+
+/** El horario de esa fecha, o `null` si ese día la zona no abre. */
+export function horarioDelDia(
+  zona: Pick<ZonaComun, 'horaInicio' | 'horaFin' | 'horarioSemanal'>,
+  fecha: FechaISO,
+): { horaInicio: Hora; horaFin: Hora } | null {
+  if (!zona.horarioSemanal) return { horaInicio: zona.horaInicio, horaFin: zona.horaFin }
+  return zona.horarioSemanal.find((h) => h.dia === diaDeLaSemana(fecha)) ?? null
+}
+
+export function motivoHorarioSemanalInvalido(
+  horario: HorarioDia[] | undefined,
+  duracionBloqueHoras: number,
+): string | null {
+  if (!horario) return null
+  if (horario.length === 0) return 'Marca al menos un día en que abre la zona.'
+  for (const dia of horario) {
+    const nombre = NOMBRES_DIA[dia.dia]
+    const inicio = horaEntera(dia.horaInicio)
+    const fin = horaEntera(dia.horaFin)
+    if (inicio === null || fin === null) return `El horario de los ${nombre} va en horas en punto.`
+    if (fin <= inicio) return `El horario de los ${nombre} tiene que terminar después de empezar.`
+    if ((fin - inicio) % duracionBloqueHoras !== 0) {
+      return `Los ${nombre}, con turnos de ${duracionBloqueHoras} horas, sobra un pedazo que nadie puede reservar.`
+    }
+  }
+  return null
+}
+
+/** El horario en palabras: «Lun a Vie 05:00–21:00 · Sáb 08:00–14:00». */
+export function textoHorarioSemanal(zona: Pick<ZonaComun, 'horaInicio' | 'horaFin' | 'horarioSemanal'>): string {
+  if (!zona.horarioSemanal) return `Todos los días ${zona.horaInicio} a ${zona.horaFin}`
+  const dias = ORDEN_SEMANA.map((d) => zona.horarioSemanal!.find((h) => h.dia === d)).filter(
+    (h): h is HorarioDia => !!h,
+  )
+  // Se agrupan los días seguidos con el mismo horario.
+  const grupos: Array<{ desde: number; hasta: number; horario: string }> = []
+  for (const h of dias) {
+    const horario = `${h.horaInicio} a ${h.horaFin}`
+    const ultimo = grupos[grupos.length - 1]
+    const posicion = ORDEN_SEMANA.indexOf(h.dia)
+    if (ultimo && ultimo.horario === horario && ORDEN_SEMANA.indexOf(ultimo.hasta) === posicion - 1) {
+      ultimo.hasta = h.dia
+    } else {
+      grupos.push({ desde: h.dia, hasta: h.dia, horario })
+    }
+  }
+  return grupos
+    .map((g) =>
+      g.desde === g.hasta
+        ? `${DIAS_CORTOS[g.desde]} ${g.horario}`
+        : `${DIAS_CORTOS[g.desde]} a ${DIAS_CORTOS[g.hasta]} ${g.horario}`,
+    )
+    .join(' · ')
+}
+
+/**
+ * RN-115 — **La administración puede cancelar una sola reserva, con motivo, y a
+ * quien reservó le llega el mensaje.**
+ *
+ * Hasta hoy solo podía rechazar la que estaba por aprobar, o cerrar la zona
+ * entera (RN-107, RN-108). Pero pasa que el salón se necesita para una reunión
+ * del consejo, o que se reservó violando el reglamento. Se cancela la reserva
+ * activa de hoy en adelante; el motivo es obligatorio y viaja en el mismo
+ * mensaje de RN-107. No es una multa ni la genera.
+ */
+export function puedeCancelarLaAdministracion(reserva: Reserva, ahora: Date = new Date()): boolean {
+  // RN-128 — Hasta que empiece el turno; después se cierra (RN-119).
+  if (reserva.estado !== 'confirmada' || reserva.cierre) return false
+  return ahora.getTime() < inicioDeReserva(reserva)
+}
+
+/**
+ * RN-116 — **Portería ve las reservas de hoy.**
+ *
+ * «El vigilante no sabe que el 402 tiene el salón hoy de 1 a 5 con 30
+ * invitados», y sin eso los invitados esperan en la puerta mientras alguien
+ * llama al apartamento. En el turno aparecen las reservas **confirmadas** de
+ * hoy, por hora: la zona, el horario, la unidad, quién reservó y cuántas
+ * personas van (RN-113). Nada de costos, depósitos ni multas: como la
+ * cartera, no son asunto de la portería (RN-52).
+ */
+export function reservasDeHoyParaPorteria(
+  reservas: Reserva[],
+  zonasDeLaCopropiedad: ZonaComun[],
+  hoy: FechaISO = hoyISO(),
+): Reserva[] {
+  const zonas = new Set(zonasDeLaCopropiedad.map((z) => z.id))
+  return reservas
+    .filter((r) => zonas.has(r.zonaId) && r.fecha === hoy && r.estado === 'confirmada')
+    .sort((a, b) => a.horaInicio.localeCompare(b.horaInicio))
+}
+
+/**
+ * RN-117 — **El cierre por mantenimiento se le puede avisar a toda la
+ * copropiedad.**
+ *
+ * «Es importante que el administrador tenga la opción, si el área común se
+ * cierra por mantenimiento, de seleccionar esta opción y que se genere un
+ * mensaje masivo» (Mary, 2026-10-01). A quien tenía reserva le llega siempre
+ * su cancelación (RN-108); con esta opción, además, todos se enteran antes de
+ * intentar reservar. Va por las dos vías de siempre, como los avances de obra
+ * (RN-101): un comunicado de mantenimiento en la cartelera y un mensaje a cada
+ * persona con residencia vigente —propietarios, arrendatarios y autorizados—,
+ * uno por persona aunque tenga varias unidades. Quien ya recibió la
+ * cancelación de su reserva no recibe un segundo mensaje: ya lo sabe.
+ */
+export function textoCierreZona(
+  zona: ZonaComun,
+  cierre: { desde: FechaISO; hasta: FechaISO; motivo: string },
+  copropiedad: string,
+): string {
+  const fechas =
+    cierre.desde === cierre.hasta
+      ? `el ${fechaCorta(cierre.desde)}`
+      : `del ${fechaCorta(cierre.desde)} al ${fechaCorta(cierre.hasta)}`
+  const porque = cierre.motivo.trim().replace(/[.\s]+$/, '')
+  return `${copropiedad}: ${zona.nombre} estará cerrada por mantenimiento ${fechas}. Motivo: ${porque}. Más detalles en la cartelera de Idiky.`
+}
+
+// ---------------------------------------------------------------------------
+// Calendario de ocupación — CU-A-29
+// ---------------------------------------------------------------------------
+
+/** El lunes de la semana de esa fecha: la semana se lee de lunes a domingo. */
+export function lunesDeLaSemana(fecha: FechaISO): FechaISO {
+  const dia = diaDeLaSemana(fecha)
+  return sumarDias(fecha, dia === 0 ? -6 : 1 - dia)
+}
+
+/** Los turnos que existen en alguno de esos días, en orden (RN-114: cada día puede tener los suyos). */
+export function franjasDeLaSemana(zona: ZonaComun, dias: FechaISO[]): Array<{ inicio: string; fin: string }> {
+  const todas = new Map<string, { inicio: string; fin: string }>()
+  for (const dia of dias) for (const f of franjasDeZona(zona, dia)) todas.set(`${f.inicio}-${f.fin}`, f)
+  return [...todas.values()].sort((a, b) => a.inicio.localeCompare(b.inicio))
+}
+
+/**
+ * Qué hay en una casilla del calendario. No es una regla nueva: junta las que
+ * ya existen para que el administrador las vea de un vistazo —el horario del
+ * día (RN-114), el cierre por mantenimiento (RN-108), la reserva exclusiva
+ * (RN-09) o la ocupación del turno compartido (RN-111)—.
+ */
+export type CeldaCalendario =
+  | { tipo: 'no_abre' }
+  | { tipo: 'cerrada'; motivo: string }
+  | { tipo: 'libre' }
+  | { tipo: 'ocupada'; reservas: Reserva[]; personas: number }
+
+export function celdaCalendario(
+  zona: ZonaComun,
+  reservas: Reserva[],
+  fecha: FechaISO,
+  horaInicio: string,
+): CeldaCalendario {
+  if (!franjasDeZona(zona, fecha).some((f) => f.inicio === horaInicio)) return { tipo: 'no_abre' }
+  const cierre = cierreEnFecha(zona, fecha)
+  if (cierre) return { tipo: 'cerrada', motivo: cierre.motivo }
+  const delTurno = reservas.filter(
+    (r) => r.zonaId === zona.id && r.fecha === fecha && r.horaInicio === horaInicio && reservaOcupaFranja(r),
+  )
+  if (delTurno.length === 0) return { tipo: 'libre' }
+  return { tipo: 'ocupada', reservas: delTurno, personas: delTurno.reduce((t, r) => t + (r.personas ?? 1), 0) }
+}
+
+/**
+ * La ocupación de la semana, en turnos: cuántos de los que abren tienen al
+ * menos una reserva. En la zona compartida cuenta además las personas sobre
+ * el cupo total, que es lo que dice si el gimnasio se queda corto.
+ */
+export function ocupacionDeLaSemana(
+  zona: ZonaComun,
+  reservas: Reserva[],
+  dias: FechaISO[],
+): { turnos: number; ocupados: number; personas: number; cupo: number } {
+  let turnos = 0
+  let ocupados = 0
+  let personas = 0
+  for (const dia of dias) {
+    for (const f of franjasDeZona(zona, dia)) {
+      const celda = celdaCalendario(zona, reservas, dia, f.inicio)
+      if (celda.tipo === 'no_abre' || celda.tipo === 'cerrada') continue
+      turnos += 1
+      if (celda.tipo === 'ocupada') {
+        ocupados += 1
+        personas += celda.personas
+      }
+    }
+  }
+  return { turnos, ocupados, personas, cupo: turnos * zona.aforo }
+}
+
+// ---------------------------------------------------------------------------
+// La plata de la reserva: cobro por uso, depósito y multa — RN-118 a RN-121
+// ---------------------------------------------------------------------------
+
+/**
+ * RN-118 — **Lo que cuesta una reserva se fija al reservar.**
+ *
+ * El valor por uso y el depósito se copian de la zona a la reserva cuando se
+ * crea, como el documento contable guarda su cuenta (RN-85): si la
+ * administración sube el precio después, lo que el residente aceptó no cambia.
+ */
+export function valoresDeLaReserva(zona: ZonaComun): { valorUso?: number; deposito?: number; horasLimiteCancelacion?: number } {
+  return {
+    ...(zona.valorUso ? { valorUso: zona.valorUso } : {}),
+    ...(zona.deposito ? { deposito: zona.deposito } : {}),
+    // RN-128 — El límite para cancelar también se fija al reservar.
+    ...(zona.horasLimiteCancelacion ? { horasLimiteCancelacion: zona.horasLimiteCancelacion } : {}),
+  }
+}
+
+/**
+ * RN-119 — **El cobro por uso se genera al cerrar la reserva, no al
+ * confirmarla.**
+ *
+ * «Sigamos con el 8» (Mary, 2026-10-01). Después del turno, la administración
+ * cierra la reserva: se usó, o no se presentó. En los dos casos se genera el
+ * cobro por uso en el estado de cuenta de la unidad —el turno quedó apartado
+ * y nadie más lo pudo usar—, como una cuota `uso_zona` con su justificación
+ * y el documento que la autoriza (RN-45, RN-47), que vence a los diez días.
+ *
+ * Por qué al cerrar y no al confirmar: una reserva cancelada nunca deja un
+ * cobro, y así no hace falta anular cuotas, que es tocar las reglas de cartera
+ * que se comparten con la contable (RN-75 a RN-79). Se cierra una reserva
+ * confirmada cuyo turno ya empezó, una sola vez.
+ */
+export const DIAS_PARA_PAGAR_USO = 10
+
+export function puedeCerrarReserva(reserva: Reserva, ahora: Date = new Date()): boolean {
+  if (reserva.estado !== 'confirmada' || reserva.cierre) return false
+  return inicioDeReserva(reserva) <= ahora.getTime()
+}
+
+/** Por qué se cobra, en la línea del estado de cuenta (RN-47). */
+export function justificacionCobroUso(reserva: Reserva, zona: ZonaComun, noSePresento: boolean): string {
+  const respaldo = zona.respaldoCobro ? ` (${textoRespaldo(zona.respaldoCobro)})` : ''
+  const cuando = `${fechaCorta(reserva.fecha)}, ${reserva.horaInicio} a ${reserva.horaFin}`
+  return noSePresento
+    ? `Reserva de ${zona.nombre} del ${cuando}: el turno quedó apartado y no se usó${respaldo}.`
+    : `Uso de ${zona.nombre} el ${cuando}${respaldo}.`
+}
+
+/**
+ * RN-120 — **El depósito se devuelve completo si la zona queda bien; si no, se
+ * retiene una parte, con motivo.**
+ *
+ * La administración registra que lo recibió. Al cerrar la reserva anota cómo
+ * quedó la zona —bien, o con novedades, que se describen, con una foto si la
+ * hay— y decide: devolverlo completo o retener una parte que no pasa del
+ * depósito. Retener exige que haya novedades y el motivo: es la plata del
+ * residente, y sin prueba es la queja que sigue. Si no se presentó, la zona no
+ * se usó y el depósito se devuelve completo.
+ */
+export function motivoCierreReservaInvalido(
+  reserva: Reserva,
+  cierre: {
+    resultado: 'usada' | 'no_se_presento'
+    estadoZona?: 'bien' | 'con_novedades'
+    observaciones?: string
+    retener?: number
+    motivoRetencion?: string
+  },
+): string | null {
+  if (!puedeCerrarReserva(reserva)) return 'Esa reserva no se puede cerrar: tiene que estar confirmada y su turno ya empezado.'
+  if (cierre.resultado === 'no_se_presento') return null
+  if (!cierre.estadoZona) return 'Di cómo quedó la zona.'
+  if (cierre.estadoZona === 'con_novedades' && (cierre.observaciones ?? '').trim().length < 10) {
+    return 'Describe las novedades: qué se dañó o qué faltó.'
+  }
+  const retener = cierre.retener ?? 0
+  if (retener > 0) {
+    if (!reserva.depositoRecibidoEn) return 'No se puede retener un depósito que no se recibió.'
+    if (cierre.estadoZona !== 'con_novedades') return 'Solo se retiene si la zona quedó con novedades.'
+    if (!Number.isInteger(retener) || retener > (reserva.deposito ?? 0)) {
+      return 'Lo retenido va en pesos y no pasa del depósito.'
+    }
+    if ((cierre.motivoRetencion ?? '').trim().length < 10) return 'Escribe por qué se retiene: es lo que lee el residente.'
+  }
+  return null
+}
+
+/**
+ * RN-121 — **Si no se presentó, o canceló fuera de plazo, la administración
+ * puede abrir el proceso por la multa.**
+ *
+ * Con la multa que la zona tiene en el catálogo (RN-110), un solo proceso por
+ * reserva y con los hechos ya escritos: qué zona, qué turno y qué pasó. La
+ * administración decide si lo abre —no es automático—, y desde ahí es un
+ * proceso sancionatorio como cualquiera: descargos, decisión, impugnación y
+ * la cuota solo cuando queda firme (RN-39, RN-69).
+ */
+export function puedeAbrirProcesoPorReserva(reserva: Reserva, zona: ZonaComun | undefined): boolean {
+  if (!zona?.multaNoCancelar || reserva.sancionId) return false
+  return reserva.cierre?.resultado === 'no_se_presento' || !!reserva.canceladaFueraDePlazo
+}
+
+export function hechosDeLaReserva(reserva: Reserva, zona: ZonaComun): string {
+  const cuando = `el ${fechaCorta(reserva.fecha)} de ${reserva.horaInicio} a ${reserva.horaFin}`
+  // RN-124 — Si aceptó las condiciones al reservar, los hechos lo dicen.
+  const acepto = reserva.condicionesAceptadas
+    ? ` Al reservar aceptó las condiciones de la zona, incluida la multa, el ${fechaCorta(reserva.condicionesAceptadas.aceptadasEn.slice(0, 10))}.`
+    : ''
+  return (reserva.canceladaFueraDePlazo
+    ? `La unidad canceló su reserva de ${zona.nombre} ${cuando} fuera del plazo de ${zona.multaNoCancelar?.horasParaCancelar ?? 0} horas que fija la zona.`
+    : `La unidad reservó ${zona.nombre} ${cuando}, no se presentó y no canceló la reserva.`) + acepto
+}
+
+// ---------------------------------------------------------------------------
+// Solicitudes, avisos, condiciones e invitados — RN-122 a RN-126
+// ---------------------------------------------------------------------------
+
+
+/** `80000` → `$80.000`, dentro de un texto que se guarda o se manda. */
+function pesos(valor: number): string {
+  return `$${valor.toLocaleString('es-CO')}`
+}
+
+/**
+ * RN-122 — **La solicitud que nadie contesta vence en su turno** (CU-S-03).
+ *
+ * «Implementar del 1 al 5» (Mary, 2026-10-01). Una zona con aprobación deja
+ * la reserva en `solicitada`, y así el turno queda apartado. Si la
+ * administración no la aprueba ni la rechaza, al llegar la hora del turno la
+ * solicitud **vence**: queda `vencida`, el turno se libera y al residente le
+ * llega un mensaje. Antes de eso, el tablero del administrador avisa las
+ * solicitudes a las que les faltan menos de 48 horas.
+ *
+ * El demo no tiene un servidor que corra a la hora exacta: el vencimiento se
+ * aplica cada vez que se abre la app, que para una reserva ya pasada da lo
+ * mismo.
+ */
+export const HORAS_ALERTA_SOLICITUD = 48
+
+export function solicitudVencida(reserva: Reserva, ahora: Date = new Date()): boolean {
+  return reserva.estado === 'solicitada' && inicioDeReserva(reserva) <= ahora.getTime()
+}
+
+/** Las solicitudes a las que les faltan menos de 48 horas, la más urgente primero. */
+export function solicitudesPorVencer(
+  reservas: Reserva[],
+  zonasDeLaCopropiedad: ZonaComun[],
+  ahora: Date = new Date(),
+): Array<{ reserva: Reserva; horas: number }> {
+  const zonas = new Set(zonasDeLaCopropiedad.map((z) => z.id))
+  return reservas
+    .filter((r) => zonas.has(r.zonaId) && r.estado === 'solicitada')
+    .map((reserva) => ({ reserva, horas: (inicioDeReserva(reserva) - ahora.getTime()) / 3_600_000 }))
+    .filter((x) => x.horas > 0 && x.horas <= HORAS_ALERTA_SOLICITUD)
+    .map((x) => ({ reserva: x.reserva, horas: Math.floor(x.horas) }))
+    .sort((a, b) => a.horas - b.horas)
+}
+
+export function textoReservaVencida(reserva: Reserva, zona: ZonaComun, copropiedad: string): string {
+  return (
+    `${copropiedad}: tu solicitud de ${zona.nombre} del ${fechaCorta(reserva.fecha)} de ` +
+    `${reserva.horaInicio} a ${reserva.horaFin} venció sin respuesta de la administración. ` +
+    'No tiene ningún cobro. Puedes volver a reservar en Idiky.'
+  )
+}
+
+/**
+ * RN-123 — **Al residente le llega la respuesta a su solicitud.**
+ *
+ * Aprobada o rechazada, con el motivo si se rechazó: es lo que promete CU-A-06
+ * («el residente se entera»), por el mismo canal de los demás avisos (RN-64).
+ */
+export function textoReservaDecidida(
+  reserva: Reserva,
+  zona: ZonaComun,
+  decision: 'confirmada' | 'rechazada',
+  motivo: string | undefined,
+  copropiedad: string,
+): string {
+  const cuando = `del ${fechaCorta(reserva.fecha)} de ${reserva.horaInicio} a ${reserva.horaFin}`
+  if (decision === 'confirmada') {
+    const deposito = reserva.deposito ? ` Recuerda entregar el depósito de ${pesos(reserva.deposito)} antes del turno.` : ''
+    return `${copropiedad}: la administración aprobó tu reserva de ${zona.nombre} ${cuando}.${deposito}`
+  }
+  const porque = (motivo ?? '').trim().replace(/[.\s]+$/, '')
+  return `${copropiedad}: la administración rechazó tu reserva de ${zona.nombre} ${cuando}.${porque ? ` Motivo: ${porque}.` : ''}`
+}
+
+/**
+ * RN-124 — **Quien reserva acepta las condiciones, y queda constancia.**
+ *
+ * Si la zona cobra, pide depósito o tiene multa por no cancelar, antes de
+ * confirmar el residente marca que las acepta. Se guarda **el texto tal como
+ * lo leyó** y la hora: si mañana la zona cambia, la constancia sigue diciendo
+ * lo que aceptó. Es lo que respalda el cobro (RN-119), la retención (RN-120) y
+ * la multa (RN-121) si después se reclaman. Una zona sin nada de eso no pide
+ * aceptar nada.
+ */
+export function condicionesDeLaZona(zona: ZonaComun, conceptosSancion: ConceptoSancion[]): string | null {
+  const partes: string[] = []
+  // Cada cosa con su respaldo: el cobro y el depósito, el de la zona; la multa, el de su concepto.
+  const cobros: string[] = []
+  if (zona.valorUso) cobros.push(`valor por reserva de ${pesos(zona.valorUso)}`)
+  if (zona.deposito) cobros.push(`depósito de garantía de ${pesos(zona.deposito)}, que se devuelve si la zona queda como se entregó`)
+  if (cobros.length) {
+    const respaldo = zona.respaldoCobro ? ` (${textoRespaldo(zona.respaldoCobro)})` : ''
+    partes.push(`${cobros.join('; ')}${respaldo}`)
+  }
+  const multa = zona.multaNoCancelar
+  const concepto = multa ? conceptosSancion.find((c) => c.id === multa.conceptoId) : undefined
+  if (multa && concepto) {
+    partes.push(
+      `multa de ${pesos(concepto.valor)} («${concepto.nombre}», ${textoRespaldo(concepto)}) si no cancelo con al menos ${multa.horasParaCancelar} horas de anticipación o no me presento`,
+    )
+  }
+  if (partes.length === 0) return null
+  // RN-128 — Si hay algo que aceptar, el límite para cancelar va con ello.
+  partes.push(
+    zona.horasLimiteCancelacion
+      ? `solo puedo cancelar hasta ${zona.horasLimiteCancelacion} horas antes del turno`
+      : 'solo puedo cancelar antes de que empiece el turno',
+  )
+  return `Acepto las condiciones de ${zona.nombre}: ${partes.join('; ')}.`
+}
+
+/**
+ * RN-125 — **El día antes, un recordatorio.**
+ *
+ * A la reserva confirmada de hoy o de mañana que todavía no empieza le llega
+ * un mensaje, una sola vez: qué zona, a qué hora y, si falta, que entregue el
+ * depósito. Evita el «se me olvidó» que termina en «no se presentó» (RN-121).
+ * Como el vencimiento (RN-122), se aplica al abrir la app.
+ */
+export function debeRecordarse(reserva: Reserva, ahora: Date = new Date()): boolean {
+  if (reserva.estado !== 'confirmada' || reserva.cierre || reserva.recordatorioEnviadoEn) return false
+  const faltan = inicioDeReserva(reserva) - ahora.getTime()
+  const manana = new Date(ahora)
+  manana.setDate(manana.getDate() + 1)
+  const fechaManana = `${manana.getFullYear()}-${String(manana.getMonth() + 1).padStart(2, '0')}-${String(manana.getDate()).padStart(2, '0')}`
+  return faltan > 0 && reserva.fecha <= fechaManana
+}
+
+export function textoRecordatorioReserva(reserva: Reserva, zona: ZonaComun, copropiedad: string, hoy: FechaISO = hoyISO()): string {
+  const cuando = reserva.fecha === hoy ? 'hoy' : 'mañana'
+  const deposito =
+    reserva.deposito && !reserva.depositoRecibidoEn ? ` Recuerda entregar el depósito de ${pesos(reserva.deposito)} a la administración.` : ''
+  const invitados = reserva.invitados?.length ? ` Portería tiene la lista de tus ${reserva.invitados.length} invitados.` : ''
+  return `${copropiedad}: ${cuando} tienes ${zona.nombre} de ${reserva.horaInicio} a ${reserva.horaFin}.${deposito}${invitados} Si no vas a ir, cancela en Idiky.`
+}
+
+/**
+ * RN-126 — **La lista de invitados la ve portería.**
+ *
+ * Quien reserva puede escribir los nombres de sus invitados, uno por renglón,
+ * al reservar o después, hasta que empiece el turno. Caben tantos como
+ * personas declaró menos él mismo (RN-113). Portería los ve en las reservas de
+ * hoy (RN-116), para dejarlos entrar sin llamar al apartamento. Son nombres,
+ * no documentos: portería pide el documento en la entrada como a cualquier
+ * visitante.
+ */
+export const MAXIMO_LARGO_INVITADO = 80
+
+export function limpiarInvitados(texto: string): string[] {
+  return texto
+    .split('\n')
+    .map((linea) => linea.replace(/^[-•*\d.)\s]+/, '').trim())
+    .filter((linea) => linea.length > 0)
+}
+
+export function motivoInvitadosInvalido(invitados: string[], personas: number): string | null {
+  const maximo = Math.max(0, personas - 1)
+  if (invitados.length > maximo) {
+    return `Declaraste ${personas} ${personas === 1 ? 'persona' : 'personas'}: caben ${maximo} ${maximo === 1 ? 'invitado' : 'invitados'} además de ti.`
+  }
+  if (invitados.some((n) => n.length > MAXIMO_LARGO_INVITADO)) return 'Cada nombre cabe en 80 caracteres.'
+  return null
+}
+
+export function puedeEditarInvitados(reserva: Reserva, ahora: Date = new Date()): boolean {
+  return (reserva.estado === 'solicitada' || reserva.estado === 'confirmada') && inicioDeReserva(reserva) > ahora.getTime()
+}
+
+// ---------------------------------------------------------------------------
+// Informe de uso de las zonas comunes — CU-A-30
+// ---------------------------------------------------------------------------
+
+/** Los días de un periodo, de `desde` a `hasta`, incluidos los dos. */
+export function diasDelPeriodo(desde: FechaISO, hasta: FechaISO): FechaISO[] {
+  const dias: FechaISO[] = []
+  for (let dia = desde; dia <= hasta && dias.length < 400; dia = sumarDias(dia, 1)) dias.push(dia)
+  return dias
+}
+
+/** Lo que dice el informe de una zona en un periodo. */
+export interface FilaInformeZona {
+  zona: ZonaComun
+  /** Todas las reservas con fecha en el periodo, en cualquier estado. */
+  solicitudes: number
+  /** Las que quedaron tomadas: confirmadas, usadas o no. */
+  tomadas: number
+  usadas: number
+  noSePresento: number
+  canceladasPorResidente: number
+  canceladasFueraDePlazo: number
+  canceladasPorAdministracion: number
+  rechazadas: number
+  vencidas: number
+  /** Personas declaradas en las tomadas (RN-113). */
+  personas: number
+  /** Turnos que abrieron en el periodo y cuántos tuvieron al menos una reserva. */
+  turnos: number
+  turnosOcupados: number
+  /** Cobros por uso generados al cerrar (RN-119) y lo que ya se pagó de ellos. */
+  cobrado: number
+  recaudado: number
+  depositoRetenido: number
+  procesos: number
+}
+
+/**
+ * CU-A-30 — **El informe de uso cuenta lo que ya está registrado; no inventa.**
+ *
+ * «Me gusta la idea del informe del uso de las zonas comunes» (Mary,
+ * 2026-10-01). Toma las reservas con fecha dentro del periodo y cuenta así:
+ * tomadas son las confirmadas (se hayan cerrado o no); usadas y «no se
+ * presentó» salen del cierre (RN-119); las canceladas se separan por quién y
+ * cuándo (el residente a tiempo, fuera de plazo —RN-112— o la administración,
+ * RN-107, RN-108, RN-115); la ocupación son los turnos que abrieron con al
+ * menos una reserva, con los días y cierres de cada zona (RN-114, RN-108); lo
+ * cobrado son las cuotas de uso generadas y lo recaudado, lo que ya se pagó
+ * de ellas (RN-75). No es una regla nueva: es la suma de las que ya existen.
+ */
+export function informeDeUsoDeZonas(
+  zonas: ZonaComun[],
+  reservas: Reserva[],
+  cuotas: Cuota[],
+  desde: FechaISO,
+  hasta: FechaISO,
+): FilaInformeZona[] {
+  const dias = diasDelPeriodo(desde, hasta)
+  return zonas.map((zona) => {
+    const delPeriodo = reservas.filter((r) => r.zonaId === zona.id && r.fecha >= desde && r.fecha <= hasta)
+    const tomadas = delPeriodo.filter((r) => r.estado === 'confirmada')
+    const canceladas = delPeriodo.filter((r) => r.estado === 'cancelada')
+    const ocupacion = ocupacionDeLaSemana(zona, reservas, dias)
+    let cobrado = 0
+    let recaudado = 0
+    let depositoRetenido = 0
+    for (const r of tomadas) {
+      const cuota = r.cierre?.cuotaUsoId ? cuotas.find((c) => c.id === r.cierre!.cuotaUsoId) : undefined
+      if (cuota) {
+        cobrado += cuota.valor
+        recaudado += cuota.valor - cuota.saldo
+      }
+      depositoRetenido += r.cierre?.depositoRetenido ?? 0
+    }
+    return {
+      zona,
+      solicitudes: delPeriodo.length,
+      tomadas: tomadas.length,
+      usadas: tomadas.filter((r) => r.cierre?.resultado === 'usada').length,
+      noSePresento: tomadas.filter((r) => r.cierre?.resultado === 'no_se_presento').length,
+      canceladasPorResidente: canceladas.filter((r) => !r.motivoCancelacion && !r.canceladaFueraDePlazo).length,
+      canceladasFueraDePlazo: canceladas.filter((r) => r.canceladaFueraDePlazo).length,
+      canceladasPorAdministracion: canceladas.filter((r) => !!r.motivoCancelacion).length,
+      rechazadas: delPeriodo.filter((r) => r.estado === 'rechazada').length,
+      vencidas: delPeriodo.filter((r) => r.estado === 'vencida').length,
+      personas: tomadas.reduce((t, r) => t + (r.personas ?? 1), 0),
+      turnos: ocupacion.turnos,
+      turnosOcupados: ocupacion.ocupados,
+      cobrado,
+      recaudado,
+      depositoRetenido,
+      procesos: delPeriodo.filter((r) => r.sancionId).length,
+    }
+  })
+}
+
+/** Las unidades que más turnos tomaron en el periodo, de más a menos. */
+export function unidadesQueMasReservan(
+  reservas: Reserva[],
+  zonas: ZonaComun[],
+  desde: FechaISO,
+  hasta: FechaISO,
+  cuantas = 5,
+): Array<{ unidadId: string; reservas: number; noSePresento: number }> {
+  const ids = new Set(zonas.map((z) => z.id))
+  const conteo = new Map<string, { reservas: number; noSePresento: number }>()
+  for (const r of reservas) {
+    if (!ids.has(r.zonaId) || r.fecha < desde || r.fecha > hasta || r.estado !== 'confirmada') continue
+    const actual = conteo.get(r.unidadId) ?? { reservas: 0, noSePresento: 0 }
+    actual.reservas += 1
+    if (r.cierre?.resultado === 'no_se_presento') actual.noSePresento += 1
+    conteo.set(r.unidadId, actual)
+  }
+  return [...conteo.entries()]
+    .map(([unidadId, c]) => ({ unidadId, ...c }))
+    .sort((a, b) => b.reservas - a.reservas)
+    .slice(0, cuantas)
+}
+
+// ---------------------------------------------------------------------------
+// Estado de cuenta — CU-R-18 · RN-127
+// ---------------------------------------------------------------------------
+
+/**
+ * RN-127 — **El estado de cuenta cuenta lo que se cobró y lo que se aplicó, y
+ * congela lo que afirma.**
+ *
+ * «Sí, por favor» (Mary, 2026-10-01, al escoger CU-R-18). Para un rango de
+ * periodos —por defecto el año en curso— el estado de cuenta lista:
+ *
+ * - **Saldo anterior:** lo cobrado antes del rango menos lo aplicado antes.
+ * - **Cargos:** cada cuota con periodo dentro del rango —ordinarias,
+ *   extraordinarias, intereses, multas en firme, uso de zonas—, por su valor.
+ * - **Abonos:** cada pago **aplicado** con fecha de aplicación dentro del
+ *   rango, por su valor completo; si sobró, el saldo final queda a favor
+ *   (RN-76). El abono que el propietario informó y la administración no ha
+ *   aplicado **no cuenta** (RN-79), y el anulado tampoco (RN-78).
+ * - **Saldo final** = saldo anterior + cargos − abonos, con el saldo corrido
+ *   en cada renglón.
+ *
+ * Se emite como documento con consecutivo y código de verificación (RN-36,
+ * ADR-0006) y **guarda lo que afirmó**: reimprimirlo en junio da el papel de
+ * marzo, no uno nuevo con el mismo número. Sin movimientos ni saldo en el
+ * rango no se emite: se avisa antes (CU-R-18, A1).
+ */
+export function estadoDeCuenta(
+  cuotas: Cuota[],
+  pagos: Pago[],
+  desde: Periodo,
+  hasta: Periodo,
+): Omit<EstadoCuentaCongelado, 'solicitadoPor'> {
+  const aplicados = pagos.filter((p) => p.estado === 'aplicado')
+  const mesDePago = (p: Pago) => (p.fechaAplicacion ?? p.fecha).slice(0, 7)
+  const saldoInicial =
+    cuotas.filter((c) => c.periodo < desde).reduce((t, c) => t + c.valor, 0) -
+    aplicados.filter((p) => mesDePago(p) < desde).reduce((t, p) => t + p.valor, 0)
+
+  const renglones: Array<Omit<MovimientoCuenta, 'saldo'>> = [
+    ...cuotas
+      .filter((c) => c.periodo >= desde && c.periodo <= hasta)
+      .map((c) => ({ fecha: `${c.periodo}-01`, tipo: 'cargo' as const, concepto: c.concepto, valor: c.valor })),
+    ...aplicados
+      .filter((p) => mesDePago(p) >= desde && mesDePago(p) <= hasta)
+      .map((p) => ({
+        fecha: (p.fechaAplicacion ?? p.fecha).slice(0, 10),
+        tipo: 'abono' as const,
+        concepto: p.recibo ? `Pago aplicado · recibo ${p.recibo}` : 'Pago aplicado',
+        valor: p.valor,
+      })),
+  ].sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.tipo === b.tipo ? 0 : a.tipo === 'cargo' ? -1 : 1))
+
+  let saldo = saldoInicial
+  const movimientos = renglones.map((r) => {
+    saldo += r.tipo === 'cargo' ? r.valor : -r.valor
+    return { ...r, saldo }
+  })
+  const totalCargos = renglones.filter((r) => r.tipo === 'cargo').reduce((t, r) => t + r.valor, 0)
+  const totalAbonos = renglones.filter((r) => r.tipo === 'abono').reduce((t, r) => t + r.valor, 0)
+  return { desde, hasta, saldoInicial, movimientos, totalCargos, totalAbonos, saldoFinal: saldo }
+}
+
+/** Por qué no se puede emitir con ese rango, o `null` si se puede. */
+export function motivoEstadoCuentaInvalido(desde: Periodo, hasta: Periodo, estado: { saldoInicial: number; movimientos: unknown[] }): string | null {
+  if (!/^\d{4}-\d{2}$/.test(desde) || !/^\d{4}-\d{2}$/.test(hasta)) return 'Escoge el mes inicial y el final.'
+  if (desde > hasta) return 'El mes final va después del inicial.'
+  if (estado.movimientos.length === 0 && estado.saldoInicial === 0) {
+    return 'En ese rango no hay cobros, pagos ni saldo: no hay nada que certificar.'
+  }
+  return null
+}
+
+/**
+ * RN-129 — **Solo se cierran a mano las reservas que mueven plata; las demás se
+ * cierran solas.**
+ *
+ * «De acuerdo con el punto 4, las demás quedan cerradas» (Mary, 2026-10-02).
+ * Cerrar una reserva (RN-119) sirve para cobrar el uso, devolver o retener el
+ * depósito y, si no se presentó, abrir el proceso por la multa. Una reserva sin
+ * cobro, sin depósito y en una zona sin multa no tiene nada de eso: pedirle al
+ * administrador que la cierre llenaría «Por cerrar» con cientos de turnos del
+ * gimnasio al mes. Por eso:
+ *
+ * - **«Por cerrar» muestra solo las que mueven plata:** con valor por uso o
+ *   depósito (los que se fijaron al reservar, RN-118) o en una zona con multa
+ *   por no cancelar (RN-110).
+ * - **Las demás se cierran solas como usadas** cuando termina su turno, marcadas
+ *   como cierre automático. El informe de uso (CU-A-30) las cuenta como usadas.
+ *
+ * Como el vencimiento y el recordatorio (RN-122, RN-125), se aplica al abrir la
+ * app.
+ */
+export function reservaMueveDinero(reserva: Reserva, zona: Pick<ZonaComun, 'multaNoCancelar'> | undefined): boolean {
+  return !!reserva.valorUso || !!reserva.deposito || !!zona?.multaNoCancelar
+}
+
+/** RN-129 — Una reserva que no mueve plata y cuyo turno ya terminó se cierra sola. */
+export function debeCerrarseSola(reserva: Reserva, zona: Pick<ZonaComun, 'multaNoCancelar'> | undefined, ahora: Date = new Date()): boolean {
+  if (reserva.estado !== 'confirmada' || reserva.cierre || reservaMueveDinero(reserva, zona)) return false
+  return finDeReserva(reserva) <= ahora.getTime()
 }

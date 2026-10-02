@@ -27,6 +27,9 @@ const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta
   { ruta: '/admin/reservas', texto: 'Reservas', icono: 'reservas' },
   { ruta: '/admin/pqrs', texto: 'PQRS', icono: 'pqrs' },
   { ruta: '/admin/comunicados', texto: 'Comunicados', icono: 'comunicados' },
+  // Las obras: lo que mas plata mueve y menos se ve desde un apartamento
+  // (CU-A-28). Va junto a comunicados porque cada avance es uno.
+  { ruta: '/admin/proyectos', texto: 'Proyectos', icono: 'tablero' },
   { ruta: '/admin/correspondencia', texto: 'Correspondencia', icono: 'correspondencia' },
 ]
 
@@ -35,13 +38,18 @@ const TITULOS: Record<string, string> = {
   '/admin/registros': 'Registro de personas',
   '/admin/unidades': 'Unidades y residentes',
   '/admin/cartera': 'Cartera',
+  '/admin/cartera/paz-y-salvo': 'Paz y salvo',
   '/admin/multas': 'Catálogo de multas',
   '/admin/sanciones': 'Procesos sancionatorios',
   '/admin/asambleas': 'Asambleas',
   '/admin/pagos': 'Pagos y recibos de caja',
-  '/admin/reservas': 'Reservas por aprobar',
+  '/admin/reservas': 'Reservas',
+  '/admin/reservas/calendario': 'Calendario de ocupación',
+  '/admin/reservas/informe': 'Informe de uso de las zonas',
+  '/admin/reservas/zonas': 'Zonas comunes',
   '/admin/pqrs': 'Bandeja de PQRS',
   '/admin/comunicados': 'Comunicados',
+  '/admin/proyectos': 'Proyectos y obras',
   '/admin/correspondencia': 'Correspondencia',
 }
 

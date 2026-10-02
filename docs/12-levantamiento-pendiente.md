@@ -126,8 +126,10 @@ hay que responderlo explícitamente, no asumirlo.
   fijo? *(Supuesto actual: por coeficiente — RN-05.)* → *(respuesta)*
 - ¿Cuál es el **plazo real de respuesta** a una PQRS? *(Supuesto actual: 15 días — RN-13.)*
   → *(respuesta)*
-- ¿Las reservas de zonas comunes tienen **depósito o cobro**? ¿Sanción por no cancelar?
-  → *(respuesta)*
+- ~~¿Las reservas de zonas comunes tienen **depósito o cobro**? ¿Sanción por no cancelar?~~
+  → ✅ **Respondido (Mary, 2026-10-01):** las tres cosas se parametrizan por zona —cobro por
+  uso, depósito si aplica y multa por no cancelar— y se ven en la información de cada zona
+  (RN-109, RN-110).
 
 ## 3 bis. Asambleas — preguntas que bloquean el diseño
 
@@ -202,8 +204,14 @@ reglamento de la copropiedad y la Ley 675 de 2001.
   suma las dos**: una sola cuenta. Verificado además contra la norma —Ley 675 art. 42 y
   Decreto 398 de 2020 art. 1— que dicen lo mismo. Implementado: RN-92, y la app se lo dice a
   quien está conectado.
-- **Transmisión:** ¿la transmisión debe quedar **grabada** como soporte del acta? Eso
-  cambia el costo de almacenamiento y el proveedor. → *(respuesta)*
+- ~~**Transmisión:** ¿la transmisión debe quedar **grabada** como soporte del acta?~~ →
+  ✅ **Resuelto (2026-09-28):** con Vimeo como opción (Mary), la grabación la guarda la
+  herramienta; Idiky enlaza y el acta la cita como soporte (RN-99). Sin costo de almacenamiento.
+- **Transmisión de una sola vía *(pregunta nueva, 2026-09-28 — para el abogado)*:** con Vimeo o
+  YouTube los conectados ven y oyen pero no hablan; intervienen por el chat de la transmisión.
+  El art. 42 de la Ley 675 exige que puedan **deliberar** por un medio de comunicación
+  simultánea o sucesiva. **¿El chat de la transmisión basta como deliberación?** Hoy Idiky lo
+  advierte al convocar y lo deja en el acta, sin impedirlo (RN-98). → *(respuesta)*
 - ~~**Acta — comisión verificadora:**~~ → ✅ **Respondido (Mary, 2026-09-10):** *«la comisión
   verificadora o persona que revisa el acta déjala como una opción para que el administrador
   seleccione, **a veces hay revisión**»*. Implementado como opcional (RN-93). La firma quedó
@@ -389,8 +397,9 @@ texto o configuración.
   cadena — el operador de Idiky crea al administrador, el administrador crea a los
   propietarios, el propietario crea a los demás de su unidad, y el residente crea visitantes
   (RN-63). En una copropiedad el derecho a estar ahí se lo da a uno alguien que ya está.
-- ¿Cómo se identifica un residente al registrarse: correo, celular, número de documento?
-  → *(respuesta)*
+- ~~¿Cómo se identifica un residente al registrarse: correo, celular, número de documento?~~
+  → ✅ **Respondido (Mary, 2026-10-01):** con cualquiera de los tres, en un solo campo, y entra
+  con un código por SMS o por correo, sin clave (CU-R-01, RN-54).
 - ¿Un arrendatario ve la cartera de la unidad, o solo el propietario? → *(respuesta)*
 
 ## 5. Técnico

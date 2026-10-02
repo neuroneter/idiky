@@ -61,7 +61,7 @@ infra/desplegar.sh
 
 - **Se publica lo que está en git**, no la carpeta de trabajo. Los cambios sin commit no suben,
   y el script avisa si los hay.
-- **BLOKY, BOB y Jitsi tienen su propio repositorio** ([ADR-0017](../docs/adr/0017-un-repositorio-por-sistema-e-idiky-como-arnes.md)),
+- **BLOKY, BOB y Jitsi tienen su propio repositorio** ([ADR-0018](../docs/adr/0018-un-repositorio-por-sistema-e-idiky-como-arnes.md)),
   con las mismas rutas que tenían aquí (`apps/bloky…`, `infra/gestion/`…). `desplegar.sh` los
   trae de GitHub a `~/.cache/idiky/repos/` (una copia sin carpeta de trabajo), toma su
   `origin/main` —u otro commit con `IDIKY_REF_BLOKY`, `IDIKY_REF_GESTION` o `IDIKY_REF_JITSI`— y
