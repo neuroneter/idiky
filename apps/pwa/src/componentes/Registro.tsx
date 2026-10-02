@@ -123,6 +123,7 @@ export function FormularioRegistro({
   categoriaInicial,
   permitirNoObligatorio = false,
   registraArrendatario = false,
+  soloDeUnDia = false,
   alCrear,
   alCerrar,
 }: {
@@ -136,6 +137,8 @@ export function FormularioRegistro({
   permitirNoObligatorio?: boolean
   /** Quien registra es arrendatario: la estadía larga la aprueba el propietario (RN-60). */
   registraArrendatario?: boolean
+  /** Quien registra es un familiar: solo visitas de un día (Mary, 2026-10-02). */
+  soloDeUnDia?: boolean
   alCrear: (datos: DatosRegistro) => Promise<void>
   alCerrar: () => void
 }) {
@@ -146,7 +149,7 @@ export function FormularioRegistro({
   const [unidadId, setUnidadId] = useState(
     unidadInicial && unidades?.some((u) => u.id === unidadInicial) ? unidadInicial : (unidades?.[0]?.id ?? ''),
   )
-  const [condicion, setCondicion] = useState<CondicionRegistro>(condicionesPosibles(categoria)[0])
+  const [condicion, setCondicion] = useState<CondicionRegistro>(soloDeUnDia ? 'no_residente' : condicionesPosibles(categoria)[0])
   const [pedirFotos, setPedirFotos] = useState(false)
   /** El visitante frecuente: qué días viene (0 = domingo). */
   const [dias, setDias] = useState<number[]>([1, 2, 3, 4, 5])
@@ -162,7 +165,7 @@ export function FormularioRegistro({
   const [placa, setPlaca] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  const posibles = condicionesPosibles(categoria)
+  const posibles: readonly CondicionRegistro[] = soloDeUnDia ? ['no_residente'] : condicionesPosibles(categoria)
   const clase = { categoria, condicion, pedirFotos }
   const conVigencia = exigeVigencia(clase)
   /* Lo que se le promete a quien registra cambia con la clase, porque el

@@ -853,8 +853,11 @@ escogen **los días de la semana** en que viene y una fecha de fin; sube sus fot
 entra con su código **solo esos días** (en `Visitante` usa la marca `recurrente`, que existía sin
 usarse, y `dias`). No lleva la marca de residente: no vive ahí.
 
-**El familiar o acompañante** lo registran el propietario o el arrendatario; no vota y no registra a
-nadie (rol `familiar`). Si sale el arrendatario, sale su familia.
+**El familiar o acompañante** lo registran el propietario o el arrendatario; no vota (rol
+`familiar`). **Si es mayor de edad, registra visitas de un día, y nada más** (Mary, 2026-10-02);
+el menor no registra a nadie. **Sale con quien lo registró**: si se va el arrendatario, o si el
+propietario vende (cambio de propietario), su familia sale con él y se revocan las visitas que
+ella había registrado. El arrendatario del dueño anterior, en cambio, sigue.
 
 **Menores de edad** *(2026-10-02)*: el familiar o el visitante puede marcarse como menor. Entonces
 no se le exige celular ni correo, y su documento puede ser **tarjeta de identidad** o **registro

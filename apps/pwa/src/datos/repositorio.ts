@@ -1651,6 +1651,9 @@ export async function revocarVisitante(
  *
  * - Sus registros **en curso** se anulan: solo él podía autorizarlos y ya no
  *   está. Vale para todos, y con el motivo del cambio de propietario si lo es.
+ * - Si es **propietario**, sale con él su familia (Mary, 2026-10-02: al vender,
+ *   la familia del dueño anterior no se queda); el arrendatario y las visitas
+ *   que registró los hereda el siguiente propietario (RN-65).
  * - Si es **arrendatario**, salen con él su familia y los visitantes que
  *   registró: los temporales, los frecuentes y las visitas que aún no pasan
  *   (Mary, 2026-10-02). Los
@@ -1670,25 +1673,34 @@ function cerrarLoQueDejo(bd: BaseDatos, residencia: Residencia, cerradoPor: stri
       registro.decididoPor = cerradoPor
     }
   }
-  if (residencia.rol !== 'arrendatario') return
-  const registrados = new Set(
-    bd.registros.filter((r) => r.unidadId === residencia.unidadId && r.creadoPor === residencia.personaId).map((r) => r.id),
-  )
-  for (const vinculo of bd.residencias) {
-    if (
-      (vinculo.rol === 'autorizado' || vinculo.rol === 'familiar') &&
-      vinculo.registroId &&
-      registrados.has(vinculo.registroId) &&
-      residenciaVigente(vinculo)
-    ) {
-      vinculo.hasta = ayer
-      vinculo.cierre = { motivo: 'otro', detalle: 'Salió el arrendatario que lo registró.', cerradoPor, cerradoEn: ahora }
+  // Las visitas que registró quien sale (el arrendatario, el familiar) se
+  // revocan; las del propietario las hereda el siguiente (RN-65).
+  const salen = new Set<string>(residencia.rol === 'propietario' ? [] : [residencia.personaId])
+  if (residencia.rol === 'arrendatario' || residencia.rol === 'propietario') {
+    const registrados = new Set(
+      bd.registros.filter((r) => r.unidadId === residencia.unidadId && r.creadoPor === residencia.personaId).map((r) => r.id),
+    )
+    for (const vinculo of bd.residencias) {
+      // Del propietario sale solo su familia (Mary, 2026-10-02); lo demás que
+      // registró —el arrendatario, sus visitas— lo hereda el siguiente (RN-65).
+      const saleConEl =
+        residencia.rol === 'propietario' ? vinculo.rol === 'familiar' : vinculo.rol === 'autorizado' || vinculo.rol === 'familiar'
+      if (saleConEl && vinculo.registroId && registrados.has(vinculo.registroId) && residenciaVigente(vinculo)) {
+        vinculo.hasta = ayer
+        vinculo.cierre = {
+          motivo: 'otro',
+          detalle: residencia.rol === 'propietario' ? 'Salió el propietario que lo registró.' : 'Salió el arrendatario que lo registró.',
+          cerradoPor,
+          cerradoEn: ahora,
+        }
+        salen.add(vinculo.personaId)
+      }
     }
   }
   for (const visitante of bd.visitantes) {
     if (
       visitante.unidadId === residencia.unidadId &&
-      visitante.personaId === residencia.personaId &&
+      salen.has(visitante.personaId) &&
       visitante.estado === 'activo' &&
       visitante.vigenciaHasta >= hoyISO()
     ) {
@@ -3214,10 +3226,12 @@ export async function crearRegistroPersona(
     )
     if (motivo) throw new ErrorDeNegocio(motivo)
   } else {
-    rolEnLaUnidad = bd.residencias.find(
+    const suVinculo = bd.residencias.find(
       (r) => r.unidadId === parametros.unidadId && r.personaId === parametros.creadoPor && residenciaVigente(r),
-    )?.rol
-    if (!puedeRegistrar(rolEnLaUnidad, parametros.categoria)) {
+    )
+    rolEnLaUnidad = suVinculo?.rol
+    const esMenor = !!bd.registros.find((r) => r.id === suVinculo?.registroId)?.menorDeEdad
+    if (!puedeRegistrar(rolEnLaUnidad, parametros.categoria, esMenor, parametros.condicion)) {
       throw new ErrorDeNegocio('Tu papel en esta unidad no te permite registrar a esa clase de persona (RN-60).')
     }
   }

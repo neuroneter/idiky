@@ -1753,21 +1753,36 @@ const CATEGORIAS_POR_ROL: Record<RolResidencia, readonly CategoriaRegistro[]> = 
   propietario: ['propietario', 'arrendatario', 'familiar', 'visitante'],
   // El arrendatario registra a su familia y a sus visitas (2026-10-02).
   arrendatario: ['familiar', 'visitante'],
-  familiar: [],
+  // El familiar mayor de edad registra visitas de un día, y nada más (Mary,
+  // 2026-10-02). El menor, a nadie.
+  familiar: ['visitante'],
   autorizado: [],
 }
 
 export function categoriasQuePuedeRegistrar(
   rol: RolResidencia | undefined,
+  esMenor = false,
 ): readonly CategoriaRegistro[] {
+  if (rol === 'familiar' && esMenor) return []
   return rol ? CATEGORIAS_POR_ROL[rol] : []
+}
+
+/** Lo que cada quien puede escoger en «cómo se queda»: el familiar, solo «de un día». */
+export function condicionesQuePuedeRegistrar(
+  rol: RolResidencia | undefined,
+  categoria: CategoriaRegistro,
+): readonly CondicionRegistro[] {
+  return rol === 'familiar' ? ['no_residente'] : condicionesPosibles(categoria)
 }
 
 export function puedeRegistrar(
   rol: RolResidencia | undefined,
   categoria: CategoriaRegistro,
+  esMenor = false,
+  condicion?: CondicionRegistro,
 ): boolean {
-  return categoriasQuePuedeRegistrar(rol).includes(categoria)
+  if (!categoriasQuePuedeRegistrar(rol, esMenor).includes(categoria)) return false
+  return !condicion || condicionesQuePuedeRegistrar(rol, categoria).includes(condicion)
 }
 
 /**
