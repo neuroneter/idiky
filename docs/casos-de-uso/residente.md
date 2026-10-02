@@ -662,8 +662,15 @@ curso es **mixta**, así que se ven las dos formas de asistir.
 > para que otro vote por mi unidad»** (más abajo en este documento), que es lo que se construyó.
 > De esta versión, el apoderado **sí** vota por cada unidad que representa (`emitirVoto`, RN-29) y
 > se le muestra el acumulado (CU-A-19). Lo que **no** existe es el paso de **aceptar o rechazar**
-> el poder recibido: el diseño construido no lo pide. **Decisión de Mary (2026-10-02): «está bien
-> así»** — el poder vale sin que el apoderado lo acepte.
+> el poder recibido: el diseño construido no lo pide.
+>
+> **Decisión de Mary (2026-10-02), por construir (T-46):** *«si es usuario de Idiky lo debería
+> aprobar y la administración debe darlo como recibido»*. El poder dado desde la app valdrá cuando:
+> (1) si el apoderado **usa Idiky**, **lo apruebe** en su app; y (2) **la administración lo dé por
+> recibido**. Si el apoderado **no usa Idiky**, no tiene cómo aprobarlo antes: le llega el aviso a
+> su celular y basta con que la administración lo reciba. A los dos les llega un aviso. Mientras
+> falte un paso, la unidad no está representada y vota su propietario, como el poder en foto
+> (RN-96).
 > Se conserva abajo como estaba, por trazabilidad.
 
 - **Actor principal:** Copropietario apoderado

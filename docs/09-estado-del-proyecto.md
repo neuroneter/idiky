@@ -131,7 +131,10 @@ gastaron números.**
 versión («recibir y ejercer poderes») y la construida («dar poder para que otro vote por mi
 unidad»). La primera quedó marcada como versión anterior, con lo que sí existe de ella (el
 apoderado vota por cada unidad) y lo que **no**: **aceptar o rechazar el poder recibido**. Mary
-lo decidió: *«está bien así»*. El poder vale sin que el apoderado lo acepte.
+distinguió los dos casos y decidió (**T-46**, por construir): *«si es usuario de Idiky lo debería
+aprobar y la administración debe darlo como recibido»*. Si el apoderado no usa Idiky, basta con
+que la administración lo reciba. A los dos les llega un aviso. Necesita una regla nueva: espera el
+rango.
 
 **Lo que sigue pendiente de verdad, confirmado en el código:**
 - **CU-A-18** (⬜): no existe forma de crear, abrir ni cerrar una votación desde la consola. Las
