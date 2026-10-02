@@ -111,6 +111,31 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-02 · Mary + IA (Claude) · Las pruebas de navegador, dentro del repositorio (T-42)
+
+Mary: *«sí, haz el 1»* (traer sus pruebas al repositorio antes de que se pierdan con la sesión).
+Sobre la base que dejó Daniel (ADR-0020, `apps/pwa/pruebas/navegador/base.ts`), se trajeron las
+suites que vivían en el directorio de la sesión:
+
+| Archivo | Pruebas | Qué cubre |
+|---|---|---|
+| `apps/pwa/pruebas/navegador/reservas.spec.ts` | 12 | Zonas comunes y reservas (RN-104 a RN-129, CU-A-10, CU-A-29, CU-A-30) |
+| `apps/pwa/pruebas/navegador/usuarios.spec.ts` | 11 | Crear, cambiar e inhabilitar personas (RN-57 a RN-68) |
+| `apps/pwa/pruebas/navegador/cartera.spec.ts` | 2 | Estado de cuenta y paz y salvo (CU-R-18, CU-A-13) |
+| `apps/pwa/pruebas/navegador/pantallas.spec.ts` | 1 | Las 36 pantallas de los tres perfiles |
+
+**Resultado: 30 pruebas en verde en 1,9 minutos** (`npm run probar:navegador`), con las 4 de
+humo de Daniel. **«Autocierre» y «seis», que fallaban de noche, ya pasan siempre**: corren con el
+reloj fijo (viernes 2026-10-09, 10:00, Bogotá). Las fechas que las pruebas calculaban con el reloj
+real ahora usan `AHORA_PRUEBAS`. Las dos que solo imprimían resultados (`usuarios`, `herencia`)
+ahora los comprueban con `expect`. T-42 queda hecha.
+
+**Ojo para quien las corra en la nube de Claude Code:** el Chromium preinstalado ahí es de otra
+versión que la de `@playwright/test`; se apunta a él con `PLAYWRIGHT_BROWSERS_PATH`. En un
+computador normal basta `npm run probar:navegador:instalar` una vez.
+
+---
+
 ### 2026-10-02 · Integración · Sesión de IA (Claude) con Daniel · Jitsi encendido: la regla UDP ya existe (T-78)
 
 **Lo que cambió:** Daniel consiguió en Azure la regla **`Dev-Udp` — 10000/UDP desde cualquier
