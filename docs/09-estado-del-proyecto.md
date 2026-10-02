@@ -108,6 +108,49 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-09-26 · Integración · Sesión de IA (Claude) a pedido del responsable de integración · Jitsi escrito y apagado: falta un puerto UDP que no es nuestro (T-78, ADR-0016)
+
+**Lo que pidió Daniel:** otro contenedor en el servidor, para instalar
+[Jitsi](https://jitsi.org/), **para las asambleas virtuales**. Y preguntó si hacía falta algún
+permiso para conectarme.
+
+**El permiso no era el problema.** El acceso al servidor ya estaba (`ssh -i ~/.ssh/id_rsa.pem
+idiky@20.55.251.120` responde). Lo que se midió antes de escribir una línea sí lo fue:
+
+- **Jitsi no es una aplicación web más: lleva audio y video en tiempo real.** Su *videobridge*
+  necesita **`10000/udp` alcanzable desde internet**. La regla `Dev` de Azure solo deja pasar
+  **TCP 8080–8083**: comprobado desde fuera, el **8085 no llega**. Y **ADR-0014 ya dejó escrito
+  que el equipo no administra la suscripción de Azure**.
+- **El túnel de Cloudflare no lo salva.** Lleva HTTP con certificado; el medio va por UDP, y el
+  `jvb` ya no trae el respaldo por TCP. El túnel puede dar la página, no el video.
+- **El servidor va apretado**: 2 núcleos y 5 GB para *todo* `idiky`, y `jicofo` y `jvb` son dos
+  JVM que de fábrica piden hasta 3 GB de heap cada una. En disco quedan **4,3 GB**, y las cuatro
+  imágenes de Jitsi pesan ~1,2 GB: el disco queda justo en el mínimo de 3 GB que `levantar.sh`
+  exige para construir.
+- **Y hay una decisión previa**: **ADR-0007 dice que Idiky no transmite video**, que enlaza el
+  Zoom o el Meet que la copropiedad ya use. Jitsi propio la reabre, y el porqué lo tiene que
+  poner Daniel.
+
+**Qué se hizo:** el servicio completo, escrito y registrado, **apagado hasta que exista la regla
+UDP**. `infra/jitsi/` (pod `idiky-jitsi` de cinco contenedores: nginx + web + prosody + jicofo +
+videobridge, en el **8085** y **`10000/udp`**), con versión fija `stable-11031`, los heaps
+recortados a mano para que quepan bajo el techo de 5 GB, `secretos.sh`, `comun.env`, su
+[README](../infra/jitsi/README.md) y [ADR-0016](./adr/0016-jitsi-propio-para-las-asambleas-virtuales.md)
+en estado **Propuesta**. Registrado en `levantar.sh`, `desplegar.sh`, las tablas de puertos y la
+guía de despliegue; **`todo` no lo incluye**, como el túnel.
+
+**Dos decisiones del diseño que vale la pena recordar:** **1)** **sin la clave del entorno**, por
+lo mismo que BOB —Jitsi habla por WebSocket y `auth_basic` lo rompe—: la puerta es que **sin
+cuenta no se puede abrir una sala** (`ENABLE_AUTH=1`, cuentas creadas con `prosodyctl`), y para
+entrar a una sala abierta basta el enlace; **2)** **solo persiste `prosody`**, porque ahí viven
+esas cuentas.
+
+**Qué sigue, en orden:** **1)** pedir a quien administre Azure la regla **`10000/udp`**; **2)**
+que Daniel declare el porqué frente a ADR-0007, para que ADR-0016 pase de Propuesta a Aceptada;
+**3)** el disco. Y una advertencia que quedó escrita: **con 2 núcleos compartidos esto sirve para
+probar y para reuniones pequeñas**; una asamblea de verdad, con decenas de cámaras, pide la VM
+propia. **No se tocó el servidor**: solo se leyó su estado.
+
 ### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Cómo se siente el primer día: «Arma tu copropiedad» (prototipo)
 
 **La preocupación de Daniel:** que crear un edificio, un conjunto o sus unidades sea difícil para

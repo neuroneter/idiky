@@ -7,8 +7,9 @@
 #
 #   REVISION=abc1234 IDIKY_SERVICIOS="pwa contable" sh infra/servidor/levantar.sh
 #
-# IDIKY_SERVICIOS dice cuales se publican (pwa, contable, gestion, bloky, tunel); los demas no se
-# tocan. Sin la variable se publican los cuatro de siempre (el tunel solo si se nombra).
+# IDIKY_SERVICIOS dice cuales se publican (pwa, contable, gestion, bloky, tunel, jitsi); los
+# demas no se tocan. Sin la variable se publican los cuatro de siempre (el tunel y jitsi solo
+# si se nombran).
 #
 # Configuracion opcional, fuera del repositorio, en ~/.config/idiky/entorno:
 #   IDIKY_HOST=127.0.0.1         # 0.0.0.0 para publicar hacia la red
@@ -17,6 +18,9 @@
 #   IDIKY_PUERTO_GESTION=8082
 #   IDIKY_PUERTO_BLOKY=8083
 #   IDIKY_PUERTO_TUNEL=8084      # solo /ready del tunel, y solo en 127.0.0.1 (ADR-0014)
+#   IDIKY_PUERTO_JITSI=8085      # la sala de Jitsi por HTTP (ADR-0016)
+#   IDIKY_PUERTO_JITSI_UDP=10000 # el VIDEO de Jitsi. Necesita una regla UDP en Azure
+#   IDIKY_JITSI_VERSION=stable-11031   # la version de las cuatro imagenes de Jitsi
 #   IDIKY_DATOS=$HOME/datos      # lo que persiste: PostgreSQL, archivos subidos, respaldos
 #   IDIKY_MINIMO_DISCO_MB=3000   # con menos espacio libre no se construye nada
 set -eu
@@ -35,6 +39,9 @@ IDIKY_PUERTO_CONTABLE="${IDIKY_PUERTO_CONTABLE:-8081}"
 IDIKY_PUERTO_GESTION="${IDIKY_PUERTO_GESTION:-8082}"
 IDIKY_PUERTO_BLOKY="${IDIKY_PUERTO_BLOKY:-8083}"
 IDIKY_PUERTO_TUNEL="${IDIKY_PUERTO_TUNEL:-8084}"
+IDIKY_PUERTO_JITSI="${IDIKY_PUERTO_JITSI:-8085}"
+IDIKY_PUERTO_JITSI_UDP="${IDIKY_PUERTO_JITSI_UDP:-10000}"
+IDIKY_JITSI_VERSION="${IDIKY_JITSI_VERSION:-stable-11031}"
 IDIKY_DATOS="${IDIKY_DATOS:-$HOME/datos}"
 IDIKY_MINIMO_DISCO_MB="${IDIKY_MINIMO_DISCO_MB:-3000}"
 UNIDADES="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
@@ -42,8 +49,8 @@ SECRETOS="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/secretos"
 
 for servicio in $IDIKY_SERVICIOS; do
   case "$servicio" in
-    pwa | contable | gestion | bloky | tunel) ;;
-    *) echo "Servicio desconocido: $servicio. Son pwa, contable, gestion, bloky y tunel." >&2; exit 2 ;;
+    pwa | contable | gestion | bloky | tunel | jitsi) ;;
+    *) echo "Servicio desconocido: $servicio. Son pwa, contable, gestion, bloky, tunel y jitsi." >&2; exit 2 ;;
   esac
 done
 incluye() {
@@ -190,6 +197,59 @@ levantar_tunel() {
   systemctl --user enable --now "container-$nombre.service"
 }
 
+# Jitsi para las asambleas virtuales (ADR-0016): un pod de cinco contenedores. nginx es el
+# unico con puerto HTTP; prosody (XMPP), jicofo (quien arma la conferencia) y jitsi/web se
+# hablan por 127.0.0.1 dentro del pod.
+#
+# La diferencia con los demas servicios: el videobridge necesita un puerto UDP alcanzable
+# DESDE INTERNET (10000/udp). Sin la regla UDP en el grupo de seguridad de red de Azure, la
+# sala se ve pero no hay audio ni video. Es lo unico de Idiky que no basta con publicar aqui.
+#
+# port_handler=slirp4netns conserva la IP real de quien llega, que aqui no es un lujo: el
+# videobridge empareja candidatos ICE por direccion, y con todos llegando de la misma IP el
+# emparejamiento se vuelve inutil.
+levantar_jitsi() {
+  pod="idiky-jitsi"
+  echo "==> Levantando el pod $pod en $IDIKY_HOST:$1 (video en $IDIKY_HOST:$2/udp)"
+  # comun.env se copia fuera de la carpeta del despliegue, como el script de respaldo: la
+  # unidad de systemd guarda la ruta del --env-file tal cual, y esa carpeta se reemplaza en
+  # cada despliegue. Con una ruta relativa, el pod no volveria tras reiniciar el servidor.
+  COMUN="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/jitsi-comun.env"
+  install -m 644 infra/jitsi/comun.env "$COMUN"
+  # Solo prosody persiste: ahi viven las CUENTAS de quien puede abrir salas. Las demas piezas
+  # regeneran su configuracion desde las variables en cada arranque.
+  mkdir -p "$IDIKY_DATOS/jitsi/prosody"
+  chmod 700 "$IDIKY_DATOS" "$IDIKY_DATOS/jitsi"
+  systemctl --user stop "pod-$pod.service" 2>/dev/null || true
+  podman pod rm --force --ignore "$pod" >/dev/null
+  podman pod create --name "$pod" --network slirp4netns:port_handler=slirp4netns \
+    --publish "$IDIKY_HOST:$1:80" --publish "$IDIKY_HOST:$2:$2/udp" >/dev/null
+  podman create --pod "$pod" --name "$pod-prosody" --memory 192m --pids-limit 256 \
+    --env-file "$COMUN" --env-file "$SECRETOS/jitsi.env" \
+    --volume "$IDIKY_DATOS/jitsi/prosody:/config" \
+    "docker.io/jitsi/prosody:$IDIKY_JITSI_VERSION" >/dev/null
+  podman create --pod "$pod" --name "$pod-jicofo" --memory 384m --pids-limit 512 \
+    --env-file "$COMUN" --env-file "$SECRETOS/jitsi.env" \
+    "docker.io/jitsi/jicofo:$IDIKY_JITSI_VERSION" >/dev/null
+  # JVB_PORT tiene que ser el mismo puerto que publica el pod: un solo origen para el numero.
+  podman create --pod "$pod" --name "$pod-jvb" --memory 640m --pids-limit 512 \
+    --env-file "$COMUN" --env-file "$SECRETOS/jitsi.env" \
+    --env "JVB_PORT=$2" \
+    "docker.io/jitsi/jvb:$IDIKY_JITSI_VERSION" >/dev/null
+  # jitsi/web cede el 80 del pod al nginx de Idiky, que es el que responde /salud.
+  podman create --pod "$pod" --name "$pod-web" --memory 128m --pids-limit 256 \
+    --env-file "$COMUN" --env-file "$SECRETOS/jitsi.env" \
+    --env "HTTP_PORT=8000" \
+    "docker.io/jitsi/web:$IDIKY_JITSI_VERSION" >/dev/null
+  podman create --pod "$pod" --name "$pod-proxy" --memory 64m --pids-limit 64 \
+    "localhost/idiky-jitsi-proxy:actual" >/dev/null
+  mkdir -p "$UNIDADES"
+  (cd "$UNIDADES" && podman generate systemd --new --files --name "$pod" >/dev/null)
+  podman pod rm --force "$pod" >/dev/null
+  systemctl --user daemon-reload
+  systemctl --user enable --now "pod-$pod.service"
+}
+
 # Respaldo diario de la base (infra/gestion/respaldo.sh). Se copia fuera de la carpeta del
 # despliegue porque esa carpeta se reemplaza en cada despliegue.
 instalar_respaldo_gestion() {
@@ -237,6 +297,15 @@ if incluye bloky && grep -q 'CAMBIAR-POR' "$SECRETOS/bloky-api.env"; then
   echo "Los secretos de BLOKY tienen valores sin completar (CAMBIAR-POR...): editar $SECRETOS/bloky-api.env" >&2
   exit 1
 fi
+if incluye jitsi && [ ! -f "$SECRETOS/jitsi.env" ]; then
+  echo "Faltan los secretos de Jitsi. Se crean una vez: ssh idiky@<ip> 'sh -s' < infra/jitsi/secretos.sh" >&2
+  exit 1
+fi
+if incluye jitsi && grep -q 'CAMBIAR-POR' "$SECRETOS/jitsi.env"; then
+  echo "Los secretos de Jitsi tienen valores sin completar (CAMBIAR-POR...): editar $SECRETOS/jitsi.env." >&2
+  echo "JVB_ADVERTISE_IPS es la IP publica del servidor; sin ella no hay video." >&2
+  exit 1
+fi
 if incluye tunel && [ ! -f "$SECRETOS/tunel.env" ]; then
   echo "Falta el token del tunel. Se crea una vez con infra/tunel/secretos.sh (ver su encabezado: el script se copia y el token va por stdin)" >&2
   exit 1
@@ -257,6 +326,15 @@ if incluye bloky; then
   podman pull --quiet docker.io/library/postgres:17-alpine >/dev/null
 fi
 if incluye tunel; then construir tunel tunel/Containerfile 512m; fi
+if incluye jitsi; then
+  construir jitsi-proxy jitsi/proxy.Containerfile
+  # Las cuatro imagenes de Jitsi no se construyen: se traen con version fija, como postgres.
+  # Pesan cerca de 1 GB en disco, y el disco de este servidor es lo mas escaso que hay.
+  for imagen in web prosody jicofo jvb; do
+    echo "==> Trayendo jitsi/$imagen:$IDIKY_JITSI_VERSION"
+    podman pull --quiet "docker.io/jitsi/$imagen:$IDIKY_JITSI_VERSION" >/dev/null
+  done
+fi
 
 if incluye pwa; then levantar pwa "$IDIKY_PUERTO_PWA"; fi
 if incluye contable; then levantar contable "$IDIKY_PUERTO_CONTABLE"; fi
@@ -266,6 +344,7 @@ if incluye gestion; then
 fi
 if incluye bloky; then levantar_bloky "$IDIKY_PUERTO_BLOKY"; fi
 if incluye tunel; then levantar_tunel "$IDIKY_PUERTO_TUNEL"; fi
+if incluye jitsi; then levantar_jitsi "$IDIKY_PUERTO_JITSI" "$IDIKY_PUERTO_JITSI_UDP"; fi
 
 if incluye pwa; then esperar pwa "$IDIKY_PUERTO_PWA"; fi
 if incluye contable; then esperar contable "$IDIKY_PUERTO_CONTABLE"; fi
@@ -283,6 +362,11 @@ if incluye tunel; then
   # /ready responde 200 cuando hay al menos una conexion viva con Cloudflare.
   esperar tunel "$IDIKY_PUERTO_TUNEL" /ready 60
 fi
+if incluye jitsi; then
+  esperar jitsi "$IDIKY_PUERTO_JITSI"
+  # config.js lo genera jitsi/web al arrancar: si responde, la sala ya se puede abrir.
+  esperar jitsi "$IDIKY_PUERTO_JITSI" /config.js 120
+fi
 
 # El disco del servidor es compartido y escaso: se borra toda imagen que no use un
 # contenedor en marcha, incluidos Node y las capas de construccion. Lo publicado queda; el
@@ -290,7 +374,12 @@ fi
 podman image prune --all --force >/dev/null
 
 echo "==> Lo que queda publicado (cada servicio con su revision)"
-for par in "pwa:$IDIKY_PUERTO_PWA" "contable:$IDIKY_PUERTO_CONTABLE" "gestion:$IDIKY_PUERTO_GESTION" "bloky:$IDIKY_PUERTO_BLOKY"; do
+PARES="pwa:$IDIKY_PUERTO_PWA contable:$IDIKY_PUERTO_CONTABLE gestion:$IDIKY_PUERTO_GESTION bloky:$IDIKY_PUERTO_BLOKY"
+# jitsi solo aparece si esta instalado: hasta entonces no tiene sentido decir que no responde.
+if incluye jitsi || podman pod exists idiky-jitsi 2>/dev/null; then
+  PARES="$PARES jitsi:$IDIKY_PUERTO_JITSI"
+fi
+for par in $PARES; do
   printf '    %-9s %s\n' "${par%%:*}" "$(curl -fsS --max-time 3 "http://$LOCAL:${par#*:}/revision.txt" 2>/dev/null || echo 'no responde')"
 done
 df -h "$HOME" | tail -1

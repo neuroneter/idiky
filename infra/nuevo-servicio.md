@@ -55,12 +55,17 @@ despliega sin la clave.
 | 8082 | Pod `idiky-gestion` (sistema de gestión) |
 | 8083 | Pod `idiky-bloky` (BLOKY Dev: app + API + PostgreSQL) |
 | 8084 | `idiky-tunel`, solo `/ready` y solo en `127.0.0.1` (ADR-0014). El túnel no publica nada hacia internet |
-| **8085 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
+| 8085 | Pod `idiky-jitsi` (Jitsi, ADR-0016) |
+| **10000/udp** | El **video** de Jitsi. Es el único puerto UDP de Idiky, y **necesita una regla propia en Azure**: la regla `Dev` es solo TCP |
+| **8086 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
 
 - **Para que se vea desde internet** hay que agregar el puerto a la regla `Dev` del grupo de
   seguridad de red en Azure (hoy dice `8080,8081,8082`). Eso lo hace el **responsable de
   integración** en el portal, en *Intervalos de puertos de destino*: `8080,8081,8082,8083,8084`. Sin ese
   paso el puerto no llega desde internet.
+- **Un servicio con audio o video en tiempo real necesita UDP**, y eso es una regla nueva en
+  Azure, no un puerto más en la existente. Antes de construir nada, asegúrate de que alguien
+  pueda crearla: el equipo **no administra la suscripción** (ADR-0014, ADR-0016).
 - **Aunque no esté en la regla, escucha en todas las interfaces** mientras
   `IDIKY_HOST=0.0.0.0`, y la red virtual de Azure sí llega. Un servicio que no debe salir del
   servidor necesita otro tratamiento (§5).

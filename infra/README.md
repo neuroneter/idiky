@@ -17,6 +17,7 @@ que **no puede verse afectado**. Las decisiones y sus porqués están en
 | Contable | `infra/contable/` | contenedor `idiky-contable` | `8081` | Clave del entorno | Copia `apps/contable` **tal cual** (ADR-0010) y la sirve con nginx. **Demo** |
 | **BOB** | `infra/gestion/` | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082`, y por nombre **`https://bob-dev.idiky.com`** (ruta del mismo túnel, ADR-0014) | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`apps/gestion`, ADR-0012) |
 | **BLOKY Dev** | `infra/bloky/` | **pod** `idiky-bloky`: nginx + API de BLOKY + PostgreSQL | `8083`, y por nombre **`https://bloky-dev.idiky.com`** (túnel, ADR-0014). El ingreso solo funciona por el nombre | Clave del entorno, y luego **el ingreso de BLOKY** (código SMS, Google o Microsoft, con lo registrado en BOB) | El sistema de las copropiedades, construido de cero (`apps/bloky`, `apps/bloky-api`; ADR-0008, ADR-0013) |
+| **Jitsi** *(sin desplegar)* | `infra/jitsi/` | **pod** `idiky-jitsi`: nginx + web + prosody + jicofo + videobridge | `8085`, y **`10000/udp` para el video** | Cuenta de Jitsi para **abrir** una sala; el enlace basta para entrar | Las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md), [`jitsi/README.md`](./jitsi/README.md)). **Apagado hasta que Azure deje pasar `10000/udp`**: sin eso la sala abre y no hay ni audio ni video |
 | **Túnel** | `infra/tunel/` | contenedor `idiky-tunel` (`cloudflared`) | ninguno hacia internet; `/ready` en `127.0.0.1:8084` | — | Publica BLOKY Dev en `https://bloky-dev.idiky.com` con certificado de Cloudflare, sin abrir puertos ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)). Su token: `infra/tunel/secretos.sh` |
 
 ## 1. La regla del servidor
@@ -117,6 +118,12 @@ user-1001.slice ·············· techo: 2 núcleos de CPU y 5 GB   (
     │   ├── proxy ·························· 64 MB
     │   ├── strapi ························· 1,5 GB  (en reposo usa ~140 MB)
     │   └── postgres ······················· 512 MB  (en reposo usa ~90 MB)
+    ├── pod-idiky-jitsi.service (sin desplegar)
+    │   ├── proxy ·························· 64 MB
+    │   ├── web ···························· 128 MB
+    │   ├── prosody ························ 192 MB
+    │   ├── jicofo ························· 384 MB  (heap recortado a 256 MB)
+    │   └── videobridge ···················· 640 MB  (heap recortado a 512 MB)
     ├── idiky-gestion-respaldo.timer ······· pg_dump diario
     └── construcciones ····················· nice 15 · 2 GB (Strapi: 3 GB)
 ```
@@ -351,6 +358,8 @@ poner:
 | `~idiky/.config/idiky/nginx/acceso.conf` y `htpasswd` | La clave del entorno | `clave-acceso.sh` o el comando del §6 |
 | `~idiky/.config/idiky/secretos/gestion-*.env` | Secretos de Strapi y PostgreSQL (600) | `infra/gestion/secretos.sh` |
 | `~idiky/.config/idiky/secretos/integraciones.env` | Credenciales de Twilio Verify (600). **Todavía no las usa ningún servicio**: son para **BLOKY**, el sistema de las copropiedades (ADR-0008), que las recibirá con `--env-file`. **BOB no las usa** | `servidor/cargar-integraciones.sh`, desde la máquina de quien tiene los valores |
+| `~idiky/.config/idiky/secretos/jitsi.env` | Claves internas de Jitsi, su `PUBLIC_URL` y **`JVB_ADVERTISE_IPS`** (600) | `infra/jitsi/secretos.sh`, y dos valores a mano |
+| `~idiky/datos/jitsi/prosody/` | **Las cuentas de quien puede abrir salas** en Jitsi | prosody, al primer arranque |
 | `~idiky/datos/gestion/postgres/` | **La base de datos del sistema de gestión** | PostgreSQL, al primer arranque |
 | `~idiky/datos/gestion/uploads/` | Archivos subidos a Strapi | Strapi |
 | `~idiky/datos/respaldos/gestion/` | Los últimos 7 respaldos | `respaldo.sh` |
@@ -358,6 +367,7 @@ poner:
 | `~idiky/.config/idiky/vecino-base.txt` | La última foto de LangFlow | `verificar-vecino.sh --base` |
 | `~idiky/.config/systemd/user/*.service`, `*.timer` | Las unidades | `levantar.sh`. **No se editan a mano** |
 | `~idiky/.local/bin/idiky-gestion-respaldo` | Copia del script de respaldo | `levantar.sh` |
+| `~idiky/.config/idiky/jitsi-comun.env` | La configuración común de Jitsi, fuera de la carpeta del despliegue (la unidad de systemd guarda la ruta tal cual) | `levantar.sh` |
 | `~idiky/.config/cni/net.d/87-podman.conflist` | La red por defecto de Podman | Podman |
 | `~idiky/despliegues/` | Las últimas 3 copias del código desplegado y `registro.tsv`, con quién desplegó qué | `desplegar.sh` |
 | `~idiky/.idiky-despliegue.lock` | El candado: un despliegue a la vez | `desplegar.sh` (`flock`) |
@@ -400,7 +410,7 @@ sus respaldos**: sácalos antes si hacen falta. Se corre con un usuario con sudo
 ```bash
 sudo -u idiky XDG_RUNTIME_DIR=/run/user/$(id -u idiky) \
   systemctl --user disable --now container-idiky-pwa container-idiky-contable \
-  pod-idiky-gestion pod-idiky-bloky container-idiky-tunel idiky-gestion-respaldo.timer
+  pod-idiky-gestion pod-idiky-bloky pod-idiky-jitsi container-idiky-tunel idiky-gestion-respaldo.timer
 sudo loginctl disable-linger idiky
 sudo rm -rf /etc/systemd/system.control/user-$(id -u idiky).slice.d && sudo systemctl daemon-reload
 sudo pkill -u idiky; sudo userdel -r idiky

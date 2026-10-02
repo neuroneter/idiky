@@ -6,15 +6,18 @@
 #   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main contable
 #   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main gestion
 #   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main bloky
+#   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main jitsi
 #   IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main todo
 #
-# Servicios: pwa (8080), contable (8081), gestion (8082, BOB), bloky (8083) y tunel (ADR-0014). Los que no se nombran siguen
-# como estaban. La direccion del servidor no va en el repositorio a proposito.
+# Servicios: pwa (8080), contable (8081), gestion (8082, BOB), bloky (8083), tunel (ADR-0014) y
+# jitsi (8085 y 10000/udp, ADR-0016). Los que no se nombran siguen como estaban. `todo` NO
+# incluye el tunel ni jitsi: los publica solo el responsable de integracion, nombrandolos.
+# La direccion del servidor no va en el repositorio a proposito.
 set -eu
 
 : "${IDIKY_SERVIDOR:?Falta el destino, p. ej. IDIKY_SERVIDOR=idiky@203.0.113.10}"
 if [ $# -lt 2 ]; then
-  echo "Uso: infra/desplegar.sh <rama-o-commit> <pwa|contable|gestion|bloky|tunel|todo> [otro servicio...]" >&2
+  echo "Uso: infra/desplegar.sh <rama-o-commit> <pwa|contable|gestion|bloky|tunel|jitsi|todo> [otro servicio...]" >&2
   exit 2
 fi
 REF="$1"
@@ -23,12 +26,12 @@ shift
 SERVICIOS=""
 for servicio in "$@"; do
   case "$servicio" in
-    pwa | contable | gestion | bloky | tunel)
+    pwa | contable | gestion | bloky | tunel | jitsi)
       case " $SERVICIOS " in *" $servicio "*) ;; *) SERVICIOS="$SERVICIOS $servicio" ;; esac
       ;;
     todo) SERVICIOS=" pwa contable gestion bloky" ;;
     *)
-      echo "Servicio desconocido: $servicio. Son pwa, contable, gestion, bloky, tunel o todo." >&2
+      echo "Servicio desconocido: $servicio. Son pwa, contable, gestion, bloky, tunel, jitsi o todo." >&2
       exit 2
       ;;
   esac
