@@ -37,6 +37,8 @@ import {
   decisionAdmisibleEnLaSesion,
   mayoriaDelPunto,
   resultadoVotacion,
+  baseDeVoto,
+  unidadesNecesarias,
   sumaCoeficientes,
   etiquetaUnidad,
   formasDeAsistir,
@@ -176,12 +178,21 @@ export function AsambleaDetallePage() {
     const conteo = contarVotacion(votacion, votos)
     // El resultado se calcula sobre la base que exige la ley: lo representado
     // para la simple, el edificio entero para la calificada (arts. 45 y 46).
+    // RN-211 — Económica, por coeficiente; si no, en vivienda, una unidad un voto.
+    const base = baseDeVoto(sel.copropiedad(bd, sesion!.copropiedadId), votacion)
+    const porUnidad = base === 'unidad'
     const resultado = resultadoVotacion({
       conteo,
       mayoria,
       coeficienteRepresentado: resumen.coeficiente,
       coeficienteEdificio: sumaCoeficientes(sel.unidadesDe(bd, sesion!.copropiedadId)),
+      baseDeVoto: base,
+      unidadesRepresentadas: resumen.unidades,
+      unidadesEdificio: sel.unidadesDe(bd, sesion!.copropiedadId).length,
     })
+    const umbralTexto = porUnidad
+      ? `al menos ${unidadesNecesarias(resultado.umbral, mayoria)} ${resultado.baseTexto}`
+      : null
     const abierta = votacion.estado === 'abierta'
     // RN-94 — Si la sesión no puede tomar esta decisión, no hay voto que emitir.
     // Se pasa `{ modalidad }` y no `asamblea` porque esta es una declaración de
@@ -207,11 +218,23 @@ export function AsambleaDetallePage() {
               importa: la calificada **se alcanza** (70 %), la simple **se
               supera** (más de la mitad). Con exactamente la mitad, no pasa. */}
           <span className="subtitulo" style={{ textAlign: 'right' }}>
-            {mayoria === 'calificada'
-              ? `${formatearCoeficiente(resultado.umbral)} ${resultado.baseTexto} (art. 46)`
-              : `más de ${formatearCoeficiente(resultado.umbral)} ${resultado.baseTexto} (art. 45)`}
+            {umbralTexto
+              ? `${umbralTexto} (${mayoria === 'calificada' ? 'art. 46' : 'art. 45'})`
+              : mayoria === 'calificada'
+                ? `${formatearCoeficiente(resultado.umbral)} ${resultado.baseTexto} (art. 46)`
+                : `más de ${formatearCoeficiente(resultado.umbral)} ${resultado.baseTexto} (art. 45)`}
           </span>
         </div>
+
+        {/* RN-211 — Cómo se cuenta este punto, antes de votar: no es lo mismo
+            que pese el coeficiente a que cada unidad valga un voto. */}
+        <p className="tenue" style={{ fontSize: 'var(--texto-xs)', marginBottom: 'var(--e3)' }}>
+          {porUnidad
+            ? 'Decisión no económica: cada unidad vale un voto, sin importar su coeficiente (Corte Constitucional, sentencia C-522 de 2002).'
+            : votacion.contenidoEconomico
+              ? 'Decisión económica: el voto de cada unidad pesa su coeficiente (Ley 675 de 2001, art. 37).'
+              : 'Decisión no económica en un edificio que, por su reglamento, vota por coeficiente.'}
+        </p>
 
         {/* RN-94 — **Antes que cualquier otra cosa.** Que la decisión no quepa
             en esta reunión no es un detalle del reglamento: lo que se votara
@@ -281,8 +304,9 @@ export function AsambleaDetallePage() {
             ) : (
               unidad && (
                 <p className="subtitulo">
-                  Tu voto pesa {formatearCoeficiente(pesoDelVoto(unidad))}, que es el coeficiente
-                  de tu unidad. Una vez emitido no se cambia.
+                  {porUnidad
+                    ? 'Tu unidad vale un voto, igual que las demás. Una vez emitido no se cambia.'
+                    : `Tu voto pesa ${formatearCoeficiente(pesoDelVoto(unidad))}, que es el coeficiente de tu unidad. Una vez emitido no se cambia.`}
                 </p>
               )
             )}
@@ -298,8 +322,8 @@ export function AsambleaDetallePage() {
                   Votaste {votacion.opciones.find((o) => o.id === miVoto.opcionId)?.texto}
                 </strong>
                 <span className="subtitulo">
-                  {formatearFechaHora(miVoto.fecha)} · con un peso de{' '}
-                  {formatearCoeficiente(miVoto.coeficiente)}
+                  {formatearFechaHora(miVoto.fecha)} ·{' '}
+                  {porUnidad ? 'un voto de tu unidad' : `con un peso de ${formatearCoeficiente(miVoto.coeficiente)}`}
                 </span>
               </div>
             </div>
@@ -315,13 +339,19 @@ export function AsambleaDetallePage() {
                 <div key={opcion.opcionId} className="columna" style={{ gap: 'var(--e1)' }}>
                   <div className="fila">
                     <span className="subtitulo">{opcion.texto}</span>
-                    <strong className="numerico">{formatearCoeficiente(opcion.coeficiente)}</strong>
+                    <strong className="numerico">
+                      {porUnidad
+                        ? `${opcion.unidades} ${opcion.unidades === 1 ? 'voto' : 'votos'}`
+                        : formatearCoeficiente(opcion.coeficiente)}
+                    </strong>
                   </div>
                   <div className="medidor">
                     <div
                       className="medidor__relleno"
                       style={{
-                        width: `${conteo.coeficienteVotante > 0 ? (opcion.coeficiente / conteo.coeficienteVotante) * 100 : 0}%`,
+                        width: porUnidad
+                          ? `${conteo.unidadesVotantes > 0 ? (opcion.unidades / conteo.unidadesVotantes) * 100 : 0}%`
+                          : `${conteo.coeficienteVotante > 0 ? (opcion.coeficiente / conteo.coeficienteVotante) * 100 : 0}%`,
                       }}
                     />
                   </div>
@@ -716,6 +746,7 @@ export function AsambleaDetallePage() {
             presidente={sel.persona(bd, actaAprobada.presidenteId ?? '')}
             secretario={sel.persona(bd, actaAprobada.secretarioId ?? '')}
             coeficienteEdificio={sumaCoeficientes(sel.unidadesDe(bd, sesion.copropiedadId))}
+            unidadesEdificio={sel.unidadesDe(bd, sesion.copropiedadId).length}
             quorumMinimo={quorumMinimo}
           />
         </div>
@@ -747,12 +778,13 @@ export function AsambleaDetallePage() {
         ))}
       </div>
 
-      {/* Lo que falta se nombra, no se esconde: es la diferencia entre un demo
-          honesto y uno que promete lo que nadie ha decidido todavía. */}
+      {/* Cómo se cuenta, en una línea: cada punto lo dice arriba, y aquí va la
+          regla completa para quien quiera saber de dónde sale (RN-211). */}
       <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
-        El conteo es por coeficiente (RN-27). Si un punto quedó aprobado depende de la mayoría
-        exigida y del quórum con que se instaló la asamblea, reglas que el equipo todavía tiene
-        que definir.
+        Las decisiones económicas se cuentan por coeficiente (Ley 675 de 2001, art. 37); en un
+        conjunto de vivienda, las demás se cuentan un voto por unidad (Corte Constitucional,
+        C-522 de 2002). Un punto se aprueba con la mayoría que exige (arts. 45 y 46) y si la
+        asamblea tiene quórum.
       </p>
     </>
   )

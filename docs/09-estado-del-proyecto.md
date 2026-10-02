@@ -111,6 +111,47 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-02 · Mary + IA (Claude) · Votaciones: por coeficiente o una unidad, un voto (RN-211)
+
+Mary: *«las votaciones están definidas por la Ley 675 de 2001, que entiendo que es solamente por
+coeficiente; sin embargo, hay una sentencia que para decisiones no económicas tiene en cuenta el
+voto por cabeza… revisar la norma y estructurar desde la parametrización del edificio»*.
+
+**La norma, revisada:** Ley 675 de 2001, art. 37 (el voto vale el coeficiente) y **Corte
+Constitucional, sentencia C-522 de 2002**, que lo dejó vigente con una condición: en inmuebles
+**de vivienda**, el coeficiente cuenta **solo en las decisiones de contenido económico**; las demás,
+**un voto por unidad privada**. Fuentes consultadas:
+[C-522/02, Corte Constitucional](https://www.corteconstitucional.gov.co/relatoria/2002/C-522-02.htm),
+[SISJUR Bogotá](https://www.alcaldiabogota.gov.co/sisjur/normas/Norma1.jsp?i=6926),
+[Actualícese](https://actualicese.com/archivo/decisiones-no-economicas-en-p-h-residenciales-un-bien-un-voto-y-no-por-coeficiente/).
+**Ojo:** el texto completo de la sentencia no se pudo abrir desde el entorno de la sesión (la red lo
+bloquea); se verificó con el buscador y fuentes que la citan. **Que lo confirme el abogado.**
+
+**Decisiones de Mary:** en residencial queda **fijo por ley** (*«sí»*) y **la administración escoge
+siempre** si cada votación es económica (*«sí, debe seleccionar»*).
+
+**Lo construido (RN-211):**
+- `Votacion.contenidoEconomico` y `baseDeVoto`: económica → coeficiente; no económica → por unidad en
+  residencial, coeficiente en comercial y, en mixto, lo que escoja la administración.
+- Las mayorías por unidad se miden en unidades (simple: las representadas; calificada: las del
+  edificio). El quórum sigue por coeficiente.
+- **Asambleas** (consola): tarjeta «Cómo se cuentan los votos»; en mixto, con la opción.
+- **App del residente:** cada punto dice cómo se cuenta antes de votar, y el conteo se muestra en votos
+  o en coeficiente. Se corrigió el texto viejo que decía que «el equipo todavía tiene que definir»
+  las mayorías.
+- **El acta** dice, por punto, cómo se contó y con qué fundamento.
+- **Semilla v34:** las cuatro votaciones del demo son económicas; la asamblea en curso trae una que
+  no lo es: **mascotas en las zonas comunes**.
+- **Pruebas:** `apps/pwa/pruebas/navegador/asambleas.spec.ts` (5); **38 en verde**.
+
+**Para el abogado:** cómo votar en los **mixtos**, y si la **mayoría calificada** de una decisión no
+económica se mide sobre el total de unidades.
+
+**Sigue:** CU-A-18 (crear, abrir y cerrar votaciones desde la consola), donde la administración
+escoge «económica / no económica» al crear la votación; y T-46.
+
+---
+
 ### 2026-10-02 · Mary + IA (Claude) · Cada edificio decide la aprobación del propietario (RN-210)
 
 Mary, sobre las preguntas abiertas de usuarios: *«voy a cambiar el tema de aprobación del familiar o

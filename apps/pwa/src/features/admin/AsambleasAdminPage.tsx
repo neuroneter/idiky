@@ -37,6 +37,7 @@ import {
   revocarPoder,
   validarPoder,
   rechazarPoder,
+  configurarVotoNoEconomico,
 } from '../../datos/repositorio'
 import {
   MODALIDADES,
@@ -68,6 +69,7 @@ import {
   poderEsperandoValidacion,
   poderRechazado,
   resumenAsistencia,
+  baseDeVoto,
 } from '../../dominio/reglas'
 import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import type { Asamblea, ModalidadAsamblea, TipoAsamblea } from '../../dominio/tipos'
@@ -93,6 +95,7 @@ export function AsambleasAdminPage() {
   const [viendoActa, setViendoActa] = useState<string | null>(null)
 
   if (!sesion) return null
+  const copropiedad = sel.copropiedad(bd, sesion.copropiedadId)
 
   const asambleas = sel
     .asambleasDe(bd, sesion.copropiedadId)
@@ -119,6 +122,71 @@ export function AsambleasAdminPage() {
           <Icono nombre="mas" tamano={16} />
           Convocar
         </button>
+      </div>
+
+      {/* RN-211 — Cómo se cuentan los votos en este edificio. Va arriba porque
+          decide el resultado de cada votación, y el administrador tiene que
+          saberlo antes de convocar. */}
+      <div className="tarjeta">
+        <strong>Cómo se cuentan los votos</strong>
+        <ul className="especificaciones" style={{ marginTop: 'var(--e2)' }}>
+          <li>
+            <strong>Decisiones económicas</strong> (presupuesto, cuotas, obras, estados financieros):
+            cada unidad pesa su <strong>coeficiente</strong> (Ley 675 de 2001, art. 37).
+          </li>
+          <li>
+            <strong>Decisiones no económicas</strong> (convivencia, uso de zonas, elecciones):{' '}
+            {copropiedad?.tipo === 'comercial' ? (
+              <>
+                por <strong>coeficiente</strong>: este edificio es comercial, y la regla de un voto por
+                unidad es para los de vivienda.
+              </>
+            ) : copropiedad?.tipo === 'mixto' ? (
+              <>
+                el edificio es mixto: escoge lo que diga su reglamento.{' '}
+                <span className="segmentos" style={{ display: 'inline-flex', verticalAlign: 'middle' }}>
+                  {(
+                    [
+                      ['unidad', 'Un voto por unidad'],
+                      ['coeficiente', 'Por coeficiente'],
+                    ] as const
+                  ).map(([valor, texto]) => (
+                    <button
+                      key={valor}
+                      type="button"
+                      className="segmento"
+                      disabled={cargando}
+                      aria-current={baseDeVoto(copropiedad, { contenidoEconomico: false }) === valor ? 'page' : undefined}
+                      onClick={() =>
+                        void ejecutar(
+                          (base) =>
+                            configurarVotoNoEconomico(base, {
+                              copropiedadId: sesion.copropiedadId,
+                              personaId: sesion.personaId,
+                              base: valor,
+                            }),
+                          'Guardado.',
+                        )
+                      }
+                    >
+                      {texto}
+                    </button>
+                  ))}
+                </span>
+              </>
+            ) : (
+              <>
+                <strong>un voto por unidad</strong>, sin importar el coeficiente. En un conjunto de
+                vivienda lo fija la Corte Constitucional (sentencia C-522 de 2002) y no se puede
+                cambiar.
+              </>
+            )}
+          </li>
+          <li className="tenue">
+            Cada votación se marca como económica o no al crearla. El quórum para sesionar sigue
+            siendo por coeficiente (art. 45).
+          </li>
+        </ul>
       </div>
 
       {asambleas.length === 0 ? (
@@ -1725,6 +1793,7 @@ function VistaActa({
           presidente={sel.persona(bd, presidenteId)}
           secretario={sel.persona(bd, secretarioId)}
           coeficienteEdificio={sumaCoeficientes(sel.unidadesDe(bd, asamblea.copropiedadId))}
+          unidadesEdificio={sel.unidadesDe(bd, asamblea.copropiedadId).length}
           quorumMinimo={sel.copropiedad(bd, asamblea.copropiedadId)?.quorumMinimo ?? 50}
           actaOriginal={
             acta.aclaraActaId ? bd.actas.find((a) => a.id === acta.aclaraActaId) : undefined

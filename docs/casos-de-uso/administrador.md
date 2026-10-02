@@ -428,12 +428,16 @@ coeficiente y se cierra.
 
 **Flujo principal**
 1. El administrador redacta la pregunta y sus opciones, e indica la mayoría exigida
-   (simple | calificada | unanimidad **(?)**).
+   (simple | calificada | unanimidad **(?)**) y **si la decisión es de contenido económico**:
+   **lo escoge siempre**, no viene marcado (Mary, 2026-10-02). Eso decide cómo se cuenta
+   (RN-211): las económicas, por coeficiente; las demás, en un conjunto de vivienda, un voto
+   por unidad (Corte Constitucional, C-522 de 2002).
 2. El sistema verifica que haya quórum antes de permitir abrirla.
 3. El administrador **abre** la votación: los asistentes la ven aparecer (CU-R-13).
 4. Durante la votación el administrador ve cuánto coeficiente ha votado, **sin ver el
    detalle de quién votó qué** mientras siga abierta.
-5. El administrador **cierra** la votación; el sistema consolida por coeficiente (CU-S-08),
+5. El administrador **cierra** la votación; el sistema consolida por coeficiente o por unidad
+   según RN-211 (CU-S-08),
    determina si se aprobó según la mayoría exigida, y publica el resultado.
 
 **Flujos alternativos**

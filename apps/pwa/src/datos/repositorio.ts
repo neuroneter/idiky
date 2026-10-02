@@ -10,6 +10,7 @@
  */
 
 import type {
+  BaseDeVoto,
   Copropiedad,
   MotivoCierreVinculo,
   AccesoSoporte,
@@ -156,6 +157,7 @@ import {
   faltaContacto,
   requiereAprobacionPropietario,
   aprobacionPropietarioActiva,
+  baseNoEconomicaEditable,
   esperaAlPropietario,
   soloUnDia,
   soportesCompletos,
@@ -3579,6 +3581,34 @@ export async function cerrarRegistro(
   // nadie mas; uno que se rechaza despues de que adjunto, si: estuvo esperando.
   if (!parametros.anular) avisar(bd, registro, 'registro_rechazado')
   return persistir(bd, registro)
+}
+
+/**
+ * RN-211 — En un edificio **mixto**, la administración escoge cómo se votan las
+ * decisiones que no son económicas, según su reglamento. En el residencial (un
+ * voto por unidad) y en el comercial (por coeficiente) no se escoge: lo fija la
+ * Corte (C-522 de 2002).
+ */
+export async function configurarVotoNoEconomico(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; base: BaseDeVoto },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('Esta opción la cambia la administración del edificio (RN-211).')
+  }
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  if (!baseNoEconomicaEditable(copropiedad)) {
+    throw new ErrorDeNegocio(
+      copropiedad.tipo === 'residencial'
+        ? 'En un conjunto de vivienda las decisiones no económicas se votan una unidad, un voto: lo fija la Corte Constitucional (C-522 de 2002).'
+        : 'En un edificio comercial se vota por coeficiente (Ley 675, art. 37).',
+    )
+  }
+  copropiedad.votoNoEconomicoMixto = parametros.base
+  return persistir(bd, copropiedad)
 }
 
 /**

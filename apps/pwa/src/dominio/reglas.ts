@@ -51,6 +51,8 @@ import type {
   Votacion,
   Voto,
   ZonaComun,
+  BaseDeVoto,
+  Copropiedad,
 } from './tipos'
 
 /** Resultado de validar una operacion contra las reglas del dominio. */
@@ -902,6 +904,49 @@ export function faltaParaQuorum(
 }
 
 /**
+ * RN-211 — **Sobre qué se cuenta una votación: coeficiente o unidades.**
+ *
+ * La Ley 675 (art. 37) dice que el voto vale lo que el coeficiente. La Corte
+ * Constitucional (C-522 de 2002) la dejó vigente **con una condición**: en los
+ * inmuebles **de vivienda**, el coeficiente cuenta **solo para las decisiones
+ * de contenido económico**; las demás se votan **un voto por unidad privada**,
+ * sin importar el coeficiente (votar todo por coeficiente concentra el poder en
+ * los dueños de las unidades más grandes).
+ *
+ * - Decisión económica → coeficiente, siempre.
+ * - No económica, residencial → una unidad, un voto. Fijo: lo dice la Corte
+ *   (Mary, 2026-10-02: «sí» a que no se pueda cambiar).
+ * - No económica, comercial → coeficiente: la condición es para vivienda.
+ * - No económica, mixto → lo que escoja la administración según su reglamento
+ *   (pregunta abierta para el abogado; sin escoger, por unidad).
+ *
+ * «Por cabeza» es **por unidad**, no por persona: tres dueños de un apartamento
+ * siguen siendo un voto (RN-29).
+ */
+export function baseDeVoto(
+  copropiedad: Pick<Copropiedad, 'tipo' | 'votoNoEconomicoMixto'> | undefined,
+  votacion: Pick<Votacion, 'contenidoEconomico'>,
+): BaseDeVoto {
+  if (votacion.contenidoEconomico) return 'coeficiente'
+  if (!copropiedad || copropiedad.tipo === 'residencial') return 'unidad'
+  if (copropiedad.tipo === 'comercial') return 'coeficiente'
+  return copropiedad.votoNoEconomicoMixto ?? 'unidad'
+}
+
+/**
+ * El umbral en unidades enteras, para decirlo como se dice en una asamblea:
+ * «al menos 7 unidades». La simple se **supera**; la calificada se **alcanza**.
+ */
+export function unidadesNecesarias(umbral: number, mayoria: MayoriaExigida): number {
+  return mayoria === 'calificada' ? Math.ceil(umbral) : Math.floor(umbral) + 1
+}
+
+/** Si en este edificio la administración escoge la base de las no económicas (solo el mixto). */
+export function baseNoEconomicaEditable(copropiedad: Pick<Copropiedad, 'tipo'> | undefined): boolean {
+  return copropiedad?.tipo === 'mixto'
+}
+
+/**
  * RN-74 — **¿Se aprobo el punto?** Ley 675 de 2001, articulos 45 y 46.
  *
  * Las dos mayorias se miden **sobre bases distintas**, y confundirlas es el
@@ -924,33 +969,55 @@ export function resultadoVotacion(parametros: {
   coeficienteRepresentado: number
   /** Coeficiente total del edificio, para la calificada. Normalmente 100. */
   coeficienteEdificio: number
+  /**
+   * RN-211 — Sobre qué se cuenta. Por unidad, las mismas dos mayorías se miden
+   * en unidades: las representadas en la sesión (simple) o las del edificio
+   * (calificada). Sin decirlo, por coeficiente.
+   */
+  baseDeVoto?: BaseDeVoto
+  unidadesRepresentadas?: number
+  unidadesEdificio?: number
 }): {
-  aprobada?: { opcionId: string; texto: string; coeficiente: number }
+  /** `valor` es coeficiente o unidades, según `porUnidad`. */
+  aprobada?: { opcionId: string; texto: string; coeficiente: number; valor: number }
   umbral: number
   base: number
   baseTexto: string
+  porUnidad: boolean
 } {
   const { conteo, mayoria, coeficienteRepresentado, coeficienteEdificio } = parametros
-  const base = mayoria === 'calificada' ? coeficienteEdificio : coeficienteRepresentado
+  const porUnidad = parametros.baseDeVoto === 'unidad'
+  const base = porUnidad
+    ? mayoria === 'calificada'
+      ? (parametros.unidadesEdificio ?? 0)
+      : (parametros.unidadesRepresentadas ?? 0)
+    : mayoria === 'calificada'
+      ? coeficienteEdificio
+      : coeficienteRepresentado
   const umbral = mayoria === 'calificada' ? base * 0.7 : base / 2
-  const baseTexto =
-    mayoria === 'calificada'
+  const baseTexto = porUnidad
+    ? mayoria === 'calificada'
+      ? 'de las unidades del edificio'
+      : 'de las unidades representadas en la sesión'
+    : mayoria === 'calificada'
       ? 'del coeficiente del edificio'
       : 'del coeficiente representado en la sesión'
 
   // La calificada se **alcanza** (70 %); la simple se **supera** (mas de la
   // mitad). No es un detalle: con exactamente la mitad, la simple no pasa.
+  const valorDe = (opcion: ConteoOpcion) => (porUnidad ? opcion.unidades : opcion.coeficiente)
   const ganadora = conteo.porOpcion.find((opcion) =>
-    mayoria === 'calificada' ? opcion.coeficiente >= umbral : opcion.coeficiente > umbral,
+    mayoria === 'calificada' ? valorDe(opcion) >= umbral : valorDe(opcion) > umbral,
   )
 
   return {
     aprobada: ganadora
-      ? { opcionId: ganadora.opcionId, texto: ganadora.texto, coeficiente: ganadora.coeficiente }
+      ? { opcionId: ganadora.opcionId, texto: ganadora.texto, coeficiente: ganadora.coeficiente, valor: valorDe(ganadora) }
       : undefined,
     umbral: Number(umbral.toFixed(4)),
     base: Number(base.toFixed(4)),
     baseTexto,
+    porUnidad,
   }
 }
 
