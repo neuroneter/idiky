@@ -89,10 +89,12 @@ export function PersonasPage() {
   if (!sesion) return null
 
   const unidadId = sesion.unidadActivaId
-  const miRol = sel
+  const miVinculo = sel
     .residenciasDePersona(bd, sesion.personaId)
-    .find((residencia) => residencia.unidadId === unidadId)?.rol
-  const categorias = categoriasQuePuedeRegistrar(miRol)
+    .find((residencia) => residencia.unidadId === unidadId)
+  const miRol = miVinculo?.rol
+  const soyMenor = !!sel.registro(bd, miVinculo?.registroId)?.menorDeEdad
+  const categorias = categoriasQuePuedeRegistrar(miRol, soyMenor)
 
   const residencias = sel.residenciasDeUnidad(bd, unidadId ?? '')
   const registros = sel.registrosDeUnidad(bd, unidadId)
@@ -311,8 +313,12 @@ export function PersonasPage() {
           esta pantalla y no puede registrar residentes, y merece saber por qué. */}
       {miRol !== 'propietario' && (
         <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
-          Registrar residentes y arrendatarios es del propietario de la unidad (RN-60). Tú puedes
-          registrar visitantes.
+          Registrar propietarios y arrendatarios es del propietario de la unidad (RN-60).{' '}
+          {miRol === 'arrendatario'
+            ? 'Tú puedes registrar a tu familia y a tus visitas.'
+            : miRol === 'familiar' && !soyMenor
+              ? 'Tú puedes registrar visitas de un día.'
+              : 'Las visitas las registra quien responde por la unidad.'}
         </p>
       )}
 
@@ -320,6 +326,7 @@ export function PersonasPage() {
         <FormularioRegistro
           categorias={categorias}
           registraArrendatario={miRol === 'arrendatario'}
+          soloDeUnDia={miRol === 'familiar'}
           categoriaInicial={pedida === 'visitante' ? 'visitante' : undefined}
           alCerrar={() => setRegistrando(false)}
           alCrear={async (datos) => {

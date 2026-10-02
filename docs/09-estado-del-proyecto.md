@@ -146,6 +146,26 @@ pruebas); los otros tres **estaban vacíos** mientras su código seguía aquí. 
 **Qué sigue:** el primer despliegue real de `bloky` y `gestion` desde sus repositorios (T-79);
 los ADR de ALICE en Flutter (T-80) y de los contratos inteligentes (T-81).
 
+### 2026-10-02 · Mary + IA (Claude) · La familia sale con el propietario que vende, y el familiar adulto registra visitas
+
+Mary: *«sí, haz 1 y 4»*, de las preguntas abiertas de usuarios. Antes se trajo `main` a la rama
+(ya con la integración de la solicitud neuroneter/idiky#1 y el traslado de BLOKY, BOB y Jitsi a
+sus repositorios, T-79); sin choques. **Sin números nuevos** (revisiones de RN-60 y RN-65).
+
+| # | Qué | Dónde |
+|---|---|---|
+| 1 | Cuando sale un propietario (p. ej. cambio de propietario), **sale su familia**; su arrendatario y sus visitas los hereda el nuevo dueño. Si sale alguien que no es propietario, se revocan las visitas que registró | `datos/repositorio.ts` (`cerrarLoQueDejo`) |
+| 4 | El **familiar mayor de edad registra visitas de un día**, y nada más; el menor, a nadie. La pantalla se lo dice | `dominio/reglas.ts` (`categoriasQuePuedeRegistrar`, `condicionesQuePuedeRegistrar`, `puedeRegistrar`), `componentes/Registro.tsx` (`soloDeUnDia`), `features/residente/PersonasPage.tsx` |
+
+**Siguen abiertas** (preguntas 2, 3 y 5): si las estadías largas de la familia del arrendatario y su
+visitante frecuente necesitan aprobación del propietario, y cuánto tiempo se guardan las fotos
+(pregunta jurídica).
+
+**Pruebas:** nueva `prueba-unoycuatro` (en el repositorio y en pantalla, con la hija mayor de edad);
+las de usuarios y la de humo, en verde. `prueba-autocierre` y `prueba-seis` siguen dependiendo de la hora.
+
+---
+
 ### 2026-10-02 · Mary + IA (Claude) · Familia, menores, visitante frecuente, fotos en cadena y aviso de fin de estadía
 
 Mary: *«sí a las 5 propuestas»*. **Sin números nuevos** (revisiones de RN-60, RN-62 y RN-67).
