@@ -135,7 +135,10 @@ for par in $EXTERNOS; do
 done
 
 echo "==> Subiendo $REF ($REVISION) a $IDIKY_SERVIDOR · servicios: $SERVICIOS"
-tar -c -C "$ARMADO" . | ssh_idiky "mkdir -p ~/despliegues/$ID && tar -x -C ~/despliegues/$ID"
+# COPYFILE_DISABLE: el tar de macOS agrega un archivo ._<nombre> por cada archivo con metadatos
+# del sistema, y en el servidor parecen codigo (un ._001-inicial.sql tumbo la API de BLOKY el
+# 2026-10-02 porque se corrio como migracion). En Linux no tiene efecto.
+COPYFILE_DISABLE=1 tar -c -C "$ARMADO" . | ssh_idiky "mkdir -p ~/despliegues/$ID && tar -x -C ~/despliegues/$ID"
 
 # Un despliegue a la vez: si otra persona esta desplegando, este se detiene sin tocar nada (75).
 # Cada despliegue queda en el registro, y se conservan las ultimas 3 copias del codigo.
