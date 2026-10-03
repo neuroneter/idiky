@@ -1035,7 +1035,7 @@ Viven en `apps/bloky-api/src/dominio/reglas.ts` del repo `Bloky-Idiky` como func
 
 | ID | Regla | Dónde se implementa |
 |---|---|---|
-| RN-160 | **La identidad viene de BOB.** La persona, su celular, su correo y sus asignaciones por copropiedad se leen en BOB con un token de solo lectura; BLOKY nunca los escribe. | `bloky-api/src/bob/cliente.ts` |
+| RN-160 | **La identidad viene de BOB.** La persona, su celular, su correo y sus asignaciones por copropiedad se leen en BOB con un token de solo lectura; BLOKY nunca los escribe. *Desde el 2026-10-03 (ADR-0022) BLOKY guarda una copia en su **directorio de acceso**: cada ingreso la refresca desde BOB si responde, BOB avisa los cambios y se concilia cada 15 min; si BOB no responde, se entra con la copia.* | `bloky-api/src/bob/cliente.ts`, `directorio/` |
 | RN-161 | **Solo entra quien tiene en BOB una asignación vigente** como Administrador o Delegado: estado `vigente`, que ya empezó (`desde` ≤ hoy) y no ha terminado (`hasta` vacío o ≥ hoy). | `reglas.ts` (`asignacionVigente`) |
 | RN-162 | **La copropiedad tiene que estar activa o en implementación.** Prospecto, suspendida o retirada no dan acceso. Qué conserva una suspendida sigue abierto (docs/13 §7.8). | `reglas.ts` (`copropiedadAdmiteIngreso`) |
 | RN-163 | **El código de un solo uso va al celular registrado en BOB**, nunca a un número que la persona escriba. Se normaliza a E.164; un celular colombiano son diez dígitos que empiezan por 3. | `reglas.ts` (`celularParaCodigo`) |

@@ -57,6 +57,12 @@ creen. BLOKY no crea a nadie por su cuenta.
 - La clave de cuatro números y la huella del demo (ADR-0004) son de ALICE, la app del
   propietario; BLOKY no las usa.
 
+**Desde el 2026-10-03 (ADR-0022):** la persona se lee del **directorio de acceso** de BLOKY, que se
+refresca desde BOB en cada ingreso (si BOB no responde, se entra con lo que tiene). Después de
+entrar, cada copropiedad tiene su dirección (`/c/<id>`), con un selector en la barra para cambiar
+sin salir, y la API comprueba el rol en cada petición: quitar un rol en BOB corta el acceso en
+cuanto BOB avisa o en la siguiente conciliación.
+
 **Estado en BLOKY Dev:** ✅ — en el repo `Bloky-Idiky`: `apps/bloky/src/features/acceso/` y `apps/bloky-api/src/acceso/`.
 Probado el flujo por SMS contra un BOB simulado (`apps/bloky-api/pruebas/humo.ts`) y, el
 2026-09-21, la identificación contra el BOB real en el servidor de desarrollo (bitácora). **Google y

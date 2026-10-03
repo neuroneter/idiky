@@ -141,8 +141,20 @@ coeficiente y un acta que resista revisión.
 que limpiar (las 14 imágenes están en uso); las salidas son ampliar el disco en Azure o quitar
 Jitsi (~2,1 GB) si no se usa todavía.
 
-**Qué sigue (T-77, paso 2):** el directorio de acceso (personas y membresías) y CU-B-01 sobre él,
-el aviso de BOB, la copropiedad en la dirección y el rol en cada petición.
+**Paso 2, el mismo día** (desplegado como **`f3a2c08.bloky-5b4df6f`**, LangFlow igual): el
+**directorio de acceso** (`comun/003`: `bloky.persona` y `bloky.membresia`, con origen BOB o
+BLOKY; lo que BOB ya no tiene queda finalizado). **CU-B-01 lee el directorio** y lo refresca desde
+BOB en cada ingreso; **si BOB no responde en 4 s, se entra con el directorio**. BOB avisará por
+`/api/admin/directorio/sincronizar` (BLOKY vuelve a leer a la persona en BOB, no confía en el
+aviso) y hay **conciliación cada 15 minutos**. Toda ruta `/api/c/<copropiedad>/` comprueba el rol en
+el directorio **en cada petición**, y la app pasó a **`/c/<id>`** con selector en la barra. La prueba
+de humo tiene 23 pasos (8 nuevos: otro rol en otra copropiedad, copropiedad ajena 403, BOB quita
+el rol y el acceso se corta, BOB caído y el ingreso sigue). En el servidor: migración `003`
+aplicada y **las 5 personas de BOB sincronizadas** con sus roles (Olga y María Camila en Altos del
+Bosque, Jorge y Sandra en Torres del Parque, Andrés en Mirador, que está suspendida).
+
+**Qué sigue:** que Daniel pruebe el ingreso en `https://bloky-dev.idiky.com`; en BOB-Idiky, el aviso
+al cambiar una asignación y el botón de aprovisionar; y **T-83**, el terreno (CU-B-03).
 
 ### 2026-10-03 · BLOKY · Sesión de IA (Claude) con Daniel · El primer módulo, refinado: puesta en marcha, terreno y flujos de uso (CU-B-02 a CU-B-05)
 
