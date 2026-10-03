@@ -153,8 +153,23 @@ el rol y el acceso se corta, BOB caído y el ingreso sigue). En el servidor: mig
 aplicada y **las 5 personas de BOB sincronizadas** con sus roles (Olga y María Camila en Altos del
 Bosque, Jorge y Sandra en Torres del Parque, Andrés en Mirador, que está suspendida).
 
-**Qué sigue:** que Daniel pruebe el ingreso en `https://bloky-dev.idiky.com`; en BOB-Idiky, el aviso
-al cambiar una asignación y el botón de aprovisionar; y **T-83**, el terreno (CU-B-03).
+Daniel entró con la cédula de Olga (administradora de Altos del Bosque) y vio la consola vacía.
+
+**T-83, el mismo día** (desplegado como **`3570cb9.bloky-77343fb`**, LangFlow igual): **el terreno
+de «Arma tu copropiedad» dentro de BLOKY**. En la API, la migración de copropiedad `002`
+(`elemento`, con `dentro_de`, el croquis y la configuración; `estructura_version`), que **la API
+aplicó sola al arrancar a las dos copropiedades** (la migración en bucle de ADR-0015, funcionando);
+las reglas RN-169, RN-170, RN-172 y RN-186 como funciones puras (`motivoEstructuraInvalida`, con
+pruebas); y `GET/PUT /api/c/:id/estructura` por `para()`, con **control de versión** (si otra
+persona cambió el terreno, 409 y no se pisa nada) y la bitácora. En la app, el terreno con
+**arrastre por eventos de puntero** (ratón, tableta y dedo), cae donde se ve, cuadrícula de 10,
+flechas, contención al soltar encima, asignación con líneas, deshacer, guardado automático, «Otro
+espacio» con sus 53 íconos y la Oficina; el **menú agrupado** y el **Inicio con los seis primeros
+pasos** (CU-B-02). Probado en local con una API simulada (arrastres, contención, asignación,
+guardado y el tamaño teléfono) antes de desplegar.
+
+**Qué sigue:** que Daniel arme Altos del Bosque en el terreno; en BOB-Idiky, el aviso al cambiar una
+asignación y el botón de aprovisionar; y CU-B-04, el popup con el flujo de uso.
 
 ### 2026-10-03 · BLOKY · Sesión de IA (Claude) con Daniel · El primer módulo, refinado: puesta en marcha, terreno y flujos de uso (CU-B-02 a CU-B-05)
 

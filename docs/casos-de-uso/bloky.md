@@ -180,7 +180,11 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
 - El arrastre del producto usa eventos de puntero (computador, tableta y teléfono) y guías de
   alineación; el del prototipo es el nativo del navegador y solo sirve con ratón.
 
-**Estado en BLOKY Dev:** ⬜ — necesita T-77 (la capa de datos).
+**Estado en BLOKY Dev:** 🟡 (2026-10-03) — el terreno funciona y guarda en el esquema de cada
+copropiedad (`elemento`, `estructura_version`), con arrastre por eventos de puntero, contención,
+asignación, deshacer y control de versión (dos personas no se pisan). Faltan la importación desde
+Excel y las guías de alineación. Código: `apps/bloky/src/features/estructura/` y
+`apps/bloky-api/src/estructura/`.
 
 ---
 
