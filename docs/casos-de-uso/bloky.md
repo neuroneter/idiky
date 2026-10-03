@@ -162,6 +162,10 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
    de cada torre; se dibujan líneas hacia ellas y el resto queda para visitantes.
 6. Mueve, alinea y duplica. Lo que suelta cae donde lo ve, ajustado a una cuadrícula fina; con
    algo seleccionado, las flechas lo afinan (RN-173). Todo se puede **deshacer**.
+   **Quitar** algo (el botón del panel, o la tecla **Suprimir**/**Borrar** con algo seleccionado;
+   Daniel, 2026-10-03) **pregunta antes**: qué se quita, que lo de dentro queda suelto y sus
+   asignaciones se pierden, y que se recupera con Deshacer. El botón por defecto es «Cancelar»:
+   un Enter sin leer no quita nada.
 7. Guarda: el croquis queda con la posición de cada cosa (RN-173).
 
 **Flujos alternativos**
