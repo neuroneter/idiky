@@ -112,6 +112,14 @@ con datos reales.
 | ID | Caso de uso | Fase | Estado | Detalle |
 |---|---|---|---|---|
 | CU-B-01 | **Ingresar a BLOKY** (documento + código SMS al celular de BOB, o Google/Microsoft con el correo de BOB) | 1 | ✅ BLOKY (SMS, Google y Microsoft probados con cuentas reales en `https://bloky-dev.idiky.com`, 2026-09-21) | [ver](./casos-de-uso/bloky.md#cu-b-01) |
+| CU-B-02 | **Poner en marcha la copropiedad:** primeros pasos (seis, con anillo de avance) y el menú de BLOKY (Inicio · Pendientes · Mi copropiedad · Convivencia · Dinero · Gobierno) | 1 | ⬜ Pendiente | [ver](./casos-de-uso/bloky.md#cu-b-02) |
+| CU-B-03 | **Armar la estructura** en el terreno: estructuras, espacios, «está dentro de» y «pertenece a», croquis guardado | 1 | ⬜ Pendiente (prototipo: [Arma tu copropiedad](./prototipos/arma-tu-copropiedad/README.md)) | [ver](./casos-de-uso/bloky.md#cu-b-03) |
+| CU-B-04 | **Configurar un espacio y su flujo de uso**: bloques de preguntas, reserva, autorizaciones, acceso, pagos, alertas y no asistencia; probar con una persona | 1 | ⬜ Pendiente (prototipo) | [ver](./casos-de-uso/bloky.md#cu-b-04) |
+| CU-B-05 | **Resolver los pendientes**: soportes de pago, refutaciones de multas, reservas por aprobar | 1 | ⬜ Pendiente | [ver](./casos-de-uso/bloky.md#cu-b-05) |
+| CU-B-06 | Unidades y coeficientes (con Excel) | 1 | ⬜ Por escribir | [ver](./casos-de-uso/bloky.md#cu-b-06-a-cu-b-09--por-escribir) |
+| CU-B-07 | Propietarios y residentes | 1 | ⬜ Por escribir | [ver](./casos-de-uso/bloky.md#cu-b-06-a-cu-b-09--por-escribir) |
+| CU-B-08 | Tu equipo y sus grupos de colaboradores | 1 | ⬜ Por escribir | [ver](./casos-de-uso/bloky.md#cu-b-06-a-cu-b-09--por-escribir) |
+| CU-B-09 | Ubicación y fotos | 1 | ⬜ Por escribir | [ver](./casos-de-uso/bloky.md#cu-b-06-a-cu-b-09--por-escribir) |
 
 ## 3. Sistema — procesos automáticos
 

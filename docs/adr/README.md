@@ -23,6 +23,7 @@ persona o IA — tenga que reconstruir el razonamiento más adelante.
 | [0016](./0016-jitsi-propio-para-las-asambleas-virtuales.md) | **Jitsi propio para las asambleas virtuales**: pod `idiky-jitsi` en el 8085 y `10000/udp`, escrito y apagado. Reabre ADR-0007 (que enlaza Zoom o Meet) y depende de una regla UDP en Azure que el equipo no puede crear | **Propuesta** |
 | [0018](./0018-un-repositorio-por-sistema-e-idiky-como-arnes.md) | **Un repositorio por sistema, e `idiky` como el arnés**: BLOKY, BOB y Jitsi se mudan a `Bloky-Idiky`, `BOB-Idiky` y `Jitsi-Streaming-Idiky` con las mismas rutas; `desplegar.sh` arma la carpeta con idiky + el repo del servicio. ALICE (`App-Idiky`) y los contratos (`SmartContrat-Idiky`) quedan registrados | Aceptada |
 | [0020](./0020-pruebas-de-navegador-de-la-pwa.md) | **Pruebas de navegador de la PWA**: `apps/pwa/pruebas/navegador/`, Playwright Test como dependencia de desarrollo, `npm run probar:navegador`, y el reloj del navegador fijo para que ninguna prueba dependa de la hora | Aceptada |
+| [0021](./0021-flujos-de-uso-como-datos.md) | **Los flujos de uso de los espacios como datos**: un árbol de bloques versionado por espacio y un intérprete puro (`dominio/flujo.ts`) que usan por igual «Probar» y las reservas; los efectos los ejecuta quien llama | Aceptada |
 
 El ADR-0008 (backend) se escribió el 2026-09-21, con el ingreso a BLOKY. Recuerden la regla
 del [`CLAUDE.md`](../../CLAUDE.md): no se agregan dependencias sin ADR.

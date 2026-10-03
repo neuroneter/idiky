@@ -21,8 +21,8 @@ nueva o una sesión de IA distinta.
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
-| **Casos de uso** | 75 documentados: 48 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 13 ⬜ pendientes, 3 ⛔ retirados |
-| **Reglas de negocio** | 129 del demo (RN-01…RN-129; RN-07, RN-11, RN-41 y RN-55 retiradas) + 8 de BLOKY (RN-160…RN-167). RN-75 a RN-91 vienen de la contable; RN-92 a RN-129, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
+| **Casos de uso** | 83 documentados: 48 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes (8 de BLOKY desde el 2026-10-03: CU-B-02…09, cuatro escritos y cuatro por escribir), 3 ⛔ retirados |
+| **Reglas de negocio** | 129 del demo (RN-01…RN-129; RN-07, RN-11, RN-41 y RN-55 retiradas) + 27 de BLOKY (RN-160…RN-186). RN-75 a RN-91 vienen de la contable; RN-92 a RN-129, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
 | **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
@@ -110,6 +110,51 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-03 · BLOKY · Sesión de IA (Claude) con Daniel · El primer módulo, refinado: puesta en marcha, terreno y flujos de uso (CU-B-02 a CU-B-05)
+
+**Qué se hizo:** sobre el prototipo **«Arma tu copropiedad»** (v4 del 2026-09-21) se refinó con
+Daniel, en una sola sesión, el alcance del primer módulo de BLOKY, y se documentó para llevarlo
+al producto. El prototipo quedó en `c3a4f3a` (`docs/prototipos/arma-tu-copropiedad/`, abrir
+`index.html#demo`; con el navegador de la app, el servidor `prototipos` de `.claude/launch.json`).
+
+**Lo que cambió en el prototipo**, en el orden en que Daniel lo pidió:
+- Lo que está dentro de una torre o agrupación **se toca y se configura ahí mismo** (era un error
+  del boceto); una relación equivocada se deshace con la ×, arrastrando fuera, con «Está en» o con
+  **Deshacer**.
+- **Configurar cada cosa** en un popup (doble clic, clic derecho o «⚙ Configurar») con dos
+  pestañas: **General** (nombre, relación, descripción, **condiciones y reglas de uso**) y **Flujo
+  de uso**. Las **estructuras no se reservan**: solo General.
+- El **flujo de uso** como juego de bloques, «como un workflow» (Daniel): preguntas con caminos
+  Sí/No, reserva y uso, autorizaciones, **pagos** (antes, con soporte que **aprueba la
+  administración**, o con la cuota, sin revisión; en línea por IDIKY, después), **alertas** por
+  medio, destinatario (incluidos **grupos de colaboradores**) y tiempo, **código de acceso**
+  (portería hoy; cerraduras y torniquetes después), y el camino **después de reservar**: cancelar
+  tarde y no llegar liberan la zona y pueden tener **multa**, que **se carga directo y el residente
+  puede refutar** en la app. Plantillas, misiones y **Probar**: una persona recorre el flujo y se
+  ven el veredicto, los pagos, la línea de tiempo de las alertas y la multa como la ve el residente.
+- **«Otro espacio»** con 53 íconos en nueve grupos; la estructura **Oficina** (pisos, puestos de
+  trabajo, oficinas cerradas); mover sin saltos (se recuerda el punto de agarre, cuadrícula de 10,
+  flechas para afinar).
+
+**Lo que quedó escrito:** CU-B-02 (primeros pasos y menú), CU-B-03 (terreno), CU-B-04 (espacio y
+flujo de uso, con la tabla de qué bloque corresponde a cada regla de zonas comunes del demo),
+CU-B-05 (Pendientes) y los números de CU-B-06 a CU-B-09; **RN-168 a RN-186**; **ADR-0021** (los
+flujos como datos, con un intérprete puro que usan por igual «Probar» y las reservas); T-83, T-84
+y T-85 en el tablero.
+
+**Decidido con Daniel:** el menú se agrupa por tarea (Inicio · **Pendientes** · Mi copropiedad ·
+Convivencia · Dinero · Gobierno); la puesta en marcha tiene seis pasos; los módulos quedan
+**abiertos con aviso**, pero lo que mueve plata exige estructura, coeficientes y propietarios
+(pasos 1, 2 y 3); lo que espera decisión va a una bandeja única, **Pendientes**.
+
+**Para Mary (T-84):** en BLOKY las reglas de las zonas comunes son bloques y ninguna del demo se
+pierde, pero **la multa por no asistir se carga directo y se refuta** (RN-179), distinto del proceso
+sancionatorio del demo (RN-110, RN-39). Y falta el lado del residente en ALICE: cargar el soporte,
+ver y refutar la multa, ver el código y las alertas.
+
+**Qué sigue:** **T-77** (la capa de datos) y **T-83** (menú, primeros pasos y terreno en
+`Bloky-Idiky`); las decisiones abiertas de T-85 no lo bloquean.
 
 ### 2026-10-03 · Integración · Sesión de IA (Claude) con Daniel · Jitsi documentado y con cuentas para la prueba (T-78)
 
