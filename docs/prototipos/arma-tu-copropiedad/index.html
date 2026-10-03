@@ -17,7 +17,7 @@
   .nombre{margin:18px 32px 0;font-size:22px;font-weight:700}
   .resumen{margin:2px 32px 0;opacity:.85;font-size:14px}
   /* El terreno: una cuadricula donde se sueltan las cosas. */
-  .terreno{position:relative;flex:1;margin:18px 32px 28px;border:2px dashed rgba(255,255,255,.35);border-radius:16px;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:40px 40px}
+  .terreno{position:relative;flex:1;margin:18px 32px 28px;border:2px dashed rgba(255,255,255,.35);border-radius:16px;background-image:linear-gradient(rgba(255,255,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.07) 1px,transparent 1px);background-size:20px 20px}
   .terreno.sobre{border-color:var(--color-marca-claro);background-color:rgba(255,255,255,.06)}
   .terreno__vacio{position:absolute;inset:0;display:grid;place-items:center;text-align:center;opacity:.8;font-size:16px;padding:40px;pointer-events:none}
   .terreno__vacio small{display:block;opacity:.8;margin-top:8px;font-size:13px}
@@ -39,6 +39,15 @@
   .dentro{display:flex;gap:4px;flex-wrap:wrap;justify-content:center;margin-top:4px;max-width:120px}
   .dentro .chip{display:inline-flex;align-items:center;gap:3px;padding:2px 6px;border-radius:999px;border:1px solid rgba(255,255,255,.6);background:rgba(255,255,255,.16);font-size:10px;white-space:nowrap}
   .dentro .chip svg{width:12px;height:12px;stroke:#fff;fill:none;stroke-width:2}
+  .dentro .chip{cursor:grab}
+  .chip.sel,.mini.sel{outline:2px solid var(--color-marca-claro);outline-offset:2px;border-radius:8px}
+  .sacar{border:0;background:rgba(255,255,255,.25);color:#fff;border-radius:50%;width:14px;height:14px;line-height:12px;font-size:11px;padding:0;cursor:pointer;margin-left:2px}
+  .sacar:hover{background:var(--color-marca-claro)}
+  .mini{position:relative;cursor:grab;padding:2px;border-radius:8px}
+  .mini .sacar{position:absolute;top:-4px;right:-4px;background:rgba(29,46,122,.9);border:1px solid rgba(255,255,255,.6)}
+  .mini__dentro{font-size:9px;opacity:.8}
+  .deshacer{border:1px solid rgba(255,255,255,.5);background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:4px 12px;font:inherit;font-size:13px;cursor:pointer}
+  .deshacer:disabled{opacity:.35;cursor:default}
   .obj.destino{outline:2px solid var(--color-marca-claro);outline-offset:6px;border-radius:10px}
   .zona{width:220px;height:120px;border:2px dashed rgba(255,255,255,.7);border-radius:14px;background:rgba(255,255,255,.07);position:relative}
   .zona__titulo{position:absolute;top:-10px;left:12px;background:var(--color-marca);padding:0 8px;font-size:11px;border-radius:999px;border:1px solid rgba(255,255,255,.5)}
@@ -82,22 +91,178 @@
   .boton--peligro{color:var(--color-error);border-color:var(--color-error-suave);background:var(--color-error-suave)}
   .pie{padding:12px 20px 16px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--color-borde);font-size:12px;color:var(--color-texto-suave)}
   .pie a{color:var(--color-marca);font-weight:600}
-  .aviso{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);background:rgba(23,25,53,.85);color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none}
+  .aviso{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);background:rgba(23,25,53,.9);color:#fff;padding:8px 14px;border-radius:999px;font-size:13px;opacity:0;transition:opacity .2s;pointer-events:none;display:flex;gap:10px;align-items:center;z-index:60}
+  .aviso.ver{pointer-events:auto}
+  .aviso button{border:0;background:none;color:var(--color-marca-claro);font:inherit;font-weight:700;cursor:pointer;padding:0}
   .aviso.ver{opacity:1}
+  /* Configurar: el popup (doble clic, clic derecho o el boton del panel) */
+  .velo{position:fixed;inset:0;background:rgba(15,18,45,.55);display:grid;place-items:center;z-index:50;padding:24px}
+  .dialogo{background:var(--color-superficie);border-radius:18px;width:min(820px,100%);height:min(720px,calc(100vh - 48px));display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(0,0,0,.35);color:var(--color-texto);user-select:text}
+  .dialogo__cab{display:flex;align-items:center;gap:12px;padding:18px 22px 0}
+  .dialogo__cab .ico svg{width:34px;height:34px;stroke:var(--color-marca);fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+  .dialogo__cab h2{margin:0;font-size:18px} .dialogo__cab small{color:var(--color-texto-tenue)}
+  .dialogo__cerrar{margin-left:auto;border:0;background:none;font-size:24px;cursor:pointer;color:var(--color-texto-suave)}
+  .dialogo .pestanas{padding:0 22px;margin-top:10px}
+  .dialogo__cuerpo{padding:14px 22px;overflow:auto;flex:1}
+  .dialogo__pie{display:flex;align-items:center;justify-content:flex-end;gap:8px;padding:12px 22px;border-top:1px solid var(--color-borde)}
+  .boton--primario{background:var(--color-marca);color:#fff;border-color:var(--color-marca)}
+  .campo{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--color-borde);font-size:14px}
+  .campo:first-child{border-top:0}
+  .campo small{display:block;color:var(--color-texto-tenue);font-size:12px;margin-top:2px}
+  .entrada{font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--color-borde-fuerte);background:#fff;font-size:13px;color:var(--color-texto)}
+  .entrada--num{width:76px}
+  .dias{display:inline-flex;gap:4px;flex-wrap:wrap}
+  .dias button{min-width:34px;height:28px;padding:0 6px;border-radius:8px;border:1px solid var(--color-borde-fuerte);background:#fff;font:inherit;font-size:11px;cursor:pointer;color:var(--color-texto)}
+  .dias button[aria-pressed=true]{background:var(--color-marca);color:#fff;border-color:var(--color-marca)}
+  .bloque{border:1px solid var(--color-borde);border-radius:12px;padding:12px 14px;margin:10px 0;background:var(--color-superficie-2)}
+  .regla__frase{font-size:14px;font-weight:600;color:var(--color-marca);margin:0 0 6px;line-height:1.4}
+  .regla__frase em{font-style:normal;color:var(--color-texto)}
+  .cond{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:5px 0;font-size:13px}
+  .cond > b{min-width:150px;font-weight:600}
+  .etq{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--color-texto-tenue);text-transform:uppercase}
+  .plantillas{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px;align-items:center}
+  .chip-claro{border:1px dashed var(--color-marca);color:var(--color-marca);background:var(--color-marca-suave);border-radius:999px;padding:5px 10px;font:inherit;font-size:12px;cursor:pointer}
+  .quitar-claro{border:0;background:none;color:var(--color-texto-tenue);font:inherit;font-size:12px;cursor:pointer;text-decoration:underline}
+  .heredada{border-style:dashed;background:transparent}
+  .veredicto{padding:12px 14px;border-radius:12px;font-weight:700;margin:10px 0}
+  .veredicto--si{background:var(--color-exito-suave);color:var(--color-exito)}
+  .veredicto--no{background:var(--color-error-suave);color:var(--color-error)}
+  .veredicto--cond{background:var(--color-alerta-suave);color:var(--color-alerta)}
+  .aviso-campo{color:var(--color-error);font-size:12px}
+  .obj__conf{font-size:9px;padding:1px 6px;border-radius:999px;background:rgba(255,255,255,.18);white-space:nowrap}
+  /* El flujo de uso: bloques que encajan */
+  .dialogo--grande{width:min(1280px,100%);height:calc(100vh - 48px)}
+  .dialogo__cuerpo--flujo{padding:0;display:flex;flex-direction:column;overflow:hidden}
+  .flujo-tab{flex:1;display:grid;grid-template-columns:1fr 340px;min-height:0}
+  .flujo-lienzo{overflow:auto;background-color:var(--color-fondo);background-image:radial-gradient(var(--color-borde-fuerte) 1px,transparent 1px);background-size:18px 18px;padding:20px}
+  .flujo{display:flex;flex-direction:column;align-items:center;min-width:max-content;padding-bottom:30px}
+  .inicio{background:var(--degradado-marca-vertical);color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;box-shadow:var(--sombra-1)}
+  .final-implicito{border:1.5px dashed var(--color-borde-fuerte);color:var(--color-texto-suave);padding:8px 16px;border-radius:999px;font-size:13px;background:var(--color-superficie)}
+  .conector{width:2px;height:14px;background:var(--color-borde-fuerte)}
+  .lista{display:flex;flex-direction:column;align-items:center}
+  .paso{display:flex;flex-direction:column;align-items:center}
+  .ranura{width:220px;height:16px;display:grid;place-items:center;position:relative;transition:height .12s}
+  .ranura::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:2px;background:var(--color-borde-fuerte)}
+  .ranura span{position:relative;z-index:1;font-size:11px;color:var(--color-texto-tenue);display:none}
+  .ranura:hover span{display:block;background:var(--color-superficie);border:1px dashed var(--color-borde-fuerte);border-radius:999px;padding:0 6px}
+  .flujo.arrastrando .ranura{height:34px}
+  .flujo.arrastrando .ranura span{display:block;background:var(--color-marca-suave);border:1.5px dashed var(--color-marca);color:var(--color-marca);border-radius:8px;padding:3px 12px}
+  .ranura.sobre span{display:block!important;background:var(--color-marca)!important;color:#fff!important}
+  .ranura--vacia{height:auto;padding:4px 0}
+  .ranura--vacia::before{display:none}
+  .ranura--vacia span{display:block;border:1.5px dashed var(--color-borde-fuerte);border-radius:8px;padding:6px 12px;background:var(--color-superficie)}
+  .nodo{position:relative;display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--color-superficie);border:1.5px solid var(--color-borde);border-left:5px solid var(--c, var(--color-marca));border-radius:12px;padding:8px 30px 8px 6px;font-size:13px;box-shadow:var(--sombra-1);max-width:560px;transition:box-shadow .2s, transform .2s}
+  .nodo small{color:var(--color-texto-tenue);font-size:11px}
+  .nodo__ico{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;background:var(--c);color:#fff;font-size:13px;font-weight:700;flex-shrink:0}
+  .nodo__filas{display:flex;flex-direction:column;gap:4px}
+  .nodo__quitar{position:absolute;top:4px;right:6px;border:0;background:none;color:var(--color-texto-tenue);font-size:16px;cursor:pointer;line-height:1}
+  .nodo__quitar:hover{color:var(--color-error)}
+  .asa{cursor:grab;color:var(--color-texto-tenue);font-size:14px;padding:0 2px;user-select:none}
+  .nodo--pregunta,.pieza--pregunta,.cat__ico.nodo--pregunta{--c:#d99a00}
+  .nodo--pregunta{background:#fff9e8}
+  .nodo--autorizacion,.pieza--autorizacion,.cat__ico.nodo--autorizacion{--c:var(--color-info)}
+  .nodo--pago,.pieza--pago,.cat__ico.nodo--pago{--c:var(--color-exito)}
+  .nodo--alerta,.pieza--alerta,.cat__ico.nodo--alerta{--c:var(--color-acento)}
+  .nodo--alerta{background:#fff5fb}
+  .nodo--limite,.nodo--reserva,.pieza--limite,.cat__ico.nodo--limite{--c:var(--color-marca)}
+  .nodo--codigo,.pieza--codigo,.cat__ico.nodo--codigo{--c:#0e7c86}
+  .nodo--codigo{background:#eefafa}
+  .codigo{display:flex;gap:12px;align-items:center;border:1.5px solid #0e7c86;background:#eefafa;border-radius:12px;padding:10px 12px;margin:8px 0;font-size:12px;line-height:1.5}
+  .codigo__valor{font:700 20px/1 ui-monospace,Menlo,monospace;letter-spacing:.08em;color:#0e7c86;white-space:nowrap}
+  .tl li.tl__codigo::before{background:#0e7c86}
+  .tl li.tl__pago::before{background:var(--color-exito)}
+  .nodo--despues,.pieza--despues,.cat__ico.nodo--despues{--c:#6b4fa0}
+  .nodo--multa{background:#f6f1ff} .nodo--fin-cancelada{--c:#6b4fa0;background:#f6f1ff}
+  .app{border:1px solid var(--color-borde);border-radius:18px;padding:8px;background:var(--color-superficie-2);margin:8px 0}
+  .app__cab{font-size:11px;color:var(--color-texto-tenue);padding:2px 6px 6px}
+  .app__tarjeta{background:#fff;border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:8px;font-size:13px;border-left:4px solid var(--color-error);box-shadow:var(--sombra-1)}
+  .app__tarjeta small{color:var(--color-texto-tenue);font-size:11px}
+  .app__fila{display:flex;justify-content:space-between}
+  .app__hilo{display:flex;flex-direction:column;gap:6px}
+  .app__yo{align-self:flex-end;max-width:85%;background:var(--color-marca-suave);border-radius:10px 10px 2px 10px;padding:6px 9px;font-size:12px}
+  .app__admin{max-width:85%;border-radius:10px 10px 10px 2px;padding:6px 9px;font-size:12px}
+  .app__admin.ok{background:var(--color-exito-suave)} .app__admin.no{background:var(--color-error-suave)}
+  .app__boton{align-self:flex-start;border:1px solid var(--color-marca);color:var(--color-marca);border-radius:8px;padding:4px 10px;font-size:12px;font-weight:600}
+  .dias__mas{border-style:dashed!important;color:var(--color-marca)!important}
+  .tl{list-style:none;margin:4px 0 8px;padding:0 0 0 10px;border-left:2px solid var(--color-acento);font-size:13px}
+  .tl li{display:flex;gap:10px;padding:3px 0;position:relative}
+  .tl li::before{content:'';position:absolute;left:-16px;top:9px;width:10px;height:10px;border-radius:50%;background:var(--color-acento)}
+  .tl li.tl__uso::before{background:var(--color-marca)}
+  .tl__cuando{min-width:120px;font-variant-numeric:tabular-nums;color:var(--color-texto-suave)}
+  .tl q{color:var(--color-texto-suave)}
+  .nodo--fin,.pieza--fin,.cat__ico.nodo--fin{--c:var(--color-exito)}
+  .nodo--fin-no,.pieza--no{--c:var(--color-error)}
+  .nodo--fin-si{background:var(--color-exito-suave)} .nodo--fin-no{background:var(--color-error-suave)}
+  .nodo--heredado{--c:var(--color-texto-tenue);border-style:dashed;background:transparent;padding-right:12px}
+  .entrada--falta{border-color:var(--color-error);background:var(--color-error-suave)}
+  .legal{color:var(--color-alerta)!important;cursor:help}
+  .ramas{display:flex;gap:18px;align-items:flex-start;position:relative;padding-top:14px}
+  .ramas::before{content:"";position:absolute;top:0;left:50%;width:2px;height:14px;background:var(--color-borde-fuerte)}
+  .rama{position:relative;border:1.5px dashed var(--rc);border-radius:14px;padding:16px 10px 6px;min-width:240px;display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,.4);transition:background .2s}
+  .rama--si{--rc:var(--color-exito)} .rama--no{--rc:var(--color-error)}
+  .rama.tomada{border-style:solid;border-width:2.5px;background:rgba(255,255,255,.85)}
+  .rama__etq{position:absolute;top:-10px;left:12px;background:var(--rc);color:#fff;font-size:11px;font-weight:700;padding:1px 10px;border-radius:999px}
+  .nodo.pisado{box-shadow:0 0 0 3px var(--color-marca-claro)}
+  .nodo.actual{transform:scale(1.04);box-shadow:0 0 0 4px var(--color-marca-claro),0 8px 24px rgba(29,46,122,.25)}
+  .ficha{position:absolute;right:-14px;top:-14px;width:28px;height:28px;border-radius:50%;background:var(--color-marca-claro);color:#fff;font-weight:800;display:grid;place-items:center;border:2px solid #fff;box-shadow:var(--sombra-1);animation:salta .45s ease-out}
+  .ficha--quieta{position:static;width:22px;height:22px;font-size:11px;animation:none;border-width:1px}
+  @keyframes salta{0%{transform:translateY(-14px) scale(.6);opacity:0}60%{transform:translateY(2px) scale(1.1);opacity:1}100%{transform:none}}
+  .flujo-catalogo{border-left:1px solid var(--color-borde);overflow:auto;padding:12px 14px;background:var(--color-superficie)}
+  .cat{margin-top:12px}
+  .cat__cab{display:grid;grid-template-columns:auto 1fr;column-gap:8px;align-items:center}
+  .cat__cab small{grid-column:2;font-size:11px;color:var(--color-texto-tenue)}
+  .cat__ico{width:22px;height:22px;border-radius:6px;display:grid;place-items:center;background:var(--c);color:#fff;font-size:12px;font-weight:700;grid-row:span 2}
+  .cat__bloques{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .pieza{border:1.5px solid var(--c);border-left-width:5px;background:#fff;border-radius:9px;padding:6px 9px;font:inherit;font-size:12px;cursor:grab;color:var(--color-texto);transition:transform .1s}
+  .pieza:hover{transform:translateY(-2px);box-shadow:var(--sombra-1)}
+  .misiones{border:1px solid var(--color-borde);border-radius:12px;padding:10px 12px;background:var(--color-superficie-2);margin-bottom:6px}
+  .misiones__cab{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .anillo--claro{width:38px;height:38px;background:conic-gradient(var(--color-exito) var(--p,0%), var(--color-borde) 0)}
+  .anillo--claro span{width:30px;height:30px;background:var(--color-superficie-2);color:var(--color-texto);font-size:10px}
+  .mision{font-size:12px;color:var(--color-texto-suave);padding:2px 0}
+  .mision.ok{color:var(--color-exito);font-weight:600}
+  .prueba{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 16px;border-top:1px solid var(--color-borde);background:var(--color-superficie-2);font-size:13px}
+  .prueba__datos{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .persona{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--color-borde-fuerte);background:#fff;border-radius:999px;padding:3px 10px 3px 3px;font:inherit;font-size:12px;cursor:pointer}
+  .persona.elegida{border-color:var(--color-marca);background:var(--color-marca-suave);font-weight:700}
+  .boton--jugar{margin-left:auto;min-height:38px;padding:0 18px;font-size:14px}
+  .flujo-resultado .veredicto{margin:10px 0 6px}
+  .resultado{margin:0 0 6px;padding-left:18px;font-size:13px;line-height:1.7}
+  .recorrido{font-size:12px;color:var(--color-texto-suave);margin-bottom:10px} .recorrido summary{cursor:pointer}
+  /* Crea tu espacio: el selector de iconos */
+  .velo--alto{z-index:70}
+  .dialogo--selector{width:min(760px,100%);height:min(680px,calc(100vh - 48px))}
+  .selector__vista{width:64px;height:64px;border-radius:16px;background:var(--degradado-marca-vertical);display:grid;place-items:center;flex-shrink:0}
+  .selector__vista svg{width:38px;height:38px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+  .selector__lista{flex:1;overflow:auto;padding:0 22px 12px}
+  .selector__grilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:8px}
+  .selector__op{border:1.5px solid var(--color-borde);background:var(--color-superficie-2);border-radius:12px;padding:10px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font:inherit;font-size:11px;color:var(--color-texto)}
+  .selector__op svg{width:30px;height:30px;stroke:var(--color-marca);fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+  .selector__op:hover{border-color:var(--color-marca);background:var(--color-marca-suave)}
+  .selector__op.elegido{border-color:var(--color-marca);background:var(--color-marca);color:#fff}
+  .selector__op.elegido svg{stroke:#fff}
+  .icono-actual{width:40px;height:40px;border-radius:10px;background:var(--color-marca-suave);display:grid;place-items:center}
+  .icono-actual svg{width:26px;height:26px;stroke:var(--color-marca);fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+  /* La oficina: estructura de varios pisos con puestos de trabajo */
+  .oficina{width:118px;display:flex;flex-direction:column-reverse;gap:2px;padding-top:2px;border-top:4px solid rgba(255,255,255,.85);border-radius:3px}
+  .piso--oficina{height:14px;border-radius:2px;background:rgba(150,210,255,.18)}
+  .piso--oficina i{background:rgba(190,230,255,.65)}
 </style>
 </head>
 <body>
 <div class="arma">
   <section class="lienzo">
-    <div class="cab"><span class="producto">BLOKY</span><span class="avance"><span class="anillo" id="anillo"><span id="pct">0 %</span></span> Tu copropiedad</span></div>
+    <div class="cab"><span class="producto">BLOKY</span><span class="avance"><button class="deshacer" id="deshacer" onclick="deshacer()" title="Deshacer (Ctrl/Cmd + Z)">↶ Deshacer</button><span class="anillo" id="anillo"><span id="pct">0 %</span></span> Tu copropiedad</span></div>
     <div class="nombre">Conjunto Residencial Altos del Bosque</div>
     <div class="resumen" id="resumen">Arrastra del catálogo al terreno.</div>
     <div class="terreno" id="terreno">
-      <div class="terreno__vacio" id="vacio">Este es el terreno de tu copropiedad.<small>Arrastra una torre, una manzana o una zona común desde la derecha y suéltala donde va. Suelta algo <b>encima de una torre o de una zona</b> para meterlo dentro. Toca cualquier cosa para configurarla.</small></div>
+      <div class="terreno__vacio" id="vacio">Este es el terreno de tu copropiedad.<small>Arrastra una torre, una manzana o una zona común desde la derecha y suéltala donde va. Para afinar la posición, selecciónala y usa las flechas del teclado. Suelta algo <b>encima de una torre o de una zona</b> para meterlo dentro. Toca cualquier cosa para configurarla.</small></div>
       <svg class="lineas" id="lineas"></svg>
     </div>
     <div class="leyenda" id="leyenda" style="display:none"><span>parqueaderos asignados a cada torre</span></div>
     <div class="aviso" id="aviso"></div>
+    <div id="config"></div>
+    <div id="selector"></div>
   </section>
   <aside class="panel">
     <div class="pestanas" id="pestanas"></div>
@@ -120,119 +285,546 @@ const I = {
   gimnasio:'<svg viewBox="0 0 24 24"><path d="M2 12h3M19 12h3M5 8v8M19 8v8M8 6v12M16 6v12M8 12h8"/></svg>',
   parque:'<svg viewBox="0 0 24 24"><path d="M12 21v-6M12 15l-5-4 5-8 5 8zM3 21h18"/></svg>',
   entrada:'<svg viewBox="0 0 24 24"><path d="M3 21V7h8v14M11 21V3h10v18M6 14h1M15 8h2M15 12h2M15 16h2"/></svg>',
+  oficina:'<svg viewBox="0 0 24 24"><path d="M3 21V7h18v14M3 11h18M3 15h18M7 7v14M12 7v14M17 7v14M8 3h8v4M1 21h22"/></svg>',
+  espacio:'<svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z" stroke-dasharray="3 2"/><path d="M12 8v8M8 12h8"/></svg>',
   zona:'<svg viewBox="0 0 24 24"><path d="M4 6h16v13H4zM4 6V4h5v2M9 13h6M12 10v6" stroke-dasharray="3 2"/></svg>',
 };
-const NOMBRE = { torre:'Torre', manzana:'Manzana', local:'Locales', parqueadero:'Parqueaderos', deposito:'Depósitos', porteria:'Portería', salon:'Salón social', piscina:'Piscina', gimnasio:'Gimnasio', parque:'Parque infantil', entrada:'Entrada vehicular', zona:'Agrupación' };
+const NOMBRE = { oficina:'Oficina', espacio:'Otro espacio', torre:'Torre', manzana:'Manzana', local:'Locales', parqueadero:'Parqueaderos', deposito:'Depósitos', porteria:'Portería', salon:'Salón social', piscina:'Piscina', gimnasio:'Gimnasio', parque:'Parque infantil', entrada:'Entrada vehicular', zona:'Agrupación' };
 const CATALOGO = {
-  Estructura: { ayuda:'Arrastra al terreno. Una Agrupación (etapa, sector, zona) recibe torres, manzanas, locales o zonas comunes: suéltalos encima.', objetos:['zona','torre','manzana','local'] },
-  Espacios:   { ayuda:'Parqueaderos y depósitos llevan cantidad; las zonas comunes se sueltan donde están.', objetos:['parqueadero','deposito','porteria','salon','piscina','gimnasio','parque','entrada'] },
+  Estructura: { ayuda:'Arrastra al terreno. Una Agrupación (etapa, sector, zona) recibe torres, manzanas, oficinas, locales o zonas comunes: suéltalos encima. La Oficina tiene pisos y puestos de trabajo.', objetos:['zona','torre','manzana','oficina','local'] },
+  Espacios:   { ayuda:'Parqueaderos y depósitos llevan cantidad; las zonas comunes se sueltan donde están. ¿No está el tuyo? «Otro espacio»: le eliges ícono y nombre.', objetos:['parqueadero','deposito','porteria','salon','piscina','gimnasio','parque','entrada','espacio'] },
 };
 const estado = { pestana:'Estructura', objetos:[], sel:null };
 const $ = (s)=>document.querySelector(s);
-let contador = { torre:0, manzana:0, local:0 };
+let contador = { torre:0, manzana:0, local:0, oficina:0 };
+let secuencia = 0; const nuevoId = ()=> 'o'+(++secuencia);
 function crear(tipo, x, y){
-  const base = { id: Date.now()+Math.random(), tipo, x, y };
+  const base = { id: nuevoId(), tipo, x, y };
   if (tipo==='torre') { contador.torre++; return { ...base, nombre:'Torre '+contador.torre, pisos:6, porPiso:4, locales:false }; }
+  if (tipo==='oficina') { contador.oficina++; return { ...base, nombre:'Oficina '+contador.oficina, pisos:3, puestos:12, oficinas:2 }; }
+  if (tipo==='espacio') return { ...base, nombre:'Otro espacio', icono:'otro' };
   if (tipo==='manzana') { contador.manzana++; return { ...base, nombre:'Manzana '+contador.manzana, casas:8 }; }
   if (tipo==='local') { contador.local++; return { ...base, nombre:'Locales', n:4 }; }
   if (tipo==='parqueadero'||tipo==='deposito') return { ...base, nombre:NOMBRE[tipo], n: tipo==='parqueadero'?40:20, asignados:{} };
   if (tipo==='zona') { contador.zona=(contador.zona||0)+1; return { ...base, nombre:'Etapa '+contador.zona, clase:'Etapa', ancho:260, alto:150 }; }
   return { ...base, nombre:NOMBRE[tipo] };
 }
-function unidades(){ return estado.objetos.reduce((a,o)=> a + (o.tipo==='torre'? o.pisos*o.porPiso : o.tipo==='manzana'? o.casas : o.tipo==='local'? o.n : 0), 0); }
-function aviso(t){ const a=$('#aviso'); a.textContent=t; a.classList.add('ver'); clearTimeout(aviso.t); aviso.t=setTimeout(()=>a.classList.remove('ver'),1800); }
+function unidades(){ return estado.objetos.reduce((a,o)=> a + (o.tipo==='torre'? o.pisos*o.porPiso : o.tipo==='oficina'? o.pisos*o.oficinas : o.tipo==='manzana'? o.casas : o.tipo==='local'? o.n : 0), 0); }
+function aviso(t, conDeshacer){ const a=$('#aviso'); a.innerHTML=''; a.append(t); if (conDeshacer) { const b=document.createElement('button'); b.textContent='Deshacer'; b.onclick=deshacer; a.append(b); } a.classList.add('ver'); clearTimeout(aviso.t); aviso.t=setTimeout(()=>a.classList.remove('ver'), conDeshacer?4000:1800); }
+// ---- deshacer: cada cambio guarda como estaba antes. Ctrl/Cmd + Z, el boton de arriba o el del aviso.
+const historial = []; let ultimo = null;
+function deshacer(){ if (!historial.length) return; ultimo = historial.pop(); estado.objetos = JSON.parse(ultimo); if (estado.sel && !objeto(estado.sel)) estado.sel=null; ultimo=null; render(true); aviso('Deshecho.'); }
+document.addEventListener('keydown', (e)=>{
+  const flecha={ArrowLeft:[-1,0],ArrowRight:[1,0],ArrowUp:[0,-1],ArrowDown:[0,1]}[e.key], o=!selector && !borrador && estado.sel && objeto(estado.sel);
+  if (flecha && o && !o.dentroDe && !['INPUT','SELECT','TEXTAREA'].includes(document.activeElement?.tagName)) { e.preventDefault(); const p=e.shiftKey? 1 : PASO; o.x+=flecha[0]*p; o.y+=flecha[1]*p; render(); return; }
+  if (selector) { if (e.key==='Escape') cerrarSelector(); return; } if (borrador) { if (e.key==='Escape') cerrarConfig(); return; } if ((e.metaKey||e.ctrlKey) && e.key.toLowerCase()==='z') { e.preventDefault(); deshacer(); } });
+// ---- sacar de su contenedor: queda suelto en el terreno, al lado de donde estaba
+function sacar(id){ const o=objeto(id), c=o && objeto(o.dentroDe); if (!o) return; o.dentroDe=null; if (c) { o.x=c.x+(c.tipo==='zona'?(c.ancho||260)/2+60:80); o.y=c.y; } estado.sel=o.id; render(); aviso(`${o.nombre} quedó suelto en el terreno.`, true); }
+function moverA(id, destinoId){ const o=objeto(id); if (!o) return; if (!destinoId) return sacar(id); const c=objeto(destinoId); o.dentroDe=destinoId; render(); aviso(`${o.nombre} ahora está dentro de ${c.nombre}.`, true); }
+// a donde puede ir: torres y agrupaciones (una torre o manzana no entra en una torre; nada entra en si mismo ni en lo que contiene)
+const EDIFICIOS=['torre','oficina'];
+function contenedoresPara(o){ return estado.objetos.filter(c=> (EDIFICIOS.includes(c.tipo)||c.tipo==='zona') && c.id!==o.id && !(EDIFICIOS.includes(c.tipo) && ['torre','manzana','oficina'].includes(o.tipo)) && o.tipo!=='zona' && !contiene(o,c)); }
+function contiene(a,b){ let x=b; while (x && x.dentroDe) { if (x.dentroDe===a.id) return true; x=objeto(x.dentroDe); } return false; }
+function quitar(id){ const o=objeto(id); estado.objetos.filter(c=>c.dentroDe===id).forEach(c=>{ c.dentroDe=null; c.x=o.x; c.y=o.y+80; }); estado.objetos=estado.objetos.filter(z=>z.id!==id); estado.sel=null; render(); aviso(`${o.nombre} quitado.`, true); }
 // ---- arrastrar desde el catalogo y dentro del terreno (HTML5 drag & drop; en el producto real, eventos de puntero para tactil)
 const terreno = $('#terreno');
 terreno.addEventListener('dragover', (e)=>{ e.preventDefault(); terreno.classList.add('sobre'); });
 terreno.addEventListener('dragleave', ()=> terreno.classList.remove('sobre'));
+// Cada objeto se ubica por su BASE CENTRAL (asi las torres de distinta altura quedan alineadas abajo). Al moverlo se
+// recuerda en que punto se agarro, para que caiga exactamente donde se ve al arrastrarlo, sin saltar arriba o abajo.
+const PASO = 10; // la cuadricula a la que se ajusta lo que se suelta
+let agarre = null; // {dx, dy}: del cursor a la base central del objeto que se arrastra
+const ajustar = (v, min, max) => Math.min(max, Math.max(min, Math.round(v/PASO)*PASO));
+document.addEventListener('dragend', ()=>{ agarre=null; });
 terreno.addEventListener('drop', (e)=>{
   e.preventDefault(); terreno.classList.remove('sobre');
-  const r = terreno.getBoundingClientRect();
-  const x = Math.round((e.clientX - r.left)/40)*40, y = Math.round((e.clientY - r.top)/40)*40;
+  const r = terreno.getBoundingClientRect(), g = agarre || {dx:0, dy:0}; agarre = null;
+  const x = ajustar(e.clientX - r.left - g.dx, 20, r.width-20), y = ajustar(e.clientY - r.top - g.dy, 60, r.height-10);
   const datos = e.dataTransfer.getData('text/plain');
   let o;
-  if (datos.startsWith('nuevo:')) { o = crear(datos.slice(6), x, y); estado.objetos.push(o); estado.sel=o.id; aviso(`${o.nombre} agregada. Tócala para configurarla.`); }
+  if (datos.startsWith('nuevo:')) { o = crear(datos.slice(6), x, y); estado.objetos.push(o); estado.sel=o.id; if (o.tipo!=='espacio') aviso(`${o.nombre} agregada. Tócala para configurarla.`); }
   else { o = estado.objetos.find(z=>String(z.id)===datos); if (o) { o.x=x; o.y=y; o.dentroDe=null; } }
   // ¿se solto encima de una torre o de una zona? Entonces queda DENTRO.
   const destino = destinoEn(e.clientX, e.clientY, o);
-  if (o && destino) { o.dentroDe = destino.id; aviso(`${o.nombre} ahora está dentro de ${destino.nombre}.`); }
+  if (o && destino) { o.dentroDe = destino.id; aviso(`${o.nombre} ahora está dentro de ${destino.nombre}.`, true); }
   render();
+  if (o && o.tipo==='espacio' && datos.startsWith('nuevo:')) abrirSelector(o.id, true);
 });
 function destinoEn(cx, cy, o){
   if (!o || o.tipo==='zona') return null;
   for (const el of terreno.querySelectorAll('.obj[data-contenedor]')) {
     const c = objeto(el.dataset.id); if (!c || c.id===o.id) continue;
-    if (c.tipo==='torre' && (o.tipo==='torre'||o.tipo==='manzana')) continue; // una torre no entra en otra torre
+    if (EDIFICIOS.includes(c.tipo) && ['torre','manzana','oficina'].includes(o.tipo)) continue; // un edificio no entra en otro
     const r = el.getBoundingClientRect();
     if (cx>=r.left-10 && cx<=r.right+10 && cy>=r.top-10 && cy<=r.bottom+10) return c;
   }
   return null;
 }
-function render(){
+
+// ================= Configurar: un popup por objeto (doble clic, clic derecho o «Configurar» en el panel) =================
+// Dos pestañas: General · Flujo de uso. TODO lo del uso vive en el flujo, un juego de bloques que se arrastran del catálogo
+// (preguntas, reserva y uso, autorizaciones, pagos, alertas y finales) y se encajan. Una pregunta abre dos caminos, Sí y No, que
+// se vuelven a juntar debajo. El flujo de una agrupación o torre se recorre primero en todo lo que está dentro.
+const DIAS=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'], DIAS_LARGO=['domingo','lunes','martes','miércoles','jueves','viernes','sábado'];
+const PERFILES=['Propietario','Arrendatario','Residente','Invitado','Empleado'];
+const CATEGORIAS={
+  Preguntas:{ico:'◆', clase:'pregunta', ayuda:'Abren dos caminos: Sí y No'},
+  'Reserva y uso':{ico:'⧗', clase:'limite', ayuda:'Cómo se reserva y sus topes'},
+  Autorizaciones:{ico:'✔', clase:'autorizacion', ayuda:'Alguien tiene que dar el visto bueno'},
+  'Después de reservar':{ico:'↺', clase:'despues', ayuda:'Si cancela tarde o no llega: liberar y multar'},
+  Acceso:{ico:'🔑', clase:'codigo', ayuda:'Un código para entrar; después, cerraduras y torniquetes'},
+  Pagos:{ico:'$', clase:'pago', ayuda:'Lo que se cobra, con quién lo autoriza'},
+  Alertas:{ico:'🔔', clase:'alerta', ayuda:'Por dónde, a quién y con cuánto tiempo'},
+  Finales:{ico:'⚑', clase:'fin', ayuda:'Cierran el camino'},
+};
+const TODOS_LOS_DIAS=[0,1,2,3,4,5,6];
+// las cuentas de la copropiedad (en BLOKY salen de su configuracion; aqui, de ejemplo)
+const CUENTAS=['Bancolombia ahorros ···4521','Davivienda corriente ···0987'];
+// como se paga: por banco se carga el soporte y lo aprueba la administracion; con la cuota o por IDIKY no hay revision
+const FORMAS={anticipado:['antes, por transferencia o consignación',true], cuota:['con la cuota de administración',true], idiky:['en línea por IDIKY',false]};
+const REFUTA={no:'no la refuta', retira:'la refuta y la retiran', mantiene:'la refuta y la mantienen'};
+const ESTADOS_PAGO={aprobado:'soporte aprobado', pendiente:'soporte sin revisar', rechazado:'soporte rechazado', nopago:'no pagó a tiempo'};
+const PLAZOS={antes:'antes de empezar', despues:'después de reservar'};
+const formaPago=(forma='anticipado')=>({forma, cuenta:CUENTAS[0], plazo:48, plazoRef:'antes'});
+const BLOQUES={
+  horario:{cat:'Preguntas', t:'¿Está en horario?', nuevo:()=>({tipo:'pregunta',q:'horario',franjas:[{dias:[1,2,3,4,5],desde:'06:00',hasta:'21:00'},{dias:[6,0],desde:'08:00',hasta:'18:00'}]})},
+  edad:{cat:'Preguntas', t:'¿Qué edad tiene?', nuevo:()=>({tipo:'pregunta',q:'edad',op:'menor',a:12,b:17})},
+  hora:{cat:'Preguntas', t:'¿A qué hora?', nuevo:()=>({tipo:'pregunta',q:'hora',desde:'19:00',hasta:'22:00'})},
+  dia:{cat:'Preguntas', t:'¿Qué día?', nuevo:()=>({tipo:'pregunta',q:'dia',dias:[6,0]})},
+  perfil:{cat:'Preguntas', t:'¿Quién es?', nuevo:()=>({tipo:'pregunta',q:'perfil',perfiles:['Invitado']})},
+  personas:{cat:'Preguntas', t:'¿Cuántos van?', nuevo:()=>({tipo:'pregunta',q:'personas',mas:10})},
+  cartera:{cat:'Preguntas', t:'¿Está en mora?', nuevo:()=>({tipo:'pregunta',q:'cartera'})},
+  reservaPrevia:{cat:'Reserva y uso', t:'Pide reserva previa', nuevo:()=>({tipo:'reserva',turno:2,anticipacion:24})},
+  limAforo:{cat:'Reserva y uso', t:'Aforo máximo', nuevo:()=>({tipo:'limite',cual:'aforo',valor:10,modo:'exclusivo'})},
+  cupo:{cat:'Reserva y uso', t:'Reservas al mes', nuevo:()=>({tipo:'limite',cual:'cupo',valor:2})},
+  duracion:{cat:'Reserva y uso', t:'Horas por uso', nuevo:()=>({tipo:'limite',cual:'duracion',valor:2})},
+  administracion:{cat:'Autorizaciones', t:'Aprueba la administración', nuevo:()=>({tipo:'autorizacion',quien:'administracion'})},
+  consejo:{cat:'Autorizaciones', t:'Aprueba el consejo', nuevo:()=>({tipo:'autorizacion',quien:'consejo'})},
+  adulto:{cat:'Autorizaciones', t:'Va con un adulto responsable', nuevo:()=>({tipo:'autorizacion',quien:'adulto'})},
+  condiciones:{cat:'Autorizaciones', t:'Acepta las condiciones de uso', nuevo:()=>({tipo:'autorizacion',quien:'condiciones'})},
+  codigo:{cat:'Acceso', t:'Código de acceso', nuevo:()=>({tipo:'codigo',formato:'pin',digitos:6,usos:'vigencia',antes:15,despues:15,medios:['sms','app'],a:['reservo'],cuando:'antes',cantidad:1,unidad:'horas',dispositivo:'porteria'})},
+  caminoNoAsiste:{cat:'Después de reservar', t:'★ Camino completo', camino:true},
+  cancelo:{cat:'Después de reservar', t:'¿Canceló?', nuevo:()=>({tipo:'pregunta',q:'cancelo'})},
+  canceloTarde:{cat:'Después de reservar', t:'¿Canceló tarde?', nuevo:()=>({tipo:'pregunta',q:'canceloTarde',horas:24})},
+  llego:{cat:'Después de reservar', t:'¿Llegó a tiempo?', nuevo:()=>({tipo:'pregunta',q:'llego',minutos:15})},
+  cancelada:{cat:'Después de reservar', t:'Cancelar y liberar la zona', nuevo:()=>({tipo:'fin',resultado:'cancelada',motivo:'Se liberó la zona'})},
+  multa:{cat:'Después de reservar', t:'Multa', nuevo:()=>({tipo:'multa',concepto:'Multa por no asistir',valor:30000,motivo:'No llegó a su reserva ni la canceló a tiempo',respaldo:''})},
+  alquiler:{cat:'Pagos', t:'Alquiler', nuevo:()=>({tipo:'pago',concepto:'Alquiler',valor:100000,por:'reserva',respaldo:'',...formaPago()})},
+  pagoReserva:{cat:'Pagos', t:'Reserva', nuevo:()=>({tipo:'pago',concepto:'Reserva',valor:20000,por:'reserva',respaldo:'',...formaPago()})},
+  aseo:{cat:'Pagos', t:'Aseo', nuevo:()=>({tipo:'pago',concepto:'Aseo',valor:50000,por:'reserva',respaldo:'',...formaPago()})},
+  mantenimiento:{cat:'Pagos', t:'Mantenimiento', nuevo:()=>({tipo:'pago',concepto:'Mantenimiento',valor:30000,por:'reserva',respaldo:'',...formaPago()})},
+  deposito:{cat:'Pagos', t:'Depósito', nuevo:()=>({tipo:'pago',concepto:'Depósito de garantía',valor:200000,por:'reserva',respaldo:'',...formaPago()})},
+  otroPago:{cat:'Pagos', t:'Otro cobro', nuevo:()=>({tipo:'pago',concepto:'Otro cobro',valor:10000,por:'persona',respaldo:'',...formaPago()})},
+  alertaRecordatorio:{cat:'Alertas', t:'Recordar a quien reservó', nuevo:()=>({tipo:'alerta',medios:['sms','app'],a:['reservo'],cuando:'antes',cantidad:24,unidad:'horas',mensaje:'Hola {nombre}: te esperamos en {espacio} el {fecha}.'})},
+  alertaPorteria:{cat:'Alertas', t:'Avisar a portería', nuevo:()=>({tipo:'alerta',medios:['app'],a:['porteria'],cuando:'antes',cantidad:1,unidad:'horas',mensaje:'{nombre} usará {espacio} a las {hora}. Van {personas} personas.'})},
+  alertaAdmin:{cat:'Alertas', t:'Avisar al reservar', nuevo:()=>({tipo:'alerta',medios:['correo'],a:['administracion'],cuando:'confirmar',cantidad:0,unidad:'horas',mensaje:'Nueva reserva de {espacio} para el {fecha}.'})},
+  alertaFin:{cat:'Alertas', t:'Revisar al terminar', nuevo:()=>({tipo:'alerta',medios:['app'],a:['zonas'],cuando:'despues',cantidad:30,unidad:'minutos',mensaje:'Revisar {espacio} y el depósito de {nombre}.'})},
+  alerta:{cat:'Alertas', t:'Alerta en blanco', nuevo:()=>({tipo:'alerta',medios:[],a:[],cuando:'antes',cantidad:2,unidad:'horas',mensaje:''})},
+  puede:{cat:'Finales', t:'Puede usarlo', nuevo:()=>({tipo:'fin',resultado:'si',motivo:''})},
+  nopuede:{cat:'Finales', t:'No puede usarlo', nuevo:()=>({tipo:'fin',resultado:'no',motivo:'No cumple las reglas'})},
+};
+// la red de colaboradores: los grupos fijos y los que cree la administracion para gestionar reservas y uso
+const MEDIOS={correo:'Correo', sms:'SMS', llamada:'Llamada', app:'App'};
+const DESTINOS={reservo:'Quien reservó', todos:'Todos los colaboradores', porteria:'Portería', zonas:'Zonas sociales', administracion:'Administración'};
+const GRUPOS=['Comité de reservas'];
+// el codigo de acceso: hoy lo verifica porteria; los dispositivos quedan listos para conectarlos despues
+const FORMATOS={pin:'PIN numérico', qr:'Código QR'};
+const USOS={una:'sirve una sola vez', vigencia:'sirve mientras esté vigente', persona:'uno por cada persona que va'};
+const DISPOSITIVOS={porteria:['Lo verifica portería',true], cerradura:['Cerradura inteligente',false], torniquete:['Torniquete o talanquera',false], lector:['Lector de QR en la puerta',false]};
+const CUANDO={confirmar:'al confirmarse la reserva', antes:'antes de empezar', inicio:'al empezar', despues:'después de terminar'};
+const UNIDADES={minutos:1, horas:60, dias:1440};
+const AUTORIZA={administracion:'Aprueba la administración', consejo:'Aprueba el consejo de administración', adulto:'Va con un adulto responsable', condiciones:'Acepta las condiciones de uso'};
+const PERSONAS=[{nombre:'Sofía',edad:10,perfil:'Residente'},{nombre:'Andrés',edad:16,perfil:'Residente'},{nombre:'Marta',edad:45,perfil:'Propietario'},{nombre:'Carlos',edad:30,perfil:'Invitado'}];
+let secNodo=0;
+const PREGUNTAS_DESPUES=['cancelo','canceloTarde','llego'];
+// el camino de no asistencia, completo: canceló tarde → multa; no llegó en la espera → se libera la zona y multa
+function caminoNoAsiste({horas=24, minutos=15, multaTarde=20000, multaNoLlego=30000, respaldo=''}={}){
+  return [B('cancelo',{},[B('canceloTarde',{horas},[B('multa',{concepto:'Multa por cancelar tarde',valor:multaTarde,motivo:`Canceló con menos de ${horas} horas de anticipación`,respaldo})]),B('cancelada',{motivo:'Canceló la reserva'})]),
+          B('llego',{minutos},[],[B('multa',{valor:multaNoLlego,motivo:`No llegó en los ${minutos} minutos de espera ni canceló a tiempo`,respaldo}),B('cancelada',{motivo:`No llegó en los ${minutos} minutos de espera: se liberó la zona`})])]; }
+function B(k, extra={}, si, no){ const n={nid:'n'+(++secNodo), ...BLOQUES[k].nuevo(), ...extra}; if (n.tipo==='pregunta') { n.si=si||[]; n.no=no||[]; } return n; }
+const RESPALDO='Manual de convivencia, art. 25';
+const PLANTILLAS_FLUJO={
+  salon:{t:'Salón con alquiler', f:()=>[B('reservaPrevia',{turno:6,anticipacion:72}),B('horario',{franjas:[{dias:TODOS_LOS_DIAS,desde:'10:00',hasta:'22:00'}]},[],[B('nopuede',{motivo:'Fuera del horario'})]),B('condiciones'),B('alquiler',{valor:150000,respaldo:RESPALDO}),B('aseo',{valor:50000,respaldo:RESPALDO,forma:'cuota'}),B('deposito',{respaldo:RESPALDO}),B('personas',{mas:40},[B('administracion')]),B('limAforo',{valor:60}),B('codigo'),B('alertaAdmin'),B('alertaRecordatorio'),B('alertaPorteria'),B('alertaFin'),...caminoNoAsiste({horas:48,minutos:30,multaTarde:50000,multaNoLlego:80000,respaldo:RESPALDO}),B('puede')]},
+  piscina:{t:'Piscina con horarios', f:()=>[B('horario',{},[],[B('nopuede',{motivo:'Fuera del horario'})]),B('hora',{desde:'19:00',hasta:'21:00'},[B('edad',{op:'menor',a:18},[B('nopuede',{motivo:'Franja solo para adultos'})])]),B('perfil',{perfiles:['Invitado']},[B('otroPago',{concepto:'Ingreso de invitado',valor:8000,respaldo:'Acta de asamblea 2026',forma:'cuota'}),B('alertaPorteria',{cuando:'confirmar',mensaje:'{nombre} entra como invitado a {espacio}.'})]),B('limAforo',{valor:20,modo:'compartido'}),B('puede')]},
+  gimnasio:{t:'Gimnasio por edades', f:()=>[B('reservaPrevia',{turno:1,anticipacion:2}),B('horario',{franjas:[{dias:TODOS_LOS_DIAS,desde:'05:00',hasta:'22:00'}]},[],[B('nopuede',{motivo:'Fuera del horario'})]),B('edad',{op:'menor',a:14},[B('nopuede',{motivo:'Menores de 14 no entran'})],[B('edad',{op:'menor',a:18},[B('adulto')])]),B('limAforo',{valor:8,modo:'compartido'}),B('codigo',{formato:'qr',usos:'una',antes:10,despues:0,medios:['app'],cuando:'confirmar'}),B('alertaRecordatorio',{medios:['app'],cantidad:30,unidad:'minutos'}),...caminoNoAsiste({horas:2,minutos:10,multaTarde:0,multaNoLlego:10000,respaldo:'Manual de convivencia, art. 31'}).map(n=>n.q==='cancelo'? {...n, si:[B('cancelada',{motivo:'Canceló la reserva'})]} : n),B('puede')]},
+  vacio:{t:'En blanco', f:()=>[]},
+};
+function confVacia(){ return { descripcion:'', condiciones:'', flujo:[] }; }
+const ESTRUCTURAS=['torre','manzana','oficina','local'];
+let borrador=null, pestanaConf='General', ultimoToque={id:null,t:0}, animacion=null;
+const esc=(t)=>String(t??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');
+const copia=(x)=>JSON.parse(JSON.stringify(x));
+const fmt=(n)=>Number(n||0).toLocaleString('es-CO');
+function recorrer(lista, fn){ for (const n of lista||[]) { fn(n); if (n.tipo==='pregunta') { recorrer(n.si, fn); recorrer(n.no, fn); } } }
+function bloquesDe(lista){ const a=[]; recorrer(lista, n=>a.push(n)); return a; }
+// un toque selecciona; dos toques seguidos sobre lo mismo abren el popup (el terreno se redibuja entre toques, por eso no se usa dblclick)
+function tocar(id){ const ahora=Date.now(); if (ultimoToque.id===id && ahora-ultimoToque.t<450) { ultimoToque={id:null,t:0}; return abrirConfig(id); } ultimoToque={id,t:ahora}; estado.sel=id; render(); }
+function abrirConfig(id){ const o=objeto(id); if(!o) return; estado.sel=o.id; render(); borrador=copia(o); borrador.conf={...confVacia(), ...(o.conf?copia(o.conf):{})};
+  pestanaConf=ESTRUCTURAS.includes(o.tipo)? 'General' : 'Flujo de uso'; pintarConfig(); }
+function cerrarConfig(){ clearInterval(animacion); borrador=null; $('#config').innerHTML=''; }
+function motivoInvalido(b){
+  if (!b.nombre.trim()) return 'El nombre es obligatorio.';
+  if (bloquesDe(b.conf.flujo).some(n=>(n.tipo==='pago'||n.tipo==='multa') && n.valor>0 && !n.respaldo.trim())) return 'Cada cobro y cada multa necesitan el documento que los autoriza (RN-38, RN-45).';
+  const bl=bloquesDe(b.conf.flujo);
+  if (bl.some(n=>n.q==='horario' && n.franjas.some(f=>f.hasta<=f.desde || !f.dias.length))) return 'Revisa el horario: cada franja necesita días y terminar después de empezar.';
+  if (bl.some(n=>(n.tipo==='alerta'||n.tipo==='codigo') && (!n.medios.length || !n.a.length))) return 'Cada alerta y cada código necesitan por dónde se envían y a quién.';
+  return null; }
+function guardarConfig(){ const m=motivoInvalido(borrador); if (m) { aviso(m); return; } const b=copia(borrador); delete b._caso; delete b._recorrido; delete b._probado; const o=objeto(b.id); Object.assign(o, b); cerrarConfig(); render(); aviso(`Configuración de ${o.nombre} guardada.`, true); }
+// editar el borrador por ruta: 'conf.flujo.0.si.1.valor'. Todo cambio borra la ultima prueba.
+function leer(ruta){ return ruta.split('.').reduce((x,k)=>x[k], borrador); }
+function cambio(){ clearInterval(animacion); borrador._recorrido=null; pintarConfig(); }
+function cf(ruta, valor){ const p=ruta.split('.'), k=p.pop(); (p.length? leer(p.join('.')) : borrador)[k]=valor; cambio(); }
+function cfQuitar(ruta,i){ leer(ruta).splice(i,1); cambio(); }
+function cfAlternar(ruta,v){ const a=leer(ruta), i=a.indexOf(v); i>=0? a.splice(i,1) : a.push(v); cambio(); }
+function quitarNodo(ruta){ const p=ruta.split('.'), i=+p.pop(); leer(p.join('.')).splice(i,1); cambio(); }
+function agregarFranja(ruta){ leer(ruta+'.franjas').push({dias:[6], desde:'08:00', hasta:'18:00'}); cambio(); }
+function nuevoGrupo(ruta){ const g=prompt('Nombre del grupo de colaboradores (por ejemplo: Comité de reservas, Salvavidas)'); if (!g || !g.trim()) return; if (!GRUPOS.includes(g.trim())) GRUPOS.push(g.trim()); const a=leer(ruta+'.a'); if (!a.includes(g.trim())) a.push(g.trim()); cambio(); aviso(`Grupo «${g.trim()}» creado. Ya lo puedes usar en cualquier alerta.`); }
+function usarPlantilla(k){ if (borrador.conf.flujo.length && !confirm('¿Reemplazar el flujo actual por la plantilla?')) return; borrador.conf.flujo=PLANTILLAS_FLUJO[k].f(); cambio(); aviso(`Plantilla «${PLANTILLAS_FLUJO[k].t}» puesta. Ajústala a tu gusto.`); }
+// un clic en el catalogo agrega el bloque al final (antes del final, si ya hay uno); arrastrarlo lo pone donde se suelte
+function agregarBloque(k){ const f=borrador.conf.flujo; if (BLOQUES[k].camino) { const u=f[f.length-1]; f.splice(u&&u.tipo==='fin'? f.length-1 : f.length, 0, ...caminoNoAsiste()); cambio(); return aviso('Camino de no asistencia puesto: ajusta tiempos, multas y motivos.'); } const n=B(k); const ultimo=f[f.length-1]; f.splice(ultimo&&ultimo.tipo==='fin'&&n.tipo!=='fin'? f.length-1 : f.length, 0, n); cambio(); }
+function arrastrarCatalogo(e,k){ e.dataTransfer.setData('text/plain','nuevo:'+k); document.querySelector('.flujo')?.classList.add('arrastrando'); }
+function arrastrarNodo(e,ruta){ e.stopPropagation(); e.dataTransfer.setData('text/plain','mover:'+ruta); const c=e.target.closest('.nodo'); if (c) e.dataTransfer.setDragImage(c, 24, 20); setTimeout(()=>document.querySelector('.flujo')?.classList.add('arrastrando')); }
+function sobreRanura(e){ e.preventDefault(); e.currentTarget.classList.add('sobre'); }
+function soltarEnRanura(e){ e.preventDefault(); e.stopPropagation(); const r=e.currentTarget, destino=r.dataset.lista, pos=+r.dataset.pos, d=e.dataTransfer.getData('text/plain');
+  const arr=leer(destino);
+  if (d.startsWith('nuevo:')) arr.splice(pos,0,...(BLOQUES[d.slice(6)].camino? caminoNoAsiste() : [B(d.slice(6))]));
+  else if (d.startsWith('mover:')) { const origen=d.slice(6); if (destino===origen || destino.startsWith(origen+'.')) { aviso('Un bloque no cabe dentro de sí mismo.'); return cambio(); }
+    const p=origen.split('.'), i=+p.pop(), arrO=leer(p.join('.')); const [n]=arrO.splice(i,1); arr.splice(arrO===arr && i<pos? pos-1 : pos, 0, n); }
+  cambio(); }
+document.addEventListener('dragend', ()=>document.querySelector('.flujo')?.classList.remove('arrastrando'));
+// controles
+const sw=(ruta,v)=>`<button class="interruptor" role="switch" aria-checked="${!!v}" onclick="cf('${ruta}', ${!v})"></button>`;
+const num=(ruta,v,ancho)=>`<input class="entrada entrada--num" ${ancho?`style="width:${ancho}px"`:''} type="number" min="0" value="${v}" onchange="cf('${ruta}', Number(this.value))">`;
+const hora=(ruta,v)=>`<input class="entrada" type="time" step="1800" value="${v}" onchange="cf('${ruta}', this.value)">`;
+const sel=(ruta,v,ops,numerico)=>`<select class="entrada" onchange="cf('${ruta}', ${numerico?'Number(this.value)':'this.value'})">${ops.map(([val,t])=>`<option value="${val}" ${String(v)===String(val)?'selected':''}>${t}</option>`).join('')}</select>`;
+const dias=(ruta,arr)=>`<span class="dias">${[1,2,3,4,5,6,0].map(d=>`<button aria-pressed="${arr.includes(d)}" onclick="cfAlternar('${ruta}',${d})">${DIAS[d]}</button>`).join('')}</span>`;
+const campo=(t,ctrl,ayuda)=>`<div class="campo"><span>${t}${ayuda?`<small>${ayuda}</small>`:''}</span><span style="display:flex;gap:8px;align-items:center;flex-shrink:0">${ctrl}</span></div>`;
+function diasTexto(d){ const s=[...d].sort().join(); if (s==='0,1,2,3,4,5,6') return 'cualquier día'; if (s==='1,2,3,4,5') return 'de lunes a viernes'; if (s==='0,6') return 'el fin de semana'; if (!d.length) return 'ningún día'; return 'el '+[1,2,3,4,5,6,0].filter(x=>d.includes(x)).map(x=>DIAS_LARGO[x]).join(' o '); }
+function pregunta(n){ switch(n.q){
+  case 'edad': return n.op==='menor'? `¿Es menor de ${n.a} años?` : n.op==='mayor'? `¿Es mayor de ${n.a} años?` : `¿Tiene entre ${n.a} y ${n.b} años?`;
+  case 'hora': return `¿Es entre las ${n.desde} y las ${n.hasta}?`;
+  case 'dia': return `¿Es ${diasTexto(n.dias)}?`;
+  case 'perfil': return `¿Es ${n.perfiles.map(p=>p.toLowerCase()).join(' o ')||'—'}?`;
+  case 'personas': return `¿Van más de ${n.mas} personas?`;
+  case 'reserva': return '¿Tiene reserva confirmada?';
+  case 'horario': return '¿Está dentro del horario?';
+  case 'cancelo': return '¿Canceló la reserva?';
+  case 'canceloTarde': return `¿Canceló con menos de ${n.horas} horas de anticipación?`;
+  case 'llego': return `¿Llegó dentro de los ${n.minutos} minutos de espera?`;
+  case 'cartera': return '¿Su unidad está en mora?'; } }
+function textoLimite(n){ return n.cual==='aforo'? `Aforo máximo: ${n.valor} personas, uso ${n.modo==='compartido'?'compartido':'exclusivo'}` : n.cual==='cupo'? `Máximo ${n.valor} reservas al mes por unidad` : `Máximo ${n.valor} horas por uso`; }
+function contenedores(b){ const out=[]; let c=b.dentroDe && objeto(b.dentroDe); while (c) { out.unshift(c); c=c.dentroDe && objeto(c.dentroDe); } return out; }
+function resumenConf(o){ const c=o.conf; if (!c) return ''; const bl=bloquesDe(c.flujo||[]), af=bl.find(n=>n.cual==='aforo'), al=bl.filter(n=>n.tipo==='alerta').length;
+  return [af&&`aforo ${af.valor}`, bl.some(n=>n.q==='horario')&&'horario', bl.some(n=>n.tipo==='reserva')&&'reserva', bl.some(n=>n.tipo==='codigo')&&'código', bl.some(n=>n.tipo==='pago')&&'cobra', bl.some(n=>n.tipo==='multa')&&'multa', al&&`${al} alerta${al>1?'s':''}`].filter(Boolean).join(' · ') || (bl.length? `flujo de ${bl.length}` : ''); }
+// ---- pestañas General y Capacidad
+function tabGeneral(b){ const o=objeto(b.id), ops=contenedoresPara(o);
+  let h=campo('Nombre', `<input class="entrada" style="width:260px" value="${esc(b.nombre)}" onchange="cf('nombre', this.value)">`);
+  h += b.tipo==='zona'? campo('Tipo de agrupación', sel('clase', b.clase, ['Etapa','Sector','Bloque','Zona social','Zona comercial','Otra'].map(c=>[c,c])), 'Su flujo se recorre primero en todo lo que está dentro') : campo('Qué es', `<b>${NOMBRE[b.tipo]}</b>`);
+  if (b.tipo!=='zona') h += campo('Está en', `<select class="entrada" onchange="cf('dentroDe', this.value||null)"><option value="">Suelto en el terreno</option>${ops.map(c=>`<option value="${c.id}" ${b.dentroDe===c.id?'selected':''}>Dentro de ${esc(c.nombre)}</option>`).join('')}</select>`, 'Su relación con una torre o agrupación: hereda su flujo');
+  if (b.tipo==='torre') h += campo('Pisos', num('pisos', b.pisos)) + campo('Apartamentos por piso', num('porPiso', b.porPiso)) + campo('Locales en el primer piso', sw('locales', b.locales));
+  if (b.tipo==='oficina') h += campo('Pisos', num('pisos', b.pisos)) + campo('Puestos de trabajo por piso', num('puestos', b.puestos), 'Los puestos que se reservan van como espacio «Puestos de trabajo» dentro de la oficina, con su flujo') + campo('Oficinas cerradas por piso', num('oficinas', b.oficinas), 'Cuentan como unidades');
+  if (b.tipo==='espacio') h += campo('Ícono', `<span class="icono-actual">${svgIcono(b.icono)}</span><button class="boton" onclick="abrirSelector('borrador')">Cambiar</button>`);
+  if (b.tipo==='manzana') h += campo('Casas', num('casas', b.casas));
+  if (b.n!==undefined) h += campo('Cantidad', num('n', b.n));
+  h += `<div class="campo" style="flex-direction:column;align-items:stretch"><span>Descripción<small>Qué es, en dos líneas, como lo leerá el residente</small></span><textarea class="entrada" rows="2" maxlength="280" onchange="cf('conf.descripcion', this.value)">${esc(b.conf.descripcion)}</textarea></div>`;
+  h += `<div class="campo" style="flex-direction:column;align-items:stretch"><span>Condiciones y reglas de uso<small>Un renglón por punto, hasta 2.000 caracteres. ${ESTRUCTURAS.includes(b.tipo)? 'Las ven quienes viven o trabajan aquí.' : 'El residente las lee antes de reservar y las acepta con el bloque «Acepta las condiciones de uso» del flujo.'}${b.tipo==='zona'? ' Valen también para todo lo que está dentro.' : ''}</small></span><textarea class="entrada" rows="7" maxlength="2000" placeholder="Ej.: No se permite música después de las 10 p. m.&#10;Los menores de 12 años entran con un adulto.&#10;Se entrega aseado y con el mobiliario en su sitio." onchange="cf('conf.condiciones', this.value)">${esc(b.conf.condiciones)}</textarea></div>`;
+  return h; }
+// ---- el flujo: bloques que encajan
+function lista(arr, ruta){ return `<div class="lista">${arr.map((n,i)=>ranura(ruta,i)+nodo(n, `${ruta}.${i}`)).join('')}${ranura(ruta, arr.length, !arr.length)}</div>`; }
+function ranura(ruta,i,vacia){ return `<div class="ranura${vacia?' ranura--vacia':''}" data-lista="${ruta}" data-pos="${i}" ondragover="sobreRanura(event)" ondragleave="this.classList.remove('sobre')" ondrop="soltarEnRanura(event)"><span>${vacia?'suelta un bloque':'+'}</span></div>`; }
+function nodo(n, ruta){ const R=borrador._recorrido, pisado=R&&R.pasos.slice(0,R.hasta).includes(n.nid), actual=R&&R.pasos[R.hasta-1]===n.nid;
+  const cls=`nodo nodo--${n.tipo}${n.tipo==='fin'?' nodo--fin-'+n.resultado:''}${PREGUNTAS_DESPUES.includes(n.q)||n.tipo==='multa'?' nodo--despues':''}${pisado?' pisado':''}${actual?' actual':''}`;
+  const ficha=actual? `<span class="ficha" title="${esc(borrador._caso.nombre)}">${esc(borrador._caso.nombre[0])}</span>` : '';
+  const asa=`<span class="asa" draggable="true" ondragstart="arrastrarNodo(event,'${ruta}')" title="Arrastra para mover">⠿</span>`, x=`<button class="nodo__quitar" title="Quitar bloque" onclick="quitarNodo('${ruta}')">×</button>`;
+  const ico=(c)=>`<span class="nodo__ico">${c}</span>`;
+  let cuerpo='';
+  if (n.tipo==='pregunta') { cuerpo=ico('◆')+controlPregunta(n, ruta);
+    const tomada=R&&pisado&&R.hasta>R.pasos.indexOf(n.nid)+1? R.ramas[n.nid] : null;
+    return `<div class="paso">${`<div class="${cls}" data-nid="${n.nid}">${asa}${cuerpo}${x}${ficha}</div>`}<div class="ramas"><div class="rama rama--si${tomada==='si'?' tomada':''}"><span class="rama__etq">Sí</span>${lista(n.si, ruta+'.si')}</div><div class="rama rama--no${tomada==='no'?' tomada':''}"><span class="rama__etq">No</span>${lista(n.no, ruta+'.no')}</div></div></div>`; }
+  if (n.tipo==='autorizacion') cuerpo=ico('✔')+`<span>${AUTORIZA[n.quien]}${n.quien==='condiciones'? (()=>{ const c=puntos(borrador.conf.condiciones).length; return c? ` <small>(${c} puntos, en General)</small>` : ' <small class="aviso-campo">Escríbelas en la pestaña General</small>'; })() : ''}</span>`;
+  if (n.tipo==='multa') { const falta=n.valor>0 && !n.respaldo.trim();
+    cuerpo=ico('⚠')+`<span class="nodo__filas"><span><b>Multa</b> <input class="entrada" style="width:170px" value="${esc(n.concepto)}" onchange="cf('${ruta}.concepto', this.value)"> $ ${num(ruta+'.valor', n.valor, 100)}</span>
+      <span><small>Motivo que verá el residente</small> <input class="entrada" style="width:330px" value="${esc(n.motivo)}" onchange="cf('${ruta}.motivo', this.value)"></span>
+      <span><small>Lo autoriza</small> <input class="entrada${falta?' entrada--falta':''}" style="width:240px" placeholder="Reglamento art. …, manual, acta" value="${esc(n.respaldo)}" onchange="cf('${ruta}.respaldo', this.value)"></span>
+      <small>Se carga directo en la cuenta de cobro de administración. El residente la ve en la app con su motivo y <b>puede refutarla</b> diciendo por qué; la administración la <b>retira</b> (el cargo queda anulado) o la <b>mantiene</b>.</small></span>`; }
+  if (n.tipo==='reserva') cuerpo=ico('⧗')+`<span class="nodo__filas"><b>Pide reserva previa</b><span>Turnos de ${sel(ruta+'.turno', n.turno, [1,2,3,4,6,12].map(x=>[x, x+(x===1?' hora':' horas')]), true)} · con ${num(ruta+'.anticipacion', n.anticipacion, 60)} h de anticipación</span><small>Hasta cuándo se cancela y cuánto se espera: con el camino «Después de reservar».</small></span>`;
+  if (n.tipo==='codigo') cuerpo=ico('🔑')+`<span class="nodo__filas"><span><b>Código de acceso</b> · ${sel(ruta+'.formato', n.formato, Object.entries(FORMATOS))}${n.formato==='pin'? ` de ${sel(ruta+'.digitos', n.digitos, [4,6,8].map(d=>[d,d+' dígitos']), true)}` : ''} · ${sel(ruta+'.usos', n.usos, Object.entries(USOS))}</span>
+      <span>Vigente desde ${num(ruta+'.antes', n.antes, 56)} min antes de empezar hasta ${num(ruta+'.despues', n.despues, 56)} min después de terminar</span>
+      ${envio(n, ruta, 'Se envía')}
+      <span>Se conecta con <select class="entrada" onchange="cf('${ruta}.dispositivo', this.value)">${Object.entries(DISPOSITIVOS).map(([k,[t,ok]])=>`<option value="${k}" ${n.dispositivo===k?'selected':''} ${ok?'':'disabled'}>${t}${ok?'':' (próximamente)'}</option>`).join('')}</select></span>${!n.medios.length||!n.a.length? '<small class="aviso-campo">Elige por dónde y a quién se envía</small>' : ''}</span>`;
+  if (n.tipo==='alerta') { const destinos=[...Object.entries(DESTINOS), ...GRUPOS.map(g=>[g,g])], falta=!n.medios.length || !n.a.length;
+    cuerpo=ico('🔔')+`<span class="nodo__filas"><span><b>Alerta</b> por <span class="dias">${Object.entries(MEDIOS).map(([k,t])=>`<button aria-pressed="${n.medios.includes(k)}" onclick="cfAlternar('${ruta}.medios','${k}')">${t}</button>`).join('')}</span></span>
+      <span>a <span class="dias">${destinos.map(([k,t])=>`<button aria-pressed="${n.a.includes(k)}" onclick="cfAlternar('${ruta}.a','${esc(k)}')">${esc(t)}</button>`).join('')}<button class="dias__mas" onclick="nuevoGrupo('${ruta}')" title="Crear un grupo de colaboradores">+ grupo</button></span></span>
+      <span>${n.cuando==='antes'||n.cuando==='despues'? `${num(ruta+'.cantidad', n.cantidad, 56)} ${sel(ruta+'.unidad', n.unidad, Object.keys(UNIDADES).map(u=>[u,u]))} ` : ''}${sel(ruta+'.cuando', n.cuando, Object.entries(CUANDO))}</span>
+      <span><input class="entrada" style="width:420px" placeholder="Mensaje. Puedes usar {nombre}, {espacio}, {fecha}, {hora}, {personas}" value="${esc(n.mensaje)}" onchange="cf('${ruta}.mensaje', this.value)"></span>${falta? '<small class="aviso-campo">Elige por dónde y a quién</small>' : ''}</span>`; }
+  if (n.tipo==='limite') cuerpo=ico('⧗')+(n.cual==='aforo'? `Aforo máximo ${num(ruta+'.valor', n.valor)} personas · ${sel(ruta+'.modo', n.modo||'exclusivo', [['exclusivo','exclusivo: el turno es de una unidad'],['compartido','compartido: varias unidades hasta llenarlo']])}` : n.cual==='cupo'? `Máximo ${num(ruta+'.valor', n.valor)} reservas al mes por unidad` : `Máximo ${num(ruta+'.valor', n.valor)} horas por uso`);
+  if (n.tipo==='pago') { const falta=n.valor>0 && !n.respaldo.trim();
+    cuerpo=ico('$')+`<span class="nodo__filas"><span>Cobrar <input class="entrada" style="width:150px" value="${esc(n.concepto)}" onchange="cf('${ruta}.concepto', this.value)"> $ ${num(ruta+'.valor', n.valor, 100)} ${n.concepto.startsWith('Depósito')? '<small>se devuelve</small>' : sel(ruta+'.por', n.por, [['reserva','por reserva'],['hora','por hora'],['persona','por persona']])}</span><span><small>Lo autoriza</small> <input class="entrada${falta?' entrada--falta':''}" style="width:240px" placeholder="Reglamento art. …, manual, acta" value="${esc(n.respaldo)}" onchange="cf('${ruta}.respaldo', this.value)"></span>
+      <span><small>Se paga</small> <select class="entrada" onchange="cf('${ruta}.forma', this.value)">${Object.entries(FORMAS).map(([k,[t,ok]])=>`<option value="${k}" ${n.forma===k?'selected':''} ${ok?'':'disabled'}>${t}${ok?'':' (próximamente)'}</option>`).join('')}</select></span>
+      ${n.forma==='anticipado'? `<span>a ${sel(ruta+'.cuenta', n.cuenta, CUENTAS.map(c=>[c,c]))}, con el soporte cargado hasta ${num(ruta+'.plazo', n.plazo, 56)} horas ${sel(ruta+'.plazoRef', n.plazoRef, Object.entries(PLAZOS))}</span><small>El residente carga el soporte (foto o PDF) y <b>lo aprueba la administración</b>. Mientras tanto la reserva queda pendiente; si vence el plazo sin soporte, se libera.</small>`
+        : n.forma==='cuota'? `<small>Se suma a la siguiente cuenta de cobro de la unidad, como el cobro por uso de zona (RN-119). <b>Sin revisión</b>: lo respalda la liquidación.</small>`
+        : `<small>El pago en línea se confirma solo, <b>sin revisión</b>.</small>`}</span>`; }
+  if (n.tipo==='fin' && n.resultado==='cancelada') cuerpo = ico('🚫')+`<b>Se cancela la reserva y se libera la zona</b> <input class="entrada" style="width:260px" placeholder="Por qué (lo verá el residente)" value="${esc(n.motivo)}" onchange="cf('${ruta}.motivo', this.value)">`;
+  else if (n.tipo==='fin') cuerpo = n.resultado==='si'? ico('✓')+'<b>Puede usarlo</b>' : ico('⛔')+`<b>No puede usarlo</b> <input class="entrada" style="width:220px" placeholder="Por qué (lo verá el residente)" value="${esc(n.motivo)}" onchange="cf('${ruta}.motivo', this.value)">`;
+  return `<div class="paso"><div class="${cls}" data-nid="${n.nid}">${asa}${cuerpo}${x}${ficha}</div></div>`; }
+// por donde, a quien y cuando: lo comparten la alerta y el codigo de acceso
+function envio(n, ruta, titulo){ const destinos=[...Object.entries(DESTINOS), ...GRUPOS.map(g=>[g,g])];
+  return `<span>${titulo} por <span class="dias">${Object.entries(MEDIOS).map(([k,t])=>`<button aria-pressed="${n.medios.includes(k)}" onclick="cfAlternar('${ruta}.medios','${k}')">${t}</button>`).join('')}</span></span>
+    <span>a <span class="dias">${destinos.map(([k,t])=>`<button aria-pressed="${n.a.includes(k)}" onclick="cfAlternar('${ruta}.a','${esc(k)}')">${esc(t)}</button>`).join('')}<button class="dias__mas" onclick="nuevoGrupo('${ruta}')" title="Crear un grupo de colaboradores">+ grupo</button></span></span>
+    <span>${n.cuando==='antes'||n.cuando==='despues'? `${num(ruta+'.cantidad', n.cantidad, 56)} ${sel(ruta+'.unidad', n.unidad, Object.keys(UNIDADES).map(u=>[u,u]))} ` : ''}${sel(ruta+'.cuando', n.cuando, Object.entries(CUANDO))}</span>`; }
+function controlPregunta(n, ruta){
+  switch(n.q){
+    case 'edad': return `¿${sel(ruta+'.op', n.op, [['menor','Es menor de'],['mayor','Es mayor de'],['entre','Tiene entre']])} ${num(ruta+'.a', n.a, 60)}${n.op==='entre'? ' y '+num(ruta+'.b', n.b, 60) : ''} años?`;
+    case 'hora': return `¿Es entre las ${hora(ruta+'.desde', n.desde)} y las ${hora(ruta+'.hasta', n.hasta)}?`;
+    case 'dia': return `¿Es ${dias(ruta+'.dias', n.dias)}?`;
+    case 'perfil': return `¿Es <span class="dias">${PERFILES.map(p=>`<button aria-pressed="${n.perfiles.includes(p)}" onclick="cfAlternar('${ruta}.perfiles','${p}')">${p}</button>`).join('')}</span>?`;
+    case 'personas': return `¿Van más de ${num(ruta+'.mas', n.mas, 60)} personas?`;
+    case 'reserva': return '¿Tiene reserva confirmada?';
+    case 'horario': return `<span class="nodo__filas"><b>¿Está dentro del horario?</b>${n.franjas.map((f,i)=>`<span>${dias(`${ruta}.franjas.${i}.dias`, f.dias)} de ${hora(`${ruta}.franjas.${i}.desde`, f.desde)} a ${hora(`${ruta}.franjas.${i}.hasta`, f.hasta)} ${n.franjas.length>1?`<button class="quitar-claro" onclick="cfQuitar('${ruta}.franjas',${i})">quitar</button>`:''}</span>`).join('')}<span><button class="chip-claro" onclick="agregarFranja('${ruta}')">+ otra franja</button></span></span>`;
+    case 'cancelo': return '¿Canceló la reserva?';
+    case 'canceloTarde': return `¿Canceló con menos de ${num(ruta+'.horas', n.horas, 56)} horas de anticipación?`;
+    case 'llego': return `¿Llegó dentro de los ${num(ruta+'.minutos', n.minutos, 56)} minutos de espera? <small>Lo marca portería o el uso del código</small>`;
+    case 'cartera': return '¿Su unidad está en mora? <small class="legal" title="Restringir zonas comunes por deuda es delicado en Colombia: debe estar en el reglamento y revisarlo alguien con criterio jurídico">⚖ solo si el reglamento lo permite</small>'; } }
+// ---- probar: una persona recorre el flujo
+const puntos=(t)=>String(t||'').split('\n').map(x=>x.trim()).filter(Boolean);
+function enHorario(n,k){ return n.franjas.some(f=>f.dias.includes(k.dia) && k.hora>=f.desde && k.hora<f.hasta); }
+function responde(n,k,conf){ switch(n.q){
+  case 'edad': return n.op==='menor'? k.edad<n.a : n.op==='mayor'? k.edad>n.a : k.edad>=n.a && k.edad<=n.b;
+  case 'hora': return k.hora>=n.desde && k.hora<n.hasta;
+  case 'dia': return n.dias.includes(k.dia);
+  case 'perfil': return n.perfiles.includes(k.perfil);
+  case 'personas': return k.personas>n.mas;
+  case 'horario': return enHorario(n,k);
+  case 'cancelo': return k.asistencia==='cancelo';
+  case 'canceloTarde': return k.horasCancelo<n.horas;
+  case 'llego': return k.asistencia==='llego';
+  case 'cartera': return k.estado==='mora'; } }
+function correr(arr,k,conf,r,de){ for (const n of arr) { if (r.fin) return; r.pasos.push(n.nid); const origen=de? ` <small>(de ${esc(de)})</small>` : '';
+  if (n.tipo==='pregunta') { const v=responde(n,k,conf); r.ramas[n.nid]=v?'si':'no'; r.log.push(`${pregunta(n)} <b>${v?'Sí':'No'}</b>${origen}`); correr(v?n.si:n.no,k,conf,r,de); }
+  else if (n.tipo==='fin') { r.fin={...n, de}; }
+  else if (n.tipo==='limite' && n.cual==='aforo' && k.personas>n.valor) { r.fin={resultado:'no', motivo:`Van ${k.personas} y el aforo es de ${n.valor}`, de}; }
+  else if (n.tipo==='pago') { r.cobros.push(n); if (n.forma==='anticipado' && n.valor>0) {
+    if (k.pago==='nopago') r.fin={resultado:'no', motivo:`No cargó el soporte de ${n.concepto.toLowerCase()} a tiempo: la reserva se liberó`, de};
+    else if (k.pago==='rechazado') r.fin={resultado:'no', motivo:`La administración rechazó el soporte de ${n.concepto.toLowerCase()}`, de};
+    else if (k.pago==='pendiente') r.pendiente=true; } }
+  else if (n.tipo==='autorizacion') r.condiciones.push(AUTORIZA[n.quien]+(n.quien==='condiciones'&&puntos(conf.condiciones).length? `: <i>${puntos(conf.condiciones).map(esc).join(' · ')}</i>` : '')+origen);
+  else if (n.tipo==='reserva') { r.turno=n.turno; if (!k.reserva) r.fin={resultado:'no', motivo:`Necesita reserva previa, con ${n.anticipacion} h de anticipación`, de}; else r.condiciones.push(`Reserva en turnos de ${n.turno} h, con ${n.anticipacion} h de anticipación`+origen); }
+  else if (n.tipo==='multa') r.multas.push({n, de});
+  else if (n.tipo==='alerta') r.alertas.push({n, de});
+  else if (n.tipo==='codigo') r.codigos.push({n, de, valor: n.formato==='qr'? 'QR-'+Math.random().toString(36).slice(2,8).toUpperCase() : String(Math.floor(Math.random()*10**n.digitos)).padStart(n.digitos,'0')});
+  else if (n.tipo==='limite' && n.cual==='duracion') { r.duracion=n.valor; r.condiciones.push(textoLimite(n)+origen); }
+  else if (n.tipo==='limite') r.condiciones.push(textoLimite(n)+origen); } }
+function simular(b){ const k=b._caso, r={pasos:[],ramas:{},log:[],cobros:[],condiciones:[],alertas:[],codigos:[],multas:[],fin:null};
+  for (const c of contenedores(b)) { if (!c.conf?.flujo?.length) continue; r.pasos.push('her-'+c.id); correr(c.conf.flujo,k,c.conf,r,c.nombre); if (r.fin && r.fin.resultado==='si') r.fin=null; if (r.fin) break; } // un «puede» de la agrupación no termina: sigue al espacio
+  if (!r.fin) correr(b.conf.flujo,k,b.conf,r,null);
+  return r; }
+function probar(){ clearInterval(animacion); const r=simular(borrador); r.hasta=0; borrador._recorrido=r; borrador._probado=true;
+  animacion=setInterval(()=>{ r.hasta++; pintarConfig(); const a=document.querySelector('.nodo.actual'); if (a) a.scrollIntoView({block:'nearest', inline:'nearest', behavior:'smooth'}); if (r.hasta>=r.pasos.length) { clearInterval(animacion); r.listo=true; pintarConfig(); } }, 550); pintarConfig(); }
+function elegirPersona(i){ Object.assign(borrador._caso, PERSONAS[i]); cambio(); }
+function tarjetaMulta(r,b){ const k=b._caso, cuando=`${DIAS_LARGO[k.dia]} ${k.hora}`;
+  return r.multas.filter(({n})=>n.valor>0).map(({n,de})=>`<div class="app"><div class="app__cab">📱 Así la ve ${esc(k.nombre)} en la app</div><div class="app__tarjeta"><div class="app__fila"><b>${esc(n.concepto)}</b><b>$${fmt(n.valor)}</b></div><div><small>Motivo</small><br>${esc(n.motivo)}</div><small>Reserva de ${esc(b.nombre)}, ${cuando} · Lo autoriza: ${esc(n.respaldo)||'—'}${de?` · regla de ${esc(de)}`:''}</small><small>Se sumó a tu cuenta de cobro de administración.${k.refuta==='no'? ' Si no estás de acuerdo, puedes refutarla.' : ''}</small>${k.refuta==='no'? '<span class="app__boton">Refutar esta multa</span>' : `<div class="app__hilo"><div class="app__yo"><small>Tu refutación</small><br>Tuve una emergencia médica ese día; adjunto la incapacidad.</div><div class="app__admin ${k.refuta==='retira'?'ok':'no'}"><small>Respuesta de la administración</small><br>${k.refuta==='retira'? '<b>Multa retirada.</b> El cargo quedó anulado en tu cuenta de cobro.' : '<b>Multa mantenida.</b> La incapacidad no corresponde a la fecha de la reserva.'}</div></div>`}</div></div>`).join(''); }
+function resultado(r,b){ if (r && r.listo && r.fin && r.fin.resultado==='cancelada') { const multas=r.multas.filter(m=>m.n.valor>0);
+    return `<div class="veredicto veredicto--no">🚫 La reserva de ${esc(b._caso.nombre)} en ${esc(b.nombre)} se canceló</div><ul class="resultado"><li><b>Por qué:</b> ${esc(r.fin.motivo)}${r.fin.de?` <small>(de ${esc(r.fin.de)})</small>`:''}</li><li>${multas.length? `Se carga ${multas.length>1?'multas':'una multa'} de <b>$${fmt(multas.reduce((a,m)=>a+Number(m.n.valor),0))}</b> en la cuenta de cobro de administración.${b._caso.refuta==='retira'? ' <b>La refutó y la administración la retiró</b>: el cargo queda anulado, con su motivo (no se borra).' : b._caso.refuta==='mantiene'? ' La refutó y la administración la mantuvo.' : ''}` : '<b>Sin multa.</b>'}</li></ul>${tarjetaMulta(r,b)}<details class="recorrido"><summary>Ver el camino que hizo</summary><ol>${r.log.map(l=>`<li>${l}</li>`).join('')}</ol></details>`; }
+  if (!r || !r.listo) return r? `<div class="veredicto veredicto--cond">${esc(b._caso.nombre)} va recorriendo el flujo…</div>` : '';
+  const no=r.fin && r.fin.resultado==='no', total=r.cobros.reduce((a,c)=>a+Number(c.valor||0),0); const dep=r.cobros.filter(c=>c.concepto.startsWith('Depósito')).reduce((a,c)=>a+Number(c.valor||0),0);
+  const lineas=[...(no? [`<b>Por qué:</b> ${esc(r.fin.motivo||'No cumple las reglas')}${r.fin.de?` <small>(de ${esc(r.fin.de)})</small>`:''}`] : []), ...(!no? r.condiciones : []), ...(!no? [['anticipado','Paga antes, con soporte'],['cuota','Se carga a su cuota de administración'],['idiky','Paga en línea']].map(([f,t])=>{ const cs=r.cobros.filter(c=>c.forma===f && c.valor>0); if (!cs.length) return null; const tot=cs.reduce((a,c)=>a+Number(c.valor),0), d=cs.filter(c=>c.concepto.startsWith('Depósito')).reduce((a,c)=>a+Number(c.valor),0);
+      return `<b>${t} $${fmt(tot)}</b>${d? ` <small>(incluye $${fmt(d)} de depósito, que se devuelve)</small>` : ''}: ${cs.map(c=>`${esc(c.concepto)} $${fmt(c.valor)}${c.por&&c.por!=='reserva'&&!c.concepto.startsWith('Depósito')?' por '+c.por:''}${f==='anticipado'?` <small>a ${esc(c.cuenta)}</small>`:''}`).join(' · ')}`; }).filter(Boolean) : [])];
+  if (!no && r.pendiente) lineas.unshift('<b>La reserva está pendiente</b>: la administración todavía no aprueba el soporte de pago.');
+  else if (!no && r.cobros.some(c=>c.forma==='anticipado' && c.valor>0)) lineas.unshift('La administración aprobó el soporte de pago.');
+  return `<div class="veredicto veredicto--${no?'no':(r.pendiente||r.condiciones.length||r.cobros.length)?'cond':'si'}">${no? `⛔ ${esc(b._caso.nombre)} no puede usar ${esc(b.nombre)}` : r.pendiente? `⏳ La reserva de ${esc(b._caso.nombre)} en ${esc(b.nombre)} está pendiente` : `🎉 ${esc(b._caso.nombre)} puede usar ${esc(b.nombre)}`}${!no&&!r.pendiente&&(r.condiciones.length||r.cobros.length)?', con lo siguiente:':''}</div>${lineas.length?`<ul class="resultado">${lineas.map(l=>`<li>${l}</li>`).join('')}</ul>`:''}${!no && (r.alertas.length||r.codigos.length||r.cobros.some(c=>c.forma==='anticipado'))? lineaDeTiempo(r,b) : ''}<details class="recorrido"><summary>Ver el camino que hizo</summary><ol>${r.log.map(l=>`<li>${l}</li>`).join('')||'<li>No pasó por ninguna pregunta.</li>'}</ol></details>`; }
+// cuando sale cada alerta, contado desde el dia y la hora de la prueba (la semana como reloj de 7 dias)
+const aMin=(h)=>{ const [a,b]=h.split(':').map(Number); return a*60+b; };
+function momento(t){ t=((t%10080)+10080)%10080; const d=Math.floor(t/1440), m=t%1440; return `${DIAS_LARGO[d]} ${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`; }
+function lineaDeTiempo(r,b){ const k=b._caso, inicio=k.dia*1440+aMin(k.hora), fin=inicio+(r.turno||r.duracion||2)*60;
+  const conCodigo=r.codigos.map(({n,de,valor})=>({n:{...n, mensaje:`Tu código para {espacio} es ${valor}. Vale de ${momento(inicio-n.antes)} a ${momento(fin+n.despues)}.`}, de, codigo:true}));
+  const items=[...r.alertas, ...conCodigo].map(({n,de,codigo})=>{ const off=(n.cantidad||0)*UNIDADES[n.unidad]; const t= n.cuando==='antes'? inicio-off : n.cuando==='inicio'? inicio : n.cuando==='despues'? fin+off : null;
+    const quien=n.a.map(x=>x==='reservo'? `${k.nombre} (quien reservó)` : DESTINOS[x]||x).join(', ');
+    const texto=(n.mensaje||'').replace(/{nombre}/g,k.nombre).replace(/{espacio}/g,b.nombre).replace(/{fecha}/g,momento(inicio)).replace(/{hora}/g,k.hora).replace(/{personas}/g,k.personas);
+    return {orden: t??-1e9, html:`<li${codigo?' class="tl__codigo"':''}><span class="tl__cuando">${t==null? 'Al confirmar' : momento(t)}</span><span>${codigo?'🔑 ':''}<b>${n.medios.map(m=>MEDIOS[m]).join(' + ')||'—'}</b> → ${esc(quien)||'—'}${texto?` <q>${esc(texto)}</q>`:''}${de?` <small>(de ${esc(de)})</small>`:''}</span></li>`}; });
+  r.cobros.filter(c=>c.forma==='anticipado' && c.valor>0).forEach(c=>{ const t=c.plazoRef==='antes'? inicio-c.plazo*60 : null;
+    items.push({orden: t??-1e9+1, html:`<li class="tl__pago"><span class="tl__cuando">${t==null? `Reserva + ${c.plazo} h` : momento(t)}</span><span>$ <b>Límite para cargar el soporte</b> de ${esc(c.concepto)} $${fmt(c.valor)} pagado a ${esc(c.cuenta)}; después lo aprueba la administración. Sin soporte, la reserva se libera</span></li>`}); });
+  items.push({orden:inicio, html:`<li class="tl__uso"><span class="tl__cuando">${momento(inicio)}</span><span><b>Empieza el uso</b> · termina ${momento(fin)}</span></li>`});
+  const tarjetas=r.codigos.map(({n,valor,de})=>`<div class="codigo"><span class="codigo__valor">${valor.replace(/^(\d{3})(\d{3})$/,'$1 $2')}</span><span>${FORMATOS[n.formato]} · ${USOS[n.usos]}<br>Vale de <b>${momento(inicio-n.antes)}</b> a <b>${momento(fin+n.despues)}</b><br><small>${DISPOSITIVOS[n.dispositivo][0]}${de?` · de ${esc(de)}`:''}</small></span></div>`).join('');
+  return `${tarjetas}<div class="etq" style="margin-top:6px">Alertas programadas</div><ol class="tl">${items.sort((a,b)=>a.orden-b.orden).map(i=>i.html).join('')}</ol>`; }
+function misiones(b){ const bl=bloquesDe(b.conf.flujo), pre=bl.filter(n=>n.tipo==='pregunta'), pagos=bl.filter(n=>n.tipo==='pago'||n.tipo==='multa');
+  const m=[['Pon tu primer bloque', bl.length>0], ['Cada pregunta lleva algo en Sí o en No', bl.length>0 && pre.every(n=>n.si.length||n.no.length)], ['Cada cobro y multa dice quién lo autoriza', bl.length>0 && pagos.every(n=>!(n.valor>0) || n.respaldo.trim())], ['Cada alerta y código dice por dónde y a quién', bl.length>0 && bl.filter(n=>n.tipo==='alerta'||n.tipo==='codigo').every(n=>n.medios.length && n.a.length)], ['Pruébalo con alguien', !!b._probado]];
+  const hechas=m.filter(x=>x[1]).length, pct=Math.round(hechas/m.length*100);
+  return `<div class="misiones"><div class="misiones__cab"><span class="anillo anillo--claro" style="--p:${pct}%"><span>${hechas}/${m.length}</span></span><b>${hechas===m.length? '¡Flujo listo!' : 'Misiones'}</b></div>${m.map(([t,ok])=>`<div class="mision${ok?' ok':''}">${ok?'✓':'○'} ${t}</div>`).join('')}</div>`; }
+function tabFlujo(b){ const R=b._recorrido, k=b._caso;
+  const heredados=contenedores(b).filter(c=>c.conf?.flujo?.length).map(c=>{ const pis=R&&R.pasos.slice(0,R.hasta).includes('her-'+c.id), act=R&&R.pasos[R.hasta-1]==='her-'+c.id;
+    return `<div class="paso"><div class="nodo nodo--heredado${pis?' pisado':''}${act?' actual':''}" data-nid="her-${c.id}"><span class="nodo__ico">⤓</span><span>Primero pasa por el flujo de <b>${esc(c.nombre)}</b> <small>· ${bloquesDe(c.conf.flujo).length} bloques · se cambia allá</small></span>${act?`<span class="ficha">${esc(k.nombre[0])}</span>`:''}</div></div><div class="conector"></div>`; }).join('');
+  const lienzo=`<div class="flujo"><div class="inicio">🙋 Alguien quiere usar <b>${esc(b.nombre)}</b></div><div class="conector"></div>${heredados}${lista(b.conf.flujo,'conf.flujo')}<div class="conector"></div><div class="final-implicito">Si nada lo detiene → <b>puede usarlo</b></div></div>`;
+  const catalogo=`<div class="plantillas"><span class="etq">Empezar de</span>${Object.entries(PLANTILLAS_FLUJO).map(([kk,p])=>`<button class="chip-claro" onclick="usarPlantilla('${kk}')">${p.t}</button>`).join('')}</div>`+
+    Object.entries(CATEGORIAS).map(([cat,c])=>`<div class="cat"><div class="cat__cab"><span class="cat__ico nodo--${c.clase}">${c.ico}</span><b>${cat}</b><small>${c.ayuda}</small></div><div class="cat__bloques">${Object.entries(BLOQUES).filter(([,v])=>v.cat===cat).map(([kk,v])=>`<button class="pieza pieza--${c.clase}${kk==='nopuede'?' pieza--no':''}" draggable="true" ondragstart="arrastrarCatalogo(event,'${kk}')" onclick="agregarBloque('${kk}')" title="Arrástralo al flujo, o tócalo para ponerlo al final">${v.t}</button>`).join('')}</div></div>`).join('');
+  const prueba=`<div class="prueba"><span class="etq">Probar con</span>${PERSONAS.map((p,i)=>`<button class="persona${k.nombre===p.nombre?' elegida':''}" onclick="elegirPersona(${i})"><span class="ficha ficha--quieta">${p.nombre[0]}</span>${p.nombre}, ${p.edad}</button>`).join('')}
+    <span class="prueba__datos">${sel('_caso.perfil',k.perfil,PERFILES.map(p=>[p,p]))} de ${num('_caso.edad',k.edad,56)} años · ${sel('_caso.dia',k.dia,[1,2,3,4,5,6,0].map(d=>[d,DIAS_LARGO[d]]),true)} ${hora('_caso.hora',k.hora)} · van ${num('_caso.personas',k.personas,56)} · reserva ${sw('_caso.reserva',k.reserva)} · pago ${sel('_caso.pago',k.pago,Object.entries(ESTADOS_PAGO))} · después ${sel('_caso.asistencia',k.asistencia,[['llego','llegó a tiempo'],['nollego','no llegó'],['cancelo','canceló']])}${k.asistencia==='cancelo'? ` con ${num('_caso.horasCancelo',k.horasCancelo,52)} h de anticipación` : ''}${k.asistencia!=='llego'? ` · si hay multa ${sel('_caso.refuta',k.refuta,Object.entries(REFUTA))}` : ''} · ${sel('_caso.estado',k.estado,[['aldia','al día'],['mora','en mora']])}</span>
+    <button class="boton boton--primario boton--jugar" onclick="probar()">▶ Probar</button></div>`;
+  const panel = R? `<div class="flujo-resultado">${resultado(R,b)}${R.listo?`<button class="boton" style="width:100%" onclick="borrador._recorrido=null;pintarConfig()">Seguir armando</button>`:''}</div>` : misiones(b)+catalogo;
+  return `<div class="flujo-tab"><div class="flujo-lienzo">${lienzo}</div><aside class="flujo-catalogo">${panel}</aside></div>${prueba}`; }
+const PESTANAS_CONF={'General':tabGeneral,'Flujo de uso':tabFlujo};
+function pintarConfig(){ if (!borrador) return; const b=borrador; b._caso ||= {...PERSONAS[0], estado:'aldia', dia:6, hora:'19:00', personas:4, reserva:true, pago:'aprobado', asistencia:'llego', horasCancelo:48, refuta:'no'};
+  const scrolls=['.dialogo__cuerpo','.flujo-lienzo','.flujo-catalogo'].map(s=>{ const e=document.querySelector(s); return e && [e.scrollTop, e.scrollLeft]; });
+  const flujo=pestanaConf==='Flujo de uso', nb=bloquesDe(b.conf.flujo).length, cont=b.dentroDe && objeto(b.dentroDe);
+  $('#config').innerHTML=`<div class="velo" onclick="if(event.target===this) cerrarConfig()"><div class="dialogo${flujo?' dialogo--grande':''}" role="dialog" aria-modal="true" aria-label="Configurar ${esc(b.nombre)}">
+    <div class="dialogo__cab"><span class="ico">${icono(b)}</span><div><h2>${esc(b.nombre)}</h2><small>${b.tipo==='zona'? esc(b.clase) : NOMBRE[b.tipo]}${cont? ' · dentro de '+esc(cont.nombre) : ''}</small></div><button class="dialogo__cerrar" onclick="cerrarConfig()" aria-label="Cerrar">×</button></div>
+    <div class="pestanas">${Object.keys(PESTANAS_CONF).filter(p=>p==='General' || !ESTRUCTURAS.includes(b.tipo)).map(p=>`<button role="tab" aria-selected="${pestanaConf===p}" onclick="pestanaConf='${p}';pintarConfig()">${p}${p==='Flujo de uso'&&nb? ` (${nb})` : ''}</button>`).join('')}</div>
+    <div class="dialogo__cuerpo${flujo?' dialogo__cuerpo--flujo':''}">${PESTANAS_CONF[pestanaConf](b)}</div>
+    <div class="dialogo__pie"><span style="margin-right:auto;font-size:12px;color:var(--color-texto-tenue)">${ESTRUCTURAS.includes(b.tipo)? 'Las estructuras no se reservan: no llevan flujo de uso.' : resumenConf(b)||'Sin configurar todavía'}</span><button class="boton" onclick="cerrarConfig()">Cancelar</button><button class="boton boton--primario" onclick="guardarConfig()">Guardar</button></div></div></div>`;
+  ['.dialogo__cuerpo','.flujo-lienzo','.flujo-catalogo'].forEach((s,i)=>{ const e=document.querySelector(s); if (e && scrolls[i]) { e.scrollTop=scrolls[i][0]; e.scrollLeft=scrolls[i][1]; } }); }
+// ---- biblioteca de iconos para los espacios que el catalogo no trae: se elige uno y se le pone nombre
+const ICONOS={
+  // Salud y bienestar
+  enfermeria:{t:'Enfermería', g:'Salud y bienestar', p:'<path d="M4 4h16v16H4zM12 8v8M8 12h8"/>'},
+  sauna:{t:'Sauna', g:'Salud y bienestar', p:'<path d="M4 21V10l8-6 8 6v11M9 17c0-2 2-2 2-4M13 17c0-2 2-2 2-4M3 21h18"/>'},
+  turco:{t:'Baño turco', g:'Salud y bienestar', p:'<path d="M7 19h10a4 4 0 0 0 0-8 5 5 0 0 0-10 0 4 4 0 0 0 0 8zM9 6c0-1 1-1 1-2M14 6c0-1 1-1 1-2"/>'},
+  jacuzzi:{t:'Jacuzzi', g:'Salud y bienestar', p:'<path d="M3 12h18v3a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5z"/><circle cx="8" cy="8" r="1.2"/><circle cx="12" cy="6" r="1.2"/><circle cx="16" cy="8" r="1.2"/>'},
+  spa:{t:'Spa', g:'Salud y bienestar', p:'<path d="M12 20c-4 0-8-3-8-7 3 0 6 2 8 5 2-3 5-5 8-5 0 4-4 7-8 7zM12 17c-2-3-2-7 0-10 2 3 2 7 0 10z"/>'},
+  yoga:{t:'Yoga', g:'Salud y bienestar', p:'<circle cx="12" cy="5" r="2"/><path d="M12 8v5M6 11l6 2 6-2M5 19c2-2 5-3 7-3s5 1 7 3"/>'},
+  peluqueria:{t:'Peluquería', g:'Salud y bienestar', p:'<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8 7.5 20 18M8 16.5 20 6"/>'},
+  zonaHumeda:{t:'Zona húmeda', g:'Salud y bienestar', p:'<path d="M12 3c4 5 6 8 6 11a6 6 0 0 1-12 0c0-3 2-6 6-11zM9 15a3 3 0 0 0 3 3"/>'},
+  // Deporte
+  cancha:{t:'Cancha múltiple', g:'Deporte', p:'<path d="M3 6h18v12H3zM12 6v12"/><circle cx="12" cy="12" r="2.5"/>'},
+  tenis:{t:'Cancha de tenis', g:'Deporte', p:'<circle cx="12" cy="12" r="8"/><path d="M5 7c4 2 4 8 0 10M19 7c-4 2-4 8 0 10"/>'},
+  futbol:{t:'Cancha de fútbol', g:'Deporte', p:'<circle cx="12" cy="12" r="8"/><path d="m12 8.5 3 2.2-1.1 3.6h-3.8L9 10.7z"/>'},
+  baloncesto:{t:'Baloncesto', g:'Deporte', p:'<circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4v16M6.5 6.5c2.5 3 2.5 8 0 11M17.5 6.5c-2.5 3-2.5 8 0 11"/>'},
+  squash:{t:'Squash', g:'Deporte', p:'<circle cx="14.5" cy="9.5" r="5.5"/><path d="M10.5 13.5 4 20"/><circle cx="19" cy="19" r="1.2"/>'},
+  golfito:{t:'Golfito', g:'Deporte', p:'<path d="M8 21V3l9 4-9 4M4 21h12"/>'},
+  trote:{t:'Pista de trote', g:'Deporte', p:'<circle cx="14" cy="4.5" r="2"/><path d="m10 21 2-6 3 2v4M7 12l3-4h4l2 3 3 1M12 15l-1-4"/>'},
+  billar:{t:'Billar', g:'Deporte', p:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="11" r="3"/><path d="M11 10h2"/>'},
+  // Niños
+  salonNinos:{t:'Salón de niños', g:'Niños', p:'<path d="M4 14h7v7H4zM13 14h7v7h-7zM8.5 7h7v7h-7z"/>'},
+  ludoteca:{t:'Ludoteca', g:'Niños', p:'<circle cx="12" cy="13" r="6"/><circle cx="7" cy="6" r="2.2"/><circle cx="17" cy="6" r="2.2"/><path d="M10 12h.01M14 12h.01M10.5 15.5c1 .8 2 .8 3 0"/>'},
+  guarderia:{t:'Guardería', g:'Niños', p:'<path d="M10 3h4v3h-4zM9 6h6l1 3v10a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2V9zM8 13h8"/>'},
+  piscinaNinos:{t:'Piscina de niños', g:'Niños', p:'<circle cx="9" cy="8" r="3"/><path d="M2 16c2-2 4-2 6 0s4 2 6 0 4-2 6 0M2 20c2-2 4-2 6 0s4 2 6 0 4-2 6 0"/>'},
+  juegos:{t:'Sala de juegos', g:'Niños', p:'<path d="M6 9h12a4 4 0 0 1 4 4v1a3 3 0 0 1-5.2 2L15 14H9l-1.8 2A3 3 0 0 1 2 14v-1a4 4 0 0 1 4-4zM7 11v4M5 13h4M16 12h.01M18 14h.01"/>'},
+  // Trabajo y estudio
+  puestos:{t:'Puestos de trabajo', g:'Trabajo y estudio', p:'<path d="M3 17h18M5 17v4M19 17v4M8 6h8v7H8zM12 13v4"/>'},
+  reuniones:{t:'Sala de reuniones', g:'Trabajo y estudio', p:'<path d="M4 11h16v4H4zM7 15v4M17 15v4"/><circle cx="6" cy="6.5" r="1.6"/><circle cx="12" cy="6.5" r="1.6"/><circle cx="18" cy="6.5" r="1.6"/>'},
+  coworking:{t:'Coworking', g:'Trabajo y estudio', p:'<path d="M5 6h14v9H5zM2 18h20"/>'},
+  biblioteca:{t:'Biblioteca', g:'Trabajo y estudio', p:'<path d="M4 4h4v16H4zM10 4h4v16h-4zM16 5l3.5-1 3 15.5-3.5 1z"/>'},
+  estudio:{t:'Sala de estudio', g:'Trabajo y estudio', p:'<path d="m12 4 10 5-10 5L2 9zM6 11v5c0 2 3 3 6 3s6-1 6-3v-5M22 9v6"/>'},
+  auditorio:{t:'Auditorio', g:'Trabajo y estudio', p:'<path d="M3 21v-3h18v3M5 18v-3h14v3M7 15v-3h10v3M9 9h6V4H9z"/>'},
+  recepcion:{t:'Recepción', g:'Trabajo y estudio', p:'<path d="M4 17h16M6 17a6 6 0 0 1 12 0M12 11V9M10 9h4M3 20h18"/>'},
+  // Social
+  bbq:{t:'Zona BBQ', g:'Social', p:'<path d="M5 10h14a7 7 0 0 1-14 0zM8 17l-2 4M16 17l2 4M12 17v4M9 6c0-1 1-1 1-2M13 6c0-1 1-1 1-2"/>'},
+  terraza:{t:'Terraza', g:'Social', p:'<path d="M12 3a9 9 0 0 1 9 8H3a9 9 0 0 1 9-8zM12 11v10M8 21h8"/>'},
+  mirador:{t:'Mirador', g:'Social', p:'<circle cx="7" cy="15" r="3.5"/><circle cx="17" cy="15" r="3.5"/><path d="M5 12V6h3.5v6M15.5 12V6H19v6M10.5 15h3"/>'},
+  cine:{t:'Sala de cine', g:'Social', p:'<path d="M3 10h18v10H3zM3 10l1.5-5 15 0L21 10M9 5l-2 5M15 5l-2 5"/>'},
+  comunal:{t:'Salón comunal', g:'Social', p:'<circle cx="8" cy="8" r="3"/><circle cx="16.5" cy="9" r="2.5"/><path d="M2 20c0-4 3-6 6-6s6 2 6 6M14.5 20c0-3 1.5-5 4-5s3.5 2 3.5 5"/>'},
+  capilla:{t:'Capilla', g:'Social', p:'<path d="M12 2v4M10 4h4M6 21V11l6-4 6 4v10M10 21v-5h4v5M3 21h18"/>'},
+  cafeteria:{t:'Cafetería', g:'Social', p:'<path d="M4 9h13v5a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM17 10h1.5a2.5 2.5 0 0 1 0 5H17M8 5c0-1 1-1 1-2M12 5c0-1 1-1 1-2"/>'},
+  minimercado:{t:'Minimercado', g:'Social', p:'<path d="M3 4h2l2.5 11h11L21 7H6"/><circle cx="9" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/>'},
+  // Servicios
+  lavanderia:{t:'Lavandería', g:'Servicios', p:'<path d="M5 3h14v18H5zM8 6h.01M11 6h3"/><circle cx="12" cy="13" r="4"/>'},
+  basuras:{t:'Cuarto de basuras', g:'Servicios', p:'<path d="M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14M10 11v6M14 11v6"/>'},
+  reciclaje:{t:'Punto de reciclaje', g:'Servicios', p:'<path d="m12 3 3 5H9zM5 20l3-5 3 5zM19 20l-3-5-3 5zM8 11l-1.5 2.5M16 11l1.5 2.5M10.5 20h3"/>'},
+  correspondencia:{t:'Correspondencia', g:'Servicios', p:'<path d="M4 10a4 4 0 0 1 8 0v10H4zM8 10h12v10h-8M8 3v4M15 14h3"/>'},
+  oficinaAdmin:{t:'Oficina de administración', g:'Servicios', p:'<path d="M3 8h18v12H3zM9 8V5h6v3M3 13h18"/>'},
+  tecnico:{t:'Cuarto técnico', g:'Servicios', p:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>'},
+  planta:{t:'Planta eléctrica', g:'Servicios', p:'<path d="M4 4h16v16H4zM13 7l-4 6h4l-2 4"/>'},
+  tanque:{t:'Tanque de agua', g:'Servicios', p:'<path d="M5 6c0-1.7 3.1-3 7-3s7 1.3 7 3v12c0 1.7-3.1 3-7 3s-7-1.3-7-3zM5 6c0 1.7 3.1 3 7 3s7-1.3 7-3M5 12c0 1.7 3.1 3 7 3s7-1.3 7-3"/>'},
+  // Movilidad
+  bicicletero:{t:'Bicicletero', g:'Movilidad', p:'<circle cx="6" cy="16" r="3.5"/><circle cx="18" cy="16" r="3.5"/><path d="m6 16 4-7h5l3 7M10 9l2 7M14 6h3"/>'},
+  cargadorEV:{t:'Carga de carros eléctricos', g:'Movilidad', p:'<path d="M7 3v5M12 3v5M5 8h9v4a4.5 4.5 0 0 1-9 0zM9.5 16.5V21M19 9l-2 4h3l-2 4"/>'},
+  lavaderoCarros:{t:'Lavadero de carros', g:'Movilidad', p:'<path d="M3 17v-4l2-5h14l2 5v4zM8 3c0 1 1 1 1 2M15 3c0 1 1 1 1 2"/><circle cx="7" cy="17" r="1.6"/><circle cx="17" cy="17" r="1.6"/>'},
+  motos:{t:'Parqueadero de motos', g:'Movilidad', p:'<circle cx="5" cy="17" r="3"/><circle cx="19" cy="17" r="3"/><path d="m5 17 4-6h6l4 6M14 8h3"/>'},
+  // Naturaleza y mascotas
+  huerta:{t:'Huerta', g:'Naturaleza y mascotas', p:'<path d="M12 21v-9M12 12c0-4-3-6-7-6 0 4 3 6 7 6zM12 14c0-3 3-5 6-5 0 3-3 5-6 5zM7 21h10"/>'},
+  jardin:{t:'Jardín', g:'Naturaleza y mascotas', p:'<circle cx="12" cy="8" r="2"/><circle cx="12" cy="4.5" r="1.6"/><circle cx="15.5" cy="8" r="1.6"/><circle cx="8.5" cy="8" r="1.6"/><circle cx="12" cy="11.5" r="1.6"/><path d="M12 13v8M12 18c-2 0-3-1-4-2M12 17c2 0 3-1 4-2"/>'},
+  sendero:{t:'Sendero', g:'Naturaleza y mascotas', p:'<path d="M9 21c0-4 6-4 6-8s-6-4-6-8M5 21c0-4 4-5 4-8M19 21c0-4-4-5-4-8"/>'},
+  mascotas:{t:'Zona de mascotas', g:'Naturaleza y mascotas', p:'<circle cx="8" cy="7" r="1.7"/><circle cx="16" cy="7" r="1.7"/><circle cx="5" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/><path d="M12 12c-3 0-5 3-5 5.5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2c0-2.5-2-5.5-5-5.5z"/>'},
+  // Otro
+  otro:{t:'Otro espacio', g:'Otro', p:'<path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.6 6.6 19.5l1.2-6-4.5-4.2 6.1-.7z"/>'},
+};
+const svgIcono=(k)=>`<svg viewBox="0 0 24 24">${(ICONOS[k]||ICONOS.otro).p}</svg>`;
+const icono=(o)=> o.tipo==='espacio'? svgIcono(o.icono) : I[o.tipo];
+// el selector: crea un espacio nuevo o cambia el icono de uno (desde el terreno o desde el popup de configurar)
+let selector=null;
+function abrirSelector(destino, nuevo){ const o = destino==='borrador'? borrador : objeto(destino); selector={destino, nuevo, icono:o.icono||'otro', nombre:nuevo? '' : o.nombre, buscar:''}; pintarSelector(); }
+function pintarSelector(){ const c=$('#selector'); if (!selector) { c.innerHTML=''; return; } const q=selector.buscar.toLowerCase(), grupos={};
+  Object.entries(ICONOS).filter(([k,v])=>!q || v.t.toLowerCase().includes(q) || v.g.toLowerCase().includes(q)).forEach(([k,v])=>(grupos[v.g] ||= []).push([k,v]));
+  const previo=document.querySelector('.selector__lista'), scroll=previo? previo.scrollTop : 0;
+  c.innerHTML=`<div class="velo velo--alto" onclick="if(event.target===this) cerrarSelector()"><div class="dialogo dialogo--selector" role="dialog" aria-modal="true" aria-label="Elegir ícono">
+    <div class="dialogo__cab"><span class="selector__vista">${svgIcono(selector.icono)}</span><div style="flex:1"><h2>${selector.nuevo? 'Crea tu espacio' : 'Ícono y nombre'}</h2><input class="entrada" style="width:100%;margin-top:6px;font-size:15px" placeholder="Nombre (p. ej., ${esc(ICONOS[selector.icono].t)})" value="${esc(selector.nombre)}" oninput="selector.nombre=this.value"></div><button class="dialogo__cerrar" onclick="cerrarSelector()" aria-label="Cerrar">×</button></div>
+    <div style="padding:10px 22px 0"><input class="entrada" style="width:100%" placeholder="Buscar: sauna, niños, trabajo, mascotas…" value="${esc(selector.buscar)}" oninput="selector.buscar=this.value;pintarSelector();const e=document.querySelector('.selector__buscar');" id="buscarIcono"></div>
+    <div class="selector__lista">${Object.entries(grupos).map(([g,items])=>`<div class="etq" style="margin:12px 0 6px">${g}</div><div class="selector__grilla">${items.map(([k,v])=>`<button class="selector__op${selector.icono===k?' elegido':''}" onclick="elegirIcono('${k}')">${svgIcono(k)}<span>${v.t}</span></button>`).join('')}</div>`).join('') || '<p class="ayuda">No hay íconos con ese nombre. Usa «Otro espacio» y escríbele el nombre.</p>'}</div>
+    <div class="dialogo__pie"><button class="boton" onclick="cerrarSelector()">Cancelar</button><button class="boton boton--primario" onclick="aplicarSelector()">${selector.nuevo? 'Crear espacio' : 'Listo'}</button></div></div></div>`;
+  const l=document.querySelector('.selector__lista'); if (l) l.scrollTop=scroll;
+  const b=document.getElementById('buscarIcono'); if (b && document.activeElement!==b && selector.buscar) { b.focus(); b.setSelectionRange(b.value.length,b.value.length); } }
+function elegirIcono(k){ const anterior=ICONOS[selector.icono]?.t; if (!selector.nombre.trim() || selector.nombre===anterior) selector.nombre=ICONOS[k].t; selector.icono=k; pintarSelector(); }
+function cerrarSelector(){ if (selector?.nuevo) { const o=objeto(selector.destino); if (o) { estado.objetos=estado.objetos.filter(z=>z.id!==o.id); estado.sel=null; } } selector=null; pintarSelector(); render(); }
+function aplicarSelector(){ const nombre=(selector.nombre||'').trim() || ICONOS[selector.icono].t;
+  if (selector.destino==='borrador') { borrador.icono=selector.icono; borrador.nombre=nombre; selector=null; pintarSelector(); return cambio(); }
+  const o=objeto(selector.destino); o.icono=selector.icono; o.nombre=nombre; const nuevo=selector.nuevo; selector=null; pintarSelector(); estado.sel=o.id; render(); if (nuevo) aviso(`${nombre} creado. Tócalo dos veces para configurar su flujo de uso.`, true); }
+function render(desdeDeshacer){
+  const ahora = JSON.stringify(estado.objetos); if (!desdeDeshacer && ultimo!==null && ahora!==ultimo) { historial.push(ultimo); if (historial.length>50) historial.shift(); } ultimo = ahora; $('#deshacer').disabled = !historial.length;
   $('#pestanas').innerHTML = Object.keys(CATALOGO).map(k=>`<button role="tab" aria-selected="${estado.pestana===k}" onclick="estado.pestana='${k}';render()">${k}</button>`).join('');
   $('#ayuda').textContent = CATALOGO[estado.pestana].ayuda;
-  $('#catalogo').innerHTML = CATALOGO[estado.pestana].objetos.map(id=>`<div class="objeto" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','nuevo:${id}')" ondblclick="const o=crear('${id}', 120+estado.objetos.length*90, 300); estado.objetos.push(o); estado.sel=o.id; render()">${I[id]}<strong>${NOMBRE[id]}</strong><span>arrastra</span></div>`).join('');
+  $('#catalogo').innerHTML = CATALOGO[estado.pestana].objetos.map(id=>`<div class="objeto" draggable="true" ondragstart="event.dataTransfer.setData('text/plain','nuevo:${id}')" ondblclick="const o=crear('${id}', 120+estado.objetos.length*90, 300); estado.objetos.push(o); estado.sel=o.id; render(); if (o.tipo==='espacio') abrirSelector(o.id, true)">${I[id]}<strong>${NOMBRE[id]}</strong><span>arrastra</span></div>`).join('');
   // terreno
   terreno.querySelectorAll('.obj').forEach(n=>n.remove());
   $('#vacio').style.display = estado.objetos.length? 'none':'grid';
   for (const o of estado.objetos) {
     if (o.dentroDe && objeto(o.dentroDe)) continue; // los contenidos se dibujan con su contenedor
     const d=document.createElement('div'); d.className='obj'+(estado.sel===o.id?' sel':''); d.style.left=o.x+'px'; d.style.top=o.y+'px'; d.draggable=true; d.dataset.id=o.id;
-    if (o.tipo==='torre'||o.tipo==='zona') d.dataset.contenedor='1';
-    d.ondragstart=(e)=>e.dataTransfer.setData('text/plain',String(o.id)); d.onclick=()=>{estado.sel=o.id;render();};
+    if (EDIFICIOS.includes(o.tipo)||o.tipo==='zona') d.dataset.contenedor='1';
+    d.ondragstart=(e)=>{ e.dataTransfer.setData('text/plain',String(o.id)); const b=d.getBoundingClientRect(); agarre={dx:e.clientX-(b.left+b.width/2), dy:e.clientY-b.bottom}; }; d.onclick=()=>tocar(o.id); d.oncontextmenu=(e)=>{ e.preventDefault(); abrirConfig(o.id); };
     let cuerpo='';
     if (o.tipo==='torre') { const t=document.createElement('div'); t.className='torre'; for(let p=0;p<Math.min(o.pisos,8);p++){ const piso=document.createElement('div'); piso.className='piso'+(p===0&&o.locales?' piso--local':''); piso.style.animationDelay=(p*25)+'ms'; for(let u=0;u<Math.min(o.porPiso,6);u++) piso.appendChild(document.createElement('i')); t.appendChild(piso);} const techo=document.createElement('div'); techo.className='techo'; t.appendChild(techo); d.appendChild(t); cuerpo=`${o.pisos} pisos × ${o.porPiso}`; }
+    else if (o.tipo==='oficina') { const t=document.createElement('div'); t.className='oficina'; for(let p=0;p<Math.min(o.pisos,6);p++){ const piso=document.createElement('div'); piso.className='piso piso--oficina'; piso.style.animationDelay=(p*25)+'ms'; for(let u=0;u<Math.min(o.puestos,10);u++) piso.appendChild(document.createElement('i')); t.appendChild(piso);} d.appendChild(t); cuerpo=`${o.pisos} pisos · ${o.pisos*o.puestos} puestos`; }
     else if (o.tipo==='manzana') { const c=document.createElement('div'); c.className='casa'; d.appendChild(c); cuerpo=`${o.casas} casas`; }
     else if (o.tipo==='zona') {
       const z=document.createElement('div'); z.className='zona'; z.style.width=(o.ancho||260)+'px'; z.style.height=(o.alto||150)+'px';
       const hijos=estado.objetos.filter(c=>c.dentroDe===o.id);
       const resumenZ = hijos.filter(c=>c.tipo==='torre').length ? ` · ${hijos.filter(c=>c.tipo==='torre').length} torres` : hijos.filter(c=>c.tipo==='manzana').length ? ` · ${hijos.filter(c=>c.tipo==='manzana').length} manzanas` : '';
-      z.innerHTML=`<span class="zona__titulo">${(o.clase&&o.clase!==o.nombre)?o.clase+' · ':''}${o.nombre}${resumenZ}</span><div class="zona__contenido">${hijos.map(c=>`<div class="mini" draggable="true" ondragstart="event.stopPropagation();event.dataTransfer.setData('text/plain','${c.id}')" onclick="event.stopPropagation();estado.sel='${c.id}';render()">${c.tipo==='torre'?`<div class="torre" style="width:44px">${Array.from({length:Math.min(c.pisos,5)}).map((_,p)=>`<div class="piso${p===0&&c.locales?' piso--local':''}" style="height:9px;padding:1px;gap:1px"><i></i><i></i><i></i></div>`).join('')}<div class="techo" style="height:8px"></div></div>`:c.tipo==='manzana'?`<div class="casa" style="width:40px;height:28px"></div>`:`<div class="pin">${I[c.tipo]}</div>`}${c.nombre}${c.n?' · '+c.n:''}${c.tipo==='torre'?` · ${c.pisos}×${c.porPiso}`:''}</div>`).join('')||'<span style="font-size:11px;opacity:.7">Suelta aquí torres, manzanas, locales o zonas comunes</span>'}</div>`;
+      z.innerHTML=`<span class="zona__titulo">${(o.clase&&o.clase!==o.nombre)?o.clase+' · ':''}${o.nombre}${resumenZ}${o.conf?.flujo?.length?` · ⚙ flujo de ${bloquesDe(o.conf.flujo).length}`:''}</span><div class="zona__contenido">${hijos.map(c=>`<div class="mini${estado.sel===c.id?' sel':''}" draggable="true" title="Toca para configurar · arrastra fuera para sacar" ondragstart="event.stopPropagation();event.dataTransfer.setData('text/plain','${c.id}')" onclick="event.stopPropagation();tocar('${c.id}')" oncontextmenu="event.preventDefault();event.stopPropagation();abrirConfig('${c.id}')"><button class="sacar" title="Sacar de ${o.nombre}" onclick="event.stopPropagation();sacar('${c.id}')">×</button>${c.tipo==='torre'?`<div class="torre" style="width:44px">${Array.from({length:Math.min(c.pisos,5)}).map((_,p)=>`<div class="piso${p===0&&c.locales?' piso--local':''}" style="height:9px;padding:1px;gap:1px"><i></i><i></i><i></i></div>`).join('')}<div class="techo" style="height:8px"></div></div>`:c.tipo==='manzana'?`<div class="casa" style="width:40px;height:28px"></div>`:`<div class="pin">${icono(c)}</div>`}${c.nombre}${c.n?' · '+c.n:''}${c.tipo==='torre'?` · ${c.pisos}×${c.porPiso}`:c.tipo==='oficina'?` · ${c.pisos} pisos`:''}${resumenConf(c)?`<span class="mini__dentro">⚙ ${resumenConf(c)}</span>`:''}${estado.objetos.some(n=>n.dentroDe===c.id)?`<span class="mini__dentro">con ${estado.objetos.filter(n=>n.dentroDe===c.id).map(n=>n.nombre).join(', ')}</span>`:''}</div>`).join('')||'<span style="font-size:11px;opacity:.7">Suelta aquí torres, manzanas, locales o zonas comunes</span>'}</div>`;
       d.appendChild(z); d.style.transform='translate(-50%,-100%)';
     }
-    else { const p=document.createElement('div'); p.className='pin'+(['parqueadero','deposito','local'].includes(o.tipo)?' zona':''); p.innerHTML=I[o.tipo]; d.appendChild(p); cuerpo = o.n? `${o.n}` : ''; }
+    else { const p=document.createElement('div'); p.className='pin'+(['parqueadero','deposito','local'].includes(o.tipo)?' zona':''); p.innerHTML=icono(o); d.appendChild(p); cuerpo = o.n? `${o.n}` : ''; }
     if (o.tipo!=='zona') { const n=document.createElement('div'); n.className='obj__nombre'; n.textContent=o.nombre; d.appendChild(n); }
     if (cuerpo) { const s=document.createElement('div'); s.className='obj__sub'; s.textContent=cuerpo; d.appendChild(s); }
-    if (o.tipo==='torre') { const hijos=estado.objetos.filter(c=>c.dentroDe===o.id); if (hijos.length) { const h=document.createElement('div'); h.className='dentro'; h.innerHTML=hijos.map(c=>`<span class="chip" onclick="event.stopPropagation();estado.sel='${c.id}';render()">${I[c.tipo]}${c.nombre}${c.n?' · '+c.n:''}</span>`).join(''); d.appendChild(h); } }
+    if (resumenConf(o) && o.tipo!=='zona') { const s=document.createElement('div'); s.className='obj__conf'; s.textContent='⚙ '+resumenConf(o); d.appendChild(s); }
+    if (EDIFICIOS.includes(o.tipo)) { const hijos=estado.objetos.filter(c=>c.dentroDe===o.id); if (hijos.length) { const h=document.createElement('div'); h.className='dentro'; h.innerHTML=hijos.map(c=>`<span class="chip${estado.sel===c.id?' sel':''}" draggable="true" title="Toca para configurar · arrastra fuera para sacar" ondragstart="event.stopPropagation();event.dataTransfer.setData('text/plain','${c.id}')" onclick="event.stopPropagation();tocar('${c.id}')" oncontextmenu="event.preventDefault();event.stopPropagation();abrirConfig('${c.id}')">${icono(c)}${c.nombre}${c.n?' · '+c.n:''}<button class="sacar" title="Sacar de ${o.nombre}" onclick="event.stopPropagation();sacar('${c.id}')">×</button></span>`).join(''); d.appendChild(h); } }
     terreno.appendChild(d);
   }
   // lineas de asignacion: del parqueadero/deposito seleccionado a las torres
   const L=$('#lineas'); L.innerHTML=''; $('#leyenda').style.display='none';
   const sel = estado.objetos.find(z=>z.id===estado.sel);
   if (sel && sel.asignados) {
-    const desde = terreno.querySelector(`.obj[data-id="${sel.id}"]`) || terreno.querySelector(`.obj[data-id="${sel.dentroDe}"]`);
+    let raiz = sel; while (raiz.dentroDe && objeto(raiz.dentroDe)) raiz = objeto(raiz.dentroDe);
+    const desde = terreno.querySelector(`.obj[data-id="${raiz.id}"]`);
     if (desde) {
       const rt=terreno.getBoundingClientRect(), rd=desde.getBoundingClientRect(); const x1=rd.left-rt.left+rd.width/2, y1=rd.top-rt.top+rd.height/2;
       for (const [tid,n] of Object.entries(sel.asignados)) { if(!n) continue; const el=terreno.querySelector(`.obj[data-id="${tid}"]`); if(!el) continue; const r=el.getBoundingClientRect(); const x2=r.left-rt.left+r.width/2, y2=r.top-rt.top+r.height/2; const mx=(x1+x2)/2, my=Math.min(y1,y2)-40;
         L.innerHTML += `<path d="M${x1} ${y1} Q${mx} ${my} ${x2} ${y2}"/><text x="${mx}" y="${my+8}" text-anchor="middle">${n}</text>`; $('#leyenda').style.display='flex'; }
     }
   }
-  const u=unidades(); const torres=estado.objetos.filter(o=>o.tipo==='torre').length, manz=estado.objetos.filter(o=>o.tipo==='manzana').length;
-  $('#resumen').textContent = estado.objetos.length ? [torres&&`${torres} torres`, manz&&`${manz} manzanas`, `${u} unidades`].filter(Boolean).join(' · ') : 'Arrastra del catálogo al terreno.';
+  const u=unidades(); const torres=estado.objetos.filter(o=>o.tipo==='torre').length, manz=estado.objetos.filter(o=>o.tipo==='manzana').length, ofis=estado.objetos.filter(o=>o.tipo==='oficina'), puestos=ofis.reduce((a,o)=>a+o.pisos*o.puestos,0);
+  $('#resumen').textContent = estado.objetos.length ? [torres&&`${torres} torres`, manz&&`${manz} manzanas`, ofis.length&&`${ofis.length} oficina${ofis.length>1?'s':''}`, `${u} unidades`, puestos&&`${puestos} puestos de trabajo`].filter(Boolean).join(' · ') : 'Arrastra del catálogo al terreno.';
   const pct=Math.min(60, u>0? 20+Math.min(40,Math.round(u/3)) : (estado.objetos.length?8:0)); $('#anillo').style.setProperty('--p',pct+'%'); $('#pct').textContent=pct+' %';
   $('#conteo').textContent = u? `${u} unidades hasta ahora` : 'Nada todavía';
   // inspector
   const o = estado.objetos.find(z=>z.id===estado.sel);
   let html='';
   if (o) {
-    html = `<div class="inspector"><h2>${o.nombre} <button onclick="const n=prompt('Nombre','${o.nombre}'); if(n){objeto(${JSON.stringify(String(o.id))}).nombre=n;render()}">Renombrar</button></h2><div class="sub">Arrástrala para moverla. Puedes cambiarlo después.</div>`;
+    html = `<div class="inspector"><h2>${o.nombre} <button onclick="const n=prompt('Nombre','${o.nombre}'); if(n){objeto(${JSON.stringify(String(o.id))}).nombre=n;render()}">Renombrar</button></h2><div class="sub">Arrástrala para moverla, o afínala con las <b>flechas</b> (Shift: de a 1 px). <b>Doble clic o clic derecho</b> para configurarla.</div>`;
     if (o.tipo==='torre') html += fila('Pisos','pisos',o) + fila('Apartamentos por piso','porPiso',o) + `<div class="fila"><span>Locales en el primer piso</span><button class="interruptor" role="switch" aria-checked="${o.locales}" onclick="objeto('${o.id}').locales=!${o.locales};render()"></button></div>`;
+    else if (o.tipo==='oficina') html += fila('Pisos','pisos',o) + fila('Puestos de trabajo por piso','puestos',o) + fila('Oficinas cerradas por piso','oficinas',o);
     else if (o.tipo==='manzana') html += fila('Casas','casas',o);
     else if (o.tipo==='zona') html += `<div class="fila"><span>Tipo</span><select onchange="objeto('${o.id}').clase=this.value;render()" style="font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--color-borde-fuerte)">${['Etapa','Sector','Bloque','Zona social','Zona comercial','Otra'].map(c=>`<option ${o.clase===c?'selected':''}>${c}</option>`).join('')}</select></div>` +
       `<div class="fila"><span>Ancho</span><span class="stepper"><button onclick="objeto('${o.id}').ancho=Math.max(160,objeto('${o.id}').ancho-40);render()">−</button><output>${o.ancho}</output><button onclick="objeto('${o.id}').ancho+=40;render()">+</button></span></div>` +
       `<div class="fila"><span>Alto</span><span class="stepper"><button onclick="objeto('${o.id}').alto=Math.max(100,objeto('${o.id}').alto-40);render()">−</button><output>${o.alto}</output><button onclick="objeto('${o.id}').alto+=40;render()">+</button></span></div>` +
       `<div class="fila"><span style="color:var(--color-texto-tenue)">Contiene ${estado.objetos.filter(c=>c.dentroDe===o.id).length} cosas. Suelta más encima, o sácalas arrastrándolas fuera.</span></div>`;
     else if (o.n!==undefined) html += fila('Cantidad','n',o);
-    const cont = o.dentroDe && objeto(o.dentroDe);
-    if (cont) html += `<div class="fila"><span>Está dentro de <b>${cont.nombre}</b></span><button class="boton" onclick="objeto('${o.id}').dentroDe=null;objeto('${o.id}').y+=60;render()">Sacar</button></div>`;
-    else if (!['torre','manzana','zona'].includes(o.tipo)) html += `<div class="fila"><span style="color:var(--color-texto-tenue)">Suelto en el terreno. Arrástralo encima de una torre o zona para meterlo dentro.</span></div>`;
+    const cont = o.dentroDe && objeto(o.dentroDe); const opciones = contenedoresPara(o);
+    if (cont || opciones.length) html += `<div class="fila"><span>Está en</span><span style="display:flex;gap:6px;align-items:center"><select onchange="moverA('${o.id}', this.value)" style="font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--color-borde-fuerte);max-width:150px"><option value="">Suelto en el terreno</option>${opciones.map(c=>`<option value="${c.id}" ${o.dentroDe===c.id?'selected':''}>Dentro de ${c.nombre}</option>`).join('')}</select>${cont?`<button class="boton" onclick="sacar('${o.id}')">Sacar</button>`:''}</span></div>`;
     if (o.asignados) {
       const torres = estado.objetos.filter(t=>t.tipo==='torre'); const asig = Object.values(o.asignados).reduce((a,b)=>a+b,0);
       html += `<div class="fila" style="flex-direction:column;align-items:stretch;gap:6px"><span><b>Asignados a apartamentos</b> <span style="color:var(--color-texto-tenue)">· ${asig} de ${o.n}; ${Math.max(0,o.n-asig)} de visitantes</span></span>` +
         (torres.length? torres.map(t=>`<span style="display:flex;justify-content:space-between;align-items:center;font-size:13px">${t.nombre}<span class="stepper"><button onclick="const a=objeto('${o.id}').asignados;a['${t.id}']=Math.max(0,(a['${t.id}']||0)-4);render()">−</button><output>${o.asignados[t.id]||0}</output><button onclick="const a=objeto('${o.id}').asignados;a['${t.id}']=Math.min(objeto('${o.id}').n,(a['${t.id}']||0)+4);render()">+</button></span></span>`).join('') : '<span style="font-size:12px;color:var(--color-texto-tenue)">Agrega torres para asignarles puestos.</span>') +
         `<span style="font-size:11px;color:var(--color-texto-tenue)">Puesto por puesto (P-12 → Apto 301) se hace después, desde cada apartamento o por Excel.</span></div>`;
     }
-    html += `<div class="acciones">${(o.tipo==='torre'||o.tipo==='manzana')?`<button class="boton" onclick="const c={...objeto('${o.id}'), id:Date.now(), x:objeto('${o.id}').x+120, nombre:(objeto('${o.id}').tipo==='torre'?'Torre ':'Manzana ')+(++contador[objeto('${o.id}').tipo])}; estado.objetos.push(c); estado.sel=c.id; render()">Duplicar</button>`:''}<button class="boton boton--peligro" onclick="estado.objetos=estado.objetos.filter(z=>String(z.id)!=='${o.id}');estado.sel=null;render()">Quitar</button></div></div>`;
+    html += `<div class="acciones"><button class="boton boton--primario" onclick="abrirConfig('${o.id}')">⚙ Configurar</button>${['torre','manzana','oficina'].includes(o.tipo)?`<button class="boton" onclick="const c={...objeto('${o.id}'), id:nuevoId(), x:objeto('${o.id}').x+120, nombre:NOMBRE[objeto('${o.id}').tipo]+' '+(++contador[objeto('${o.id}').tipo])}; estado.objetos.push(c); estado.sel=c.id; render()">Duplicar</button>`:''}<button class="boton boton--peligro" onclick="quitar('${o.id}')">Quitar</button></div></div>`;
   }
   $('#inspector').innerHTML = html;
 }
@@ -244,6 +836,13 @@ if (location.hash==='#demo') {
   const z={...crear('zona',600,560), nombre:'Zona social', clase:'Zona social', ancho:240, alto:130}; const pi={...crear('piscina',0,0), dentroDe:z.id}, sa={...crear('salon',0,0), dentroDe:z.id}, pa={...crear('parque',0,0), dentroDe:z.id};
   const e2={...crear('zona',820,330), nombre:'Etapa 2', clase:'Etapa', ancho:300, alto:170}; const t4={...crear('torre',0,0), dentroDe:e2.id}, t5={...crear('torre',0,0), dentroDe:e2.id, pisos:10}, l2={...crear('local',0,0), dentroDe:e2.id, n:6};
   estado.objetos = [ t1, t2, t3, p, dep, gym, crear('porteria',80,520), z, pi, sa, pa, crear('entrada',200,520), e2, t4, t5, l2 ];
+  z.conf = {...confVacia(), descripcion:'Piscina, salón social y parque infantil.', flujo:[B('edad',{op:'menor',a:12},[B('adulto')])]};
+  pi.conf = {...confVacia(), flujo:PLANTILLAS_FLUJO.piscina.f()};
+  sa.conf = {...confVacia(), descripcion:'Salón para 60 personas con cocineta y baños.', condiciones:'Música hasta las 10 p. m., a volumen moderado.\nSe entrega aseado y con el mobiliario en su sitio.\nNo se permite fumar ni el ingreso de mascotas.\nLos daños se descuentan del depósito.', flujo:PLANTILLAS_FLUJO.salon.f()};
+  gym.conf = {...confVacia(), flujo:PLANTILLAS_FLUJO.gimnasio.f()};
+  const of={...crear('oficina',760,680), nombre:'Torre empresarial', pisos:4, puestos:16, oficinas:3}; const pt={...crear('espacio',0,0), dentroDe:of.id, icono:'puestos', nombre:'Puestos de trabajo'}, sr={...crear('espacio',0,0), dentroDe:of.id, icono:'reuniones', nombre:'Sala de reuniones'};
+  const sauna={...crear('espacio',0,0), dentroDe:z.id, icono:'sauna', nombre:'Sauna'}, enf={...crear('espacio',340,520), icono:'enfermeria', nombre:'Enfermería'};
+  estado.objetos.push(of, pt, sr, sauna, enf);
   estado.sel = p.id; estado.pestana='Espacios';
 }
 render();
