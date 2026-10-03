@@ -1,6 +1,6 @@
 # ADR-0016 — Jitsi propio para las asambleas virtuales
 
-- **Estado:** **Propuesta** — falta la decisión de fondo y el permiso de Azure (§Pendientes)
+- **Estado:** **Propuesta** — desplegado y en prueba desde el 2026-10-02; falta la decisión de fondo (§Pendientes, punto 2). Cómo se usa: [`infra/guia-de-jitsi.md`](../../infra/guia-de-jitsi.md)
 - **Fecha:** 2026-09-26
 - **Decide:** Responsable de integración (Daniel)
 - **Relacionados:** [ADR-0007](./0007-transmision-en-vivo.md) (hoy Idiky **no** transmite: enlaza
@@ -85,6 +85,11 @@ Lo que se decide con eso, punto por punto:
    responsable de integración.
 
 ## Lo que hace falta y no está en nuestras manos
+
+> **Estado al 2026-10-03:** 1 ✅ (regla `Dev-Udp` en Azure, 2026-10-02) · 2 ⏳ · 3 ✅
+> (`https://jitsi-dev.idiky.com`, ruta `HTTP` del túnel) · 4 ⚠️ (quedan ~3,3 GB). Lo que salió
+> distinto a lo previsto al desplegar —el puerto de `jitsi/web`— está en
+> [`infra/guia-de-jitsi.md`](../../infra/guia-de-jitsi.md) §5.
 
 | # | Qué | Quién |
 |---|---|---|

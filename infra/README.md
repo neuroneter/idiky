@@ -17,7 +17,7 @@ que **no puede verse afectado**. Las decisiones y sus porqués están en
 | Contable | `infra/contable/` | contenedor `idiky-contable` | `8081` | Clave del entorno | Copia `apps/contable` **tal cual** (ADR-0010) y la sirve con nginx. **Demo** |
 | **BOB** | `infra/gestion/` *(repo `BOB-Idiky`)* | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082`, y por nombre **`https://bob-dev.idiky.com`** (ruta del mismo túnel, ADR-0014) | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`BOB-Idiky/apps/gestion`, ADR-0012) |
 | **BLOKY Dev** | `infra/bloky/` *(repo `Bloky-Idiky`)* | **pod** `idiky-bloky`: nginx + API de BLOKY + PostgreSQL | `8083`, y por nombre **`https://bloky-dev.idiky.com`** (túnel, ADR-0014). El ingreso solo funciona por el nombre | Clave del entorno, y luego **el ingreso de BLOKY** (código SMS, Google o Microsoft, con lo registrado en BOB) | El sistema de las copropiedades, construido de cero (`Bloky-Idiky`: `apps/bloky`, `apps/bloky-api`; ADR-0008, ADR-0013) |
-| **Jitsi** *(desplegado 2026-10-02, en prueba)* | `infra/jitsi/` *(repo `Jitsi-Streaming-Idiky`)* | **pod** `idiky-jitsi`: nginx + web + prosody + jicofo + videobridge | `8085`, y **`10000/udp` para el video** | Cuenta de Jitsi para **abrir** una sala; el enlace basta para entrar | Las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md), `infra/jitsi/README.md` en su repo). **Apagado hasta que Azure deje pasar `10000/udp`**: sin eso la sala abre y no hay ni audio ni video |
+| **Jitsi** *(desplegado 2026-10-02, en prueba; [guía](./guia-de-jitsi.md))* | `infra/jitsi/` *(repo `Jitsi-Streaming-Idiky`)* | **pod** `idiky-jitsi`: nginx + web + prosody + jicofo + videobridge | `8085`, y **`10000/udp` para el video** | Cuenta de Jitsi para **abrir** una sala; el enlace basta para entrar | Las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md), `infra/jitsi/README.md` en su repo). **Apagado hasta que Azure deje pasar `10000/udp`**: sin eso la sala abre y no hay ni audio ni video |
 | **Túnel** | `infra/tunel/` | contenedor `idiky-tunel` (`cloudflared`) | ninguno hacia internet; `/ready` en `127.0.0.1:8084` | — | Publica BLOKY Dev en `https://bloky-dev.idiky.com` con certificado de Cloudflare, sin abrir puertos ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)). Su token: `infra/tunel/secretos.sh` |
 
 ## 1. La regla del servidor
@@ -128,7 +128,7 @@ user-1001.slice ·············· techo: 2 núcleos de CPU y 5 GB   (
     │   ├── proxy ·························· 64 MB
     │   ├── strapi ························· 1,5 GB  (en reposo usa ~140 MB)
     │   └── postgres ······················· 512 MB  (en reposo usa ~90 MB)
-    ├── pod-idiky-jitsi.service (sin desplegar)
+    ├── pod-idiky-jitsi.service (desde 2026-10-02)
     │   ├── proxy ·························· 64 MB
     │   ├── web ···························· 128 MB
     │   ├── prosody ························ 192 MB

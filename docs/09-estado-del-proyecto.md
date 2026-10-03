@@ -111,6 +111,28 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-03 · Integración · Sesión de IA (Claude) con Daniel · Jitsi documentado y con cuentas para la prueba (T-78)
+
+**Lo que quedó:** Jitsi responde en **`https://jitsi-dev.idiky.com`** (ver las dos entradas del
+2026-10-02) y tiene tres cuentas para abrir salas: `daniel` (la de prueba de la instalación),
+**`ohernandez83`** (Daniel Obed Ortega Hernandez) y **`ju2484s`** (Justo Soto Bueno). Las creó
+Daniel en su terminal con `prosodyctl adduser`, que pide la contraseña sin mostrarla; **la IA no
+crea cuentas con contraseña en el servidor** y las contraseñas no se escriben en ningún
+documento. Se comprobó que las tres existen con `user:list`, sin ver las claves.
+
+**Dos cosas que conviene saber**, ya escritas en la guía: **el usuario no puede ser un correo**
+(la cuenta es `usuario@meet.jitsi` y esa parte no admite `@`; se usa lo que va antes del `@`), y
+**sin `https://` el navegador no presta cámara ni micrófono**.
+
+**Documentación nueva:** [`infra/guia-de-jitsi.md`](../infra/guia-de-jitsi.md) —cómo entrar, las
+cuentas y los comandos para crearlas, cambiarlas y borrarlas, cómo está armado (túnel, puertos,
+`8085 → 8090`, UDP), cómo comprobarlo y lo que ya falló—. Al día: ADR-0016 (estado de los cuatro
+pendientes), `infra/README.md`, la guía de despliegue, el mapa de repositorios, el tablero y
+`CLAUDE.md`.
+
+**Qué sigue:** la reunión de prueba entre Daniel y Justo desde redes distintas; si se ven y se
+oyen, T-78 pasa a hecha en lo técnico. Queda la decisión de fondo frente a ADR-0007.
+
 ### 2026-10-02 · Mary + IA (Claude) · Votaciones: por coeficiente o una unidad, un voto (RN-211)
 
 Mary: *«las votaciones están definidas por la Ley 675 de 2001, que entiendo que es solamente por

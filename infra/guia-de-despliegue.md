@@ -12,7 +12,7 @@ demás ni el servidor que compartimos. Si vas a **crear** un servicio nuevo, la 
 | `contable` | **La maqueta de Jeimy**: la aplicación contable | Jeimy | `origin/main` | 8081 |
 | `gestion` | **BOB**, el *back office* de IDIKY (Strapi + PostgreSQL) | **Solo el responsable de integración** | `origin/main` **de `BOB-Idiky`, y nada más** | 8082 |
 | `bloky` | **BLOKY Dev**: el sistema de las copropiedades, construido de cero (app + API + PostgreSQL) | **El responsable de integración** | `origin/main` de `Bloky-Idiky` | 8083 |
-| `jitsi` | **Jitsi** para las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md)). **Todavía no se ha desplegado**: espera una regla UDP en Azure | **Solo el responsable de integración** | `origin/main` de `Jitsi-Streaming-Idiky` | 8085 y **10000/udp** |
+| `jitsi` | **Jitsi** para las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md)), en `https://jitsi-dev.idiky.com`. Desplegado el 2026-10-02; cuentas y uso: [`guia-de-jitsi.md`](./guia-de-jitsi.md) | **Solo el responsable de integración** | `origin/main` de `Jitsi-Streaming-Idiky` | 8085 y **10000/udp** |
 | `tunel` | **El túnel de Cloudflare** que publica BLOKY Dev en `https://bloky-dev.idiky.com` ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)) | **Solo el responsable de integración** | `origin/main` | ninguno hacia internet (`/ready` en 127.0.0.1:8084) |
 
 > **Las maquetas no son los espacios de desarrollo.** BLOKY (el sistema de las copropiedades)

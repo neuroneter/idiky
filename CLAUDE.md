@@ -125,6 +125,10 @@ pie de la letra: **solo el servicio de quien lo pide** (`pwa` Mary, `contable` J
 **BOB** (Strapi, repo `BOB-Idiky`): **el modelo de datos se diseña en local con `npm run develop`
 y va a git**; en el servidor Strapi corre en modo producción y lo creado ahí se pierde.
 
+**Jitsi** (`https://jitsi-dev.idiky.com`): cómo entrar, crear cuentas y qué hacer si falla, en
+[`infra/guia-de-jitsi.md`](./infra/guia-de-jitsi.md). **Las cuentas con contraseña las crea la
+persona en su terminal**, nunca la IA ni con la clave escrita en el comando.
+
 **Si la tarea es crear o cambiar un servicio del entorno**, lee primero
 [`infra/README.md`](./infra/README.md) (cómo está armado, incluido lo que no está en git) y
 sigue [`infra/nuevo-servicio.md`](./infra/nuevo-servicio.md) (el contrato y la receta).
