@@ -111,6 +111,39 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-03 · BLOKY · Sesión de IA (Claude) con Daniel · T-77, paso 1: un esquema por copropiedad, en el servidor
+
+**Qué se hizo** (repo `Bloky-Idiky`, `feature/T-77-capa-de-datos` → `develop`, desplegado como
+**`58231ef.bloky-c3815ed`**, LangFlow igual antes y después):
+
+- **Migraciones en dos carpetas** (ADR-0015 §3): `comun/` y `copropiedad/`. La `002` creó el
+  esquema **`bloky`** y movió ahí las tablas del ingreso (las 8 sesiones quedaron intactas), más el
+  **catálogo** de copropiedades, el **consumo** y la **auditoría**. La `001` de cada copropiedad crea
+  su **bitácora** (con «actuando como», para la impersonación de ADR-0022 §5).
+- **`para(id)`**, la única puerta a los datos de una copropiedad: el esquema sale del catálogo, cada
+  operación va en una transacción con **tiempo máximo por consulta** (15 s), y **`pesado()`** admite
+  **un solo proceso pesado a la vez por copropiedad** (bloqueo consultivo), con 5 min y medido en
+  `bloky.consumo` (ADR-0022 §6).
+- **API de administración** (`/api/admin/…`, token `BLOKY_ADMIN_TOKEN`, que `secretos.sh` agregó al
+  servidor sin mostrarlo): catálogo, aprovisionar (solo lo que existe en BOB; idempotente y en una
+  transacción), retirar y consumo. En el nginx va sin la clave del entorno y **cerrada al túnel**
+  (lo que trae `Cf-Ray` recibe 404): desde `bloky-dev.idiky.com` no se alcanza.
+- **Verificado contra el PostgreSQL real**, con `podman exec idiky-bloky-api node
+  dist/herramientas/verificar-capa-de-datos.js` (no deja rastro): esquemas por copropiedad,
+  aislamiento, el segundo proceso pesado rechazado (y en otra copropiedad sí corre) y la consulta
+  descontrolada cortada. Y por la API: **Altos del Bosque** y **Torres del Parque aprovisionadas**
+  (`cp_bkwwzdh1272t066z3w32b836`, `cp_m45gtff6o0g32sjji5txmppe`); Mirador de la Sabana, suspendida
+  en BOB, no.
+
+**Decidido con Daniel:** BLOKY Dev se despliega desde **`origin/develop`** de `Bloky-Idiky`
+(`IDIKY_REF_BLOKY=origin/develop`); `main`, para las entregas. Quedó en la guía de despliegue y en
+`CLAUDE.md`. **El disco** tiene 3,1 GB libres (mínimo 3 GB): en el espacio de `idiky` no hay nada
+que limpiar (las 14 imágenes están en uso); las salidas son ampliar el disco en Azure o quitar
+Jitsi (~2,1 GB) si no se usa todavía.
+
+**Qué sigue (T-77, paso 2):** el directorio de acceso (personas y membresías) y CU-B-01 sobre él,
+el aviso de BOB, la copropiedad en la dirección y el rol en cada petición.
+
 ### 2026-10-03 · BLOKY · Sesión de IA (Claude) con Daniel · El primer módulo, refinado: puesta en marcha, terreno y flujos de uso (CU-B-02 a CU-B-05)
 
 **Qué se hizo:** sobre el prototipo **«Arma tu copropiedad»** (v4 del 2026-09-21) se refinó con

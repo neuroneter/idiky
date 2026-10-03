@@ -117,7 +117,8 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/m
 
 **Si te piden desplegar**, sigue [`infra/guia-de-despliegue.md`](./infra/guia-de-despliegue.md) al
 pie de la letra: **solo el servicio de quien lo pide** (`pwa` Mary, `contable` Jeimy, `bloky` y
-`gestion` el responsable de integración), **solo desde `origin/main`**, y
+`gestion` el responsable de integración), **solo desde `origin/main`** (BLOKY Dev, desde
+`origin/develop` de su repo: `IDIKY_REF_BLOKY=origin/develop`), y
 `infra/servidor/verificar-vecino.sh` antes y después. Lo que Mary y Jeimy despliegan hoy son
 **maquetas**; BLOKY Dev es el producto real y vive en el 8083. Para `bloky`, `gestion` y `jitsi`,
 `desplegar.sh` trae el `origin/main` de **su** repositorio (ADR-0018).
