@@ -153,6 +153,16 @@ pierde, pero **la multa por no asistir se carga directo y se refuta** (RN-179), 
 sancionatorio del demo (RN-110, RN-39). Y falta el lado del residente en ALICE: cargar el soporte,
 ver y refutar la multa, ver el código y las alertas.
 
+**La infraestructura de datos, revisada con Daniel ([ADR-0022](./adr/0022-directorio-de-acceso-impersonacion-y-consumo.md)):**
+el esquema por copropiedad (ADR-0015) se confirma. Se agrega un **directorio de acceso** en el
+esquema común (quién puede entrar a dónde, con qué rol; BOB avisa los cambios y el ingreso deja de
+depender de BOB), la copropiedad activa **en la dirección** (una pestaña por copropiedad), el rol
+comprobado **en cada petición**, y la **impersonación de soporte** con permiso de BOB: entra con el
+rol y su propia firma, solo lectura por defecto, vence a las dos horas y se le avisa al
+administrador. Sobre el rendimiento, Daniel decidió **medir antes de gastar**: sin cola de tareas
+por ahora; BLOKY registra el consumo por copropiedad y **BOB lo muestra** para decidir cuándo mudar
+una copropiedad a su propia base o escalar. Abierto: si ALICE usa el mismo directorio (con Justo).
+
 **Qué sigue:** **T-77** (la capa de datos) y **T-83** (menú, primeros pasos y terreno en
 `Bloky-Idiky`); las decisiones abiertas de T-85 no lo bloquean.
 
