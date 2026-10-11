@@ -112,6 +112,30 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Demarcar el lote y las entradas en pantalla partida (RN-250)
+
+Idea de Daniel: *como Google, una pantalla compartida partida a la mitad que el usuario hace más
+ancha o delgada, y al terminar cerrar la mitad del mapa*. **Desplegado** `294e2eb.bloky-9283727`
+(migración `006`): en el terreno, **«🗺 Ver el mapa»** parte la pantalla —el terreno y el **mapa
+real**—, con una barra que se arrastra (25 a 75 %) y una ✕; en el teléfono van uno sobre otro.
+Sobre el mapa se marca **el lote** (un recuadro que se ajusta moviendo sus esquinas; punto medio de
+cada lado para agregar una, doble clic para quitarla) y **las entradas** (peatonal, vehicular,
+portería) con nombre; una entrada puede volverse la portería o la entrada vehicular del terreno en
+su sitio. Lo marcado **aparece al instante en el plano** (el lote demarcado reemplaza al de
+OpenStreetMap) y **se guarda solo, con versión**, con quién y cuándo: lo ven todos los que entran.
+
+**Decisiones (ADR-0017 §6):** fondo **«Satélite» de Esri World Imagery**, cuyas condiciones permiten
+*trazar elementos para crear datos vectoriales* (con su crédito; a gran escala, confirmar con Esri),
+y **«Calles» con los mosaicos de OpenStreetMap** (uso interactivo normal); **Google no**, porque
+prohíbe calcar sus imágenes. **Mapa propio y liviano, sin librería** (mosaicos Web Mercator,
+arrastrar, zoom, capa SVG). Probado con Oasis: la foto satelital cargó, el lote marcado y ajustado
+se reflejó al instante en el terreno y quedó guardado (versión 2) con la portería.
+
+**Lo que sigue:** los **bloques** (trazar el contorno de cada torre sobre la foto y asociarlo a la
+Torre 1, 2…, para que el terreno las ponga en su sitio) y **las calles de acceso**; resaltar en el
+mapa el bloque de la torre elegida en el terreno; comentarios sobre el mapa; y que «Armar desde
+documentos» tome la dirección de la escritura.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · La copropiedad sobre su barrio real (CU-B-09, ADR-0017)
 
 **Desplegado** `ea6d4a0.bloky-5285ee3` (migración `005`, tabla `ubicacion`). «Mi copropiedad →
