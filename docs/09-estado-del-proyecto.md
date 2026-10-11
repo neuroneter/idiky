@@ -112,6 +112,30 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · BLOKY nativo para agentes (ADR-0023, propuesta)
+
+Daniel siente que el terreno de «Arma tu copropiedad», aunque funciona, es un editor *de hace 5 o 7
+años*: el administrador arma todo a mano. Partiendo de un artículo sobre oficinas virtuales en 2D
+(Xataka, 2021: lo que quedó de esa moda es **el plano como forma de ubicar las cosas**), se definió
+un camino que hace a BLOKY difícil de comparar:
+
+- **Armar desde los documentos.** El reglamento de propiedad horizontal (Ley 675) ya lista cada
+  unidad con su área y coeficiente. Un agente lo lee (con los planos y el Excel) y **propone** la
+  copropiedad; el administrador la revisa y confirma en el terreno. A mano, mixto y asistido son
+  **una sola vía**: la propuesta.
+- **El agente propone, el dominio decide**: formato fijo, fuente por dato (página), validación con
+  las reglas puras y borrador hasta que alguien lo confirma.
+- **BLOKY habla MCP**: sus herramientas se exponen al agente propio y a los asistentes de cada
+  administrador, con el rol comprobado en cada llamada; primero solo lectura.
+- **El plano vivo** (mora, reservas y pendientes en su sitio) y el flujo de uso armado desde una
+  frase (CU-B-04) quedan como siguientes pasos con el mismo patrón.
+
+Quedó escrito como **[ADR-0023](./adr/0023-bloky-nativo-para-agentes.md), en estado Propuesta**.
+**Lo que sigue:** el experimento con el reglamento real de una copropiedad (Daniel lo consigue);
+si acierta en más del 90 % de unidades y coeficientes, se acepta el ADR, se define el estado
+«propuesta» en `docs/05` y se construye «Arma con IA» en `Bloky-Idiky`, rama
+`feature/CU-B-03-ajustes-terreno`.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · BLOKY sin la clave del entorno (CU-B-01)
 
 Daniel pidió quitar el «doble factor» de BLOKY: antes del ingreso, el navegador pedía **la clave del
