@@ -137,6 +137,16 @@ en un piso intermedio y privada de un apartamento**; el retroceso queda abierto.
 **Ojo:** «Armar por pisos» en una torre con «locales en el primer piso» la vuelve 1 local + vivienda
 desde el piso 2: el conteo cambia (antes contaba el primer piso como apartamentos).
 
+**El constructor del edificio (misma tarde):** Daniel: *es súper difícil armar el edificio por pisos;
+el formulario es complicado*. Ahora, con **doble clic** en una torre u oficina (o «🏗 Construir
+pisos»), la torre se abre en grande, piso por piso, y **se pinta** con bloques de una paleta (tocar o
+pasar el dedo por varios pisos); las **manijas** crecen el edificio (los pisos nuevos entran debajo de
+la terraza) y hacen sótanos; tocar un piso deja ajustar cuántas unidades tiene su tramo o su terraza
+privada; hay **plantillas** (residencial, locales abajo, con terraza, mixto) y la vista isométrica se
+actualiza en vivo. Por debajo son los mismos tramos: los pisos seguidos iguales se agrupan solos. El
+formulario quedó como «modo avanzado». Probado: plantilla mixta, pintar dos pisos de oficinas de un
+trazo, crecer a 12 pisos y guardar (8 tramos, 39 unidades).
+
 **Lo que sigue:** el retroceso (pisos altos más angostos); que el alta desde documentos arme los
 tramos desde los pisos de las unidades leídas; zoom del terreno.
 

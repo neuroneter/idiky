@@ -167,8 +167,9 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
    asignaciones se pierden, y que se recupera con Deshacer. El botón por defecto es «Cancelar»:
    un Enter sin leer no quita nada.
 7. Guarda: el croquis queda con la posición de cada cosa (RN-173).
-8. **Pisos por tramos (RN-242 a RN-244, 2026-10-11):** en una torre u oficina, «Armar por pisos»
-   la vuelve una pila de tramos —sótanos, locales, vivienda, oficinas, zonas comunes, terraza— con
+8. **Pisos por tramos (RN-242 a RN-244, 2026-10-11):** doble clic en una torre u oficina (o
+   «Construir pisos») abre **el constructor**: la torre en grande, piso por piso, que se pinta con
+   bloques de una paleta, crece y hace sótanos con manijas, y trae plantillas. Por debajo es una pila de tramos —sótanos, locales, vivienda, oficinas, zonas comunes, terraza— con
    sus unidades por piso; un tramo de vivienda puede tener **terraza privada**, y uno de uso
    «terraza» es **zona común** (en la azotea o en un piso intermedio). El dibujo muestra la pila, y
    un espacio dentro del edificio dice en qué piso está.
