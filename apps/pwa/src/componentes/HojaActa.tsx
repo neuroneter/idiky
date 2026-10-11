@@ -34,7 +34,6 @@ import {
   contarVotacion,
   decisionAdmisibleEnLaSesion,
   etiquetaUnidad,
-  hayQuorum,
   herramientaDeEnlace,
   mayoriaDelPunto,
   resultadoVotacion,
@@ -44,6 +43,7 @@ import {
   verificacionVigente,
   verificadoresFueraDePlazo,
   hoyISO,
+  quorumDeLaSesion,
 } from '../dominio/reglas'
 
 function porcentaje(valor: number): string {
@@ -59,6 +59,7 @@ export function HojaActa({
   personaDe,
   unidadDe,
   votacionDePunto,
+  anuladasDePunto = () => [],
   votosDe,
   presidente,
   secretario,
@@ -75,6 +76,8 @@ export function HojaActa({
   personaDe: (id: string) => Persona | undefined
   unidadDe: (id: string) => Unidad | undefined
   votacionDePunto: (puntoId: string) => Votacion | undefined
+  /** RN-34 — Las votaciones anuladas del punto: el acta deja constancia de ellas. */
+  anuladasDePunto?: (puntoId: string) => Votacion[]
   votosDe: (votacionId: string) => Voto[]
   presidente?: Persona
   secretario?: Persona
@@ -88,7 +91,8 @@ export function HojaActa({
   if (!asamblea) return null
 
   const resumen = resumenAsistencia(asistencias, asamblea.id)
-  const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
+  // RN-215 — El quórum es el que se verificó al instalar.
+  const quorum = quorumDeLaSesion(asamblea, resumen, quorumMinimo)
   const deLaAsamblea = asistencias.filter((a) => a.asambleaId === asamblea.id)
   // RN-98 — El acta dice por qué medio fue la sesión no presencial, y si fue
   // una transmisión de una vía: es lo que se mira si alguien impugna la
@@ -227,14 +231,27 @@ export function HojaActa({
       <h2>Desarrollo y decisiones</h2>
       {asamblea.ordenDelDia.map((punto) => {
         const votacion = votacionDePunto(punto.id)
+        // RN-34 — Lo anulado no desaparece: el acta lo dice con su motivo.
+        const constanciaAnuladas = anuladasDePunto(punto.id).map((anulada) => (
+          <p key={anulada.id}>
+            Se deja constancia de que la votación «{anulada.pregunta}» de este punto fue anulada.
+            Motivo: {anulada.anulacion?.motivo}
+          </p>
+        ))
         if (!punto.seVota || !votacion) {
           return (
-            <p key={punto.id}>
-              <strong>
-                {punto.orden}. {punto.titulo}.
-              </strong>{' '}
-              {punto.descripcion} Punto informativo; no se sometió a votación.
-            </p>
+            <div key={punto.id}>
+              <p>
+                <strong>
+                  {punto.orden}. {punto.titulo}.
+                </strong>{' '}
+                {punto.descripcion}{' '}
+                {punto.seVota
+                  ? 'Estaba previsto someterlo a votación, pero no se votó.'
+                  : 'Punto informativo; no se sometió a votación.'}
+              </p>
+              {constanciaAnuladas}
+            </div>
           )
         }
         const votos = votosDe(votacion.id)
@@ -260,6 +277,7 @@ export function HojaActa({
         const votos_ = (n: number) => `${n} ${n === 1 ? 'voto' : 'votos'}`
         return (
           <div key={punto.id}>
+            {constanciaAnuladas}
             <p>
               <strong>
                 {punto.orden}. {punto.titulo}.

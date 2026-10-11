@@ -111,6 +111,40 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Mary + IA (Claude) · Votaciones desde la consola y el quórum al instalar (CU-A-18, RN-212 a RN-215)
+
+Mary: *«sí, vamos con el 1»* (CU-A-18) y, a mitad del trabajo, *«la asistencia es el quórum y se
+verifica al inicio de la asamblea»*.
+
+**Votaciones desde la consola (CU-A-18 ✅):** en el detalle de la asamblea, cada punto que se vota
+tiene su votación (`apps/pwa/src/features/admin/VotacionPunto.tsx`):
+- **Preparar** (RN-213): pregunta, opciones y **económica o no, escogido siempre**: sin escogerlo, no
+  se guarda. Ahí mismo dice si se contará por coeficiente o una unidad, un voto (RN-211).
+- **Abrir** (RN-212): con la asamblea instalada y si la sesión puede tomar la decisión (RN-94).
+- **Abierta:** cuántas unidades han votado y cuánto coeficiente suman, **sin quién votó qué**.
+- **Cerrar:** resultado, opción por opción, y sobre qué base se contó.
+- **Anular** (RN-34): con motivo; queda en el historial del punto y **el acta deja constancia**. El
+  punto se puede votar de nuevo.
+- **La asamblea no se cierra con votaciones abiertas** (RN-214).
+
+**El quórum se verifica al instalar (RN-215).** Antes el demo instalaba primero y la asistencia se
+marcaba después. Ahora: la asistencia se registra el día de la asamblea, **solo se instala con
+quórum** (el botón dice qué falta) y **el quórum de ese momento queda guardado**; las votaciones no lo
+vuelven a medir, y si alguien se va después, lo votado sigue valiendo (eso resolvió la pregunta
+abierta A1 de CU-A-18). En la semilla (v35), la asamblea en curso se instaló con 6 unidades y el
+51,8 %.
+
+**Archivos:** `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/{repositorio,selectores,semilla}.ts`,
+`apps/pwa/src/features/admin/{AsambleasAdminPage,VotacionPunto}.tsx`,
+`apps/pwa/src/features/residente/AsambleaDetallePage.tsx`, `apps/pwa/src/componentes/HojaActa.tsx`.
+
+**Pruebas:** 3 nuevas en `apps/pwa/pruebas/navegador/asambleas.spec.ts`; **41 en verde**.
+
+**Sigue abierto:** el empate cuando el reglamento prevé algo distinto (A2) y la unanimidad como
+mayoría; T-46 (el poder que aprueba el apoderado).
+
+---
+
 ### 2026-10-03 · BLOKY · Sesión de IA (Claude) con Daniel · T-77, paso 1: un esquema por copropiedad, en el servidor
 
 **Qué se hizo** (repo `Bloky-Idiky`, `feature/T-77-capa-de-datos` → `develop`, desplegado como

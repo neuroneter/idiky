@@ -33,7 +33,6 @@ import {
   actaDeAsamblea,
   contarVotacion,
   definicionModalidad,
-  hayQuorum,
   decisionAdmisibleEnLaSesion,
   mayoriaDelPunto,
   resultadoVotacion,
@@ -51,6 +50,7 @@ import {
   puedeVotar,
   resumenAsistencia,
   yaVoto,
+  quorumDeLaSesion,
 } from '../../dominio/reglas'
 import { formatearFechaHora } from '../../utilidades/formato'
 import { BotonVolver } from '../../componentes/BotonVolver'
@@ -104,7 +104,7 @@ export function AsambleaDetallePage() {
   const miAsistencia = asistenciaDeUnidad(bd.asistencias, asamblea.id, sesion.unidadActivaId ?? '')
   const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
   const quorumMinimo = sel.copropiedad(bd, sesion.copropiedadId)?.quorumMinimo ?? 50
-  const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
+  const quorum = quorumDeLaSesion(asamblea, resumen, quorumMinimo)
   // Solo la aprobada: un borrador no está «a disposición», está a medio hacer.
   const acta = actaDeAsamblea(bd.actas, asamblea.id)
   const actaAprobada = acta && actaCongelada(acta) ? acta : undefined
@@ -742,6 +742,7 @@ export function AsambleaDetallePage() {
             personaDe={(id) => sel.persona(bd, id)}
             unidadDe={(id) => sel.unidad(bd, id)}
             votacionDePunto={(puntoId) => sel.votacionDePunto(bd, puntoId)}
+            anuladasDePunto={(puntoId) => sel.votacionesAnuladasDePunto(bd, puntoId)}
             votosDe={(votacionId) => sel.votosDe(bd, votacionId)}
             presidente={sel.persona(bd, actaAprobada.presidenteId ?? '')}
             secretario={sel.persona(bd, actaAprobada.secretarioId ?? '')}

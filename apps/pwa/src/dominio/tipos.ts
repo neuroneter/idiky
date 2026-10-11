@@ -1103,6 +1103,12 @@ export interface Asamblea {
   enlaceGrabacion?: string
   ordenDelDia: PuntoOrdenDelDia[]
   estado: EstadoAsamblea
+  /**
+   * RN-215 — El quórum con que se instaló: la asistencia de ese momento (Mary,
+   * 2026-10-11: «la asistencia es el quórum y se verifica al inicio de la
+   * asamblea»). Lo que pase después —alguien que llega o se va— no lo cambia.
+   */
+  quorumAlInstalar?: { unidades: number; coeficiente: number; en: FechaHoraISO }
   /** Lo que convoca: numero y fecha del acta o de la citacion. */
   citacion: string
 }
@@ -1365,8 +1371,13 @@ export interface Votacion {
   contenidoEconomico: boolean
   opciones: OpcionVotacion[]
   estado: EstadoVotacion
+  /** Quién la preparó y cuándo (CU-A-18). Las de la semilla no lo tienen. */
+  preparadaPor?: string
+  preparadaEn?: FechaHoraISO
   abiertaEn?: FechaHoraISO
   cerradaEn?: FechaHoraISO
+  /** RN-34 — Una votación no se borra ni se reabre: se anula con motivo y se repite. */
+  anulacion?: { motivo: string; por: string; en: FechaHoraISO }
 }
 
 export interface Voto {
