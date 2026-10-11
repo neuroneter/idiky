@@ -481,8 +481,10 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
 **Flujo principal**
 1. La primera vez, elige una **plantilla** para el piso 1: piso abierto, oficinas con pasillo,
    coworking o vacío, y el tamaño del piso en metros.
-2. Ve la **planta desde arriba**, con cuadrícula de 1 m: cada recinto con su color, su nombre y su
-   área. La planta se arrastra y se acerca con la rueda, como el terreno (RN-251).
+2. Ve la **planta en isométrico, con el estilo de juego del terreno** (2026-10-11, Daniel: *se
+   siente de cuadritos*): losa, fachada con ventanas, suelos con su material, muros en corte y los
+   muebles de cada tipo (escritorios, mesa de juntas, sofás, cocineta, baños, ascensores), con el
+   nombre de cada recinto flotando. Se arrastra y se acerca con la rueda, como el terreno (RN-251).
 3. **Agrega recintos** desde el catálogo (zona de puestos, sala, oficina privada, recepción…) y
    los **mueve y ajusta arrastrando sus esquinas**, de a 0,5 m (RN-254). No se pueden montar uno
    sobre otro.
