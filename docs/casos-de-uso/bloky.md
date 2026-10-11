@@ -515,7 +515,7 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
 **Lo que queda abierto:** muros en ángulo y puertas; ubicar cada sede en el mapa (CU-B-09); las reservas (CU-B-13); los
 miembros y empresas que reservan; tarifas.
 
-**Estado en BLOKY Dev:** 🟡 (2026-10-11) — desplegado (`759d8b3.bloky-8815a83`) y probado con la API simulada (cliente «Cowork Centro 93»); para verlo en Dev falta que BOB tenga el campo `negocio` (rama `feature/negocio-espacio-trabajo` de `BOB-Idiky`). Código: `apps/bloky/src/features/planta/` y `apps/bloky-api/src/planta/`.
+**Estado en BLOKY Dev:** 🟡 (2026-10-11) — desplegado (`2a10ec0.bloky-e1f5ab7`) con BOB `gestion-581faf5`; cliente de prueba **Cowork Centro 93** (espacio de trabajo) aprovisionado, administrado por Olga Lucía Henao. Falta la prueba de Daniel. Código: `apps/bloky/src/features/planta/` y `apps/bloky-api/src/planta/`.
 
 ---
 

@@ -123,8 +123,12 @@ Coworking/Oficina, ese es el modelo; si es una Copropiedad, el de edificios y ca
 - **BLOKY** (`develop` `e1f5ab7`): al entrar, «¿Qué vas a administrar?» en dos grupos (copropiedades
   y espacios de trabajo); herramienta `dist/herramientas/aprovisionar-por-nit.js <NIT>` (busca en
   BOB, aprovisiona y concilia el directorio, sin mostrar tokens).
-- **Sigue (lo lanza Daniel):** desplegar `gestion` y `bloky`, sembrar en BOB, aprovisionar el NIT
-  901456789 y entrar como Olga: debe ver Altos del Bosque (terreno) y Cowork Centro 93 (planta).
+- **Hecho en el servidor** (lo lanzó Daniel): `gestion` `2a10ec0.gestion-581faf5` (con respaldo
+  previo de la base de BOB) y `bloky` `2a10ec0.bloky-e1f5ab7` (los esquemas en `008-sedes.sql`); siembra
+  en BOB (solo se crearon el cowork y su asignación; el script se copió con `podman cp`, porque el
+  contenedor no deja escribir en `/opt/app/scripts`); `aprovisionar-por-nit.js 901456789`: aprovisionado
+  como `espacio_trabajo`. Olga Lucía Henao es administradora de Altos del Bosque y de Cowork Centro 93.
+  LangFlow igual antes y después. **Sigue:** que Daniel entre como Olga y lo pruebe.
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Sedes y parqueaderos (RN-259, RN-260, CU-B-12)
 
