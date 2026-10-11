@@ -125,7 +125,7 @@ menú menos denso, con la estética de «Arma tu copropiedad».
 - Después, a pedido de Daniel: **las flechas mueven lo elegido**. En la planta, en la dirección de la
   pantalla (espacio de a 0,5 m con lo que tiene, Shift 2 m; puesto u objeto de a 0,1 m, Shift 0,5 m; si
   no cabe, avisa). En el terreno, también una agrupación entera. Daniel: *no se siente como un sistema de
-  gestión serio sino algo cómodo, como un juego*. **Sigue:** desplegar y que Daniel lo pruebe.
+  gestión serio sino algo cómodo, como un juego*. **Desplegado** en BLOKY Dev (`40d560f.bloky-e0cbaf4`); LangFlow igual.
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Llevar los dos negocios a BLOKY Dev (RN-252)
 
