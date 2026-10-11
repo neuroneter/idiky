@@ -440,6 +440,12 @@ Código: `apps/bloky-api/src/{almacen,documentos}/` y `apps/bloky/src/features/d
 5. **Demarcar (RN-250):** en el terreno, «🗺 Ver el mapa» parte la pantalla: a un lado el terreno, al
    otro el mapa real (calles o satélite). Marca el lote moviendo las esquinas del recuadro y pone
    las entradas; todo aparece al instante en el terreno y queda guardado para los demás.
+6. **Ajustar el plano al lote (RN-251):** el terreno no crece ni hace scroll: el plano se arrastra
+   con el mouse o el dedo, como un mapa, y la rueda acerca alrededor del cursor. Al abrir, el lote
+   llena la pantalla y lo de afuera se oscurece («⌖» lo vuelve a encajar). El plano se gira para
+   que el lote quede derecho: solo, la primera vez, por su lado más largo, o con ⟲ ⟳ de 15° y
+   «Auto»; las torres se mueven con el barrio. Las torres y oficinas van a escala real, con su
+   ancho y fondo en metros.
 
 **Flujos alternativos**
 - A1. No encuentra el barrio → el mapa queda en la ciudad y lo dice; la persona lo mueve hasta su conjunto.
@@ -447,11 +453,13 @@ Código: `apps/bloky-api/src/{almacen,documentos}/` y `apps/bloky/src/features/d
 
 **Reglas de negocio:** RN-248, RN-249, RN-250, RN-251.
 
-**Lo que queda abierto:** dibujar o corregir el límite del lote; el catastro abierto; tomar la
-dirección de la escritura en «Armar desde documentos»; las fotos (galería en R2, ADR-0019).
+**Lo que queda abierto:** calcar los bloques sobre el satélite y asociarlos a las torres; las
+calles de acceso; el catastro abierto; tomar la dirección de la escritura en «Armar desde
+documentos»; las fotos (galería en R2, ADR-0019).
 
-**Estado en BLOKY Dev:** 🟡 (2026-10-11) — desplegado (`ea6d4a0.bloky-5285ee3`): buscar, confirmar, descargar el
-barrio y dibujarlo. Falta el límite del lote y tomar la dirección de la escritura. Código:
+**Estado en BLOKY Dev:** 🟡 (2026-10-11) — desplegado (`08eda9a.bloky-6f68e3b`): ubicar, descargar el
+barrio, demarcar el lote y las entradas (RN-250) y ajustar el plano al lote (RN-251). Falta calcar
+los bloques sobre el satélite y tomar la dirección de la escritura. Código:
 `apps/bloky-api/src/ubicacion/` y `apps/bloky/src/features/ubicacion/`.
 
 ---

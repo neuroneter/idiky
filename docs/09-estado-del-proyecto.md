@@ -112,7 +112,35 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
-### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · TRASPASO: el plano se ajusta al lote (RN-251, a medias)
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El plano se ajusta al lote (RN-251, CU-B-09)
+
+Se retomó el traspaso de abajo y se terminó el frontend de RN-251 en `Bloky-Idiky`
+(`feature/CU-B-03-ajustes-terreno` `3727ee3` → `develop` `6f68e3b`). **Desplegado en BLOKY Dev**
+(`08eda9a.bloky-6f68e3b`, lo lanzó Daniel); `verificar-vecino.sh` antes y después: LangFlow igual.
+
+- **Arrastre sin scroll** (`Terreno.tsx`, `terreno.css`): visor fijo con `overflow:hidden`; el
+  terreno va con `translate(pan) scale(zoom)`; arrastrar el fondo lo mueve (sin movimiento, suelta lo
+  elegido); la rueda acerca alrededor del cursor (0,2×–3×). Sin plano, el terreno abre centrado.
+- **Giro** (`plano.tsx`): `aPlano(m, θ)` y su inversa `dePlano`; `giroAutomatico` deja derecho el
+  lado más largo del lote (entre −45° y 45°). ⟲ ⟳ de 15° y «Auto» junto al zoom; girar lleva las
+  cosas a su mismo sitio del barrio en un solo cambio (se deshace) y guarda `demarcacion.rotacion`.
+  Al abrir, si el giro nunca se fijó y hay lote, se gira solo. El norte se calcula con el giro.
+- **Escala real** (`Sprite.tsx`): con plano, torre y oficina usan `huella` (por defecto
+  ≈ √(porPiso·70) m); ancho y fondo se editan en el inspector.
+- **Encajar**: al abrir el lote llena el visor; «⌖» lo vuelve a encajar; capa `evenodd` oscurece
+  lo de afuera.
+- **Error encontrado y corregido:** una respuesta vieja de `GET /ubicacion` (el doble efecto de
+  desarrollo o el sondeo del barrio) pisaba un giro recién hecho: las torres quedaban giradas y el
+  plano no. Ahora no se pisa lo demarcado mientras falte guardarlo o si la versión es vieja.
+- Verificado con la API simulada (lote girado 30°), `npm run build` de las dos apps y
+  `npm run probar` (todo pasa).
+
+**Sigue:** que Daniel lo pruebe sobre el plano real; (d) calcar los bloques sobre el satélite y
+asociarlos a las torres; calles de acceso; dirección de la escritura (CU-B-10); catastro. Nota: el
+menú lateral de la consola es más alto que una pantalla de 900 px y deja un poco de scroll de página
+(no es del plano). Rango de Integración: RN-240..269 (usadas hasta RN-251).
+
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · TRASPASO: el plano se ajusta al lote (RN-251, a medias — terminado arriba)
 
 **Para retomar en un chat nuevo.** Rama `feature/CU-B-03-ajustes-terreno` de `Bloky-Idiky`
 (empujada; aún **no** está en `develop` ni desplegada). Último commit: `aa37b5b`.
