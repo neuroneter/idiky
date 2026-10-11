@@ -362,7 +362,13 @@ sancionatorio. Mary debe conocerlo antes de seguir con reservas (T-84).
 - Marcar en el terreno lo que vino de la IA y ver la página del documento al lado del dato
   (necesita guardar el archivo: ADR-0019).
 
-**Estado en BLOKY Dev:** 🔨 (2026-10-11) — en construcción en la rama `feature/CU-B-03-ajustes-terreno`.
+**Estado en BLOKY Dev:** 🟡 (2026-10-11) — construido y probado en la rama `feature/CU-B-03-ajustes-terreno`
+(`5979f5c`), aún sin desplegar: subir el PDF, lectura en segundo plano con la escalera, validación,
+propuesta con la página de cada unidad, confirmar en el terreno y la tabla `unidad`. Probado contra
+la API de Anthropic con el reglamento de Oasis (Haiku pasó al primer peldaño, 0,02 US$) y en la app
+con la API simulada. Para usarlo en BLOKY Dev falta poner `ANTHROPIC_API_KEY` en
+`~/.config/idiky/secretos/bloky-api.env`. Código: `apps/bloky-api/src/{ia,alta}/` y
+`apps/bloky/src/features/alta/`.
 
 ---
 

@@ -120,7 +120,7 @@ con datos reales.
 | CU-B-07 | Propietarios y residentes | 1 | ⬜ Por escribir | [ver](./casos-de-uso/bloky.md#cu-b-06-a-cu-b-09--por-escribir) |
 | CU-B-08 | Tu equipo y sus grupos de colaboradores | 1 | ⬜ Por escribir | [ver](./casos-de-uso/bloky.md#cu-b-06-a-cu-b-09--por-escribir) |
 | CU-B-09 | Ubicación y fotos | 1 | ⬜ Por escribir | [ver](./casos-de-uso/bloky.md#cu-b-06-a-cu-b-09--por-escribir) |
-| CU-B-10 | **Armar la copropiedad desde sus documentos (con IA):** el reglamento escaneado se vuelve una propuesta validada (coeficientes 100 %, áreas, coherencia) que se confirma en el terreno ([ADR-0023](./adr/0023-bloky-nativo-para-agentes.md)) | 1 | 🔨 En construcción | [ver](./casos-de-uso/bloky.md#cu-b-10) |
+| CU-B-10 | **Armar la copropiedad desde sus documentos (con IA):** el reglamento escaneado se vuelve una propuesta validada (coeficientes 100 %, áreas, coherencia) que se confirma en el terreno ([ADR-0023](./adr/0023-bloky-nativo-para-agentes.md)) | 1 | 🟡 Construido en `feature/CU-B-03-ajustes-terreno`, sin desplegar | [ver](./casos-de-uso/bloky.md#cu-b-10) |
 
 ## 3. Sistema — procesos automáticos
 

@@ -112,6 +112,37 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · «Armar desde documentos» construido (CU-B-10, T-86)
+
+Lo que el experimento probó ya es parte de BLOKY, en `Bloky-Idiky`, rama
+`feature/CU-B-03-ajustes-terreno` (`5979f5c`), **aún sin desplegar**:
+
+- **Definido aquí primero:** [CU-B-10](./casos-de-uso/bloky.md#cu-b-10), **RN-187** (lo que lee la IA
+  es una propuesta con la fuente de cada unidad; se confirma solo si pasa la validación y sobre un
+  terreno sin estructuras; el PDF no se guarda), **RN-188** (la validación sin IA, Ley 675 arts.
+  25-26: coeficientes 100 %, áreas contra el total, coherencia área-coeficiente con aviso si el
+  reglamento pondera, repetidas, dudosas) y **RN-189** (la escalera Haiku → Sonnet → Opus, una
+  lectura a la vez, vencida a los 20 min), y las entidades `Propuesta` y `Unidad` en `docs/05`.
+  **El rango RN-160 … RN-189 quedó agotado.**
+- **API:** `src/ia/` (el proveedor de modelo y el lector de Anthropic con salida estructurada),
+  `src/alta/rutas.ts` (subir, consultar, confirmar, descartar; la lectura va en segundo plano
+  porque el nginx corta a los 30 s), la migración `003` (`propuesta`, `unidad`), el costo en
+  `consumo` y `ANTHROPIC_API_KEY` opcional. nginx acepta 32 MB solo en la subida.
+- **App:** «Armar desde documentos» desde la cabecera del terreno: subir, «Leyendo…» con reloj,
+  controles con ✓/✗/!, filas dudosas destacadas, unidades por estructura con su página, confirmar
+  (con «Cancelar» por defecto) y descartar.
+- **Verificado:** `npm run build` en las dos apps, 41 pruebas (12 nuevas con la lectura real de
+  Oasis), **el lector real contra la API** (Haiku pasó al primer peldaño, 320 unidades, 0,02 US$)
+  y la pantalla de punta a punta con la API simulada (Oasis queda como 2 etapas y 5 torres de
+  8 × 8, «5 torres · 320 unidades»; un segundo intento sobre el terreno ya armado se niega con su
+  motivo).
+
+**Lo que sigue:** (1) crear la clave de la API en la organización de IDIKY y ponerla en
+`~/.config/idiky/secretos/bloky-api.env` como `ANTHROPIC_API_KEY`; (2) integrar a `develop` y
+desplegar; (3) probarlo en BLOKY Dev con Torres del Parque (terreno vacío); (4) lo abierto de
+CU-B-10: unir con un terreno ya armado, varios documentos por paquete, partir los grandes y marcar
+en el terreno lo que vino de la IA.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El experimento de ADR-0023 acierta el 100 %; ADR aceptado
 
 Se probó leer con IA un reglamento real: el capítulo VII del reglamento del **Conjunto Residencial
