@@ -417,10 +417,40 @@ Código: `apps/bloky-api/src/{almacen,documentos}/` y `apps/bloky/src/features/d
 
 ---
 
-### CU-B-06 a CU-B-09 — por escribir
+### CU-B-09
+## CU-B-09 — Ubicar la copropiedad: su dirección y el plano real
+
+- **Actor principal:** Administrador o Delegado
+- **Precondiciones:** CU-B-02.
+- **Disparador:** «Mi copropiedad → Ubicación», el paso 6 de los primeros pasos o el botón del terreno.
+- **Resultado esperado:** La copropiedad tiene su dirección y su punto, y el terreno se dibuja
+  dentro de su barrio real: las calles y carreras con su nombre, los vecinos y los parques, a escala
+  y con el norte (ADR-0017).
+
+**Flujo principal**
+1. Escribe la dirección como se escribe en Colombia («Carrera 68 # 74-80») y la ciudad.
+2. BLOKY la lee (RN-248), busca la esquina y calcula el punto; dice si es **exacta** o
+   **aproximada** y cómo la encontró.
+3. Confirma: BLOKY descarga el vecindario y lo guarda (RN-249); la primera vez centra la
+   copropiedad en su punto.
+4. En el terreno ve su copropiedad sobre el barrio, con zoom para acercar y alejar.
+
+**Flujos alternativos**
+- A1. No encuentra la vía → lo dice, y se puede escribir de otra forma o probar otra ciudad.
+- A2. Los servidores del mapa no responden → se intenta en otro; si ninguno, «intenta en un momento».
+
+**Reglas de negocio:** RN-248, RN-249.
+
+**Lo que queda abierto:** dibujar o corregir el límite del lote; el catastro abierto; tomar la
+dirección de la escritura en «Armar desde documentos»; las fotos (galería en R2, ADR-0019).
+
+**Estado en BLOKY Dev:** 🔨 (2026-10-11) — en construcción en `feature/CU-B-03-ajustes-terreno`.
+
+---
+
+### CU-B-06 a CU-B-08 — por escribir
 
 Los demás pasos de la puesta en marcha (CU-B-02) tienen número reservado y se escriben cuando
 se construyan: **CU-B-06** Unidades y coeficientes (con la carga masiva desde Excel y la
 propuesta de coeficiente por área para comparar, docs/09 2026-09-21) · **CU-B-07** Propietarios y
-residentes · **CU-B-08** Tu equipo y sus grupos de colaboradores · **CU-B-09** Ubicación y fotos
-(Google Maps, ADR-0017; galería en R2, ADR-0019).
+residentes · **CU-B-08** Tu equipo y sus grupos de colaboradores. (CU-B-09 ya está escrito arriba.)
