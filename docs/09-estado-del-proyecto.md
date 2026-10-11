@@ -121,7 +121,11 @@ menú menos denso, con la estética de «Arma tu copropiedad».
 - `MenuJuego.tsx`: barra de fichas con dibujos isométricos, la activa en blanco con brillo, el rol como
   insignia; lo que no existe aún vive en «Pronto» (panel de niveles bloqueados). En el teléfono, arriba.
 - Verificado con la API simulada (copropiedad y cowork). `Bloky-Idiky` `develop` (merge posterior a
-  `e1f5ab7`). **Sigue:** desplegar y que Daniel lo pruebe.
+  `e1f5ab7`).
+- Después, a pedido de Daniel: **las flechas mueven lo elegido**. En la planta, en la dirección de la
+  pantalla (espacio de a 0,5 m con lo que tiene, Shift 2 m; puesto u objeto de a 0,1 m, Shift 0,5 m; si
+  no cabe, avisa). En el terreno, también una agrupación entera. Daniel: *no se siente como un sistema de
+  gestión serio sino algo cómodo, como un juego*. **Sigue:** desplegar y que Daniel lo pruebe.
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Llevar los dos negocios a BLOKY Dev (RN-252)
 
