@@ -140,10 +140,12 @@ que entiende las dos estructuras de negocio.*
     copia de piso, deshacer y guardado automático. Verificado con la API simulada; las cuatro
     plantillas, validadas con las reglas de la API en cinco tamaños de piso.
 
-**Sigue:** (1) desplegar BLOKY `develop` (lo lanza Daniel); (2) verificar BOB y pasar el campo a
-`develop`/`main` y desplegar `gestion` (solo el responsable de integración); (3) marcar un cliente
+**Desplegado** en BLOKY Dev (`759d8b3.bloky-8815a83`, lo lanzó Daniel); LangFlow igual antes y después. En la base: `comun/004-negocio.sql` aplicada y los dos clientes en `007-planta.sql`, como `copropiedad`. `verificar-capa-de-datos` daba 4 falsas alarmas desde la migración 002 (esperaba `001-base.sql`): corregida en `develop` (`ca865fe`), sale en el próximo despliegue.
+
+**Sigue:** (1) verificar BOB y pasar el campo a
+`develop`/`main` y desplegar `gestion` (solo el responsable de integración); (2) marcar un cliente
 de prueba como `espacio_trabajo` en BOB y volver a aprovisionarlo en BLOKY para probar en Dev;
-(4) CU-B-13, las reservas. Rango de Integración: RN usadas hasta RN-257; ADR hasta 0024; CU-B
+(3) CU-B-13, las reservas. Rango de Integración: RN usadas hasta RN-257; ADR hasta 0024; CU-B
 hasta CU-B-12.
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Tamaño de las estructuras y agrupaciones estables (RN-247, CU-B-03)
