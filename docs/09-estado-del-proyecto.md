@@ -111,6 +111,34 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Mary + IA (Claude) · Sin quórum, segunda convocatoria (RN-216)
+
+Mary: *«el quórum debe ser el 50 + 1»* —ya lo era: más del 50 % del coeficiente, art. 45; se
+aclaró que «50 + 1» en coeficiente es «más de la mitad» y Mary confirmó (*«tienes razón»*)— y *«en el
+caso que no se cumpla se debe citar una nueva asamblea»*.
+
+**Ley 675 de 2001, art. 41**, verificada con el buscador (fuentes:
+[Ley 675 en la SIC](https://www.sic.gov.co/sites/default/files/normatividad/Ley_675_2001.pdf),
+[Actualícese](https://actualicese.com/archivo/ley-675-de-03-08-2001-ii-parte/),
+[Tribunal Superior de Cundinamarca](https://www.ramajudicial.gov.co/documents/23584402/79978598/25290-31-03-001-2019-00241-01++++++Impugnacion+actos.+Art.+41+y+45+ley+675+de+2001.pdf/22d79e4d-554b-4bfe-be05-089a2caf7bab)):
+la nueva reunión es **el tercer día hábil siguiente a las 8:00 p. m.**, salvo que el reglamento diga otra
+cosa, y **sesiona con cualquier número plural de propietarios**.
+
+**Lo construido:** en la consola, el día de la asamblea y sin quórum, aparece **«¿No se reunió el
+quórum?»** con la fecha y la hora de la ley puestas y el botón **Citar segunda convocatoria**. La
+primera queda «Sin quórum», la segunda se crea con el mismo orden del día y se publica fijada en la
+cartelera. El texto del quórum ahora dice «la mitad más uno de los coeficientes: más del 50 %».
+Archivos: `apps/pwa/src/features/admin/SegundaConvocatoria.tsx` (nuevo),
+`apps/pwa/src/features/admin/AsambleasAdminPage.tsx`, `apps/pwa/src/dominio/{tipos,reglas}.ts`,
+`apps/pwa/src/datos/repositorio.ts`, `apps/pwa/src/componentes/Etiquetas.tsx`.
+
+**Pruebas:** 3 nuevas en `apps/pwa/pruebas/navegador/asambleas.spec.ts`; **44 en verde**.
+
+**Para revisar:** los días hábiles del demo no saltan festivos; y si los **poderes** de la primera
+valen para la segunda (hoy RN-31 ata cada poder a una sola asamblea).
+
+---
+
 ### 2026-10-11 · Mary + IA (Claude) · Votaciones desde la consola y el quórum al instalar (CU-A-18, RN-212 a RN-215)
 
 Mary: *«sí, vamos con el 1»* (CU-A-18) y, a mitad del trabajo, *«la asistencia es el quórum y se

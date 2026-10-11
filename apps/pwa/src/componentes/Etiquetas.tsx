@@ -100,6 +100,7 @@ const ASAMBLEA: Record<EstadoAsamblea, [string, Variante]> = {
   instalada: ['En curso', 'alerta'],
   cerrada: ['Cerrada', ''],
   cancelada: ['Cancelada', 'error'],
+  sin_quorum: ['Sin quórum', 'error'],
 }
 
 export function ChipAsamblea({ estado }: { estado: EstadoAsamblea }) {
