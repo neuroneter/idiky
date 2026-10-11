@@ -112,6 +112,53 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · TRASPASO: el plano se ajusta al lote (RN-251, a medias)
+
+**Para retomar en un chat nuevo.** Rama `feature/CU-B-03-ajustes-terreno` de `Bloky-Idiky`
+(empujada; aún **no** está en `develop` ni desplegada). Último commit: `aa37b5b`.
+
+Daniel (sobre el plano real): *no logro encajar de forma estética las estructuras en el espacio
+mapeado; la pantalla ocupa mucho y la zona queda muy pequeña.* Se acordó RN-251 (`docs/05`):
+**(a)** girar el plano para que el lote quede derecho, **(b)** torres y oficinas a escala real,
+**(c)** encajar el lote al abrir y oscurecer el barrio de afuera; y, con énfasis de Daniel: **la
+pantalla no debe crecer ni hacer scroll de la página: el plano se arrastra con el mouse, como
+Google Maps, y las estructuras se mueven con él**. Después, **(d)** calcar los bloques sobre el
+satélite.
+
+**Hecho (API, `apps/bloky-api`, 63 pruebas pasan):**
+- `ubicacion/geo.ts`: `Demarcacion.rotacion?` (grados, −180..180) validada en `motivoDemarcacionInvalida`;
+  `ubicacion/rutas.ts` la recibe y guarda en `PUT /ubicacion/demarcacion`.
+- `dominio/tipos.ts`: `Elemento.huella?: [ancho, fondo]` en metros; `dominio/reglas.ts` la valida
+  (5–200 m, solo torre/oficina); `estructura/rutas.ts` la deja pasar (`DATOS`).
+
+**Falta (frontend, `apps/bloky/src`), en este orden:**
+1. **Arrastre sin scroll** — `features/estructura/Terreno.tsx`: hoy el zoom es `transform: scale`
+   + scroll del visor (`.arma__visor { overflow:auto }` en `terreno.css`, `.terreno-marco` de
+   W×zoom, `cambiarZoom` y el centrado con `scrollTo`). Cambiar a visor `overflow:hidden` de
+   tamaño fijo, estado `pan {x,y}` y `transform: translate(pan) scale(zoom)` (origen 0 0); arrastrar
+   el fondo mueve (si no hubo movimiento, `setSel(null)`); la rueda hace zoom alrededor del cursor
+   (`pan' = cursor − (cursor − pan)·z2/z1`); quitar `.terreno-marco`. Las conversiones de puntero
+   que dividen por `zoomRef.current` sobre el rect del terreno siguen sirviendo. Añadir el visor
+   a `pruebas/api-simulada.mjs` si hace falta.
+2. **Giro (a)** — `features/ubicacion/plano.tsx`: `aPlano(m, θ)` gira los metros −θ antes de la
+   proyección isométrica; la inversa: `a=(sx−W/2)/(4·0.894)`, `b=(sy−H/2)/(4·0.447)`, `e=(a+b)/2`,
+   `n=(a−b)/2`, y desgirar. θ automático = el lado más largo del lote (o la calle más cercana);
+   botones ⟲ ⟳ de 15° y «Auto»; se guarda en `demarcacion.rotacion` (`api.guardarDemarcacion`).
+   Al cambiar θ, mover las posiciones de los elementos en un solo `cambiar`. `Norte` calcula su
+   ángulo con el vector norte girado (hoy fijo en 63.4°). `MapaReal` no gira.
+3. **Escala real (b)** — `Sprite.tsx`: con plano, la torre y la oficina usan `huella` (por defecto
+   ≈ √(porPiso·70) m de lado); 4 px por metro en el plano.
+4. **Encajar (c)** — al abrir con lote, zoom y pan para que el lote llene el visor; botón
+   «⌖ Encajar el lote»; capa SVG `fill-rule="evenodd"` que oscurece todo lo que está fuera del lote.
+5. Verificar en el preview (añadir temporalmente las entradas de bloky a `~/idiky/.claude/launch.json`
+   y luego `git checkout` de ese archivo), `npm run build` de las dos apps, `npm run probar`,
+   commit, merge a `develop`, desplegar `bloky` con `IDIKY_REF_BLOKY=origin/develop` y
+   `verificar-vecino.sh` antes y después; actualizar esta bitácora y CU-B-09.
+
+**Después:** (d) bloques calcados sobre el satélite y asociados a las torres; calles de acceso;
+resaltar el bloque de la torre elegida; tomar la dirección de la escritura en CU-B-10; catastro.
+Rango de Integración: RN-240..269 (usadas hasta RN-251); ADR hasta 0023.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Ubicar moviendo el mapa: ciudad, barrio y pin (CU-B-09)
 
 En BLOKY Dev, buscar «Cra. 68 #74-80, Barranquilla» falló con «No se pudo completar»: el servidor
