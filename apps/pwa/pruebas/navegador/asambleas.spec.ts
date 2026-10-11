@@ -257,6 +257,7 @@ test('sin quórum se cita la segunda convocatoria: tercer día hábil, 8:00 p. m
       ordenDelDia: [{ titulo: 'Presupuesto', descripcion: 'Del año', seVota: true, mayoria: 'simple' }],
     }))) as { id: string }
     await intento(() => repo.marcarAsistencia(bd, { asambleaId: primera.id, unidadId: 'uni-torre1-201', personaId: 'per-3', forma: 'presencial' }))
+    const poder = await intento(() => repo.otorgarPoder(bd, { asambleaId: primera.id, unidadId: 'uni-torre1-402', otorgadoPor: 'per-1', nombresApoderado: 'Ana', apellidosApoderado: 'Prueba', documentoApoderado: '99887766' }))
     const laPropietaria = await intento(() => repo.citarSegundaConvocatoria(bd, { asambleaId: primera.id, personaId: 'per-1' }))
     const segunda = (await intento(() => repo.citarSegundaConvocatoria(bd, { asambleaId: primera.id, personaId: 'per-admin' }))) as { id: string; numeroConvocatoria: number; fechaHora: string; ordenDelDia: { titulo: string }[]; primeraConvocatoriaId: string }
     const laPrimera = bd.asambleas.find((a) => a.id === primera.id)!
@@ -274,6 +275,9 @@ test('sin quórum se cita la segunda convocatoria: tercer día hábil, 8:00 p. m
       comunicado: !!comunicado && comunicado.fijado,
       dosUnidadesBastan: hayQuorum(segundaBd, { unidades: 2, coeficiente: 17 }, 50),
       unaNoBasta: hayQuorum(segundaBd, { unidades: 1, coeficiente: 9 }, 50),
+      poderOtorgado: typeof poder === 'object',
+      poderesEnLaSegunda: bd.poderes.filter((p) => p.asambleaId === segunda.id).length,
+      avisaPoderes: /poderes/.test(comunicado?.cuerpo ?? ''),
     }
   })
   expect(r.laPropietaria).toMatch(/administración/)
@@ -287,6 +291,10 @@ test('sin quórum se cita la segunda convocatoria: tercer día hábil, 8:00 p. m
   expect(r.comunicado).toBe(true)
   expect(r.dosUnidadesBastan).toBe(true)
   expect(r.unaNoBasta).toBe(false)
+  // Los poderes son de cada asamblea: el de la primera no pasa a la segunda (RN-31, Mary 2026-10-11).
+  expect(r.poderOtorgado).toBe(true)
+  expect(r.poderesEnLaSegunda).toBe(0)
+  expect(r.avisaPoderes).toBe(true)
 })
 
 test('con quórum no se cita la segunda: se instala (RN-216)', async ({ page }) => {

@@ -134,8 +134,11 @@ Archivos: `apps/pwa/src/features/admin/SegundaConvocatoria.tsx` (nuevo),
 
 **Pruebas:** 3 nuevas en `apps/pwa/pruebas/navegador/asambleas.spec.ts`; **44 en verde**.
 
-**Para revisar:** los días hábiles del demo no saltan festivos; y si los **poderes** de la primera
-valen para la segunda (hoy RN-31 ata cada poder a una sola asamblea).
+**Poderes (Mary, 2026-10-11):** *«los poderes para cada asamblea son independientes»*: los de la
+primera no pasan a la segunda; la pantalla y el aviso de la cartelera lo dicen (RN-31).
+
+**Para revisar:** los días hábiles del demo no saltan festivos (la ley habla de día hábil; hoy el
+administrador corrige la fecha a mano en una semana con festivo).
 
 ---
 

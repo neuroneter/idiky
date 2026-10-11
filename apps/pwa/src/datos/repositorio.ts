@@ -2553,7 +2553,8 @@ export async function citarSegundaConvocatoria(
     cuerpo:
       `La asamblea de hoy no reunió el quórum. Conforme al artículo 41 de la Ley 675 de 2001, queda ` +
       `citada para el ${cuando} a las ${fechaHora.slice(11, 16)}${primera.lugar ? `, en ${primera.lugar}` : ''}, ` +
-      `con el mismo orden del día. Esa reunión sesiona y decide con cualquier número plural de propietarios.`,
+      `con el mismo orden del día. Esa reunión sesiona y decide con cualquier número plural de propietarios. ` +
+      `Los poderes de la primera no valen para la segunda: quien no asista debe otorgar uno nuevo.`,
     categoria: 'asamblea',
     fijado: true,
     fechaPublicacion: ahoraISO(),
