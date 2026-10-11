@@ -324,6 +324,48 @@ sancionatorio. Mary debe conocerlo antes de seguir con reservas (T-84).
 
 ---
 
+### CU-B-10
+## CU-B-10 — Armar la copropiedad desde sus documentos (con IA)
+
+- **Actor principal:** Administrador o Delegado
+- **Precondiciones:** CU-B-02. La API tiene configurada la IA (`ANTHROPIC_API_KEY`); si no, la
+  pantalla lo dice y queda el camino a mano (CU-B-03).
+- **Disparador:** «Mi copropiedad → Estructura → Armar desde documentos».
+- **Resultado esperado:** El terreno y las unidades quedan armados a partir del reglamento de
+  propiedad horizontal, cada unidad con su área, su coeficiente y la página de donde salió, después
+  de que una persona revisó y confirmó la propuesta. Decisión: [ADR-0023](../adr/0023-bloky-nativo-para-agentes.md).
+
+**Flujo principal**
+1. Sube el PDF del reglamento (o del capítulo de coeficientes), escaneado o no, de hasta 32 MB.
+2. BLOKY lo lee en segundo plano (RN-189: Haiku → Sonnet → Opus según la validación) y la pantalla
+   muestra «Leyendo…», con el tiempo que va; se puede salir y volver.
+3. Ve **la propuesta**: cuántas estructuras y unidades, los controles de RN-188 con su resultado
+   (✓ o el motivo), las filas dudosas destacadas para revisar contra el documento, las
+   observaciones de la lectura y la tabla de unidades por estructura con su página.
+4. **Confirma** (RN-187): el terreno recibe las etapas como agrupaciones y las torres (o
+   parqueaderos, depósitos, locales) con sus pisos y unidades por piso, y las unidades quedan
+   guardadas con su fuente. Lo lleva al terreno para acomodar el croquis.
+
+**Flujos alternativos**
+- A1. La lectura no pasa la validación en ningún peldaño → la propuesta se ve con sus motivos y
+  no se puede confirmar; puede subir otro documento o seguir a mano.
+- A2. El terreno ya tiene estructuras → la propuesta se puede revisar pero no confirmar (RN-187).
+- A3. Descarta la propuesta → queda registrada como descartada; no toca nada.
+- A4. Ya hay una lectura en curso en la copropiedad → espera a que termine (RN-189).
+
+**Reglas de negocio:** RN-187 a RN-189.
+
+**Lo que queda abierto**
+- Unir una propuesta con un terreno ya armado (emparejar torres por nombre).
+- Varios documentos en un mismo paquete (reglamento, reformas, planos) y partir los grandes en
+  pedazos de menos de 100.000 tokens para la tarifa base de Haiku (ADR-0023 §5).
+- Marcar en el terreno lo que vino de la IA y ver la página del documento al lado del dato
+  (necesita guardar el archivo: ADR-0019).
+
+**Estado en BLOKY Dev:** 🔨 (2026-10-11) — en construcción en la rama `feature/CU-B-03-ajustes-terreno`.
+
+---
+
 ### CU-B-06 a CU-B-09 — por escribir
 
 Los demás pasos de la puesta en marcha (CU-B-02) tienen número reservado y se escriben cuando

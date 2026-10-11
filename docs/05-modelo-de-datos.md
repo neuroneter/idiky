@@ -1079,6 +1079,25 @@ de los flujos, según [ADR-0021](./adr/0021-flujos-de-uso-como-datos.md).
 | RN-185 | **Los espacios que el catálogo no trae se crean con ícono y nombre** («Otro espacio»), de una biblioteca de íconos por grupos (salud y bienestar, deporte, niños, trabajo y estudio, social, servicios, movilidad, naturaleza y mascotas). Los tipos de espacio son datos, no código (docs/13 §6). | Catálogo `tipos_espacio` |
 | RN-186 | **La Oficina es una estructura de trabajo**, no residencial: pisos, puestos de trabajo por piso y oficinas cerradas por piso. Las oficinas cerradas **son unidades**; los puestos que se reservan van como espacio «Puestos de trabajo» **dentro** de la oficina, con su flujo. | `reglas.ts` (`unidadesDeOficina`) |
 
+## Reglas del alta desde documentos (CU-B-10, ADR-0023) — rango de la integración
+
+Definidas el 2026-10-11 con Daniel, sobre el experimento de ADR-0023 §5 (Oasis: 320 unidades,
+100 % de acierto con Opus, Sonnet y Haiku). Se implementan en `apps/bloky-api/src/dominio/reglas.ts`
+del repo `Bloky-Idiky`; la escalera de modelos, en `apps/bloky-api/src/ia/`.
+
+| ID | Regla | Dónde se implementa |
+|---|---|---|
+| RN-187 | **Lo que lee la IA es una propuesta, nunca un dato.** Se guarda aparte (`Propuesta`), con **la fuente de cada unidad** (página del documento y si se leyó bien), y no toca el terreno ni las unidades hasta que el Administrador o el Delegado la **confirma**. Solo se confirma una propuesta **que pasa la validación** (RN-188), y por ahora solo sobre un terreno **sin estructuras** (torres, manzanas, oficinas, locales): unir una propuesta con un terreno ya armado queda abierto. Al confirmar, cada grupo se vuelve una estructura del terreno (torre con sus pisos y unidades por piso; parqueaderos, depósitos o locales con su cantidad), las etapas se vuelven agrupaciones y cada unidad queda guardada con su fuente. El documento **no se guarda**: solo su nombre, tamaño y huella (SHA-256). Descartar no borra la propuesta. | `reglas.ts` (`estructuraDesdePropuesta`) |
+| RN-188 | **La propuesta se valida sin IA**, con la Ley 675 (arts. 25-26): (1) hay al menos una unidad; (2) ningún identificador se repite dentro de una misma estructura; (3) **los coeficientes suman 100 %** (± 0,01, el redondeo de la tabla); (4) si el documento declara el área total, **las áreas suman ese total** (± 0,05 m²); (5) **cada coeficiente corresponde a su área** (área ÷ área total × 100, ± 0,001): si fallan pocas filas (menos del 20 %) es una mala lectura y no pasa; si fallan muchas, el reglamento **pondera** (uso mixto, art. 26) y queda como aviso; (6) las filas que la IA marcó como **dudosas** (tapadas, borrosas) no pasan de 3 o del 2 % de las unidades, lo que sea mayor, y siempre se muestran para revisar. | `reglas.ts` (`validarPropuesta`) |
+| RN-189 | **La escalera de modelos** (ADR-0023 §6): el documento lo lee primero el modelo más económico (Claude Haiku); si su lectura no pasa RN-188 o no llega completa, sube a Claude Sonnet, y luego a Claude Opus. Se queda con **la primera lectura que pasa**; si ninguna pasa, la propuesta queda con la última lectura y sus motivos, y no se puede confirmar. Cada peldaño queda registrado (modelo, tokens, costo, tiempo, si pasó) y el costo se suma al consumo de la copropiedad (ADR-0022 §6). Una sola lectura a la vez por copropiedad; una lectura que lleva más de 20 minutos se da por fallida. | `ia/proveedor.ts` (`leerConEscalera`) |
+
+### Lo que BLOKY guarda del alta desde documentos (en el esquema de cada copropiedad)
+
+| Entidad | Campos | Notas |
+|---|---|---|
+| `Propuesta` | `id`, `estado` (`leyendo` \| `lista` \| `fallida` \| `confirmada` \| `descartada`), `archivoNombre`, `archivoBytes`, `archivoSha256`, `creadaPor` (persona y nombre), `creadaEn`, `terminadaEn?`, `modelo?` (el peldaño que resolvió), `intentos[]` (modelo, pasó, motivos, tokens, costo, segundos), `resultado?` (copropiedad, etapas, estructuras con sus unidades, totales declarados, observaciones), `validacion?` (RN-188), `error?`, `decididaPor?`, `decididaEn?` | RN-187 a RN-189. No se borra |
+| `Unidad` | `id`, `estructuraId` (el elemento del terreno), `identificador`, `piso`, `tipo` (apartamento, local, oficina, parqueadero, depósito, cuarto útil, otro), `areaPrivadaM2`, `coeficiente` (en %), `fuente` (propuesta, página, legible), `creadaEn`, `retiradaEn?` | La siembra el alta desde documentos (RN-187); **CU-B-06 la completa** (matrícula, edición a mano, Excel). Única por estructura e identificador mientras no esté retirada |
+
 ### Lo que BLOKY guarda por su cuenta para el ingreso
 
 | Entidad | Campos | Notas |
