@@ -112,6 +112,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Ubicar moviendo el mapa: ciudad, barrio y pin (CU-B-09)
+
+En BLOKY Dev, buscar «Cra. 68 #74-80, Barranquilla» falló con «No se pudo completar»: el servidor
+esperó a Overpass más de 30 s y el nginx cortó (504). Daniel: *¿no será más fácil solo ciudad y
+barrio, y que el usuario mueva y amplíe el mapa hasta ubicar la dirección? Ellos conocen el lugar.*
+Rehecho así: **ciudad y barrio** (Nominatim, rápido y estable) llevan el mapa a la zona; la persona
+**mueve el mapa hasta que el pin fijo del centro quede sobre su conjunto** (satélite o calles); la
+dirección queda como **atajo opcional** (con 8 s por servidor, para no pasar de los 30 s); y «Mi
+conjunto está aquí» **guarda el punto al instante y descarga el barrio en segundo plano**: el terreno
+avisa y se completa solo, o deja reintentar (`POST /ubicacion/vecindario`). Probado de punta a punta
+con la API simulada: punto movido a mano guardado como «manual», aviso de descarga y barrio dibujado
+sin recargar.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Demarcar el lote y las entradas en pantalla partida (RN-250)
 
 Idea de Daniel: *como Google, una pantalla compartida partida a la mitad que el usuario hace más

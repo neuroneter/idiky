@@ -427,20 +427,23 @@ Código: `apps/bloky-api/src/{almacen,documentos}/` y `apps/bloky/src/features/d
   dentro de su barrio real: las calles y carreras con su nombre, los vecinos y los parques, a escala
   y con el norte (ADR-0017).
 
-**Flujo principal**
-1. Escribe la dirección como se escribe en Colombia («Carrera 68 # 74-80») y la ciudad.
-2. BLOKY la lee (RN-248), busca la esquina y calcula el punto; dice si es **exacta** o
-   **aproximada** y cómo la encontró.
-3. Confirma: BLOKY descarga el vecindario y lo guarda (RN-249); la primera vez centra la
-   copropiedad en su punto.
+**Flujo principal** (rehecho el 2026-10-11 con Daniel: *ellos conocen el lugar*)
+1. Escribe **la ciudad y el barrio** (el barrio es opcional) y toca «Ir al mapa»: el mapa va a esa
+   zona (satélite o calles).
+2. **Mueve y acerca el mapa hasta que el pin del centro quede sobre su conjunto.** Si sabe la
+   dirección, puede escribirla como atajo («Carrera 68 # 74-80», RN-248): si se encuentra, el mapa se
+   acerca solo; si no, no pasa nada y sigue moviéndolo.
+3. «📍 Mi conjunto está aquí» guarda el punto al instante; **las calles del barrio se descargan en
+   segundo plano** (RN-249) y el terreno avisa «Descargando las calles…» hasta que aparecen; si los
+   servidores fallan, se puede reintentar. La primera vez, la copropiedad se centra en su punto.
 4. En el terreno ve su copropiedad sobre el barrio, con zoom para acercar y alejar.
 5. **Demarcar (RN-250):** en el terreno, «🗺 Ver el mapa» parte la pantalla: a un lado el terreno, al
    otro el mapa real (calles o satélite). Marca el lote moviendo las esquinas del recuadro y pone
    las entradas; todo aparece al instante en el terreno y queda guardado para los demás.
 
 **Flujos alternativos**
-- A1. No encuentra la vía → lo dice, y se puede escribir de otra forma o probar otra ciudad.
-- A2. Los servidores del mapa no responden → se intenta en otro; si ninguno, «intenta en un momento».
+- A1. No encuentra el barrio → el mapa queda en la ciudad y lo dice; la persona lo mueve hasta su conjunto.
+- A2. Los servidores del mapa no responden al descargar el barrio → el punto ya quedó guardado; el terreno lo dice y deja reintentar.
 
 **Reglas de negocio:** RN-248, RN-249, RN-250.
 
