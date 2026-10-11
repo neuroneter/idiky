@@ -112,6 +112,34 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El edificio como pila de pisos por tramos, con terrazas (RN-242 a RN-244)
+
+Daniel: *¿qué pasa si hay terrazas en algunos pisos o el último piso tiene terraza?* Eligió hacerlo
+como **la pila de pisos completa** que pedían los casos reales del 2026-09-23 (el «paso 5»): en
+Life72 el piso no existía como concepto y el conteo de unidades —base de los coeficientes— salía
+mal (19×4 en vez de los pisos de vivienda). Tipos de terraza pedidos: **común en la azotea, común
+en un piso intermedio y privada de un apartamento**; el retroceso queda abierto.
+
+- **Definido** en `docs/05`: **RN-242** (tramos de abajo hacia arriba con rango —sótanos negativos,
+  sin piso 0—, uso y cuántas por piso; las unidades salen de los tramos; sin tramos, todo como
+  antes), **RN-243** (terraza común como tramo con sus espacios en un piso; terraza privada en
+  vivienda como área privada libre, que pesa en el coeficiente solo si el reglamento lo pondera) y
+  **RN-244** (la pila no se cruza ni deja huecos; el piso de un espacio existe). CU-B-03 paso 8.
+- **Desplegado** `f027966.bloky-0692745`: la API valida y guarda `tramos` y `piso`; el dibujo apila
+  cada tramo según su uso (sótanos bajo el suelo, locales con toldo, parqueaderos con aberturas,
+  oficinas de vidrio, vivienda con balcones y matas si tiene terraza privada, terraza con baranda,
+  sombrillas y columnas si es intermedia); el panel edita la pila **por cuántos pisos tiene cada
+  tramo** (los rangos salen solos, sin huecos posibles) y «En qué piso» para los espacios dentro de
+  un edificio. 5 pruebas nuevas (56 en total) con un Life72 de ejemplo: **55 unidades** en vez de 76.
+- Probado en la app: el Life72 de ejemplo se dibuja con sus 10 tramos; al quitar la terraza de la
+  azotea, el BBQ que estaba en ese piso pierde el piso y todo se guarda.
+
+**Ojo:** «Armar por pisos» en una torre con «locales en el primer piso» la vuelve 1 local + vivienda
+desde el piso 2: el conteo cambia (antes contaba el primer piso como apartamentos).
+
+**Lo que sigue:** el retroceso (pisos altos más angostos); que el alta desde documentos arme los
+tramos desde los pisos de las unidades leídas; zoom del terreno.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El terreno como un juego, en isométrico (CU-B-03)
 
 Daniel: las cosas en el terreno *se veían súper feas y pequeñas*; quería que *se sienta lindo, como
