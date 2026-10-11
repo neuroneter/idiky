@@ -167,6 +167,11 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
    asignaciones se pierden, y que se recupera con Deshacer. El botón por defecto es «Cancelar»:
    un Enter sin leer no quita nada.
 7. Guarda: el croquis queda con la posición de cada cosa (RN-173).
+8. **Pisos por tramos (RN-242 a RN-244, 2026-10-11):** en una torre u oficina, «Armar por pisos»
+   la vuelve una pila de tramos —sótanos, locales, vivienda, oficinas, zonas comunes, terraza— con
+   sus unidades por piso; un tramo de vivienda puede tener **terraza privada**, y uno de uso
+   «terraza» es **zona común** (en la azotea o en un piso intermedio). El dibujo muestra la pila, y
+   un espacio dentro del edificio dice en qué piso está.
 
 **Flujos alternativos**
 - A1. Copropiedad grande → **Duplicar** una torre ya configurada, o **Importar desde Excel**
@@ -175,7 +180,7 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
   tiene historia (unidades con propietarios, reservas), en el producto se **retira**, no se borra.
 - A3. Intenta meter una torre en otra, o algo dentro de sí mismo → no se deja (RN-170).
 
-**Reglas de negocio:** RN-169 a RN-173, RN-185, RN-186.
+**Reglas de negocio:** RN-169 a RN-173, RN-185, RN-186; la pila de pisos y las terrazas, RN-242 a RN-244.
 
 **Lo que queda abierto**
 - ¿Las agrupaciones se anidan (etapa → sector → torres)? Hoy no (RN-170); docs/13 §6 lo permite.
