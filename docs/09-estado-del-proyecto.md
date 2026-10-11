@@ -112,6 +112,21 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El creador de personajes por partes (CU-B-14)
+
+Daniel: *en vez de una galería de personajes, una galería de accesorios, tipos de cabello, uniforme,
+color de piel… como un juego para crear el avatar de cada colaborador, porque después el colaborador,
+desde su app, podrá ajustar mejor su personaje*.
+- **RN-261** ampliada (`docs/05`): la apariencia se arma por **partes con nombre fijo** (piel, ojos,
+  boca, cabello y su color, barba, gafas, cabeza, ropa y su color, mano, insignia); lo que no viene sale
+  del kit del cargo. La API valida cada parte (prueba nueva en `npm run probar`: todo pasa).
+- App: `Personaje.tsx` dibuja desde las partes (9 peinados, 5 ojos, 4 bocas, 4 barbas, 4 gafas,
+  8 cosas de la cabeza, 7 ropas, 10 de la mano, 4 insignias); `EditorAvatar.tsx` nuevo: galerías por
+  pestaña, cada opción en miniatura sobre el mismo personaje (la cara, de cerca), 🎲 al azar y «Ropa de
+  su cargo». El creador queda: nombre y cargo → el personaje → el horario; la ficha abre el mismo editor.
+- Verificado en una copia aparte: crear a Luis con afro y gafas, editarlo desde la ficha (casco) y que
+  se guarde con versión. `Bloky-Idiky` `develop` `895ef78`. **Sigue:** desplegar y que Daniel lo pruebe.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Tu equipo: colaboradores animados (CU-B-14)
 
 Daniel: *crear, como a modo de juego, a los colaboradores (vigilantes, aseadoras, mantenimiento,

@@ -541,10 +541,13 @@ miembros y empresas que reservan; tarifas.
 1. Ve **la sala**: los colaboradores como personajes animados (respiran, parpadean, caminan,
    saludan al pasar el ratón). Quien está en turno camina por la zona de trabajo; quien no,
    descansa en la banca. Debajo, **«Hoy»** muestra quién cubre cada hora, con la hora actual.
-2. **Crea un colaborador** como quien arma un personaje: (1) su cargo, cada uno con su uniforme y
-   su accesorio; (2) su nombre y su apariencia (piel, peinado, color del pelo y del uniforme),
-   viéndolo animado; (3) un turno de un toque y los días. Se une al equipo con su saludo.
-3. Toca a alguien para ver su ficha: cambia su nombre, su cargo o su apariencia.
+2. **Crea un colaborador** como quien arma un personaje en un juego: (1) su nombre y su cargo; el
+   cargo lo viste con su kit (gorra, ropa, lo de la mano, insignia); (2) **el creador de
+   personajes**: galerías de piel, ojos, boca, cabello, color de cabello, barba, gafas, lo de la
+   cabeza, ropa, color de la ropa, lo de la mano e insignia; cada opción se ve puesta sobre el mismo
+   personaje, y 🎲 arma uno al azar; (3) un turno de un toque y los días. Se une al equipo con su saludo.
+3. Toca a alguien para ver su ficha: cambia su nombre o su cargo («Ponerle la ropa de…» lo viste
+   con el kit del cargo nuevo) y **edita su personaje** en el mismo creador.
 4. **Ajusta el horario** en la grilla de la semana: arrastra en un día vacío para crear un turno,
    arrastra un turno para moverlo (a otra hora u otro día) y su borde para estirarlo, de a media
    hora; Suprimir lo quita; pone turnos de un toque en los días marcados (RN-262).
@@ -557,9 +560,10 @@ miembros y empresas que reservan; tarifas.
 **Reglas de negocio:** RN-261, RN-262, RN-263.
 
 **Lo que queda abierto:** novedades del día (incapacidades, reemplazos), marcar llegada y salida,
-avisos a los colaboradores, y sus permisos en BLOKY (perfiles, CU-B-01).
+avisos a los colaboradores, sus permisos en BLOKY (perfiles, CU-B-01) y que **cada colaborador
+ajuste su propio personaje desde su app** con las mismas partes (RN-261).
 
-**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en `develop` de `Bloky-Idiky` (`ea1059b`), probado con la
+**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en `develop` de `Bloky-Idiky` (`895ef78`, con el creador por partes), probado con la
 API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `apps/bloky-api/src/equipo/`.
 
 ---
