@@ -128,7 +128,7 @@ Archivos: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/reposito
 **Pruebas:** `apps/pwa/pruebas/navegador/poderes.spec.ts` (2 nuevas); **46 en verde**.
 
 **Decidido (Mary, 2026-10-11):** el poder enviado en foto (CU-R-31) **se deja así**: solo lo
-valida la administración (RN-96), sin aceptación del apoderado. *«lo dejamos así»*.
+valida la administración (RN-96), sin aceptación del apoderado. *«lo dejamos así … porque si lo envía en papel debe ser que no tiene app»*.
 
 **Para revisar:** el «aviso» es en pantalla (no hay notificaciones push en el demo).
 
