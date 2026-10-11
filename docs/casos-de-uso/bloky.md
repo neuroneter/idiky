@@ -464,6 +464,49 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
 
 ---
 
+### CU-B-12
+## CU-B-12 — Armar la planta de un espacio de trabajo
+
+> Solo para los clientes cuyo negocio es **espacio de trabajo** (RN-252, ADR-0024): una empresa o un
+> coworking que administra su espacio por reservas. En una copropiedad, las oficinas son unidades
+> privadas y se arman en el terreno (CU-B-03, RN-253).
+
+- **Actor principal:** Administrador o Delegado del espacio de trabajo
+- **Precondiciones:** CU-B-01; el cliente está aprovisionado en BLOKY con negocio `espacio_trabajo`.
+- **Disparador:** «Mi espacio de trabajo → Planta» o el paso 1 de los primeros pasos.
+- **Resultado esperado:** El espacio tiene sus pisos con sus recintos (salas, oficinas privadas,
+  zonas de puestos, recepción, baños…) y sus puestos, con áreas y capacidades, listos para
+  reservar (CU-B-13). Referencia: el modo «Plano» de Spot.
+
+**Flujo principal**
+1. La primera vez, elige una **plantilla** para el piso 1: piso abierto, oficinas con pasillo,
+   coworking o vacío, y el tamaño del piso en metros.
+2. Ve la **planta desde arriba**, con cuadrícula de 1 m: cada recinto con su color, su nombre y su
+   área. La planta se arrastra y se acerca con la rueda, como el terreno (RN-251).
+3. **Agrega recintos** desde el catálogo (zona de puestos, sala, oficina privada, recepción…) y
+   los **mueve y ajusta arrastrando sus esquinas**, de a 0,5 m (RN-254). No se pueden montar uno
+   sobre otro.
+4. Al tocar un recinto, en el panel cambia su nombre, su tipo, su tamaño, su capacidad y si se puede
+   reservar (RN-255).
+5. En una zona de puestos o una oficina, **«Llenar de puestos»** la llena de escritorios
+   numerados; también se agregan, mueven y quitan uno por uno (RN-256).
+6. **Agrega pisos** (vacíos o como copia de otro, para los pisos iguales) y pasa de uno a otro.
+7. Todo se guarda solo, con versión, y se puede deshacer (RN-257). El resumen dice el área, los
+   puestos, las salas, las oficinas y la capacidad total.
+
+**Flujos alternativos**
+- A1. Otra persona cambió la planta mientras tanto → no se pisa; se avisa y se recarga.
+- A2. Un recinto quedaría fuera del piso o encima de otro → no se suelta ahí; vuelve a su lugar.
+
+**Reglas de negocio:** RN-252, RN-254, RN-255, RN-256, RN-257.
+
+**Lo que queda abierto:** muros en ángulo y puertas; varias sedes; las reservas (CU-B-13); los
+miembros y empresas que reservan; tarifas.
+
+**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en construcción en `feature/CU-B-03-ajustes-terreno`.
+
+---
+
 ### CU-B-06 a CU-B-08 — por escribir
 
 Los demás pasos de la puesta en marcha (CU-B-02) tienen número reservado y se escriben cuando
