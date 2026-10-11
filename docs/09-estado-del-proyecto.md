@@ -127,7 +127,7 @@ En `Bloky-Idiky` (`feature/CU-B-03-ajustes-terreno` `11a8ef0` → `develop` `0b3
   cercanía; solo soltándolo sobre el nombre de la otra o en «Está en».
 - Verificado con la API simulada (dos etapas con torres juntas, al 50 %) y `npm run build`.
 
-**Sigue:** desplegar `develop` en BLOKY Dev (lo lanza Daniel) y que lo pruebe.
+**Desplegado** en BLOKY Dev (`d9dd7a0.bloky-0b36f39`, lo lanzó Daniel); `verificar-vecino.sh` antes y después: LangFlow igual. **Sigue:** que Daniel lo pruebe.
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El plano se ajusta al lote (RN-251, CU-B-09)
 
