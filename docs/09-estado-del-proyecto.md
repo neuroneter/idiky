@@ -121,7 +121,9 @@ muebles por tipo de recinto, con los nombres flotando («🏷 Etiquetas» los oc
 arrastre siguen en metros (proyección inversa). La API simulada y `npm run dev` aceptan
 `BLOKY_API_PUERTO` para tener una copia aparte sin tocar la de quien prueba. Verificado: plantilla
 Coworking, arrastrar encima (vuelve), esquina (ajusta), puesto fuera de su zona (vuelve), sin errores.
-`Bloky-Idiky` `develop` `ed8abdc`. **Sigue:** desplegar y que Daniel lo pruebe.
+`Bloky-Idiky` `develop` `ed8abdc`. Luego, a pedido de Daniel, el catálogo se llama **«Espacios»**
+(no «Recintos») y cada tipo lleva su miniatura isométrica, como las piezas del terreno; lo que ve la
+persona dice «espacio» (`develop` posterior). **Sigue:** desplegar y que Daniel lo pruebe.
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Dos negocios y la planta del espacio de trabajo (ADR-0024, CU-B-12)
 

@@ -485,7 +485,8 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
    siente de cuadritos*): losa, fachada con ventanas, suelos con su material, muros en corte y los
    muebles de cada tipo (escritorios, mesa de juntas, sofás, cocineta, baños, ascensores), con el
    nombre de cada recinto flotando. Se arrastra y se acerca con la rueda, como el terreno (RN-251).
-3. **Agrega recintos** desde el catálogo (zona de puestos, sala, oficina privada, recepción…) y
+3. **Agrega espacios** desde el catálogo «Espacios», cada uno con su miniatura isométrica (zona de
+   puestos, sala, oficina privada, recepción…; en el código y en las reglas se llaman recintos) y
    los **mueve y ajusta arrastrando sus esquinas**, de a 0,5 m (RN-254). No se pueden montar uno
    sobre otro.
 4. Al tocar un recinto, en el panel cambia su nombre, su tipo, su tamaño, su capacidad y si se puede
