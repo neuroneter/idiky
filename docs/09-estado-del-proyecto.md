@@ -20,6 +20,7 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
+| **BLOKY hoy** (2026-10-11) | Desplegado `edea76b.bloky-817429b` desde `develop` de `Bloky-Idiky`: **un esquema por copropiedad** con catálogo y API de administración (ADR-0015), **directorio de acceso** y rol en cada petición (ADR-0022), consola con menú y primeros pasos (CU-B-02) y **el terreno** de «Arma tu copropiedad» guardando de verdad (CU-B-03). **Para retomar:** la entrada de la bitácora «Traspaso» del 2026-10-11 |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 83 documentados: 48 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes (8 de BLOKY desde el 2026-10-03: CU-B-02…09, cuatro escritos y cuatro por escribir), 3 ⛔ retirados |
 | **Reglas de negocio** | 129 del demo (RN-01…RN-129; RN-07, RN-11, RN-41 y RN-55 retiradas) + 27 de BLOKY (RN-160…RN-186). RN-75 a RN-91 vienen de la contable; RN-92 a RN-129, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
@@ -110,6 +111,58 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Traspaso: dónde quedó BLOKY y cómo retomarlo
+
+Daniel cierra una sesión larga (2026-10-03, ver las entradas de ese día) y abre otra. **Esto es lo
+que una IA nueva necesita para seguir con BLOKY.**
+
+**Qué hay construido y desplegado** (`edea76b.bloky-817429b`, `https://bloky-dev.idiky.com`):
+ingreso sobre el directorio de acceso (CU-B-01, ADR-0022), un esquema PostgreSQL por copropiedad
+con catálogo, migraciones en bucle y API de administración (ADR-0015, T-77 pasos 1 y 2), consola en
+`/c/<id>` con menú agrupado e Inicio con los seis primeros pasos (CU-B-02), y el terreno de «Arma
+tu copropiedad» con arrastre por eventos de puntero, contención, asignación, deshacer, quitar con
+Suprimir y confirmación, y guardado con control de versión (CU-B-03, T-83). **Altos del Bosque** y
+**Torres del Parque** están aprovisionadas; las 5 personas de prueba de BOB, en el directorio. Se
+entra con la persona de prueba **Olga Lucía Henao** (administradora de Altos del Bosque); el código
+llega por SMS al celular registrado en BOB.
+
+**Cómo retomar:**
+1. En `Bloky-Idiky`: `CLAUDE.md`, el **README de la raíz** (el ciclo: `feature/` → `develop` →
+   desplegar `develop` con `IDIKY_REF_BLOKY=origin/develop` y la foto de LangFlow antes y después) y
+   los README de `apps/bloky-api` (cómo está armado el acceso a datos: todo por `catalogo.para(id)`;
+   rutas, variables, verificación contra la base real) y `apps/bloky` (la API simulada para ver la
+   app sin base: `node apps/bloky/pruebas/api-simulada.mjs`).
+2. Los casos de uso en `docs/casos-de-uso/bloky.md` (CU-B-02 a CU-B-09), las reglas RN-160 a RN-186
+   en `docs/05`, ADR-0015, ADR-0021 y ADR-0022, y el prototipo `docs/prototipos/arma-tu-copropiedad/`
+   (abrir `index.html#demo`; es la referencia visual del módulo).
+3. El acceso al servidor sigue `infra/guia-de-despliegue.md`.
+
+**Lo que sigue, en orden:**
+1. **Que Daniel arme Altos del Bosque en el terreno** y diga qué ajustar.
+2. **CU-B-04, el flujo de uso**: el popup (General con condiciones; Flujo de uso con bloques) y el
+   intérprete puro `apps/bloky-api/src/dominio/flujo.ts` (ADR-0021, RN-174 a RN-183), guardado en
+   `elemento.configuracion`. Es el módulo más grande: el prototipo lo tiene completo.
+3. **Lo que falta de T-77:** la impersonación de soporte (ADR-0022 §5), respaldar y eliminar
+   (ADR-0015 §4-§5); y en **BOB-Idiky**: el botón «Aprovisionar en BLOKY», **el aviso a BLOKY al
+   cambiar una asignación**, el permiso «Puede entrar como soporte» y el informe de consumo (BOB se
+   despliega solo desde `main` y con cuidado: Strapi borra lo que su código no tenga).
+4. **Lo que falta de CU-B-03:** importar desde Excel (con CU-B-06), guías de alineación, asignar
+   parqueaderos arrastrando.
+5. **CU-B-05** (Pendientes) y **CU-B-06 a CU-B-09** (unidades y coeficientes, propietarios, equipo,
+   ubicación y fotos).
+6. **Decisiones abiertas:** T-85 (el bloque «¿Está en mora?», si el Delegado arma flujos, plazo
+   para refutar una multa, depósito con la cuota, agrupaciones anidadas) y **si ALICE usa el mismo
+   directorio** (con Justo, T-80).
+7. **El disco del servidor**: ~3,1 GB libres con un mínimo de 3 GB para construir; ampliar en Azure o
+   quitar Jitsi (~2,1 GB).
+
+**El equipo al 2026-10-11:** **Mary** está integrada en `main` (asambleas: votaciones desde la
+consola, quórum al instalar, segunda convocatoria y poderes, RN-212 a RN-218); le queda **T-84**
+(conocer CU-B-04/05 y RN-179: en BLOKY la multa se carga directo y se refuta en la app). **Jeimy**
+tiene **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de despliegue de la
+contable al día) y su rama está 81 cambios atrás de `main`: integrarlo quedó pendiente de la
+aprobación de Daniel (el permiso de la sesión lo frenó por ser un recurso compartido).
 
 ### 2026-10-11 · Mary + IA (Claude) · El poder lo acepta el apoderado y lo recibe la administración (T-46, RN-217, RN-218)
 
