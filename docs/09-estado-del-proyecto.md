@@ -160,9 +160,9 @@ llega por SMS al celular registrado en BOB.
 **El equipo al 2026-10-11:** **Mary** está integrada en `main` (asambleas: votaciones desde la
 consola, quórum al instalar, segunda convocatoria y poderes, RN-212 a RN-218); le queda **T-84**
 (conocer CU-B-04/05 y RN-179: en BLOKY la multa se carga directo y se refuta en la app). **Jeimy**
-tiene **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de despliegue de la
-contable al día) y su rama está 81 cambios atrás de `main`: integrarlo quedó pendiente de la
-aprobación de Daniel (el permiso de la sesión lo frenó por ser un recurso compartido).
+tenía **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de despliegue de la
+contable al día): **Daniel lo integró a `main` el 2026-10-11**. Su rama sigue atrás de `main`; el
+aviso de inicio de su próxima sesión se la trae.
 
 ### 2026-10-11 · Mary + IA (Claude) · El poder lo acepta el apoderado y lo recibe la administración (T-46, RN-217, RN-218)
 
