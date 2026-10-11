@@ -594,6 +594,74 @@ export function yaVoto(votos: Voto[], votacionId: string, unidadId?: string): Vo
   return votos.find((voto) => voto.votacionId === votacionId && voto.unidadId === unidadId)
 }
 
+// ---------------------------------------------------------------------------
+// CU-A-18 — La administración prepara, abre, cierra y anula votaciones
+// ---------------------------------------------------------------------------
+
+/**
+ * RN-213 — **Qué necesita una votación para quedar preparada.** Una pregunta que
+ * se entienda, al menos dos opciones distintas y **si la decisión es de contenido
+ * económico, escogido a propósito**: no viene marcado, porque decide cómo se
+ * cuenta (RN-211) y equivocarse cambia el resultado (Mary, 2026-10-02: «debe
+ * seleccionar»). Y un punto tiene **una sola votación vigente**: si hay que
+ * repetirla, la anterior se anula primero (RN-34).
+ */
+export function faltaParaPrepararVotacion(parametros: {
+  pregunta: string
+  opciones: string[]
+  contenidoEconomico: boolean | undefined
+  punto: { seVota: boolean } | undefined
+  votacionVigenteDelPunto: boolean
+}): string | undefined {
+  if (!parametros.punto?.seVota) return 'Ese punto del orden del día no se somete a votación.'
+  if (parametros.votacionVigenteDelPunto) {
+    return 'Ese punto ya tiene una votación. Si hay que repetirla, anula primero la anterior.'
+  }
+  if (parametros.pregunta.trim().length < 5) return 'Escribe la pregunta que se va a votar.'
+  const opciones = parametros.opciones.map((o) => o.trim()).filter(Boolean)
+  if (opciones.length < 2) return 'Una votación necesita al menos dos opciones.'
+  if (new Set(opciones.map((o) => o.toLowerCase())).size !== opciones.length) {
+    return 'Hay dos opciones iguales.'
+  }
+  if (parametros.contenidoEconomico === undefined) {
+    return 'Escoge si la decisión es de contenido económico: de eso depende cómo se cuentan los votos (RN-211).'
+  }
+  return undefined
+}
+
+/**
+ * RN-212 — **Cuándo se puede abrir una votación.** Con la asamblea **instalada**
+ * —que ya verificó su quórum al inicio (RN-215)— y si la sesión **puede tomar
+ * esa decisión** (RN-94: la calificada no se vota en una reunión no
+ * presencial). Devuelve el motivo para decirlo en el botón, no un «no» mudo.
+ */
+export function motivoNoAbreVotacion(parametros: {
+  asamblea: Pick<Asamblea, 'estado' | 'modalidad'>
+  votacion: Pick<Votacion, 'estado'>
+  punto: { mayoria?: MayoriaExigida }
+}): string | undefined {
+  if (parametros.votacion.estado !== 'preparada') return 'Esta votación ya no está preparada.'
+  // RN-215 — El quórum se verificó al instalar: no se vuelve a medir aquí.
+  if (parametros.asamblea.estado !== 'instalada') return 'Primero instala la asamblea (con quórum).'
+  const admisible = decisionAdmisibleEnLaSesion(parametros.asamblea, parametros.punto)
+  if (!admisible.admisible) return admisible.motivo
+  return undefined
+}
+
+/**
+ * RN-214 — **La asamblea no se cierra con votaciones abiertas.** Cerrarla con una
+ * abierta dejaría un resultado a medias en el acta; primero se cierran (o se
+ * anulan) las votaciones.
+ */
+export function votacionesAbiertas(votaciones: Votacion[], asambleaId: string): Votacion[] {
+  return votaciones.filter((v) => v.asambleaId === asambleaId && v.estado === 'abierta')
+}
+
+/** La votación vigente de un punto: la que no se anuló (RN-34). */
+export function votacionVigente<T extends Pick<Votacion, 'puntoId' | 'estado'>>(votaciones: T[], puntoId: string): T | undefined {
+  return votaciones.find((v) => v.puntoId === puntoId && v.estado !== 'anulada')
+}
+
 /** La votacion solo recibe votos mientras este abierta (RN-34). */
 export function votacionRecibeVotos(votacion: Votacion): boolean {
   return votacion.estado === 'abierta'
@@ -1280,9 +1348,43 @@ export function decisionAdmisibleEnLaSesion(
   }
 }
 
-/** Solo tiene sentido marcar asistencia mientras la asamblea esta instalada. */
-export function admiteAsistencia(asamblea: Asamblea): boolean {
-  return asamblea.estado === 'instalada'
+/**
+ * RN-215 — **La asistencia se registra el día de la asamblea, antes de
+ * instalarla**: es la que da el quórum, y el quórum se verifica al inicio (Mary,
+ * 2026-10-11). Después de instalada, quien llega tarde todavía se registra. No
+ * antes del día: marcarse presente dos semanas antes no es asistir.
+ */
+export function admiteAsistencia(asamblea: Asamblea, hoy: FechaISO = hoyISO()): boolean {
+  if (asamblea.estado === 'instalada') return true
+  return asamblea.estado === 'convocada' && asamblea.fechaHora.slice(0, 10) === hoy
+}
+
+/**
+ * RN-215 — **Se instala con quórum**, medido con la asistencia de ese momento.
+ * Lo que pase después no lo deshace: el quórum se verifica al inicio.
+ */
+export function motivoNoSeInstala(
+  asamblea: Asamblea,
+  resumen: { unidades: number; coeficiente: number },
+  quorumMinimo: number,
+): string | undefined {
+  if (asamblea.estado !== 'convocada') return 'Solo se instala una asamblea convocada.'
+  if (!hayQuorum(asamblea, resumen, quorumMinimo)) {
+    return resumen.unidades < 2
+      ? 'No hay quórum: hace falta al menos otro propietario presente (número plural).'
+      : 'No hay quórum: la asistencia registrada no alcanza el coeficiente que exige la ley (art. 45).'
+  }
+  return undefined
+}
+
+/** El quórum de una asamblea ya instalada es el que tuvo al instalarse (RN-215). */
+export function quorumDeLaSesion(
+  asamblea: Asamblea,
+  resumen: { unidades: number; coeficiente: number },
+  quorumMinimo: number,
+): boolean {
+  if (asamblea.quorumAlInstalar) return true
+  return hayQuorum(asamblea, resumen, quorumMinimo)
 }
 
 // ---------------------------------------------------------------------------

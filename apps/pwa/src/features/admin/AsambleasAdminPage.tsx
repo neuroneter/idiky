@@ -63,13 +63,15 @@ import {
   salvedadCanalDeUnaVia,
   etiquetaUnidad,
   faltaParaQuorum,
-  hayQuorum,
   ordenAsamblea,
   poderVigente,
   poderEsperandoValidacion,
   poderRechazado,
   resumenAsistencia,
   baseDeVoto,
+  admiteAsistencia,
+  motivoNoSeInstala,
+  quorumDeLaSesion,
 } from '../../dominio/reglas'
 import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import type { Asamblea, ModalidadAsamblea, TipoAsamblea } from '../../dominio/tipos'
@@ -80,6 +82,7 @@ import { ChipAsamblea } from '../../componentes/Etiquetas'
 import { CapturaFoto } from '../../componentes/CapturaFoto'
 import { HojaPoder } from '../../componentes/HojaPoder'
 import { HojaActa } from '../../componentes/HojaActa'
+import { VotacionPunto } from './VotacionPunto'
 
 function formatearCoeficiente(coeficiente: number): string {
   return `${coeficiente.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
@@ -423,7 +426,9 @@ function DetalleAsamblea({
   const porValidar = poderes.filter((p) => !p.revocadoEn && poderEsperandoValidacion(p))
   const copropiedad = sel.copropiedad(bd, asamblea.copropiedadId)
   const quorumMinimo = copropiedad?.quorumMinimo ?? 50
-  const quorum = hayQuorum(asamblea, resumen, quorumMinimo)
+  // RN-215 — Antes de instalar, el de ahora; instalada, el que tuvo al instalarse.
+  const quorum = quorumDeLaSesion(asamblea, resumen, quorumMinimo)
+  const noSeInstala = motivoNoSeInstala(asamblea, resumen, quorumMinimo)
   const falta = faltaParaQuorum(asamblea, resumen, quorumMinimo)
   const acta = actaDeAsamblea(bd.actas, asamblea.id)
   const acumulado = acumuladoPorApoderado(
@@ -538,6 +543,8 @@ function DetalleAsamblea({
                   {admisible.motivo}
                 </p>
               )}
+              {/* CU-A-18 — La votación del punto, donde se discute. */}
+              <VotacionPunto asamblea={asamblea} punto={punto} />
             </li>
           )
         })}
@@ -680,7 +687,9 @@ function DetalleAsamblea({
         </>
       )}
 
-      {asamblea.estado !== 'convocada' && (
+      {/* RN-215 — La asistencia se ve desde el día de la asamblea, antes de
+          instalarla: es la que da el quórum para instalar. */}
+      {(asamblea.estado !== 'convocada' || admiteAsistencia(asamblea)) && (
         <>
           <div className="separador" />
           <span className="titulo-seccion">Quién asiste</span>
@@ -835,12 +844,12 @@ function DetalleAsamblea({
         <div className="grupo-botones">
           <button
             className="boton boton--primario"
-            disabled={cargando}
+            disabled={cargando || !!noSeInstala}
             onClick={() =>
               void alCambiar(
                 asamblea.id,
                 'instalada',
-                'Asamblea instalada. Ya se puede marcar asistencia.',
+                'Asamblea instalada con quórum. Ya se pueden abrir las votaciones.',
               )
             }
           >
@@ -854,6 +863,13 @@ function DetalleAsamblea({
             Cancelar
           </button>
         </div>
+      )}
+      {asamblea.estado === 'convocada' && noSeInstala && (
+        <p className="ayuda-campo">
+          {admiteAsistencia(asamblea)
+            ? noSeInstala
+            : 'Se instala el día de la asamblea, con la asistencia registrada ese día (RN-215).'}
+        </p>
       )}
 
       {asamblea.estado === 'instalada' && (
@@ -1789,6 +1805,7 @@ function VistaActa({
           personaDe={(id) => sel.persona(bd, id)}
           unidadDe={(id) => sel.unidad(bd, id)}
           votacionDePunto={(puntoId) => sel.votacionDePunto(bd, puntoId)}
+          anuladasDePunto={(puntoId) => sel.votacionesAnuladasDePunto(bd, puntoId)}
           votosDe={(votacionId) => sel.votosDe(bd, votacionId)}
           presidente={sel.persona(bd, presidenteId)}
           secretario={sel.persona(bd, secretarioId)}

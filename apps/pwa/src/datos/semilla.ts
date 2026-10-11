@@ -71,7 +71,9 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 33 — Gustavo, dueño no residente de la 301, en la lista de perfiles del demo.
 // 34 — cada votación dice si es de contenido económico, y la asamblea en curso
 //      trae una que no lo es (mascotas), que se cuenta por unidad (RN-211).
-export const VERSION_ESQUEMA = 34
+// 35 — la asamblea en curso se instaló con quórum (51,8 %), que queda guardado
+//      (RN-215); se agrega la asistencia de la Torre 1 · 302.
+export const VERSION_ESQUEMA = 35
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1043,6 +1045,8 @@ const asambleas: Asamblea[] = [
     // Se ve asi a proposito: es lo que hace evidente que el video no es de Idiky.
     enlaceTransmision: 'https://meet.google.com/idiky-demo-asm',
     estado: 'instalada',
+    // RN-215 — Se instaló con las seis unidades que habían llegado a las 19:13.
+    quorumAlInstalar: { unidades: 6, coeficiente: 51.8, en: fechaHoraRelativa(0, '19:15') },
     citacion: 'Citación 003 del consejo de administración',
     ordenDelDia: [
       {
@@ -1430,7 +1434,7 @@ function construirSanciones(): { sanciones: Sancion[]; consecutivo: number } {
 /**
  * Asistencia a la asamblea en curso, que es mixta (ADR-0007).
  *
- * Cinco unidades y de las dos formas, a proposito: en una mixta el acta tiene
+ * Seis unidades y de las dos formas, a proposito: en una mixta el acta tiene
  * que poder decir cuantos habia de cada lado, y con todas iguales eso no se
  * veria. **Quedan sin marcar las dos unidades de los perfiles del demo** —Torre
  * 1 · 402 y Torre 2 · 901— para que quien lo abra pueda marcar la suya.
@@ -1442,6 +1446,8 @@ function construirAsistencias(): Asistencia[] {
     ['uni-torre1-301', 'per-5', 'virtual', '19:03'],
     ['uni-torre2-501', 'per-8', 'virtual', '19:08'],
     ['uni-torre2-602', 'per-11', 'presencial', '19:11'],
+    // RN-215 — Con esta se alcanza el quórum (51,8 %) y por eso se pudo instalar.
+    ['uni-torre1-302', 'per-6', 'presencial', '19:13'],
   ]
   return definicion.map(([unidadId, personaId, forma, hora], i) => ({
     id: `asi-${i + 1}`,

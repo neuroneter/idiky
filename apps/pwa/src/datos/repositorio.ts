@@ -10,6 +10,7 @@
  */
 
 import type {
+  Votacion,
   BaseDeVoto,
   Copropiedad,
   MotivoCierreVinculo,
@@ -147,6 +148,12 @@ import {
   esVisitaDeUnDia,
   condicionesPosibles,
   marcaResidente,
+  motivoNoSeInstala,
+  resumenAsistencia,
+  votacionVigente,
+  votacionesAbiertas,
+  motivoNoAbreVotacion,
+  faltaParaPrepararVotacion,
   debeAvisarseFinDeEstadia,
   saleConCodigo,
   admiteMenor,
@@ -2374,9 +2381,138 @@ export async function cambiarEstadoAsamblea(
       `Una asamblea ${asamblea.estado} no puede pasar a ${parametros.estado}.`,
     )
   }
+  // RN-215 — Se instala con quórum, medido con la asistencia de este momento, y
+  // queda guardado: lo que pase después no lo deshace.
+  if (parametros.estado === 'instalada') {
+    const copropiedad = bd.copropiedades.find((c) => c.id === asamblea.copropiedadId)
+    const resumen = resumenAsistencia(bd.asistencias, asamblea.id)
+    const motivo = motivoNoSeInstala(asamblea, resumen, copropiedad?.quorumMinimo ?? 50)
+    if (motivo) throw new ErrorDeNegocio(motivo)
+    asamblea.quorumAlInstalar = { unidades: resumen.unidades, coeficiente: Number(resumen.coeficiente.toFixed(4)), en: ahoraISO() }
+  }
+  // RN-214 — No se cierra con votaciones abiertas: el acta quedaría a medias.
+  if (parametros.estado === 'cerrada' && votacionesAbiertas(bd.votaciones, asamblea.id).length > 0) {
+    throw new ErrorDeNegocio('Hay votaciones abiertas: ciérralas (o anúlalas) antes de cerrar la asamblea.')
+  }
 
   asamblea.estado = parametros.estado
   return persistir(bd, asamblea)
+}
+
+// ---------------------------------------------------------------------------
+// CU-A-18 — Preparar, abrir, cerrar y anular una votación
+//
+// Solo la administración. Las cuatro dejan constancia de quién y cuándo, y
+// ninguna borra: una votación mal hecha se anula con motivo y se repite (RN-34).
+// ---------------------------------------------------------------------------
+
+function votacionDeLaAdministracion(bd: BaseDatos, votacionId: string, personaId: string) {
+  const votacion = bd.votaciones.find((v) => v.id === votacionId)
+  if (!votacion) throw new ErrorDeNegocio('Esa votación no existe.')
+  const asamblea = bd.asambleas.find((a) => a.id === votacion.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (!esAdministracion(bd, personaId, asamblea.copropiedadId)) {
+    throw new ErrorDeNegocio('Las votaciones las maneja la administración (CU-A-18).')
+  }
+  return { votacion, asamblea }
+}
+
+/** RN-213 — Prepara la votación de un punto: pregunta, opciones y si es económica. */
+export async function prepararVotacion(
+  bdActual: BaseDatos,
+  parametros: {
+    asambleaId: string
+    puntoId: string
+    personaId: string
+    pregunta: string
+    opciones: string[]
+    contenidoEconomico: boolean | undefined
+  },
+): Promise<Resultado<Votacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (!esAdministracion(bd, parametros.personaId, asamblea.copropiedadId)) {
+    throw new ErrorDeNegocio('Las votaciones las maneja la administración (CU-A-18).')
+  }
+  if (asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') {
+    throw new ErrorDeNegocio('La asamblea ya terminó: no se preparan votaciones.')
+  }
+  const punto = asamblea.ordenDelDia.find((p) => p.id === parametros.puntoId)
+  const falta = faltaParaPrepararVotacion({
+    pregunta: parametros.pregunta,
+    opciones: parametros.opciones,
+    contenidoEconomico: parametros.contenidoEconomico,
+    punto,
+    votacionVigenteDelPunto: !!votacionVigente(bd.votaciones, parametros.puntoId),
+  })
+  if (falta) throw new ErrorDeNegocio(falta)
+  const votacion: Votacion = {
+    id: nuevoId('vta'),
+    asambleaId: asamblea.id,
+    puntoId: parametros.puntoId,
+    pregunta: parametros.pregunta.trim(),
+    contenidoEconomico: parametros.contenidoEconomico!,
+    opciones: parametros.opciones
+      .map((texto) => texto.trim())
+      .filter(Boolean)
+      .map((texto, i) => ({ id: `op-${i + 1}`, texto })),
+    estado: 'preparada',
+    preparadaPor: parametros.personaId,
+    preparadaEn: ahoraISO(),
+  }
+  bd.votaciones.push(votacion)
+  return persistir(bd, votacion)
+}
+
+/** RN-212 — Abre la votación: asamblea instalada, con quórum y decisión admisible. */
+export async function abrirVotacion(
+  bdActual: BaseDatos,
+  parametros: { votacionId: string; personaId: string },
+): Promise<Resultado<Votacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const { votacion, asamblea } = votacionDeLaAdministracion(bd, parametros.votacionId, parametros.personaId)
+  const punto = asamblea.ordenDelDia.find((p) => p.id === votacion.puntoId) ?? {}
+  const motivo = motivoNoAbreVotacion({ asamblea, votacion, punto })
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  votacion.estado = 'abierta'
+  votacion.abiertaEn = ahoraISO()
+  return persistir(bd, votacion)
+}
+
+/** Cierra la votación: el resultado queda fijo (RN-34). */
+export async function cerrarVotacion(
+  bdActual: BaseDatos,
+  parametros: { votacionId: string; personaId: string },
+): Promise<Resultado<Votacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const { votacion } = votacionDeLaAdministracion(bd, parametros.votacionId, parametros.personaId)
+  if (votacion.estado !== 'abierta') throw new ErrorDeNegocio('Solo se cierra una votación abierta.')
+  votacion.estado = 'cerrada'
+  votacion.cerradaEn = ahoraISO()
+  return persistir(bd, votacion)
+}
+
+/**
+ * RN-34 — Anula una votación con motivo. Queda en el historial con sus votos; el
+ * punto queda libre para preparar una nueva.
+ */
+export async function anularVotacion(
+  bdActual: BaseDatos,
+  parametros: { votacionId: string; personaId: string; motivo: string },
+): Promise<Resultado<Votacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const { votacion } = votacionDeLaAdministracion(bd, parametros.votacionId, parametros.personaId)
+  if (votacion.estado === 'anulada') throw new ErrorDeNegocio('Esa votación ya está anulada.')
+  const motivo = parametros.motivo.trim()
+  if (motivo.length < 10) throw new ErrorDeNegocio('Escribe el motivo de la anulación: queda en el acta.')
+  votacion.estado = 'anulada'
+  votacion.anulacion = { motivo, por: parametros.personaId, en: ahoraISO() }
+  return persistir(bd, votacion)
 }
 
 // ---------------------------------------------------------------------------
@@ -3040,7 +3176,7 @@ export async function marcarAsistencia(
   if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
   if (!admiteAsistencia(asamblea)) {
     throw new ErrorDeNegocio(
-      'Solo se puede marcar asistencia mientras la asamblea está instalada.',
+      'La asistencia se registra el día de la asamblea, antes o después de instalarla (RN-215).',
     )
   }
   // La forma tiene que caber en la modalidad: no se «asiste presencialmente» a

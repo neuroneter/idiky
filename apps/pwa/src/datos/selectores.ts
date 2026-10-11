@@ -29,7 +29,7 @@ import type {
   Voto,
   ZonaComun,
 } from '../dominio/tipos'
-import { hoyISO, ordenAsamblea, proyectosOrdenados, registroEnCurso, residenciaVigente } from '../dominio/reglas'
+import { hoyISO, ordenAsamblea, proyectosOrdenados, registroEnCurso, residenciaVigente, votacionVigente } from '../dominio/reglas'
 
 // RN-01 — Todo se lee filtrado por copropiedad: un selector nunca mezcla dos.
 
@@ -298,8 +298,14 @@ export function votacionesDe(bd: BaseDatos, asambleaId: string): Votacion[] {
   return bd.votaciones.filter((v) => v.asambleaId === asambleaId)
 }
 
+/** La votación vigente del punto: la anulada queda en el historial, no aquí (RN-34). */
 export function votacionDePunto(bd: BaseDatos, puntoId: string): Votacion | undefined {
-  return bd.votaciones.find((v) => v.puntoId === puntoId)
+  return votacionVigente(bd.votaciones, puntoId)
+}
+
+/** Las votaciones anuladas de un punto, para el historial y el acta (RN-34). */
+export function votacionesAnuladasDePunto(bd: BaseDatos, puntoId: string): Votacion[] {
+  return bd.votaciones.filter((v) => v.puntoId === puntoId && v.estado === 'anulada')
 }
 
 export function votosDe(bd: BaseDatos, votacionId: string): Voto[] {

@@ -381,16 +381,21 @@ necesita autorización previa— no cambia: hoy pueden emitirlo los dos.
 > la copropiedad ya hace la reunión por Zoom o Meet, e Idiky la enlaza. Lo que sí es de Idiky
 > —y es lo que Zoom no puede dar— es **la asistencia ponderada por coeficiente**.
 
-**Flujo principal**
-1. El administrador abre la asamblea y la **instala**. Ahí empieza a contar la asistencia.
+**Flujo principal** *(revisado el 2026-10-11, RN-215: «la asistencia es el quórum y se verifica
+al inicio de la asamblea»)*
+1. **El día de la asamblea**, antes de instalarla, se registra la asistencia. No antes: marcarse
+   presente dos semanas antes no es asistir.
 2. Los copropietarios marcan asistencia desde su app, diciendo **cómo**: en el salón o
    conectados. **Las dos formas pesan igual** (RN-92): suman al mismo coeficiente. El reparto
    presencial/virtual se lleva aparte porque **el acta lo exige** (art. 47), no porque una
    cuente menos.
 3. El administrador ve en vivo cuántas unidades hay y **cuánto coeficiente** reunido, repartido
    entre presenciales y conectadas.
-4. Al terminar, cierra la asamblea. **La asistencia y los votos quedan** — es de lo que sale el
-   acta (RN-61).
+4. **Con quórum, el administrador instala la asamblea.** Sin quórum el botón no deja y dice
+   qué falta. **El quórum con que se instaló queda guardado**: lo que pase después —alguien que
+   llega tarde, alguien que se va— no lo deshace. Quien llega tarde todavía se registra.
+5. Al terminar, cierra la asamblea, **siempre que no tenga votaciones abiertas** (RN-214).
+   **La asistencia y los votos quedan**: de ahí sale el acta (RN-61).
 
 **Flujos alternativos**
 - A1. Se cae la reunión de Zoom → **la asamblea no se cae**: la asistencia y las votaciones
@@ -422,7 +427,7 @@ coeficiente y se cierra.
 ## CU-A-18 — Habilitar, abrir y cerrar una votación
 
 - **Actor principal:** Administrador
-- **Precondiciones:** La asamblea está instalada y con quórum suficiente (RN-28).
+- **Precondiciones:** La asamblea está instalada, y por eso tuvo quórum al instalarse (RN-215).
 - **Disparador:** Se llega a un punto del orden del día que se somete a votación.
 - **Resultado esperado:** La votación queda cerrada con un resultado consolidado e inmutable.
 
@@ -432,7 +437,8 @@ coeficiente y se cierra.
    **lo escoge siempre**, no viene marcado (Mary, 2026-10-02). Eso decide cómo se cuenta
    (RN-211): las económicas, por coeficiente; las demás, en un conjunto de vivienda, un voto
    por unidad (Corte Constitucional, C-522 de 2002).
-2. El sistema verifica que haya quórum antes de permitir abrirla.
+2. El sistema deja abrirla solo con la asamblea **instalada** (RN-212). El quórum no se vuelve
+   a medir: se verificó al instalar (RN-215).
 3. El administrador **abre** la votación: los asistentes la ven aparecer (CU-R-13).
 4. Durante la votación el administrador ve cuánto coeficiente ha votado, **sin ver el
    detalle de quién votó qué** mientras siga abierta.
@@ -441,16 +447,23 @@ coeficiente y se cierra.
    determina si se aprobó según la mayoría exigida, y publica el resultado.
 
 **Flujos alternativos**
-- A1. Se pierde el quórum durante la votación → se avisa; **(?)** pendiente definir si el
-  resultado sigue siendo válido.
-- A2. Empate → se resuelve según el reglamento **(?)**.
+- A1. ~~Se pierde el quórum durante la votación~~ → **resuelto** (Mary, 2026-10-11): el quórum
+  se verifica al inicio de la asamblea; si alguien se va después, las votaciones siguen siendo
+  válidas (RN-215).
+- A2. Empate → la opción **no alcanza la mayoría**: la simple exige superar la mitad (RN-74). Si el
+  reglamento prevé otra cosa, **(?)** pendiente.
 - A3. Anular una votación por vicio de procedimiento → se marca `anulada` con motivo y se
   repite como una votación nueva. La anulada no se borra (RN-34).
 
 **Reglas de negocio**
-- RN-27, RN-28, RN-29, RN-34.
+- RN-27, RN-28, RN-29, RN-34, RN-74, RN-94, RN-211, **RN-212** (cuándo se abre), **RN-213**
+  (qué necesita para prepararse), **RN-214** (no se cierra la asamblea con votaciones abiertas),
+  **RN-215** (el quórum se verifica al instalar).
 
-**Estado en el demo:** ⬜ — no existe.
+**Estado en el demo:** ✅ — `src/features/admin/VotacionPunto.tsx`, dentro del orden del día de
+la asamblea (`AsambleasAdminPage.tsx`). Preparar, abrir, ver cuánto se ha votado sin quién votó qué,
+cerrar con el resultado y la base, y anular con motivo; el acta deja constancia de lo anulado
+(2026-10-11).
 
 ---
 
