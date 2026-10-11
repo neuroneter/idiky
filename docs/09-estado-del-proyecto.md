@@ -125,6 +125,8 @@ espacios de comer o de espera, los puestos y las salas de juntas aunque tengan d
 - Verificado en una copia aparte (puerto 5174): duplicar puesto (P-62), sala de espera, comedor,
   mesa de juntas de 8 → 4 y girada, puestos negados en una sala, fila de 4 en la oficina,
   duplicar espacio con su mesa; lo guardado pasa las reglas de la API. `develop` `54860ff`.
+Después, a pedido de Daniel: televisor, impresora, fotocopiadora, video proyector, mesa de comedor larga
+(6 a 16), silla de lactancia, nevera y barra de café (2 a 4), con su dibujo y su prueba.
 Rango de Integración: RN usadas hasta RN-258.
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · La planta en isométrico (CU-B-12)
