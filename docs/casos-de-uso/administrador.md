@@ -403,7 +403,8 @@ al inicio de la asamblea»)*
   ofrece **Citar segunda convocatoria**, con la fecha y la hora de la ley ya puestas —**el tercer día
   hábil siguiente a las 8:00 p. m.**— que se cambian solo si el reglamento dice otra cosa. La primera
   queda «Sin quórum» (no se cancela: sí se reunió gente), la segunda nace con el mismo orden del día,
-  **sesiona con cualquier número plural de propietarios** y se publica fijada en la cartelera.
+  **sesiona con cualquier número plural de propietarios** y se publica fijada en la cartelera. **Los
+  poderes no pasan de la primera a la segunda**: cada asamblea tiene los suyos (RN-31, Mary 2026-10-11).
 - A1. Se cae la reunión de Zoom → **la asamblea no se cae**: la asistencia y las votaciones
   están en Idiky. Se cae el canal, no el registro.
 - A2. Alguien se pasa del salón a la reunión, o al revés → vuelve a marcar y **se corrige la

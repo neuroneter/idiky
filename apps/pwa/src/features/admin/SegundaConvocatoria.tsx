@@ -36,7 +36,8 @@ export function SegundaConvocatoria({ asamblea }: { asamblea: Asamblea }) {
       <p className="acceso__nota" style={{ marginTop: 'var(--e3)' }}>
         No se reunió el quórum. Se citó a segunda convocatoria
         {segunda ? ` para el ${formatearFechaHora(segunda.fechaHora)}` : ''}, que sesiona con cualquier
-        número plural de propietarios (Ley 675, art. 41).
+        número plural de propietarios (Ley 675, art. 41). Los poderes de la primera no valen: se otorgan
+        de nuevo para la segunda (RN-31).
       </p>
     )
   }
@@ -51,7 +52,8 @@ export function SegundaConvocatoria({ asamblea }: { asamblea: Asamblea }) {
       <p className="subtitulo">
         Se cita a una segunda convocatoria con el mismo orden del día. Por ley es el tercer día hábil
         siguiente a las 8:00 p. m.; cámbialo solo si el reglamento dice otra cosa (Ley 675, art. 41).
-        Sesiona con cualquier número plural de propietarios, y se publica en la cartelera.
+        Sesiona con cualquier número plural de propietarios, y se publica en la cartelera. Los poderes
+        son de cada asamblea: para la segunda se otorgan de nuevo (RN-31).
       </p>
       <div className="fila" style={{ gap: 'var(--e2)', flexWrap: 'wrap' }}>
         <input type="date" aria-label="Fecha de la segunda convocatoria" value={fecha} onChange={(e) => setFecha(e.target.value)} />
