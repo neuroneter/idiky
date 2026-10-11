@@ -112,6 +112,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Llevar los dos negocios a BLOKY Dev (RN-252)
+
+Daniel: *llevarlo a BLOKY Dev; al entrar se presentan las unidades que se administran y, si es un
+Coworking/Oficina, ese es el modelo; si es una Copropiedad, el de edificios y casas*.
+- **BOB** (`BOB-Idiky`): verificado en local (`probar-bob.mjs`: 52 de 52) y la siembra en una base
+  desechable; `feature/negocio-espacio-trabajo` → `develop` (`494eea8`) → `main` (`581faf5`). La
+  siembra agrega **Cowork Centro 93** (NIT 901456789, `espacio_trabajo`), administrado por Olga
+  Lucía Henao, la misma de Altos del Bosque.
+- **BLOKY** (`develop` `e1f5ab7`): al entrar, «¿Qué vas a administrar?» en dos grupos (copropiedades
+  y espacios de trabajo); herramienta `dist/herramientas/aprovisionar-por-nit.js <NIT>` (busca en
+  BOB, aprovisiona y concilia el directorio, sin mostrar tokens).
+- **Sigue (lo lanza Daniel):** desplegar `gestion` y `bloky`, sembrar en BOB, aprovisionar el NIT
+  901456789 y entrar como Olga: debe ver Altos del Bosque (terreno) y Cowork Centro 93 (planta).
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Sedes y parqueaderos (RN-259, RN-260, CU-B-12)
 
 Daniel: *una empresa puede tener uno o más pisos en un edificio y oficinas en otros edificios, otras
