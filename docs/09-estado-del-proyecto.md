@@ -112,6 +112,40 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Dos negocios y la planta del espacio de trabajo (ADR-0024, CU-B-12)
+
+Daniel quería trabajar la estructura «Oficina» con Spot (`spotvirtual.com`) como referencia. Se
+revisó Spot por dentro (equipo de prueba «Prueba IDIKY» en la cuenta de Daniel, plantilla
+Co-Working): elegir plantilla (13 de oficina), modo Construir → **Plano** (salas con nombre, muros
+que se dibujan, esquinas que se arrastran, «Asignar sala») y muebles. Con Daniel se aclaró que
+«oficina» eran **dos cosas**: en una copropiedad es una **unidad privada**; como negocio es un
+**espacio de trabajo** (empresa o coworking) que se administra por reservas. *Una sola aplicación
+que entiende las dos estructuras de negocio.*
+
+- **ADR-0024** y **RN-252 a RN-257** (`docs/05`), **CU-B-12** (`casos-de-uso/bloky.md`).
+- **BOB** (`BOB-Idiky`, rama `feature/negocio-espacio-trabajo`, `af6ba21`, sin pasar a `develop`
+  porque no hay dependencias de Strapi en la Mac para verificar): campo `negocio`
+  (`copropiedad` | `espacio_trabajo`, por defecto copropiedad) con su ayuda en el panel.
+- **BLOKY** (`Bloky-Idiky` `develop` `8815a83`):
+  - API: `negocio` en el catálogo (migración `comun/004`), lo lee de BOB sin pedirlo por nombre
+    (si BOB aún no lo tiene, es copropiedad) y lo actualiza al volver a aprovisionar; llega a la
+    sesión y al contexto. Planta: migración `copropiedad/007`, `GET/PUT /api/c/:id/planta` (solo
+    espacios de trabajo, con versión e historial), reglas `motivoPlantaInvalida` y
+    `centrosDePuestos`. `npm run probar`: todo pasa, con RN-252, RN-254, RN-255 y RN-256.
+  - App: la consola y los primeros pasos según el negocio; «Edificio de oficinas» y «Bloque
+    comercial» en el catálogo de la copropiedad (RN-253); el editor de planta
+    (`features/planta/`): plantillas (piso abierto, oficinas con pasillo, coworking, vacío) con
+    vista previa, recintos en metros que se mueven y ajustan por las esquinas sin salirse ni
+    montarse, tipos con capacidad y reserva, puestos numerados y «Llenar de puestos», pisos y
+    copia de piso, deshacer y guardado automático. Verificado con la API simulada; las cuatro
+    plantillas, validadas con las reglas de la API en cinco tamaños de piso.
+
+**Sigue:** (1) desplegar BLOKY `develop` (lo lanza Daniel); (2) verificar BOB y pasar el campo a
+`develop`/`main` y desplegar `gestion` (solo el responsable de integración); (3) marcar un cliente
+de prueba como `espacio_trabajo` en BOB y volver a aprovisionarlo en BLOKY para probar en Dev;
+(4) CU-B-13, las reservas. Rango de Integración: RN usadas hasta RN-257; ADR hasta 0024; CU-B
+hasta CU-B-12.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Tamaño de las estructuras y agrupaciones estables (RN-247, CU-B-03)
 
 Daniel probó RN-251 en BLOKY Dev (*mejoró muchísimo*) y pidió: achicar todas las estructuras desde

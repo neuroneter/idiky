@@ -503,7 +503,7 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
 **Lo que queda abierto:** muros en ángulo y puertas; varias sedes; las reservas (CU-B-13); los
 miembros y empresas que reservan; tarifas.
 
-**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en construcción en `feature/CU-B-03-ajustes-terreno`.
+**Estado en BLOKY Dev:** 🟡 (2026-10-11) — en `develop` de `Bloky-Idiky` (`8815a83`), probado con la API simulada (cliente «Cowork Centro 93»); falta desplegar y que BOB tenga el campo `negocio` (rama `feature/negocio-espacio-trabajo` de `BOB-Idiky`). Código: `apps/bloky/src/features/planta/` y `apps/bloky-api/src/planta/`.
 
 ---
 
