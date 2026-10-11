@@ -112,6 +112,28 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Disco del servidor a 128 GB; CU-B-10 desplegado con IA
+
+**El disco del servidor dejó de ser el cuello de botella.** El despliegue de CU-B-10 se negó (quedaban
+2.986 MB y el mínimo es 3.000). Daniel amplió en Azure el disco del sistema operativo de la VM
+(`VM-DAFC-IAOFERTA-QA`, Prosperidad Social, autorizado): IP pública confirmada **estática**,
+instantánea `antes-de-ampliar-2026-10-11` (incremental), VM desasignada, disco de **30 GiB (P4) a
+128 GiB (P10, 500 IOPS)**, iniciada. Ubuntu agrandó la partición solo: **124 GB, 99 GB libres**.
+Los 17 contenedores de IDIKY arrancaron solos y LangFlow responde igual (solo cambiaron PID y
+reinicios, como se espera tras apagar); se tomó foto base nueva (16:49 UTC). Costo aproximado: de
+~5 a ~20 US$ al mes en esa suscripción.
+
+**Desplegado `68c8b19.bloky-9ab02d8`** desde `develop` de `Bloky-Idiky` (merge `9ab02d8` de
+`feature/CU-B-03-ajustes-terreno`): las dos copropiedades recibieron la migración `003`
+(`propuesta`, `unidad`). Daniel puso `ANTHROPIC_API_KEY` en `~/.config/idiky/secretos/bloky-api.env`
+(con `ssh -t` y `read -s`: la clave no pasó por el chat ni quedó en pantalla) y tras redesplegar
+`/api/salud` dice **`"ia": true`**. **CU-B-10 está disponible en BLOKY Dev.**
+
+**Lo que sigue:** que Daniel lo pruebe en **Torres del Parque** (terreno vacío) con el PDF de Oasis
+(copiado a su Escritorio); lo abierto de CU-B-10 (unir con un terreno armado, varios documentos,
+partir los grandes, marcar en el terreno lo que vino de la IA); y con espacio de sobra, retomar
+CU-B-04.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · «Armar desde documentos» construido (CU-B-10, T-86)
 
 Lo que el experimento probó ya es parte de BLOKY, en `Bloky-Idiky`, rama
@@ -270,8 +292,7 @@ llega por SMS al celular registrado en BOB.
 7. **Decisiones abiertas:** T-85 (el bloque «¿Está en mora?», si el Delegado arma flujos, plazo
    para refutar una multa, depósito con la cuota, agrupaciones anidadas) y **si ALICE usa el mismo
    directorio** (con Justo, T-80).
-8. **El disco del servidor**: ~3,1 GB libres con un mínimo de 3 GB para construir; ampliar en Azure o
-   quitar Jitsi (~2,1 GB).
+8. ~~**El disco del servidor**~~: resuelto el 2026-10-11, ampliado a 128 GB (99 GB libres).
 
 **El equipo al 2026-10-11:** **Mary** está integrada en `main` (asambleas: votaciones desde la
 consola, quórum al instalar, segunda convocatoria y poderes, RN-212 a RN-218); le queda **T-84**
