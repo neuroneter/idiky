@@ -132,11 +132,17 @@ local, sino para buscar economía en modelos más baratos.
 (ohernandez83@gmail.com, perfil `idiky` de `ant`), con crédito propio; la suscripción de Claude
 no da saldo a la API. Para producción: organización y clave de IDIKY en los secretos del servidor.
 
+**Modelos económicos (misma tarde):** el mismo experimento con **Sonnet 5.5** (121 s, 0,29 US$) y
+**Haiku 5.5** (93 s, **0,018 US$**, 33 veces menos que Opus) dio **los mismos 320 × 5 datos, sin
+una diferencia**, y los dos pasan la validación. Un paquete de alta completo (150 a 400 páginas)
+costaría con Haiku unos **0,05 a 0,11 US$ por copropiedad**. Queda en ADR-0023 la escalera
+Haiku → Sonnet → Opus según la validación. Jev (TypeSafe) se revisó: decide y clasifica muy barato,
+pero no lee PDF ni genera listas; queda para clasificar solicitudes de residentes, con experimento.
+
 **Lo que sigue:** definir en `docs/05` el estado «propuesta» (borrador con fuente por dato);
 construir «Arma con IA» en `Bloky-Idiky` (rama `feature/CU-B-03-ajustes-terreno`): subir el PDF,
 el proveedor de modelo, el borrador y la revisión en el terreno; probar el mismo experimento con
-Claude Haiku y con el modelo «JEV» que mencionó Daniel (por identificar) para comparar costo y
-acierto; y conseguir un reglamento completo (bienes comunes, parqueaderos, depósitos).
+documentos más difíciles (planos, usos mixtos), donde sí se notará la diferencia entre modelos; y conseguir un reglamento completo (bienes comunes, parqueaderos, depósitos).
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · BLOKY nativo para agentes (ADR-0023, propuesta)
 

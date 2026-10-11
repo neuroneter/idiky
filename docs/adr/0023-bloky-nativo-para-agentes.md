@@ -79,6 +79,22 @@ numeración consecutiva entre torres, las dos etapas, el tamaño distinto de la 
 tabla no trae parqueaderos ni depósitos. **Acierto: 100 %.** Alcance: una tabla de un reglamento;
 faltan bienes comunes, parqueaderos, depósitos y usos mixtos.
 
+**Los modelos económicos (2026-10-11).** Mismo documento, mismo formato, misma validación:
+
+| Modelo | Acierto (320 filas × 5 campos, contra Opus) | Validación sin IA | Tiempo | Costo |
+|---|---|---|---|---|
+| `claude-opus-5-5` | referencia | pasa | 171 s | 0,60 US$ |
+| `claude-sonnet-5-5` | 0 diferencias | pasa | 121 s | 0,29 US$ |
+| `claude-haiku-5-5` | 0 diferencias | pasa | 93 s | **0,018 US$** |
+
+Los tres marcaron la fila tapada como dudosa; Haiku además señaló la 0137 (46,06 m²) como atípica
+para verificar contra el plano. Costo de un **paquete de alta** (reglamento completo, reformas y
+planos: 150 a 400 páginas, ~1.700 tokens de entrada por página, ~100 tokens de salida por unidad),
+partiendo cada documento en peticiones de menos de 100K tokens para la tarifa base de Haiku:
+**Haiku ≈ 0,05 a 0,11 US$; Sonnet ≈ 1 a 2,2 US$; Opus ≈ 2 a 4,3 US$** por copropiedad. Esta tabla fue
+fácil para los tres: la diferencia entre modelos se medirá con documentos más difíciles (planos,
+usos mixtos, reglamentos completos).
+
 **6. El proveedor de modelo: una sola pieza, el modelo se elige por tarea.** Todo uso de IA en
 BLOKY pasa por una pieza de `bloky-api` (como el repositorio de ADR-0003 para los datos) que recibe
 la tarea —«lee este reglamento con este formato»— y decide a qué modelo mandarla. Así:
@@ -89,6 +105,9 @@ la tarea —«lee este reglamento con este formato»— y decide a qué modelo m
   servidor con GPU cuesta de 400 a 1.500 US$ al mes se use o no; leer reglamentos, que ocurre una
   vez por copropiedad, sale mucho más barato por API);
 - si la validación falla, la tarea **sube** a un modelo mejor; el resto de BLOKY no se entera.
+- **Escalera inicial para leer documentos de alta:** `claude-haiku-5-5` → si la validación falla,
+  `claude-sonnet-5-5` → si vuelve a fallar, `claude-opus-5-5`. Se registra qué peldaño resolvió cada
+  documento, para ajustar la escalera con datos.
 
 ## Alternativas consideradas
 
