@@ -132,7 +132,7 @@ En `Bloky-Idiky` (`feature/CU-B-03-ajustes-terreno` `11a8ef0` → `develop` `0b3
 Después Daniel pidió un botón para ocultar los nombres: **«🏷 Etiquetas»**, junto a «Agrupaciones»
 y igual a él (presionado = visibles). Oculta los nombres de agrupaciones, estructuras y espacios
 con `visibility` (los dibujos no se mueven); el de lo elegido queda y los demás salen al pasar el
-ratón; se recuerda en el navegador. En `develop`. **Sigue:** desplegarlo (lo lanza Daniel) y probar.
+ratón; se recuerda en el navegador. **Desplegado** en BLOKY Dev (`9450234.bloky-990a452`, lo lanzó Daniel); LangFlow igual antes y después.
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El plano se ajusta al lote (RN-251, CU-B-09)
 
