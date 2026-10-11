@@ -112,6 +112,23 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Tamaño de las estructuras y agrupaciones estables (RN-247, CU-B-03)
+
+Daniel probó RN-251 en BLOKY Dev (*mejoró muchísimo*) y pidió: achicar todas las estructuras desde
+un control, que al acercar una a otra no salte de agrupación y que lo que se toca quede encima.
+En `Bloky-Idiky` (`feature/CU-B-03-ajustes-terreno` `11a8ef0` → `develop` `0b36f39`):
+
+- Control **«Tamaño»** junto al zoom (30 %–150 %; 100 % = escala real con plano): agranda o achica
+  todas las estructuras; se recuerda en el navegador (`localStorage`, por copropiedad). Las
+  etiquetas, el anillo de selección y la cercanía para entrar a una agrupación se ajustan con él.
+- **Lo tocado pasa al frente** (orden de dibujo en memoria, no se guarda). Los nombres de las
+  agrupaciones siguen encima de todo.
+- **RN-247 ajustada** (`docs/05`): lo que ya está en una agrupación no cambia de agrupación por
+  cercanía; solo soltándolo sobre el nombre de la otra o en «Está en».
+- Verificado con la API simulada (dos etapas con torres juntas, al 50 %) y `npm run build`.
+
+**Sigue:** desplegar `develop` en BLOKY Dev (lo lanza Daniel) y que lo pruebe.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El plano se ajusta al lote (RN-251, CU-B-09)
 
 Se retomó el traspaso de abajo y se terminó el frontend de RN-251 en `Bloky-Idiky`
