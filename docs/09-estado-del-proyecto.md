@@ -112,6 +112,30 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · La copropiedad sobre su barrio real (CU-B-09, ADR-0017)
+
+**Desplegado** `ea6d4a0.bloky-5285ee3` (migración `005`, tabla `ubicacion`). «Mi copropiedad →
+**Ubicación**»: se escribe la dirección como en Colombia y la ciudad; BLOKY la lee (**RN-248**),
+resuelve la ciudad con Nominatim, busca las vías con Overpass dentro de ella, calcula la esquina y
+avanza los metros hacia la cuadra siguiente. **Probado con Oasis desde el servidor: exacta**
+(«Carrera 68 con 74, 80 m hacia la 75»; en Barranquilla hay **dos** esquinas con ese nombre y se
+tomó la que tiene la cuadra siguiente cerca). Al confirmar se descarga el vecindario (**RN-249**):
+37 tramos de calle, 199 vecinos, 12 nombres de vías, guardados en metros; la primera vez la
+copropiedad se centra en su punto. El terreno pasa a ser el barrio: isométrico a 4 px/m, 3200 × 2200,
+calles con andén, rayas y nombre, vecinos en gris, lote en césped, zoom que conserva el centro,
+norte y «© OpenStreetMap». ADR-0017 escrito (OpenStreetMap, no Google: Google no deja redibujar).
+
+**Lo aprendido de los servidores gratuitos:** con varias pruebas seguidas, el Mac quedó bloqueado
+un rato (todos respondían 500/504) y también el servidor por momentos; la consulta de la ciudad por
+nombre dentro de Overpass se agotaba (por eso Nominatim). En producción: una sola descarga por
+copropiedad, dos consultas livianas, varios servidores y reintentos. Si sigue fallando, la solución
+de fondo es **una copia propia del mapa de Colombia en el servidor** (hay espacio).
+
+**Lo que sigue:** **el límite del lote** (Oasis no está dibujado en OpenStreetMap: hoy es una elipse
+centrada en la dirección, y la Carrera 68 la atraviesa): decir de qué lado de la calle está, o
+dibujarlo moviendo las esquinas, o el catastro abierto; mover el lote si el punto quedó corrido; y
+que «Armar desde documentos» tome la dirección de la escritura y ubique sola la copropiedad.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · La agrupación como capa de color (RN-247) y el plano real que viene
 
 Daniel quiere **un plano con las calles de acceso reales** alrededor de la copropiedad (con la

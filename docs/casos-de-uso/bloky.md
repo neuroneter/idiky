@@ -444,7 +444,9 @@ Código: `apps/bloky-api/src/{almacen,documentos}/` y `apps/bloky/src/features/d
 **Lo que queda abierto:** dibujar o corregir el límite del lote; el catastro abierto; tomar la
 dirección de la escritura en «Armar desde documentos»; las fotos (galería en R2, ADR-0019).
 
-**Estado en BLOKY Dev:** 🔨 (2026-10-11) — en construcción en `feature/CU-B-03-ajustes-terreno`.
+**Estado en BLOKY Dev:** 🟡 (2026-10-11) — desplegado (`ea6d4a0.bloky-5285ee3`): buscar, confirmar, descargar el
+barrio y dibujarlo. Falta el límite del lote y tomar la dirección de la escritura. Código:
+`apps/bloky-api/src/ubicacion/` y `apps/bloky/src/features/ubicacion/`.
 
 ---
 
