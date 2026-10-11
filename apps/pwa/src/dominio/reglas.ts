@@ -1443,12 +1443,56 @@ export function poderRechazado(poder: Poder): boolean {
   return poder.validacion?.estado === 'rechazado'
 }
 
+// ---------------------------------------------------------------------------
+// RN-217 y RN-218 — El poder dado desde la app lo acepta el apoderado, si tiene
+// la app, y lo recibe la administracion (T-46; Mary, 2026-10-02 y 2026-10-11).
+//
+// «Tiene la app» es ser usuario en **alguna** copropiedad: un vinculo vigente
+// con una unidad, sea o no de este edificio. El apoderado externo —cuyo unico
+// vinculo es este poder— no tiene donde aceptar, y entonces basta con que la
+// administracion lo reciba. Mientras falte un paso, **vota el propietario**,
+// como con el poder por validar (RN-96).
+// ---------------------------------------------------------------------------
+
+/** RN-217 — Si la persona usa Idiky: tiene un vinculo vigente en alguna copropiedad. */
+export function tieneLaApp(
+  residencias: Array<{ personaId: string; desde: FechaISO; hasta?: FechaISO; cierre?: unknown }>,
+  personaId: string,
+  hoy: FechaISO = hoyISO(),
+): boolean {
+  return residencias.some((r) => r.personaId === personaId && !r.cierre && residenciaVigente(r, hoy))
+}
+
+/** RN-217 — El apoderado todavia no lo acepta. */
+export function poderEsperandoAceptacion(poder: Poder): boolean {
+  return poder.aceptacion?.estado === 'esperando'
+}
+
+/** RN-217 — El apoderado dijo que no: la unidad queda libre para dar otro. */
+export function poderNoAceptado(poder: Poder): boolean {
+  return poder.aceptacion?.estado === 'no_aceptado'
+}
+
+/** RN-218 — La administracion todavia no lo da por recibido. */
+export function poderEsperandoRecepcion(poder: Poder): boolean {
+  return poder.recepcion?.estado === 'esperando'
+}
+
+/** Lo que le falta al poder para representar, en el orden en que se destraba. */
+export function faltaAlPoder(poder: Poder): 'aceptacion' | 'recepcion' | 'validacion' | undefined {
+  if (poderEsperandoValidacion(poder)) return 'validacion'
+  if (poderEsperandoAceptacion(poder)) return 'aceptacion'
+  if (poderEsperandoRecepcion(poder)) return 'recepcion'
+  return undefined
+}
+
 /**
- * Un poder representa cuando no esta revocado **y esta validado** (RN-96). Los
- * que no llevan `validacion` lo estan por construccion. **No se borra** (RN-61).
+ * Un poder representa cuando no esta revocado **y esta validado** (RN-96), y,
+ * si se dio desde la app, **aceptado y recibido** (RN-217, RN-218). Los que no
+ * llevan esos datos lo estan por construccion. **No se borra** (RN-61).
  */
 export function poderVigente(poder: Poder): boolean {
-  return !poder.revocadoEn && !poderEsperandoValidacion(poder) && !poderRechazado(poder)
+  return !poder.revocadoEn && !poderRechazado(poder) && !poderNoAceptado(poder) && !faltaAlPoder(poder)
 }
 
 /**
@@ -1458,7 +1502,7 @@ export function poderVigente(poder: Poder): boolean {
  * los dos.
  */
 export function poderEnCurso(poder: Poder): boolean {
-  return !poder.revocadoEn && !poderRechazado(poder)
+  return !poder.revocadoEn && !poderRechazado(poder) && !poderNoAceptado(poder)
 }
 
 /** El poder en curso de la unidad (vigente o por validar), si lo hay. */
@@ -1484,7 +1528,7 @@ export function ultimoPoderRechazadoDeUnidad(
 ): Poder | undefined {
   if (poderEnCursoDeUnidad(poderes, asambleaId, unidadId)) return undefined
   return poderes
-    .filter((p) => p.asambleaId === asambleaId && p.unidadId === unidadId && poderRechazado(p))
+    .filter((p) => p.asambleaId === asambleaId && p.unidadId === unidadId && (poderRechazado(p) || poderNoAceptado(p)))
     .sort((a, b) => b.registradoEn.localeCompare(a.registradoEn))[0]
 }
 

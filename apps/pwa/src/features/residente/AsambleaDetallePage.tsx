@@ -45,6 +45,7 @@ import {
   poderEnCursoDeUnidad,
   herramientaDeEnlace,
   poderEsperandoValidacion,
+  faltaAlPoder,
   poderVigente,
   ultimoPoderRechazadoDeUnidad,
   puedeVotar,
@@ -115,6 +116,8 @@ export function AsambleaDetallePage() {
   // todavia, pero ocupa el lugar: no se ofrece dar otro mientras tanto.
   const miPoder = poderEnCursoDeUnidad(bd.poderes, asamblea.id, sesion.unidadActivaId ?? '')
   const miPoderEsperando = !!miPoder && poderEsperandoValidacion(miPoder)
+  // RN-217, RN-218 — Dado desde la app y le falta un paso: aceptarlo o recibirlo.
+  const faltaMiPoder = miPoder && !miPoderEsperando ? faltaAlPoder(miPoder) : undefined
   const poderRechazado = ultimoPoderRechazadoDeUnidad(
     bd.poderes,
     asamblea.id,
@@ -583,6 +586,34 @@ export function AsambleaDetallePage() {
                 Retirar el poder
               </button>
             </div>
+          ) : miPoder && faltaMiPoder ? (
+            /* T-46 — Dado y todavía sin aceptar o sin recibir (RN-217, RN-218). */
+            <div className="columna" style={{ gap: 'var(--e2)' }}>
+              <div className="fila">
+                <strong>Poder dado, en trámite</strong>
+                <span className="chip chip--info">
+                  {faltaMiPoder === 'aceptacion' ? 'Falta que lo acepte' : 'Falta la administración'}
+                </span>
+              </div>
+              <span className="subtitulo">
+                {faltaMiPoder === 'aceptacion'
+                  ? <>{apoderado ? nombreCompleto(apoderado) : 'Tu apoderado'} tiene que aceptarlo en su app, y la administración darlo por recibido.</>
+                  : <>La administración tiene que darlo por recibido.</>}{' '}
+                <strong>Mientras tanto votas tú.</strong>
+              </span>
+              <button
+                className="boton"
+                disabled={cargando}
+                onClick={() =>
+                  void ejecutar(
+                    (base) => revocarPoder(base, { poderId: miPoder!.id }),
+                    'Poder retirado. Puedes dar otro.',
+                  )
+                }
+              >
+                Retirar el poder
+              </button>
+            </div>
           ) : miPoder ? (
             <div className="columna" style={{ gap: 'var(--e2)' }}>
               <div className="fila">
@@ -624,7 +655,16 @@ export function AsambleaDetallePage() {
               </span>
               {/* CU-R-31 — El rechazo se muestra con su motivo: es lo que hay
                   que corregir para volver a enviarlo. No se borra (RN-61). */}
-              {poderRechazado && (
+              {poderRechazado?.aceptacion?.estado === 'no_aceptado' ? (
+                <p className="acceso__nota">
+                  {sel.persona(bd, poderRechazado.apoderadoId)
+                    ? nombreCompleto(sel.persona(bd, poderRechazado.apoderadoId)!)
+                    : 'Tu apoderado'}{' '}
+                  <strong>no aceptó</strong> el poder
+                  {poderRechazado.aceptacion.motivo ? `: «${poderRechazado.aceptacion.motivo}»` : ''}. Puedes
+                  dárselo a otra persona.
+                </p>
+              ) : poderRechazado && (
                 <p className="acceso__nota">
                   La administración <strong>no validó</strong> el poder que enviaste
                   {poderRechazado.validacion?.motivo

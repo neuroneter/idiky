@@ -1206,6 +1206,20 @@ export type OrigenPoder = 'papel' | 'app'
  * Un rechazo lleva **motivo** siempre, y no se borra (RN-61): el propietario
  * tiene que saber que corregir, y el expediente que se rechazo y por que.
  */
+/** RN-217 — Lo que decidio el apoderado. Con «no acepto», el motivo es opcional. */
+export interface AceptacionPoder {
+  estado: 'esperando' | 'aceptado' | 'no_aceptado'
+  decididoEn?: FechaHoraISO
+  motivo?: string
+}
+
+/** RN-218 — La administracion lo da por recibido. */
+export interface RecepcionPoder {
+  estado: 'esperando' | 'recibido'
+  recibidoPor?: string
+  recibidoEn?: FechaHoraISO
+}
+
 export interface ValidacionPoder {
   estado: 'esperando' | 'validado' | 'rechazado'
   decididoPor?: string
@@ -1252,6 +1266,19 @@ export interface Poder {
    * la potestad. Presente = pasa por la administracion (RN-96).
    */
   validacion?: ValidacionPoder
+  /**
+   * RN-217 — Solo en el poder dado **desde la app** (CU-R-23) y solo si el
+   * apoderado **tiene la app**: es usuario en alguna copropiedad (Mary,
+   * 2026-10-11: *«si no tiene la app no puede aceptar»*). Ausente = no hay
+   * aceptacion que esperar.
+   */
+  aceptacion?: AceptacionPoder
+  /**
+   * RN-218 — El poder dado desde la app lo **recibe la administracion** (Mary,
+   * 2026-10-02). Ausente = recibido por construccion (los de la semilla, y los
+   * que la propia administracion registro).
+   */
+  recepcion?: RecepcionPoder
   /** Cuando se revoco. Presente = ya no representa (RN-61). */
   revocadoEn?: FechaHoraISO
 }
