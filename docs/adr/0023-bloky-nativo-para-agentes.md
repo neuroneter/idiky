@@ -1,6 +1,6 @@
 # ADR-0023 — BLOKY nativo para agentes: el agente propone, el dominio decide
 
-- **Estado:** Propuesta (2026-10-11). Se acepta cuando el experimento del §5 dé resultado.
+- **Estado:** Aceptada (2026-10-11), con la evidencia del experimento del §5.
 - **Fecha:** 2026-10-11
 - **Decide:** Responsable de integración (Daniel)
 - **Relacionados:** [ADR-0008](./0008-backend-de-bloky.md), [ADR-0015](./0015-capa-de-datos-de-bloky-un-esquema-por-copropiedad.md),
@@ -58,6 +58,37 @@ páginas cuesta **2 a 4 dólares por copropiedad**, una sola vez al darla de alt
 **5. Antes de aceptar, un experimento.** Con el reglamento real de una copropiedad, fuera del
 código de BLOKY: pedir la estructura con el formato del §2 y compararla con la realidad. Si
 acierta en más del 90 % de las unidades y coeficientes, se acepta este ADR y se construye.
+
+**Resultado (2026-10-11).** Documento: el capítulo VII («De los coeficientes de copropiedad») del
+reglamento del Conjunto Residencial Oasis Apartamentos (Barranquilla), publicado por el conjunto:
+13 páginas de escritura notarial **escaneada** (sellos, QR, marca de agua, anotaciones a mano), sin
+texto seleccionable y sin nombres de propietarios. Un programa con el SDK, el formato del §2 y la
+validación sin IA dio:
+
+| Qué | Resultado |
+|---|---|
+| Unidades | 320 (5 torres × 8 pisos × 8), con torre, piso, área, coeficiente y página |
+| Suma de áreas | 20.187,79 m², **igual** al total declarado |
+| Suma de coeficientes | 100,0049 % (redondeo de la propia tabla) |
+| Repetidas · incoherentes área↔coeficiente | 0 · 0 |
+| Filas dudosas | 1 (Apto 0534, tapada en el escaneo): reconstruida por el patrón y marcada para revisión |
+| Tiempo · costo | 171 s · 0,60 US$ (21.704 tokens de entrada, 25.436 de salida, `claude-opus-5-5`) |
+
+Ocho filas cotejadas a mano contra el escaneo coinciden. Además el modelo dedujo sin instrucción la
+numeración consecutiva entre torres, las dos etapas, el tamaño distinto de la Torre 5 y que la
+tabla no trae parqueaderos ni depósitos. **Acierto: 100 %.** Alcance: una tabla de un reglamento;
+faltan bienes comunes, parqueaderos, depósitos y usos mixtos.
+
+**6. El proveedor de modelo: una sola pieza, el modelo se elige por tarea.** Todo uso de IA en
+BLOKY pasa por una pieza de `bloky-api` (como el repositorio de ADR-0003 para los datos) que recibe
+la tarea —«lee este reglamento con este formato»— y decide a qué modelo mandarla. Así:
+- se mide el costo **por tarea y por copropiedad** desde el primer día;
+- cada tarea usa **el modelo más económico que pase la validación sin IA del §2**: Claude Opus
+  para lo difícil, Claude Haiku (unas 40 veces más barato) o un modelo de otro proveedor para lo
+  sencillo, o un **modelo abierto en un servidor propio** cuando el volumen lo justifique (un
+  servidor con GPU cuesta de 400 a 1.500 US$ al mes se use o no; leer reglamentos, que ocurre una
+  vez por copropiedad, sale mucho más barato por API);
+- si la validación falla, la tarea **sube** a un modelo mejor; el resto de BLOKY no se entera.
 
 ## Alternativas consideradas
 

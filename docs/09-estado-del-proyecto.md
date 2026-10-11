@@ -112,6 +112,32 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El experimento de ADR-0023 acierta el 100 %; ADR aceptado
+
+Se probó leer con IA un reglamento real: el capítulo VII del reglamento del **Conjunto Residencial
+Oasis** (Barranquilla), 13 páginas de escritura **escaneada**, publicado por el conjunto. Un
+programa fuera de BLOKY (SDK de Anthropic, `claude-opus-5-5`, formato fijo, validación sin IA)
+sacó **320 apartamentos de 5 torres**: la suma de áreas da exactamente los **20.187,79 m²**
+declarados, los coeficientes 100 % (redondeo de la tabla), cero repetidas o incoherentes, y la
+única fila tapada del escaneo quedó reconstruida y **marcada para revisión**. **171 s y 0,60 US$.**
+Detalle en [ADR-0023 §5](./adr/0023-bloky-nativo-para-agentes.md).
+
+**[ADR-0023](./adr/0023-bloky-nativo-para-agentes.md) queda Aceptada**, y gana el §6: **el proveedor
+de modelo**, una sola pieza por la que pasa toda la IA de BLOKY, que elige por tarea el modelo más
+económico que pase la validación (Claude Opus, Claude Haiku, otro proveedor o un modelo abierto en
+servidor propio) y mide el costo por copropiedad. Daniel pidió que no sea solo para un modelo
+local, sino para buscar economía en modelos más baratos.
+
+**Cuenta de la API:** el experimento corrió en la organización «DanielObed's Individual Org»
+(ohernandez83@gmail.com, perfil `idiky` de `ant`), con crédito propio; la suscripción de Claude
+no da saldo a la API. Para producción: organización y clave de IDIKY en los secretos del servidor.
+
+**Lo que sigue:** definir en `docs/05` el estado «propuesta» (borrador con fuente por dato);
+construir «Arma con IA» en `Bloky-Idiky` (rama `feature/CU-B-03-ajustes-terreno`): subir el PDF,
+el proveedor de modelo, el borrador y la revisión en el terreno; probar el mismo experimento con
+Claude Haiku y con el modelo «JEV» que mencionó Daniel (por identificar) para comparar costo y
+acierto; y conseguir un reglamento completo (bienes comunes, parqueaderos, depósitos).
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · BLOKY nativo para agentes (ADR-0023, propuesta)
 
 Daniel siente que el terreno de «Arma tu copropiedad», aunque funciona, es un editor *de hace 5 o 7
