@@ -147,6 +147,15 @@ actualiza en vivo. Por debajo son los mismos tramos: los pisos seguidos iguales 
 formulario quedó como «modo avanzado». Probado: plantilla mixta, pintar dos pisos de oficinas de un
 trazo, crecer a 12 pisos y guardar (8 tramos, 39 unidades).
 
+**Pisos mixtos y el piso de cada espacio (misma tarde, RN-245 y RN-246):** un piso puede tener
+varios usos a la vez (un tramo con su uso principal y lo que «también tiene», hasta cinco, con su
+cantidad; las unidades salen de todas las partes). En el constructor: modos **Solo ver / Reemplaza /
+Suma**, el piso dibujado en franjas por uso, y al tocarlo sus usos editables y **sus espacios**, con
+«Ubicar aquí» cualquier espacio del edificio. **Al soltar un espacio sobre un edificio sale «¿En qué
+piso de la torre está?»** con los pisos de colores. Desplegado `4549c4b.bloky-…`; probado: piso
+mixto vivienda + oficinas + zona común (31 unidades), gimnasio ubicado en el piso 8 desde el
+constructor y piscina soltada sobre la torre y puesta en el piso 8 con la pregunta.
+
 **Lo que sigue:** el retroceso (pisos altos más angostos); que el alta desde documentos arme los
 tramos desde los pisos de las unidades leídas; zoom del terreno.
 
