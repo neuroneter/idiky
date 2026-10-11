@@ -112,6 +112,23 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Tu equipo: colaboradores animados (CU-B-14)
+
+Daniel: *crear, como a modo de juego, a los colaboradores (vigilantes, aseadoras, mantenimiento,
+administradores, secretarios)… con su nombre… su horario, que puede cambiar en cualquier momento y
+tiene que ser fácil de ajustar… y que tengan movimiento, algo divertido de crear y personalizar*.
+- **CU-B-14** y **RN-261 a RN-263** (`docs/05`). API: migración `009-equipo.sql`,
+  `GET/PUT /api/c/:id/equipo` (versión e historial), reglas y pruebas (`npm run probar`: todo pasa).
+- App (`features/equipo/`): `Personaje.tsx` (SVG animado: respira, parpadea, camina, saluda, duerme;
+  uniforme y accesorio por cargo), la sala, «Hoy», el creador en tres pasos y el horario de la semana
+  (arrastrar para crear, mover y estirar; plantillas por días; nocturnos que pasan al día siguiente).
+  Ficha «Equipo» en el menú de los dos negocios.
+- Verificado en una copia aparte: crear a Don Carlos (mantenimiento, 5 turnos), la sala con seis,
+  crear/mover/estirar un turno, el cruce que se rechaza y «Mañana 6–14» de lunes a viernes. Se corrigió
+  un error al soltar en la grilla y que los personajes quedaran sobre el horario.
+- `Bloky-Idiky` `develop` `ea1059b`. **Sigue:** desplegar (`009-equipo.sql` se aplica sola) y que
+  Daniel lo pruebe. Rango: RN usadas hasta RN-263; CU-B-13 queda para las reservas.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Entrar a la estructura y menú de fichas (CU-B-02)
 
 Daniel probó los dos negocios en BLOKY Dev (*quedó todo muy bien*) y pidió: (1) que al entrar lo

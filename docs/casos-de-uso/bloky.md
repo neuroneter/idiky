@@ -524,6 +524,46 @@ miembros y empresas que reservan; tarifas.
 
 ---
 
+### CU-B-14
+## CU-B-14 — Tu equipo: los colaboradores y sus horarios
+
+> Para los dos negocios (RN-252). Daniel (2026-10-11): *que sea muy entretenido crearlos… y el
+> horario fácil de ajustar en cualquier momento… que tengan movimiento, algo divertido*.
+
+- **Actor principal:** Administrador o Delegado
+- **Precondiciones:** CU-B-01; el cliente está aprovisionado.
+- **Disparador:** la ficha «Equipo» del menú.
+- **Resultado esperado:** Cada persona que trabaja en la copropiedad o en el espacio de trabajo
+  está en BLOKY con su nombre, su cargo, su personaje y su horario de la semana; se ve quién está en
+  turno ahora y quién cubre cada hora de hoy.
+
+**Flujo principal**
+1. Ve **la sala**: los colaboradores como personajes animados (respiran, parpadean, caminan,
+   saludan al pasar el ratón). Quien está en turno camina por la zona de trabajo; quien no,
+   descansa en la banca. Debajo, **«Hoy»** muestra quién cubre cada hora, con la hora actual.
+2. **Crea un colaborador** como quien arma un personaje: (1) su cargo, cada uno con su uniforme y
+   su accesorio; (2) su nombre y su apariencia (piel, peinado, color del pelo y del uniforme),
+   viéndolo animado; (3) un turno de un toque y los días. Se une al equipo con su saludo.
+3. Toca a alguien para ver su ficha: cambia su nombre, su cargo o su apariencia.
+4. **Ajusta el horario** en la grilla de la semana: arrastra en un día vacío para crear un turno,
+   arrastra un turno para moverlo (a otra hora u otro día) y su borde para estirarlo, de a media
+   hora; Suprimir lo quita; pone turnos de un toque en los días marcados (RN-262).
+5. Todo se guarda solo, con versión, y se deshace con Ctrl/Cmd + Z (RN-263).
+
+**Flujos alternativos**
+- A1. Un turno se cruzaría con otro de la misma persona → no se acepta; vuelve y se avisa.
+- A2. Alguien deja de trabajar → se **retira** (no se borra) y se puede traer de vuelta.
+
+**Reglas de negocio:** RN-261, RN-262, RN-263.
+
+**Lo que queda abierto:** novedades del día (incapacidades, reemplazos), marcar llegada y salida,
+avisos a los colaboradores, y sus permisos en BLOKY (perfiles, CU-B-01).
+
+**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en `develop` de `Bloky-Idiky` (`ea1059b`), probado con la
+API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `apps/bloky-api/src/equipo/`.
+
+---
+
 ### CU-B-06 a CU-B-08 — por escribir
 
 Los demás pasos de la puesta en marcha (CU-B-02) tienen número reservado y se escriben cuando
