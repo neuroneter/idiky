@@ -434,12 +434,15 @@ Código: `apps/bloky-api/src/{almacen,documentos}/` y `apps/bloky/src/features/d
 3. Confirma: BLOKY descarga el vecindario y lo guarda (RN-249); la primera vez centra la
    copropiedad en su punto.
 4. En el terreno ve su copropiedad sobre el barrio, con zoom para acercar y alejar.
+5. **Demarcar (RN-250):** en el terreno, «🗺 Ver el mapa» parte la pantalla: a un lado el terreno, al
+   otro el mapa real (calles o satélite). Marca el lote moviendo las esquinas del recuadro y pone
+   las entradas; todo aparece al instante en el terreno y queda guardado para los demás.
 
 **Flujos alternativos**
 - A1. No encuentra la vía → lo dice, y se puede escribir de otra forma o probar otra ciudad.
 - A2. Los servidores del mapa no responden → se intenta en otro; si ninguno, «intenta en un momento».
 
-**Reglas de negocio:** RN-248, RN-249.
+**Reglas de negocio:** RN-248, RN-249, RN-250.
 
 **Lo que queda abierto:** dibujar o corregir el límite del lote; el catastro abierto; tomar la
 dirección de la escritura en «Armar desde documentos»; las fotos (galería en R2, ADR-0019).

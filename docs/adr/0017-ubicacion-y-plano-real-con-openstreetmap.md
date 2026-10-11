@@ -44,6 +44,21 @@ proyección **isométrica** alineada con la cuadrícula del terreno, con la flec
 terreno crece para contener el vecindario y gana **zoom**. Al ubicarla por primera vez, la
 copropiedad se centra en su punto.
 
+**6. Demarcar sobre el mapa real, en pantalla partida (2026-10-11, Daniel).** El límite del lote
+casi nunca está en OpenStreetMap, así que **la persona lo dibuja**: en el terreno, «🗺 Ver el mapa»
+parte la pantalla en dos (el terreno y el mapa real), con una barra que se arrastra para dar más
+ancho a uno u otro, y una ✕ que cierra el mapa. Sobre el mapa se marca **el lote** (un recuadro
+que se ajusta moviendo sus esquinas) y **las entradas** (peatonal, vehicular, portería); lo
+marcado aparece al instante en el terreno y queda guardado para todos (RN-250). Después: los
+bloques y las calles de acceso.
+- **Fondo del mapa:** «Calles» con los mosaicos de OpenStreetMap (uso interactivo normal, con su
+  crédito, sin descargas en masa; si BLOKY crece, un proveedor o mosaicos propios) y «Satélite» con
+  **Esri World Imagery**, cuyas condiciones permiten *usarla para trazar elementos y crear datos
+  vectoriales*, mostrando su crédito (para uso comercial a gran escala, confirmar con Esri).
+  **Google Maps no**: sus condiciones prohíben calcar sobre sus imágenes para crear datos propios.
+- **Sin librería de mapas:** un mapa propio y liviano (mosaicos Web Mercator, arrastrar, zoom y una
+  capa SVG para dibujar), como la firma de R2 y el lector de Markdown.
+
 ## Alternativas consideradas
 
 | Opción | A favor | En contra | Veredicto |
@@ -52,6 +67,9 @@ copropiedad se centra en su punto.
 | Imagen de mapa de fondo (teselas) | Fácil | Rompe el estilo de juego; no sabemos dónde están las calles | ❌ |
 | **OpenStreetMap (Nominatim + Overpass), guardado** | Geometría real, gratis, redibujable, todo Colombia | Calidad desigual; servidores públicos inestables | ✅ |
 | Catastro abierto (Bogotá, Medellín, IGAC) | El límite exacto del lote | No cubre todo el país; formatos distintos | Después, para el límite |
+| Demarcar sobre Google Maps | La foto más conocida | Sus condiciones prohíben calcar para crear datos propios; cobra por uso | ❌ |
+| **Demarcar sobre OpenStreetMap + Esri, mapa propio** | Se puede calcar; sin dependencias | Hay que mantener el mapa propio | ✅ |
+| Leaflet | Mapa completo y probado | Una dependencia y un ADR más, para usar poco de ella | ❌ por ahora |
 
 ## Consecuencias
 
