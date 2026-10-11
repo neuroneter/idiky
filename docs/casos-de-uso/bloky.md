@@ -181,7 +181,7 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
   tiene historia (unidades con propietarios, reservas), en el producto se **retira**, no se borra.
 - A3. Intenta meter una torre en otra, o algo dentro de sí mismo → no se deja (RN-170).
 
-**Reglas de negocio:** RN-169 a RN-173, RN-185, RN-186; la pila de pisos y las terrazas, RN-242 a RN-244.
+**Reglas de negocio:** RN-169 a RN-173, RN-185, RN-186; la pila de pisos y las terrazas, RN-242 a RN-244; pisos mixtos y el piso de cada espacio, RN-245 y RN-246.
 
 **Lo que queda abierto**
 - ¿Las agrupaciones se anidan (etapa → sector → torres)? Hoy no (RN-170); docs/13 §6 lo permite.
