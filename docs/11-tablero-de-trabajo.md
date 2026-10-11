@@ -17,7 +17,7 @@ quien numera dentro de su rango** y, al agotarlo, pide el siguiente aquí. Los m
 |---|---|---|---|---|
 | Mary (ALICE / PWA) | RN-98 … RN-129 (agotado) · **RN-210 … RN-239** (desde 2026-10-02, para T-46 y CU-A-18; usadas: RN-210 … RN-218) | CU-R-32 … CU-R-49 · CU-A-28 … CU-A-39 | T-45 … T-59 | Se piden al integrador |
 | Jeimy (contable) | RN-130 … RN-159 | CU-A-40 … CU-A-49 | T-60 … T-74 | Se piden al integrador |
-| Integración (infra, BOB, BLOKY) | RN-160 … RN-189 (agotado) · **RN-240 … RN-269** (desde 2026-10-11; usadas: RN-240 … RN-250) | CU-S-10 … CU-S-29 · CU-P-04 … CU-P-09 · **CU-B-01 … CU-B-49** (BLOKY, usados: CU-B-01…11; CU-B-09 escrito) | T-75 … T-89 (usados: T-75…T-86) | ADR-0013 en adelante (usados: 0013…0023; el 0017 —ubicación con OpenStreetMap— y el 0019 —archivos en R2— se escribieron el 2026-10-11 —la bitácora del 2026-09-21 los anunció como 0016 y 0017, pero el 0016 lo tomó Jitsi—) |
+| Integración (infra, BOB, BLOKY) | RN-160 … RN-189 (agotado) · **RN-240 … RN-269** (desde 2026-10-11; usadas: RN-240 … RN-251) | CU-S-10 … CU-S-29 · CU-P-04 … CU-P-09 · **CU-B-01 … CU-B-49** (BLOKY, usados: CU-B-01…11; CU-B-09 escrito) | T-75 … T-89 (usados: T-75…T-86) | ADR-0013 en adelante (usados: 0013…0023; el 0017 —ubicación con OpenStreetMap— y el 0019 —archivos en R2— se escribieron el 2026-10-11 —la bitácora del 2026-09-21 los anunció como 0016 y 0017, pero el 0016 lo tomó Jitsi—) |
 | Justo (APP / ALICE, `App-Idiky`) | RN-190 … RN-209 | Los CU los definen Mary y Jeimy; Justo los implementa | T-90 … T-104 | Se piden al integrador |
 
 ## Ahora — antes de seguir construyendo

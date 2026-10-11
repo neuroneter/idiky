@@ -445,7 +445,7 @@ Código: `apps/bloky-api/src/{almacen,documentos}/` y `apps/bloky/src/features/d
 - A1. No encuentra el barrio → el mapa queda en la ciudad y lo dice; la persona lo mueve hasta su conjunto.
 - A2. Los servidores del mapa no responden al descargar el barrio → el punto ya quedó guardado; el terreno lo dice y deja reintentar.
 
-**Reglas de negocio:** RN-248, RN-249, RN-250.
+**Reglas de negocio:** RN-248, RN-249, RN-250, RN-251.
 
 **Lo que queda abierto:** dibujar o corregir el límite del lote; el catastro abierto; tomar la
 dirección de la escritura en «Armar desde documentos»; las fotos (galería en R2, ADR-0019).
