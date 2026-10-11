@@ -112,6 +112,34 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Documentos en R2 y su versión digital (CU-B-11, ADR-0019)
+
+Daniel pidió que el documento que se sube **quede en los documentos de la copropiedad** y que se cree
+**una versión digital** que el futuro chat de IA use de forma nativa. Eligió **Cloudflare R2**
+([ADR-0019](./adr/0019-archivos-de-las-copropiedades-en-r2.md), escrito hoy: bucket privado, solo
+`bloky-api` entra; la ficha y el texto en el esquema de cada copropiedad; firma S3 propia sin
+librería de AWS; carpeta local en desarrollo). **Rango nuevo de reglas para la integración:
+RN-240 … RN-269.** Definidos [CU-B-11](./casos-de-uso/bloky.md#cu-b-11), **RN-240** (todo documento
+queda guardado; mismo archivo no se duplica; nada se borra) y **RN-241** (la versión digital:
+transcripción fiel página por página en Markdown con índice de capítulos, artículos y parágrafos,
+por tramos con la escalera Haiku → Sonnet; marcada como automática: manda el PDF). **RN-187 cambia:**
+el documento del alta ya sí se guarda.
+
+**Construido y desplegado** (`221a6fd.bloky-b9b2944`, migración `004`: `documento`,
+`documento_pagina` con búsqueda en español, `propuesta.documento_id`): «Documentos» en el menú
+(subir, buscar en todos, avance de la transcripción; lector con índice y una página a la vez, porque
+todas juntas no se leen y en un reglamento largo pesan demasiado), y el alta guarda el reglamento y
+lo transcribe después de la propuesta. **Probado:** la firma S3 contra el ejemplo oficial de AWS;
+la transcripción real de Oasis (13 páginas, 2 tramos, **0,008 US$**; la caché del PDF abarata el
+segundo tramo) con artículos, parágrafos y tablas fieles; las pantallas con la API simulada.
+
+**R2 en el servidor:** las variables ya estaban puestas hoy a las 17:05 (bucket **`idiky-dev`**);
+una consulta de solo lectura respondió `404 NoSuchKey`: credenciales y bucket válidos. La API dice
+`"archivos": "r2"`.
+
+**Lo que sigue:** Daniel prueba subir el reglamento en BLOKY Dev y ver su versión digital; luego
+**el terreno isométrico 2.5D** (Daniel lo eligió: torres con su altura y ventanas, «como un juego»).
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Disco del servidor a 128 GB; CU-B-10 desplegado con IA
 
 **El disco del servidor dejó de ser el cuello de botella.** El despliegue de CU-B-10 se negó (quedaban

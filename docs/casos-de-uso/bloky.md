@@ -404,7 +404,9 @@ con la API simulada. Falta la prueba de Daniel en Torres del Parque. Código: `a
 - Corregir a mano la transcripción de una página.
 - Fotos y planos como imagen (CU-B-09).
 
-**Estado en BLOKY Dev:** 🔨 (2026-10-11) — en construcción en `feature/CU-B-03-ajustes-terreno`.
+**Estado en BLOKY Dev:** 🟡 (2026-10-11) — desplegado (`221a6fd.bloky-b9b2944`) con R2 (bucket `idiky-dev`) y la IA:
+subir, guardar, transcribir por tramos, buscar y leer por página. Falta la prueba de Daniel y el chat de IA.
+Código: `apps/bloky-api/src/{almacen,documentos}/` y `apps/bloky/src/features/documentos/`.
 
 ---
 

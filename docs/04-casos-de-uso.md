@@ -121,7 +121,7 @@ con datos reales.
 | CU-B-08 | Tu equipo y sus grupos de colaboradores | 1 | ⬜ Por escribir | [ver](./casos-de-uso/bloky.md#cu-b-06-a-cu-b-09--por-escribir) |
 | CU-B-09 | Ubicación y fotos | 1 | ⬜ Por escribir | [ver](./casos-de-uso/bloky.md#cu-b-06-a-cu-b-09--por-escribir) |
 | CU-B-10 | **Armar la copropiedad desde sus documentos (con IA):** el reglamento escaneado se vuelve una propuesta validada (coeficientes 100 %, áreas, coherencia) que se confirma en el terreno ([ADR-0023](./adr/0023-bloky-nativo-para-agentes.md)) | 1 | 🟡 BLOKY Dev (desplegado con IA el 2026-10-11; falta la prueba de Daniel) | [ver](./casos-de-uso/bloky.md#cu-b-10) |
-| CU-B-11 | **Los documentos de la copropiedad y su versión digital:** cada PDF guardado en R2 y transcrito página por página con su índice, para leer, buscar y para el chat de IA ([ADR-0019](./adr/0019-archivos-de-las-copropiedades-en-r2.md)) | 1 | 🔨 En construcción | [ver](./casos-de-uso/bloky.md#cu-b-11) |
+| CU-B-11 | **Los documentos de la copropiedad y su versión digital:** cada PDF guardado en R2 y transcrito página por página con su índice, para leer, buscar y para el chat de IA ([ADR-0019](./adr/0019-archivos-de-las-copropiedades-en-r2.md)) | 1 | 🟡 BLOKY Dev (desplegado el 2026-10-11; falta la prueba de Daniel) | [ver](./casos-de-uso/bloky.md#cu-b-11) |
 
 ## 3. Sistema — procesos automáticos
 
