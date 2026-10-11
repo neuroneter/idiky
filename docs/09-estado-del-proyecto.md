@@ -20,7 +20,7 @@ nueva o una sesión de IA distinta.
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
-| **BLOKY hoy** (2026-10-11) | Desplegado `edea76b.bloky-817429b` desde `develop` de `Bloky-Idiky`: **un esquema por copropiedad** con catálogo y API de administración (ADR-0015), **directorio de acceso** y rol en cada petición (ADR-0022), consola con menú y primeros pasos (CU-B-02) y **el terreno** de «Arma tu copropiedad» guardando de verdad (CU-B-03). **Para retomar:** la entrada de la bitácora «Traspaso» del 2026-10-11 |
+| **BLOKY hoy** (2026-10-11) | Desplegado `b5164c4.bloky-a60318f` desde `develop` de `Bloky-Idiky`, **sin la clave del entorno** (se entra solo con su ingreso): **un esquema por copropiedad** con catálogo y API de administración (ADR-0015), **directorio de acceso** y rol en cada petición (ADR-0022), consola con menú y primeros pasos (CU-B-02) y **el terreno** de «Arma tu copropiedad» guardando de verdad (CU-B-03). **Para retomar:** la entrada de la bitácora «Traspaso» del 2026-10-11 |
 | **Autenticación** | El **flujo** está dibujado —documento, celular o correo; código de un solo uso por **SMS o correo**; **huella**— pero **no autentica**: el código se muestra en pantalla. Sin clave desde el 2026-10-01. La huella sí es real (WebAuthn); falta el servidor que enviaría el código y comprobaría la credencial ([ADR-0004](./adr/0004-autenticacion-demo.md)) |
 | **Casos de uso** | 83 documentados: 48 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes (8 de BLOKY desde el 2026-10-03: CU-B-02…09, cuatro escritos y cuatro por escribir), 3 ⛔ retirados |
 | **Reglas de negocio** | 129 del demo (RN-01…RN-129; RN-07, RN-11, RN-41 y RN-55 retiradas) + 27 de BLOKY (RN-160…RN-186). RN-75 a RN-91 vienen de la contable; RN-92 a RN-129, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
@@ -111,6 +111,24 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · BLOKY sin la clave del entorno (CU-B-01)
+
+Daniel pidió quitar el «doble factor» de BLOKY: antes del ingreso, el navegador pedía **la clave del
+entorno** (usuario `equipo`, `auth_basic` de nginx) y después el código por SMS o Google/Microsoft.
+El nginx de BLOKY (`Bloky-Idiky/infra/bloky/nginx.conf`) ya no hace
+`include /etc/nginx/idiky/*.conf;`; su puerta es su propio ingreso (CU-B-01). La API de
+administración sigue cerrada al túnel (Cf-Ray → 404). La PWA, la contable y los demás servicios
+**conservan** la clave.
+
+Antes de desplegar se comprobó que la API corre en `produccion` (`/api/salud`): SMS real por Twilio
+Verify, sin códigos simulados que la API devuelva. Rama `feature/bloky-sin-clave-del-entorno` →
+`develop` → desplegado `b5164c4.bloky-a60318f`; `https://bloky-dev.idiky.com` responde 200 sin clave
+y LangFlow sigue igual que en la foto base. Actualizados `infra/README.md` §6 y los README de BLOKY.
+
+**Ojo:** BLOKY Dev ahora está abierto en internet hasta su puerta de ingreso. Si algún día la API
+vuelve a `desarrollo` en el servidor, el envío simulado devolvería el código en la respuesta: el
+servidor debe seguir en `produccion`.
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Traspaso: dónde quedó BLOKY y cómo retomarlo
 

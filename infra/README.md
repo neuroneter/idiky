@@ -277,7 +277,10 @@ Todo queda escuchando solo en `127.0.0.1`.
 ## 6. La clave del entorno
 
 Protege la PWA, la contable y todo servicio nuevo que sea un nginx sirviendo archivos. **No
-aplica al sistema de gestión** (§2). **No se guarda en claro en ningún sitio ni va al
+aplica al sistema de gestión** (§2) **ni a BLOKY**: desde el 2026-10-11 su nginx
+(`Bloky-Idiky/infra/bloky/nginx.conf`) no hace el `include`, porque pedir la clave antes de su
+ingreso (código por SMS o Google/Microsoft, CU-B-01) era un segundo paso que no aportaba. Su
+puerta es su propio ingreso, y la API de administración sigue cerrada al túnel. **No se guarda en claro en ningún sitio ni va al
 repositorio**: se comparte por un canal privado. El usuario es `equipo`.
 
 - **Poner una clave al azar**, que se muestra una sola vez:
@@ -400,6 +403,7 @@ Cada una ya costó tiempo una vez:
 | nginx y `.webmanifest` | Lo sirve como `application/octet-stream` | `default_type application/manifest+json` en su `location` |
 | Cambiar flags con `restart` | No aplica: la unidad guarda el comando de creación | Cambiar `levantar.sh` y desplegar |
 | `auth_basic` delante de algo con tokens | Strapi (panel y API) usa la cabecera `Authorization`: la clave lo rompe | Sin clave; la puerta es el login del servicio |
+| La clave del entorno delante de un servicio con su propio ingreso | En BLOKY obligaba a entrar dos veces (clave y luego el código por SMS) | Sin clave; la puerta es el ingreso del servicio (2026-10-11) |
 | `du` en la carpeta de PostgreSQL | Dice 4 KB: `idiky` no puede leerla por fuera, es del usuario `postgres` del contenedor | `podman unshare du -sh …` |
 | `npm ci` con `NODE_ENV=production` | Omite las `devDependencies` y la compilación falla sin TypeScript | `npm ci --include=dev` |
 | Lockfile generado en macOS | Podría faltarle el binario de Linux musl de `sharp`, `rollup` o `esbuild` | Antes de construir, buscarlos en `package-lock.json`. Hoy están |
