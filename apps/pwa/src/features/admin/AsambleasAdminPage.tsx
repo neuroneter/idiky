@@ -83,6 +83,7 @@ import { CapturaFoto } from '../../componentes/CapturaFoto'
 import { HojaPoder } from '../../componentes/HojaPoder'
 import { HojaActa } from '../../componentes/HojaActa'
 import { VotacionPunto } from './VotacionPunto'
+import { SegundaConvocatoria } from './SegundaConvocatoria'
 
 function formatearCoeficiente(coeficiente: number): string {
   return `${coeficiente.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
@@ -733,7 +734,7 @@ function DetalleAsamblea({
             <span className="subtitulo">
               {asamblea.numeroConvocatoria === 2
                 ? 'En segunda convocatoria sesiona cualquier número plural de propietarios, sea cual sea el coeficiente (Ley 675, art. 41).'
-                : `Se exige número plural de propietarios y más del ${quorumMinimo} % de los coeficientes (Ley 675, art. 45).`}
+                : `Se exige número plural de propietarios y la mitad más uno de los coeficientes: más del ${quorumMinimo} % (Ley 675, art. 45). Si no se reúne, se cita a segunda convocatoria (art. 41).`}
             </span>
             {!quorum && asamblea.numeroConvocatoria === 1 && (
               <span className="subtitulo" style={{ marginTop: 'var(--e1)' }}>
@@ -864,6 +865,9 @@ function DetalleAsamblea({
           </button>
         </div>
       )}
+      {/* RN-216 — Sin quórum el día de la asamblea: la segunda convocatoria. */}
+      <SegundaConvocatoria asamblea={asamblea} />
+
       {asamblea.estado === 'convocada' && noSeInstala && (
         <p className="ayuda-campo">
           {admiteAsistencia(asamblea)

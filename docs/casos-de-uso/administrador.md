@@ -398,6 +398,12 @@ al inicio de la asamblea»)*
    **La asistencia y los votos quedan**: de ahí sale el acta (RN-61).
 
 **Flujos alternativos**
+- A2. **No se reúne el quórum** (RN-216, Mary 2026-10-11: *«en el caso que no se cumpla se debe citar
+  una nueva asamblea»*; Ley 675 de 2001, art. 41): el día de la asamblea, sin quórum, la consola
+  ofrece **Citar segunda convocatoria**, con la fecha y la hora de la ley ya puestas —**el tercer día
+  hábil siguiente a las 8:00 p. m.**— que se cambian solo si el reglamento dice otra cosa. La primera
+  queda «Sin quórum» (no se cancela: sí se reunió gente), la segunda nace con el mismo orden del día,
+  **sesiona con cualquier número plural de propietarios** y se publica fijada en la cartelera.
 - A1. Se cae la reunión de Zoom → **la asamblea no se cae**: la asistencia y las votaciones
   están en Idiky. Se cae el canal, no el registro.
 - A2. Alguien se pasa del salón a la reunión, o al revés → vuelve a marcar y **se corrige la

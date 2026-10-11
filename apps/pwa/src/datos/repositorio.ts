@@ -148,6 +148,9 @@ import {
   esVisitaDeUnDia,
   condicionesPosibles,
   marcaResidente,
+  motivoNoCitaSegunda,
+  fechaSegundaConvocatoria,
+  HORA_SEGUNDA_CONVOCATORIA,
   motivoNoSeInstala,
   resumenAsistencia,
   votacionVigente,
@@ -2375,6 +2378,8 @@ export async function cambiarEstadoAsamblea(
     instalada: ['cerrada'],
     cerrada: [],
     cancelada: [],
+    // RN-216 — Se llega aquí solo citando la segunda convocatoria.
+    sin_quorum: [],
   }
   if (!permitido[asamblea.estado].includes(parametros.estado)) {
     throw new ErrorDeNegocio(
@@ -2494,6 +2499,69 @@ export async function cerrarVotacion(
   votacion.estado = 'cerrada'
   votacion.cerradaEn = ahoraISO()
   return persistir(bd, votacion)
+}
+
+/**
+ * RN-216 — **No hubo quórum: se cita la segunda convocatoria** (Ley 675, art. 41).
+ *
+ * La primera queda «sin quórum» —no se cancela: sí se reunió gente, y el acta de
+ * la segunda la cita—; la segunda nace con el mismo orden del día, el tercer día
+ * hábil siguiente a las 8:00 p. m. (o lo que diga el reglamento), y sesiona con
+ * cualquier número plural de propietarios. Se publica en la cartelera.
+ */
+export async function citarSegundaConvocatoria(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; personaId: string; fechaHora?: FechaHoraISO },
+): Promise<Resultado<Asamblea>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const primera = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!primera) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (!esAdministracion(bd, parametros.personaId, primera.copropiedadId)) {
+    throw new ErrorDeNegocio('La segunda convocatoria la cita la administración.')
+  }
+  const copropiedad = bd.copropiedades.find((c) => c.id === primera.copropiedadId)
+  const motivo = motivoNoCitaSegunda(primera, resumenAsistencia(bd.asistencias, primera.id), copropiedad?.quorumMinimo ?? 50)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const fechaHora =
+    parametros.fechaHora ?? `${fechaSegundaConvocatoria(primera.fechaHora)}T${HORA_SEGUNDA_CONVOCATORIA}:00`
+  if (fechaHora.slice(0, 10) <= primera.fechaHora.slice(0, 10)) {
+    throw new ErrorDeNegocio('La segunda convocatoria es posterior a la primera.')
+  }
+  const segunda: Asamblea = {
+    ...primera,
+    id: nuevoId('asa'),
+    titulo: `${primera.titulo} — segunda convocatoria`,
+    fechaHora,
+    numeroConvocatoria: 2,
+    estado: 'convocada',
+    citacion: `Segunda convocatoria por falta de quórum de: ${primera.citacion} (Ley 675 de 2001, art. 41)`,
+    ordenDelDia: primera.ordenDelDia.map((punto) => ({ ...punto, id: nuevoId('pun') })),
+    quorumAlInstalar: undefined,
+    enlaceGrabacion: undefined,
+    segundaConvocatoriaId: undefined,
+    primeraConvocatoriaId: primera.id,
+  }
+  bd.asambleas.push(segunda)
+  primera.estado = 'sin_quorum'
+  primera.segundaConvocatoriaId = segunda.id
+  const cuando = formatearFecha(fechaHora.slice(0, 10))
+  bd.comunicados.unshift({
+    id: nuevoId('com'),
+    copropiedadId: primera.copropiedadId,
+    titulo: `Segunda convocatoria: ${primera.titulo}`,
+    cuerpo:
+      `La asamblea de hoy no reunió el quórum. Conforme al artículo 41 de la Ley 675 de 2001, queda ` +
+      `citada para el ${cuando} a las ${fechaHora.slice(11, 16)}${primera.lugar ? `, en ${primera.lugar}` : ''}, ` +
+      `con el mismo orden del día. Esa reunión sesiona y decide con cualquier número plural de propietarios.`,
+    categoria: 'asamblea',
+    fijado: true,
+    fechaPublicacion: ahoraISO(),
+    vigenteHasta: fechaHora.slice(0, 10),
+    autor: 'Administración',
+    leidoPor: [],
+  })
+  return persistir(bd, segunda)
 }
 
 /**

@@ -236,3 +236,96 @@ test('la administradora anula y vuelve a preparar la votación desde la consola 
   await expect(punto).toContainText('Cerrada')
   await expect(punto).toContainText('No alcanzó la mayoría exigida')
 })
+
+// ---------------------------------------------------------------------------
+// RN-216 — Sin quórum, segunda convocatoria (Ley 675, art. 41).
+// ---------------------------------------------------------------------------
+
+test('sin quórum se cita la segunda convocatoria: tercer día hábil, 8:00 p. m., número plural (RN-216)', async ({ page }) => {
+  await page.goto('/')
+  const r = await page.evaluate(async () => {
+    const repo = await import('/src/datos/repositorio.ts')
+    const { hayQuorum } = await import('/src/dominio/reglas.ts')
+    let bd = await repo.cargar()
+    const intento = async (f: () => Promise<{ bd: typeof bd; datos: unknown }>) => {
+      try { const res = await f(); bd = res.bd; return res.datos } catch (e) { return 'ERR: ' + (e as Error).message }
+    }
+    const hoy = new Date().toISOString().slice(0, 10)
+    const primera = (await intento(() => repo.convocarAsamblea(bd, {
+      copropiedadId: 'cop-1', tipo: 'ordinaria', titulo: 'Ordinaria de prueba', fechaHora: `${hoy}T18:00:00`,
+      modalidad: 'presencial', lugar: 'Salón social', citacion: 'Convocatoria 009',
+      ordenDelDia: [{ titulo: 'Presupuesto', descripcion: 'Del año', seVota: true, mayoria: 'simple' }],
+    }))) as { id: string }
+    await intento(() => repo.marcarAsistencia(bd, { asambleaId: primera.id, unidadId: 'uni-torre1-201', personaId: 'per-3', forma: 'presencial' }))
+    const laPropietaria = await intento(() => repo.citarSegundaConvocatoria(bd, { asambleaId: primera.id, personaId: 'per-1' }))
+    const segunda = (await intento(() => repo.citarSegundaConvocatoria(bd, { asambleaId: primera.id, personaId: 'per-admin' }))) as { id: string; numeroConvocatoria: number; fechaHora: string; ordenDelDia: { titulo: string }[]; primeraConvocatoriaId: string }
+    const laPrimera = bd.asambleas.find((a) => a.id === primera.id)!
+    const otraVez = await intento(() => repo.citarSegundaConvocatoria(bd, { asambleaId: primera.id, personaId: 'per-admin' }))
+    const comunicado = bd.comunicados.find((c) => c.titulo.startsWith('Segunda convocatoria'))
+    const segundaBd = bd.asambleas.find((a) => a.id === segunda.id)!
+    return {
+      laPropietaria,
+      estadoPrimera: laPrimera.estado,
+      enlazadas: laPrimera.segundaConvocatoriaId === segunda.id && segunda.primeraConvocatoriaId === primera.id,
+      numero: segunda.numeroConvocatoria,
+      fechaHora: segunda.fechaHora,
+      puntos: segunda.ordenDelDia.map((p) => p.titulo),
+      otraVez,
+      comunicado: !!comunicado && comunicado.fijado,
+      dosUnidadesBastan: hayQuorum(segundaBd, { unidades: 2, coeficiente: 17 }, 50),
+      unaNoBasta: hayQuorum(segundaBd, { unidades: 1, coeficiente: 9 }, 50),
+    }
+  })
+  expect(r.laPropietaria).toMatch(/administración/)
+  expect(r.estadoPrimera).toBe('sin_quorum')
+  expect(r.enlazadas).toBe(true)
+  expect(r.numero).toBe(2)
+  // Viernes 2026-10-09 → tercer día hábil: miércoles 2026-10-14, 8:00 p. m.
+  expect(r.fechaHora).toBe('2026-10-14T20:00:00')
+  expect(r.puntos).toEqual(['Presupuesto'])
+  expect(r.otraVez).toMatch(/^ERR/)
+  expect(r.comunicado).toBe(true)
+  expect(r.dosUnidadesBastan).toBe(true)
+  expect(r.unaNoBasta).toBe(false)
+})
+
+test('con quórum no se cita la segunda: se instala (RN-216)', async ({ page }) => {
+  await page.goto('/')
+  const r = await page.evaluate(async () => {
+    const { motivoNoCitaSegunda } = await import('/src/dominio/reglas.ts')
+    const hoy = new Date().toISOString().slice(0, 10)
+    const asamblea = { estado: 'convocada', numeroConvocatoria: 1, fechaHora: `${hoy}T18:00:00` } as never
+    return {
+      conQuorum: motivoNoCitaSegunda(asamblea, { unidades: 6, coeficiente: 51.8 }, 50),
+      sinQuorum: motivoNoCitaSegunda(asamblea, { unidades: 2, coeficiente: 18 }, 50) ?? null,
+    }
+  })
+  expect(r.conQuorum).toMatch(/Hay quórum/)
+  expect(r.sinQuorum).toBeNull()
+})
+
+test('la administradora cita la segunda convocatoria desde la consola (RN-216)', async ({ page }) => {
+  await page.goto('/')
+  await page.evaluate(async () => {
+    const repo = await import('/src/datos/repositorio.ts')
+    let bd = await repo.cargar()
+    const hoy = new Date().toISOString().slice(0, 10)
+    const res = await repo.convocarAsamblea(bd, {
+      copropiedadId: 'cop-1', tipo: 'ordinaria', titulo: 'Ordinaria sin gente', fechaHora: `${hoy}T18:00:00`,
+      modalidad: 'presencial', lugar: 'Salón social', citacion: 'Convocatoria 010',
+      ordenDelDia: [{ titulo: 'Presupuesto', descripcion: 'Del año', seVota: true }],
+    })
+    bd = res.bd
+    await repo.marcarAsistencia(bd, { asambleaId: res.datos.id, unidadId: 'uni-torre1-201', personaId: 'per-3', forma: 'presencial' })
+  })
+  await page.reload()
+  await entrarComo(page, /Olga Lucia Henao/)
+  await page.goto('/#/admin/asambleas')
+  await page.locator('tr', { hasText: 'Ordinaria sin gente' }).first().getByRole('button', { name: 'Abrir' }).click()
+  await expect(page.getByRole('button', { name: 'Instalar la asamblea' })).toBeDisabled()
+  await expect(page.getByText('¿No se reunió el quórum?')).toBeVisible()
+  await expect(page.getByLabel('Fecha de la segunda convocatoria')).toHaveValue('2026-10-14')
+  await expect(page.getByLabel('Hora de la segunda convocatoria')).toHaveValue('20:00')
+  await page.getByRole('button', { name: 'Citar segunda convocatoria' }).click()
+  await expect(page.getByText(/Se citó a segunda convocatoria/)).toBeVisible()
+})

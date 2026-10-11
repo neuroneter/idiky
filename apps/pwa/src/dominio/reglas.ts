@@ -717,7 +717,7 @@ export function contarVotacion(
 
 /** Orden de la lista: primero lo que esta pasando, despues lo que viene, al final lo cerrado. */
 export function ordenAsamblea(asamblea: Asamblea): number {
-  return { instalada: 0, convocada: 1, cerrada: 2, cancelada: 3 }[asamblea.estado]
+  return { instalada: 0, convocada: 1, cerrada: 2, sin_quorum: 3, cancelada: 4 }[asamblea.estado]
 }
 
 // ---------------------------------------------------------------------------
@@ -1374,6 +1374,36 @@ export function motivoNoSeInstala(
       ? 'No hay quórum: hace falta al menos otro propietario presente (número plural).'
       : 'No hay quórum: la asistencia registrada no alcanza el coeficiente que exige la ley (art. 45).'
   }
+  return undefined
+}
+
+/**
+ * RN-216 — **Si no se reúne el quórum, se cita a una segunda convocatoria**
+ * (Mary, 2026-10-11; Ley 675 de 2001, art. 41): «se convocará a una nueva
+ * reunión que se realizará el **tercer día hábil siguiente** al de la
+ * convocatoria inicial, a las **ocho pasado meridiano (8:00 p. m.)**, la cual
+ * sesionará y decidirá válidamente con un **número plural de propietarios**,
+ * cualquiera que sea el porcentaje de coeficientes representados». La fecha y
+ * la hora son las de la ley salvo que el reglamento diga otra cosa: por eso la
+ * administración las puede ajustar. Solo desde una primera convocatoria, el día
+ * de la asamblea y sin quórum.
+ */
+export const HORA_SEGUNDA_CONVOCATORIA = '20:00'
+
+export function fechaSegundaConvocatoria(fechaPrimera: FechaISO): FechaISO {
+  return sumarDiasHabiles(fechaPrimera.slice(0, 10), 3)
+}
+
+export function motivoNoCitaSegunda(
+  asamblea: Asamblea,
+  resumen: { unidades: number; coeficiente: number },
+  quorumMinimo: number,
+  hoy: FechaISO = hoyISO(),
+): string | undefined {
+  if (asamblea.numeroConvocatoria !== 1) return 'Ya es una segunda convocatoria: sesiona con cualquier número plural.'
+  if (asamblea.estado !== 'convocada') return 'Solo se cita la segunda de una asamblea convocada que no se instaló.'
+  if (asamblea.fechaHora.slice(0, 10) !== hoy) return 'La falta de quórum se constata el día de la asamblea.'
+  if (hayQuorum(asamblea, resumen, quorumMinimo)) return 'Hay quórum: la asamblea se puede instalar.'
   return undefined
 }
 

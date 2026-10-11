@@ -1037,7 +1037,8 @@ export interface Proyecto {
 // ---------------------------------------------------------------------------
 export type TipoAsamblea = 'ordinaria' | 'extraordinaria'
 
-export type EstadoAsamblea = 'convocada' | 'instalada' | 'cerrada' | 'cancelada'
+/** `sin_quorum`: el día de la asamblea no se reunió el quórum y se citó la segunda convocatoria (RN-216). */
+export type EstadoAsamblea = 'convocada' | 'instalada' | 'cerrada' | 'cancelada' | 'sin_quorum'
 
 export type ModalidadAsamblea = 'presencial' | 'virtual' | 'mixta'
 
@@ -1109,6 +1110,12 @@ export interface Asamblea {
    * asamblea»). Lo que pase después —alguien que llega o se va— no lo cambia.
    */
   quorumAlInstalar?: { unidades: number; coeficiente: number; en: FechaHoraISO }
+  /**
+   * RN-216 — Cuando no se reunió el quórum: la segunda convocatoria que se citó
+   * (en la primera) y la primera de la que viene (en la segunda).
+   */
+  segundaConvocatoriaId?: string
+  primeraConvocatoriaId?: string
   /** Lo que convoca: numero y fecha del acta o de la citacion. */
   citacion: string
 }
