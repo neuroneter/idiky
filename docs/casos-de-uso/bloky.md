@@ -353,14 +353,14 @@ sancionatorio. Mary debe conocerlo antes de seguir con reservas (T-84).
 - A3. Descarta la propuesta → queda registrada como descartada; no toca nada.
 - A4. Ya hay una lectura en curso en la copropiedad → espera a que termine (RN-189).
 
-**Reglas de negocio:** RN-187 a RN-189.
+**Reglas de negocio:** RN-187 a RN-189; el documento se guarda y se transcribe (RN-240, RN-241, CU-B-11).
 
 **Lo que queda abierto**
 - Unir una propuesta con un terreno ya armado (emparejar torres por nombre).
 - Varios documentos en un mismo paquete (reglamento, reformas, planos) y partir los grandes en
   pedazos de menos de 100.000 tokens para la tarifa base de Haiku (ADR-0023 §5).
 - Marcar en el terreno lo que vino de la IA y ver la página del documento al lado del dato
-  (necesita guardar el archivo: ADR-0019).
+  (el archivo ya se guarda desde el 2026-10-11: ADR-0019, CU-B-11).
 
 **Estado en BLOKY Dev:** 🟡 (2026-10-11) — **desplegado** (`68c8b19.bloky-9ab02d8`, con la IA configurada) desde
 `develop` (`5979f5c`): subir el PDF, lectura en segundo plano con la escalera, validación,
@@ -368,6 +368,43 @@ propuesta con la página de cada unidad, confirmar en el terreno y la tabla `uni
 la API de Anthropic con el reglamento de Oasis (Haiku pasó al primer peldaño, 0,02 US$) y en la app
 con la API simulada. Falta la prueba de Daniel en Torres del Parque. Código: `apps/bloky-api/src/{ia,alta}/` y
 `apps/bloky/src/features/alta/`.
+
+---
+
+### CU-B-11
+## CU-B-11 — Los documentos de la copropiedad y su versión digital
+
+- **Actor principal:** Administrador o Delegado
+- **Precondiciones:** CU-B-02. El almacén de archivos configurado (ADR-0019); la versión digital,
+  además, con la IA configurada (ADR-0023).
+- **Disparador:** «Mi copropiedad → Documentos», o subir el reglamento en CU-B-10 (que lo guarda solo).
+- **Resultado esperado:** Los documentos de la copropiedad (reglamento, reformas, planos, actas)
+  están guardados y cada uno tiene su versión digital: el texto de cada página y su índice, listos
+  para leer, buscar y para que el chat de IA los use citando artículo y página.
+
+**Flujo principal**
+1. Ve la lista de documentos: tipo, título, quién lo subió y cuándo, páginas, y el estado de la
+   versión digital («Transcribiendo… 30 de 120 páginas», «Lista»).
+2. Sube un documento (PDF hasta 32 MB) con su tipo y título; BLOKY lo guarda (RN-240) y lo
+   transcribe en segundo plano (RN-241).
+3. Abre un documento: el índice a un lado (capítulos, artículos) y el texto página por página; el
+   botón «Ver el PDF» abre el original.
+4. Busca una palabra en todos los documentos («mascotas», «parqueadero») y ve en qué documento y
+   página aparece.
+
+**Flujos alternativos**
+- A1. El mismo archivo ya está → se reutiliza; no se transcribe dos veces (RN-240).
+- A2. La transcripción falla en un tramo → la versión digital queda «fallida» con lo que alcanzó y
+  se puede reintentar; el PDF sigue guardado.
+
+**Reglas de negocio:** RN-240, RN-241.
+
+**Lo que queda abierto**
+- El chat de IA que responde con esta versión digital (ADR-0023).
+- Corregir a mano la transcripción de una página.
+- Fotos y planos como imagen (CU-B-09).
+
+**Estado en BLOKY Dev:** 🔨 (2026-10-11) — en construcción en `feature/CU-B-03-ajustes-terreno`.
 
 ---
 
