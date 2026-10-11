@@ -554,11 +554,14 @@ revisión, se imprime desde la app, sin servidor ni librerías.
    fecha y hora, modalidad (presencial, virtual o mixta **(?)**), orden del día y el
    documento formal de convocatoria en PDF.
 2. El copropietario confirma si asistirá, si no asistirá, o si delegará mediante poder.
+   **Esto no es quórum ni lo anticipa**: el quórum se verifica al inicio de la reunión con la
+   asistencia real (RN-215; Mary, 2026-10-11: *«el quórum no se calcula antes de la reunión»*).
 3. Si elige delegar, el sistema lo lleva a otorgar el poder (CU-R-22).
 4. El sistema le recuerda la asamblea antes de que empiece.
 
 **Flujos alternativos**
-- A1. Segunda convocatoria por falta de quórum → se emite una citación nueva **(?)**.
+- A1. Segunda convocatoria por falta de quórum → se emite una citación nueva y se publica en la
+  cartelera (RN-216). Los poderes de la primera no pasan (RN-31).
 - A2. Se modifica el orden del día → se reemite la citación y se avisa el cambio.
 
 **Si la asamblea va por Vimeo** (RN-98): el botón dice «Ver la transmisión en Vimeo» en vez de
