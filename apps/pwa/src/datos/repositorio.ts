@@ -139,6 +139,10 @@ import {
   poderDeUnidad,
   poderEnCursoDeUnidad,
   poderEsperandoValidacion,
+  poderEsperandoAceptacion,
+  poderEsperandoRecepcion,
+  poderNoAceptado,
+  tieneLaApp,
   residenciaVigente,
   definicionModalidad,
   formasDeAsistir,
@@ -3076,8 +3080,85 @@ export async function otorgarPoder(
     documentoId: documento.id,
     registradoPor: parametros.otorgadoPor,
     registradoEn: ahoraISO(),
+    // RN-217 — Lo acepta el apoderado solo si tiene la app; si no, no hay donde.
+    ...(tieneLaApp(bd.residencias, apoderado.id) ? { aceptacion: { estado: 'esperando' as const } } : {}),
+    // RN-218 — Siempre lo recibe la administracion.
+    recepcion: { estado: 'esperando' },
   }
   bd.poderes.push(poder)
+  return persistir(bd, poder)
+}
+
+/** RN-217 y RN-218 — Lo comun a aceptar, no aceptar y recibir. */
+function poderPorDecidir(bd: BaseDatos, poderId: string): Poder {
+  const poder = bd.poderes.find((p) => p.id === poderId)
+  if (!poder) throw new ErrorDeNegocio('Ese poder no existe.')
+  if (poder.revocadoEn) throw new ErrorDeNegocio('El propietario retiró ese poder.')
+  if (poderNoAceptado(poder)) throw new ErrorDeNegocio('El apoderado no aceptó ese poder.')
+  const asamblea = bd.asambleas.find((a) => a.id === poder.asambleaId)
+  if (!asamblea || asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada' || asamblea.estado === 'sin_quorum') {
+    throw new ErrorDeNegocio('Esa asamblea ya terminó: el poder no se puede usar.')
+  }
+  return poder
+}
+
+/**
+ * RN-217 — El apoderado **acepta** en su app el poder que le dieron (T-46).
+ * Solo él: aceptar es comprometerse a ir a votar por otro.
+ */
+export async function aceptarPoder(
+  bdActual: BaseDatos,
+  parametros: { poderId: string; personaId: string },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const poder = poderPorDecidir(bd, parametros.poderId)
+  if (poder.apoderadoId !== parametros.personaId) {
+    throw new ErrorDeNegocio('Solo la persona a quien se le dio el poder puede aceptarlo.')
+  }
+  if (!poderEsperandoAceptacion(poder)) throw new ErrorDeNegocio('Ese poder no está esperando tu respuesta.')
+  poder.aceptacion = { estado: 'aceptado', decididoEn: ahoraISO() }
+  return persistir(bd, poder)
+}
+
+/**
+ * RN-217 — El apoderado **no acepta**. El poder no se borra (RN-61): queda
+ * «no aceptado», el propietario lo ve y puede darle poder a otra persona.
+ */
+export async function noAceptarPoder(
+  bdActual: BaseDatos,
+  parametros: { poderId: string; personaId: string; motivo?: string },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const poder = poderPorDecidir(bd, parametros.poderId)
+  if (poder.apoderadoId !== parametros.personaId) {
+    throw new ErrorDeNegocio('Solo la persona a quien se le dio el poder puede responderlo.')
+  }
+  if (!poderEsperandoAceptacion(poder)) throw new ErrorDeNegocio('Ese poder no está esperando tu respuesta.')
+  const motivo = parametros.motivo?.trim()
+  poder.aceptacion = { estado: 'no_aceptado', decididoEn: ahoraISO(), ...(motivo ? { motivo } : {}) }
+  if (poder.documentoId) {
+    const documento = bd.documentos.find((d) => d.id === poder.documentoId)
+    if (documento) documento.estado = 'anulado'
+  }
+  return persistir(bd, poder)
+}
+
+/**
+ * RN-218 — La administracion **da por recibido** el poder dado desde la app.
+ * Puede hacerlo antes o despues de que el apoderado acepte: el poder
+ * representa cuando estan los dos pasos.
+ */
+export async function recibirPoder(
+  bdActual: BaseDatos,
+  parametros: { poderId: string; recibidoPor: string },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const poder = poderPorDecidir(bd, parametros.poderId)
+  if (!poderEsperandoRecepcion(poder)) throw new ErrorDeNegocio('Ese poder no está esperando recibirse.')
+  poder.recepcion = { estado: 'recibido', recibidoPor: parametros.recibidoPor, recibidoEn: ahoraISO() }
   return persistir(bd, poder)
 }
 

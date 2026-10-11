@@ -111,6 +111,25 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Mary + IA (Claude) · El poder lo acepta el apoderado y lo recibe la administración (T-46, RN-217, RN-218)
+
+Mary: *«para el punto dos solo aplica si al que le dan el poder hace parte de la copropiedad o
+tiene la APP por ser usuario en alguna copropiedad, pero si no tiene la app no puede aceptar»*.
+El poder dado desde la app (CU-R-23) queda **en trámite**: si el apoderado tiene la app (un
+vínculo vigente en cualquier copropiedad), lo **acepta o no** desde una tarjeta en su inicio
+(`PoderesPorAceptar.tsx`); en todos los casos la administración lo **da por recibido** en la
+consola («Por recibir»). Mientras falte un paso vota el propietario, como con el poder por
+validar (RN-96). Si el apoderado no acepta, el documento se anula, el propietario ve el motivo
+y puede dar otro. Los poderes de papel y los de la semilla no cambian.
+Archivos: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/repositorio.ts`,
+`apps/pwa/src/features/residente/{PoderesPorAceptar,InicioPage,AsambleaDetallePage}.tsx`,
+`apps/pwa/src/features/admin/AsambleasAdminPage.tsx`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/poderes.spec.ts` (2 nuevas); **46 en verde**.
+
+**Para revisar:** el «aviso» es en pantalla (no hay notificaciones push en el demo); y el
+poder enviado en foto (CU-R-31) sigue pasando solo por la validación de la administración.
+
 ### 2026-10-11 · Mary + IA (Claude) · Sin quórum, segunda convocatoria (RN-216)
 
 Mary: *«el quórum debe ser el 50 + 1»* —ya lo era: más del 50 % del coeficiente, art. 45; se

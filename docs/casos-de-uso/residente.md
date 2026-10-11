@@ -1117,11 +1117,18 @@ administración.
 2. Si esa persona no está en Idiky, se le crea un **usuario temporal de asamblea**: su única
    vinculación con la copropiedad es este poder, y muere con la asamblea.
 3. Idiky **emite el documento** con su número y su código de verificación (RN-36).
-4. Desde ese momento **las opciones de votar quedan deshabilitadas** —a la vista, pero sin
+4. **El poder queda en trámite** (T-46, RN-217 y RN-218): si el apoderado **tiene la app** —es
+   usuario en alguna copropiedad—, primero **lo acepta en su app** (le aparece en el inicio,
+   «Te dieron un poder»); si no la tiene, no hay dónde aceptar y se salta ese paso. En los dos
+   casos **la administración lo da por recibido** en la consola. **Mientras falte un paso, vota
+   el propietario.** Mary, 2026-10-11: *«solo aplica si al que le dan el poder hace parte de la
+   copropiedad o tiene la APP por ser usuario en alguna copropiedad, pero si no tiene la app no
+   puede aceptar»*.
+5. Completo el trámite, **las opciones de votar quedan deshabilitadas** —a la vista, pero sin
    poder pulsarse (Mary, 2026-09-10)— y la pantalla dice por qué: ese punto lo vota su
    apoderado. Se ven porque **qué se está decidiendo en su unidad es información suya aunque no
    sea su voto**; esconderlas la dejaría a ciegas.
-5. Puede **abrir el poder** y leerlo: la hoja dice a quién representa, con qué coeficiente y
+6. Puede **abrir el poder** y leerlo: la hoja dice a quién representa, con qué coeficiente y
    cómo se otorgó. Es **la misma hoja** que ve la administración.
 
 **Flujos alternativos**
@@ -1130,6 +1137,9 @@ administración.
   (RN-28, RN-29).
 - A3. Es arrendatario → no puede dar poder: no puede ceder un voto que no tiene (RN-51).
 - A4. El poder llegó en papel → lo registra el administrador (CU-A-19), no esta pantalla.
+- A5. **El apoderado no lo acepta** (RN-217) → puede decir por qué; el documento se anula, el
+  propietario ve «no aceptó» con el motivo y **puede darle poder a otra persona**. No se borra
+  (RN-61).
 
 **Decisiones de interfaz**
 - **No pide una foto de nada**, y esa es la diferencia con el camino del papel: aquí lo que

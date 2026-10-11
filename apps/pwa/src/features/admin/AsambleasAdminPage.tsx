@@ -36,6 +36,7 @@ import {
   registrarGrabacionAsamblea,
   revocarPoder,
   validarPoder,
+  recibirPoder,
   rechazarPoder,
   configurarVotoNoEconomico,
 } from '../../datos/repositorio'
@@ -67,6 +68,9 @@ import {
   poderVigente,
   poderEsperandoValidacion,
   poderRechazado,
+  poderNoAceptado,
+  poderEsperandoRecepcion,
+  faltaAlPoder,
   resumenAsistencia,
   baseDeVoto,
   admiteAsistencia,
@@ -321,6 +325,12 @@ export function AsambleasAdminPage() {
             )
             if (hecho) setViendoPoder(null)
           }}
+          alRecibir={async () => {
+            await ejecutar(
+              (base) => recibirPoder(base, { poderId: viendoPoder, recibidoPor: sesion.personaId }),
+              'Poder recibido.',
+            )
+          }}
         />
       )}
 
@@ -425,6 +435,8 @@ function DetalleAsamblea({
   const [grabacion, setGrabacion] = useState(asamblea.enlaceGrabacion ?? '')
   const vigentes = poderes.filter(poderVigente)
   const porValidar = poderes.filter((p) => !p.revocadoEn && poderEsperandoValidacion(p))
+  // RN-218 — Dados desde la app y sin recibir.
+  const porRecibir = poderes.filter((p) => !p.revocadoEn && !poderNoAceptado(p) && poderEsperandoRecepcion(p))
   const copropiedad = sel.copropiedad(bd, asamblea.copropiedadId)
   const quorumMinimo = copropiedad?.quorumMinimo ?? 50
   // RN-215 — Antes de instalar, el de ahora; instalada, el que tuvo al instalarse.
@@ -580,6 +592,18 @@ function DetalleAsamblea({
               unidades las vota su propietario.
             </p>
           )}
+          {/* T-46 — El poder dado desde la app lo recibe la administración (RN-218). */}
+          {porRecibir.length > 0 && (
+            <p className="acceso__nota">
+              <strong>
+                {porRecibir.length === 1
+                  ? 'Hay un poder por recibir'
+                  : `Hay ${porRecibir.length} poderes por recibir`}
+              </strong>
+              : los dieron los propietarios desde la app. Ábrelos con «Ver» y dalos por recibidos;
+              hasta entonces esas unidades las vota su propietario.
+            </p>
+          )}
 
           {/* El acumulado por apoderado, a la vista: **la Ley 675 no fija tope**
               (RN-30, revisado el 2026-09-10), y el del reglamento de esta
@@ -630,6 +654,12 @@ function DetalleAsamblea({
                             <span className="chip chip--alerta">Por validar</span>
                           ) : poderRechazado(poder) ? (
                             <span className="chip">Rechazado</span>
+                          ) : poderNoAceptado(poder) ? (
+                            <span className="chip">No aceptado</span>
+                          ) : faltaAlPoder(poder) === 'aceptacion' ? (
+                            <span className="chip chip--info">Espera al apoderado</span>
+                          ) : faltaAlPoder(poder) === 'recepcion' ? (
+                            <span className="chip chip--alerta">Por recibir</span>
                           ) : (
                             <span className="chip chip--exito">Vigente</span>
                           )}
@@ -1326,6 +1356,7 @@ function VistaPoder({
   cargando,
   alCerrar,
   alValidar,
+  alRecibir,
   alRechazar,
 }: {
   bd: ReturnType<typeof useDatos>['bd']
@@ -1334,6 +1365,7 @@ function VistaPoder({
   alCerrar: () => void
   alValidar: () => Promise<void>
   alRechazar: (motivo: string) => Promise<void>
+  alRecibir: () => Promise<void>
 }) {
   const [motivo, setMotivo] = useState('')
   const [rechazando, setRechazando] = useState(false)
@@ -1421,6 +1453,43 @@ function VistaPoder({
             ? ` el ${formatearFecha(poder.validacion.decididoEn.slice(0, 10))}`
             : ''}
           : «{poder.validacion.motivo}». Se conserva con su motivo (RN-61).
+        </p>
+      )}
+
+      {/* T-46 — Dado desde la app: lo acepta el apoderado, si tiene la app
+          (RN-217), y lo recibe la administración (RN-218). */}
+      {poder.aceptacion && (
+        <p className="subtitulo" style={{ marginBottom: 'var(--e2)' }}>
+          {poder.aceptacion.estado === 'esperando'
+            ? 'El apoderado usa Idiky: tiene que aceptarlo en su app.'
+            : poder.aceptacion.estado === 'aceptado'
+              ? 'El apoderado lo aceptó en su app.'
+              : `El apoderado no lo aceptó${poder.aceptacion.motivo ? `: «${poder.aceptacion.motivo}»` : ''}.`}
+        </p>
+      )}
+      {!poder.revocadoEn && !poderNoAceptado(poder) && poderEsperandoRecepcion(poder) && (
+        <div className="columna" style={{ gap: 'var(--e2)', marginBottom: 'var(--e3)' }}>
+          <p className="acceso__nota">
+            El propietario <strong>dio este poder desde su app</strong>.{' '}
+            {poder.aceptacion
+              ? 'Representa cuando el apoderado lo acepte y tú lo des por recibido.'
+              : 'El apoderado no usa Idiky, así que basta con que lo des por recibido.'}{' '}
+            Mientras tanto, esa unidad la vota su propietario.
+          </p>
+          <div className="grupo-botones">
+            <button className="boton boton--primario" disabled={cargando} onClick={() => void alRecibir()}>
+              Dar por recibido
+            </button>
+          </div>
+        </div>
+      )}
+      {poder.recepcion?.estado === 'recibido' && (
+        <p className="subtitulo" style={{ marginBottom: 'var(--e3)' }}>
+          Recibido por la administración
+          {poder.recepcion.recibidoPor && sel.persona(bd, poder.recepcion.recibidoPor)
+            ? ` (${nombreCompleto(sel.persona(bd, poder.recepcion.recibidoPor)!)})`
+            : ''}
+          {poder.recepcion.recibidoEn ? ` el ${formatearFecha(poder.recepcion.recibidoEn.slice(0, 10))}` : ''}.
         </p>
       )}
 

@@ -24,6 +24,7 @@ import { formatearDinero, formatearFecha, formatearFechaCorta } from '../../util
 import { Icono } from '../../componentes/Icono'
 import { ChipComunicado, ChipReserva } from '../../componentes/Etiquetas'
 import { BarraAvance, ChipProyecto } from '../../componentes/TableroProyecto'
+import { PoderesPorAceptar } from './PoderesPorAceptar'
 
 export function InicioPage() {
   const { bd } = useDatos()
@@ -87,6 +88,9 @@ export function InicioPage() {
           <span className="cartera-inicio__etiqueta">No tienes cuotas pendientes</span>
         )}
       </Link>
+
+      {/* T-46 — Un poder que me dieron y espera mi respuesta (RN-217). */}
+      <PoderesPorAceptar />
 
       {/* Accesos directos. Solicitudes se queda aqui (Mary, 2026-08-27): lo que
           habia que unificar no era el sitio, era la identidad. Antes este acceso
