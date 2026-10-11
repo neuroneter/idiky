@@ -151,10 +151,21 @@ llega por SMS al celular registrado en BOB.
    parqueaderos arrastrando.
 5. **CU-B-05** (Pendientes) y **CU-B-06 a CU-B-09** (unidades y coeficientes, propietarios, equipo,
    ubicación y fotos).
-6. **Decisiones abiertas:** T-85 (el bloque «¿Está en mora?», si el Delegado arma flujos, plazo
+6. **Los cuatro casos reales del 2026-09-23** (Life72, Altos del Cacique, Residencias Familiares,
+   copropiedad militar), rescatados el 2026-10-11 (ver su entrada): son **la fuente de requisitos del
+   módulo** y traen lo que el terreno de BLOKY todavía no tiene: **la estructura como pila de pisos
+   por tramos** (usos distintos por piso, sótanos, base común con torres encima: sin eso el conteo de
+   unidades —base de los coeficientes— sale mal), **cuartos útiles** asignados a un apartamento de
+   otro piso (en propiedad o alquiler), la relación **«se bloquea con»** (reservar el salón bloquea la
+   piscina), la **Agrupación que pertenece a una estructura** (tipo Piso), **las agrupaciones anidadas**
+   (prototipadas ahí: resuelve esa decisión de T-85), la **Oficina en planta con puestos fijos o
+   reservables**, y **el acceso como capa** (perímetro → portería → edificio → entrada propia), con
+   la pregunta para Mary de si entra la categoría **«trabajador»**. Verlos en
+   `docs/prototipos/arma-tu-copropiedad/casos-reales.html` antes de seguir con CU-B-03 y CU-B-04.
+7. **Decisiones abiertas:** T-85 (el bloque «¿Está en mora?», si el Delegado arma flujos, plazo
    para refutar una multa, depósito con la cuota, agrupaciones anidadas) y **si ALICE usa el mismo
    directorio** (con Justo, T-80).
-7. **El disco del servidor**: ~3,1 GB libres con un mínimo de 3 GB para construir; ampliar en Azure o
+8. **El disco del servidor**: ~3,1 GB libres con un mínimo de 3 GB para construir; ampliar en Azure o
    quitar Jitsi (~2,1 GB).
 
 **El equipo al 2026-10-11:** **Mary** está integrada en `main` (asambleas: votaciones desde la
@@ -1519,6 +1530,107 @@ que Daniel declare el porqué frente a ADR-0007, para que ADR-0016 pase de Propu
 **3)** el disco. Y una advertencia que quedó escrita: **con 2 núcleos compartidos esto sirve para
 probar y para reuniones pequeñas**; una asamblea de verdad, con decenas de cámaras, pide la VM
 propia. **No se tocó el servidor**: solo se leyó su estado.
+
+### 2026-09-23 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · «Arma tu copropiedad»: la manzana que no crecía y la Oficina con reserva de puestos
+
+> **Rescatada el 2026-10-11.** Esta sesión trabajó en una copia local del repositorio (`idiky/idiky/`)
+> y nunca se subió; se encontró al limpiar esa copia. La rama original quedó en GitHub como
+> `claude/arma-tu-copropiedad-espacios` (`96fd538`) y su versión del prototipo en
+> [`casos-reales.html`](./prototipos/arma-tu-copropiedad/casos-reales.html). El prototipo vigente
+> (`index.html`, 2026-10-03) siguió por otro camino: lo de aquí que **no** tiene está en el traspaso
+> del 2026-10-11.
+
+Sobre el prototipo vigente [`docs/prototipos/arma-tu-copropiedad/index.html`](./prototipos/arma-tu-copropiedad/README.md),
+sin tocar la PWA ni la contable (son bocetos clicables, no código de producto).
+
+**Lo que Daniel notó mirándolo:** al agregarle casas a una **manzana** no pasaba nada en el
+dibujo, mientras que a la torre sí se le veían subir los pisos. Era un error real: la manzana
+dibujaba una sola casa fuera cual fuera el contador, y solo cambiaba el texto. Ahora pone una
+casa por casa, con la misma animación escalonada de los pisos, y un bloque `+N` cuando pasa de
+ocho.
+
+**Lo que pidió:** un objeto **Oficina** al que se le agregan **puestos de trabajo**, pensando en
+oficinas que administran la **reserva de puestos**, con la referencia de
+[Wiser XP](https://wiserxp.com/es-solucion-completa-e-intuitiva/) (oficinas → plantas → zonas →
+puestos; puestos dedicados frente a flexibles; salas de reunión; reserva, *check-in* y analítica).
+
+**Cómo quedó, y por qué la mecánica es distinta:** la torre y la manzana se configuran con
+contadores; la Oficina se configura **tocando la planta**. Se dibuja **vista desde arriba**
+—salas de reunión arriba, puestos abajo—, y **cada puesto se toca para volverlo fijo** (tiene
+dueño, no entra a la reserva) **o reservable** (cualquiera lo aparta por día). Esa es la
+distinción de la que vive una aplicación de reserva de puestos, y es lo primero que un
+administrador necesita declarar. El inspector muestra puestos, salas y el conteo de reservables
+contra fijos, con atajos «Todos reservables» / «Todos fijos». La Oficina entra dentro de una
+torre o de una Agrupación como cualquier otra cosa, se duplica, y suma **una unidad** a la
+copropiedad; sus puestos se cuentan aparte en el encabezado.
+
+**Lo cuarto, y lo más importante de la sesión: cuatro construcciones reales para probar el modelo.**
+Daniel las fue dando una por una, pidiendo que se pensara cada una antes de escribir código:
+
+| Caso | Forma | Lo que destapó |
+|---|---|---|
+| **Life72** | Un edificio de 19 pisos | El piso no existe como concepto. La torre es `pisos × porPiso`, y aquí hay seis usos repartidos en la altura (recepción, parqueaderos, zonas comunes, oficinas, apartamentos, terraza). `unidades()` cuenta 19×4=76 apartamentos cuando son trece pisos: **el conteo de unidades es la base de los coeficientes**, así que no es cosmético |
+| **Altos del Cacique** | Tres torres sobre un edificio base, con tres sótanos | La pila de pisos **se ramifica**: base común abajo, torres distintas arriba, y baja a sótanos. Aparecen el uso **con reserva y pago** (3 parqueaderos de carga eléctrica), los **bienes con acceso independiente** (locales comerciales), **coeficientes distintos entre apartamentos**, y los **cuartos útiles**: están en los pisos 2–8 pero se asignan a un apartamento de cualquier piso, **en propiedad o en alquiler** —y eso cambia si entran al coeficiente o son ingreso de la copropiedad— |
+| **Residencias Familiares** | Etapas y cuadras de casas | La estructura horizontal **ya funcionaba** (una Agrupación recibe manzanas). Lo nuevo es todo de uso: **reservar el salón de fiestas bloquea la piscina**, con solicitud si ya hay reserva; aforo, invitados, tarifas por hora o franja, aseo, reglamento con sanción, y **reservas comerciales** para eventos ajenos. La zona de correr que cruza todas las etapas es el caso donde «no marcar nada» (bien común general) es la respuesta correcta |
+| **Copropiedad militar** | Un complejo que contiene un conjunto, oficinas, restaurantes, clínica y cancha de golf | **El acceso es una capa, no una puerta**: perímetro militar → portería del conjunto → entrada del edificio → entrada propia de la clínica. La clínica tiene dos accesos con dos audiencias. Y el domiciliario le da propósito al croquis: **el nombre de cada agrupación es parte de la dirección** |
+
+**La conclusión:** las cuatro formas salen de las mismas piezas —Agrupación anidable, estructura
+como pila de pisos, espacios—, así que después del segundo caso no apareció ninguna primitiva nueva.
+Lo que sí quedó claro es que hay **tres dimensiones**, y el tablero solo tenía una:
+
+| | Qué responde | Dónde vive | Estado |
+|---|---|---|---|
+| **Estructura** | dónde está cada cosa | el croquis | existe; le falta la pila de pisos por tramos |
+| **Uso** | cómo se reserva y cuánto cuesta | **`ZonaComun` y `Reserva`, que ya existen** en `docs/05` con aforo, ventana operativa, `duracionBloqueHoras`, anticipación, cupo mensual y `requiereAprobacion` | sin conectar al croquis |
+| **Acceso** | quién puede pasar por dónde | — | **no existe**. `Persona`, `Residencia` y `Visitante` sí están, pero el modelo asume **una** portería, y las categorías son `residente`, `residente_temporal` y `visitante`: **no hay ninguna para quien trabaja**, y este caso arranca diciendo «quienes viven **o trabajan** dentro» |
+
+Al croquis solo va lo que se entiende viéndolo —dónde está, de quién es, qué bloquea a qué, por
+dónde se entra—. Tarifas, franjas, aforo y reglamentos se abren desde ahí pero no se dibujan: si se
+meten al tablero vuelve a ser un formulario, que es justo lo que Daniel no quería.
+
+**Lo que se construyó (pasos 1 y 2 del plan, aprobados por Daniel):** el **Espacio con nombre libre
+e ícono a elegir** —el catálogo fijo de ocho amenidades no alcanzaba para las treinta que nombran
+los casos—, **las Agrupaciones anidadas** —se dibujan como caja dentro de caja, al soltar gana la
+más interna, y no se puede meter una dentro de lo que ya contiene— y la **tercera relación, «se
+bloquea con»**, en línea blanca punteada con una × (no roja: `tokens.css` reserva el rojo para la
+plata). Además el nombre se escribe en el inspector en vez de un `prompt()`.
+
+**Y el paso 3, en la misma sesión: el croquis ya habla con el modelo de reservas.** Un interruptor
+**«Se reserva»** en el inspector; encendido, la zona queda con una **marca de reloj en el croquis**
+—se ve cuáles se reservan sin abrir nada— y se abre su **ficha**, una hoja encima del tablero. Los
+campos de la ficha son **literalmente los de `ZonaComun`**, con el mismo nombre. Lo que los casos
+pidieron y el modelo no tiene va en tres grupos aparte (Quién puede, Costo, Reglas), y la hoja lo
+advierte al pie: así **la decisión de qué agregarle a `ZonaComun` se toma mirando la ficha**. Nada
+de eso se dibuja en el croquis, a propósito.
+
+**Lo que falta, en orden:** (4) los accesos —portería y entrada son adornos hoy: no saben a qué
+recinto dan paso ni quién lo cruza—; (5) abrir el edificio: la pila de pisos por tramos, con
+sótanos y ramificada, que rehace buena parte del dibujo. **Y una decisión que no es del prototipo:
+¿entra la categoría «trabajador» al dominio?** Toca el registro de personas y la portería, que son
+de Mary.
+
+**Lo tercero que pidió, en la misma sesión:** «un agrupador en los espacios, ya que se puede tener
+un piso completo o una zona completa con diferentes amenidades, y que este agrupador se pueda
+después relacionar con una estructura». No se creó un concepto nuevo —la Agrupación ya era general
+por pedido suyo—: **se puso la misma Agrupación también en la pestaña Espacios**, naciendo distinta
+según de dónde se saque (de Estructura, «Etapa 1»; de Espacios, «Zona común 1»), con los tipos
+nuevos **Piso** (con «¿qué piso?»), Zona común, Terraza y Sótano. Lo que de verdad faltaba era la
+relación: **una Agrupación solo podía recibir cosas, no pertenecer a nada**. Ahora tiene
+**«pertenece a»** con la misma mecánica de líneas de los parqueaderos —en el inspector, «¿De quién
+es?» con un interruptor por torre, manzana o agrupación, y vacío significa «de toda la
+copropiedad»—, y no se deja relacionar con algo que ya tiene adentro.
+
+**Cuatro errores que salieron al revisar:** tocar algo **dentro de una Agrupación** no abría el
+inspector (el id se guardaba como texto en los manejadores en línea y como número en los del
+terreno, y la búsqueda comparaba con `===`); **Duplicar** dejaba la copia compartiendo con el
+original la lista de parqueaderos asignados; los conteos decían «1 casas»; y el título de una
+Agrupación repetía el tipo («Etapa · Etapa 2») cuando el nombre ya lo decía. Corregidos.
+
+**Qué sigue:** decidir si la Oficina entra al alcance de BLOKY o es otro producto —la reserva de
+puestos no es propiedad horizontal—; si entra, falta lo que viene después de armar el espacio:
+atributos por puesto (doble pantalla, zona o «barrio»), cabinas telefónicas y **el flujo de
+reserva**, que es otro caso de uso. Sigue pendiente de la v4: la versión táctil con eventos de
+puntero y la ruta experta con Excel.
 
 ### 2026-09-21 · BLOKY Dev · Sesión de IA (Claude) con el responsable de integración · Cómo se siente el primer día: «Arma tu copropiedad» (prototipo)
 
