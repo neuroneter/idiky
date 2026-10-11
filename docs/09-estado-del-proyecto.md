@@ -112,6 +112,29 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · La agrupación como capa de color (RN-247) y el plano real que viene
+
+Daniel quiere **un plano con las calles de acceso reales** alrededor de la copropiedad (con la
+dirección), y para eso las agrupaciones no pueden seguir siendo cajas donde se encajan las torres.
+Primer paso, **desplegado**: **RN-247, la agrupación es una capa, no una caja**. Sus miembros se
+ubican libres en el plano; la etapa es **una mancha suave de su color** bajo ellos y **un letrero
+en el suelo** que, al arrastrarlo, mueve a todos juntos; el recuadro solo aparece al elegirla o con
+«▢ Agrupaciones». Se entra soltando sobre la mancha o desde el panel; mover un miembro no lo saca.
+Lo que venía encajado (posición 0,0 o repetida) **se acomoda solo** en fila donde estaba la caja, y
+la API reparte en el plano las torres de cada etapa al confirmar una propuesta del reglamento.
+Probado: terreno viejo acomodado y guardado; mover la etapa por su letrero (las 3 torres juntas);
+la piscina soltada junto a la Torre 3 entró a la etapa.
+
+**El plano real (lo que sigue), analizado con datos:** con OpenStreetMap se encontró la esquina
+**Carrera 68 con Calle 74** de Barranquilla (Oasis); el número no está, pero la dirección
+colombiana lo da: *Carrera 68 # 74-80* = sobre la Carrera 68, a 80 m de la esquina con la Calle 74.
+Las calles y edificios vecinos salen de OpenStreetMap (se pueden redibujar con estilo propio,
+citando «© OpenStreetMap»; **Google no lo permite**); los límites del lote, de OpenStreetMap si está,
+del **catastro abierto** donde exista (Bogotá, Medellín, IGAC) o dibujados por el administrador.
+Los servidores públicos gratuitos fallaron en la prueba: el barrio se descarga **una vez** y se
+guarda. Es CU-B-09 (Ubicación); ADR-0017 se escribirá con OpenStreetMap y no Google. Daniel: cuando
+se cargue un documento, el mapa y las estructuras tendrán que dibujarse solos sobre el plano.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El edificio como pila de pisos por tramos, con terrazas (RN-242 a RN-244)
 
 Daniel: *¿qué pasa si hay terrazas en algunos pisos o el último piso tiene terraza?* Eligió hacerlo
