@@ -127,8 +127,10 @@ Archivos: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/reposito
 
 **Pruebas:** `apps/pwa/pruebas/navegador/poderes.spec.ts` (2 nuevas); **46 en verde**.
 
-**Para revisar:** el «aviso» es en pantalla (no hay notificaciones push en el demo); y el
-poder enviado en foto (CU-R-31) sigue pasando solo por la validación de la administración.
+**Decidido (Mary, 2026-10-11):** el poder enviado en foto (CU-R-31) **se deja así**: solo lo
+valida la administración (RN-96), sin aceptación del apoderado. *«lo dejamos así»*.
+
+**Para revisar:** el «aviso» es en pantalla (no hay notificaciones push en el demo).
 
 ### 2026-10-11 · Mary + IA (Claude) · Sin quórum, segunda convocatoria (RN-216)
 
