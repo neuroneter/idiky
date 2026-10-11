@@ -479,8 +479,11 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
   reservar (CU-B-13). Referencia: el modo «Plano» de Spot.
 
 **Flujo principal**
-1. La primera vez, elige una **plantilla** para el piso 1: piso abierto, oficinas con pasillo,
-   coworking o vacío, y el tamaño del piso en metros.
+0. La primera vez crea su **sede** (RN-259): el nombre de la oficina, el edificio, la dirección, la
+   ciudad y el país. Después puede agregar más sedes (otros edificios, ciudades o países) y pasar
+   de una a otra; cada sede tiene sus propios pisos.
+1. Para cada piso nuevo elige una **plantilla**: piso abierto, oficinas con pasillo, coworking,
+   sótano de parqueo o vacío, y el tamaño del piso en metros.
 2. Ve la **planta en isométrico, con el estilo de juego del terreno** (2026-10-11, Daniel: *se
    siente de cuadritos*): losa, fachada con ventanas, suelos con su material, muros en corte y los
    muebles de cada tipo (escritorios, mesa de juntas, sofás, cocineta, baños, ascensores), con el
@@ -493,6 +496,8 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
    reservar (RN-255).
 5. En una zona de puestos o una oficina, **«Llenar de puestos»** la llena de escritorios
    numerados; también se agregan, mueven, **duplican** y quitan uno por uno (RN-256).
+5a. Agrega **parqueaderos de carros, motos o bicicletas** donde van (un sótano, por ejemplo): los
+   cupos salen del tamaño del área y se ven con sus líneas y vehículos (RN-260).
 5b. **Amobla** cada espacio desde la pestaña «Objetos»: mesas de juntas de 4 a 16 personas, mesas
    de comedor, mesitas de café, sofás, salas y sillas de espera, poltronas, matas y tableros, cada
    uno con su miniatura (RN-258). Se arrastran, se giran, se les cambia la capacidad y se duplican;
@@ -505,9 +510,9 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
 - A1. Otra persona cambió la planta mientras tanto → no se pisa; se avisa y se recarga.
 - A2. Un recinto quedaría fuera del piso o encima de otro → no se suelta ahí; vuelve a su lugar.
 
-**Reglas de negocio:** RN-252, RN-254, RN-255, RN-256, RN-257, RN-258.
+**Reglas de negocio:** RN-252, RN-254, RN-255, RN-256, RN-257, RN-258, RN-259, RN-260.
 
-**Lo que queda abierto:** muros en ángulo y puertas; varias sedes; las reservas (CU-B-13); los
+**Lo que queda abierto:** muros en ángulo y puertas; ubicar cada sede en el mapa (CU-B-09); las reservas (CU-B-13); los
 miembros y empresas que reservan; tarifas.
 
 **Estado en BLOKY Dev:** 🟡 (2026-10-11) — desplegado (`759d8b3.bloky-8815a83`) y probado con la API simulada (cliente «Cowork Centro 93»); para verlo en Dev falta que BOB tenga el campo `negocio` (rama `feature/negocio-espacio-trabajo` de `BOB-Idiky`). Código: `apps/bloky/src/features/planta/` y `apps/bloky-api/src/planta/`.

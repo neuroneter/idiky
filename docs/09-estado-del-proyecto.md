@@ -112,6 +112,23 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Sedes y parqueaderos (RN-259, RN-260, CU-B-12)
+
+Daniel: *una empresa puede tener uno o más pisos en un edificio y oficinas en otros edificios, otras
+ciudades u otros países… con el nombre de cada oficina; y parqueaderos para motos, carros o bicicletas*.
+- **RN-259** sedes: la planta se guarda por sedes (nombre, edificio, dirección, ciudad, país y sus
+  pisos). API: `motivoSedesInvalidas`, `PUT /planta {sedes, version}`, migración `008-sedes.sql`
+  (expandir: lo anterior pasa a una «Sede principal»; la columna `pisos` se quitará después).
+- **RN-260** parqueaderos de carros, motos y bicicletas: cupos calculados por tamaño
+  (`cuposParqueo`), dibujados con líneas y vehículos; plantilla «Sótano de parqueo».
+- Pantalla: selector de sede, «Datos de la sede», «＋ Nueva sede»; el resumen dice la sede, cuántas
+  sedes en cuántas ciudades y países, y el parqueo.
+- Verificado en una copia aparte: sede «Oficina Centro 93 · Torre 93 · Bogotá», piso coworking y
+  sótano (20 carros, 15 motos, 16 bicicletas), sede «Oficina Lima · Perú» con oficinas con pasillo;
+  lo guardado pasa `motivoSedesInvalidas`. `npm run probar` con RN-259 y RN-260. `develop` `1e4eac0`.
+- Ojo: la API simulada guarda ahora por sedes; quien la tenga corriendo debe reiniciarla.
+Rango de Integración: RN usadas hasta RN-260.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Duplicar y objetos para amoblar (RN-258, CU-B-12)
 
 Daniel: *falta cómo duplicar los puestos… y un menú que me dé objetos como salas, mesitas para los
