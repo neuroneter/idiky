@@ -112,6 +112,27 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El terreno como un juego, en isométrico (CU-B-03)
+
+Daniel: las cosas en el terreno *se veían súper feas y pequeñas*; quería que *se sienta lindo, como
+un juego*. Eligió **isométrico 2.5D**. Desplegado `760c788.bloky-83cb40e` (`Bloky-Idiky`,
+`apps/bloky/src/features/estructura/Sprite.tsx`):
+
+- **Cada cosa se dibuja en isométrico con SVG propio, sin librerías.** La torre crece con sus pisos
+  y lleva una ventana por apartamento (con vitrinas y toldos si tiene locales, y el tanque en el
+  techo); oficina de vidrio, manzana de casitas a dos aguas, locales con toldos, depósito, piscina
+  con agua y escalerilla, parque con árboles y arenero, parqueadero con rayas y su «P», portería
+  con talanquera, entrada con reja, salón y gimnasio con letrero, «otro espacio» con su ícono.
+- **El terreno es césped** con cuadrícula isométrica; **cada etapa es una parcela con cerca y su
+  color**, que heredan las torres que tiene dentro. Aparecen con rebote, se levantan al pasar, lo
+  elegido lleva un anillo en el piso, y los nombres van en **etiquetas flotantes**. **El catálogo
+  muestra las piezas en 3D.** Se dibujan 1,6 veces sueltas y 1 vez dentro de una etapa.
+- **No cambió** la posición por base central (RN-173), el arrastre, la contención, la asignación
+  ni el guardado; se probó arrastrar (se guarda solo) y en celular.
+
+**Lo que sigue:** que Daniel lo vea en BLOKY Dev y diga qué ajustar (tamaños, colores, más
+detalle); zoom del terreno; y el resto de CU-B-03 (guías de alineación, asignar arrastrando).
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Documentos en R2 y su versión digital (CU-B-11, ADR-0019)
 
 Daniel pidió que el documento que se sube **quede en los documentos de la copropiedad** y que se cree

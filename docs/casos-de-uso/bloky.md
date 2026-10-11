@@ -187,7 +187,8 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
 **Estado en BLOKY Dev:** 🟡 (2026-10-03) — el terreno funciona y guarda en el esquema de cada
 copropiedad (`elemento`, `estructura_version`), con arrastre por eventos de puntero, contención,
 asignación, deshacer y control de versión (dos personas no se pisan). Faltan la importación desde
-Excel y las guías de alineación. Código: `apps/bloky/src/features/estructura/` y
+Excel y las guías de alineación. **2026-10-11:** se ve como un juego, en isométrico (torres con su altura y
+ventanas, césped, etapas como parcelas de color, etiquetas flotantes; `Sprite.tsx`). Código: `apps/bloky/src/features/estructura/` y
 `apps/bloky-api/src/estructura/`.
 
 ---
