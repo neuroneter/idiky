@@ -113,6 +113,11 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
 | **Dinero** | Cartera · Pagos · Multas |
 | **Gobierno** | Asambleas · Procesos |
 
+> **Actualización (2026-10-11, Daniel):** al entrar a un cliente, lo primero es su **estructura** (el
+> terreno o la planta, RN-252), para ubicarse de forma gráfica; los primeros pasos quedan en el menú.
+> El menú es una **barra de fichas** con dibujos isométricos (Estructura o Planta, Primeros pasos,
+> Documentos, Ubicación y «Pronto», donde lo que aún no existe aparece como niveles bloqueados).
+
 **Flujo principal**
 1. Entra a la copropiedad. Si faltan pasos obligatorios, el Inicio muestra el camino con el
    siguiente paso destacado («Empieza por armar tu copropiedad»).

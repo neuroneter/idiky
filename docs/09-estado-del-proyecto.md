@@ -112,6 +112,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Entrar a la estructura y menú de fichas (CU-B-02)
+
+Daniel probó los dos negocios en BLOKY Dev (*quedó todo muy bien*) y pidió: (1) que al entrar lo
+primero sea la estructura, para que el Administrador o el Delegado se ubique de forma gráfica; (2) un
+menú menos denso, con la estética de «Arma tu copropiedad».
+- Al abrir un cliente se va a su estructura (`/estructura` o `/planta`); «Primeros pasos» en `/pasos`.
+- `MenuJuego.tsx`: barra de fichas con dibujos isométricos, la activa en blanco con brillo, el rol como
+  insignia; lo que no existe aún vive en «Pronto» (panel de niveles bloqueados). En el teléfono, arriba.
+- Verificado con la API simulada (copropiedad y cowork). `Bloky-Idiky` `develop` (merge posterior a
+  `e1f5ab7`). **Sigue:** desplegar y que Daniel lo pruebe.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Llevar los dos negocios a BLOKY Dev (RN-252)
 
 Daniel: *llevarlo a BLOKY Dev; al entrar se presentan las unidades que se administran y, si es un
