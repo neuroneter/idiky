@@ -112,6 +112,21 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Duplicar y objetos para amoblar (RN-258, CU-B-12)
+
+Daniel: *falta cómo duplicar los puestos… y un menú que me dé objetos como salas, mesitas para los
+espacios de comer o de espera, los puestos y las salas de juntas aunque tengan diferente capacidad*.
+- **RN-258** (`docs/05`): objetos con capacidad, girables, dentro de su espacio y sin chocar; la API
+  los valida (`motivoObjetosInvalidos`) y los guarda con la planta (prueba de humo nueva).
+- App: pestañas «Espacios | Objetos» con miniaturas; puesto y fila de 4 puestos (como puestos);
+  **Duplicar** puesto, objeto o espacio (con sus puestos y objetos), botón o Cmd/Ctrl + D; el
+  inspector del objeto cambia la capacidad en fichas y lo gira; un espacio con objetos ya no
+  muestra los muebles de muestra.
+- Verificado en una copia aparte (puerto 5174): duplicar puesto (P-62), sala de espera, comedor,
+  mesa de juntas de 8 → 4 y girada, puestos negados en una sala, fila de 4 en la oficina,
+  duplicar espacio con su mesa; lo guardado pasa las reglas de la API. `develop` `54860ff`.
+Rango de Integración: RN usadas hasta RN-258.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · La planta en isométrico (CU-B-12)
 
 Daniel probó la planta en local: *no tiene la estética de las unidades residenciales; se siente de

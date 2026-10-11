@@ -492,7 +492,11 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
 4. Al tocar un recinto, en el panel cambia su nombre, su tipo, su tamaño, su capacidad y si se puede
    reservar (RN-255).
 5. En una zona de puestos o una oficina, **«Llenar de puestos»** la llena de escritorios
-   numerados; también se agregan, mueven y quitan uno por uno (RN-256).
+   numerados; también se agregan, mueven, **duplican** y quitan uno por uno (RN-256).
+5b. **Amobla** cada espacio desde la pestaña «Objetos»: mesas de juntas de 4 a 16 personas, mesas
+   de comedor, mesitas de café, sofás, salas y sillas de espera, poltronas, matas y tableros, cada
+   uno con su miniatura (RN-258). Se arrastran, se giran, se les cambia la capacidad y se duplican;
+   un espacio también se duplica con todo lo que tiene (Cmd/Ctrl + D).
 6. **Agrega pisos** (vacíos o como copia de otro, para los pisos iguales) y pasa de uno a otro.
 7. Todo se guarda solo, con versión, y se puede deshacer (RN-257). El resumen dice el área, los
    puestos, las salas, las oficinas y la capacidad total.
@@ -501,7 +505,7 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
 - A1. Otra persona cambió la planta mientras tanto → no se pisa; se avisa y se recarga.
 - A2. Un recinto quedaría fuera del piso o encima de otro → no se suelta ahí; vuelve a su lugar.
 
-**Reglas de negocio:** RN-252, RN-254, RN-255, RN-256, RN-257.
+**Reglas de negocio:** RN-252, RN-254, RN-255, RN-256, RN-257, RN-258.
 
 **Lo que queda abierto:** muros en ángulo y puertas; varias sedes; las reservas (CU-B-13); los
 miembros y empresas que reservan; tarifas.
