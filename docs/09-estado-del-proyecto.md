@@ -130,8 +130,13 @@ un juego*. Eligió **isométrico 2.5D**. Desplegado `760c788.bloky-83cb40e` (`Bl
 - **No cambió** la posición por base central (RN-173), el arrastre, la contención, la asignación
   ni el guardado; se probó arrastrar (se guarda solo) y en celular.
 
-**Lo que sigue:** que Daniel lo vea en BLOKY Dev y diga qué ajustar (tamaños, colores, más
-detalle); zoom del terreno; y el resto de CU-B-03 (guías de alineación, asignar arrastrando).
+**Ajuste (misma tarde):** Daniel notó que al soltar un espacio dentro de una torre el dibujo se
+volvía una etiqueta. Ahora **lo que está dentro de una torre u oficina conserva su dibujo**, al lado
+del edificio, **en su patio con cerca del color del edificio** (el lenguaje de las etapas), sin
+correr el edificio; también se ven los espacios de las torres que están dentro de una etapa.
+Probado sacar y volver a meter arrastrando.
+
+**Lo que sigue:** zoom del terreno; y el resto de CU-B-03 (guías de alineación, asignar arrastrando).
 
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · Documentos en R2 y su versión digital (CU-B-11, ADR-0019)
 
