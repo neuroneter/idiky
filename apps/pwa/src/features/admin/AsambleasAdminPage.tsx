@@ -59,6 +59,7 @@ import {
   sumaCoeficientes,
   convocatoriaCompleta,
   definicionModalidad,
+  antelacionConvocatoria,
   admiteGrabacion,
   herramientaDeEnlace,
   salvedadCanalDeUnaVia,
@@ -88,6 +89,7 @@ import { HojaPoder } from '../../componentes/HojaPoder'
 import { HojaActa } from '../../componentes/HojaActa'
 import { VotacionPunto } from './VotacionPunto'
 import { SegundaConvocatoria } from './SegundaConvocatoria'
+import { CitacionAsamblea } from './CitacionAsamblea'
 
 function formatearCoeficiente(coeficiente: number): string {
   return `${coeficiente.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
@@ -262,8 +264,8 @@ export function AsambleasAdminPage() {
           alCerrar={() => setConvocando(false)}
           alConvocar={async (datos) => {
             const creada = await ejecutar(
-              (base) => convocarAsamblea(base, { copropiedadId: sesion.copropiedadId, ...datos }),
-              'Asamblea convocada.',
+              (base) => convocarAsamblea(base, { copropiedadId: sesion.copropiedadId, convocadaPor: sesion.personaId, ...datos }),
+              'Asamblea convocada. La citación quedó enviada a cada propietario.',
             )
             if (creada) setConvocando(false)
           }}
@@ -502,6 +504,9 @@ function DetalleAsamblea({
           <ChipAsamblea estado={asamblea.estado} />
         </div>
       </div>
+
+      {/* CU-A-12 — La citación y su constancia de envío (RN-219). */}
+      <CitacionAsamblea asamblea={asamblea} />
 
       {/* RN-98 — La salvedad de la transmisión de una vía. Se dice, no se
           impide: quien convoca decide con la ley a la vista. */}
@@ -959,6 +964,8 @@ function FormularioConvocatoria({
   const [error, setError] = useState<string | null>(null)
 
   const definicion = definicionModalidad(modalidad)
+  // RN-33 — La antelación se ve al escoger la fecha, no al final.
+  const antelacion = fechaHora ? antelacionConvocatoria({ tipo, fechaHora }) : undefined
   const respaldoListo = convocatoriaCompleta({
     modalidad,
     lugar,
@@ -974,6 +981,10 @@ function FormularioConvocatoria({
     }
     if (!fechaHora) {
       setError('Falta la fecha y la hora.')
+      return
+    }
+    if (antelacion?.bloquea) {
+      setError(antelacion.bloquea)
       return
     }
     if (citacion.trim().length < 4) {
@@ -1086,6 +1097,12 @@ function FormularioConvocatoria({
               value={fechaHora}
               onChange={(evento) => setFechaHora(evento.target.value)}
             />
+            {/* RN-33 — Ley 675, art. 39: la ordinaria, con 15 días calendario. */}
+            {(antelacion?.bloquea || antelacion?.aviso) && (
+              <span className="ayuda-campo" role="status">
+                {antelacion.bloquea ?? antelacion.aviso}
+              </span>
+            )}
           </div>
         </div>
 

@@ -731,6 +731,29 @@ tenía **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de de
 contable al día): **Daniel lo integró a `main` el 2026-10-11**. Su rama sigue atrás de `main`; el
 aviso de inicio de su próxima sesión se la trae.
 
+### 2026-10-12 · Mary + IA (Claude) · La citación a asamblea (CU-A-12, RN-33, RN-219)
+
+Mary: *«si, construye la citación»*, sobre la propuesta de cinco puntos. Al convocar, Idiky
+**emite la citación** (`CIT-AAAA-NNNN` con código): fecha, hora, modalidad, lugar o enlace, el
+orden del día, el aviso de la segunda convocatoria (art. 41) y la nota de poderes. Va a **cada
+propietario** (art. 39): en la app, al correo si lo tiene y, sin correo, **impresa** para
+entregar en mano; queda la **constancia** de a quién, cuándo y por dónde, y se fija en la
+cartelera. La **ordinaria exige 15 días calendario** de antelación (RN-33); la extraordinaria
+solo avisa. La segunda convocatoria lleva su propia citación. Las asambleas del demo se citan
+con «Emitir la citación». El propietario la ve e imprime desde su app (CU-R-20). Además: la
+citación **no pide confirmar asistencia** (Mary: *«no se requiere o exige confirmación de
+asistencia»*).
+Archivos: `apps/pwa/src/componentes/HojaCitacion.tsx` y
+`apps/pwa/src/features/admin/CitacionAsamblea.tsx` (nuevos), `apps/pwa/src/dominio/{tipos,reglas}.ts`,
+`apps/pwa/src/datos/repositorio.ts`, `apps/pwa/src/features/admin/AsambleasAdminPage.tsx`,
+`apps/pwa/src/features/residente/AsambleaDetallePage.tsx`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/citacion.spec.ts` (3 nuevas); en `asambleas.spec.ts`
+las asambleas de prueba convocadas para hoy pasaron a extraordinarias (la ordinaria ya no se
+puede citar para el mismo día). **49 en verde.**
+
+**Para el abogado:** si el correo electrónico vale como «última dirección registrada» (art. 39).
+
 ### 2026-10-11 · Mary + IA (Claude) · El poder lo acepta el apoderado y lo recibe la administración (T-46, RN-217, RN-218)
 
 Mary: *«para el punto dos solo aplica si al que le dan el poder hace parte de la copropiedad o
