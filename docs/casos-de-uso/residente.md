@@ -542,21 +542,21 @@ revisión, se imprime desde la app, sin servidor ni librerías.
 ---
 
 ### CU-R-20
-## CU-R-20 — Recibir la citación a asamblea y confirmar asistencia
+## CU-R-20 — Recibir la citación a asamblea
 
 - **Actor principal:** Copropietario
 - **Precondiciones:** El administrador convocó la asamblea (CU-A-12).
 - **Disparador:** Se emite la convocatoria.
-- **Resultado esperado:** Conoce fecha, hora, modalidad y orden del día, y dice si asiste.
+- **Resultado esperado:** Conoce fecha, hora, modalidad y orden del día.
 
 **Flujo principal**
 1. El sistema le entrega la citación con: tipo de asamblea (ordinaria o extraordinaria),
    fecha y hora, modalidad (presencial, virtual o mixta **(?)**), orden del día y el
    documento formal de convocatoria en PDF.
-2. El copropietario confirma si asistirá, si no asistirá, o si delegará mediante poder.
-   **Esto no es quórum ni lo anticipa**: el quórum se verifica al inicio de la reunión con la
+2. **No se le pide confirmar asistencia** (Mary, 2026-10-12: *«no se requiere o exige
+   confirmación de asistencia»*). El quórum se verifica al inicio de la reunión con la
    asistencia real (RN-215; Mary, 2026-10-11: *«el quórum no se calcula antes de la reunión»*).
-3. Si elige delegar, el sistema lo lleva a otorgar el poder (CU-R-22).
+3. Si no puede ir, puede dar poder desde la misma asamblea (CU-R-23).
 4. El sistema le recuerda la asamblea antes de que empiece.
 
 **Flujos alternativos**
@@ -573,7 +573,7 @@ las votaciones siguen siendo aquí.
 
 **Estado en el demo:** 🟡 — `src/features/residente/AsambleasPage.tsx` muestra la citación, la
 modalidad, el lugar y el orden del día de cada asamblea, ordinaria o extraordinaria. **No
-confirma asistencia** (paso 2) ni entrega la convocatoria en PDF (ADR-0006).
+entrega** la convocatoria en PDF (ADR-0006).
 
 ---
 
