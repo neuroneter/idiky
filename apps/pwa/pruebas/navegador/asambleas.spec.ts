@@ -252,7 +252,7 @@ test('sin quórum se cita la segunda convocatoria: tercer día hábil, 8:00 p. m
     }
     const hoy = new Date().toISOString().slice(0, 10)
     const primera = (await intento(() => repo.convocarAsamblea(bd, {
-      copropiedadId: 'cop-1', tipo: 'ordinaria', titulo: 'Ordinaria de prueba', fechaHora: `${hoy}T18:00:00`,
+      copropiedadId: 'cop-1', tipo: 'extraordinaria', titulo: 'Extraordinaria de prueba', fechaHora: `${hoy}T18:00:00`,
       modalidad: 'presencial', lugar: 'Salón social', citacion: 'Convocatoria 009',
       ordenDelDia: [{ titulo: 'Presupuesto', descripcion: 'Del año', seVota: true, mayoria: 'simple' }],
     }))) as { id: string }
@@ -319,7 +319,7 @@ test('la administradora cita la segunda convocatoria desde la consola (RN-216)',
     let bd = await repo.cargar()
     const hoy = new Date().toISOString().slice(0, 10)
     const res = await repo.convocarAsamblea(bd, {
-      copropiedadId: 'cop-1', tipo: 'ordinaria', titulo: 'Ordinaria sin gente', fechaHora: `${hoy}T18:00:00`,
+      copropiedadId: 'cop-1', tipo: 'extraordinaria', titulo: 'Extraordinaria sin gente', fechaHora: `${hoy}T18:00:00`,
       modalidad: 'presencial', lugar: 'Salón social', citacion: 'Convocatoria 010',
       ordenDelDia: [{ titulo: 'Presupuesto', descripcion: 'Del año', seVota: true }],
     })
@@ -329,7 +329,7 @@ test('la administradora cita la segunda convocatoria desde la consola (RN-216)',
   await page.reload()
   await entrarComo(page, /Olga Lucia Henao/)
   await page.goto('/#/admin/asambleas')
-  await page.locator('tr', { hasText: 'Ordinaria sin gente' }).first().getByRole('button', { name: 'Abrir' }).click()
+  await page.locator('tr', { hasText: 'Extraordinaria sin gente' }).first().getByRole('button', { name: 'Abrir' }).click()
   await expect(page.getByRole('button', { name: 'Instalar la asamblea' })).toBeDisabled()
   await expect(page.getByText('¿No se reunió el quórum?')).toBeVisible()
   await expect(page.getByLabel('Fecha de la segunda convocatoria')).toHaveValue('2026-10-14')

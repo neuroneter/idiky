@@ -153,6 +153,8 @@ import {
   condicionesPosibles,
   marcaResidente,
   motivoNoCitaSegunda,
+  antelacionConvocatoria,
+  canalesDeCitacion,
   fechaSegundaConvocatoria,
   HORA_SEGUNDA_CONVOCATORIA,
   motivoNoSeInstala,
@@ -2294,10 +2296,16 @@ export async function convocarAsamblea(
       seVota: boolean
       mayoria?: MayoriaExigida
     }>
+    /** Quien convoca: firma la citacion (RN-219). */
+    convocadaPor?: string
   },
 ): Promise<Resultado<Asamblea>> {
   await esperar()
   const bd = clonar(bdActual)
+
+  // RN-33 — La ordinaria, con 15 dias calendario; la extraordinaria solo avisa.
+  const antelacion = antelacionConvocatoria(parametros)
+  if (antelacion.bloquea) throw new ErrorDeNegocio(antelacion.bloquea)
 
   if (!convocatoriaCompleta(parametros)) {
     const definicion = definicionModalidad(parametros.modalidad)
@@ -2333,6 +2341,116 @@ export async function convocarAsamblea(
     estado: 'convocada',
   }
   bd.asambleas.push(asamblea)
+  emitirCitacionEn(bd, asamblea, parametros.convocadaPor, { publicarEnCartelera: true })
+  return persistir(bd, asamblea)
+}
+
+/**
+ * RN-219 — Emite la citacion: el documento con su consecutivo y su codigo
+ * (RN-36, ADR-0006), la constancia de envio a **cada propietario** por sus
+ * canales y, si se pide, el aviso fijado en la cartelera. El envio es simulado:
+ * el demo no manda correos (fase 1).
+ */
+function emitirCitacionEn(
+  bd: BaseDatos,
+  asamblea: Asamblea,
+  emitidoPor: string | undefined,
+  opciones: { publicarEnCartelera: boolean },
+): Documento {
+  const hoy = hoyISO()
+  const consecutivo = bd.consecutivos.citacion ?? 1
+  const documento: Documento = {
+    id: nuevoId('doc'),
+    tipo: 'citacion',
+    numero: `CIT-${hoy.slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`,
+    codigoVerificacion: nuevoCodigoVerificacion(),
+    copropiedadId: asamblea.copropiedadId,
+    unidadId: '',
+    asambleaId: asamblea.id,
+    emitidoEn: hoy,
+    ...(emitidoPor ? { emitidoPor } : {}),
+    estado: 'vigente',
+  }
+  bd.documentos.push(documento)
+  bd.consecutivos.citacion = consecutivo + 1
+  asamblea.citacionDocumentoId = documento.id
+
+  const ahora = ahoraISO()
+  const unidades = bd.unidades.filter((u) => u.copropiedadId === asamblea.copropiedadId)
+  asamblea.envioCitacion = unidades.flatMap((unidad) =>
+    bd.residencias
+      .filter((r) => r.unidadId === unidad.id && r.rol === 'propietario' && !r.cierre && residenciaVigente(r))
+      .map((r) => {
+        const persona = bd.personas.find((p) => p.id === r.personaId)
+        return {
+          unidadId: unidad.id,
+          personaId: r.personaId,
+          canales: canalesDeCitacion(persona ?? { email: '' }),
+          enviadoEn: ahora,
+        }
+      }),
+  )
+
+  if (opciones.publicarEnCartelera) {
+    const cuando = formatearFecha(asamblea.fechaHora.slice(0, 10))
+    bd.comunicados.unshift({
+      id: nuevoId('com'),
+      copropiedadId: asamblea.copropiedadId,
+      titulo: `Convocatoria: ${asamblea.titulo}`,
+      cuerpo:
+        `Se convoca a los propietarios a la ${asamblea.titulo.toLowerCase()} el ${cuando} a las ` +
+        `${asamblea.fechaHora.slice(11, 16)}${asamblea.lugar ? `, en ${asamblea.lugar}` : ''}. ` +
+        `La citación, con el orden del día, está en Asambleas (${documento.numero}).`,
+      categoria: 'asamblea',
+      fijado: true,
+      fechaPublicacion: ahora,
+      vigenteHasta: asamblea.fechaHora.slice(0, 10),
+      autor: 'Administración',
+      leidoPor: [],
+    })
+  }
+  return documento
+}
+
+/**
+ * CU-A-12 — Emitir la citacion de una asamblea convocada que todavia no la
+ * tiene (las de la semilla, o las convocadas antes de que existiera).
+ */
+export async function emitirCitacion(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; personaId: string },
+): Promise<Resultado<Documento>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (!esAdministracion(bd, parametros.personaId, asamblea.copropiedadId)) {
+    throw new ErrorDeNegocio('La citación la emite la administración.')
+  }
+  if (asamblea.estado !== 'convocada') throw new ErrorDeNegocio('Solo se cita una asamblea convocada.')
+  if (asamblea.citacionDocumentoId) throw new ErrorDeNegocio('Esa asamblea ya tiene su citación.')
+  const documento = emitirCitacionEn(bd, asamblea, parametros.personaId, { publicarEnCartelera: true })
+  return persistir(bd, documento)
+}
+
+/** RN-219 — La administracion entrego en mano la citacion impresa. */
+export async function marcarCitacionEntregada(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; personaId: string; unidadId: string; destinatarioId: string },
+): Promise<Resultado<Asamblea>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  if (!esAdministracion(bd, parametros.personaId, asamblea.copropiedadId)) {
+    throw new ErrorDeNegocio('La entrega la registra la administración.')
+  }
+  const envio = asamblea.envioCitacion?.find(
+    (e) => e.unidadId === parametros.unidadId && e.personaId === parametros.destinatarioId,
+  )
+  if (!envio || !envio.canales.includes('impresa')) throw new ErrorDeNegocio('Esa citación no va impresa.')
+  if (envio.impresaEntregadaEn) throw new ErrorDeNegocio('Esa citación ya se entregó.')
+  envio.impresaEntregadaEn = ahoraISO()
   return persistir(bd, asamblea)
 }
 
@@ -2545,8 +2663,12 @@ export async function citarSegundaConvocatoria(
     enlaceGrabacion: undefined,
     segundaConvocatoriaId: undefined,
     primeraConvocatoriaId: primera.id,
+    citacionDocumentoId: undefined,
+    envioCitacion: undefined,
   }
   bd.asambleas.push(segunda)
+  // RN-219 — La segunda lleva su propia citación; el aviso de la cartelera es el de abajo.
+  emitirCitacionEn(bd, segunda, parametros.personaId, { publicarEnCartelera: false })
   primera.estado = 'sin_quorum'
   primera.segundaConvocatoriaId = segunda.id
   const cuando = formatearFecha(fechaHora.slice(0, 10))

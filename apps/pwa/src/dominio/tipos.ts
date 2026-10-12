@@ -1118,6 +1118,23 @@ export interface Asamblea {
   primeraConvocatoriaId?: string
   /** Lo que convoca: numero y fecha del acta o de la citacion. */
   citacion: string
+  /** CU-A-12 — El documento de la citacion (RN-219). Ausente en las de la semilla. */
+  citacionDocumentoId?: string
+  /** RN-219 — La constancia de envio: a quien, cuando y por donde. */
+  envioCitacion?: EnvioCitacion[]
+}
+
+/** RN-219 — Por donde le llega la citacion a un propietario. */
+export type CanalCitacion = 'app' | 'correo' | 'impresa'
+
+/** RN-219 — Una linea de la constancia de envio de la citacion. */
+export interface EnvioCitacion {
+  unidadId: string
+  personaId: string
+  canales: CanalCitacion[]
+  enviadoEn: FechaHoraISO
+  /** Solo con canal `impresa`: cuando la administracion la entrego en mano. */
+  impresaEntregadaEn?: FechaHoraISO
 }
 
 /**
@@ -1429,7 +1446,7 @@ export interface Voto {
 // ---------------------------------------------------------------------------
 // Documentos formales — CU-R-12
 // ---------------------------------------------------------------------------
-export type TipoDocumento = 'paz_y_salvo' | 'acta' | 'poder' | 'estado_cuenta'
+export type TipoDocumento = 'paz_y_salvo' | 'acta' | 'poder' | 'estado_cuenta' | 'citacion'
 
 export interface Documento {
   id: string
@@ -1582,5 +1599,7 @@ export interface BaseDatos {
     recibo: number
     /** Consecutivo del estado de cuenta (RN-36, CU-R-18). Ausente en bases viejas: empieza en 1. */
     estadoCuenta?: number
+    /** Consecutivo de la citacion a asamblea (RN-36, RN-219). Ausente en bases viejas: empieza en 1. */
+    citacion?: number
   }
 }

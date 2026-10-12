@@ -7,6 +7,10 @@
  */
 
 import type {
+  CanalCitacion,
+  FechaHoraISO,
+  EnvioCitacion,
+  TipoAsamblea,
   Acta,
   Correspondencia,
   Residencia,
@@ -54,6 +58,7 @@ import type {
   BaseDeVoto,
   Copropiedad,
 } from './tipos'
+import { formatearFecha } from '../utilidades/formato'
 
 /** Resultado de validar una operacion contra las reglas del dominio. */
 export interface ResultadoValidacion {
@@ -1389,6 +1394,51 @@ export function motivoNoSeInstala(
  * de la asamblea y sin quórum.
  */
 export const HORA_SEGUNDA_CONVOCATORIA = '20:00'
+
+// ---------------------------------------------------------------------------
+// RN-33 — Antelacion de la convocatoria (Ley 675 de 2001, art. 39; Mary,
+// 2026-10-12). La ordinaria se cita con **al menos 15 dias calendario**; si no,
+// no se convoca. La extraordinaria no tiene plazo en la ley —lo fija el
+// reglamento—: con menos de 15 dias se avisa, no se impide. La segunda
+// convocatoria tiene su fecha en la ley (art. 41) y no se mide.
+// ---------------------------------------------------------------------------
+
+export const DIAS_ANTELACION_ORDINARIA = 15
+
+export function antelacionConvocatoria(
+  convocatoria: { tipo: TipoAsamblea; fechaHora: FechaHoraISO; numeroConvocatoria?: 1 | 2 },
+  hoy: FechaISO = hoyISO(),
+): { dias: number; bloquea?: string; aviso?: string } {
+  const dias = diasEntre(hoy, convocatoria.fechaHora.slice(0, 10))
+  if ((convocatoria.numeroConvocatoria ?? 1) === 2 || dias >= DIAS_ANTELACION_ORDINARIA) return { dias }
+  if (convocatoria.tipo === 'ordinaria') {
+    return {
+      dias,
+      bloquea: `La asamblea ordinaria se cita con al menos ${DIAS_ANTELACION_ORDINARIA} días calendario de anticipación (Ley 675, art. 39). Faltan ${Math.max(dias, 0)}: escoge una fecha desde el ${formatearFecha(sumarDias(hoy, DIAS_ANTELACION_ORDINARIA))}.`,
+    }
+  }
+  return {
+    dias,
+    aviso: `Faltan ${Math.max(dias, 0)} días. La ley no fija plazo para la extraordinaria: revisa que cumpla el que diga el reglamento.`,
+  }
+}
+
+// ---------------------------------------------------------------------------
+// RN-219 — La citacion va a **cada propietario**, no al arrendatario (Ley 675,
+// art. 39: «a cada uno de los propietarios … a la ultima direccion
+// registrada»). Le llega en la app siempre; al correo si lo tiene; y si no
+// tiene correo, la administracion la imprime y la entrega. Queda constancia de
+// a quien, cuando y por donde: una asamblea mal convocada se puede anular.
+// ---------------------------------------------------------------------------
+
+export function canalesDeCitacion(persona: { email: string }): CanalCitacion[] {
+  return persona.email.trim() ? ['app', 'correo'] : ['app', 'impresa']
+}
+
+/** RN-219 — Las impresas que la administracion todavia no ha entregado. */
+export function citacionesPorEntregar(envios: EnvioCitacion[] = []): EnvioCitacion[] {
+  return envios.filter((e) => e.canales.includes('impresa') && !e.impresaEntregadaEn)
+}
 
 export function fechaSegundaConvocatoria(fechaPrimera: FechaISO): FechaISO {
   return sumarDiasHabiles(fechaPrimera.slice(0, 10), 3)

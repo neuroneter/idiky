@@ -297,13 +297,22 @@ marca las que el residente canceló fuera de plazo (RN-112).
 
    Después: tipo (ordinaria | extraordinaria), fecha, hora y qué la convoca.
 2. Redacta el orden del día como una lista de puntos; marca cuáles se someten a votación.
-3. El sistema valida la antelación mínima frente a la fecha (RN-33) y avisa si no se cumple.
-4. El sistema genera el documento de convocatoria y lo envía a todas las unidades.
+3. El sistema valida la antelación (RN-33; Ley 675, art. 39): la **ordinaria** se cita con al
+   menos **15 días calendario** y, si no, no deja convocar; la **extraordinaria** solo avisa,
+   porque su plazo lo fija el reglamento. La segunda convocatoria no se mide (art. 41).
+4. El sistema genera la **citación** (RN-219): documento con número `CIT-AAAA-NNNN` y código de
+   verificación, con fecha, hora, modalidad, lugar o enlace, qué la convoca, el orden del día,
+   el aviso de la segunda convocatoria si no hay quórum (art. 41) y la nota de poderes. Va a
+   **cada propietario** —no al arrendatario—: en la app siempre, al correo si lo tiene y, si no
+   tiene correo, **impresa**, que la administración entrega y marca «Entregada». Se publica
+   fijada en la cartelera. Queda la **constancia**: a quién, cuándo y por dónde (Mary,
+   2026-10-12). El envío es simulado: el demo no manda correos.
 5. La asamblea queda en estado `convocada`.
 
 **Flujos alternativos**
-- A1. No se alcanza el quórum el día de la asamblea → se registra la no instalación y se
-  convoca por segunda vez **(?)**.
+- A1. No se alcanza el quórum el día de la asamblea → segunda convocatoria (CU-A-17 A2, RN-216),
+  con su propia citación.
+- A4. La asamblea ya estaba convocada sin citación (las del demo) → «Emitir la citación».
 - A2. Se modifica el orden del día antes de la asamblea → se reemite la citación.
 - A3. Se cancela la asamblea → estado `cancelada`, con motivo. No se borra (trazabilidad).
 
@@ -315,14 +324,16 @@ abogado. Se dice, no se impide. Ya instalada la asamblea, el administrador puede
 grabación** y el acta la cita como soporte (RN-99).
 
 **Reglas de negocio**
-- RN-33: antelación mínima de la convocatoria **(?)**.
+- RN-33: antelación de la convocatoria. RN-219: a quién va la citación, por dónde, y su constancia.
 
-**Estado en el demo:** 🟡 — `/admin/asambleas`, botón «Convocar». Se convoca con su orden del
-día y **la modalidad manda**: el botón queda deshabilitado diciendo qué falta, y
-`convocarAsamblea()` lo vuelve a comprobar.
+**Estado en el demo:** ✅ — `/admin/asambleas`, botón «Convocar». Se convoca con su orden del
+día y **la modalidad manda**; la antelación se ve al escoger la fecha. En el detalle de la
+asamblea, la tarjeta **Citación** (`features/admin/CitacionAsamblea.tsx`) muestra el número, la
+constancia de envío, las impresas por entregar y la hoja para imprimir
+(`componentes/HojaCitacion.tsx`). El PDF de servidor espera a ADR-0006.
 
-**Falta:** el **documento de convocatoria** y su envío (paso 4) —depende de ADR-0006— y la
-**antelación mínima** del paso 3, que es RN-33 y sigue sin definir.
+**Para el abogado:** si el correo electrónico cuenta como «última dirección registrada»
+(art. 39). Por eso, a quien no tiene correo, la citación va impresa.
 
 ---
 

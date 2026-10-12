@@ -59,6 +59,7 @@ import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { Icono } from '../../componentes/Icono'
 import { ChipAsamblea } from '../../componentes/Etiquetas'
 import { Modal } from '../../componentes/Modal'
+import { HojaCitacion } from '../../componentes/HojaCitacion'
 import { HojaPoder } from '../../componentes/HojaPoder'
 import { CapturaFoto } from '../../componentes/CapturaFoto'
 import { HojaActa } from '../../componentes/HojaActa'
@@ -76,6 +77,7 @@ export function AsambleaDetallePage() {
   // firmado (CU-R-31). Un solo formulario, dos respaldos distintos.
   const [dandoPoder, setDandoPoder] = useState<null | 'app' | 'foto'>(null)
   const [viendoHoja, setViendoHoja] = useState(false)
+  const [viendoCitacion, setViendoCitacion] = useState(false)
   const [viendoActa, setViendoActa] = useState(false)
   if (!sesion) return null
 
@@ -123,6 +125,9 @@ export function AsambleaDetallePage() {
     asamblea.id,
     sesion.unidadActivaId ?? '',
   )
+  const documentoCitacion = asamblea.citacionDocumentoId
+    ? bd.documentos.find((d) => d.id === asamblea.citacionDocumentoId)
+    : undefined
   const apoderado = miPoder ? sel.persona(bd, miPoder.apoderadoId) : undefined
   const documentoPoder = miPoder?.documentoId
     ? bd.documentos.find((d) => d.id === miPoder.documentoId)
@@ -400,7 +405,33 @@ export function AsambleaDetallePage() {
           </span>
           <span className="subtitulo">{asamblea.citacion}</span>
         </div>
+        {/* CU-R-20 — La citación que le llegó, la misma que firma la administración (RN-219). */}
+        {documentoCitacion && (
+          <div className="grupo-botones" style={{ marginTop: 'var(--e2)' }}>
+            <button className="boton" onClick={() => setViendoCitacion(!viendoCitacion)}>
+              <Icono nombre={viendoCitacion ? 'cerrar' : 'buscar'} tamano={16} />
+              {viendoCitacion ? 'Ocultar la citación' : 'Ver la citación'}
+            </button>
+            {viendoCitacion && (
+              <button className="boton boton--primario" onClick={() => window.print()}>
+                Imprimir o guardar en PDF
+              </button>
+            )}
+          </div>
+        )}
       </div>
+
+      {/* Solo se monta al verla: así no sale impresa junto con otra hoja. */}
+      {documentoCitacion && viendoCitacion && (
+        <div className="previsualizacion-hoja">
+          <HojaCitacion
+            asamblea={asamblea}
+            documento={documentoCitacion}
+            copropiedad={sel.copropiedad(bd, asamblea.copropiedadId)}
+            administrador={sel.persona(bd, documentoCitacion.emitidoPor) ?? sel.administradorDe(bd)}
+          />
+        </div>
+      )}
 
       {/* CU-R-21 — La sala, que cambia con la modalidad (ADR-0007).
           Idiky no transmite: enlaza la reunión que la copropiedad ya hace. Lo que
