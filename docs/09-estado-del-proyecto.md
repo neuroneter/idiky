@@ -731,6 +731,12 @@ tenía **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de de
 contable al día): **Daniel lo integró a `main` el 2026-10-11**. Su rama sigue atrás de `main`; el
 aviso de inicio de su próxima sesión se la trae.
 
+### 2026-10-13 · Mary + IA (Claude) · El orden del día no se cambia después de convocar (CU-A-12 A2)
+
+Decidido con Mary: no se construye «cambiar el orden del día». Si hubo un error, se cancela la
+asamblea con motivo y se convoca de nuevo, con citación y antelación propias. Anotado en
+`docs/casos-de-uso/administrador.md` (CU-A-12 A2) y `docs/casos-de-uso/residente.md` (CU-R-20 A2).
+
 ### 2026-10-13 · Mary + IA (Claude) · Corregir coeficientes mal cargados (CU-A-21, RN-222)
 
 Mary: *«los coeficientes no se pueden cambiar, no obstante puede ser un error del administrador,

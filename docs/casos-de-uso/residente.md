@@ -564,7 +564,8 @@ revisión, se imprime desde la app, sin servidor ni librerías.
 **Flujos alternativos**
 - A1. Segunda convocatoria por falta de quórum → se emite una citación nueva y se publica en la
   cartelera (RN-216). Los poderes de la primera no pasan (RN-31).
-- A2. Se modifica el orden del día → se reemite la citación y se avisa el cambio.
+- A2. El orden del día no se cambia después de convocar: si hubo un error, la administración
+  cancela y convoca de nuevo, y llega una citación nueva (CU-A-12 A2).
 
 **Si la asamblea va por Vimeo** (RN-98): el botón dice «Ver la transmisión en Vimeo» en vez de
 «Entrar a la reunión», y la nota explica que se interviene por el chat de la transmisión y que
