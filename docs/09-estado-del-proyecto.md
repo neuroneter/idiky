@@ -731,6 +731,19 @@ tenía **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de de
 contable al día): **Daniel lo integró a `main` el 2026-10-11**. Su rama sigue atrás de `main`; el
 aviso de inicio de su próxima sesión se la trae.
 
+### 2026-10-13 · Mary + IA (Claude) · Los días hábiles saltan los festivos (RN-223)
+
+Mary: *«sí, vamos con los festivos»*. `sumarDiasHabiles` ya salta sábados, domingos **y festivos
+de Colombia**, calculados con la Ley 51 de 1983 para cualquier año (comprobado contra los
+calendarios oficiales de 2025 y 2026). Cambia la fecha que propone la segunda convocatoria y el
+plazo de 20 días hábiles del acta. Ejemplo real: una asamblea del viernes 9 de octubre de 2026 sin
+quórum va al **jueves 15**, no al miércoles 14, porque el lunes 12 es festivo. Mary confirma
+además que **todos votan aunque estén en mora**, salvo que el edificio active la restricción
+(RN-221).
+Archivos: `apps/pwa/src/dominio/reglas.ts`; pruebas en
+`apps/pwa/pruebas/navegador/festivos.spec.ts` (nueva) y `asambleas.spec.ts` (la fecha esperada).
+**55 en verde.**
+
 ### 2026-10-13 · Mary + IA (Claude) · El orden del día no se cambia después de convocar (CU-A-12 A2)
 
 Decidido con Mary: no se construye «cambiar el orden del día». Si hubo un error, se cancela la
@@ -839,8 +852,7 @@ Archivos: `apps/pwa/src/features/admin/SegundaConvocatoria.tsx` (nuevo),
 **Poderes (Mary, 2026-10-11):** *«los poderes para cada asamblea son independientes»*: los de la
 primera no pasan a la segunda; la pantalla y el aviso de la cartelera lo dicen (RN-31).
 
-**Para revisar:** los días hábiles del demo no saltan festivos (la ley habla de día hábil; hoy el
-administrador corrige la fecha a mano en una semana con festivo).
+**Resuelto el 2026-10-13:** los días hábiles saltan los festivos (RN-223).
 
 ---
 
