@@ -117,11 +117,13 @@ hay que responderlo explícitamente, no asumirlo.
 
 - ¿Las cuotas se facturan **por anticipado o vencidas**? ¿Qué día vencen?
   *(Supuesto actual: vencen el día 10 del periodo — RN-23.)* → *(respuesta)*
-- ~~¿Cómo se calcula el **interés de mora**?~~ → ✅ **Respondido en parte (Mary, 2026-08-27):**
-  según la normativa vigente en Colombia, y **configurable por copropiedad**, porque no todas
-  lo cobran (RN-42, CU-A-25). Lo que falta de esa respuesta está en §3 quinquies.
-- ¿Qué pasa con una unidad en mora: pierde voto, pierde reservas, ambas?
-  *(Supuesto actual: pierde reservas — RN-08.)* → *(respuesta)*
+- ~~¿Cómo se calcula el **interés de mora**?~~ → ✅ **Respondido en parte (Mary, 2026-08-27),
+  corregido el 2026-10-13 contra la Ley 675, art. 30:** el interés **lo causa la ley** (1,5 veces
+  el interés bancario corriente); la asamblea solo puede aprobar una tasa inferior (RN-42,
+  RN-43, CU-A-25). Lo que falta está en §3 quinquies.
+- ~~¿Qué pasa con una unidad en mora: pierde voto, pierde reservas, ambas?~~ → ✅ **Respondido
+  (Mary, 2026-10-13):** **vota**, salvo que el reglamento diga otra cosa (RN-221), y cuenta para
+  el quórum. Las reservas siguen con RN-08.
 - ¿El valor de la cuota se define **por coeficiente**, por tipo de unidad, por área, o es
   fijo? *(Supuesto actual: por coeficiente — RN-05.)* → *(respuesta)*
 - ¿Cuál es el **plazo real de respuesta** a una PQRS? *(Supuesto actual: 15 días — RN-13.)*
@@ -312,21 +314,23 @@ adicionales resultaron ser las extraordinarias (RN-73).
 
 ## 3 quinquies. Interés de mora — lo que falta de la respuesta
 
-Ya está decidido que se calcula según la normativa colombiana y que cada copropiedad elige si
-lo cobra. Falta lo que **no podemos suponer sin equivocarnos**:
+Corregido el 2026-10-13 contra la Ley 675, art. 30: el interés **lo causa la ley** y la
+copropiedad solo puede aprobar, en asamblea, una tasa inferior. Falta lo que **no podemos
+suponer sin equivocarnos**:
 
-- **El tope legal.** ¿Cuál es el tope por encima del cual el cobro es usura, según la Ley 675?
-  *No lo escribimos de memoria: un número mal puesto expone a la copropiedad.* Es lo único que
-  el sistema necesita de la ley — **la tasa en sí la pone cada copropiedad** (reglamento o
-  asamblea), la ley solo pone el techo. → *(respuesta)*
+- ~~**El tope legal.**~~ → ✅ **Respondido por la norma (art. 30):** 1,5 veces el interés bancario
+  corriente certificado por la Superintendencia Financiera. Es la tasa por defecto y el tope.
+- **¿La asamblea puede bajarla a cero (no cobrar)?** La ley dice «un interés inferior». →
+  **Para el abogado.**
+- **Quién carga cada periodo el interés bancario corriente** que certifica la Superintendencia
+  Financiera, y de dónde se toma. → *(respuesta)*
 - ~~**Quién mantiene la tasa actualizada.**~~ → ✅ **Respondido (Mary, 2026-08-27):** la
   registra **el administrador de cada copropiedad**.
   *Consecuencia:* la tasa la teclea una persona, así que la app tiene que protegerla de
   equivocarse — avisar cuando la tasa vigente está vieja y rechazar una que supere el tope
   legal. Eso hace **más urgente** confirmar cuál es ese tope (pregunta de arriba).
-- **Si la asamblea no ha aprobado ninguna tasa.** ¿Se cobra el máximo legal por defecto, o
-  no se cobra nada hasta que haya aprobación? *(Lo segundo es lo prudente, pero es una decisión
-  del equipo.)* → *(respuesta)*
+- ~~**Si la asamblea no ha aprobado ninguna tasa.**~~ → ✅ **Respondido por la norma (art. 30):**
+  rige la de la ley, 1,5 veces el interés bancario corriente.
 - **Una tasa aprobada por asamblea, ¿desde cuándo rige?** ¿Desde el acta, desde su aprobación,
   desde el periodo siguiente? → *(respuesta)*
 - **Sobre qué se liquida.** ¿Sobre el saldo vencido total, o cuota por cuota desde su

@@ -731,6 +731,16 @@ tenía **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de de
 contable al día): **Daniel lo integró a `main` el 2026-10-11**. Su rama sigue atrás de `main`; el
 aviso de inicio de su próxima sesión se la trae.
 
+### 2026-10-13 · Mary + IA (Claude) · El interés de mora lo causa la ley (CU-A-25 corregido)
+
+Mary preguntó si es correcto que cada edificio configure si cobra interés de mora. **No**: la
+Ley 675, art. 30, dice que el retardo **causará** intereses de 1,5 veces el interés bancario
+corriente, y que la asamblea puede aprobar uno **inferior**. Se corrigió CU-A-25 (ahora
+«Registrar la tasa de interés de mora»), RN-42 y RN-43, el catálogo y §3 quinquies del
+levantamiento. Solo documentación: el cálculo **no se construye todavía**, porque la cartera la
+comparte la contable de Jeimy y las reglas tienen que quedar iguales en las dos.
+**Para el abogado:** si la asamblea puede bajar la tasa a cero.
+
 ### 2026-10-13 · Mary + IA (Claude) · Unanimidad, y la mayoría se escoge al convocar (RN-224)
 
 Mary: *«agregamos la opción de unanimidad»*. Un punto puede exigir **unanimidad**: todo el
