@@ -297,7 +297,9 @@ export function HojaActa({
             </p>
             <p>
               Exigiendo este punto{' '}
-              {porUnidad
+              {mayoria === 'unanimidad'
+                ? `unanimidad, como lo exige el reglamento: ${porUnidad ? `todas las unidades que integran el conjunto, esto es ${votos_(unidadesNecesarias(resultado.umbral, mayoria))}` : `la totalidad de los coeficientes que integran el conjunto, esto es ${porcentaje(resultado.umbral)}`}`
+                : porUnidad
                 ? mayoria === 'calificada'
                   ? `mayoría calificada del 70 % de las unidades que integran el conjunto (Ley 675 de 2001, artículo 46), esto es al menos ${votos_(unidadesNecesarias(resultado.umbral, mayoria))}`
                   : `mayoría de la mitad más uno de las unidades representadas en la sesión (Ley 675 de 2001, artículo 45), esto es al menos ${votos_(unidadesNecesarias(resultado.umbral, mayoria))}`

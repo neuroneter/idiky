@@ -29,6 +29,7 @@ import {
   quorumDeLaSesion,
   motivoNoAbreVotacion,
   resultadoVotacion,
+  definicionMayoria,
   resumenAsistencia,
   sumaCoeficientes,
   unidadesNecesarias,
@@ -130,7 +131,7 @@ export function VotacionPunto({ asamblea, punto }: { asamblea: Asamblea; punto: 
           </span>
         </div>
         <p className="subtitulo">
-          Mayoría que exige el punto: {mayoria === 'calificada' ? 'calificada (70 %, art. 46)' : 'simple (art. 45)'}.
+          Mayoría que exige el punto: {definicionMayoria(mayoria).corto}, {definicionMayoria(mayoria).fuente}.
         </p>
         <div className="grupo-botones">
           <button
@@ -189,7 +190,7 @@ export function VotacionPunto({ asamblea, punto }: { asamblea: Asamblea; punto: 
       <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
         {votacion.contenidoEconomico ? 'Económica' : 'No económica'} · se cuenta{' '}
         {porUnidad ? 'una unidad, un voto' : 'por coeficiente'} · mayoría{' '}
-        {mayoria === 'calificada' ? 'calificada' : 'simple'} · opciones: {votacion.opciones.map((o) => o.texto).join(', ')}
+        {definicionMayoria(mayoria).corto} · opciones: {votacion.opciones.map((o) => o.texto).join(', ')}
       </span>
 
       {votacion.estado === 'preparada' && (
@@ -253,7 +254,7 @@ export function VotacionPunto({ asamblea, punto }: { asamblea: Asamblea; punto: 
             Se necesitaba{' '}
             {porUnidad
               ? `al menos ${unidadesNecesarias(resultado.umbral, mayoria)} ${resultado.baseTexto}`
-              : `${mayoria === 'calificada' ? '' : 'más de '}${porcentaje(resultado.umbral)} ${resultado.baseTexto}`}
+              : `${mayoria === 'simple' ? 'más de ' : ''}${porcentaje(resultado.umbral)} ${resultado.baseTexto}`}
             .
           </p>
         </div>

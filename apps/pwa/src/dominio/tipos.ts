@@ -1062,7 +1062,8 @@ export type EstadoAsamblea = 'convocada' | 'instalada' | 'cerrada' | 'cancelada'
 export type ModalidadAsamblea = 'presencial' | 'virtual' | 'mixta'
 
 /** Ley 675 de 2001, articulos 45 y 46. Revisado contra la norma el 2026-09-10. */
-export type MayoriaExigida = 'simple' | 'calificada'
+/** RN-224 — `unanimidad`: la exige el reglamento para ciertos puntos (Mary, 2026-10-13). */
+export type MayoriaExigida = 'simple' | 'calificada' | 'unanimidad'
 
 export interface PuntoOrdenDelDia {
   id: string

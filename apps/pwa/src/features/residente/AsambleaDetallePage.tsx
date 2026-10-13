@@ -47,6 +47,7 @@ import {
   poderEsperandoValidacion,
   faltaAlPoder,
   motivoNoVotaPorMora,
+  definicionMayoria,
   poderVigente,
   ultimoPoderRechazadoDeUnidad,
   puedeVotar,
@@ -225,17 +226,17 @@ export function AsambleaDetallePage() {
             La Ley 675 se verificó el 2026-09-10 (arts. 45 y 46). */}
         <div className="fila fila-inicio" style={{ marginBottom: 'var(--e3)' }}>
           <span className="subtitulo">
-            {mayoria === 'calificada' ? 'Mayoría calificada' : 'Mayoría simple'}
+            {definicionMayoria(mayoria).nombre}
           </span>
           {/* Cada mayoría dice su cifra una sola vez, y con la precisión que
               importa: la calificada **se alcanza** (70 %), la simple **se
               supera** (más de la mitad). Con exactamente la mitad, no pasa. */}
           <span className="subtitulo" style={{ textAlign: 'right' }}>
             {umbralTexto
-              ? `${umbralTexto} (${mayoria === 'calificada' ? 'art. 46' : 'art. 45'})`
-              : mayoria === 'calificada'
-                ? `${formatearCoeficiente(resultado.umbral)} ${resultado.baseTexto} (art. 46)`
-                : `más de ${formatearCoeficiente(resultado.umbral)} ${resultado.baseTexto} (art. 45)`}
+              ? `${umbralTexto} (${definicionMayoria(mayoria).fuente})`
+              : mayoria === 'simple'
+                ? `más de ${formatearCoeficiente(resultado.umbral)} ${resultado.baseTexto} (art. 45)`
+                : `${formatearCoeficiente(resultado.umbral)} ${resultado.baseTexto} (${definicionMayoria(mayoria).fuente})`}
           </span>
         </div>
 

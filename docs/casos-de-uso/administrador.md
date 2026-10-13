@@ -296,7 +296,9 @@ marca las que el residente canceló fuera de plazo (RN-112).
    | Mixta | **Lugar y enlace** | Los dos, y escoge cómo asiste |
 
    Después: tipo (ordinaria | extraordinaria), fecha, hora y qué la convoca.
-2. Redacta el orden del día como una lista de puntos; marca cuáles se someten a votación.
+2. Redacta el orden del día como una lista de puntos; marca cuáles se someten a votación y, en
+   cada uno, **qué mayoría exige**: simple (art. 45), calificada del 70 % (art. 46) o
+   **unanimidad** si el reglamento la pide (RN-224).
 3. El sistema valida la antelación (RN-33; Ley 675, art. 39): la **ordinaria** se cita con al
    menos **15 días calendario** y, si no, no deja convocar; la **extraordinaria** solo avisa,
    porque su plazo lo fija el reglamento. La segunda convocatoria no se mide (art. 41).
