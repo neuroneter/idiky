@@ -575,6 +575,30 @@ export function sumaCoeficientes(unidades: Unidad[]): number {
   return Number(unidades.reduce((total, unidad) => total + unidad.coeficiente, 0).toFixed(4))
 }
 
+// ---------------------------------------------------------------------------
+// RN-222 — Los coeficientes **no se cambian**: los fija el reglamento. Lo que
+// si se hace es **corregir un error** de quien los cargo (Mary, 2026-10-13),
+// con motivo, quedando el historial. La suma tiene que dar 100 % (RN-19), y no
+// se corrige con una asamblea instalada: alteraria el quorum y el peso de los
+// votos de una sesion viva. Lo ya votado no cambia: la asistencia y el voto
+// guardan el coeficiente del momento (RN-37).
+// ---------------------------------------------------------------------------
+
+/** RN-19, RN-222 — Cuanto le falta (o sobra) a la suma para dar 100 %. */
+export function diferenciaCoeficientes(coeficientes: number[]): number {
+  return Number((coeficientes.reduce((t, c) => t + c, 0) - 100).toFixed(4))
+}
+
+export function motivoNoCorrigeCoeficientes(
+  asambleas: Array<{ copropiedadId: string; estado: string; titulo: string }>,
+  copropiedadId: string,
+): string | undefined {
+  const viva = asambleas.find((a) => a.copropiedadId === copropiedadId && a.estado === 'instalada')
+  return viva
+    ? `Hay una asamblea instalada («${viva.titulo}»): corregir un coeficiente ahora cambiaría su quórum y el peso de sus votos. Ciérrala primero.`
+    : undefined
+}
+
 /**
  * RN-27 — El peso del voto de una unidad en asamblea es su coeficiente.
  *

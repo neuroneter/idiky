@@ -156,6 +156,8 @@ import {
   antelacionConvocatoria,
   motivoTopePoderes,
   motivoNoVotaPorMora,
+  motivoNoCorrigeCoeficientes,
+  diferenciaCoeficientes,
   canalesDeCitacion,
   fechaSegundaConvocatoria,
   HORA_SEGUNDA_CONVOCATORIA,
@@ -4025,6 +4027,59 @@ export async function configurarVotoNoEconomico(
   }
   copropiedad.votoNoEconomicoMixto = parametros.base
   return persistir(bd, copropiedad)
+}
+
+/**
+ * RN-222 — La administración **corrige** coeficientes mal cargados. No es
+ * cambiarlos: el motivo es obligatorio, la suma tiene que quedar en 100 %
+ * (RN-19), no se hace con una asamblea instalada y queda el historial.
+ */
+export async function corregirCoeficientes(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    personaId: string
+    cambios: Array<{ unidadId: string; coeficiente: number }>
+    motivo: string
+  },
+): Promise<Resultado<Unidad[]>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('Los coeficientes los corrige la administración (RN-222).')
+  }
+  const bloqueo = motivoNoCorrigeCoeficientes(bd.asambleas, parametros.copropiedadId)
+  if (bloqueo) throw new ErrorDeNegocio(bloqueo)
+  const motivo = parametros.motivo.trim()
+  if (motivo.length < 10) {
+    throw new ErrorDeNegocio('Explica el error que se corrige: queda en el historial de la unidad.')
+  }
+  const unidades = bd.unidades.filter((u) => u.copropiedadId === parametros.copropiedadId)
+  const reales = parametros.cambios.filter((c) => {
+    const unidad = unidades.find((u) => u.id === c.unidadId)
+    if (!unidad) throw new ErrorDeNegocio('Esa unidad no es de esta copropiedad.')
+    if (!(c.coeficiente > 0)) throw new ErrorDeNegocio(`El coeficiente de ${etiquetaUnidad(unidad)} tiene que ser mayor que cero.`)
+    return unidad.coeficiente !== c.coeficiente
+  })
+  if (reales.length === 0) throw new ErrorDeNegocio('No cambiaste ningún coeficiente.')
+  const nuevos = unidades.map((u) => reales.find((c) => c.unidadId === u.id)?.coeficiente ?? u.coeficiente)
+  const diferencia = diferenciaCoeficientes(nuevos)
+  if (diferencia !== 0) {
+    throw new ErrorDeNegocio(
+      `Los coeficientes tienen que sumar 100 % (RN-19). Así ${diferencia > 0 ? 'sobra' : 'falta'} ${Math.abs(diferencia)} %.`,
+    )
+  }
+  const en = ahoraISO()
+  const corregidas = reales.map((c) => {
+    const unidad = unidades.find((u) => u.id === c.unidadId)!
+    unidad.correccionesCoeficiente = [
+      ...(unidad.correccionesCoeficiente ?? []),
+      { antes: unidad.coeficiente, despues: c.coeficiente, motivo, por: parametros.personaId, en },
+    ]
+    unidad.coeficiente = c.coeficiente
+    return unidad
+  })
+  return persistir(bd, corregidas)
 }
 
 /**

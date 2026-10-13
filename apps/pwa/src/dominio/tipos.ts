@@ -102,6 +102,12 @@ export interface Unidad {
   area: number
   /** Porcentaje de participacion. La suma de la copropiedad es 100 (RN-19). */
   coeficiente: number
+  /**
+   * RN-222 — Correcciones del coeficiente por **error de digitacion** (Mary,
+   * 2026-10-13: *«los coeficientes no se pueden cambiar, no obstante puede ser
+   * un error del administrador»*). El historial no se borra (RN-61).
+   */
+  correccionesCoeficiente?: CorreccionCoeficiente[]
   parqueaderos: string[]
 }
 
@@ -1135,6 +1141,15 @@ export interface Asamblea {
   citacionDocumentoId?: string
   /** RN-219 — La constancia de envio: a quien, cuando y por donde. */
   envioCitacion?: EnvioCitacion[]
+}
+
+/** RN-222 — Una correccion del coeficiente: de cuanto a cuanto, por que y quien. */
+export interface CorreccionCoeficiente {
+  antes: number
+  despues: number
+  motivo: string
+  por: string
+  en: FechaHoraISO
 }
 
 /** RN-219 — Por donde le llega la citacion a un propietario. */

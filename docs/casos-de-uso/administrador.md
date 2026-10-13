@@ -629,7 +629,7 @@ pantalla y sale al imprimir, sin fingir descarga.
 ---
 
 ### CU-A-21
-## CU-A-21 — Administrar los coeficientes de las unidades
+## CU-A-21 — Corregir los coeficientes mal cargados
 
 - **Actor principal:** Administrador
 - **Precondiciones:** Existen las unidades de la copropiedad.
@@ -637,11 +637,20 @@ pantalla y sale al imprimir, sin fingir descarga.
   cambia los coeficientes.
 - **Resultado esperado:** Los coeficientes quedan cargados y suman exactamente 100 %.
 
+**Los coeficientes no se cambian**: los fija el reglamento. Lo que sí se puede es **corregir un
+error** de quien los cargó (RN-222; Mary, 2026-10-13: *«los coeficientes no se pueden cambiar, no
+obstante puede ser un error del administrador, en ese caso los puede modificar desde su
+perfil»*).
+
 **Flujo principal**
-1. El administrador ve la tabla de unidades con área y coeficiente, y la suma total.
-2. Edita los coeficientes o los carga masivamente.
-3. El sistema valida que la suma sea 100 % (RN-19) y **no permite guardar si no cuadra**.
-4. Los cambios quedan con fecha de vigencia; lo anterior se conserva (RN-37).
+1. En la consola, **Unidades** muestra cada unidad con su coeficiente y la suma total.
+2. **Corregir coeficientes** abre la tabla editable; la suma y lo que sobra o falta se ven
+   mientras se escribe.
+3. El sistema **no deja guardar** si la suma no da 100 % (RN-19) o si falta el motivo (qué error
+   se corrige).
+4. Cada unidad corregida guarda **de cuánto a cuánto, por qué, quién y cuándo**; se ve en su
+   detalle. Lo ya votado no cambia: la asistencia y el voto guardan el coeficiente del momento
+   (RN-37).
 
 **Flujos alternativos**
 - A1. La suma no da 100 % → se muestra la diferencia y qué unidades la producen.
@@ -652,8 +661,9 @@ pantalla y sale al imprimir, sin fingir descarga.
 - RN-19: la suma es 100 %.
 - RN-37: el coeficiente es histórico; cambiarlo no altera votaciones ya cerradas.
 
-**Estado en el demo:** 🟡 — el coeficiente existe y se muestra en `UnidadesPage.tsx`, pero
-**no se puede editar** y no hay versionado.
+**Estado en el demo:** ✅ — `features/admin/UnidadesPage.tsx` → «Corregir coeficientes»
+(`features/admin/CorregirCoeficientes.tsx`). En el demo hay una asamblea instalada, así que la
+corrección muestra por qué no se puede hasta cerrarla (A2).
 
 ---
 
