@@ -55,6 +55,19 @@ export interface Copropiedad {
    */
   votoNoEconomicoMixto?: BaseDeVoto
   /**
+   * RN-220 — Cuantos poderes puede llevar una misma persona en una asamblea, si
+   * el reglamento lo limita (Mary, 2026-10-13). Ausente = sin tope: la Ley 675
+   * no fija ninguno (RN-30).
+   */
+  topePoderes?: number
+  /**
+   * RN-221 — Si el reglamento no deja votar a las unidades en mora (Mary,
+   * 2026-10-13). Ausente o `false` = votan: es la regla general (Ley 675,
+   * art. 37); la restriccion solo vale si el reglamento la trae (Corte
+   * Constitucional, T-633 de 2003).
+   */
+  morososNoVotan?: boolean
+  /**
    * Meses que un antecedente en firme sigue agravando la multa (RN-72).
    *
    * Parametro por la misma razon que los plazos del debido proceso: **la

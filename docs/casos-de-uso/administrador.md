@@ -332,8 +332,8 @@ asamblea, la tarjeta **Citación** (`features/admin/CitacionAsamblea.tsx`) muest
 constancia de envío, las impresas por entregar y la hoja para imprimir
 (`componentes/HojaCitacion.tsx`). El PDF de servidor espera a ADR-0006.
 
-**Para el abogado:** si el correo electrónico cuenta como «última dirección registrada»
-(art. 39). Por eso, a quien no tiene correo, la citación va impresa.
+**El correo cuenta como dirección** para la citación (Mary, 2026-10-13: *«sí, el correo cuenta
+como dirección para la citación»*). A quien no tiene correo, la citación le va impresa.
 
 ---
 

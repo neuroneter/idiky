@@ -210,6 +210,21 @@ export function estaEnMora(cuotas: Cuota[], hoy: FechaISO = hoyISO()): boolean {
   return cuotas.some((cuota) => estadoRealCuota(cuota, hoy) === 'vencida')
 }
 
+/**
+ * RN-221 — Si la unidad no puede votar por estar en mora. Solo cuando el
+ * edificio lo configuro porque su reglamento lo dice; por defecto vota (Ley
+ * 675, art. 37; T-633 de 2003). Asiste y delibera igual: lo que se restringe
+ * es el voto, y la restriccion es de la **unidad** —tambien para su apoderado—.
+ */
+export function motivoNoVotaPorMora(
+  copropiedad: { morososNoVotan?: boolean } | undefined,
+  cuotasDeLaUnidad: Cuota[],
+  hoy: FechaISO = hoyISO(),
+): string | undefined {
+  if (!copropiedad?.morososNoVotan || !estaEnMora(cuotasDeLaUnidad, hoy)) return undefined
+  return 'Esta unidad está en mora y el reglamento del edificio no permite votar a las unidades en mora. Puede asistir y opinar; para votar, tiene que ponerse al día.'
+}
+
 /** RN-05 — Prorrateo de una cuota extraordinaria por coeficiente. */
 export function prorratearPorCoeficiente(valorTotal: number, coeficiente: number): number {
   return Math.round((valorTotal * coeficiente) / 100)
@@ -1580,6 +1595,27 @@ export function ultimoPoderRechazadoDeUnidad(
   return poderes
     .filter((p) => p.asambleaId === asambleaId && p.unidadId === unidadId && (poderRechazado(p) || poderNoAceptado(p)))
     .sort((a, b) => b.registradoEn.localeCompare(a.registradoEn))[0]
+}
+
+/**
+ * RN-220 — El tope de poderes por apoderado, si el reglamento lo fija (Mary,
+ * 2026-10-13: *«en la configuración del edificio … cuántos poderes se puede por
+ * persona»*). Cuenta los vigentes **y los en tramite**: si no, dos por
+ * aceptar o por validar pasarian el tope al completarse. Sin tope no hay nada
+ * que comprobar (RN-30: la ley no lo fija).
+ */
+export function motivoTopePoderes(
+  poderes: Poder[],
+  asambleaId: string,
+  apoderadoId: string,
+  tope: number | undefined,
+): string | undefined {
+  if (!tope) return undefined
+  const lleva = poderes.filter(
+    (p) => p.asambleaId === asambleaId && p.apoderadoId === apoderadoId && poderEnCurso(p),
+  ).length
+  if (lleva < tope) return undefined
+  return `Esa persona ya lleva ${lleva} ${lleva === 1 ? 'poder' : 'poderes'} en esta asamblea, y el reglamento del edificio permite ${tope} por persona.`
 }
 
 /** Los poderes vigentes de una asamblea. */

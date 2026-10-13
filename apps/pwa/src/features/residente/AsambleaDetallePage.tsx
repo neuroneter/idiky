@@ -46,6 +46,7 @@ import {
   herramientaDeEnlace,
   poderEsperandoValidacion,
   faltaAlPoder,
+  motivoNoVotaPorMora,
   poderVigente,
   ultimoPoderRechazadoDeUnidad,
   puedeVotar,
@@ -183,6 +184,10 @@ export function AsambleaDetallePage() {
     // el propietario como si el poder no existiera.
     const representada =
       !!miPoder && poderVigente(miPoder) && miPoder.apoderadoId !== sesion!.personaId
+    // RN-221 — Si el reglamento lo dice, la unidad en mora no vota.
+    const porMora = unidad
+      ? motivoNoVotaPorMora(sel.copropiedad(bd, sesion!.copropiedadId), sel.cuotasDeUnidad(bd, unidad.id))
+      : undefined
     const conteo = contarVotacion(votacion, votos)
     // El resultado se calcula sobre la base que exige la ley: lo representado
     // para la simple, el edificio entero para la calificada (arts. 45 y 46).
@@ -294,7 +299,7 @@ export function AsambleaDetallePage() {
               <button
                 key={opcion.id}
                 className="tarjeta tarjeta--accion"
-                disabled={cargando || representada || !admisible.admisible}
+                disabled={cargando || representada || !!porMora || !admisible.admisible}
                 onClick={() => void votar(votacion, opcion.id)}
               >
                 <div className="fila">
@@ -303,7 +308,9 @@ export function AsambleaDetallePage() {
                 </div>
               </button>
             ))}
-            {representada ? (
+            {porMora ? (
+              <p className="acceso__nota">{porMora}</p>
+            ) : representada ? (
               <p className="subtitulo">
                 Este punto lo vota{' '}
                 <strong>{apoderado ? nombreCompleto(apoderado) : 'tu apoderado'}</strong>, que

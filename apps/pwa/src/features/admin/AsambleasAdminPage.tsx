@@ -39,6 +39,8 @@ import {
   recibirPoder,
   rechazarPoder,
   configurarVotoNoEconomico,
+  configurarTopePoderes,
+  configurarVotoMorosos,
 } from '../../datos/repositorio'
 import {
   MODALIDADES,
@@ -198,6 +200,64 @@ export function AsambleasAdminPage() {
           </li>
         </ul>
       </div>
+
+      {/* RN-221 — Si las unidades en mora votan. Por defecto sí (art. 37); se
+          restringe solo si el reglamento lo dice (T-633 de 2003). */}
+      <div className="tarjeta">
+        <strong>Unidades en mora</strong>
+        <p className="subtitulo">
+          Por ley, el propietario en mora <strong>vota</strong> (Ley 675, art. 37). Solo se le puede
+          quitar el voto si el <strong>reglamento</strong> del edificio lo dice (Corte
+          Constitucional, T-633 de 2003). Asiste y opina igual.
+        </p>
+        <span className="segmentos" style={{ display: 'inline-flex' }}>
+          {(
+            [
+              [false, 'Votan'],
+              [true, 'No votan: lo dice el reglamento'],
+            ] as const
+          ).map(([valor, texto]) => (
+            <button
+              key={texto}
+              type="button"
+              className="segmento"
+              disabled={cargando}
+              aria-current={!!copropiedad?.morososNoVotan === valor ? 'page' : undefined}
+              onClick={() =>
+                void ejecutar(
+                  (base) =>
+                    configurarVotoMorosos(base, {
+                      copropiedadId: sesion.copropiedadId,
+                      personaId: sesion.personaId,
+                      morososNoVotan: valor,
+                    }),
+                  'Guardado.',
+                )
+              }
+            >
+              {texto}
+            </button>
+          ))}
+        </span>
+      </div>
+
+      {/* RN-220 — Cuántos poderes puede llevar una persona. La ley no fija tope
+          (RN-30); si el reglamento lo hace, se configura aquí y Idiky lo aplica. */}
+      <TopePoderes
+        tope={copropiedad?.topePoderes}
+        cargando={cargando}
+        alGuardar={(tope) =>
+          void ejecutar(
+            (base) =>
+              configurarTopePoderes(base, {
+                copropiedadId: sesion.copropiedadId,
+                personaId: sesion.personaId,
+                tope,
+              }),
+            tope === null ? 'Sin tope de poderes.' : `Guardado: hasta ${tope} por persona.`,
+          )
+        }
+      />
 
       {asambleas.length === 0 ? (
         <EstadoVacio
@@ -714,10 +774,20 @@ function DetalleAsamblea({
 
           {acumulado.length > 0 && (
             <p className="acceso__nota" style={{ margin: 'var(--e3) 0' }}>
-              La <strong>Ley 675 no fija tope</strong> de poderes por apoderado; lo puede fijar el{' '}
-              <strong>reglamento</strong> de la copropiedad, y el de esta no está cargado. Por eso
-              Idiky muestra el acumulado pero <strong>no rechaza a nadie</strong>: el número de
-              arriba es para juzgarlo con el reglamento en la mano.
+              {copropiedad?.topePoderes ? (
+                <>
+                  El reglamento de este edificio permite <strong>{copropiedad.topePoderes}</strong>{' '}
+                  {copropiedad.topePoderes === 1 ? 'poder' : 'poderes'} por persona (RN-220): Idiky
+                  no deja otorgar ni registrar uno más a quien ya llegó.
+                </>
+              ) : (
+                <>
+                  La <strong>Ley 675 no fija tope</strong> de poderes por apoderado; lo puede fijar el{' '}
+                  <strong>reglamento</strong>. Este edificio no tiene tope configurado, así que Idiky
+                  muestra el acumulado pero <strong>no rechaza a nadie</strong>. Se configura arriba,
+                  en «Poderes por persona».
+                </>
+              )}
             </p>
           )}
         </>
@@ -1908,5 +1978,61 @@ function VistaActa({
         />
       </div>
     </Modal>
+  )
+}
+
+/** RN-220 — El tope de poderes por persona, según el reglamento del edificio. */
+function TopePoderes({
+  tope,
+  cargando,
+  alGuardar,
+}: {
+  tope?: number
+  cargando: boolean
+  alGuardar: (tope: number | null) => void
+}) {
+  const [valor, setValor] = useState(tope ? String(tope) : '')
+  const cantidad = Number(valor)
+  const valido = Number.isInteger(cantidad) && cantidad >= 1 && cantidad <= 50
+  return (
+    <div className="tarjeta">
+      <strong>Poderes por persona</strong>
+      <p className="subtitulo">
+        {tope
+          ? `Una misma persona puede representar hasta ${tope} ${tope === 1 ? 'unidad' : 'unidades'} por poder en cada asamblea. Idiky no deja pasar de ahí.`
+          : 'Sin tope: la Ley 675 no fija ninguno. Si el reglamento del edificio lo limita, escribe el número.'}
+      </p>
+      <div className="fila" style={{ gap: 'var(--e2)', flexWrap: 'wrap', justifyContent: 'flex-start' }}>
+        <input
+          type="number"
+          min={1}
+          max={50}
+          aria-label="Poderes por persona"
+          value={valor}
+          onChange={(e) => setValor(e.target.value)}
+          placeholder="Sin tope"
+          style={{ width: '8rem' }}
+        />
+        <button
+          className="boton boton--primario"
+          disabled={cargando || !valido || cantidad === tope}
+          onClick={() => alGuardar(cantidad)}
+        >
+          Guardar el tope
+        </button>
+        {tope !== undefined && (
+          <button
+            className="boton"
+            disabled={cargando}
+            onClick={() => {
+              setValor('')
+              alGuardar(null)
+            }}
+          >
+            Quitar el tope
+          </button>
+        )}
+      </div>
+    </div>
   )
 }
