@@ -284,8 +284,8 @@ test('sin quórum se cita la segunda convocatoria: tercer día hábil, 8:00 p. m
   expect(r.estadoPrimera).toBe('sin_quorum')
   expect(r.enlazadas).toBe(true)
   expect(r.numero).toBe(2)
-  // Viernes 2026-10-09 → tercer día hábil: miércoles 2026-10-14, 8:00 p. m.
-  expect(r.fechaHora).toBe('2026-10-14T20:00:00')
+  // Viernes 2026-10-09; el lunes 12 es festivo (RN-223) → tercer día hábil: jueves 2026-10-15, 8:00 p. m.
+  expect(r.fechaHora).toBe('2026-10-15T20:00:00')
   expect(r.puntos).toEqual(['Presupuesto'])
   expect(r.otraVez).toMatch(/^ERR/)
   expect(r.comunicado).toBe(true)
@@ -332,7 +332,7 @@ test('la administradora cita la segunda convocatoria desde la consola (RN-216)',
   await page.locator('tr', { hasText: 'Extraordinaria sin gente' }).first().getByRole('button', { name: 'Abrir' }).click()
   await expect(page.getByRole('button', { name: 'Instalar la asamblea' })).toBeDisabled()
   await expect(page.getByText('¿No se reunió el quórum?')).toBeVisible()
-  await expect(page.getByLabel('Fecha de la segunda convocatoria')).toHaveValue('2026-10-14')
+  await expect(page.getByLabel('Fecha de la segunda convocatoria')).toHaveValue('2026-10-15')
   await expect(page.getByLabel('Hora de la segunda convocatoria')).toHaveValue('20:00')
   await page.getByRole('button', { name: 'Citar segunda convocatoria' }).click()
   await expect(page.getByText(/Se citó a segunda convocatoria/)).toBeVisible()

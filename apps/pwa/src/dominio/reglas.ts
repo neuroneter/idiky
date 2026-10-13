@@ -99,13 +99,74 @@ export function sumarDias(fecha: FechaISO, dias: number): FechaISO {
   return `${base.getFullYear()}-${mes}-${dia}`
 }
 
+// ---------------------------------------------------------------------------
+// RN-223 — Los festivos de Colombia (Mary, 2026-10-13). Se calculan, no se
+// cargan: la Ley 51 de 1983 («Ley Emiliani») los fija con tres reglas, y asi el
+// calendario sirve para cualquier ano sin que nadie lo actualice.
+//   1. Fijos, caigan el dia que caigan: 1 ene, 1 may, 20 jul, 7 ago, 8 dic, 25 dic.
+//   2. Se trasladan al lunes siguiente si no caen en lunes: 6 ene, 19 mar,
+//      29 jun, 15 ago, 12 oct, 1 nov y 11 nov.
+//   3. Atados a la Pascua: jueves y viernes santos (fijos), y Ascension,
+//      Corpus Christi y Sagrado Corazon (trasladados al lunes).
+// ---------------------------------------------------------------------------
+
+/** Domingo de Pascua (algoritmo gregoriano anonimo, de Meeus/Jones/Butcher). */
+function domingoDePascua(anio: number): FechaISO {
+  const a = anio % 19
+  const b = Math.floor(anio / 100)
+  const c = anio % 100
+  const d = Math.floor(b / 4)
+  const e = b % 4
+  const f = Math.floor((b + 8) / 25)
+  const g = Math.floor((b - f + 1) / 3)
+  const h = (19 * a + b - d - g + 15) % 30
+  const i = Math.floor(c / 4)
+  const k = c % 4
+  const l = (32 + 2 * e + 2 * i - h - k) % 7
+  const m = Math.floor((a + 11 * h + 22 * l) / 451)
+  const mes = Math.floor((h + l - 7 * m + 114) / 31)
+  const dia = ((h + l - 7 * m + 114) % 31) + 1
+  return `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
+}
+
+/** Si no es lunes, el lunes siguiente (Ley 51 de 1983). */
+function alLunes(fecha: FechaISO): FechaISO {
+  const dia = new Date(`${fecha}T12:00:00`).getDay()
+  return dia === 1 ? fecha : sumarDias(fecha, (8 - dia) % 7)
+}
+
+const festivosPorAnio = new Map<number, Set<FechaISO>>()
+
+/** RN-223 — Los festivos de Colombia de un año. */
+export function festivosDeColombia(anio: number): Set<FechaISO> {
+  const guardados = festivosPorAnio.get(anio)
+  if (guardados) return guardados
+  const f = (mes: number, dia: number) => `${anio}-${String(mes).padStart(2, '0')}-${String(dia).padStart(2, '0')}`
+  const pascua = domingoDePascua(anio)
+  const festivos = new Set<FechaISO>([
+    f(1, 1), f(5, 1), f(7, 20), f(8, 7), f(12, 8), f(12, 25),
+    ...[f(1, 6), f(3, 19), f(6, 29), f(8, 15), f(10, 12), f(11, 1), f(11, 11)].map(alLunes),
+    sumarDias(pascua, -3),
+    sumarDias(pascua, -2),
+    alLunes(sumarDias(pascua, 39)),
+    alLunes(sumarDias(pascua, 60)),
+    alLunes(sumarDias(pascua, 68)),
+  ])
+  festivosPorAnio.set(anio, festivos)
+  return festivos
+}
+
+/** RN-223 — Si la fecha es festivo en Colombia. */
+export function esFestivo(fecha: FechaISO): boolean {
+  return festivosDeColombia(Number(fecha.slice(0, 4))).has(fecha.slice(0, 10))
+}
+
 /**
- * Suma **dias habiles**: salta sabados y domingos.
+ * Suma **dias habiles**: salta sabados, domingos **y festivos de Colombia**
+ * (RN-223).
  *
- * Hace falta porque la Ley 675 cuenta asi los plazos del acta (art. 47: «veinte
- * dias habiles»). No contempla festivos —eso exige el calendario colombiano de
- * cada ano, que es un dato que la app no tiene— y por eso el plazo que calcula
- * es **el mas corto posible**: nunca dice que hay mas tiempo del que hay.
+ * Hace falta porque la Ley 675 cuenta asi sus plazos: los veinte dias habiles
+ * del acta (art. 47) y el tercer dia habil de la segunda convocatoria (art. 41).
  */
 export function sumarDiasHabiles(fecha: FechaISO, dias: number): FechaISO {
   let resultado = fecha
@@ -113,7 +174,7 @@ export function sumarDiasHabiles(fecha: FechaISO, dias: number): FechaISO {
   while (restantes > 0) {
     resultado = sumarDias(resultado, 1)
     const diaSemana = new Date(`${resultado}T12:00:00`).getDay()
-    if (diaSemana !== 0 && diaSemana !== 6) restantes -= 1
+    if (diaSemana !== 0 && diaSemana !== 6 && !esFestivo(resultado)) restantes -= 1
   }
   return resultado
 }
