@@ -452,7 +452,9 @@ administrador con su cédula y sus datos de contacto.
 - A1. La votación se cierra mientras estaba decidiendo → el voto no se acepta y se le avisa.
 - A2. Ya votó → ve su elección, sin opción de cambiarla (RN-34).
 - A3. Otorgó poder a otra persona → no puede votar esa unidad (RN-32).
-- A4. La unidad está en mora → **(?)** pendiente de definir si pierde el voto.
+- A4. La unidad está en mora → **vota**, que es la regla general (Ley 675, art. 37). Solo si el
+  edificio configuró que su reglamento lo prohíbe (RN-221; T-633 de 2003), los botones quedan
+  deshabilitados con el motivo; asiste y opina igual (Mary, 2026-10-13).
 - A5. El punto exige **mayoría calificada** y la asamblea no es presencial → **no se vota**.
   Los botones quedan deshabilitados —no escondidos— con el motivo a la vista: el parágrafo del
   art. 46 prohíbe tomar esas decisiones en reunión no presencial, y lo que se decidiera sería
@@ -470,8 +472,8 @@ administrador con su cédula y sus datos de contacto.
 asambleas ordinarias y extraordinarias, un voto por unidad (RN-29), solo el propietario o su
 apoderado (RN-51, RN-30), con el coeficiente copiado al votar (RN-37). **Dice qué mayoría exige
 el punto antes de votar y si quedó aprobado**, citando el artículo (RN-74), y el quórum se
-verifica contra la Ley 675 (RN-28). Los poderes entraron con CU-R-23. Sigue abierta **la mora
-como causal** (A4), que es de §3 bis.
+verifica contra la Ley 675 (RN-28). Los poderes entraron con CU-R-23. La **mora** (A4) se
+configura por edificio (RN-221).
 
 ---
 

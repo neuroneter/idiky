@@ -154,6 +154,8 @@ import {
   marcaResidente,
   motivoNoCitaSegunda,
   antelacionConvocatoria,
+  motivoTopePoderes,
+  motivoNoVotaPorMora,
   canalesDeCitacion,
   fechaSegundaConvocatoria,
   HORA_SEGUNDA_CONVOCATORIA,
@@ -3059,6 +3061,12 @@ function prepararPoder(
     email: '',
     telefono: parametros.telefonoApoderado?.trim() ?? '',
   }
+  // RN-220 — El tope del reglamento, si el edificio lo configuró.
+  if (existente) {
+    const copropiedad = bd.copropiedades.find((c) => c.id === asamblea.copropiedadId)
+    const tope = motivoTopePoderes(bd.poderes, asamblea.id, existente.id, copropiedad?.topePoderes)
+    if (tope) throw new ErrorDeNegocio(tope)
+  }
   if (!existente) bd.personas.push(apoderado)
 
   return { asamblea, unidad, apoderado, otorgadoPor: propietario.personaId }
@@ -4020,6 +4028,52 @@ export async function configurarVotoNoEconomico(
 }
 
 /**
+ * RN-221 — La administración indica si su reglamento no deja votar a las
+ * unidades en mora. Por defecto votan (Ley 675, art. 37).
+ */
+export async function configurarVotoMorosos(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; morososNoVotan: boolean },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('Esta opción la cambia la administración del edificio (RN-221).')
+  }
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  copropiedad.morososNoVotan = parametros.morososNoVotan
+  return persistir(bd, copropiedad)
+}
+
+/**
+ * RN-220 — La administración fija, según su reglamento, cuántos poderes puede
+ * llevar una persona en una asamblea. `null` = sin tope (la ley no fija uno).
+ * Lo ya otorgado no se toca: el tope vale para los poderes nuevos.
+ */
+export async function configurarTopePoderes(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; tope: number | null },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('Esta opción la cambia la administración del edificio (RN-220).')
+  }
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  if (parametros.tope === null) {
+    delete copropiedad.topePoderes
+  } else {
+    if (!Number.isInteger(parametros.tope) || parametros.tope < 1 || parametros.tope > 50) {
+      throw new ErrorDeNegocio('El tope es un número entero entre 1 y 50.')
+    }
+    copropiedad.topePoderes = parametros.tope
+  }
+  return persistir(bd, copropiedad)
+}
+
+/**
  * RN-210 — La administración decide si en su edificio el propietario aprueba
  * las estadías largas que registra el arrendatario. Lo ya pedido no cambia:
  * apagar la opción no aprueba lo que estaba esperando.
@@ -4169,6 +4223,13 @@ export async function emitirVoto(
 
   const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
   if (!unidad) throw new ErrorDeNegocio('La unidad no existe.')
+
+  // RN-221 — Si el reglamento lo dice, la unidad en mora no vota (ni por apoderado).
+  const mora = motivoNoVotaPorMora(
+    bd.copropiedades.find((c) => c.id === unidad.copropiedadId),
+    bd.cuotas.filter((c) => c.unidadId === unidad.id),
+  )
+  if (mora) throw new ErrorDeNegocio(mora)
 
   // **Quien puede votar por esta unidad: el propietario, o su apoderado.** Si hay
   // poder, vota solo el apoderado: quien lo otorgó ya no vota esa unidad (RN-32).

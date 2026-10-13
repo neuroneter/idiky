@@ -731,6 +731,24 @@ tenía **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de de
 contable al día): **Daniel lo integró a `main` el 2026-10-11**. Su rama sigue atrás de `main`; el
 aviso de inicio de su próxima sesión se la trae.
 
+### 2026-10-13 · Mary + IA (Claude) · Tope de poderes y voto en mora, por edificio (RN-220, RN-221)
+
+Mary: *«en la configuración del edificio … cuántos poderes se puede por persona»* y
+*«normalmente un propietario en mora puede votar, pero dejemos la opción en la configuración del
+edificio»*. En Asambleas de la consola hay dos tarjetas nuevas: **Poderes por persona** (sin
+tope, o de 1 a 50; Idiky no deja otorgar, enviar ni registrar uno más, contando también los que
+están en trámite) y **Unidades en mora** («Votan», por defecto, o «No votan: lo dice el
+reglamento»; T-633 de 2003). Con la restricción, la unidad en mora —también por apoderado— ve
+los botones deshabilitados con el motivo, y el repositorio lo rechaza igual. CU-A-19 pasa a ✅.
+También: Mary confirma que **el correo cuenta como dirección** para la citación (art. 39).
+Archivos: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/repositorio.ts`,
+`apps/pwa/src/features/admin/AsambleasAdminPage.tsx`,
+`apps/pwa/src/features/residente/AsambleaDetallePage.tsx`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/configuracion-asamblea.spec.ts` (3 nuevas); **52 en verde**.
+
+**Para el abogado:** si la unidad que no vota por mora cuenta para el quórum (hoy cuenta).
+
 ### 2026-10-12 · Mary + IA (Claude) · La citación a asamblea (CU-A-12, RN-33, RN-219)
 
 Mary: *«si, construye la citación»*, sobre la propuesta de cinco puntos. Al convocar, Idiky
@@ -752,7 +770,7 @@ Archivos: `apps/pwa/src/componentes/HojaCitacion.tsx` y
 las asambleas de prueba convocadas para hoy pasaron a extraordinarias (la ordinaria ya no se
 puede citar para el mismo día). **49 en verde.**
 
-**Para el abogado:** si el correo electrónico vale como «última dirección registrada» (art. 39).
+**El correo cuenta como dirección** (Mary, 2026-10-13).
 
 ### 2026-10-11 · Mary + IA (Claude) · El poder lo acepta el apoderado y lo recibe la administración (T-46, RN-217, RN-218)
 
