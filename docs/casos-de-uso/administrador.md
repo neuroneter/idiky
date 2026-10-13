@@ -880,62 +880,55 @@ real que este caso de uso estaba tapando.
 ---
 
 ### CU-A-25
-## CU-A-25 — Configurar si la copropiedad cobra interés de mora
+## CU-A-25 — Registrar la tasa de interés de mora de la copropiedad
 
 - **Actor principal:** Administrador
 - **Precondiciones:** Existe la copropiedad.
-- **Disparador:** Se configura la copropiedad, o la asamblea decide empezar o dejar de cobrar
-  intereses.
-- **Resultado esperado:** Queda definido si esta copropiedad cobra interés de mora. **No todas
-  lo hacen**, y apagado no se genera ninguno (RN-42).
+- **Disparador:** Se configura la copropiedad, o la asamblea aprueba una tasa distinta.
+- **Resultado esperado:** Queda registrada la tasa con la que se liquida la mora y **qué la
+  autoriza**: la ley o un acta de asamblea.
+
+> **Corregido el 2026-10-13 (Mary), contra la Ley 675 de 2001, art. 30.** Antes este caso de uso
+> decía que cada copropiedad decide **si** cobra interés de mora («no todas lo hacen»). La ley
+> dice otra cosa: *«El retardo en el cumplimiento del pago de expensas **causará** intereses de
+> mora, equivalentes a una y media veces el interés bancario corriente, certificado por la
+> Superintendencia Financiera, sin perjuicio de que la asamblea general, con quórum que señale
+> el reglamento de propiedad horizontal, establezca un **interés inferior**»*. El interés **lo
+> causa la ley**; lo que decide la copropiedad es **bajar la tasa**, por asamblea.
 
 **Flujo principal**
 1. El administrador ve la configuración de cartera de su copropiedad.
-2. Enciende o apaga el cobro de interés de mora.
-3. El sistema registra **quién lo cambió y cuándo**: encender un cobro que afecta a todos los
-   copropietarios no puede ser un cambio anónimo.
-4. Con el cobro encendido, el proceso automático (CU-S-02) liquida los intereses según la tasa
-   vigente y genera cuotas de tipo `interes` (RN-44).
-
-**Flujo de la tasa** — la registra **el administrador de cada copropiedad**
-(decisión del equipo, 2026-08-27).
-
-5. El administrador registra la tasa vigente: valor, desde cuándo aplica y **qué la aprobó** —
-   el reglamento, citando el artículo, o un acta de asamblea, enlazándola (CU-A-20).
-6. El sistema **rechaza** una tasa por encima del tope legal (RN-43) y **avisa** cuando la
-   vigente lleva demasiado tiempo sin actualizarse.
-
-> **La ley pone el techo, la asamblea pone la tasa.** Hay una norma que regula el interés de
-> mora, pero cada copropiedad tiene su reglamento y sus aprobaciones de asamblea: la tasa que
-> se cobra es la que **esa** copropiedad aprobó, y la ley solo dice hasta dónde puede llegar.
-> Por eso no basta con guardar un número: hay que guardar **qué lo autoriza**. Cuando un
-> copropietario pregunte por qué le cobran ese interés, la respuesta es un acta o un artículo.
-
-> **Y por eso los dos frenos.** Si la tasa la teclea una persona, se puede equivocar o dejarla
-> vieja. Cobrar por encima del tope es usura; cobrar con una tasa vencida es cobrar mal. El
-> sistema no puede evitar el error, pero sí hacerlo visible.
+2. **Por defecto rige la tasa de la ley**: 1,5 veces el interés bancario corriente certificado
+   por la Superintendencia Financiera para el periodo. Ese es también el **tope** (RN-43).
+3. Si la asamblea aprobó una **tasa inferior**, el administrador la registra con su valor, desde
+   cuándo rige y **el acta que la aprobó** (CU-A-20). Sin acta no se registra.
+4. El sistema registra **quién lo cambió y cuándo**: una tasa que afecta a todos los
+   copropietarios no puede cambiarse de forma anónima.
+5. El proceso automático (CU-S-02) liquida los intereses con la tasa vigente y genera cuotas de
+   tipo `interes` (RN-44).
 
 **Flujos alternativos**
-- A1. Se apaga el cobro → **los intereses ya generados no desaparecen**; son cuotas y se
-  anulan una por una si así se decide (O3).
-- A2. No hay tasa vigente registrada → el sistema **no calcula nada** y avisa. Es preferible no
-  cobrar a cobrar con una tasa desactualizada (RN-43).
-- A3. La tasa vigente está vencida → el sistema avisa y **(?)** queda por decidir si sigue
-  liquidando con la última conocida o se detiene.
+- A1. La asamblea aprueba **no cobrar** (tasa en cero) → **pregunta para el abogado**: la ley
+  habla de «un interés inferior», no de suprimirlo. Mientras no se responda, se registra como
+  cualquier tasa inferior, con su acta, y queda la advertencia.
+- A2. Se baja la tasa → **los intereses ya generados no cambian**: son cuotas, y se anulan una
+  por una si así se decide (O3).
+- A3. Se intenta registrar una tasa **por encima de la de la ley** → se rechaza (RN-43): pasaría
+  el tope.
+- A4. El interés bancario corriente del periodo no está cargado → el sistema **avisa** y no
+  liquida con una tasa vieja; quién la carga cada periodo está en §3 quinquies.
 
 **Reglas de negocio**
-- RN-42: sin activar, no se genera ningún interés.
-- RN-43: la tasa no se escribe en el código; se registra con vigencia y fuente, y no puede
-  superar el tope legal.
+- RN-42: el interés de mora **se causa por ley** (art. 30); la copropiedad no lo apaga, solo
+  puede aprobar en asamblea una tasa inferior.
+- RN-43: la tasa no se escribe en el código; se registra con vigencia y fuente (la ley o un
+  acta), y no puede superar 1,5 veces el interés bancario corriente.
 - RN-44: el interés genera una cuota de tipo `interes`, que entra en la cartera como cualquier
   otra y por tanto suma al saldo (RN-03) y se imputa por antigüedad (RN-06).
 
-> **La tasa cambia y viene de afuera.** «Normativa vigente» significa que la fija una autoridad
-> externa y se actualiza periódicamente. Por eso la tasa es un dato con vigencia, no una
-> constante del código, y por eso hace falta decidir **quién la mantiene al día**. Las
-> preguntas están en [`../12-levantamiento-pendiente.md`](../12-levantamiento-pendiente.md)
-> §3 quinquies. Sin esas respuestas se puede construir el interruptor de este caso de uso, pero
-> no el cálculo.
+> **Cartera compartida con la contable.** El interés de mora también lo lleva la aplicación
+> contable de Jeimy (`apps/contable/`). Las reglas RN-42 a RN-44 tienen que quedar **iguales en
+> las dos** el mismo día: antes de construir el cálculo, se acuerda con Jeimy y con Daniel.
 
 **Estado en el demo:** ⬜ — hoy no se calcula ningún interés (CU-S-02 está parcial).
 

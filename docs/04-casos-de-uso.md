@@ -83,7 +83,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-22 | **Administrar el catálogo de multas** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-22) |
 | CU-A-23 | **Imponer una multa y llevar el proceso** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-23) |
 | CU-A-24 | ~~Cobrar una cuota adicional a una unidad~~ | — | ⛔ Retirado — es la cuota extraordinaria (Mary, 2026-09-09) | [ver](./casos-de-uso/administrador.md#cu-a-24) |
-| CU-A-25 | **Configurar si la copropiedad cobra interés de mora** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-25) |
+| CU-A-25 | **Registrar la tasa de interés de mora de la copropiedad** | 1 | ⬜ Pendiente (corregido el 2026-10-13 contra el art. 30: el interés lo causa la ley; la asamblea solo puede bajar la tasa) | [ver](./casos-de-uso/administrador.md#cu-a-25) |
 | CU-A-26 | **Registrar propietarios y ver los registros de la copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-26) |
 | CU-A-27 | Conciliar abonos y administrar recibos de caja | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-27) |
 | CU-A-28 | **Registrar un proyecto y sus avances, y contárselos a los propietarios** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-28) |
