@@ -780,7 +780,7 @@ Archivos: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/reposito
 
 **Pruebas:** `apps/pwa/pruebas/navegador/configuracion-asamblea.spec.ts` (3 nuevas); **52 en verde**.
 
-**Para el abogado:** si la unidad que no vota por mora cuenta para el quórum (hoy cuenta).
+**Decidido (Mary, 2026-10-13):** la unidad en mora **cuenta para el quórum** aunque el reglamento le quite el voto: la mora no la inhabilita.
 
 ### 2026-10-12 · Mary + IA (Claude) · La citación a asamblea (CU-A-12, RN-33, RN-219)
 
