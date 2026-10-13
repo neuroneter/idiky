@@ -472,8 +472,9 @@ coeficiente y se cierra.
 - A1. ~~Se pierde el quórum durante la votación~~ → **resuelto** (Mary, 2026-10-11): el quórum
   se verifica al inicio de la asamblea; si alguien se va después, las votaciones siguen siendo
   válidas (RN-215).
-- A2. Empate → la opción **no alcanza la mayoría**: la simple exige superar la mitad (RN-74). Si el
-  reglamento prevé otra cosa, **(?)** pendiente.
+- A2. Empate → la opción **no alcanza la mayoría** y no se aprueba: la simple exige superar la
+  mitad (RN-74; Ley 675, art. 45). Se decide **como lo determina la ley** y no hay opción de
+  configurarlo por edificio (Mary, 2026-10-13: *«empate como lo determina la ley»*).
 - A3. Anular una votación por vicio de procedimiento → se marca `anulada` con motivo y se
   repite como una votación nueva. La anulada no se borra (RN-34).
 

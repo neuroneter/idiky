@@ -731,6 +731,12 @@ tenía **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de de
 contable al día): **Daniel lo integró a `main` el 2026-10-11**. Su rama sigue atrás de `main`; el
 aviso de inicio de su próxima sesión se la trae.
 
+### 2026-10-13 · Mary + IA (Claude) · Empate, como lo determina la ley (CU-A-18 A2)
+
+Mary: *«empate como lo determina la ley»*. Un empate **no aprueba**: la mayoría exige superar la
+mitad (art. 45; RN-74). No se agrega opción por edificio. El demo ya lo hacía; se cierra la
+pregunta en `docs/casos-de-uso/administrador.md` (CU-A-18 A2).
+
 ### 2026-10-13 · Mary + IA (Claude) · Los días hábiles saltan los festivos (RN-223)
 
 Mary: *«sí, vamos con los festivos»*. `sumarDiasHabiles` ya salta sábados, domingos **y festivos
