@@ -313,7 +313,11 @@ marca las que el residente canceló fuera de plazo (RN-112).
 - A1. No se alcanza el quórum el día de la asamblea → segunda convocatoria (CU-A-17 A2, RN-216),
   con su propia citación.
 - A4. La asamblea ya estaba convocada sin citación (las del demo) → «Emitir la citación».
-- A2. Se modifica el orden del día antes de la asamblea → se reemite la citación.
+- A2. **El orden del día no se cambia después de convocar** (Mary, 2026-10-13). La citación ya se
+  envió con él, y en la extraordinaria no se decide nada que no esté en ella (Ley 675, art. 39). Si
+  el administrador se equivocó, **cancela** la asamblea (A3, con motivo) y **convoca de nuevo**, con
+  su propia citación y su antelación (RN-33). Reordenar los puntos lo hace la propia asamblea al
+  aprobar el orden del día.
 - A3. Se cancela la asamblea → estado `cancelada`, con motivo. No se borra (trazabilidad).
 
 **Vimeo, y la salvedad** (RN-98, Mary 2026-09-28). Idiky reconoce la herramienta por el enlace
