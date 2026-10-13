@@ -79,7 +79,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-18 | **Habilitar, abrir y cerrar una votación** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-18) |
 | CU-A-19 | **Registrar un poder en papel y dar de alta a quien lo ejerce** | 1 | ✅ Demo (registra, valida el que llega en foto, muestra el acumulado y **aplica el tope de poderes por persona si el edificio lo configuró**, RN-220) | [ver](./casos-de-uso/administrador.md#cu-a-19) |
 | CU-A-20 | **Levantar el acta de la asamblea** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-20) |
-| CU-A-21 | **Administrar los coeficientes de las unidades** | 1 | ⬜ Pendiente | [ver](./casos-de-uso/administrador.md#cu-a-21) |
+| CU-A-21 | **Corregir los coeficientes mal cargados** | 1 | ✅ Demo (2026-10-13: no se cambian; se corrige un error con motivo, suma 100 % y sin asamblea instalada, con historial; RN-222) | [ver](./casos-de-uso/administrador.md#cu-a-21) |
 | CU-A-22 | **Administrar el catálogo de multas** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-22) |
 | CU-A-23 | **Imponer una multa y llevar el proceso** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-23) |
 | CU-A-24 | ~~Cobrar una cuota adicional a una unidad~~ | — | ⛔ Retirado — es la cuota extraordinaria (Mary, 2026-09-09) | [ver](./casos-de-uso/administrador.md#cu-a-24) |

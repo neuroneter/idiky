@@ -731,6 +731,20 @@ tenía **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de de
 contable al día): **Daniel lo integró a `main` el 2026-10-11**. Su rama sigue atrás de `main`; el
 aviso de inicio de su próxima sesión se la trae.
 
+### 2026-10-13 · Mary + IA (Claude) · Corregir coeficientes mal cargados (CU-A-21, RN-222)
+
+Mary: *«los coeficientes no se pueden cambiar, no obstante puede ser un error del administrador,
+en ese caso los puede modificar desde su perfil»*. En la consola, **Unidades → Corregir
+coeficientes**: tabla editable con la suma a la vista; no guarda si no da 100 % (RN-19), si falta
+el motivo o si hay una asamblea instalada. Cada unidad corregida guarda el historial y lo muestra
+en su detalle. Lo votado no cambia (RN-37). «Su perfil» se tomó como la consola del
+administrador, que es donde están las unidades.
+Archivos: `apps/pwa/src/features/admin/CorregirCoeficientes.tsx` (nuevo),
+`apps/pwa/src/features/admin/UnidadesPage.tsx`, `apps/pwa/src/dominio/{tipos,reglas}.ts`,
+`apps/pwa/src/datos/repositorio.ts`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/coeficientes.spec.ts` (2 nuevas); **54 en verde**.
+
 ### 2026-10-13 · Mary + IA (Claude) · Tope de poderes y voto en mora, por edificio (RN-220, RN-221)
 
 Mary: *«en la configuración del edificio … cuántos poderes se puede por persona»* y

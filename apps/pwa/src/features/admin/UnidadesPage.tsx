@@ -26,6 +26,7 @@ import type { MotivoCierreVinculo, Residencia } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
+import { CorregirCoeficientes } from './CorregirCoeficientes'
 
 export function UnidadesPage() {
   const { bd, ejecutar, cargando, mostrarAviso } = useDatos()
@@ -38,6 +39,7 @@ export function UnidadesPage() {
   const [cambiando, setCambiando] = useState<Residencia | null>(null)
   const [motivo, setMotivo] = useState<MotivoCierreVinculo>('otro')
   const [explicacion, setExplicacion] = useState('')
+  const [corrigiendo, setCorrigiendo] = useState(false)
   const navegar = useNavigate()
   if (!sesion) return null
 
@@ -101,7 +103,13 @@ export function UnidadesPage() {
         <span className="subtitulo">
           {unidades.length} unidades · coeficiente total {coeficienteTotal}%
         </span>
+        {/* CU-A-21, RN-222 — Corregir un error al cargarlos; no cambiarlos. */}
+        <button className="boton" onClick={() => setCorrigiendo(true)}>
+          Corregir coeficientes
+        </button>
       </div>
+
+      {corrigiendo && <CorregirCoeficientes alCerrar={() => setCorrigiendo(false)} />}
 
       <div className="tarjeta" style={{ padding: 0 }}>
         <div className="contenedor-tabla">
@@ -187,6 +195,18 @@ export function UnidadesPage() {
           }}
         >
           <div className="pila">
+            {/* RN-222 — Si el coeficiente se corrigió, de cuánto a cuánto y por qué. */}
+            {(unidadDetalle.correccionesCoeficiente ?? []).length > 0 && (
+              <div>
+                <span className="titulo-seccion">Correcciones del coeficiente</span>
+                {unidadDetalle.correccionesCoeficiente!.map((c) => (
+                  <p key={c.en} className="subtitulo" style={{ marginTop: 'var(--e1)' }}>
+                    {formatearFecha(c.en.slice(0, 10))}: de {c.antes}% a {c.despues}% —{' '}
+                    {nombreCompleto(sel.persona(bd, c.por))}: «{c.motivo}»
+                  </p>
+                ))}
+              </div>
+            )}
             <div>
               <span className="titulo-seccion">Cartera</span>
               <div className="fila" style={{ marginTop: 'var(--e2)' }}>
