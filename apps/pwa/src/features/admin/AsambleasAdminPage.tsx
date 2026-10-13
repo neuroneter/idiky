@@ -62,6 +62,8 @@ import {
   convocatoriaCompleta,
   definicionModalidad,
   antelacionConvocatoria,
+  definicionMayoria,
+  MAYORIAS,
   admiteGrabacion,
   herramientaDeEnlace,
   salvedadCanalDeUnaVia,
@@ -81,7 +83,7 @@ import {
   quorumDeLaSesion,
 } from '../../dominio/reglas'
 import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
-import type { Asamblea, ModalidadAsamblea, TipoAsamblea } from '../../dominio/tipos'
+import type { Asamblea, MayoriaExigida, ModalidadAsamblea, TipoAsamblea } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
@@ -613,8 +615,8 @@ function DetalleAsamblea({
             <li key={punto.id}>
               <strong>{punto.titulo}</strong>
               {punto.seVota && <span className="chip chip--marca">Se vota</span>}
-              {mayoriaDelPunto(punto) === 'calificada' && (
-                <span className="chip chip--alerta">Mayoría calificada</span>
+              {mayoriaDelPunto(punto) !== 'simple' && (
+                <span className="chip chip--alerta">{definicionMayoria(mayoriaDelPunto(punto)).nombre}</span>
               )}
               {!admisible.admisible && (
                 <p className="acceso__nota" style={{ marginTop: 'var(--e1)' }}>
@@ -1010,7 +1012,7 @@ interface DatosConvocatoria {
   lugar?: string
   enlaceTransmision?: string
   citacion: string
-  ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean }>
+  ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida }>
 }
 
 function FormularioConvocatoria({
@@ -1029,7 +1031,7 @@ function FormularioConvocatoria({
   const [enlace, setEnlace] = useState('')
   const [citacion, setCitacion] = useState('')
   const [puntos, setPuntos] = useState<
-    Array<{ titulo: string; descripcion: string; seVota: boolean }>
+    Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida }>
   >([{ titulo: '', descripcion: '', seVota: false }])
   const [error, setError] = useState<string | null>(null)
 
@@ -1236,6 +1238,27 @@ function FormularioConvocatoria({
               />
               <span className="subtitulo">Este punto se somete a votación</span>
             </label>
+            {/* RN-74, RN-224 — Qué mayoría exige el punto: la ley (simple o 70 %) o el reglamento (unanimidad). */}
+            {punto.seVota && (
+              <select
+                aria-label={`Mayoría del punto ${i + 1}`}
+                value={punto.mayoria ?? 'simple'}
+                onChange={(evento) =>
+                  setPuntos(
+                    puntos.map((p, j) =>
+                      i === j ? { ...p, mayoria: evento.target.value as MayoriaExigida } : p,
+                    ),
+                  )
+                }
+                style={{ marginTop: 'var(--e2)' }}
+              >
+                {MAYORIAS.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.nombre} ({m.cifra}) · {m.fuente}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
         ))}
         <button

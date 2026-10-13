@@ -1111,7 +1111,23 @@ export function baseDeVoto(
  * «al menos 7 unidades». La simple se **supera**; la calificada se **alcanza**.
  */
 export function unidadesNecesarias(umbral: number, mayoria: MayoriaExigida): number {
-  return mayoria === 'calificada' ? Math.ceil(umbral) : Math.floor(umbral) + 1
+  return mayoria === 'simple' ? Math.floor(umbral) + 1 : Math.ceil(umbral)
+}
+
+/**
+ * RN-224 — Como se nombra cada mayoria y de donde sale. La simple y la
+ * calificada las fija la Ley 675 (arts. 45 y 46); la **unanimidad** la exige el
+ * reglamento para ciertos puntos (Mary, 2026-10-13): todas las unidades o todo
+ * el coeficiente del edificio, a favor.
+ */
+export const MAYORIAS: ReadonlyArray<{ id: MayoriaExigida; nombre: string; corto: string; cifra: string; fuente: string }> = [
+  { id: 'simple', nombre: 'Mayoría simple', corto: 'simple (más de la mitad)', cifra: 'más de la mitad', fuente: 'art. 45' },
+  { id: 'calificada', nombre: 'Mayoría calificada', corto: 'calificada (70 %)', cifra: '70 % del edificio', fuente: 'art. 46' },
+  { id: 'unanimidad', nombre: 'Unanimidad', corto: 'unanimidad (100 %)', cifra: 'todo el edificio', fuente: 'reglamento' },
+]
+
+export function definicionMayoria(mayoria: MayoriaExigida) {
+  return MAYORIAS.find((m) => m.id === mayoria)!
 }
 
 /** Si en este edificio la administración escoge la base de las no económicas (solo el mixto). */
@@ -1160,27 +1176,31 @@ export function resultadoVotacion(parametros: {
 } {
   const { conteo, mayoria, coeficienteRepresentado, coeficienteEdificio } = parametros
   const porUnidad = parametros.baseDeVoto === 'unidad'
+  // La calificada y la unanimidad se miden sobre el **edificio entero**; la
+  // simple, sobre lo representado en la sesion.
+  const sobreElEdificio = mayoria !== 'simple'
   const base = porUnidad
-    ? mayoria === 'calificada'
+    ? sobreElEdificio
       ? (parametros.unidadesEdificio ?? 0)
       : (parametros.unidadesRepresentadas ?? 0)
-    : mayoria === 'calificada'
+    : sobreElEdificio
       ? coeficienteEdificio
       : coeficienteRepresentado
-  const umbral = mayoria === 'calificada' ? base * 0.7 : base / 2
+  const umbral = mayoria === 'unanimidad' ? base : mayoria === 'calificada' ? base * 0.7 : base / 2
   const baseTexto = porUnidad
-    ? mayoria === 'calificada'
+    ? sobreElEdificio
       ? 'de las unidades del edificio'
       : 'de las unidades representadas en la sesión'
-    : mayoria === 'calificada'
+    : sobreElEdificio
       ? 'del coeficiente del edificio'
       : 'del coeficiente representado en la sesión'
 
-  // La calificada se **alcanza** (70 %); la simple se **supera** (mas de la
-  // mitad). No es un detalle: con exactamente la mitad, la simple no pasa.
+  // La calificada y la unanimidad se **alcanzan**; la simple se **supera** (mas
+  // de la mitad). No es un detalle: con exactamente la mitad, la simple no pasa.
+  // La tolerancia es para la suma de coeficientes con decimales (RN-19).
   const valorDe = (opcion: ConteoOpcion) => (porUnidad ? opcion.unidades : opcion.coeficiente)
   const ganadora = conteo.porOpcion.find((opcion) =>
-    mayoria === 'calificada' ? valorDe(opcion) >= umbral : valorDe(opcion) > umbral,
+    mayoria === 'simple' ? valorDe(opcion) > umbral : valorDe(opcion) >= umbral - 1e-6,
   )
 
   return {

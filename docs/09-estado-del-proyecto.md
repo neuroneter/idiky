@@ -731,6 +731,21 @@ tenía **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de de
 contable al día): **Daniel lo integró a `main` el 2026-10-11**. Su rama sigue atrás de `main`; el
 aviso de inicio de su próxima sesión se la trae.
 
+### 2026-10-13 · Mary + IA (Claude) · Unanimidad, y la mayoría se escoge al convocar (RN-224)
+
+Mary: *«agregamos la opción de unanimidad»*. Un punto puede exigir **unanimidad**: todo el
+edificio a favor (100 % del coeficiente, o todas las unidades si se vota por unidad). Al revisar
+apareció que el formulario de convocar **no dejaba escoger la mayoría** de cada punto (solo la
+traía la semilla): ahora cada punto que se vota escoge simple, calificada (70 %) o unanimidad.
+La consola, la papeleta del residente y el acta lo dicen con su fuente (ley o reglamento).
+Archivos: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/features/admin/{AsambleasAdminPage,VotacionPunto}.tsx`,
+`apps/pwa/src/features/residente/AsambleaDetallePage.tsx`, `apps/pwa/src/componentes/HojaActa.tsx`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/unanimidad.spec.ts` (2 nuevas); **57 en verde**.
+
+**Con esto, la asamblea queda completa en el demo.** Solo sigue abierta, para el abogado, cómo
+vota un edificio mixto.
+
 ### 2026-10-13 · Mary + IA (Claude) · Empate, como lo determina la ley (CU-A-18 A2)
 
 Mary: *«empate como lo determina la ley»*. Un empate **no aprueba**: la mayoría exige superar la
