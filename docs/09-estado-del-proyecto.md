@@ -731,6 +731,15 @@ tenía **un cambio sin integrar** desde el 2026-10-02 (`6def143`, su guía de de
 contable al día): **Daniel lo integró a `main` el 2026-10-11**. Su rama sigue atrás de `main`; el
 aviso de inicio de su próxima sesión se la trae.
 
+### 2026-10-15 · Mary + IA (Claude) · La tasa del mes la carga IDIKY, no el administrador (T-47)
+
+Mary: *«el administrador carga el interés, pero ¿es necesario hacerlo? ¿no es %?»*. Es un
+porcentaje, pero cambia cada mes: 1,5 veces el interés bancario corriente que certifica la
+Superintendencia Financiera. Decidido: lo **carga IDIKY una vez al mes para todos los
+edificios, desde BOB**; el administrador solo registra una tasa inferior si su asamblea la
+aprobó. Anotado en CU-A-25, en §3 quinquies del levantamiento y como **T-47** en el tablero,
+para Daniel (BOB) y Jeimy (la contable). Solo documentación.
+
 ### 2026-10-13 · Mary + IA (Claude) · El interés de mora lo causa la ley (CU-A-25 corregido)
 
 Mary preguntó si es correcto que cada edificio configure si cobra interés de mora. **No**: la
