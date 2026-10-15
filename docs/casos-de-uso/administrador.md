@@ -899,7 +899,10 @@ real que este caso de uso estaba tapando.
 **Flujo principal**
 1. El administrador ve la configuración de cartera de su copropiedad.
 2. **Por defecto rige la tasa de la ley**: 1,5 veces el interés bancario corriente certificado
-   por la Superintendencia Financiera para el periodo. Ese es también el **tope** (RN-43).
+   por la Superintendencia Financiera para el periodo. Ese es también el **tope** (RN-43). **El
+   administrador no la carga**: como cambia cada mes y es la misma para todo el país, la carga
+   **IDIKY una vez al mes para todos los edificios**, desde BOB (T-47; Mary, 2026-10-15). Si el
+   edificio cobra la tasa de la ley, el administrador no tiene que hacer nada.
 3. Si la asamblea aprobó una **tasa inferior**, el administrador la registra con su valor, desde
    cuándo rige y **el acta que la aprobó** (CU-A-20). Sin acta no se registra.
 4. El sistema registra **quién lo cambió y cuándo**: una tasa que afecta a todos los
@@ -915,8 +918,8 @@ real que este caso de uso estaba tapando.
   por una si así se decide (O3).
 - A3. Se intenta registrar una tasa **por encima de la de la ley** → se rechaza (RN-43): pasaría
   el tope.
-- A4. El interés bancario corriente del periodo no está cargado → el sistema **avisa** y no
-  liquida con una tasa vieja; quién la carga cada periodo está en §3 quinquies.
+- A4. El interés bancario corriente del mes no está cargado todavía en BOB → el sistema
+  **avisa** y no liquida con una tasa vieja.
 
 **Reglas de negocio**
 - RN-42: el interés de mora **se causa por ley** (art. 30); la copropiedad no lo apaga, solo
