@@ -930,6 +930,90 @@ mayoría; T-46 (el poder que aprueba el apoderado).
 
 ---
 
+### 2026-10-18 · BOB · Sesión de IA (Cursor) con Justo · Amoy listo para cargar en BOB Dev, con custodia temporal explícita
+
+**Qué se hizo** (repo `BOB-Idiky`, rama `feature/T-81-plugin-cuentas`):
+
+- El plugin `cuentas-polygon` quedó configurado en local contra las fábricas y el paymaster
+  desplegados en Polygon Amoy. Las llaves de owner, cambio y movimiento se comprobaron contra
+  sus direcciones; no se escribieron en Git.
+- `infra/gestion/cargar-cadena-amoy.sh` toma únicamente las variables blockchain de
+  `apps/gestion/.env`, las valida, las envía por `stdin` de SSH y las mezcla sin mostrarlas en
+  `~/.config/idiky/secretos/gestion-strapi.env`. Al recrear el pod, Strapi puede registrar las
+  cuentas y cofirmar movimientos de prueba desde `bob-dev.idiky.com`.
+- La documentación de BOB y del plugin declara que esta custodia en variables de entorno es
+  **solo para BOB Dev / Amoy y no es apta para producción**. El destino es
+  `llaveMovimiento` y `llaveCambio` en KMS/HSM e identidades separadas, operador de privilegio
+  mínimo y owner en multisig con timelock; Strapi solicita firmas y nunca recibe las privadas.
+- `npm run build` de Strapi pasó. El código está en `origin/main` de `BOB-Idiky`
+  (`ed05ea4`) y en `develop`. Falta desplegarlo: esta máquina no tiene `IDIKY_SERVIDOR` ni
+  `IDIKY_LLAVE`. Después del despliegue hay que correr `cargar-cadena-amoy.sh`; las llaves no
+  viajan en Git.
+
+**Bloqueo antes del primer alta real:** las dos fábricas de Amoy conservan `rpIdHash = 0`.
+Hay que decidir el `rpId` de ALICE, publicar las asociaciones de Android/iOS y fijar su
+`sha256` en ambas fábricas antes de crear cuentas; las cuentas ya creadas no heredan cambios
+posteriores de la fábrica.
+
+---
+
+### 2026-10-15 · ALICE · Sesión de IA (Cursor) con Justo · CU-R-01: acceso con celular y cédula, y alta por QR de las cuentas Polygon con passkey
+
+**Qué se hizo** (repo `App-Idiky`, `feature/CU-R-01-alta-qr-passkey`):
+
+- **Acceso:** la puerta pide celular y cédula y confirma con un código de 6 números por SMS
+  (en el demo el código se muestra en pantalla; 10 min de vigencia, 5 intentos). Reglas puras en
+  `lib/dominio/reglas/acceso.dart`; el repositorio suma `identificarResidente`, `enviarCodigo`
+  y `verificarCodigo`.
+- **Alta por QR** (instrucciones de BOB del mismo día): «Leer código QR» abre la cámara
+  (`mobile_scanner`), consulta la operación en BOB (`GET /api/cuentas-polygon/operaciones/{id}`),
+  muestra descripción y vencimiento, crea una passkey ES256 con verificación obligatoria (huella,
+  rostro o PIN), firma el challenge con un WebAuthn *get* y envía x, y y la firma (r y s en low-s,
+  `challengeIndex`, `typeIndex`, `authenticatorData`, `clientDataJSON` exacto). Muestra y guarda
+  `cuentaDia` y `cuentaFinanciera`. El `credentialId` queda en el almacenamiento seguro.
+  Servicio en `lib/servicios/alta_qr/`; 400, 409 y 410 piden un QR nuevo y nunca se reintenta.
+- Configuración por `--dart-define`: `ALTA_QR_BASE_URL`, `ALTA_QR_RP_ID`, `ALTA_QR_JWT`
+  (opcional) y `ALTA_QR_TIPO_AUTENTICADOR` (por defecto `dispositivo`).
+- Dependencias nuevas: `http`, `flutter_secure_storage`, `cbor` (más `passkeys` y
+  `mobile_scanner`, ya agregadas). Android: `minSdk` 26 por Jitsi, permiso de internet y HTTP sin
+  cifrar solo en debug. iOS: `Runner.entitlements` con `webcredentials:`.
+- Pruebas: 37 en verde (hex, base64url, DER a r y s con low-s, índices, x e y del
+  `attestationObject`, el servicio con `MockClient` y la pantalla).
+
+**Qué falta para probarlo de punta a punta:**
+
+- El dominio del RP ID tiene que publicar `/.well-known/assetlinks.json` (Android) y
+  `apple-app-site-association` (iOS) con la firma de la app; sin eso el teléfono no crea la passkey.
+- BOB tiene que aceptar el origen `android:apk-key-hash:…` en el `clientDataJSON`.
+- **Decidir `tipoAutenticador`:** las passkeys de Google y Apple se sincronizan con la nube,
+  así que la llave no vive solo en el chip del teléfono y «dispositivo» no describe bien eso.
+  Propuesta de ADR en [`adr/propuesta-passkey-sincronizada-alta-qr.md`](./adr/propuesta-passkey-sincronizada-alta-qr.md)
+  (número por asignar).
+- El proxy de `f:\dani\pruebas` necesita `STRAPI_TOKEN` en su `.env`, y el puerto 5173 lo ocupa otra
+  app de Vite en esta máquina (se puede usar `PUERTO=5174`).
+
+**Qué sigue:** probar en un teléfono real con el dominio asociado; el ADR de Flutter (T-80).
+
+### 2026-10-08 · ALICE · Sesión de IA (Cursor) con Justo · App-Idiky cumple 01/02 al producto
+
+**Qué se hizo** (repo `App-Idiky`, `feature/estructura-atomic-design`):
+
+- Las convenciones `docs/01-atomic-design.md` y `docs/02-capa-de-datos.md` se
+  alinearon con la PWA: pestañas Inicio · Cuenta · Solicitudes · Asambleas ·
+  Cartelera; `asambleas` y `proyectos` en `BaseDatos`; `consulta.dart` como
+  snapshot que aplica las `RN-xx`.
+- El repositorio es la única puerta de la UI. Las pantallas ya no calculan
+  mora ni vigencia. CU-R-01 entra por perfiles demo; el inicio orquesta
+  piezas atómicas (`TarjetaSaldo`, `RejillaAccesos`, `ResumenDia`).
+- Fase 1–5 del plan: `ConsultaResidente` resuelve cargos, autorizaciones y
+  obras; las vistas de cuenta, pago, reservas, PQRS, cartelera, visitantes,
+  correspondencia, solicitudes (`FiltroSegmento`), paz y salvo
+  (`HojaPazYSalvo`), asambleas (CU-R-20) y proyectos (CU-R-32) solo pintan
+  piezas del inventario.
+
+**Qué sigue:** conectar el adaptador a la API de BLOKY cuando exista el
+contrato; voto en asamblea (CU-R-13) y el ADR de Flutter (T-80).
+
 ### 2026-10-03 · BLOKY · Sesión de IA (Claude) con Daniel · T-77, paso 1: un esquema por copropiedad, en el servidor
 
 **Qué se hizo** (repo `Bloky-Idiky`, `feature/T-77-capa-de-datos` → `develop`, desplegado como
