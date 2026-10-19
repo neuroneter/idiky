@@ -112,6 +112,18 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · Personajes hombre y mujer (CU-B-14)
+
+Daniel: *al crear un personaje solo contempla tipos masculinos… hacerlo mixto (un vigilante, una
+portera…); en el paso 2 se le da el sexo, con los peinados; y más peinados*.
+- **RN-261**: parte nueva `cuerpo` (hombre o mujer; sin ella, hombre) y 9 peinados nuevos (18 en total).
+  La API los valida (`npm run probar`: todo pasa).
+- App: figura de mujer (cintura, pestañas, labios); el paso 1 muestra los cargos con hombres y mujeres
+  mezclados; en el paso 2, «Hombre / Mujer» arriba de las galerías ordena los peinados (los suyos primero,
+  «Más peinados» abajo) y quita la barba a la mujer; las miniaturas del cabello muestran hasta el pecho.
+- Verificado en una copia aparte: crear a Marta Gómez (portería, mujer, trenza) y que se guarde.
+  `Bloky-Idiky` `develop` `70c341f`. **Sigue:** desplegar y que Daniel lo pruebe.
+
 ### 2026-10-11 · Integración · Sesión de IA (Claude) con Daniel · El creador de personajes por partes (CU-B-14)
 
 Daniel: *en vez de una galería de personajes, una galería de accesorios, tipos de cabello, uniforme,

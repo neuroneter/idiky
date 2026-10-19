@@ -541,9 +541,11 @@ miembros y empresas que reservan; tarifas.
 1. Ve **la sala**: los colaboradores como personajes animados (respiran, parpadean, caminan,
    saludan al pasar el ratón). Quien está en turno camina por la zona de trabajo; quien no,
    descansa en la banca. Debajo, **«Hoy»** muestra quién cubre cada hora, con la hora actual.
-2. **Crea un colaborador** como quien arma un personaje en un juego: (1) su nombre y su cargo; el
-   cargo lo viste con su kit (gorra, ropa, lo de la mano, insignia); (2) **el creador de
-   personajes**: galerías de piel, ojos, boca, cabello, color de cabello, barba, gafas, lo de la
+2. **Crea un colaborador** como quien arma un personaje en un juego: (1) su nombre y su cargo, con
+   hombres y mujeres mezclados en las tarjetas (el vigilante, la portera…); el cargo lo viste con su
+   kit (gorra, ropa, lo de la mano, insignia); (2) **el creador de personajes**: primero **hombre o
+   mujer** (cambia la figura y pone primero sus peinados; a la mujer no le ofrece barba), y luego
+   galerías de piel, ojos, boca, cabello, color de cabello, barba, gafas, lo de la
    cabeza, ropa, color de la ropa, lo de la mano e insignia; cada opción se ve puesta sobre el mismo
    personaje, y 🎲 arma uno al azar; (3) un turno de un toque y los días. Se une al equipo con su saludo.
 3. Toca a alguien para ver su ficha: cambia su nombre o su cargo («Ponerle la ropa de…» lo viste
@@ -563,7 +565,7 @@ miembros y empresas que reservan; tarifas.
 avisos a los colaboradores, sus permisos en BLOKY (perfiles, CU-B-01) y que **cada colaborador
 ajuste su propio personaje desde su app** con las mismas partes (RN-261).
 
-**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en `develop` de `Bloky-Idiky` (`895ef78`, con el creador por partes), probado con la
+**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en `develop` de `Bloky-Idiky` (`70c341f`, con el creador por partes, hombre y mujer), probado con la
 API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `apps/bloky-api/src/equipo/`.
 
 ---
