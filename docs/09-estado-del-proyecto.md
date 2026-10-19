@@ -112,6 +112,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · Horario fácil de ajustar (CU-B-14)
+
+Daniel: *es muy difícil ajustar el horario: la franja no se deja cambiar de tamaño, y al dar clic no
+puedo definir hora de inicio y de fin para no tener que hacerlo con el mouse*.
+- Causa: el borde para estirar medía 8 px, solo existía abajo y calculaba «cuánto se movió»; un clic no
+  hacía nada.
+- Ahora: **tarjeta del turno** (clic en un turno: día, Desde, Hasta de media en media hora, Guardar, Quitar;
+  clic en un hueco o «＋ Agregar turno»: uno nuevo en uno o varios días; avisa el cruce y el paso de la
+  medianoche); **agarraderas arriba y abajo** que siguen al cursor; filas de 16 px.
+- Verificado en una copia aparte: estirar 6–14 a 6–17, subir el inicio a 8:00, escribir 22:00–6:00, crear
+  10–18 en tres días, el cruce que no deja guardar y mover un turno al sábado; todo se guarda.
+  `Bloky-Idiky` `develop` `2c63512`. **Sigue:** desplegar y que Daniel lo pruebe.
+
 ### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · Personajes hombre y mujer (CU-B-14)
 
 Daniel: *al crear un personaje solo contempla tipos masculinos… hacerlo mixto (un vigilante, una

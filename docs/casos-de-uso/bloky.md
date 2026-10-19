@@ -550,9 +550,14 @@ miembros y empresas que reservan; tarifas.
    personaje, y 🎲 arma uno al azar; (3) un turno de un toque y los días. Se une al equipo con su saludo.
 3. Toca a alguien para ver su ficha: cambia su nombre o su cargo («Ponerle la ropa de…» lo viste
    con el kit del cargo nuevo) y **edita su personaje** en el mismo creador.
-4. **Ajusta el horario** en la grilla de la semana: arrastra en un día vacío para crear un turno,
-   arrastra un turno para moverlo (a otra hora u otro día) y su borde para estirarlo, de a media
-   hora; Suprimir lo quita; pone turnos de un toque en los días marcados (RN-262).
+4. **Ajusta el horario** en la grilla de la semana (RN-262), de dos maneras:
+   - **Escribiendo las horas:** toca un turno y se abre una tarjeta con el día, «Desde» y «Hasta»
+     (de media en media hora), con Guardar y Quitar; toca un hueco o «＋ Agregar turno» para crear
+     uno, en uno o varios días. Si termina antes de empezar, pasa al día siguiente. Avisa del cruce
+     antes de guardar.
+   - **Con el mouse:** arrastra en un día vacío para crear, arrastra el turno para moverlo, y sus
+     agarraderas de arriba y de abajo para cambiar el inicio o el fin (el borde va adonde está el
+     cursor). También pone turnos de un toque en los días marcados.
 5. Todo se guarda solo, con versión, y se deshace con Ctrl/Cmd + Z (RN-263).
 
 **Flujos alternativos**
@@ -565,7 +570,7 @@ miembros y empresas que reservan; tarifas.
 avisos a los colaboradores, sus permisos en BLOKY (perfiles, CU-B-01) y que **cada colaborador
 ajuste su propio personaje desde su app** con las mismas partes (RN-261).
 
-**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en `develop` de `Bloky-Idiky` (`70c341f`, con el creador por partes, hombre y mujer), probado con la
+**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en `develop` de `Bloky-Idiky` (`2c63512`, con el creador por partes, hombre y mujer, y el horario con tarjeta), probado con la
 API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `apps/bloky-api/src/equipo/`.
 
 ---
