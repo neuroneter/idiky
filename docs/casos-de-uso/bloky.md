@@ -560,7 +560,8 @@ miembros y empresas que reservan; tarifas.
      cursor). También pone turnos de un toque en los días marcados.
    - **Actividades** (RN-264): con «＋ Agregar actividad» (o eligiendo «Actividad» en la tarjeta de un
      turno nuevo) agenda el almuerzo, una pausa activa, una capacitación o una actividad social, con su
-     nombre y su color. Se dibujan rayadas encima del turno y no suman horas de trabajo; en la ficha se
+     nombre y su color. Pueden ir en paralelo con un turno o con otras actividades (solo dos turnos no se
+     cruzan); se dibujan rayadas encima del turno, lado a lado si se cruzan, y no suman horas de trabajo; en la ficha se
      ve «Almuerzo ahora» cuando toca.
 5. Todo se guarda solo, con versión, y se deshace con Ctrl/Cmd + Z (RN-263).
 
@@ -574,7 +575,7 @@ miembros y empresas que reservan; tarifas.
 avisos a los colaboradores, sus permisos en BLOKY (perfiles, CU-B-01) y que **cada colaborador
 ajuste su propio personaje desde su app** con las mismas partes (RN-261).
 
-**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en `develop` de `Bloky-Idiky` (`749da6e`, con el creador por partes, hombre y mujer, el horario con tarjeta y las actividades), probado con la
+**Estado en BLOKY Dev:** ⚪ (2026-10-11) — en `develop` de `Bloky-Idiky` (`develop` con el creador por partes, hombre y mujer, el horario con tarjeta y las actividades en paralelo), probado con la
 API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `apps/bloky-api/src/equipo/`.
 
 ---

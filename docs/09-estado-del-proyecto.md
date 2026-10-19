@@ -112,6 +112,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · Actividades en paralelo (CU-B-14, RN-264)
+
+Daniel probó en BLOKY Dev: *al mover la actividad se convirtió en un turno; y no permite dos actividades en
+paralelo… lo único que no puede estar en paralelo es dos turnos*.
+- Error: al arrastrar, el tramo se rearmaba con día y horas y perdía nombre y color. Corregido.
+- **RN-264** ajustada: las actividades van en paralelo con turnos y con otras actividades; solo dos turnos no
+  se cruzan. API y prueba actualizadas (`npm run probar`: todo pasa). Las que se cruzan se dibujan lado a lado.
+- Verificado en una copia aparte: arrastrar el almuerzo del lunes al martes 12–13 (sigue siendo «Almuerzo»)
+  y una «Reunión» 12–14 en paralelo, sin aviso. **Sigue:** desplegar.
+
 ### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · Actividades en el horario (CU-B-14, RN-264)
 
 Daniel: *además de «Agregar turno», otro botón con la misma funcionalidad que permita ponerle un nombre
