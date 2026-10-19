@@ -112,6 +112,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · Actividades en el horario (CU-B-14, RN-264)
+
+Daniel: *además de «Agregar turno», otro botón con la misma funcionalidad que permita ponerle un nombre
+y un color, para el horario de comida o una actividad social*.
+- **RN-264** (`docs/05`): un tramo con nombre y color es una actividad; puede caer dentro de un turno, no se
+  cruza con otra actividad y no cuenta como horas de trabajo ni como «en turno». API: validación y prueba
+  nueva (`npm run probar`: todo pasa). Sin migración: va dentro del mismo `turnos` (jsonb).
+- App: «＋ Agregar actividad» y el selector Turno/Actividad en la tarjeta, con nombre, cinco sugeridas
+  (Almuerzo, Pausa activa, Capacitación, Reunión, Actividad social) y nueve colores; se dibujan rayadas
+  encima del turno; «Hoy» las muestra encima de la barra y la ficha dice «Almuerzo ahora».
+- Verificado en una copia aparte: almuerzo 10–11 de lunes a viernes dentro del turno 6–14, «Cumpleaños
+  de Rosa» el viernes 15–17 en rosado, editarla y que las horas sigan en 40. `Bloky-Idiky` `develop`
+  `749da6e`. Rango: RN usadas hasta RN-264. **Sigue:** desplegar y que Daniel lo pruebe.
+
 ### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · Horario fácil de ajustar (CU-B-14)
 
 Daniel: *es muy difícil ajustar el horario: la franja no se deja cambiar de tamaño, y al dar clic no
