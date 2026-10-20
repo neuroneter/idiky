@@ -156,6 +156,19 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Las relaciones de la copropiedad en BOB (T-111)
+
+- Daniel: *si se deja relacionado a la copropiedad, esto se convertirá en un punto demasiado grande de relaciones*. La relación
+  queda **solo del lado de cada contenido**: la contratación, la solicitud y la asignación apuntan a la copropiedad (y la
+  contratación al plan o al servicio), pero la copropiedad, el plan y el servicio ya no las cargan como campos.
+- Panel nuevo **«Contratos y trámites»** en la ficha de la copropiedad (`src/admin/extensions/ContratosYTramites.tsx`): las
+  contrataciones vigentes y las solicitudes por resolver (recibidas o en revisión), con «Ver todas» (la lista ya filtrada por
+  la copropiedad) y «+ Nueva». Los perfiles raíz reales siguen en «Personas del cliente» (el contenido Asignación de BOB no se
+  tocó más que su relación, como se acordó, hasta hablar con Justo).
+- BOB `main` `443759b`, desplegado `fad6fc1.gestion-443759b`, con respaldo. **Las relaciones se conservaron:** 1 contratación
+  y 6 asignaciones ligadas a su copropiedad, antes y después. BLOKY sigue leyendo las contrataciones por copropiedad (el cupo
+  de reuniones). `probar-bob.mjs`: 57 de 57. LangFlow igual. El panel no se miró por dentro.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · La ficha de la copropiedad entre BOB y BLOKY (ADR-0026, T-110)
 
 - **Decisión (ADR-0026):** cada dato de la ficha tiene un solo dueño. **BOB:** lo del contrato (nombre, NIT y dígito, tipo,
