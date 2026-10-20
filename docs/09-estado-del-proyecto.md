@@ -156,6 +156,21 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · «Personas de IDIKY» en BOB, con permisos (T-105, RN-270, RN-271)
+
+Daniel: *no ocultemos nada (Persona y Asignación) hasta hablar con Justo… quiero una vista para gestionar los usuarios,
+amarrada a roles de BOB: ver tiene un rol y ver y editar otro, para evitar fugas o manipulación.*
+- **BOB** (`main` `2614bda`): página **«Personas de IDIKY»** en el menú (buscar por documento o nombre; todas las asignaciones
+  de cada persona con enlace a la ficha; corregir datos) y **dos permisos por rol**: «Ver personas de IDIKY» y «Gestionar
+  personas de IDIKY» (**RN-270**). Los exigen el menú, la página, el panel de la ficha y las rutas del servidor de BOB.
+- **Middleware** (`develop` `f26f6d5`): `GET /api/admin/directorio/personas?q=` con firma; **cada búsqueda queda en la
+  auditoría** con quién y qué buscó (**RN-271**); pide 3 letras o números y no acepta comodines (no se lista todo).
+- Probado en local (BOB con SQLite temporal, middleware en memoria): 9 de 9 en permisos (solo ver: lista y busca 200, asignar,
+  corregir y finalizar 403; sin permiso: 403; sin sesión: 401) y, en la pantalla, el usuario de solo consulta ve «Solo puedes
+  consultar» sin el botón «Corregir datos». Se borró todo lo de la prueba.
+- Rangos nuevos de integración: **RN-270…299** y **T-105…119**. Aviso 1 de Justo actualizado (no se ocultan Persona ni Asignación).
+- **Sigue:** desplegar middleware y BOB; en BOB Dev, crear los roles y dar los permisos.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · T-89 tarea 3: el plugin «Personas del cliente» de BOB
 
 - **Plugin `personas-del-cliente`** en `BOB-Idiky` (`develop` `cdac4f6`, aún no en `main`): un panel en la ficha de cada

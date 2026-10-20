@@ -19,7 +19,10 @@ id de la persona. `persona` y `asignacion` **se van de BOB** al final de T-89 (p
 datos al directorio y se verifican).
 
 **Mientras se habla:** no construir nada nuevo sobre `persona` ni `asignacion` de BOB, y no quitarlas
-todavía (Strapi borra solas las tablas que su código ya no tiene).
+todavía (Strapi borra solas las tablas que su código ya no tiene). Daniel decidió (2026-10-20) **no ocultarlas ni
+borrarlas hasta hablarlo contigo**: tu plugin `cuentas-polygon` usa `persona`, así que el retiro se hace cuando tú
+hagas tus cambios. Mientras tanto, la gestión real ya está en BOB: el panel «Personas del cliente» de la ficha de
+cada copropiedad y la página «Personas de IDIKY» del menú, con permisos «Ver» y «Gestionar» por rol (RN-270).
 
 **Para hablar:** si el módulo «Personas del cliente» lo hace Justo o el equipo de BLOKY.
 
