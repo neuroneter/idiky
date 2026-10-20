@@ -177,7 +177,7 @@ con Justo en T-80 y T-81.
 | Paso | Qué | Quién |
 |---|---|---|
 | 1 | Esquema `directorio` + catálogo de roles, y mover ahí `persona` y `asignacion` (la tabla de hoy, `bloky.membresia`, se renombra) | Middleware |
-| 2 | Mapa: `servidor_datos` y `ubicacion` en `bloky`, reemplazando `conexion` | BLOKY |
+| 2 | Mapa: `servidor_datos` y `ubicacion` en `bloky`, reemplazando `conexion` (✅ 2026-10-20, RN-273 a RN-275) | BLOKY |
 | 3 | Rutas de administración del middleware para las personas del cliente | Middleware |
 | 4 | Módulo «Personas del cliente» en BOB, que usa esas rutas del middleware | BOB (lo puede hacer el equipo de BLOKY) |
 | 5 | Pasar las personas y asignaciones de BOB al directorio, verificar | Los dos, con respaldo |

@@ -156,6 +156,22 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · T-89 paso 2: el mapa de dónde vive cada cliente (RN-273 a RN-275)
+
+- Middleware `develop` `6e76bf6`, desplegado en BLOKY Dev (`d8e0ce8.bloky-6e76bf6`). Migración `006-mapa.sql`:
+  `bloky.servidor_datos` (cada servidor con el **nombre** del secreto que tiene su conexión, nunca la clave; la base lo
+  impone con un CHECK) y `bloky.ubicacion` (el directorio y cada `cp_<id>`: servidor, esquema, estado). Reemplaza a
+  `copropiedad.conexion`, que queda sin uso (se quita más adelante, expandir y contraer).
+- **RN-273** registrar un servidor · **RN-274** fuera de `activa` (`mudandose`, `solo_lectura`) la copropiedad se consulta
+  pero no se escribe: la consola recibe 423 y la transacción va `READ ONLY` en el propio PostgreSQL · **RN-275** mudar es
+  cambiar el servidor de su fila, solo si está `mudandose` y su esquema ya está en el destino en la misma migración.
+- Rutas: `GET /api/admin/mapa`, `POST /api/admin/mapa/servidores`, `…/ubicaciones/:pieza/estado`, `…/ubicaciones/:pieza/servidor`.
+  La receta de la mudanza está en el README del middleware. El directorio no se muda desde ahí (su auditoría va en el núcleo).
+- **Verificado en BLOKY Dev:** el verificador da todo en orden (servidor `principal`, las 3 copropiedades y el directorio en el
+  mapa, ninguna clave guardada, solo lectura rechaza escrituras con 25006); la ruta rechaza un servidor con URL y mudar el
+  directorio. LangFlow igual. `npm run probar`: todo pasa.
+- Pendiente de ADR-0025 §4: entregar al entrar la dirección de una instancia propia del middleware (`api_url`), cuando un cliente la tenga.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · T-89 pasos 5 y 7: las personas de BOB al directorio y la copia apagada
 
 - Herramienta `traer-personas-de-bob` (middleware `develop` `cab6b33`; solo mira, con `--aplicar` trae) y el interruptor
