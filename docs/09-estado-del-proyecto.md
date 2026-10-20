@@ -156,6 +156,18 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Decisiones de Daniel sobre lo pendiente
+
+- **Mirador de la Sabana**, aprovisionada desde el panel «En BLOKY» y verificada en el servidor: su esquema con 14 tablas y 10
+  migraciones (igual que las demás), en el mapa (`principal`, activa) y en la auditoría. Su Administrador (Andrés) no entra
+  mientras siga suspendida en BOB (RN-162); no tiene Delegado.
+- **Roles de «Personas de IDIKY» y «En BLOKY» en BOB Dev:** se crean más adelante, con los módulos de creación de la copropiedad.
+- **El nombre de Mary:** lo corregirá ella desde su perfil en BLOKY, cuando exista.
+- **Reuniones en los planes (T-108):** número al mes o ilimitadas, si incluye grabación y cuánto se guarda (por tiempo o por GB).
+- **T-18:** Twilio, con un proveedor intercambiable y su configuración administrada desde BOB (T-109).
+- **T-85** sigue abierta. **T-88:** con Justo, solo su IP.
+- **Siguiente:** Daniel quiere refinar primero el formulario de la copropiedad en BOB; lo demás espera.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · «En BLOKY»: aprovisionar desde BOB (T-107, RN-281)
 
 - Plugin nuevo de BOB `en-bloky` (`main` `16c3a04`, desplegado `7d3970c.gestion-16c3a04`, con respaldo): en la ficha de la
