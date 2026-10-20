@@ -156,6 +156,25 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · ADR-0025: una sola casa para las personas y el mapa
+
+Daniel: *BOB crea y gestiona al Administrador y al Delegado, pero nunca los almacena: los accede y gestiona en un
+módulo, para no tener registros duplicados. Y en la base, un esquema para los datos del usuario y otro que se duplica
+por cliente, para poder llevar un cliente a otra infraestructura… ¿dónde guardamos esas rutas para que la APP,
+BLOKY y BOB sepan llegar si se migran?*
+- **[ADR-0025](./adr/0025-directorio-unico-y-mapa-de-ubicaciones.md)** (aceptada): todas las personas viven solo en el
+  **directorio de BLOKY** (esquema `directorio`, con catálogo de roles); BOB las gestiona con un módulo «Personas del
+  cliente» que escribe por la API de administración de BLOKY y no guarda copia (en BOB queda solo el trámite, con el id);
+  se acaban la copia y la conciliación. La base queda en tres tipos de esquema: `directorio`, `bloky` (núcleo: ingreso y
+  **mapa**) y `cp_<id>` por cliente. El **mapa** (`servidor_datos` + `ubicacion`) dice dónde vive cada pieza, guarda el
+  nombre del secreto y nunca la clave, y **solo lo lee la API de BLOKY**: la app, ALICE y BOB nunca tocan una base, así
+  que mudar un cliente es cambiar una fila. ALICE usa el mismo directorio (resuelve el abierto de ADR-0022).
+- Ajustados: ADR-0015 y ADR-0022 (notas de modificación), RN-160, RN-161, RN-163, RN-164, docs/13 §1 y §3, docs/06,
+  docs/16, CU-B-01, CLAUDE.md y el índice de ADR. Tablero: **T-89** (los siete pasos; agota T-75…T-89) y nota en T-87.
+- Diagrama actualizado: página 1 con el «después» y página 3 nueva, «El mapa: dónde vive cada cliente».
+- **Sigue:** revisar con Justo (sobre todo el plugin `cuentas-polygon`, que hoy guarda datos de la persona en BOB); ver si
+  el módulo de BOB lo hace el equipo de BLOKY; empezar T-89 por el esquema `directorio` y el mapa. Pedir un rango de T nuevo.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Usuarios y reuniones con video: quién guarda qué
 
 Justo propuso que BOB firme los pases de Jitsi (JWT) y entregue el enlace. Daniel aclaró: **las reuniones son de
