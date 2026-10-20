@@ -49,9 +49,10 @@ rama. **Justo** desarrolla principalmente la APP (`App-Idiky`) y **Daniel** BLOK
                       (ERC-4337)    Polygon                          (pendiente, otro CU)
 ```
 
-- **BOB crea, BLOKY lee.** La copropiedad y sus perfiles raíz nacen en BOB; BLOKY los lee con
-  un token de solo lectura ([ADR-0008](./adr/0008-backend-de-bloky.md), [`13`](./13-bob-copropiedades-y-contratos.md)).
-- **ALICE hablará con la API de BLOKY.** Hoy no hay integración: la app es una plantilla.
+- **BOB crea la copropiedad; las personas viven en BLOKY.** La copropiedad nace en BOB y BLOKY la
+  lee con un token de solo lectura. Las personas (también Administrador y Delegado) viven solo en el
+  directorio de BLOKY; BOB las gestiona por la API de administración de BLOKY ([ADR-0025](./adr/0025-directorio-unico-y-mapa-de-ubicaciones.md)) ([ADR-0008](./adr/0008-backend-de-bloky.md), [`13`](./13-bob-copropiedades-y-contratos.md)).
+- **ALICE hablará con la API de BLOKY** y usa el mismo directorio de personas (ADR-0025 §6). Nadie fuera de esa API conoce dónde están las bases: lo sabe el mapa (ADR-0025 §4).
 - **Los contratos inteligentes** cubren el login invisible de ALICE. Qué otro caso de uso los
   pide (votos, actas) no está decidido: su principio es *on-chain solo lo necesario*.
 - **Jitsi** se integrará con BLOKY al convocar asambleas virtuales; eso es otro caso de uso.

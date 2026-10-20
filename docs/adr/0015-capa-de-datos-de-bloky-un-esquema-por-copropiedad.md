@@ -1,6 +1,6 @@
 # ADR-0015 — La capa de datos de BLOKY: un esquema por copropiedad, aprovisionado desde BOB
 
-- **Estado:** Aceptada (2026-09-21)
+- **Estado:** Aceptada (2026-09-21) · **modificada por [ADR-0025](./0025-directorio-unico-y-mapa-de-ubicaciones.md)** (2026-10-20): en las personas, BOB escribe en el directorio de BLOKY por su API de administración; el campo `conexion` se reemplaza por el mapa (`servidor_datos` + `ubicacion`)
 - **Fecha:** 2026-09-21
 - **Decide:** Responsable de integración (Daniel)
 - **Relacionados:** [ADR-0008](./0008-backend-de-bloky.md) (la API y su PostgreSQL),

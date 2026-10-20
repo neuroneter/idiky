@@ -9,13 +9,14 @@
 
 | | **BOB** (el *back office* de IDIKY) | **BLOKY** (el sistema de las copropiedades) |
 |---|---|---|
-| **Es dueño de** | Lo comercial y contractual: cliente, plan, servicios, contrato. La **ficha** de la copropiedad y el **resumen** de sus bienes. Los dos **perfiles raíz** | El **árbol completo hasta la unidad**, los coeficientes, los **perfiles internos** y toda la operación |
+| **Es dueño de** | Lo comercial y contractual: cliente, plan, servicios, contrato. La **ficha** de la copropiedad y el **resumen** de sus bienes. **Gestiona** los dos **perfiles raíz**, pero no los guarda: los escribe en el directorio de BLOKY (ADR-0025) | El **árbol completo hasta la unidad**, los coeficientes, **el directorio de todas las personas** (también Administrador y Delegado, ADR-0025), los **perfiles internos** y toda la operación |
 | **Quién lo usa** | El equipo de IDIKY | El Administrador, el Delegado y los perfiles que ellos creen |
 
 - **La identidad de la copropiedad nace en BOB.** Su `id` es el `copropiedadId` con el que BLOKY
   separa los datos de cada conjunto (RN-01).
-- **BOB no guarda datos de residentes.** Sí guarda los de los dos perfiles raíz, porque con ellos
-  hay una relación comercial.
+- **BOB no guarda datos de personas** (ADR-0025, 2026-10-20). Antes guardaba los de los dos perfiles
+  raíz; ahora los gestiona en su módulo «Personas del cliente», que lee y escribe el directorio de
+  BLOKY. En BOB queda solo el **trámite** (la solicitud), con el id de la persona en el directorio.
 - **Estados propuestos** (sin confirmar): prospecto, en implementación, activa, suspendida,
   retirada. Qué acceso queda en BLOKY cuando una copropiedad está suspendida sigue abierto.
 
@@ -59,9 +60,9 @@
 6. **El Delegado tiene lo mismo que el Administrador**, más una facultad propia: **solicitar desde
    BLOKY el bloqueo o el cambio del Administrador**. La solicitud debe cumplir la ley: al
    administrador lo remueve la asamblea, o el consejo si existe (art. 50), así que va con el acta.
-   **El nuevo Administrador lo crea IDIKY en BOB.**
+   **El nuevo Administrador lo crea IDIKY desde BOB** (en el directorio de BLOKY, ADR-0025).
 7. **El cambio del Delegado no se pide desde BLOKY:** el Delegado es el superusuario, así que
-   solo se tramita **por solicitud directa a `operaciones@idiky.com`**, y IDIKY lo hace en BOB.
+   solo se tramita **por solicitud directa a `operaciones@idiky.com`**, y IDIKY lo hace desde BOB (en el directorio de BLOKY, ADR-0025).
    Propuesta: BOB registra cada solicitud (quién la pidió, cuándo, por qué canal, con qué acta),
    para que el cambio tenga soporte.
 

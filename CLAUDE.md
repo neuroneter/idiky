@@ -40,7 +40,7 @@ confundir sistemas que se parecen:
 | Nombre | Qué es | Quién entra y cómo | Dónde está |
 |---|---|---|---|
 | **BOB** | El *back office* de IDIKY | El equipo de IDIKY, con el login de Strapi. **No usa Twilio** | Repo `BOB-Idiky` (`apps/gestion/`) |
-| **BLOKY** | El sistema de las copropiedades: estructura y unidades, propietarios, cartera, asambleas | Administrador, Delegado y los perfiles que ellos creen: **código por SMS al celular de BOB, o Google/Microsoft con el correo de BOB** | **En construcción en el repo `Bloky-Idiky`** (`apps/bloky/` + `apps/bloky-api/`; ADR-0008, ADR-0013). Su precursor es la consola del administrador del demo, en `apps/pwa/`, que sigue siendo la maqueta |
+| **BLOKY** | El sistema de las copropiedades: estructura y unidades, propietarios, cartera, asambleas | Administrador, Delegado y los perfiles que ellos creen: **código por SMS al celular del directorio, o Google/Microsoft con su correo** (las personas viven solo en el directorio de BLOKY; BOB gestiona Administrador y Delegado sin guardarlos, ADR-0025) | **En construcción en el repo `Bloky-Idiky`** (`apps/bloky/` + `apps/bloky-api/`; ADR-0008, ADR-0013). Su precursor es la consola del administrador del demo, en `apps/pwa/`, que sigue siendo la maqueta |
 | **ALICE** | La app del propietario y residente | Propietarios y residentes | El producto, en el repo `App-Idiky` (Flutter, recién empezado). Su maqueta es el demo de `apps/pwa/` |
 
 La contable de Jeimy conserva su nombre. La página web pública será **IDIKY**, y todo se presenta

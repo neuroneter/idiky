@@ -1,6 +1,6 @@
 # ADR-0022 — El directorio de acceso de BLOKY, la impersonación desde BOB y la medición del consumo
 
-- **Estado:** Aceptada (2026-10-03)
+- **Estado:** Aceptada (2026-10-03) · **modificada por [ADR-0025](./0025-directorio-unico-y-mapa-de-ubicaciones.md)** (2026-10-20): el directorio es la única casa de **todas** las personas y pasa a su propio esquema `directorio` (§1); BOB ya no las guarda y no hay copia ni conciliación (§2)
 - **Fecha:** 2026-10-03
 - **Decide:** Responsable de integración (Daniel)
 - **Completa a:** [ADR-0015](./0015-capa-de-datos-de-bloky-un-esquema-por-copropiedad.md) (un esquema por copropiedad)
@@ -42,6 +42,8 @@ sola en todo IDIKY**: puede ser administradora en un conjunto y propietaria en o
 guarda datos personales: **lo mínimo** (Ley 1581 de 2012).
 
 ### 2. BOB avisa; el ingreso no depende de BOB
+
+> **Reemplazado por ADR-0025 §2 (2026-10-20):** BOB ya no guarda personas; las gestiona escribiendo en el directorio por la API de administración. No hay aviso, copia ni conciliación.
 
 BOB sigue mandando sobre los perfiles raíz, pero **avisa a BLOKY cuando cambia una asignación**
 (con la API de administración de ADR-0015 y su token), y BLOKY la copia al directorio. El
@@ -103,10 +105,10 @@ funcionando cuando una copropiedad se muda a otra base.
 
 ## Abierto
 
-- **¿ALICE usa este mismo directorio y este mismo dominio** (su API sería un módulo más de este
+- **Resuelto en ADR-0025 §6 (2026-10-20): sí, ALICE usa el mismo directorio, por la API de BLOKY.** ~~¿ALICE usa este mismo directorio y este mismo dominio** (su API sería un módulo más de este
   backend), o tendrá otro backend? Lo natural es un solo directorio para todo IDIKY, porque la
   misma persona puede ser propietaria en ALICE y administradora en BLOKY. Lo decide Daniel con
-  Justo (T-80) antes de que ALICE arme su propio ingreso.
+  Justo (T-80) antes de que ALICE arme su propio ingreso.~~
 - Los umbrales del semáforo de consumo: se fijan con las primeras mediciones reales.
 
 ## Alternativas consideradas
