@@ -156,6 +156,17 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Sin «Asignación» en BOB (T-89 paso 6, parte 1)
+
+- Daniel: la asignación *ya se realiza directamente en la copropiedad* (panel «Personas del cliente», que escribe en el directorio
+  de BLOKY). Se revisó antes: ni `cuentas-polygon` ni los repos de Justo (`App-Idiky`, `SmartContrat-Idiky`) usan `asignacion`.
+- Salió de BOB el contenido, su regla, sus etiquetas, sus pruebas, su siembra y su fila del README; **Persona se queda** (la usa
+  `cuentas-polygon`) y solo perdió su campo de asignaciones. BOB `main` `34924ad`, desplegado `899eb35.gestion-34924ad`, con respaldo.
+- **Verificado:** `/api/asignaciones` responde 404 y `/api/personas` sigue en 200; el directorio de BLOKY conserva sus 6
+  asignaciones vigentes; la copia desde BOB sigue apagada. `probar-bob.mjs` 45 de 45. LangFlow igual.
+- Consecuencia: la copia desde BOB y la herramienta `traer-personas-de-bob` ya no pueden funcionar (leían las asignaciones de BOB).
+  Quitar ese código del middleware es el resto del paso 7. Aviso 1 de Justo actualizado.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Sin «Tipo de bien» en BOB (T-113)
 
 - Daniel: el contenido «Tipo de bien» *no es necesario, no hace parte de BOB*. Solo servía para decirle a BLOKY qué tipo de unidad

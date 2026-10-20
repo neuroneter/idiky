@@ -20,7 +20,10 @@ datos al directorio y se verifican). **Hecho el 2026-10-20:** las 6 asignaciones
 asignaciones) ya están en el directorio, gestionadas por IDIKY, y **la copia desde BOB está apagada**: lo que se cree en
 `persona` o `asignacion` de BOB ya no da acceso a BLOKY.
 
-**Mientras se habla:** no construir nada nuevo sobre `persona` ni `asignacion` de BOB, y no quitarlas
+**Actualización del 2026-10-20:** Daniel decidió quitar **`asignacion`** de BOB (ya está fuera: nada tuyo la usaba).
+**`persona` se queda** hasta que hablen, porque la usa `cuentas-polygon`; solo perdió su campo de asignaciones.
+
+**Mientras se habla:** no construir nada nuevo sobre `persona` de BOB, y no quitarla
 todavía (Strapi borra solas las tablas que su código ya no tiene). Daniel decidió (2026-10-20) **no ocultarlas ni
 borrarlas hasta hablarlo contigo**: tu plugin `cuentas-polygon` usa `persona`, así que el retiro se hace cuando tú
 hagas tus cambios. Mientras tanto, la gestión real ya está en BOB: el panel «Personas del cliente» de la ficha de
