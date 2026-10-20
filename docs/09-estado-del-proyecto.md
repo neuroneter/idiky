@@ -156,6 +156,24 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · T-89: el directorio en su esquema y BOB asignando por el middleware
+
+Tareas 1 y 2 del plan de T-89 ([ADR-0025](./adr/0025-directorio-unico-y-mapa-de-ubicaciones.md)), en `Bloky-Idiky` (`develop` `96c5d4e`):
+- **Migración `comun/005-directorio.sql`**: crea el esquema `directorio` y **mueve** ahí `persona` y `membresia` (mismas filas
+  y ids), que pasa a llamarse **`asignacion`**; agrega empresa, soporte, motivo de fin y `gestionada_por`; el catálogo
+  `directorio.rol` (administrador y delegado entran a BLOKY; propietario, arrendatario, residente y colaborador no); la
+  historia se permite (la misma persona puede volver a ser Administradora del mismo lugar).
+- **Rutas de administración del middleware** (las que usará el módulo de BOB): buscar persona por documento, corregirla,
+  listar las asignaciones de un lugar, asignar Administrador o Delegado (con reemplazo) y finalizar. **RN-265 a RN-269**.
+- **El ingreso de hoy sigue igual**, con tres ajustes (Daniel: *si afecta cómo acceden hoy, hacer los ajustes*): la copia de
+  BOB **no pisa** a una persona ni **revive** una asignación que IDIKY ya gestiona en el directorio; la persona se busca por
+  documento (no por el id de BOB); y el estado del lugar (RN-162) se le pregunta a BOB también para las asignaciones del
+  directorio. Solo administrador y delegado entran a la consola de BLOKY.
+- `npm run probar`: todo pasa (incluidas 11 pruebas nuevas). La migración no se probó contra PostgreSQL en el Mac (Daniel no
+  quiere bases locales): `verificar-capa-de-datos` tiene una sección 5 para comprobarla en el servidor.
+- **Sigue:** desplegar BLOKY Dev, correr la verificación en el servidor y que Daniel entre con Olga para confirmar que el
+  ingreso real sigue igual. Después, la tarea 3 (el plugin de BOB). Rango de RN de integración agotado (RN-240…269).
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Vocabulario: asignación (no «membresía»)
 
 Lo que une a una persona con un lugar y le da un rol ahí se llama **asignación** en todas partes, como en BOB (Daniel:
