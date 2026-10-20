@@ -16,7 +16,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | `apps/pwa/` (Mary, la maqueta de ALICE y de la consola), `apps/contable/` (Jeimy), `apps/gestion/` (BOB) y, desde el 2026-09-21, **`apps/bloky/` + `apps/bloky-api/` (BLOKY Dev, el producto real, ADR-0013)** |
-| **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 y **`https://bob-dev.idiky.com`** (ADR-0014) ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) |
+| **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 y **`https://bob-dev.idiky.com`** (ADR-0014) ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) **Desde el 2026-10-19:** con el plugin `cuentas-polygon` (alta de cuentas Polygon por QR) y las claves de **Polygon Amoy** (red de pruebas), publicado como `ad48f90.gestion-12e7c44`; faltan `RP_ID_HASH` y los usuarios de la app (T-87) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
@@ -143,14 +143,14 @@ Descargas** (la copia que usa el cargador está en `BOB-Idiky/apps/gestion/.env`
 permisos `600`).
 
 **Pendiente, con dueño:**
-- **Daniel (mañana, 2026-10-20): los usuarios de la app ante BOB.** Las rutas de `cuentas-polygon`
+- **Daniel (mañana, 2026-10-20), T-87: los usuarios de la app ante BOB.** Las rutas de `cuentas-polygon`
   exigen sesión, pero BOB **no tiene usuarios finales** (el registro público se apaga en cada
   arranque). Hay que decidir cómo se identifica el teléfono ante BOB y, con eso, qué rol recibe
   permiso sobre las cinco acciones del plugin. No se dio permiso a *Authenticated* a ciegas: abriría
   operaciones de cuentas a cualquier usuario que se cree después.
 - **Justo: `RP_ID_HASH` está en cero.** BOB arranca, pero una passkey real no completa el alta hasta
   confirmar el `rpId` de ALICE y fijar el mismo `sha256` en las dos fábricas de Amoy.
-- **Daniel: la conexión de Justo a la base de BOB (5432).** Eligió la conexión directa limitada a la
+- **Daniel, T-88: la conexión de Justo a la base de BOB (5432).** Eligió la conexión directa limitada a la
   IP de Justo; el cambio en `infra/servidor/levantar.sh` y la regla de Azure los aplica él (el
   permiso de la sesión no dejó exponer una base de datos). En la regla «Dev» de Azure sobra el 8090.
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
