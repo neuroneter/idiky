@@ -156,6 +156,18 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Usuarios y reuniones con video: quién guarda qué
+
+Justo propuso que BOB firme los pases de Jitsi (JWT) y entregue el enlace. Daniel aclaró: **las reuniones son de
+BLOKY**; BOB solo dice si la copropiedad u oficina puede usarlas y **cuántas al mes**. La base de usuarios guarda tipo
+y número de documento, teléfono, correo, a qué edificios u oficinas pertenece y su rol o roles en cada uno.
+- Revisión de lo que hay: el directorio de BLOKY (`bloky.persona` + `bloky.membresia`, ADR-0022) ya tiene casi todo;
+  falta un **catálogo de roles** (hoy texto libre), la **persona ↔ unidad** (CU-B-07), el **derecho y cupo de reuniones**
+  en BOB (no existe en planes ni contrataciones) y todo lo de reuniones y Jitsi en BLOKY. ADR-0016 sigue en Propuesta.
+- Diagrama para trabajarlo con Justo: [`docs/diagramas/reuniones-y-usuarios.drawio`](./diagramas/reuniones-y-usuarios.drawio)
+  (dos páginas: quién guarda qué, y una reunión paso a paso; naranja punteado = lo que falta).
+- **Sigue:** acordarlo con Justo sobre el diagrama; después, nota en ADR-0016 y un CU-B de reuniones.
+
 ### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · Actividades en paralelo (CU-B-14, RN-264)
 
 Daniel probó en BLOKY Dev: *al mover la actividad se convirtió en un turno; y no permite dos actividades en
