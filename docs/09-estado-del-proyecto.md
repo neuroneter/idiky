@@ -156,6 +156,20 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · «En BLOKY»: aprovisionar desde BOB (T-107, RN-281)
+
+- Plugin nuevo de BOB `en-bloky` (`main` `16c3a04`, desplegado `7d3970c.gestion-16c3a04`, con respaldo): en la ficha de la
+  copropiedad, un panel que dice si ya está lista en BLOKY (desde cuándo, negocio, servidor de datos y si está en solo
+  lectura) y el botón **«Aprovisionar en BLOKY»**, con confirmación. Permisos por rol: «Ver el estado en BLOKY» y
+  «Aprovisionar en BLOKY». Pasa por el middleware con el mismo token que «Personas del cliente».
+- **Probado en local** (BOB con SQLite desechable y un middleware de mentira): 8 de 8 — sin sesión 401, quien solo ve no
+  aprovisiona (403), aprovisionar da 201 y la segunda vez 200, un id raro da 400. La consola de BOB carga con el plugin.
+  El panel no se miró por dentro: entrar al panel local pedía una clave que la sesión no podía leer.
+- **En BOB Dev:** desde el contenedor de BOB, el middleware lista las 3 copropiedades de BLOKY y responde 404 para una que no
+  está. LangFlow igual.
+- **Para Daniel:** abrir en BOB Dev una copropiedad (por ejemplo Mirador de la Sabana, que no está en BLOKY) y mirar el panel
+  «En BLOKY»; dar los permisos a los roles que corresponda.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Reuniones con video en BLOKY (CU-B-15, RN-276 a RN-280)
 
 - **BOB** (`main` `021a320`, desplegado `dd5d598.gestion-021a320`, con respaldo automático): «Reuniones con video al mes» en
