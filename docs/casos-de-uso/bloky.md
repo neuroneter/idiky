@@ -586,6 +586,45 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
 
 ---
 
+### CU-B-15
+## CU-B-15 — Reuniones con video
+
+> Para los dos negocios (RN-252). Daniel (2026-10-20): las reuniones son **de BLOKY**; BOB solo define
+> si el cliente puede usarlas y **cuántas al mes**. Diagrama: `docs/diagramas/reuniones-y-usuarios.drawio`, página 2.
+
+- **Actor principal:** Administrador o Delegado
+- **Precondiciones:** CU-B-01; el cliente está aprovisionado y **tiene reuniones contratadas** en BOB: un
+  plan o un servicio adicional con «Reuniones con video al mes» mayor que 0, en una contratación vigente.
+- **Disparador:** la ficha «Reuniones» del menú.
+- **Resultado esperado:** La reunión queda programada con su sala propia, cuenta contra el cupo de su mes
+  y queda en la bitácora.
+
+**Flujo principal**
+1. Ve el mes (se cambia con ‹ ›), **cuántas reuniones ha programado y cuántas le permite lo contratado**
+   (RN-276), y las reuniones del mes con su estado: programada, en curso, terminada o cancelada.
+2. Toca **«Programar reunión»**: escribe el tema, la fecha, la hora (de Colombia) y la duración (de 15 minutos a
+   4 horas), y agrega invitados con su nombre y su correo o celular (RN-277).
+3. BLOKY confirma con BOB el cupo del mes, la guarda con una **sala que no se adivina** (RN-280) y la muestra
+   con «Abrir sala» y «Copiar enlace».
+4. A la hora, abre la sala; los invitados entran con el enlace y esperan en la sala de espera hasta que los admite.
+
+**Flujos alternativos**
+- A1. El mes ya llenó su cupo → no se programa; se cancela otra o se piden más a IDIKY (RN-278).
+- A2. Lo contratado no incluye reuniones → la pantalla lo dice y no ofrece programar.
+- A3. BOB no responde → no se programa (no se sabe si hay cupo); la lista sí se ve.
+- A4. Cancelar: antes de que empiece y con un motivo; no se borra y libera el cupo (RN-279).
+
+**Reglas de negocio:** RN-276, RN-277, RN-278, RN-279, RN-280.
+
+**Lo que queda abierto (T-106):** que BLOKY **firme el pase** (JWT) para abrir la sala sin cuenta de Jitsi y que
+Jitsi **la cierre a tiempo** (aviso 3 de Justo); **enviar las invitaciones** (correo, SMS o aviso en ALICE); registrar
+la asistencia; y ligarla a las asambleas (RN-92, RN-94: hay decisiones que una reunión no presencial no puede tomar).
+
+**Estado en BLOKY Dev:** 🟡 (2026-10-20) — desplegado (`dd5d598.bloky-c20ca05`, BOB `dd5d598.gestion-021a320`). Hoy la
+sala se abre con una cuenta de Jitsi. Código: `apps/bloky/src/features/reuniones/` y `apps/bloky-api/src/reuniones/`.
+
+---
+
 ### CU-B-06 a CU-B-08 — por escribir
 
 Los demás pasos de la puesta en marcha (CU-B-02) tienen número reservado y se escriben cuando

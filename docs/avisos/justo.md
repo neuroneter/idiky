@@ -55,6 +55,10 @@ cierre a tiempo, prueba con dos personas), pero **cambia quién hace cada cosa**
 
 **Mientras se habla:** no crear en BOB el endpoint ni la firma de los pases.
 
+**Hecho el 2026-10-20 (CU-B-15):** el derecho y el cupo ya están en BOB («Reuniones con video al mes» en el plan y en
+el servicio adicional, copiado en la contratación), y BLOKY ya programa y cancela reuniones dentro del cupo, cada una con
+su sala. **Falta lo tuyo (T-106):** Jitsi en modo `jwt`, que el middleware firme los pases y que la sala se cierre a tiempo.
+
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 
 ALICE **no tiene directorio propio**: entra por el middleware de IDIKY, el único que sabe dónde vive cada

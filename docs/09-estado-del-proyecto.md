@@ -156,6 +156,22 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Reuniones con video en BLOKY (CU-B-15, RN-276 a RN-280)
+
+- **BOB** (`main` `021a320`, desplegado `dd5d598.gestion-021a320`, con respaldo automático): «Reuniones con video al mes» en
+  el plan y en el servicio adicional; la contratación lo copia al firmarse (`reunionesPorMesContratadas`) y no se edita.
+  `probar-bob.mjs`: 57 de 57.
+- **Middleware y app** (`Bloky-Idiky` `develop` `c20ca05`, desplegado `dd5d598.bloky-c20ca05`): tabla `reunion` en cada
+  `cp_<id>` (migración `010`), rutas `GET/POST /api/c/:id/reuniones` y `…/:reunionId/cancelar`, y la ficha **«Reuniones»**
+  en el menú de los dos negocios. El cupo se lee en BOB (suma de las contrataciones vigentes); un candado por mes evita que
+  dos personas pasen el cupo a la vez. `BLOKY_JITSI_URL` en los secretos (no es un secreto) para el enlace de la sala.
+- **Verificado en BLOKY Dev:** la migración llegó a las 3 copropiedades; el token de solo lectura de BOB lee las
+  contrataciones (hoy el cupo es 0 en todas: nada contratado trae reuniones todavía); el SQL de programar y cancelar se
+  probó dentro de una transacción deshecha (no quedó nada). LangFlow igual. `npm run probar`: todo pasa.
+- **Para probarlo de punta a punta, Daniel:** en BOB, ponerle «Reuniones con video al mes» a un plan o servicio adicional y
+  crear una contratación vigente para una copropiedad (las ya firmadas no cambian: conservan lo firmado).
+- Falta (T-106, con Justo): pase firmado, cierre a tiempo, enviar invitaciones y asistencia.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · T-89 paso 2: el mapa de dónde vive cada cliente (RN-273 a RN-275)
 
 - Middleware `develop` `6e76bf6`, desplegado en BLOKY Dev (`d8e0ce8.bloky-6e76bf6`). Migración `006-mapa.sql`:
