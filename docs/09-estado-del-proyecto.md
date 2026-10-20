@@ -135,14 +135,26 @@ Polygon por QR, T-81) y una guía para publicarlo en BOB Dev con las claves de *
   RN-252) y **BLOKY sigue leyendo a BOB** (conciliación del directorio: 5 revisadas, ninguna sin
   respuesta).
 
-**Pendiente:** (1) **`RP_ID_HASH` está en cero**: BOB arranca, pero una passkey real no completa el
-alta hasta fijar el `rpId` de ALICE en las dos fábricas de Amoy; (2) en el panel de BOB, dar al rol
-que use la app permiso sobre las acciones de `cuentas-polygon` (si no, el teléfono recibe 403); (3)
-las tres copropiedades anteriores quedaron con **`negocio` vacío** (el campo nuevo es obligatorio y
-Strapi no rellena los registros existentes): hay que ponerles «copropiedad»; (4) **no es apto para
-producción**: en producción las privadas van a un KMS o HSM y el owner a un multisig (README de
-`apps/gestion`); (5) la conexión de Justo a la base de BOB (5432) sigue sin habilitarse: el cambio
-de exponerla quedó en manos de Daniel.
+**Resuelto el mismo día:** las tres copropiedades anteriores habían quedado con **`negocio` vacío**
+(Strapi aplica el valor por defecto solo a lo nuevo); **`hotfix/0.1.2`** (`12e7c44`) lo completa en
+el arranque de BOB, solo donde falta: publicado como **`ad48f90.gestion-12e7c44`**, las tres quedaron
+«copropiedad» y BLOKY sigue leyendo a BOB. El `.env` con las claves que Justo pasó **se borró de
+Descargas** (la copia que usa el cargador está en `BOB-Idiky/apps/gestion/.env`, fuera de git y con
+permisos `600`).
+
+**Pendiente, con dueño:**
+- **Daniel (mañana, 2026-10-20): los usuarios de la app ante BOB.** Las rutas de `cuentas-polygon`
+  exigen sesión, pero BOB **no tiene usuarios finales** (el registro público se apaga en cada
+  arranque). Hay que decidir cómo se identifica el teléfono ante BOB y, con eso, qué rol recibe
+  permiso sobre las cinco acciones del plugin. No se dio permiso a *Authenticated* a ciegas: abriría
+  operaciones de cuentas a cualquier usuario que se cree después.
+- **Justo: `RP_ID_HASH` está en cero.** BOB arranca, pero una passkey real no completa el alta hasta
+  confirmar el `rpId` de ALICE y fijar el mismo `sha256` en las dos fábricas de Amoy.
+- **Daniel: la conexión de Justo a la base de BOB (5432).** Eligió la conexión directa limitada a la
+  IP de Justo; el cambio en `infra/servidor/levantar.sh` y la regla de Azure los aplica él (el
+  permiso de la sesión no dejó exponer una base de datos). En la regla «Dev» de Azure sobra el 8090.
+- **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
+  `apps/gestion`).
 
 ### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · Actividades en paralelo (CU-B-14, RN-264)
 
