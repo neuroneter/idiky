@@ -112,6 +112,38 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · BOB Dev con las claves de Polygon Amoy y el alta de cuentas por QR (T-81)
+
+**Qué se pidió:** Justo dejó en `main` de `BOB-Idiky` el plugin `cuentas-polygon` (alta de cuentas
+Polygon por QR, T-81) y una guía para publicarlo en BOB Dev con las claves de **Polygon Amoy**
+(red de pruebas). Daniel pidió hacerlo sin depender de Justo.
+
+**Qué se hizo:**
+- **Claves cargadas** con `infra/gestion/cargar-cadena-amoy.sh` (de `BOB-Idiky`) en
+  `~/.config/idiky/secretos/gestion-strapi.env` del servidor: las 16 variables, permisos `600`, sin
+  mostrarse. El `.env` que pasó Justo tenía **finales de línea de Windows (CRLF)** y el cargador lo
+  rechazó con razón; se convirtió a LF. El `.env` local anterior de BOB quedó respaldado fuera del
+  repositorio (`~/Documents/WorkSapce/.respaldos-env/`).
+- **El primer despliegue falló al compilar**: el plugin declara `qrcode` y `viem` en su propio
+  `package.json`, pero la imagen solo instala los de `apps/gestion/package.json`. Corregido con
+  **`hotfix/0.1.1`** (desde `main`, integrado a `main` y a `develop`, `73633b0`): las dos
+  dependencias y `@types/qrcode`, con el `package-lock.json`; verificado con `npm ci` en limpio y
+  `npm run build`, igual que la imagen.
+- **Publicado** como **`911bad8.gestion-73633b0`** (con respaldo previo de la base y LangFlow igual):
+  las 16 variables están dentro de Strapi, `SIMULAR_CADENA=false`, el plugin responde, los datos
+  siguen intactos (3 copropiedades, 5 personas y el espacio de trabajo de prueba **Cowork Centro 93**,
+  RN-252) y **BLOKY sigue leyendo a BOB** (conciliación del directorio: 5 revisadas, ninguna sin
+  respuesta).
+
+**Pendiente:** (1) **`RP_ID_HASH` está en cero**: BOB arranca, pero una passkey real no completa el
+alta hasta fijar el `rpId` de ALICE en las dos fábricas de Amoy; (2) en el panel de BOB, dar al rol
+que use la app permiso sobre las acciones de `cuentas-polygon` (si no, el teléfono recibe 403); (3)
+las tres copropiedades anteriores quedaron con **`negocio` vacío** (el campo nuevo es obligatorio y
+Strapi no rellena los registros existentes): hay que ponerles «copropiedad»; (4) **no es apto para
+producción**: en producción las privadas van a un KMS o HSM y el owner a un multisig (README de
+`apps/gestion`); (5) la conexión de Justo a la base de BOB (5432) sigue sin habilitarse: el cambio
+de exponerla quedó en manos de Daniel.
+
 ### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · Actividades en paralelo (CU-B-14, RN-264)
 
 Daniel probó en BLOKY Dev: *al mover la actividad se convirtió en un turno; y no permite dos actividades en
