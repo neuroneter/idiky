@@ -478,9 +478,10 @@ los bloques sobre el satélite y tomar la dirección de la escritura. Código:
 ### CU-B-12
 ## CU-B-12 — Armar la planta de un espacio de trabajo
 
-> Solo para los clientes cuyo negocio es **espacio de trabajo** (RN-252, ADR-0024): una empresa o un
-> coworking que administra su espacio por reservas. En una copropiedad, las oficinas son unidades
-> privadas y se arman en el terreno (CU-B-03, RN-253).
+> Solo para los clientes cuyo negocio es **espacio de trabajo** (RN-252, ADR-0024; en BOB, tipo **oficina**, RN-285): una
+> empresa o un coworking que administra su espacio por reservas. En una copropiedad, las oficinas son unidades
+> privadas y se arman en el terreno (CU-B-03, RN-253). **Puede ser solo un área** —unos pisos o una oficina— dentro de
+> un edificio o conjunto que IDIKY no administra: se arman solo las sedes y los pisos que administra (RN-286).
 
 - **Actor principal:** Administrador o Delegado del espacio de trabajo
 - **Precondiciones:** CU-B-01; el cliente está aprovisionado en BLOKY con negocio `espacio_trabajo`.

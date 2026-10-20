@@ -156,6 +156,19 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · La oficina como un área suelta (RN-286)
+
+- Daniel: una oficina *pertenece a un edificio o conjunto, pero puede estar desligada y solo administramos esta área*. Revisado
+  en BLOKY: **ya lo soporta** — un espacio de trabajo arma solo sus sedes (con el edificio donde queda, opcional) y los pisos que
+  administra, con su nombre («Piso 7»), sin armar el edificio.
+- Faltaba mostrarlo: el perfil y el panel «En BLOKY» contaban unidades de copropiedad (siempre 0 para una oficina). Ahora, para
+  un espacio de trabajo, muestran **su planta**: sedes, edificio, pisos, puestos, oficinas, salas y área. La ayuda de «oficina»
+  en BOB lo explica. BLOKY `develop` `122e8f5` (`9efd351.bloky-122e8f5`), BOB `main` `a433993` (`9efd351.gestion-a433993`).
+- **Verificado:** Cowork Centro 93 → sede «Life» en el edificio «Life72», pisos 1 y 2, 4 puestos, 1.200 m²; las copropiedades
+  siguen con sus unidades. LangFlow igual.
+- **Abierto:** qué se cobra «por unidad» a una oficina (¿puestos, m², oficinas, valor fijo?), y si una sede se liga a la
+  copropiedad y su unidad cuando el edificio también es cliente de IDIKY.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Un solo campo para el tipo de la copropiedad (T-112, RN-285)
 
 - «Tipo» (edificio, conjunto) y «Negocio» (copropiedad, espacio de trabajo) se pisaban: queda **Tipo: conjunto, edificio u
