@@ -156,6 +156,16 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Un solo campo para el tipo de la copropiedad (T-112, RN-285)
+
+- «Tipo» (edificio, conjunto) y «Negocio» (copropiedad, espacio de trabajo) se pisaban: queda **Tipo: conjunto, edificio u
+  oficina**. La oficina es un espacio de trabajo: siempre comercial, sin estrato ni consejo.
+- **Primero el middleware** (`develop` `4caad26`, `6e03f53.bloky-4caad26`): saca el negocio del tipo y, mientras existiera,
+  respetaba el campo viejo. **Después BOB, en dos despliegues** para no perder el dato: el paso 1 (`bc4ac04`) agregó «oficina» y
+  pasó a Cowork Centro 93 a ese tipo; el paso 2 (`3eec8a2`, `6e03f53.gestion-3eec8a2`) quitó «negocio». Respaldo antes de cada uno.
+- **Verificado:** BOB ya no tiene el campo; BLOKY entiende las 5 (Cowork → espacio de trabajo, las demás → copropiedad) y su
+  catálogo no cambió. `probar-bob.mjs` 57 de 57, `npm run probar` pasa, LangFlow igual.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Las relaciones de la copropiedad en BOB (T-111)
 
 - Daniel: *si se deja relacionado a la copropiedad, esto se convertirá en un punto demasiado grande de relaciones*. La relación

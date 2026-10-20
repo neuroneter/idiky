@@ -1,6 +1,8 @@
 # ADR-0024 — Dos negocios en BLOKY: la copropiedad y el espacio de trabajo
 
-- **Estado:** Aceptada (2026-10-11)
+- **Estado:** Aceptada (2026-10-11). **Nota del 2026-10-20 (T-112, RN-285):** en BOB ya no hay un campo «negocio»
+  aparte: lo dice el **tipo** de la copropiedad (conjunto o edificio = copropiedad; **oficina** = espacio de trabajo).
+  BLOKY sigue guardando el negocio en su catálogo
 - **Fecha:** 2026-10-11
 - **Decide:** Responsable de integración (Daniel)
 - **Relacionados:** [ADR-0013](./0013-bloky-dev-separada-del-demo.md), [ADR-0015](./0015-capa-de-datos-de-bloky-un-esquema-por-copropiedad.md),

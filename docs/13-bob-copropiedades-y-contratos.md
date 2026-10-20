@@ -91,7 +91,7 @@
 
 | Grupo | Campos |
 |---|---|
-| **Identidad** | Nombre, NIT con dígito de verificación, tipo (edificio o conjunto) y uso (residencial, comercial o mixto), check de consejo de administración |
+| **Identidad** | Nombre, NIT con dígito de verificación, **tipo** (conjunto, edificio u **oficina**; la oficina es un espacio de trabajo y siempre es comercial, sin estrato ni consejo: RN-285) y uso (residencial, comercial o mixto), check de consejo de administración |
 | **Domicilio del contrato** | País (ISO 3166), **DIVIPOLA de 8 dígitos** (departamento 2 + municipio 3 + centro poblado 3), departamento, municipio y dirección de notificación. Es lo que piden el contrato y la factura |
 | **Características** | **Estrato** (1 a 6, solo uso residencial) |
 | **Soportes** | Certificado de existencia y representación legal (alcaldía, art. 8): dice quién representa a la copropiedad ante IDIKY |
