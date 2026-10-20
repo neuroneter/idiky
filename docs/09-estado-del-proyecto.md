@@ -169,7 +169,9 @@ amarrada a roles de BOB: ver tiene un rol y ver y editar otro, para evitar fugas
   corregir y finalizar 403; sin permiso: 403; sin sesión: 401) y, en la pantalla, el usuario de solo consulta ve «Solo puedes
   consultar» sin el botón «Corregir datos». Se borró todo lo de la prueba.
 - Rangos nuevos de integración: **RN-270…299** y **T-105…119**. Aviso 1 de Justo actualizado (no se ocultan Persona ni Asignación).
-- **Sigue:** desplegar middleware y BOB; en BOB Dev, crear los roles y dar los permisos.
+- **Desplegado:** middleware `58c9bb6.bloky-f26f6d5` y BOB `58c9bb6.gestion-2614bda` (con respaldo automático de la base de
+  BOB); LangFlow igual; la ruta nueva sin sesión 401; BOB → búsqueda en el middleware 200.
+- **Sigue:** en BOB Dev, crear los roles («Consulta de personas»: Ver; «Gestión de personas»: Ver y Gestionar) y darlos.
 
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · T-89 tarea 3: el plugin «Personas del cliente» de BOB
 
