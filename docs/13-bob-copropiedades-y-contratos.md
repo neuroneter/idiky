@@ -34,9 +34,9 @@
 2. **El cobro por unidad usa las unidades del contrato**, no las que estén cargadas en BLOKY.
 3. **Solo se cobran unidades facturables:** apartamento, casa, local, **oficina** y **consultorio**.
    **No se cobran** bodegas, depósitos, parqueaderos ni zonas comunes. Coincide con el criterio de
-   la Ley 675 (art. 53), que cuenta los bienes privados sin parqueaderos ni depósitos. Cada tipo de
-   bien del catálogo lleva un indicador **facturable**: es un dato, no una regla escrita en el
-   código.
+   la Ley 675 (art. 53), que cuenta los bienes privados sin parqueaderos ni depósitos. Desde T-113
+   (2026-10-20) es **una regla de BLOKY** (RN-283), no un catálogo de BOB: BLOKY sabe qué tipo de unidad
+   se cobra (los consultorios cuentan como oficinas mientras no tengan tipo propio en la estructura).
 4. **El rango del contrato puede ser un bloqueo en BLOKY.** Si el contrato define un rango de
    unidades y **el plan tiene la restricción**, BLOKY **no deja cargar unidades facturables por
    encima del máximo**. Si el plan no la tiene, no hay bloqueo. Las unidades que no se cobran nunca
