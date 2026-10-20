@@ -1,6 +1,7 @@
 # ADR-0026 — La ficha de la copropiedad: lo del contrato en BOB, lo de la copropiedad en BLOKY
 
-- **Estado:** Aceptada (2026-10-20)
+- **Estado:** Aceptada (2026-10-20). **Modificada el mismo día (T-113):** el catálogo de tipos de bien sale de BOB; qué tipo
+  de unidad se cobra pasa a ser regla de BLOKY (RN-283)
 - **Fecha:** 2026-10-20
 - **Decide:** Responsable de integración (Daniel)
 - **Modifica a:** [docs/13 §5](../13-bob-copropiedades-y-contratos.md) (la ficha de la copropiedad en BOB)
@@ -57,8 +58,9 @@ pero no modificar»*.
 - La ficha de BOB queda corta y contractual; la vida de la copropiedad queda en un solo sitio.
 - BOB necesita que BLOKY responda para mostrar la ubicación y las unidades. Si el middleware no responde,
   el panel lo dice; el contrato no se afecta.
-- El tipo de bien gana un **código** fijo (`apartamento`, `casa`, `oficina`, `local`, `parqueadero`,
-  `deposito`…) para que BLOKY y BOB hablen del mismo tipo aunque se le cambie el nombre.
+- ~~El tipo de bien gana un **código** fijo para que BLOKY y BOB hablen del mismo tipo.~~ **T-113 (Daniel, 2026-10-20):** el
+  contenido «Tipo de bien» no es de BOB y se quitó. Qué tipos se cobran (apartamentos, casas, oficinas y locales sí;
+  parqueaderos y depósitos no, docs/13 §2) es una regla fija de BLOKY. Si algún día un plan cobra distinto, se dirá en el plan.
 - Strapi borra solas las columnas que se quitan: aquí se acepta porque los datos eran de prueba.
 
 ## Alternativas consideradas

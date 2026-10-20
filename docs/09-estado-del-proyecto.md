@@ -156,6 +156,17 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Sin «Tipo de bien» en BOB (T-113)
+
+- Daniel: el contenido «Tipo de bien» *no es necesario, no hace parte de BOB*. Solo servía para decirle a BLOKY qué tipo de unidad
+  se cobra; eso pasa a ser **regla fija de BLOKY** (RN-283: apartamentos, casas, oficinas y locales sí; parqueaderos y depósitos no,
+  como docs/13 §2.3). ADR-0026 queda modificada.
+- Primero el middleware (`develop` `c4aeb46`, `dc005fe.bloky-c4aeb46`) dejó de leer el catálogo; luego BOB (`main` `3067891`,
+  `dc005fe.gestion-3067891`, con respaldo) quitó el contenido, su siembra, sus etiquetas, sus pruebas y su fila del README.
+- **Verificado:** `/api/tipos-de-bien` responde 404; las unidades y lo que se cobra salen igual (Altos del Bosque 16 de 86, Torres
+  del Parque 30 de 30). `probar-bob.mjs` 54 de 54 (salieron las comprobaciones del catálogo), `npm run probar` pasa. LangFlow igual.
+- Si algún día un plan cobra distinto (por ejemplo, los parqueaderos), se dirá en el plan, no en un catálogo.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · La oficina como un área suelta (RN-286)
 
 - Daniel: una oficina *pertenece a un edificio o conjunto, pero puede estar desligada y solo administramos esta área*. Revisado
