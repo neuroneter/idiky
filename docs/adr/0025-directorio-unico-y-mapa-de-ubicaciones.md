@@ -23,11 +23,19 @@ acceso de BOB, la APP y cualquier cosa que quiera comunicarse con la capa de dat
   El nombre de la carpeta y del pod se mantienen por ahora; renombrarlos es un cambio de código y despliegue
   que se hará aparte.
 
+**Un solo nombre: asignación.** Lo que une a una persona con un lugar y le da un rol ahí («Marta es
+Administradora de Altos del Bosque desde el 1 de enero») se llama **asignación** en todas partes: en BOB
+(donde ya se llamaba así), en el directorio y en la documentación (Daniel, 2026-10-20). La tabla del
+directorio que hoy se llama `bloky.membresia` (ADR-0022) se renombra a `directorio.asignacion` en T-89.
+Una persona tiene **varias asignaciones** (puede administrar un conjunto y ser propietaria en otro);
+una asignación finalizada no se borra. La asignación dice **a dónde entra y con qué rol**; qué unidad es
+suya, los permisos finos o sus turnos viven en el esquema de cada cliente.
+
 ## Contexto
 
 Hasta hoy la misma persona —el Administrador o el Delegado de una copropiedad— está guardada **dos
 veces**: en BOB (`persona` + `asignacion`, en la base `gestion`) y en el directorio de acceso de
-BLOKY (`bloky.persona` + `bloky.membresia`, en la base `bloky`), que la copia de BOB en cada
+BLOKY (`bloky.persona` + `bloky.membresia` —la tabla de hoy; desde esta decisión se llama **asignación**—, en la base `bloky`), que la copia de BOB en cada
 ingreso, cuando BOB avisa y en una conciliación cada 15 minutos (ADR-0022 §2). Los demás roles
 (propietarios, residentes, colaboradores, portería…) solo existen en BLOKY. Eso deja:
 
@@ -54,7 +62,7 @@ mínimo**:
 
 - `persona`: tipo y número de documento, nombre, celular, correo (y los datos del login con
   contratos inteligentes de ALICE, T-81).
-- `membresia`: a qué copropiedad u oficina pertenece, con qué **rol**, desde y hasta cuándo, estado,
+- `asignacion`: a qué copropiedad u oficina pertenece, con qué **rol**, desde y hasta cuándo, estado,
   quién la gestiona (`origen`: `bob` = la gestiona IDIKY desde BOB; `bloky` = la crean el
   Administrador o el Delegado) y, para el Administrador, el soporte del nombramiento y si es una
   empresa administradora con su NIT.
@@ -81,13 +89,13 @@ Una persona es **una sola** en todo IDIKY y puede tener varios roles en varios l
   administradores tampoco pueden trabajar.
 - Los usuarios de BOB (el equipo de IDIKY) **siguen siendo cuentas de Strapi**: no son personas de
   los clientes y no van al directorio. El permiso de soporte para entrar a una copropiedad (ADR-0022
-  §5) se da en BOB y se guarda en el directorio como una membresía de soporte.
+  §5) se da en BOB y se guarda en el directorio como una asignación de soporte.
 
 ### 3. Tres tipos de esquema en la base, cada uno con su trabajo
 
 | Esquema | Qué guarda | ¿Se replica por cliente? | ¿Se puede mudar? |
 |---|---|---|---|
-| **`directorio`** | Solo datos de los usuarios: `persona`, `membresia`, `rol` | No: es uno, para todo IDIKY | Sí, entero, a su propia base (si ALICE crece mucho) |
+| **`directorio`** | Solo datos de los usuarios: `persona`, `asignacion`, `rol` | No: es uno, para todo IDIKY | Sí, entero, a su propia base (si ALICE crece mucho) |
 | **`bloky`** (el núcleo) | El ingreso (sesiones, intentos, OAuth), el **mapa** (§4), el consumo y la auditoría | No | No: es el punto fijo desde donde se encuentra todo lo demás |
 | **`cp_<id>`** | Todo lo de **un** cliente: estructura, unidades, equipo, cartera, reuniones… | **Sí: idéntico para cada cliente** | Sí, uno por uno, a otra base o a otra infraestructura |
 
@@ -168,7 +176,7 @@ con Justo en T-80 y T-81.
 
 | Paso | Qué | Quién |
 |---|---|---|
-| 1 | Esquema `directorio` + catálogo de roles, y mover ahí `persona` y `membresia` | BLOKY |
+| 1 | Esquema `directorio` + catálogo de roles, y mover ahí `persona` y `asignacion` (la tabla de hoy, `bloky.membresia`, se renombra) | Middleware |
 | 2 | Mapa: `servidor_datos` y `ubicacion` en `bloky`, reemplazando `conexion` | BLOKY |
 | 3 | Rutas de administración del middleware para las personas del cliente | Middleware |
 | 4 | Módulo «Personas del cliente» en BOB, que usa esas rutas del middleware | BOB (lo puede hacer el equipo de BLOKY) |

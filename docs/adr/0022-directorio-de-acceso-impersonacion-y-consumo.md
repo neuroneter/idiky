@@ -33,7 +33,7 @@ ADR-0015 separa **los datos**: un esquema por copropiedad, en la misma base o en
 El esquema común `bloky` guarda **quién puede entrar a dónde**, y nada de la operación:
 
 - `persona`: id global, tipo y número de documento, celular y correo verificados, fechas.
-- `membresia`: persona, copropiedad, **rol**, vigencia (`desde`, `hasta`), estado y **origen**:
+- `membresia` (**desde ADR-0025 se llama `asignacion`**, el mismo nombre de BOB): persona, copropiedad, **rol**, vigencia (`desde`, `hasta`), estado y **origen**:
   `bob` (Administrador, Delegado) o `bloky` (los perfiles que crea el administrador, CU-B-08).
 
 Lo que hace cada perfil dentro de su copropiedad —grupos, permisos finos, lo que aprobó— vive en
@@ -59,7 +59,7 @@ un selector en la barra. La sesión dice quién es la persona; la dirección, d�
 ### 4. El rol se comprueba en cada petición
 
 La sesión no guarda una lista de permisos por doce horas: cada petición nombra la copropiedad
-y la API consulta la membresía vigente en el directorio (una tabla pequeña del esquema común).
+y la API consulta la asignación vigente en el directorio (una tabla pequeña del esquema común).
 **Quitar un rol corta el acceso de inmediato.** Los permisos se calculan **por copropiedad**: la
 misma persona puede ser Administradora en una y solo de portería en otra.
 

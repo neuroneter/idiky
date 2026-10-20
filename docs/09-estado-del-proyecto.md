@@ -156,6 +156,14 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Vocabulario: asignación (no «membresía»)
+
+Lo que une a una persona con un lugar y le da un rol ahí se llama **asignación** en todas partes, como en BOB (Daniel:
+*mantener asignación… para evitar tener dos nombres para el mismo objetivo*). Explicado en ADR-0025 (con el ejemplo de
+una persona con varias asignaciones); ajustados ADR-0022, RN-161, el tablero y el diagrama. La tabla `bloky.membresia`
+del código se renombra a `directorio.asignacion` en la tarea 1 de T-89. Las entradas viejas de la bitácora citan el
+nombre que tenía la tabla y se dejan así.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Vocabulario: el middleware de IDIKY
 
 Daniel: *no llamemos algo «la API de IDIKY»; cada vez que nos refiramos a esto, es el **middleware** que será el punto
