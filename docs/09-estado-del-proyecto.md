@@ -169,8 +169,14 @@ permisos `600`).
 - **Probado en local** con BOB en `npm run develop` sobre SQLite temporal y el middleware en memoria: el panel aparece en la
   ficha, asigna, muestra el rechazo de RN-266 con su motivo, finaliza con motivo e historia y firma con el usuario. Se borró
   todo lo de la prueba.
-- **Para desplegar:** BOB sale de `main`, y `main` ya trae dos entregas de Justo **sin publicar** (T-81: assetlinks y
-  `RP_ID_HASH` temporal, `12e7c44..184c710`): desplegar BOB las publica también. Decide Daniel (y conviene avisarle a Justo).
+- **Desplegado en BOB Dev** (Daniel: *despliega también los cambios de Justo*): `develop` → `main` de BOB (`f79393d`),
+  `conectar-al-middleware.sh` (la clave copiada dentro del servidor), `desplegar.sh origin/main gestion` →
+  `ef20026.gestion-f79393d`, con respaldo automático de la base antes de recrear el pod. Salieron también las dos entregas de
+  Justo pendientes (T-81: assetlinks y apple-app-site-association, `RP_ID_HASH` temporal con valor por defecto; sin cambios
+  de tablas). Comprobado: LangFlow igual; BOB sin el aviso de variables; BOB → middleware con clave 200; la ruta del plugin
+  sin sesión 401; `/.well-known/assetlinks.json` y `apple-app-site-association` 200.
+- **Sigue:** que Daniel pruebe el panel en BOB Dev con una copropiedad de prueba; después, el paso 5 de T-89 (pasar las
+  personas y asignaciones que aún tiene BOB al directorio).
 - Nota: el commit `dd7764f` («docs: T-89 tarea 3…») contiene en realidad una edición del diagrama
   `reuniones-y-usuarios.drawio` hecha a mano en draw.io; se subió tal cual.
 
