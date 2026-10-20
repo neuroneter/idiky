@@ -156,6 +156,24 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · T-89 tarea 3: el plugin «Personas del cliente» de BOB
+
+- **Plugin `personas-del-cliente`** en `BOB-Idiky` (`develop` `cdac4f6`, aún no en `main`): un panel en la ficha de cada
+  copropiedad para asignar, cambiar (reemplazo), corregir y finalizar al Administrador y al Delegado, con la historia. BOB
+  no los guarda: el servidor del plugin (JavaScript directo, rutas de administración de Strapi con la sesión del panel)
+  le habla a la entrada de administración del middleware con su clave, firmando con el correo de quien hizo clic (RN-269).
+- **Red:** se comprobó en el servidor que BOB llega al middleware por la IP privada (`http://10.0.0.4:8083`: salud 200,
+  administración 401 sin clave), igual que el middleware llega a BOB; por `10.0.2.2` los pods no se ven. No hay que tocar
+  la red. `infra/gestion/conectar-al-middleware.sh` deja `BLOKY_URL` y `BLOKY_ADMIN_TOKEN` en los secretos de BOB copiando
+  la clave dentro del servidor, sin mostrarla.
+- **Probado en local** con BOB en `npm run develop` sobre SQLite temporal y el middleware en memoria: el panel aparece en la
+  ficha, asigna, muestra el rechazo de RN-266 con su motivo, finaliza con motivo e historia y firma con el usuario. Se borró
+  todo lo de la prueba.
+- **Para desplegar:** BOB sale de `main`, y `main` ya trae dos entregas de Justo **sin publicar** (T-81: assetlinks y
+  `RP_ID_HASH` temporal, `12e7c44..184c710`): desplegar BOB las publica también. Decide Daniel (y conviene avisarle a Justo).
+- Nota: el commit `dd7764f` («docs: T-89 tarea 3…») contiene en realidad una edición del diagrama
+  `reuniones-y-usuarios.drawio` hecha a mano en draw.io; se subió tal cual.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · T-89: el directorio en su esquema y BOB asignando por el middleware
 
 Tareas 1 y 2 del plan de T-89 ([ADR-0025](./adr/0025-directorio-unico-y-mapa-de-ubicaciones.md)), en `Bloky-Idiky` (`develop` `96c5d4e`):
