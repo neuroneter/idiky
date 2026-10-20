@@ -171,8 +171,11 @@ Tareas 1 y 2 del plan de T-89 ([ADR-0025](./adr/0025-directorio-unico-y-mapa-de-
   directorio. Solo administrador y delegado entran a la consola de BLOKY.
 - `npm run probar`: todo pasa (incluidas 11 pruebas nuevas). La migración no se probó contra PostgreSQL en el Mac (Daniel no
   quiere bases locales): `verificar-capa-de-datos` tiene una sección 5 para comprobarla en el servidor.
-- **Sigue:** desplegar BLOKY Dev, correr la verificación en el servidor y que Daniel entre con Olga para confirmar que el
-  ingreso real sigue igual. Después, la tarea 3 (el plugin de BOB). Rango de RN de integración agotado (RN-240…269).
+- **Desplegado en BLOKY Dev** (`4263011.bloky-96c5d4e`): la migración corrió al arrancar; `verificar-capa-de-datos` en el
+  servidor, **todo en orden** (esquema `directorio` con sus tres tablas, nada en `bloky`, 5 personas y 6 asignaciones
+  movidas, la copia de BOB no duplica ni revive, la historia queda, un rol fuera del catálogo se rechaza). LangFlow igual.
+  **Daniel entró con Olga por SMS: el ingreso real funciona igual.**
+- **Sigue:** la tarea 3 (el plugin «Personas del cliente» de BOB). Rango de RN de integración agotado (RN-240…269).
 
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Vocabulario: asignación (no «membresía»)
 
