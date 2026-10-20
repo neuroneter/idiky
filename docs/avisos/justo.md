@@ -16,7 +16,9 @@ personas de IDIKY (también el Administrador y el Delegado) viven **solo en el d
 BOB las gestiona con un módulo **«Personas del cliente»** que lee y escribe ese directorio por la
 entrada de administración del **middleware de IDIKY**, y **no guarda copia**. En BOB queda solo el trámite (`solicitud`), con el
 id de la persona. `persona` y `asignacion` **se van de BOB** al final de T-89 (primero se pasan los
-datos al directorio y se verifican).
+datos al directorio y se verifican). **Hecho el 2026-10-20:** las 6 asignaciones y tu persona de prueba (Justo Soto, sin
+asignaciones) ya están en el directorio, gestionadas por IDIKY, y **la copia desde BOB está apagada**: lo que se cree en
+`persona` o `asignacion` de BOB ya no da acceso a BLOKY.
 
 **Mientras se habla:** no construir nada nuevo sobre `persona` ni `asignacion` de BOB, y no quitarlas
 todavía (Strapi borra solas las tablas que su código ya no tiene). Daniel decidió (2026-10-20) **no ocultarlas ni

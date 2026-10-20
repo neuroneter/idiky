@@ -156,6 +156,20 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · T-89 pasos 5 y 7: las personas de BOB al directorio y la copia apagada
+
+- Herramienta `traer-personas-de-bob` (middleware `develop` `cab6b33`; solo mira, con `--aplicar` trae) y el interruptor
+  `BLOKY_COPIA_DESDE_BOB`. Regla `planDeImportacion` (ya · adoptar · importar · choque; los choques no se traen) y prueba de
+  ingreso con la copia apagada (`npm run probar`: todo pasa).
+- **En BLOKY Dev:** «solo mirar» mostró 6 personas en BOB: 6 asignaciones a adoptar, 1 persona nueva (Justo Soto, sin
+  asignaciones), 0 choques. Daniel aprobó; **aplicado**: 0 asignaciones quedan como copia de BOB. **Copia apagada**
+  (`BLOKY_COPIA_DESDE_BOB=no` en `bloky-api.env`, middleware levantado de nuevo): el aviso de BOB responde 410; el directorio
+  tiene 6 personas y 6 asignaciones, todas gestionadas por IDIKY. Ingreso comprobado por documento: Olga, María Camila, Sandra
+  y Mary entran; Andrés no (Mirador de la Sabana está **suspendida** en BOB, RN-162); Justo no (sin asignaciones). LangFlow igual.
+- Ojo: en BOB el nombre de Mary quedó «Mary Bermudeeez» y así pasó al directorio; se corrige en «Personas de IDIKY».
+- Desde ahora, crear a alguien en «Persona» o «Asignación» de BOB **ya no da acceso**: se hace en el panel o en «Personas de IDIKY».
+  `secretos.sh` deja la copia apagada en un servidor nuevo.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Filtros en «Personas de IDIKY» (T-105, RN-272)
 
 Daniel: *que no solo pueda buscar, sino traer a todos los de una copropiedad y filtrarlos por su rol*.

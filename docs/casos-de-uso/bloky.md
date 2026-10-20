@@ -60,7 +60,8 @@ creen. BLOKY no crea a nadie por su cuenta.
 **Desde el 2026-10-20 (ADR-0025):** el directorio de BLOKY es la **única casa de las personas**; el
 Administrador y el Delegado los gestiona IDIKY desde BOB, que escribe en el directorio y no guarda
 copia. Donde abajo dice «BOB», léase «el directorio» (las alternativas A1, A2, A4 y A5 cambian de
-fuente, no de comportamiento). *Mientras se construye (T-89), el código sigue copiando desde BOB.*
+fuente, no de comportamiento). **Desde el 2026-10-20 la copia desde BOB está apagada** (T-89 pasos 5 y 7): crear un
+Administrador en las pantallas viejas de BOB («Persona», «Asignación») ya no da acceso; se hace en el panel «Personas del cliente».
 
 **Desde el 2026-10-03 (ADR-0022):** la persona se lee del **directorio de acceso** de BLOKY, que se
 refresca desde BOB en cada ingreso (si BOB no responde, se entra con lo que tiene). Después de
