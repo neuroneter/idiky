@@ -156,6 +156,15 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Avisos para Justo
+
+Para que el agente de IA de Justo le avise al entrar: [`docs/avisos/justo.md`](./avisos/justo.md) con cuatro temas
+abiertos por ADR-0025 (las personas salen de BOB; el plugin `cuentas-polygon`; las reuniones con video son de
+BLOKY; ALICE usa el mismo directorio), cada uno con lo que no se debe construir mientras se habla. El aviso va al
+inicio del `CLAUDE.md` de `BOB-Idiky`, `App-Idiky` y `SmartContrat-Idiky` (en `develop`: `6513d28`, `2784d73`,
+`ec20a4d`) y en el §2 del de `idiky`. **Cuando se resuelva un tema**, Daniel lo marca ✅ en `docs/avisos/justo.md`
+y, cuando no quede ninguno abierto, se quita el bloque de los `CLAUDE.md`.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · ADR-0025: una sola casa para las personas y el mapa
 
 Daniel: *BOB crea y gestiona al Administrador y al Delegado, pero nunca los almacena: los accede y gestiona en un

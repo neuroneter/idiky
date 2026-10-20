@@ -60,6 +60,9 @@ Estado de los dos demos: **v0.1**, sin backend, con datos simulados. El producto
    `git pull` (o `git merge origin/main`, según el aviso). Mary y Jeimy no son ingenieras: no
    les expliques git, resuélvelo con ellas. Si aparecen conflictos, no los resuelvas a ciegas:
    detente y pídeles que le avisen al responsable de integración (Daniel).
+0b. **Si quien abre la sesión es Justo**, muéstrale primero los avisos abiertos de
+   [`docs/avisos/justo.md`](./docs/avisos/justo.md) (temas pendientes para hablar con Daniel) y no
+   construyas nada que los contradiga. El mismo aviso está en el `CLAUDE.md` de sus repositorios.
 1. Leer [`docs/09-estado-del-proyecto.md`](./docs/09-estado-del-proyecto.md) — la bitácora dice dónde quedó todo.
 2. Leer el caso de uso a implementar en [`docs/04-casos-de-uso.md`](./docs/04-casos-de-uso.md).
 3. Leer [`docs/06-arquitectura.md`](./docs/06-arquitectura.md) — dónde va cada cosa — y, si la
