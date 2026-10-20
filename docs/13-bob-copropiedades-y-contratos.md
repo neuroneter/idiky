@@ -9,7 +9,7 @@
 
 | | **BOB** (el *back office* de IDIKY) | **BLOKY** (el sistema de las copropiedades) |
 |---|---|---|
-| **Es dueño de** | Lo comercial y contractual: cliente, plan, servicios, contrato. La **ficha** de la copropiedad y el **resumen** de sus bienes. **Gestiona** los dos **perfiles raíz**, pero no los guarda: los escribe en el directorio de BLOKY (ADR-0025) | El **árbol completo hasta la unidad**, los coeficientes, **el directorio de todas las personas** (también Administrador y Delegado, ADR-0025), los **perfiles internos** y toda la operación |
+| **Es dueño de** | Lo comercial y contractual: cliente, plan, servicios, contrato. **Lo del contrato** en la ficha de la copropiedad (ADR-0026: la ubicación real, los bienes, las fotos y el reglamento son de BLOKY). **Gestiona** los dos **perfiles raíz**, pero no los guarda: los escribe en el directorio de BLOKY (ADR-0025) | El **árbol completo hasta la unidad**, los coeficientes, **el directorio de todas las personas** (también Administrador y Delegado, ADR-0025), los **perfiles internos** y toda la operación |
 | **Quién lo usa** | El equipo de IDIKY | El Administrador, el Delegado y los perfiles que ellos creen |
 
 - **La identidad de la copropiedad nace en BOB.** Su `id` es el `copropiedadId` con el que BLOKY
@@ -92,10 +92,15 @@
 | Grupo | Campos |
 |---|---|
 | **Identidad** | Nombre, NIT con dígito de verificación, tipo (edificio o conjunto) y uso (residencial, comercial o mixto), check de consejo de administración |
-| **Ubicación** | País (ISO 3166), **DIVIPOLA de 8 dígitos** (departamento 2 + municipio 3 + centro poblado 3; se guarda el código y el nombre), barrio, localidad o comuna (no son DIVIPOLA), dirección, latitud y longitud |
-| **Características** | **Estrato** (1 a 6, solo uso residencial), fotos (una principal; opcionales por torre o unidad) |
-| **Resumen de bienes** | Cuántos hay de cada tipo, y cuántos son facturables. Es lo que BOB necesita para cotizar y cobrar |
-| **Soportes** | Certificado de existencia y representación legal (alcaldía, art. 8) y escritura del reglamento |
+| **Domicilio del contrato** | País (ISO 3166), **DIVIPOLA de 8 dígitos** (departamento 2 + municipio 3 + centro poblado 3), departamento, municipio y dirección de notificación. Es lo que piden el contrato y la factura |
+| **Características** | **Estrato** (1 a 6, solo uso residencial) |
+| **Soportes** | Certificado de existencia y representación legal (alcaldía, art. 8): dice quién representa a la copropiedad ante IDIKY |
+
+> **Desde el 2026-10-20 ([ADR-0026](./adr/0026-la-ficha-de-la-copropiedad-entre-bob-y-bloky.md)):** la ubicación real
+> (punto en el mapa, barrio, vecindario), el resumen de bienes, las fotos y la escritura del reglamento **salieron de BOB**: son
+> de BLOKY. Las unidades que se cobran las cuenta BLOKY con su estructura y el catálogo de tipos de bien de BOB (que dice cuáles
+> se cobran y tiene un código fijo por tipo, RN-283). BOB lo ve en el panel «En BLOKY» de la ficha; BLOKY muestra lo del
+> contrato en el perfil de la copropiedad, sin poder cambiarlo.
 
 ## 6. La estructura hasta la unidad (en BLOKY)
 
@@ -131,7 +136,7 @@ Propuesta, para cualquier tipo de copropiedad:
 ## 8. Lo construido en BOB (2026-09-10)
 
 Todo lo de los §2, §3 y §5 que pertenece a BOB ya existe en Strapi: tipos de bien, planes,
-servicios adicionales, copropiedades (con ubicación y resumen de bienes), personas,
+servicios adicionales, copropiedades (con su domicilio del contrato; ADR-0026), personas,
 asignaciones de Administrador y Delegado, contrataciones y solicitudes. **Las reglas de este
 documento se cumplen en el servidor**, no solo en los formularios. El detalle, los archivos y
 cómo probarlo están en [`apps/gestion/README.md`](https://github.com/neuroneter/BOB-Idiky/blob/main/apps/gestion/README.md#qué-hay-en-bob) (repo `BOB-Idiky`).

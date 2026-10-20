@@ -156,6 +156,25 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · La ficha de la copropiedad entre BOB y BLOKY (ADR-0026, T-110)
+
+- **Decisión (ADR-0026):** cada dato de la ficha tiene un solo dueño. **BOB:** lo del contrato (nombre, NIT y dígito, tipo,
+  uso, negocio, consejo, estado, estrato, plan), el **domicilio del contrato** (país, DIVIPOLA, departamento, municipio y
+  dirección de notificación, que piden el contrato y la factura) y el certificado de existencia. **BLOKY:** la ubicación real,
+  los bienes y las unidades, las fotos y el reglamento. Los datos de prueba de los campos que salieron se perdieron a propósito.
+- **BOB** (`main` `63d3d89`, desplegado `24590d6.gestion-63d3d89`, con respaldo): salen `resumenDeBienes` (y el componente
+  `bien-por-tipo`), `unidadesFacturables`, `fotoPrincipal`, `fotos`, `escrituraReglamento`, y del domicilio `barrio`,
+  `centroPoblado`, `latitud` y `longitud`. El tipo de bien gana un **código** (sembrado solo en los 9 que había). El panel
+  «En BLOKY» muestra lo que la copropiedad tiene en BLOKY. `probar-bob.mjs`: 57 de 57; `npm run build` pasa.
+- **BLOKY** (`develop` `9358a62`, desplegado `24590d6.bloky-9358a62`): la ficha **Perfil** en el menú (lo del contrato en
+  solo lectura, lo contratado, las fotos, las unidades por tipo con las que se cobran, y dónde queda); las **fotos** (migración
+  `011`, RN-284); `GET /api/admin/copropiedades/:id/ficha` para BOB; **Ubicación** arranca con el domicilio del contrato.
+- **Verificado en el servidor:** la migración llegó a las 4 copropiedades; desde BOB, la ficha de cada una responde (Altos del
+  Bosque: 16 apartamentos, 60 parqueaderos y 10 depósitos → **16 se cobran de 86**; Torres del Parque: 30 de 30); desde BLOKY,
+  el catálogo con sus códigos y lo del contrato de las 5 copropiedades, sin los campos viejos; la tabla de fotos rechaza dos
+  principales y un SVG (prueba deshecha). LangFlow igual. `npm run probar`: todo pasa.
+- No se miró la pantalla Perfil por dentro (entrar a BLOKY pide el código por SMS).
+
 ### 2026-10-20 · Integración · Decisiones de Daniel sobre lo pendiente
 
 - **Mirador de la Sabana**, aprovisionada desde el panel «En BLOKY» y verificada en el servidor: su esquema con 14 tablas y 10
