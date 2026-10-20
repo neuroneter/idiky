@@ -51,8 +51,11 @@ rama. **Justo** desarrolla principalmente la APP (`App-Idiky`) y **Daniel** BLOK
 
 - **BOB crea la copropiedad; las personas viven en BLOKY.** La copropiedad nace en BOB y BLOKY la
   lee con un token de solo lectura. Las personas (también Administrador y Delegado) viven solo en el
-  directorio de BLOKY; BOB las gestiona por la API de administración de BLOKY ([ADR-0025](./adr/0025-directorio-unico-y-mapa-de-ubicaciones.md)) ([ADR-0008](./adr/0008-backend-de-bloky.md), [`13`](./13-bob-copropiedades-y-contratos.md)).
-- **ALICE hablará con la API de BLOKY** y usa el mismo directorio de personas (ADR-0025 §6). Nadie fuera de esa API conoce dónde están las bases: lo sabe el mapa (ADR-0025 §4).
+  directorio de BLOKY; BOB las gestiona por la entrada de administración del **middleware de IDIKY** ([ADR-0025](./adr/0025-directorio-unico-y-mapa-de-ubicaciones.md)) ([ADR-0008](./adr/0008-backend-de-bloky.md), [`13`](./13-bob-copropiedades-y-contratos.md)).
+- **El middleware de IDIKY es el único punto de acceso a la capa de datos.** BOB, la app de BLOKY, ALICE y
+  cualquier otro sistema hablan con él; nadie más se conecta a una base. Su código vive hoy en
+  `Bloky-Idiky/apps/bloky-api` ([ADR-0025](./adr/0025-directorio-unico-y-mapa-de-ubicaciones.md)).
+- **ALICE hablará con el middleware de IDIKY** y usa el mismo directorio de personas (ADR-0025 §6). Nadie fuera del middleware conoce dónde están las bases: lo sabe el mapa (ADR-0025 §4).
 - **Los contratos inteligentes** cubren el login invisible de ALICE. Qué otro caso de uso los
   pide (votos, actas) no está decidido: su principio es *on-chain solo lo necesario*.
 - **Jitsi** se integrará con BLOKY al convocar asambleas virtuales; eso es otro caso de uso.

@@ -43,10 +43,10 @@ guarda datos personales: **lo mínimo** (Ley 1581 de 2012).
 
 ### 2. BOB avisa; el ingreso no depende de BOB
 
-> **Reemplazado por ADR-0025 §2 (2026-10-20):** BOB ya no guarda personas; las gestiona escribiendo en el directorio por la API de administración. No hay aviso, copia ni conciliación.
+> **Reemplazado por ADR-0025 §2 (2026-10-20):** BOB ya no guarda personas; las gestiona escribiendo en el directorio por la entrada de administración del middleware de IDIKY. No hay aviso, copia ni conciliación.
 
 BOB sigue mandando sobre los perfiles raíz, pero **avisa a BLOKY cuando cambia una asignación**
-(con la API de administración de ADR-0015 y su token), y BLOKY la copia al directorio. El
+(con la entrada de administración de ADR-0015 y su token), y BLOKY la copia al directorio. El
 ingreso consulta solo el directorio: si BOB no responde, la gente igual entra. Se agrega una
 conciliación periódica por si un aviso se pierde.
 
@@ -86,7 +86,7 @@ misma persona puede ser Administradora en una y solo de portería en otra.
   masivos) y toda petición que pase de un umbral registran en el esquema común (`consumo`):
   copropiedad, proceso, inicio, duración, registros procesados y resultado. Y una vez al día, el
   **tamaño de cada esquema**. Son métricas del servicio, no datos de la copropiedad.
-- **BOB muestra «Consumo por copropiedad»**, leyendo la API de administración: las que más
+- **BOB muestra «Consumo por copropiedad»**, leyendo la entrada de administración del middleware: las que más
   consumen, los procesos más lentos, la tendencia y un **semáforo** al cruzar umbrales. Con eso se
   decide **mudar una copropiedad a su propia base** (catálogo `conexion`, sin cambiar código),
   escalar el servicio o revisar su plan (docs/13 §2).
@@ -105,7 +105,7 @@ funcionando cuando una copropiedad se muda a otra base.
 
 ## Abierto
 
-- **Resuelto en ADR-0025 §6 (2026-10-20): sí, ALICE usa el mismo directorio, por la API de BLOKY.** ~~¿ALICE usa este mismo directorio y este mismo dominio** (su API sería un módulo más de este
+- **Resuelto en ADR-0025 §6 (2026-10-20): sí, ALICE usa el mismo directorio, por el middleware de IDIKY.** ~~¿ALICE usa este mismo directorio y este mismo dominio** (su API sería un módulo más de este
   backend), o tendrá otro backend? Lo natural es un solo directorio para todo IDIKY, porque la
   misma persona puede ser propietaria en ALICE y administradora en BLOKY. Lo decide Daniel con
   Justo (T-80) antes de que ALICE arme su propio ingreso.~~

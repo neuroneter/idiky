@@ -156,6 +156,19 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Vocabulario: el middleware de IDIKY
+
+Daniel: *no llamemos algo «la API de IDIKY»; cada vez que nos refiramos a esto, es el **middleware** que será el punto
+de acceso de BOB, la APP y cualquier cosa que quiera comunicarse con la capa de datos de IDIKY.*
+- **El middleware de IDIKY** = el único punto de acceso a la capa de datos; nadie más se conecta a una base. Tiene la
+  entrada de las apps y la **entrada de administración** (BOB, con token). Su código sigue en `Bloky-Idiky/apps/bloky-api`
+  y el pod `idiky-bloky`; renombrar la carpeta queda para después (toca `infra/desplegar.sh`).
+- Definido en ADR-0025 (§ Vocabulario) y en la tabla de nombres de `CLAUDE.md`. Cambiado en ADR-0015, ADR-0022, ADR-0025,
+  RN-160, docs/06, docs/11, docs/16, `infra/README.md`, `docs/avisos/justo.md` y el diagrama (la capa de datos «solo la toca
+  el middleware»; en la página 2 el carril se llama «Middleware de IDIKY (BLOKY)»). En los otros repos, en `develop`:
+  `BOB-Idiky` `02d497e`, `App-Idiky` `8e41323`, `SmartContrat-Idiky` `9a7d305`, `Bloky-Idiky` `fd8caee` (README del
+  middleware y `CLAUDE.md`). Las entradas viejas de la bitácora se dejan como estaban.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Avisos para Justo
 
 Para que el agente de IA de Justo le avise al entrar: [`docs/avisos/justo.md`](./avisos/justo.md) con cuatro temas

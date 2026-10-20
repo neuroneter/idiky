@@ -1,6 +1,6 @@
 # ADR-0015 — La capa de datos de BLOKY: un esquema por copropiedad, aprovisionado desde BOB
 
-- **Estado:** Aceptada (2026-09-21) · **modificada por [ADR-0025](./0025-directorio-unico-y-mapa-de-ubicaciones.md)** (2026-10-20): en las personas, BOB escribe en el directorio de BLOKY por su API de administración; el campo `conexion` se reemplaza por el mapa (`servidor_datos` + `ubicacion`)
+- **Estado:** Aceptada (2026-09-21) · **modificada por [ADR-0025](./0025-directorio-unico-y-mapa-de-ubicaciones.md)** (2026-10-20): en las personas, BOB escribe en el directorio por la entrada de administración del middleware de IDIKY (así se llama desde entonces a esta API); el campo `conexion` se reemplaza por el mapa (`servidor_datos` + `ubicacion`)
 - **Fecha:** 2026-09-21
 - **Decide:** Responsable de integración (Daniel)
 - **Relacionados:** [ADR-0008](./0008-backend-de-bloky.md) (la API y su PostgreSQL),
@@ -87,7 +87,7 @@ actualice.** Lo que lo hace seguro es la disciplina, no la herramienta:
 
 ### 4. El aprovisionamiento se ordena desde BOB
 
-**BLOKY expone una API de administración**, separada de la de la app y protegida con un token
+**El middleware de IDIKY (aquí, «la API de BLOKY») expone una entrada de administración**, separada de la de la app y protegida con un token
 propio (`BLOKY_ADMIN_TOKEN`, distinto del token de lectura de BOB, que sigue siendo de solo
 lectura en la otra dirección):
 

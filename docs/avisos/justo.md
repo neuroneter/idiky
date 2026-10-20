@@ -2,7 +2,9 @@
 
 > **Para el agente de IA:** si quien abre la sesión es **Justo**, antes de cualquier tarea muéstrale
 > los avisos **abiertos** de esta página, en palabras sencillas, y pregúntale si ya los habló con
-> Daniel. Mientras un aviso esté abierto, **no construyas nada que lo contradiga** (abajo dice qué).
+> Daniel. **Vocabulario:** «el middleware de IDIKY» es el único punto de acceso a la capa de datos de
+> IDIKY para BOB, ALICE, la app de BLOKY y cualquier otro sistema (hoy en `Bloky-Idiky/apps/bloky-api`,
+> ADR-0025). Mientras un aviso esté abierto, **no construyas nada que lo contradiga** (abajo dice qué).
 > Los avisos los abre y los cierra Daniel; cuando se resuelvan, se marcan ✅ con la fecha.
 
 ---
@@ -11,8 +13,8 @@
 
 **Qué se decidió:** [ADR-0025](../adr/0025-directorio-unico-y-mapa-de-ubicaciones.md). Todas las
 personas de IDIKY (también el Administrador y el Delegado) viven **solo en el directorio de BLOKY**.
-BOB las gestiona con un módulo **«Personas del cliente»** que lee y escribe ese directorio por la API
-de administración de BLOKY, y **no guarda copia**. En BOB queda solo el trámite (`solicitud`), con el
+BOB las gestiona con un módulo **«Personas del cliente»** que lee y escribe ese directorio por la
+entrada de administración del **middleware de IDIKY**, y **no guarda copia**. En BOB queda solo el trámite (`solicitud`), con el
 id de la persona. `persona` y `asignacion` **se van de BOB** al final de T-89 (primero se pasan los
 datos al directorio y se verifican).
 
@@ -26,10 +28,10 @@ todavía (Strapi borra solas las tablas que su código ya no tiene).
 Hoy la `persona` de BOB guarda los datos del login con contratos inteligentes (`tipoAutenticador`,
 `cuentaDia`, `hashCorreo`, `cuentaFinanciera`, `estadoCadena`…) y el plugin `cuentas-polygon` atiende
 sus cinco acciones desde BOB (T-81, T-87). Con ADR-0025 esos datos pasan al **directorio de BLOKY**, y
-la persona de ALICE se identifica ante la **API de BLOKY**, no ante los usuarios de Strapi.
+la persona de ALICE se identifica ante el **middleware de IDIKY**, no ante los usuarios de Strapi.
 
-**Para hablar:** ¿el plugin se queda en BOB (atendiendo sin guardar personas) o pasa a la API de
-BLOKY? Esto resuelve también T-87.
+**Para hablar:** ¿el plugin se queda en BOB (atendiendo sin guardar personas) o pasa al middleware
+de IDIKY? Esto resuelve también T-87.
 
 **Mientras se habla:** no agregar más campos de la cadena a la `persona` de BOB.
 
@@ -40,17 +42,17 @@ cierre a tiempo, prueba con dos personas), pero **cambia quién hace cada cosa**
 
 | En tu propuesta | Va en |
 |---|---|
-| El endpoint que entrega el enlace | **BLOKY** |
-| Firmar el pase (la clave se comparte entre Jitsi y **BLOKY**) | **BLOKY** |
-| Responder la duración de la sala (Prosody pregunta) | **BLOKY** — Jitsi necesita llegar a la API de BLOKY |
-| Revisar quién puede abrir la reunión | **BLOKY** |
+| El endpoint que entrega el enlace | **El middleware de IDIKY** (las reuniones son de BLOKY) |
+| Firmar el pase (la clave se comparte entre Jitsi y **el middleware**) | **El middleware** |
+| Responder la duración de la sala (Prosody pregunta) | **El middleware** — Jitsi necesita llegar a él |
+| Revisar quién puede abrir la reunión | **El middleware** |
 | — | **BOB:** solo si el cliente **puede** usar reuniones y **cuántas al mes** (falta ese campo en el plan o un servicio adicional) |
 
 **Mientras se habla:** no crear en BOB el endpoint ni la firma de los pases.
 
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 
-ALICE **no tiene directorio propio**: entra por la API de BLOKY, la única que sabe dónde vive cada
+ALICE **no tiene directorio propio**: entra por el middleware de IDIKY, el único que sabe dónde vive cada
 cliente (el **mapa**, ADR-0025 §4). Ninguna app se conecta a una base de datos.
 
 **Para hablar:** cómo se arma el ingreso de ALICE con el login de contratos inteligentes sobre ese

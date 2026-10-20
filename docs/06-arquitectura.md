@@ -146,7 +146,7 @@ propia (`servicios/plataforma.ts`) con dos implementaciones. Ver
 **Decidido el 2026-09-21** ([ADR-0008](./adr/0008-backend-de-bloky.md)): BLOKY tiene su propia
 API en `apps/bloky-api/` (Node 22 + TypeScript + Fastify) con PostgreSQL. **Lee BOB y no lo
 escribe**: la copropiedad nace en BOB (ADR-0012). **Las personas viven solo en el directorio de
-BLOKY**, y BOB gestiona al Administrador y al Delegado escribiendo ahí por la API de administración
+BLOKY**, y BOB gestiona al Administrador y al Delegado escribiendo ahí por la entrada de administración del **middleware de IDIKY**
 ([ADR-0025](./adr/0025-directorio-unico-y-mapa-de-ubicaciones.md)). La base de BLOKY tiene tres tipos de esquema:
 `directorio` (las personas), `bloky` (el ingreso y el **mapa** de dónde vive cada cliente) y un
 `cp_<id>` por cliente, que se puede mudar de servidor cambiando una fila del mapa.
@@ -181,7 +181,7 @@ servidor compartido ─ usuario idiky (Podman sin root)
 ├── idiky-pwa       nginx + apps/pwa compilada          → :8080, con clave
 ├── idiky-contable  nginx + apps/contable tal cual      → :8081, con clave
 ├── idiky-gestion   pod: nginx + Strapi + PostgreSQL 17 → :8082, login de Strapi (ADR-0012)
-└── idiky-bloky     pod: nginx + API de BLOKY + PostgreSQL 17 → :8083, ingreso de BLOKY (ADR-0008, ADR-0013)
+└── idiky-bloky     pod: nginx + middleware de IDIKY (apps/bloky-api) + PostgreSQL 17 → :8083, ingreso de BLOKY (ADR-0008, ADR-0013)
                     la API lee BOB (:8082) con un token de solo lectura
 ```
 
