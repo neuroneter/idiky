@@ -156,6 +156,16 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Filtros en «Personas de IDIKY» (T-105, RN-272)
+
+Daniel: *que no solo pueda buscar, sino traer a todos los de una copropiedad y filtrarlos por su rol*.
+- **RN-272**: listar a todas las personas de una copropiedad, filtradas por rol y estado; nunca todo el directorio (sin lugar
+  hace falta texto). Middleware (`develop` `c4a79ec`): filtros `copropiedad`, `rol`, `estado` en `/api/admin/directorio/personas`,
+  registrados en la auditoría. BOB (`main` `85038f2`): filtros Copropiedad (de las fichas de BOB), Rol y Estado, y con una
+  copropiedad elegida, una **tabla** con una fila por persona y su rol ahí.
+- Probado en local (Los Pinos: Ana finalizada por reemplazo, Bruno administrador y Carla delegada; vigentes y todas) y
+  desplegado: middleware `2e03902.bloky-c4a79ec`, BOB `2e03902.gestion-85038f2` (con respaldo); LangFlow igual.
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · «Personas de IDIKY» en BOB, con permisos (T-105, RN-270, RN-271)
 
 Daniel: *no ocultemos nada (Persona y Asignación) hasta hablar con Justo… quiero una vista para gestionar los usuarios,
