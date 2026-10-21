@@ -156,6 +156,13 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · Puertas sobre el piso (CU-B-08)
+
+- Daniel: que no parezcan ventanas altas sino **puertas que salen del piso**, que den ganas de cruzarlas. Ahora cada puerta está
+  parada sobre el piso, con marco de piedra y escalón, la hoja de madera entreabierta (se abre más al acercarse), el remolino y
+  las chispas adentro, y la luz que se derrama sobre el piso. La ayuda pasó abajo a la derecha. Probado en local; desplegado en
+  BLOKY Dev. LangFlow igual.
+
 ### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · Puertas mágicas y moverse con el teclado (CU-B-08)
 
 - Daniel: no podía mover a «Tú» con las flechas; quería puertas **mágicas**, con el nombre y sin ícono; y los objetos de adorno

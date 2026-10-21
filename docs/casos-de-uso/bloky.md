@@ -603,8 +603,9 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
 **Flujo principal**
 1. Ve **el mundo, como un juego** (Daniel, 2026-10-21: *moverse por portales… un muñequito genérico… no dividamos en Turno y
    Descanso*): **un lugar a la vez, a escena completa** —un espacio de trabajo con su dibujo (garita, oficina, cuarto de
-   herramientas, jardín, recepción, bodega u otro), o la sala de juntas del consejo o de una comisión—. En la pared, **una
-   puerta mágica a cada otro lugar** (arco de piedra con un remolino de luz y chispas, y su nombre). **Tu muñequito** se mueve
+   herramientas, jardín, recepción, bodega u otro), o la sala de juntas del consejo o de una comisión—. Al fondo, **una
+   puerta mágica a cada otro lugar**, parada sobre el piso: marco de piedra, la hoja de madera entreabierta, el remolino de
+   luz y las chispas al otro lado, y la luz que se derrama sobre el piso; delante, su nombre. **Tu muñequito** se mueve
    con las flechas (o W A S D) o tocando el piso; al llegar a una puerta, o al tocarla, entras y apareces en el otro lugar,
    saliendo por la puerta de donde vienes; arriba, la **barra de lugares** salta directo. **Sin adornos:** lo que se ve en un
    lugar tiene que servir para algo (Daniel, 2026-10-21). Todos comparten el espacio: quien
