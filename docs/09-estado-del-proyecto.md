@@ -156,6 +156,12 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · Nombres en plural en el menú de BOB
+
+- Los contenidos se ven en plural: **Contratos, Copropiedades, Servicios, Solicitudes** (solo cambia `displayName`; los
+  identificadores, las tablas, la API y los datos siguen iguales). BOB `main`, desplegado con respaldo; la API de los cuatro
+  responde igual. «Persona» (de Justo) queda como estaba.
+
 ### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · El contrato es virtual (T-115, T-116)
 
 - Daniel: el contrato no tendrá documento firmado (los servicios se adquieren virtualmente; la firma será un contrato virtual
