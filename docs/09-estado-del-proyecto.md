@@ -156,6 +156,19 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · El mundo como un juego, con portales (CU-B-08)
+
+- Daniel: las cajas se veían incómodas; mejor **un lugar a la vez, con portales** y un muñequito que se mueve, y **sin dividir en
+  turno y descanso**, marcando de otra forma a quien está fuera. Hecho (`mundo.tsx`): escena completa por lugar con adornos;
+  portales en la pared a cada otro lugar (también al consejo y las comisiones); «Tú» camina hasta la puerta y entra al otro lugar
+  por la puerta de donde viene; barra de lugares arriba (y «＋ Espacio / ＋ Consejo / ＋ Comisión»); en turno caminan con barrita
+  verde, fuera quedan tenues con 🌙 y «Vuelve X 22:00». La sala de juntas muestra a los miembros en la mesa y un tablero con la
+  próxima reunión. La franja «Hoy» muestra solo a los del lugar.
+- **Arreglo encontrado al probar:** el personaje de algunos nombres de miembros («Luis Gómez») fallaba por un índice negativo y
+  dejaba la pantalla en blanco; corregido antes de desplegar.
+- Probado en local con la API simulada (ahora con Pedro de día y Marta de noche, para ver a alguien fuera). BLOKY `develop`
+  desplegado en BLOKY Dev. LangFlow igual.
+
 ### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · El mundo del equipo (CU-B-08, RN-294 a RN-296)
 
 - Daniel quiso «Tu equipo» como **un mundo**: un espacio por grupo de trabajo (la oficina de la administración también tiene

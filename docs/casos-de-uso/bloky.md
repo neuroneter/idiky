@@ -601,12 +601,18 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
   espacio, y el consejo y las comisiones con sus miembros y su calendario.
 
 **Flujo principal**
-1. Ve **el mundo**: un cuarto por **espacio de trabajo**, con su dibujo (garita, oficina, cuarto de herramientas, jardín,
-   recepción, bodega u otro) y, dentro, la sala de siempre: **En turno** y **Descanso**. La primera vez, BLOKY propone
+1. Ve **el mundo, como un juego** (Daniel, 2026-10-21: *moverse por portales… un muñequito genérico… no dividamos en Turno y
+   Descanso*): **un lugar a la vez, a escena completa** —un espacio de trabajo con su dibujo (garita, oficina, cuarto de
+   herramientas, jardín, recepción, bodega u otro) y sus adornos, o la sala de juntas del consejo o de una comisión—. En la
+   pared, **un portal a cada otro lugar**: al tocarlo, **tu muñequito** camina hasta la puerta y apareces en el otro lugar,
+   saliendo por la puerta de donde vienes; arriba, la **barra de lugares** salta directo. Todos comparten el espacio: quien
+   está **en turno** camina, con su barrita verde; quien está **fuera** queda quieto y tenue, con 🌙 y **cuándo vuelve**
+   («Vuelve L 6:00»). La primera vez, BLOKY propone
    **Portería y vigilancia**, **Aseo y mantenimiento** y **Administración**, y pasa a cada colaborador al suyo según su cargo.
 2. **Agrega espacios** («＋ Espacio de trabajo»), les cambia el nombre y el dibujo, y los retira cuando no tienen a nadie.
 3. Al crear un colaborador elige **dónde trabaja**; en su ficha lo cambia de espacio.
-4. Debajo, **Consejo y comisiones**: salas de juntas con sus miembros alrededor de la mesa y su próxima reunión. Crea el
+4. **Consejo y comisiones** son lugares del mundo, a los que también se llega por portal: la mesa con sus miembros sentados y,
+   en un tablero, su próxima reunión (al tocarlo, su calendario). Crea el
    **consejo de administración** (uno) y las **comisiones** que necesite (convivencia, salud, seguridad…).
 5. En cada uno, **los miembros**: nombre, cargo en el grupo (presidente —uno—, vicepresidente, secretario, vocal, miembro,
    suplente), su unidad escrita y su celular o correo. Son residentes: quedan **«por vincular»** hasta que existan los
