@@ -156,6 +156,15 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · El contrato es virtual (T-115, T-116)
+
+- Daniel: el contrato no tendrá documento firmado (los servicios se adquieren virtualmente; la firma será un contrato virtual
+  con blockchain, a hablar con Justo) ni notas (no lo llena un comercial: la copropiedad elegirá sus servicios en BLOKY y
+  quedarán en BOB por la API). Salen `contratoFirmado` y `notas` del Contrato. BOB `main` `42e94af`
+  (`57f52ad.gestion-42e94af`), con respaldo; el contrato de prueba conserva sus 2 servicios. `probar-bob.mjs` 52 de 52.
+- Nuevas: **T-116** (elegir servicios en BLOKY y escribirlos en BOB por la API; necesita un camino de escritura hacia BOB) y el
+  **aviso 5** de Justo (contrato virtual con blockchain).
+
 ### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · Títulos en los acordeones de BOB (T-115)
 
 - Daniel: los acordeones de «Periodos» no mostraban nada al cerrarse. Ahora cada periodo y cada servicio del contrato tiene un

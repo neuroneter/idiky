@@ -70,6 +70,17 @@ cliente (el **mapa**, ADR-0025 §4). Ninguna app se conecta a una base de datos.
 **Para hablar:** cómo se arma el ingreso de ALICE con el login de contratos inteligentes sobre ese
 directorio (T-80, T-81).
 
+## 5. El contrato con la copropiedad será virtual, firmado con blockchain — ⏳ abierto (2026-10-21)
+
+En BOB, el **Contrato** de cada copropiedad ya no tiene documento firmado ni notas: es la lista de **servicios** que tiene
+(con su periodo, su ingreso y su cancelación, RN-290 a RN-293). La copropiedad elegirá sus servicios desde BLOKY y quedarán en
+BOB por la API (T-116). Daniel quiere que **la aceptación sea un contrato virtual firmado con blockchain**.
+
+**Para hablar:** cómo se firma (¿con la cuenta de la persona, ERC-4337?), qué se registra en la cadena (¿el contrato, cada
+servicio que entra o sale?) y dónde vive esa lógica (¿`SmartContrat-Idiky`, el middleware de IDIKY?).
+
+**Mientras se habla:** no agregar a BOB campos de firma ni documentos de contrato.
+
 ---
 
 **Para entenderlo de un vistazo:** el diagrama

@@ -29,7 +29,11 @@
 | Entidad | Qué guarda |
 |---|---|
 | **Servicio** | **Tipo** (unidades, videoconferencias, almacenamiento u otro), nombre, **SKU**, descripción, **cantidad** (hasta cuántas unidades, cuántas reuniones al mes, cuántos GB), **costo mensual**, **meses de cortesía**, sus **periodos** (1, 3, 6 o 12 meses, cada uno con su **% de descuento**) y si está activo. Ejemplos: U100 (hasta 100 unidades), REU5 (5 reuniones al mes), SAVE1 (1 GB) |
-| **Contrato** | La copropiedad, la fecha de inicio, el estado, el contrato firmado y su **lista de servicios**: cada uno con su **periodo**, su **fecha de ingreso**, su **cancelación**, **hasta cuándo sigue** y **hasta cuándo va su cortesía** |
+| **Contrato** | La copropiedad, la fecha de inicio, el estado y su **lista de servicios**: cada uno con su **periodo**, su **fecha de ingreso**, su **cancelación**, **hasta cuándo sigue** y **hasta cuándo va su cortesía** |
+
+> **El contrato es virtual** (Daniel, 2026-10-21): no hay documento firmado ni notas. Lo típico no es que un comercial lo llene:
+> se crea la copropiedad, y cuando entra a BLOKY **ve los servicios y elige los que necesita**, que quedan registrados en BOB
+> **por la API** (T-116). La firma será un **contrato virtual con blockchain**, a definir con Justo (aviso 5).
 
 **Reglas decididas (RN-290 a RN-293):**
 
