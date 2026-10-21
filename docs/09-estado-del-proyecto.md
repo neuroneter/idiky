@@ -156,6 +156,11 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · Tu personaje del mismo tamaño (CU-B-08)
+
+- Daniel: «Tú» se veía más pequeño que los demás (se dibujaba a 70 y los colaboradores a 84). Ahora todos —tú, los
+  colaboradores y los miembros del consejo— van al mismo tamaño (`TAMANO_PERSONA = 84` en `mundo.tsx`). Desplegado en BLOKY Dev.
+
 ### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · «Tú» es tu personaje (RN-297)
 
 - Daniel: al tocar a «Tú» se debe poder cambiar toda su apariencia, y «Tú» es quien entra a BLOKY (al principio, el
