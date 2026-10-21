@@ -16,7 +16,7 @@ nueva o una sesión de IA distinta.
 | **Versión** | v0.1 — demo PWA navegable + demo contable |
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | `apps/pwa/` (Mary, la maqueta de ALICE y de la consola), `apps/contable/` (Jeimy), `apps/gestion/` (BOB) y, desde el 2026-09-21, **`apps/bloky/` + `apps/bloky-api/` (BLOKY Dev, el producto real, ADR-0013)** |
-| **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 y **`https://bob-dev.idiky.com`** (ADR-0014) ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) **Desde el 2026-10-19:** con el plugin `cuentas-polygon` (alta de cuentas Polygon por QR) y las claves de **Polygon Amoy** (red de pruebas), publicado como `ad48f90.gestion-12e7c44`; faltan `RP_ID_HASH` y los usuarios de la app (T-87) |
+| **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 y **`https://bob-dev.idiky.com`** (ADR-0014) ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) **Desde el 2026-10-19:** con el plugin `cuentas-polygon` (alta de cuentas Polygon por QR) y las claves de **Polygon Amoy** (red de pruebas), publicado como `ad48f90.gestion-12e7c44`; el hash del `rpId` (`bob-dev.idiky.com`) completo desde el 2026-10-21; faltan los usuarios de la app (T-87) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
@@ -112,6 +112,25 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · El hash de la identidad de las passkeys, completo en BOB Dev (T-81)
+
+**Qué pidió Justo:** publicar el hash del `rpId` (la URL que identifica la firma de las passkeys).
+El `rpId` decidido es **`bob-dev.idiky.com`** y su hash es
+`0xfab6a761f3eb155407ddadfba5200a1004a18bb075d69da61fb17e158453933f` (comprobado: es el `sha256`
+de ese dominio).
+
+**Cómo estaba:** casi todo ya lo había hecho Justo el 2026-10-19 (`BOB-Idiky` `95719b5`, publicado
+con `ce63e55`): los archivos de identidad para Android (`/.well-known/assetlinks.json`) e iOS
+(`/.well-known/apple-app-site-association`) **responden en `https://bob-dev.idiky.com`**, y **las dos
+fábricas de Amoy ya tienen ese hash** (leído en la cadena; su dueño es la dirección de la clave
+cargada en BOB). Solo faltaba que los secretos del servidor lo dijeran: seguían en cero y el código
+lo suplía con el valor por defecto.
+
+**Qué se hizo:** `RP_ID_HASH` con ese valor en `gestion-strapi.env` (con el cargador de Justo) y BOB
+recreado **con el mismo código** (`76d3382.gestion-ce63e55`, respaldo previo, LangFlow igual). Strapi
+lee el hash correcto. **El pendiente «RP_ID_HASH en cero» del 2026-10-19 queda cerrado.** Sigue
+abierto T-87 / el aviso 2 de Justo (cómo se identifica la app y quién atiende `cuentas-polygon`).
+
 ### 2026-10-19 · Integración · Sesión de IA (Claude) con Daniel · BOB Dev con las claves de Polygon Amoy y el alta de cuentas por QR (T-81)
 
 **Qué se pidió:** Justo dejó en `main` de `BOB-Idiky` el plugin `cuentas-polygon` (alta de cuentas
@@ -148,8 +167,8 @@ permisos `600`).
   arranque). Hay que decidir cómo se identifica el teléfono ante BOB y, con eso, qué rol recibe
   permiso sobre las cinco acciones del plugin. No se dio permiso a *Authenticated* a ciegas: abriría
   operaciones de cuentas a cualquier usuario que se cree después.
-- **Justo: `RP_ID_HASH` está en cero.** BOB arranca, pero una passkey real no completa el alta hasta
-  confirmar el `rpId` de ALICE y fijar el mismo `sha256` en las dos fábricas de Amoy.
+- ~~**Justo: `RP_ID_HASH` está en cero.**~~ ✅ Cerrado el 2026-10-21: `rpId` = `bob-dev.idiky.com`, el hash
+  está en las dos fábricas y en el servidor (ver la entrada de ese día).
 - **Daniel, T-88: la conexión de Justo a la base de BOB (5432).** Eligió la conexión directa limitada a la
   IP de Justo; el cambio en `infra/servidor/levantar.sh` y la regla de Azure los aplica él (el
   permiso de la sesión no dejó exponer una base de datos). En la regla «Dev» de Azure sobra el 8090.
