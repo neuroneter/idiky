@@ -156,6 +156,19 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · El mundo de la copropiedad: el mapa (CU-B-16, parte 1)
+
+- Daniel propuso unir Estructura con el mundo: recorrer la copropiedad como un juego, visitar las zonas comunes y, con el tiempo,
+  ver quién está y conversar. Se escribió **CU-B-16** en cuatro partes (mapa · acciones en cada lugar · quién ve qué · presencia
+  y chat) y se hizo la **parte 1**.
+- **Hecho:** ficha **«Mundo»** en el menú (copropiedades), que abre en el **mapa**: el terreno de Estructura visto desde arriba con
+  sus dibujos; tu personaje (a escala) camina y **entra** a las zonas comunes (portería, salón, piscina, gimnasio, parque, otros
+  espacios) y a los espacios de trabajo, que ahora se ubican en un elemento del terreno («Dónde queda en la copropiedad»; la garita,
+  sola en la portería). Cada zona común tiene su escena y un tablero honesto («Aquí podrás… pronto»); desde cualquier lugar, la
+  puerta «Mapa». Middleware: `EspacioTrabajo.elementoId` (validado; sin migración, va en el JSON del equipo).
+- Probado en local con un terreno de ejemplo en la API simulada. Desplegado (`45b080a.bloky-ae640f1`). En BLOKY Dev, Altos del
+  Bosque tiene hoy una torre, una portería y un espacio en Estructura: eso es lo que muestra su mapa. LangFlow igual.
+
 ### 2026-10-21 · BLOKY · Tu personaje del mismo tamaño (CU-B-08)
 
 - Daniel: «Tú» se veía más pequeño que los demás (se dibujaba a 70 y los colaboradores a 84). Ahora todos —tú, los
