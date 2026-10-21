@@ -603,9 +603,11 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
 **Flujo principal**
 1. Ve **el mundo, como un juego** (Daniel, 2026-10-21: *moverse por portales… un muñequito genérico… no dividamos en Turno y
    Descanso*): **un lugar a la vez, a escena completa** —un espacio de trabajo con su dibujo (garita, oficina, cuarto de
-   herramientas, jardín, recepción, bodega u otro) y sus adornos, o la sala de juntas del consejo o de una comisión—. En la
-   pared, **un portal a cada otro lugar**: al tocarlo, **tu muñequito** camina hasta la puerta y apareces en el otro lugar,
-   saliendo por la puerta de donde vienes; arriba, la **barra de lugares** salta directo. Todos comparten el espacio: quien
+   herramientas, jardín, recepción, bodega u otro), o la sala de juntas del consejo o de una comisión—. En la pared, **una
+   puerta mágica a cada otro lugar** (arco de piedra con un remolino de luz y chispas, y su nombre). **Tu muñequito** se mueve
+   con las flechas (o W A S D) o tocando el piso; al llegar a una puerta, o al tocarla, entras y apareces en el otro lugar,
+   saliendo por la puerta de donde vienes; arriba, la **barra de lugares** salta directo. **Sin adornos:** lo que se ve en un
+   lugar tiene que servir para algo (Daniel, 2026-10-21). Todos comparten el espacio: quien
    está **en turno** camina, con su barrita verde; quien está **fuera** queda quieto y tenue, con 🌙 y **cuándo vuelve**
    («Vuelve L 6:00»). La primera vez, BLOKY propone
    **Portería y vigilancia**, **Aseo y mantenimiento** y **Administración**, y pasa a cada colaborador al suyo según su cargo.

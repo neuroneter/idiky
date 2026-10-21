@@ -156,6 +156,17 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · Puertas mágicas y moverse con el teclado (CU-B-08)
+
+- Daniel: no podía mover a «Tú» con las flechas; quería puertas **mágicas**, con el nombre y sin ícono; y los objetos de adorno
+  (cámara, barrera, escudo, linterna) decepcionan si no hacen nada. Hecho: «Tú» camina con las flechas o W A S D (un toque da un
+  pasito; sostener camina seguido) o tocando el piso, y al llegar a una puerta entra; puertas de arco de piedra con remolino de
+  luz, velo que respira y chispas, y el nombre en cursiva; se quitaron los adornos. La ayuda («Muévete con las flechas…») se ve
+  unos segundos al llegar a cada lugar.
+- Probado en local: sostener → camina a la derecha, ↑ → entra por la puerta de Administración y aparece allá por la de
+  Portería. (El movimiento usa un reloj simple, no `requestAnimationFrame`, para que funcione aunque la pestaña no esté al
+  frente.) BLOKY `develop` desplegado en BLOKY Dev. LangFlow igual.
+
 ### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · El mundo como un juego, con portales (CU-B-08)
 
 - Daniel: las cajas se veían incómodas; mejor **un lugar a la vez, con portales** y un muñequito que se mueve, y **sin dividir en
