@@ -156,6 +156,18 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · El plano como el mapa de un juego, por niveles (CU-B-16)
+
+- Daniel, con el mapa de Super Mario Run de ejemplo: si hay muchas zonas en muchos pisos, los portales en fila no alcanzan; pidió
+  una ruta tipo juego, todo conectado, por niveles, y un portal en el piso para ir al plano y volver. Se hizo el **nivel 1**:
+  - **El plano:** la plaza en el centro y un camino de tierra a cada parada. Lo del terreno abajo y a los lados, en el orden en
+    que está (zonas comunes, espacios ubicados, torres); el equipo, el consejo y las comisiones arriba, como casitas.
+  - Tu personaje va por los caminos: las flechas siguen el camino de esa dirección, Enter entra, tocar una parada te lleva.
+  - **Cada lugar tiene un portal en el piso** («🗺️ Plano») que te devuelve a su parada. Se quitaron las puertas de pared
+    (CU-B-08) y el plano pequeño de la esquina.
+  - Las torres quedan como paradas «pronto»: su nivel, piso por piso, es lo siguiente (CU-B-16 parte 1b).
+- Probado en local (escritorio y celular). Desplegado (`8f9ba95.bloky-b94f37c`). LangFlow igual.
+
 ### 2026-10-21 · BLOKY · El mapa pasa a ser una plaza (CU-B-16)
 
 - Daniel, al ver el mapa: el personaje se veía muy pequeño y los lugares dispersos y desordenados; pidió que funcionara como el

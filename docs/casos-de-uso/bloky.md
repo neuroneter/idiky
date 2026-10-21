@@ -603,21 +603,19 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
 **Flujo principal**
 1. Ve **el mundo, como un juego** (Daniel, 2026-10-21: *moverse por portales… un muñequito genérico… no dividamos en Turno y
    Descanso*): **un lugar a la vez, a escena completa** —un espacio de trabajo con su dibujo (garita, oficina, cuarto de
-   herramientas, jardín, recepción, bodega u otro), o la sala de juntas del consejo o de una comisión—. Al fondo, **una
-   puerta mágica a cada otro lugar**, parada sobre el piso: marco de piedra y una hoja de madera **cerrada** (deja escapar un hilo
-   de luz; se entreabre al pasar el cursor) que **se abre cuando tu muñequito se acerca**, dejando ver el remolino de luz y
-   las chispas y derramando la luz sobre el piso; delante, su nombre. Al cruzarla, la de donde vienes queda abierta un momento
-   en el otro lugar y se cierra detrás de ti. **Tu muñequito** —**es tu personaje**: el de la persona que entró, el mismo en todas las copropiedades; tocándolo se
-   personaliza con el creador del equipo (RN-297)— se mueve
-   con las flechas (o W A S D) o tocando el piso; al llegar a una puerta, o al tocarla, entras y apareces en el otro lugar,
-   saliendo por la puerta de donde vienes; arriba, la **barra de lugares** salta directo. **Sin adornos:** lo que se ve en un
+   herramientas, jardín, recepción, bodega u otro), o la sala de juntas del consejo o de una comisión—. **Tu muñequito**
+   —**es tu personaje**: el de la persona que entró, el mismo en todas las copropiedades; tocándolo se personaliza con el
+   creador del equipo (RN-297)— se mueve con las flechas (o W A S D) o tocando el piso. **Para ir a otro lugar** se pisa el
+   **portal del piso**, que lleva al plano de la copropiedad (CU-B-16), y desde ahí se camina a cualquier lugar; arriba, la
+   **barra de lugares** salta directo. *(Hasta el 2026-10-21 había una puerta mágica en la pared por cada otro lugar; con
+   muchos lugares no cabían, y se cambiaron por el plano.)* **Sin adornos:** lo que se ve en un
    lugar tiene que servir para algo (Daniel, 2026-10-21). Todos comparten el espacio: quien
    está **en turno** camina, con su barrita verde; quien está **fuera** queda quieto y tenue, con 🌙 y **cuándo vuelve**
    («Vuelve L 6:00»). La primera vez, BLOKY propone
    **Portería y vigilancia**, **Aseo y mantenimiento** y **Administración**, y pasa a cada colaborador al suyo según su cargo.
 2. **Agrega espacios** («＋ Espacio de trabajo»), les cambia el nombre y el dibujo, y los retira cuando no tienen a nadie.
 3. Al crear un colaborador elige **dónde trabaja**; en su ficha lo cambia de espacio.
-4. **Consejo y comisiones** son lugares del mundo, a los que también se llega por portal: la mesa con sus miembros sentados y,
+4. **Consejo y comisiones** son lugares del mundo, casitas del plano: la mesa con sus miembros sentados y,
    en un tablero, su próxima reunión (al tocarlo, su calendario). Crea el
    **consejo de administración** (uno) y las **comisiones** que necesite (convivencia, salud, seguridad…).
 5. En cada uno, **los miembros**: nombre, cargo en el grupo (presidente —uno—, vicepresidente, secretario, vocal, miembro,
@@ -652,7 +650,7 @@ y `apps/bloky-api/src/equipo/`.
 
 - **Actor principal:** Administrador o Delegado (después: colaboradores, consejo, residentes desde ALICE)
 - **Precondiciones:** CU-B-01; la copropiedad tiene su terreno en Estructura (CU-B-03).
-- **Disparador:** la ficha **«Mundo»** del menú (abre en la plaza); también desde «Equipo», con el lugar «Plaza».
+- **Disparador:** la ficha **«Mundo»** del menú (abre en el plano); también desde «Equipo», con el lugar «Plano» o el portal del piso.
 - **Resultado esperado:** Recorrer la copropiedad como un juego y llegar a cada lugar para ver quién está y, con el tiempo,
   hacer ahí lo que corresponde (reservar, avisar, conversar).
 
@@ -660,37 +658,47 @@ y `apps/bloky-api/src/equipo/`.
 
 | Parte | Qué | Estado |
 |---|---|---|
-| 1 | **La plaza y el plano**: un portal a cada lugar, en fila y agrupados, con el plano del terreno de Estructura en una esquina; se entra a las zonas comunes y a los espacios de trabajo | 🟡 BLOKY Dev (2026-10-21) |
+| 1 | **El plano, nivel 1** (como el mapa de un juego): la plaza en el centro y un camino a cada lugar; se entra a las zonas comunes, a los espacios de trabajo y a las juntas, y se vuelve por el portal del piso | 🟡 BLOKY Dev (2026-10-21) |
+| 1b | **Nivel 2, adentro de una torre**: una ruta que sube piso por piso, con una parada en cada piso que tenga algo (gimnasio, terraza, salón, sótanos); también las etapas | Pendiente |
 | 2 | **Acciones en cada lugar**: reservar el salón o el BBQ (con CU-B-13), avisar una visita en la portería, horario y aforo del gimnasio o la piscina | Pendiente |
 | 3 | **Quién ve qué**: colaboradores, consejo y residentes (con CU-B-07 y ALICE) | Pendiente |
 | 4 | **Presencia y chat** con quienes están en un lugar (necesita tiempo real) | Pendiente |
 
 **Flujo principal (parte 1)**
 
-> Primera versión (2026-10-21, mañana): un mapa caminable con los dibujos del terreno. Daniel: *el personaje se ve súper pequeño
-> y los espacios están dispersos, muy desordenados; tiene que funcionar muy parecido al espacio de las puertas, donde pueda de
-> forma ordenada encontrar los portales*. Se cambió por la plaza.
+> Cómo se llegó aquí (2026-10-21): primero, un mapa caminable con los dibujos del terreno (*el personaje se ve súper pequeño y
+> los espacios están dispersos, muy desordenados*); luego, una plaza con los portales en fila y un plano pequeño en la esquina
+> (*¿qué pasa si las puertas son demasiadas, muchas zonas en diferentes pisos?… una ruta tipo juego donde todo esté conectado,
+> por niveles*, con el mapa de Super Mario Run de ejemplo). Quedó el plano por niveles.
 
-1. Llega a **la plaza**: una fila de portales, como en los demás lugares, con su personaje del tamaño de siempre. Los portales
-   van **agrupados y en orden**: «La copropiedad» (las zonas comunes y los elementos donde queda un espacio de trabajo, en el
-   orden en que se leen en el plano), «Equipo» (los espacios que no están en el terreno) y «Consejo y comisiones».
-2. Si los portales no caben en la pantalla, la plaza se alarga y **la cámara lo sigue** al caminar.
-3. En una esquina, **el plano**: el terreno de Estructura en pequeño, con sus dibujos. Marca a dónde lleva el portal que tiene
-   enfrente; tocar un lugar del plano lo lleva caminando a su portal. Se puede ocultar. Adentro de un lugar, dice «Estás en…».
-4. **Una zona común** es su escena (el salón con piso de madera, la piscina con su agua…) con un tablero **honesto** de lo que se
-   podrá hacer ahí, marcado «pronto»; y una puerta **«Plaza»** para volver, por la que sale frente a su portal.
-5. **Un espacio de trabajo** queda en un elemento del terreno: en su panel, «Dónde queda en la copropiedad». La garita queda sola
+1. Llega al **plano**: la **plaza** en el centro y un **camino de tierra** a cada parada, con su personaje de buen tamaño.
+   - **Abajo y a los lados, lo del terreno:** las zonas comunes, los elementos donde queda un espacio de trabajo y las torres,
+     manzanas y oficinas, en el orden en que están alrededor del centro del terreno (lo de la izquierda queda a la izquierda).
+     Cada parada se ve con su dibujo de Estructura sobre una base de tierra.
+   - **Arriba, como casitas:** los espacios del equipo que no están en el terreno, el consejo y las comisiones.
+   - Si son más de 12 paradas, se alternan en dos anillos para que quepan.
+2. **Se camina por los caminos:** con las flechas, cada toque lo lleva por el camino que va en esa dirección (de la plaza a una
+   parada, o de vuelta a la plaza); al llegar, una burbuja dice «⏎ Entrar a…» y **Enter** (o seguir hacia afuera) entra. Tocando
+   una parada, camina hasta ella (pasando por la plaza) y entra.
+3. **Las torres** son paradas con su camino, marcadas «pronto»: su nivel, piso por piso, es la parte 1b.
+4. **En cada lugar, un portal en el piso** («🗺️ Plano», como el tubo de Mario): al pisarlo o tocarlo vuelve al plano, a la parada
+   de ese lugar. Al llegar a un lugar, sale por ese portal.
+5. **Una zona común** es su escena (el salón con piso de madera, la piscina con su agua…) con un tablero **honesto** de lo que se
+   podrá hacer ahí, marcado «pronto».
+6. **Un espacio de trabajo** queda en un elemento del terreno: en su panel, «Dónde queda en la copropiedad». La garita queda sola
    en la primera portería del terreno. Al entrar por ahí, ve a quién está de turno (CU-B-08).
 
 **Reglas de negocio:** las de CU-B-08 y RN-297 (tu personaje); el elemento del espacio se valida con RN-294.
 
-**Lo que queda abierto:** entrar a las torres (su portería, sus pisos); las agrupaciones (etapas) como zonas del mapa; el mapa
-con la orientación y el plano real (CU-B-09); que el mapa también lo tenga el negocio «espacio de trabajo» con su planta.
+**Lo que queda abierto:** el nivel 2 (las torres por dentro, y las etapas); el plano con la orientación y el plano real
+(CU-B-09); que el plano también lo tenga el negocio «espacio de trabajo» con su planta; qué hacer cuando hay muchísimas
+paradas en el nivel 1 (más de ~20).
 
-**Estado en BLOKY Dev:** 🟡 (2026-10-21) — parte 1 desplegada, ya como plaza (`ac8ddfd.bloky-77d062b`). Probada en local con un
-terreno de ejemplo (dos torres, portería, salón, piscina, gimnasio, parque, parqueaderos): la plaza se alarga y la cámara sigue,
-tocar el gimnasio en el plano lleva a su portal y entra, «Plaza» devuelve frente al gimnasio; en el celular no se desborda.
-Código: `apps/bloky/src/features/equipo/mundo.tsx` (`portalesDePlaza`, `acomodar`, `Plano`, `ZONAS`).
+**Estado en BLOKY Dev:** 🟡 (2026-10-21) — parte 1 desplegada, ya como plano por niveles (`8f9ba95.bloky-b94f37c`). Probada en
+local con un terreno de ejemplo (dos torres, portería, salón, piscina, gimnasio, parque, parqueaderos) y tres espacios: flecha
+→ lleva al salón, Enter entra, el portal del piso devuelve a la parada del salón; ← dos veces llega a la Torre 2 y Enter avisa
+«pronto»; → ↓ ↓ entra al parque. En el celular cabe sin desbordarse. Código: `apps/bloky/src/features/equipo/mundo.tsx`
+(`paradasDelPlano`, `MapaDelMundo`, `PORTAL`, `ZONAS`).
 
 ---
 
