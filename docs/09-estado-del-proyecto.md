@@ -156,6 +156,22 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · El mundo del equipo (CU-B-08, RN-294 a RN-296)
+
+- Daniel quiso «Tu equipo» como **un mundo**: un espacio por grupo de trabajo (la oficina de la administración también tiene
+  turnos y descansos), y el **consejo** (la «junta») y las **comisiones**, que son de residentes y no tienen horario por persona
+  sino calendario del grupo. Se eligió que sus miembros queden **por vincular** hasta CU-B-07.
+- **Hecho:** un cuarto por espacio (con En turno y Descanso) y, la primera vez, Portería y vigilancia, Aseo y mantenimiento y
+  Administración, con cada colaborador según su cargo; crear, renombrar, elegir dibujo y retirar espacios; elegir el espacio al
+  crear o en la ficha. Salas de juntas para el consejo y las comisiones, con los miembros alrededor de la mesa y su próxima
+  reunión; miembros con cargo, unidad y contacto; calendario con reuniones presenciales o virtuales, y «Crear la sala de video»
+  (CU-B-15).
+- Middleware: migración `012-grupos` (columnas `espacios` y `organos` del equipo y su historial), reglas RN-294 a RN-296. BLOKY
+  `develop` `3fb38ce`, desplegado `c819b8a.bloky-3fb38ce`; la migración llegó a las 4 copropiedades. `npm run probar` pasa.
+- **Probado en local con la API simulada** (`apps/bloky/pruebas/api-simulada.mjs`, ahora con espacios, órganos y reuniones): el
+  mundo con los tres espacios, un consejo con su presidenta (Torre 2 · 502) y una reunión virtual el 5 de noviembre con su sala;
+  todo guardado, sin errores en la consola. LangFlow igual.
+
 ### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · Nombres en plural en el menú de BOB
 
 - Los contenidos se ven en plural: **Contratos, Copropiedades, Servicios, Solicitudes** (solo cambia `displayName`; los

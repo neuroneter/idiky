@@ -587,6 +587,49 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
 
 ---
 
+### CU-B-08
+## CU-B-08 — Tu equipo y sus grupos: el mundo
+
+> Daniel (2026-10-21): *como si fuera un mundo… agregar el espacio donde está el grupo administrativo, una oficina, con
+> sus turnos y descansos… la junta de copropiedad y las comisiones (convivencia, salud…) se conforman de residentes… la
+> junta no tiene calendario individual pero sí como junta, cuando se reúnen*. Amplía CU-B-14 (los colaboradores).
+
+- **Actor principal:** Administrador o Delegado
+- **Precondiciones:** CU-B-01; el cliente está aprovisionado.
+- **Disparador:** la ficha «Equipo» del menú.
+- **Resultado esperado:** Todos los grupos de la copropiedad se gestionan desde un solo tablero: cada grupo de trabajo en su
+  espacio, y el consejo y las comisiones con sus miembros y su calendario.
+
+**Flujo principal**
+1. Ve **el mundo**: un cuarto por **espacio de trabajo**, con su dibujo (garita, oficina, cuarto de herramientas, jardín,
+   recepción, bodega u otro) y, dentro, la sala de siempre: **En turno** y **Descanso**. La primera vez, BLOKY propone
+   **Portería y vigilancia**, **Aseo y mantenimiento** y **Administración**, y pasa a cada colaborador al suyo según su cargo.
+2. **Agrega espacios** («＋ Espacio de trabajo»), les cambia el nombre y el dibujo, y los retira cuando no tienen a nadie.
+3. Al crear un colaborador elige **dónde trabaja**; en su ficha lo cambia de espacio.
+4. Debajo, **Consejo y comisiones**: salas de juntas con sus miembros alrededor de la mesa y su próxima reunión. Crea el
+   **consejo de administración** (uno) y las **comisiones** que necesite (convivencia, salud, seguridad…).
+5. En cada uno, **los miembros**: nombre, cargo en el grupo (presidente —uno—, vicepresidente, secretario, vocal, miembro,
+   suplente), su unidad escrita y su celular o correo. Son residentes: quedan **«por vincular»** hasta que existan los
+   propietarios y residentes (CU-B-07).
+6. Y **su calendario**: no tienen turnos, se reúnen. Programa reuniones presenciales (con lugar) o virtuales; a una virtual le
+   **crea su sala con video** (CU-B-15), invitando a los miembros que tienen correo o celular.
+
+**Flujos alternativos**
+- A1. Un espacio con colaboradores no se retira: primero se pasan a otro.
+- A2. Un miembro sale del grupo: queda retirado, no se borra. Una reunión cancelada queda en el calendario como cancelada (y su
+  sala con video también se cancela).
+
+**Reglas de negocio:** RN-294, RN-295, RN-296 (y las de CU-B-14).
+
+**Lo que queda abierto:** vincular cada miembro a su persona y su unidad cuando exista CU-B-07; que una reunión que se cambia de
+fecha mueva también su sala con video; actas y decisiones del consejo; el calendario de cada colaborador (novedades).
+
+**Estado en BLOKY Dev:** 🟡 (2026-10-21) — desplegado (`c819b8a.bloky-3fb38ce`), probado en local con la API simulada (el
+mundo, un consejo con su presidenta, una reunión virtual con su sala). Código: `apps/bloky/src/features/equipo/` (`grupos.tsx`)
+y `apps/bloky-api/src/equipo/`.
+
+---
+
 ### CU-B-15
 ## CU-B-15 — Reuniones con video
 
