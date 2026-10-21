@@ -652,7 +652,7 @@ y `apps/bloky-api/src/equipo/`.
 
 - **Actor principal:** Administrador o Delegado (después: colaboradores, consejo, residentes desde ALICE)
 - **Precondiciones:** CU-B-01; la copropiedad tiene su terreno en Estructura (CU-B-03).
-- **Disparador:** la ficha **«Mundo»** del menú (abre en el mapa); también desde «Equipo», con el lugar «Mapa».
+- **Disparador:** la ficha **«Mundo»** del menú (abre en la plaza); también desde «Equipo», con el lugar «Plaza».
 - **Resultado esperado:** Recorrer la copropiedad como un juego y llegar a cada lugar para ver quién está y, con el tiempo,
   hacer ahí lo que corresponde (reservar, avisar, conversar).
 
@@ -660,30 +660,37 @@ y `apps/bloky-api/src/equipo/`.
 
 | Parte | Qué | Estado |
 |---|---|---|
-| 1 | **El mapa**: el terreno de Estructura visto desde arriba; tu personaje camina por él (flechas o tocando) y **entra** a las zonas comunes y a los espacios de trabajo que quedan en ellas | 🟡 BLOKY Dev (2026-10-21) |
+| 1 | **La plaza y el plano**: un portal a cada lugar, en fila y agrupados, con el plano del terreno de Estructura en una esquina; se entra a las zonas comunes y a los espacios de trabajo | 🟡 BLOKY Dev (2026-10-21) |
 | 2 | **Acciones en cada lugar**: reservar el salón o el BBQ (con CU-B-13), avisar una visita en la portería, horario y aforo del gimnasio o la piscina | Pendiente |
 | 3 | **Quién ve qué**: colaboradores, consejo y residentes (con CU-B-07 y ALICE) | Pendiente |
 | 4 | **Presencia y chat** con quienes están en un lugar (necesita tiempo real) | Pendiente |
 
 **Flujo principal (parte 1)**
-1. Ve **el mapa**: lo que está en el terreno (torres, manzanas, parqueaderos, portería, salón, piscina, gimnasio, parque, otros
-   espacios), cada uno con su dibujo de Estructura y su nombre. Lo de adentro de una torre no sale en el mapa.
-2. Los lugares a los que **se puede entrar** brillan desde el piso: las zonas comunes y los elementos donde queda un espacio de
-   trabajo. Camina hasta uno (o lo toca) y entra.
-3. **Una zona común** es su escena (el salón con piso de madera, la piscina con su agua…) con un tablero **honesto** de lo que se
-   podrá hacer ahí, marcado «pronto»; y una puerta **«Mapa»** para volver, por la que sale frente a ese lugar en el mapa.
-4. **Un espacio de trabajo** queda en un elemento del terreno: en su panel, «Dónde queda en la copropiedad». La garita queda sola
+
+> Primera versión (2026-10-21, mañana): un mapa caminable con los dibujos del terreno. Daniel: *el personaje se ve súper pequeño
+> y los espacios están dispersos, muy desordenados; tiene que funcionar muy parecido al espacio de las puertas, donde pueda de
+> forma ordenada encontrar los portales*. Se cambió por la plaza.
+
+1. Llega a **la plaza**: una fila de portales, como en los demás lugares, con su personaje del tamaño de siempre. Los portales
+   van **agrupados y en orden**: «La copropiedad» (las zonas comunes y los elementos donde queda un espacio de trabajo, en el
+   orden en que se leen en el plano), «Equipo» (los espacios que no están en el terreno) y «Consejo y comisiones».
+2. Si los portales no caben en la pantalla, la plaza se alarga y **la cámara lo sigue** al caminar.
+3. En una esquina, **el plano**: el terreno de Estructura en pequeño, con sus dibujos. Marca a dónde lleva el portal que tiene
+   enfrente; tocar un lugar del plano lo lleva caminando a su portal. Se puede ocultar. Adentro de un lugar, dice «Estás en…».
+4. **Una zona común** es su escena (el salón con piso de madera, la piscina con su agua…) con un tablero **honesto** de lo que se
+   podrá hacer ahí, marcado «pronto»; y una puerta **«Plaza»** para volver, por la que sale frente a su portal.
+5. **Un espacio de trabajo** queda en un elemento del terreno: en su panel, «Dónde queda en la copropiedad». La garita queda sola
    en la primera portería del terreno. Al entrar por ahí, ve a quién está de turno (CU-B-08).
-5. En el mapa, tu personaje se ve a escala con los edificios; adentro, del tamaño de los demás.
 
 **Reglas de negocio:** las de CU-B-08 y RN-297 (tu personaje); el elemento del espacio se valida con RN-294.
 
 **Lo que queda abierto:** entrar a las torres (su portería, sus pisos); las agrupaciones (etapas) como zonas del mapa; el mapa
 con la orientación y el plano real (CU-B-09); que el mapa también lo tenga el negocio «espacio de trabajo» con su planta.
 
-**Estado en BLOKY Dev:** 🟡 (2026-10-21) — parte 1 desplegada (`45b080a.bloky-ae640f1`). Probada en local con un terreno de
-ejemplo (dos torres, portería, salón, piscina, gimnasio, parque, parqueaderos): entrar al salón, volver por «Mapa», entrar a la
-portería y llegar a «Portería y vigilancia». Código: `apps/bloky/src/features/equipo/mundo.tsx` (`MapaTerreno`, `ZONAS`).
+**Estado en BLOKY Dev:** 🟡 (2026-10-21) — parte 1 desplegada, ya como plaza (`ac8ddfd.bloky-77d062b`). Probada en local con un
+terreno de ejemplo (dos torres, portería, salón, piscina, gimnasio, parque, parqueaderos): la plaza se alarga y la cámara sigue,
+tocar el gimnasio en el plano lleva a su portal y entra, «Plaza» devuelve frente al gimnasio; en el celular no se desborda.
+Código: `apps/bloky/src/features/equipo/mundo.tsx` (`portalesDePlaza`, `acomodar`, `Plano`, `ZONAS`).
 
 ---
 

@@ -156,6 +156,15 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · El mapa pasa a ser una plaza (CU-B-16)
+
+- Daniel, al ver el mapa: el personaje se veía muy pequeño y los lugares dispersos y desordenados; pidió que funcionara como el
+  espacio de las puertas. Ahora es **la plaza**: tu personaje del tamaño de siempre y un portal a cada lugar, en fila y agrupados
+  («La copropiedad» en el orden del terreno, «Equipo», «Consejo y comisiones»). Si no caben, la plaza se alarga y la cámara te
+  sigue (esto vale también para los espacios con muchas puertas). **El plano** del terreno queda en una esquina: marca a dónde
+  lleva el portal de enfrente, o dónde estás, y tocarlo te lleva a su portal. La puerta de vuelta se llama «Plaza».
+- Probado en local (escritorio y celular). Desplegado (`ac8ddfd.bloky-77d062b`). LangFlow igual.
+
 ### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · El mundo de la copropiedad: el mapa (CU-B-16, parte 1)
 
 - Daniel propuso unir Estructura con el mundo: recorrer la copropiedad como un juego, visitar las zonas comunes y, con el tiempo,
