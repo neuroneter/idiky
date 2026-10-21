@@ -156,6 +156,13 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · Puertas que se abren al acercarse (CU-B-08)
+
+- Daniel: puertas **cerradas** que se abran con una animación cuando el personaje se acerca. Hecho: cerradas con un hilo de luz;
+  al pasar el cursor se entreabren; al acercarse Tú (con las flechas, tocando el piso o tocando la puerta) se abren con un
+  rebote, sale la luz al piso, Tú entra en la luz, todo se funde, y en el otro lugar sales por la puerta de donde vienes, que se
+  cierra detrás de ti. Probado en local la secuencia completa. Desplegado en BLOKY Dev. LangFlow igual.
+
 ### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · Puertas sobre el piso (CU-B-08)
 
 - Daniel: que no parezcan ventanas altas sino **puertas que salen del piso**, que den ganas de cruzarlas. Ahora cada puerta está
