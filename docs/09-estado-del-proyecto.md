@@ -156,6 +156,16 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · «Tú» es tu personaje (RN-297)
+
+- Daniel: al tocar a «Tú» se debe poder cambiar toda su apariencia, y «Tú» es quien entra a BLOKY (al principio, el
+  Administrador o el Delegado). Hecho: el personaje es **de la persona** y se guarda en el directorio (`persona.apariencia`,
+  migración común `007-apariencia`), el mismo en todas las copropiedades; si no lo ha armado, BLOKY le arma uno con su nombre.
+  Al tocar a «Tú» se abre el creador de personajes (el mismo del equipo) y «✓ Listo» lo guarda (`GET/PUT /api/yo/apariencia`,
+  con la sesión; RN-297 valida las partes).
+- Probado en local con la API simulada: tocar a Tú, elegir mujer y melena, guardar, recargar → sigue igual. En BLOKY Dev: la
+  migración se aplicó, la columna existe y la ruta sin sesión responde 401. `npm run probar` pasa. LangFlow igual.
+
 ### 2026-10-21 · BLOKY · Sesión de IA (Claude) con Daniel · Puertas que se abren al acercarse (CU-B-08)
 
 - Daniel: puertas **cerradas** que se abran con una animación cuando el personaje se acerca. Hecho: cerradas con un hilo de luz;

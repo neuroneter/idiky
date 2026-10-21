@@ -607,7 +607,8 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
    puerta mágica a cada otro lugar**, parada sobre el piso: marco de piedra y una hoja de madera **cerrada** (deja escapar un hilo
    de luz; se entreabre al pasar el cursor) que **se abre cuando tu muñequito se acerca**, dejando ver el remolino de luz y
    las chispas y derramando la luz sobre el piso; delante, su nombre. Al cruzarla, la de donde vienes queda abierta un momento
-   en el otro lugar y se cierra detrás de ti. **Tu muñequito** se mueve
+   en el otro lugar y se cierra detrás de ti. **Tu muñequito** —**es tu personaje**: el de la persona que entró, el mismo en todas las copropiedades; tocándolo se
+   personaliza con el creador del equipo (RN-297)— se mueve
    con las flechas (o W A S D) o tocando el piso; al llegar a una puerta, o al tocarla, entras y apareces en el otro lugar,
    saliendo por la puerta de donde vienes; arriba, la **barra de lugares** salta directo. **Sin adornos:** lo que se ve en un
    lugar tiene que servir para algo (Daniel, 2026-10-21). Todos comparten el espacio: quien
@@ -630,7 +631,7 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
 - A2. Un miembro sale del grupo: queda retirado, no se borra. Una reunión cancelada queda en el calendario como cancelada (y su
   sala con video también se cancela).
 
-**Reglas de negocio:** RN-294, RN-295, RN-296 (y las de CU-B-14).
+**Reglas de negocio:** RN-294, RN-295, RN-296, RN-297 (y las de CU-B-14).
 
 **Lo que queda abierto:** vincular cada miembro a su persona y su unidad cuando exista CU-B-07; que una reunión que se cambia de
 fecha mueva también su sala con video; actas y decisiones del consejo; el calendario de cada colaborador (novedades).
