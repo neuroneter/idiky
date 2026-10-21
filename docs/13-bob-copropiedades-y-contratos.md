@@ -20,34 +20,36 @@
 - **Estados propuestos** (sin confirmar): prospecto, en implementación, activa, suspendida,
   retirada. Qué acceso queda en BLOKY cuando una copropiedad está suspendida sigue abierto.
 
-## 2. Planes, servicios adicionales y contrato
+## 2. Servicios y contrato
+
+> **Rehecho el 2026-10-21 (T-115, Daniel):** ya no hay planes ni «servicios adicionales»: hay **un catálogo de servicios** y
+> **un contrato por copropiedad** que registra cuándo entra y cuándo sale cada servicio. Es el registro que consultará la
+> facturación. (Antes: T-114, planes por paquete; y antes, planes por unidad con prorrateo.)
 
 | Entidad | Qué guarda |
 |---|---|
-| **Plan** | Un **paquete por tamaño**: nombre, condiciones, **valor mensual fijo**, **máximo de unidades** que cubre y reuniones con video al mes (RN-287) |
-| **Servicio adicional** | Lo que se suma a lo que paga una copropiedad (asesoría financiera, asesoría legal…): nombre, descripción, valor mensual y reuniones al mes |
-| **Contratación** | **Solo el vínculo** (RN-288): la copropiedad, el plan o el servicio, cuándo inicia, cuándo termina, el estado y el contrato firmado |
+| **Servicio** | **Tipo** (unidades, videoconferencias, almacenamiento u otro), nombre, **SKU**, descripción, **cantidad** (hasta cuántas unidades, cuántas reuniones al mes, cuántos GB), **costo mensual**, **meses de cortesía**, sus **periodos** (1, 3, 6 o 12 meses, cada uno con su **% de descuento**) y si está activo. Ejemplos: U100 (hasta 100 unidades), REU5 (5 reuniones al mes), SAVE1 (1 GB) |
+| **Contrato** | La copropiedad, la fecha de inicio, el estado, el contrato firmado y su **lista de servicios**: cada uno con su **periodo**, su **fecha de ingreso**, su **cancelación**, **hasta cuándo sigue** y **hasta cuándo va su cortesía** |
 
-> **Rehecho el 2026-10-21 (T-114, Daniel):** *los competidores ponen el precio según el número de unidades y eso deja contratos
-> con precios distintos; el número de unidades sí influye, pero en paquetes*. Antes el plan cobraba por unidad (modalidad,
-> rango de unidades, prorrateo) y la contratación copiaba el precio y las condiciones al firmar. Ahora hay un número finito de
-> planes y lo que ajusta cada cliente son los servicios.
+**Reglas decididas (RN-290 a RN-293):**
 
-**Reglas decididas:**
-
-1. **Un contrato dura 12 meses** por defecto: si no se pone la fecha de fin, se calcula; **se puede cambiar**.
-2. **El plan es un paquete con valor fijo y un máximo de unidades.** Las unidades que se cobran **las cuenta BLOKY** (RN-283);
-   si una copropiedad pasa el máximo de su plan, BLOKY y BOB **avisan** (no bloquean): corresponde el paquete siguiente (RN-287).
-3. **Solo se cobran unidades facturables:** apartamento, casa, local, **oficina** y **consultorio**.
-   **No se cobran** bodegas, depósitos, parqueaderos ni zonas comunes. Coincide con el criterio de
-   la Ley 675 (art. 53), que cuenta los bienes privados sin parqueaderos ni depósitos. Desde T-113
-   (2026-10-20) es **una regla de BLOKY** (RN-283), no un catálogo de BOB (los consultorios cuentan como oficinas mientras no
-   tengan tipo propio en la estructura).
-4. **Lo firmado no cambia:** un plan o un servicio que ya está contratado **no se edita** en su valor, su máximo, sus reuniones
-   ni sus condiciones; se crea uno nuevo y el viejo se desactiva (RN-289). Por eso la contratación no copia nada.
-5. **Una copropiedad tiene a lo sumo un plan vigente a la vez**; servicios adicionales, los que quiera (RN-288).
-6. ~~Prorrateo del primer mes~~ y ~~cobro por unidad con rango~~: salieron con T-114. Cómo se factura el primer mes se decide
-   cuando se construya la facturación.
+1. **Siempre por mes completo, nunca por días.** El mes de ingreso se cobra completo (salvo cortesía).
+2. **Los periodos son del servicio, no del contrato.** Un servicio con **un solo periodo** lo obliga (por ejemplo, U100 solo por
+   12 meses); con **varios**, el cliente elige y cada periodo tiene su descuento sobre el costo mensual.
+3. **Un servicio mensual** se cancela en el mes que el cliente quiera: sigue hasta el fin de ese mes y **el siguiente ya no se
+   factura**. Se reactiva agregándolo de nuevo.
+4. **Un paquete de 3, 6 o 12 meses se paga completo al inicio.** **Se renueva solo.** El cliente puede cancelarlo en cualquier
+   momento: **sigue activo hasta el fin del periodo pagado, sin devolución y sin renovación**; puede **deshacer la cancelación**
+   antes de esa fecha.
+5. **La cortesía** (meses sin cobro para probar) aplica **solo la primera vez** que la copropiedad toma ese tipo de servicio.
+6. **El contrato empieza con un servicio de unidades** y tiene **uno solo sin cancelar** a la vez: cambiar de tamaño es cancelar
+   el actual y agregar el nuevo. **Un contrato vigente por copropiedad.**
+7. **Lo contratado no cambia:** un servicio que ya está en un contrato no cambia su tipo, cantidad, costo, cortesía, descripción ni
+   periodos; se crea otro SKU y el viejo se desactiva. Las filas del contrato **no se borran** y su servicio, periodo e ingreso no
+   cambian: el contrato es la bitácora.
+8. **Solo se cobran unidades facturables:** apartamento, casa, local, **oficina** y **consultorio**; no bodegas, depósitos,
+   parqueaderos ni zonas comunes (Ley 675, art. 53). Las cuenta BLOKY (RN-283); si pasan lo que cubre el servicio de unidades,
+   se avisa (RN-287).
 
 ## 3. Los perfiles raíz
 

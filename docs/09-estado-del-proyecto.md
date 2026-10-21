@@ -156,6 +156,23 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · Contrato por servicios (T-115, RN-290 a RN-293)
+
+- Daniel: sin planes; **servicios separados** que se agregan o retiran de un contrato, con tipo, SKU, descripción, cantidad,
+  cortesía y costo mensual (U100, REU5, SAVE1); el **contrato** es la relación con la copropiedad y lleva la bitácora de cuándo
+  entra y sale cada servicio, para la facturación. La duración es **del servicio** (1, 3, 6 o 12 meses, obligatoria o a elección
+  con descuento). Nunca se prorratea. Mensuales: se cancelan y el mes siguiente ya no se cobra. Paquetes: se pagan al inicio, se
+  renuevan solos, y cancelados siguen hasta el fin, sin devolución; la cancelación se puede deshacer.
+- **BOB** (`main` `371a1b7`, desplegado `c6f383e.gestion-371a1b7`, con respaldo): salen Plan, Servicio adicional y Contratación;
+  entran **Servicio** (con el componente Periodo) y **Contrato** (con el componente Servicio contratado: periodo, ingreso,
+  cancelación, `terminaEl` y `cortesiaHasta` calculados). Reglas RN-290 a RN-293; el panel «Contratos y trámites» muestra el
+  contrato vigente. `probar-bob.mjs` 49 de 49 (cancelar, renovar, deshacer, cortesía, cambio de tamaño, filas que no se borran).
+- **Middleware** (`develop` `1ada510`, `c6f383e.bloky-1ada510`): lee el contrato vigente y sus servicios (`serviciosDe`); el cupo de
+  reuniones, el máximo de unidades y el perfil salen de los servicios activos. `npm run probar` pasa.
+- **En BOB Dev:** servicios de prueba U150, REU5 (1 mes de cortesía) y SAVE1, y un contrato de Altos del Bosque con U150 por 12
+  meses y REU5 mes a mes (cortesía hasta el 31 de octubre). BLOKY lee 5 reuniones al mes y 150 unidades. LangFlow igual.
+- Se perdieron a propósito los planes y la contratación de prueba anteriores.
+
 ### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · Planes por paquete y contratación mínima (T-114, RN-287 a RN-289)
 
 - Daniel: la contratación debería ser solo asignar un plan o servicio a una copropiedad, con su inicio y su fin (12 meses,
