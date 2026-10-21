@@ -24,26 +24,30 @@
 
 | Entidad | Qué guarda |
 |---|---|
-| **Plan** | Nombre, condiciones, **modalidad** (`por unidad` o `valor fijo`), valor mensual y si **restringe las unidades** al rango del contrato |
-| **Servicio adicional** | Nombre (asesoría financiera, asesoría legal…), descripción y valor mensual |
-| **Contratación** | La copropiedad, el plan o servicio, **el precio y las condiciones copiados al contratar** (como RN-37 y RN-85: cambiar la tarifa no reescribe contratos firmados), la fecha de inicio, la de fin y, si aplica, **el rango de unidades** |
+| **Plan** | Un **paquete por tamaño**: nombre, condiciones, **valor mensual fijo**, **máximo de unidades** que cubre y reuniones con video al mes (RN-287) |
+| **Servicio adicional** | Lo que se suma a lo que paga una copropiedad (asesoría financiera, asesoría legal…): nombre, descripción, valor mensual y reuniones al mes |
+| **Contratación** | **Solo el vínculo** (RN-288): la copropiedad, el plan o el servicio, cuándo inicia, cuándo termina, el estado y el contrato firmado |
+
+> **Rehecho el 2026-10-21 (T-114, Daniel):** *los competidores ponen el precio según el número de unidades y eso deja contratos
+> con precios distintos; el número de unidades sí influye, pero en paquetes*. Antes el plan cobraba por unidad (modalidad,
+> rango de unidades, prorrateo) y la contratación copiaba el precio y las condiciones al firmar. Ahora hay un número finito de
+> planes y lo que ajusta cada cliente son los servicios.
 
 **Reglas decididas:**
 
-1. **Todo plan dura 12 meses**, y los servicios adicionales también.
-2. **El cobro por unidad usa las unidades del contrato**, no las que estén cargadas en BLOKY.
+1. **Un contrato dura 12 meses** por defecto: si no se pone la fecha de fin, se calcula; **se puede cambiar**.
+2. **El plan es un paquete con valor fijo y un máximo de unidades.** Las unidades que se cobran **las cuenta BLOKY** (RN-283);
+   si una copropiedad pasa el máximo de su plan, BLOKY y BOB **avisan** (no bloquean): corresponde el paquete siguiente (RN-287).
 3. **Solo se cobran unidades facturables:** apartamento, casa, local, **oficina** y **consultorio**.
    **No se cobran** bodegas, depósitos, parqueaderos ni zonas comunes. Coincide con el criterio de
    la Ley 675 (art. 53), que cuenta los bienes privados sin parqueaderos ni depósitos. Desde T-113
-   (2026-10-20) es **una regla de BLOKY** (RN-283), no un catálogo de BOB: BLOKY sabe qué tipo de unidad
-   se cobra (los consultorios cuentan como oficinas mientras no tengan tipo propio en la estructura).
-4. **El rango del contrato puede ser un bloqueo en BLOKY.** Si el contrato define un rango de
-   unidades y **el plan tiene la restricción**, BLOKY **no deja cargar unidades facturables por
-   encima del máximo**. Si el plan no la tiene, no hay bloqueo. Las unidades que no se cobran nunca
-   cuentan para el tope.
-5. **Prorrateo del primer mes.** Si el contrato empieza con el mes en curso, se cobran los días
-   que faltan, **con meses de 30 días**: `valor mensual ÷ 30 × días`. Ejemplo: un plan de
-   $300.000 que empieza el 21 → 10 días → $100.000.
+   (2026-10-20) es **una regla de BLOKY** (RN-283), no un catálogo de BOB (los consultorios cuentan como oficinas mientras no
+   tengan tipo propio en la estructura).
+4. **Lo firmado no cambia:** un plan o un servicio que ya está contratado **no se edita** en su valor, su máximo, sus reuniones
+   ni sus condiciones; se crea uno nuevo y el viejo se desactiva (RN-289). Por eso la contratación no copia nada.
+5. **Una copropiedad tiene a lo sumo un plan vigente a la vez**; servicios adicionales, los que quiera (RN-288).
+6. ~~Prorrateo del primer mes~~ y ~~cobro por unidad con rango~~: salieron con T-114. Cómo se factura el primer mes se decide
+   cuando se construya la facturación.
 
 ## 3. Los perfiles raíz
 

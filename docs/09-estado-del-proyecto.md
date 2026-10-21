@@ -156,6 +156,24 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · Planes por paquete y contratación mínima (T-114, RN-287 a RN-289)
+
+- Daniel: la contratación debería ser solo asignar un plan o servicio a una copropiedad, con su inicio y su fin (12 meses,
+  editable); las unidades, condiciones y demás son del plan o del servicio. Y los planes, **paquetes por número máximo de
+  unidades**, para no tener un precio distinto por cliente; los servicios son lo que ajusta lo que paga cada uno.
+- **Plan:** nombre, condiciones, valor fijo, **máximo de unidades**, reuniones al mes, activo (salen modalidad, restringe
+  unidades y duración). **Servicio:** nombre, descripción, valor, reuniones, activo. **Contratación:** copropiedad, tipo, plan o
+  servicio, estado, inicio, fin, contrato firmado y notas (salen las 12 copias y cálculos: unidades, rango, nombre, condiciones,
+  modalidad, valores, prorrateo).
+- **Para que lo firmado no cambie sin copiarlo:** un plan o servicio contratado no se edita en lo que cobra (RN-289). Un plan
+  vigente a la vez por copropiedad (RN-288). Si las unidades que cuenta BLOKY pasan el máximo, se avisa (RN-287).
+- Middleware primero (`develop` `528684f`, `380aaf3.bloky-528684f`): lee nombre, reuniones y máximo **del plan o el servicio**.
+  Después BOB (`main` `c48fc8f`, `380aaf3.gestion-c48fc8f`, con respaldo; tipos regenerados con `strapi ts:generate-types`).
+- **Verificado:** la contratación de Altos del Bosque quedó con sus campos mínimos y BLOKY la lee («Básico por unidad», vigente
+  hasta 2027-09-20). `probar-bob.mjs` 44 de 44, `npm run probar` pasa. LangFlow igual.
+- Pendiente para Daniel: crear los planes por paquete; el de prueba quedó sin máximo y, como está contratado, no se completa
+  (se termina esa contratación y se contrata uno nuevo).
+
 ### 2026-10-20 · Integración · Sesión de IA (Claude) con Daniel · Sin «Asignación» en BOB (T-89 paso 6, parte 1)
 
 - Daniel: la asignación *ya se realiza directamente en la copropiedad* (panel «Personas del cliente», que escribe en el directorio
