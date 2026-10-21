@@ -669,17 +669,20 @@ y `apps/bloky-api/src/equipo/`.
 > Cómo se llegó aquí (2026-10-21): primero, un mapa caminable con los dibujos del terreno (*el personaje se ve súper pequeño y
 > los espacios están dispersos, muy desordenados*); luego, una plaza con los portales en fila y un plano pequeño en la esquina
 > (*¿qué pasa si las puertas son demasiadas, muchas zonas en diferentes pisos?… una ruta tipo juego donde todo esté conectado,
-> por niveles*, con el mapa de Super Mario Run de ejemplo). Quedó el plano por niveles.
+> por niveles*, con el mapa de Super Mario Run de ejemplo); luego, el plano con la plaza en el centro y caminos en estrella
+> (*mover al personaje entre los caminos es casi imposible, siempre agarra para alguno y no para el que le estoy indicando; esa
+> distribución en estrella es muy fea, poco práctica*). Quedó el plano en **cuadrícula de calles**.
 
-1. Llega al **plano**: la **plaza** en el centro y un **camino de tierra** a cada parada, con su personaje de buen tamaño.
-   - **Abajo y a los lados, lo del terreno:** las zonas comunes, los elementos donde queda un espacio de trabajo y las torres,
-     manzanas y oficinas, en el orden en que están alrededor del centro del terreno (lo de la izquierda queda a la izquierda).
-     Cada parada se ve con su dibujo de Estructura sobre una base de tierra.
-   - **Arriba, como casitas:** los espacios del equipo que no están en el terreno, el consejo y las comisiones.
-   - Si son más de 12 paradas, se alternan en dos anillos para que quepan.
-2. **Se camina por los caminos:** con las flechas, cada toque lo lleva por el camino que va en esa dirección (de la plaza a una
-   parada, o de vuelta a la plaza); al llegar, una burbuja dice «⏎ Entrar a…» y **Enter** (o seguir hacia afuera) entra. Tocando
-   una parada, camina hasta ella (pasando por la plaza) y entra.
+1. Llega al **plano**: las paradas en **filas y columnas unidas por calles rectas**, con su personaje de buen tamaño al lado de
+   la parada donde está. Cada grupo empieza fila, con su letrero de madera a la izquierda:
+   - **La copropiedad:** las zonas comunes y los elementos donde queda un espacio de trabajo, en el orden en que se lee el
+     terreno (de arriba abajo, de izquierda a derecha). Cada una con su dibujo de Estructura sobre una base de tierra.
+   - **Torres:** torres, manzanas y oficinas.
+   - **Equipo** y **Consejo y comisiones:** casitas (techo azul el equipo, café las juntas).
+   - Las columnas se ajustan al ancho (2 en el celular, hasta 6 en pantalla grande); si hay más filas de las que caben, el
+     plano se desplaza y sigue al personaje.
+2. **Se camina por las calles:** cada flecha lleva **al vecino que está justo en esa dirección**; si no hay calle, no se mueve.
+   Al llegar, una burbuja dice «⏎ Entrar a…» y **Enter** entra. Tocando una parada, camina por la ruta más corta y entra.
 3. **Las torres** son paradas con su camino, marcadas «pronto»: su nivel, piso por piso, es la parte 1b.
 4. **En cada lugar, un portal en el piso** («🗺️ Plano», como el tubo de Mario): al pisarlo o tocarlo vuelve al plano, a la parada
    de ese lugar. Al llegar a un lugar, sale por ese portal.
@@ -692,13 +695,15 @@ y `apps/bloky-api/src/equipo/`.
 
 **Lo que queda abierto:** el nivel 2 (las torres por dentro, y las etapas); el plano con la orientación y el plano real
 (CU-B-09); que el plano también lo tenga el negocio «espacio de trabajo» con su planta; qué hacer cuando hay muchísimas
-paradas en el nivel 1 (más de ~20).
+paradas en el nivel 1 (el plano se alarga; ¿se agrupan por etapa?).
 
 **Estado en BLOKY Dev:** 🟡 (2026-10-21) — parte 1 desplegada, ya como plano por niveles (`8f9ba95.bloky-b94f37c`). Probada en
 local con un terreno de ejemplo (dos torres, portería, salón, piscina, gimnasio, parque, parqueaderos) y tres espacios: flecha
 → lleva al salón, Enter entra, el portal del piso devuelve a la parada del salón; ← dos veces llega a la Torre 2 y Enter avisa
 «pronto»; → ↓ ↓ entra al parque. En el celular cabe sin desbordarse. Código: `apps/bloky/src/features/equipo/mundo.tsx`
-(`paradasDelPlano`, `MapaDelMundo`, `PORTAL`, `ZONAS`).
+(`paradasDelPlano`, `cuadricula`, `ruta`, `MapaDelMundo`, `PORTAL`, `ZONAS`). En cuadrícula desde `4547c87.bloky-bc11c4d`:
+→ → recorre la primera fila, ↓ sin calle no se mueve, ← ↓ ↓ llega a Administración y Enter entra; tocar el gimnasio desde
+Administración lo lleva por las calles y entra; en el celular, dos columnas y el plano se desplaza.
 
 ---
 

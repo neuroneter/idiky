@@ -156,6 +156,15 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · BLOKY · El plano en cuadrícula de calles (CU-B-16)
+
+- Daniel: la idea es la correcta, pero en estrella las flechas casi nunca llevaban al camino indicado, y se veía feo. Ahora las
+  paradas van en **filas y columnas unidas por calles rectas**; cada grupo empieza fila con su letrero (La copropiedad, Torres,
+  Equipo, Consejo y comisiones); **cada flecha lleva al vecino justo en esa dirección** (si no hay calle, no se mueve); tocar
+  una parada camina por la ruta más corta y entra; el personaje queda al lado del dibujo, sin taparlo; el plano se desplaza si
+  hay más filas de las que caben (2 columnas en el celular, hasta 6 en pantalla grande).
+- Probado en local (escritorio y celular). Desplegado (`4547c87.bloky-bc11c4d`). LangFlow igual.
+
 ### 2026-10-21 · BLOKY · El plano como el mapa de un juego, por niveles (CU-B-16)
 
 - Daniel, con el mapa de Super Mario Run de ejemplo: si hay muchas zonas en muchos pisos, los portales en fila no alcanzan; pidió
