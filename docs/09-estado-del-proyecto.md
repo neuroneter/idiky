@@ -156,6 +156,13 @@ permisos `600`).
 - **Antes de producción:** las privadas van a un KMS o HSM y el owner a un multisig (README de
   `apps/gestion`).
 
+### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · Títulos en los acordeones de BOB (T-115)
+
+- Daniel: los acordeones de «Periodos» no mostraban nada al cerrarse. Ahora cada periodo y cada servicio del contrato tiene un
+  **título que se arma solo** y es el que muestra el acordeón: «12 meses · 10 % de descuento»; «U150 · Hasta 150 unidades ·
+  12 meses · desde 2026-10-21 · hasta …». BOB `main` `711b763` (`0ab84d4.gestion-711b763`), con respaldo; se volvieron a guardar
+  los 3 servicios y el contrato de prueba para llenar sus títulos. `probar-bob.mjs` 52 de 52. LangFlow igual.
+
 ### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · Contrato por servicios (T-115, RN-290 a RN-293)
 
 - Daniel: sin planes; **servicios separados** que se agregan o retiran de un contrato, con tipo, SKU, descripción, cantidad,
