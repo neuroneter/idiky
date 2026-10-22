@@ -112,6 +112,33 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · La identidad y las billeteras de cada persona, en el directorio (T-87, RN-298, RN-299)
+
+**Qué se decidió** (para redirigir al middleware el módulo de cuentas de Justo, aviso 2): de todo lo que
+la `persona` de BOB guarda de la cadena, al **directorio** pasan solo **tres campos**, como columnas
+de `directorio.persona`:
+- **`hash_identidad`** (RN-298): la identidad en los contratos, **del documento y no del correo**
+  (que cambia): HMAC-SHA256 con una **clave secreta de IDIKY** sobre «TIPO:NUMERO» (`CC:52100200`). La
+  clave impide ubicar las billeteras de alguien en la cadena pública sabiendo su cédula; por eso lo
+  calcula solo el middleware. No se recalcula; la clave no cambia nunca.
+- **`billetera_transaccional`** (votaciones, ingresos, documentos) y **`billetera_financiera`**
+  (pagos y movimientos) (RN-299): las dos cuentas que ya crean los contratos de Justo (`cuentaDia` y
+  `cuentaFinanciera`).
+
+No pasan `telefonoX`, `telefonoY`, `tipoAutenticador`, `estadoCadena`, `errorCadena`, el hash del
+correo, ni el registro de la transacción. Las personas de prueba de BOB no se migran.
+
+**Qué se hizo** (`Bloky-Idiky`, `feature/T-87-billeteras` → `develop`, `839c38f`): migración
+`comun/008-billeteras.sql` (las tres columnas, con formato y únicas), las reglas como funciones puras,
+el completado del hash al arrancar donde falta, la clave `BLOKY_CLAVE_IDENTIDAD_CADENA` creada en el
+servidor por `secretos.sh` (sin mostrarse) y 5 pasos nuevos en la prueba de humo. **Desplegado como
+`7f6e577.bloky-839c38f`** (LangFlow igual): la migración se aplicó y **las 6 personas del directorio
+tienen su `hash_identidad`**, todos distintos; las billeteras están vacías hasta que el módulo las cree.
+**El rango de reglas RN-270 a RN-299 quedó agotado**: lo siguiente pide un rango nuevo.
+
+**Qué sigue:** con Justo (aviso 2 actualizado): si el plugin pasa al middleware, que deje de usar
+`hashCorreo`, y cómo se identifica la app (T-87).
+
 ### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · El hash de la identidad de las passkeys, completo en BOB Dev (T-81)
 
 **Qué pidió Justo:** publicar el hash del `rpId` (la URL que identifica la firma de las passkeys).

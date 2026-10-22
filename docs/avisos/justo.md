@@ -43,6 +43,20 @@ de IDIKY? Esto resuelve también T-87.
 
 **Mientras se habla:** no agregar más campos de la cadena a la `persona` de BOB.
 
+**Decidido por Daniel el 2026-10-21** (RN-298, RN-299, ya en el directorio de BLOKY Dev):
+- La persona se identifica en la cadena con **`hash_identidad`**: HMAC-SHA256 con una clave secreta
+  de IDIKY sobre **«TIPO:NUMERO»** del documento (`CC:52100200`). **Ya no con el hash del correo**,
+  porque el correo cambia. Lo calcula **solo el middleware**: el teléfono no lo puede calcular. Los
+  contratos no cambian (reciben un `bytes32`), pero el plugin y ALICE dejan de usar `hashCorreo`.
+- Las dos cuentas son **`billetera_transaccional`** (tu `cuentaDia`: votaciones, ingresos,
+  documentos) y **`billetera_financiera`** (tu `cuentaFinanciera`), como **columnas de la persona**
+  del directorio.
+- **No pasan** al directorio `telefonoX`, `telefonoY`, `tipoAutenticador`, `estadoCadena` ni
+  `errorCadena`.
+- Las personas de prueba de BOB **no se migran**: las billeteras se crean de nuevo desde el directorio.
+
+**Sigue para hablar:** si el plugin pasa al middleware, y cómo se identifica la app (T-87).
+
 ## 3. Las reuniones con video son de BLOKY, no de BOB — ⏳ abierto (2026-10-20)
 
 Sobre tu propuesta de pasar Jitsi a pases (JWT): el plan técnico está bien (modo `jwt`, sala de espera,
