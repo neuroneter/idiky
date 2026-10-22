@@ -144,6 +144,16 @@ Daniel (`infra/desplegar.sh origin/main gestion`, con `verificar-vecino.sh`). De
 inofensivo desde el panel (por ejemplo `POLYGON_CHAIN_ID` = 80002, el mismo valor) para ver el ciclo
 completo. Es la base de la pantalla del proveedor de mensajes (T-109).
 
+**Desplegado por Daniel** (`e5a741b.gestion-2ec713c`): el plugin dentro de BOB, la carpeta compartida
+escribible y `idiky-gestion-configuracion.path` activo; LangFlow igual.
+
+**Segunda vuelta (Daniel):** los grupos van en un **acordeón**, todos cerrados, y en cada grupo (menos
+«Del sistema») se **agregan variables** con nombre, tipo y si es secreta. La ficha (sin valor) queda en
+`variables-extra.json` de la carpeta compartida; una agregada vacía se puede quitar. Como un nombre
+libre podría cambiar cómo arranca BOB (`NODE_OPTIONS`, por ejemplo), hay **nombres reservados**
+(Strapi, base, Node, sistema, *proxy*), comprobados en BOB y otra vez en el servidor, que deja la lista
+fija de permitidas. Probado en la Mac (controlador con Node; script con dobles). Pendiente: desplegar.
+
 ### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · El módulo de cuentas usa el directorio; la persona sale de BOB (T-87)
 
 **Qué pidió Daniel:** quitar la colección `persona` de BOB y su relación con el módulo de Justo. Antes
