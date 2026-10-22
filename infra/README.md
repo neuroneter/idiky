@@ -211,6 +211,7 @@ Las seis imágenes suman 1,3 GB; la mayor parte es Strapi.
 | `gestion/arrancar.sh` | Dentro del contenedor de Strapi | Espera a PostgreSQL y arranca Strapi |
 | `gestion/secretos.sh` | Servidor, como `idiky`, **una vez** | Genera los secretos de gestión |
 | `gestion/respaldo.sh`, `idiky-gestion-respaldo.{service,timer}` | Servidor, como `idiky` | El `pg_dump` diario |
+| `gestion/configuracion.sh`, `idiky-gestion-configuracion.{path,service}` | Servidor, como `idiky` | Aplica al `.env` de BOB lo que se cambia en su panel (Configuraciones globales, T-117) y lo reinicia |
 | `servidor/preparar-servidor.sh` | Servidor, con sudo, **una vez** | Instala Podman, crea `idiky`, le pone el techo y le autoriza una llave |
 | `servidor/levantar.sh` | Servidor, como `idiky` | Construye y (re)crea todo. **Aquí se registra cada servicio** |
 | `servidor/clave-acceso.sh` | Servidor, como `idiky` | Pone una clave al azar a la PWA y la contable |
@@ -383,6 +384,9 @@ poner:
 | `~idiky/.config/idiky/vecino-base.txt` | La última foto de LangFlow | `verificar-vecino.sh --base` |
 | `~idiky/.config/systemd/user/*.service`, `*.timer` | Las unidades | `levantar.sh`. **No se editan a mano** |
 | `~idiky/.local/bin/idiky-gestion-respaldo` | Copia del script de respaldo | `levantar.sh` |
+| `~idiky/.local/bin/idiky-gestion-configuracion` | Copia del script de configuraciones globales de BOB | `levantar.sh` |
+| `~idiky/.config/idiky/bob-configuracion/` | Solicitudes del panel de BOB, `ultimo.txt` e `historial.log` (sin valores); montada en Strapi | `levantar.sh` |
+| `~idiky/.config/idiky/secretos/respaldos/` | Las últimas 20 copias de `gestion-strapi.env` antes de cada cambio | `idiky-gestion-configuracion` |
 | `~idiky/.config/idiky/jitsi-comun.env` | La configuración común de Jitsi, fuera de la carpeta del despliegue (la unidad de systemd guarda la ruta tal cual) | `levantar.sh` |
 | `~idiky/.config/cni/net.d/87-podman.conflist` | La red por defecto de Podman | Podman |
 | `~idiky/despliegues/` | Las últimas 3 copias del código desplegado y `registro.tsv`, con quién desplegó qué | `desplegar.sh` |

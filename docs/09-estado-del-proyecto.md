@@ -112,6 +112,38 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · Configuraciones globales de BOB (T-117)
+
+**Qué pidió Daniel:** editar desde BOB, en su administración, los valores del `.env`, **sin guardarlos
+en la base**: que el cambio quede en el `.env` del servidor y que un script reinicie BOB cuando haga
+falta. Strapi no trae nada para esto, y siempre hace falta reiniciar: Strapi lee el entorno solo al
+arrancar, y podman se lo entrega (`--env-file`) al crear el contenedor.
+
+**Qué se hizo** (`BOB-Idiky`, `feature/configuraciones-globales` → `develop` → `main` `2ec713c`):
+- **Plugin `configuraciones-globales`**: Configuración → IDIKY → Configuraciones globales, con su
+  permiso de rol. Muestra las variables por grupo (middleware, cadena, llaves de prueba, del sistema);
+  las llaves y tokens solo como «configurada», y del nodo RPC solo el servidor. Se cambian las de
+  middleware y cadena; la base, las claves de Strapi, `HOST`/`PORT`/`NODE_ENV` y `SIMULAR_CADENA` se
+  ven pero no se tocan. Se aplica todo junto («Aplicar y reiniciar BOB», o «Solo reiniciar») y la
+  página espera sola a que BOB vuelva. Historial sin valores.
+- **En el servidor**, `infra/gestion/configuracion.sh` → `~/.local/bin/idiky-gestion-configuracion`,
+  disparado por `idiky-gestion-configuracion.path` cuando aparece la solicitud en
+  `~/.config/idiky/bob-configuracion/` (montada en el contenedor en `/opt/app/configuracion`). **No le
+  cree a BOB**: vuelve a validar nombres y caracteres, guarda una copia del `.env` en
+  `secretos/respaldos/` (las últimas 20), lo escribe con permisos 600, reinicia
+  `container-idiky-gestion-strapi` y espera `/_health`; **si BOB no arranca, devuelve el `.env`
+  anterior**. También se corre a mano (`--reiniciar`).
+- **`infra/servidor/levantar.sh`** crea la carpeta, la monta en Strapi e instala el script y las unidades.
+
+**Probado en la Mac:** el script con dobles de `podman`, `systemctl` y `curl` (aplica, rechaza una
+variable prohibida y una inyección, revierte cuando BOB no arranca, solo reinicio) y el controlador con
+Node (los secretos no salen; formatos; una solicitud a la vez). `npm run build` de BOB pasa.
+
+**Sin desplegar:** el clasificador de permisos de la sesión no dejó correr el despliegue; lo corre
+Daniel (`infra/desplegar.sh origin/main gestion`, con `verificar-vecino.sh`). Después: un cambio
+inofensivo desde el panel (por ejemplo `POLYGON_CHAIN_ID` = 80002, el mismo valor) para ver el ciclo
+completo. Es la base de la pantalla del proveedor de mensajes (T-109).
+
 ### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · El módulo de cuentas usa el directorio; la persona sale de BOB (T-87)
 
 **Qué pidió Daniel:** quitar la colección `persona` de BOB y su relación con el módulo de Justo. Antes
