@@ -46,6 +46,7 @@ IDIKY_DATOS="${IDIKY_DATOS:-$HOME/datos}"
 IDIKY_MINIMO_DISCO_MB="${IDIKY_MINIMO_DISCO_MB:-3000}"
 UNIDADES="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
 SECRETOS="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/secretos"
+CONFIGURACION_BOB="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/bob-configuracion"
 
 for servicio in $IDIKY_SERVICIOS; do
   case "$servicio" in
@@ -126,6 +127,11 @@ levantar_gestion() {
   # carpeta de archivos subidos se le entrega dentro del espacio de usuarios de podman.
   # PostgreSQL no lo necesita: su imagen ajusta los permisos de su carpeta al arrancar.
   podman unshare chown 1000:1000 "$IDIKY_DATOS/gestion/uploads"
+  # T-117: la carpeta donde el panel de BOB deja sus solicitudes de configuracion; la lee
+  # idiky-gestion-configuracion (instalar_configuracion_gestion). 755 para que systemd la vigile.
+  mkdir -p "$CONFIGURACION_BOB"
+  podman unshare chown 1000:1000 "$CONFIGURACION_BOB"
+  podman unshare chmod 755 "$CONFIGURACION_BOB"
   systemctl --user stop "pod-$pod.service" 2>/dev/null || true
   podman pod rm --force --ignore "$pod" >/dev/null
   podman pod create --name "$pod" --network slirp4netns:port_handler=slirp4netns \
@@ -137,6 +143,7 @@ levantar_gestion() {
   podman create --pod "$pod" --name "$pod-strapi" --memory 1536m --pids-limit 512 \
     --env-file "$SECRETOS/gestion-strapi.env" \
     --volume "$IDIKY_DATOS/gestion/uploads:/opt/app/public/uploads" \
+    --volume "$CONFIGURACION_BOB:/opt/app/configuracion" \
     "localhost/idiky-gestion:actual" >/dev/null
   podman create --pod "$pod" --name "$pod-proxy" --memory 64m --pids-limit 64 \
     "localhost/idiky-gestion-proxy:actual" >/dev/null
@@ -260,6 +267,16 @@ instalar_respaldo_gestion() {
   systemctl --user enable --now idiky-gestion-respaldo.timer >/dev/null 2>&1
 }
 
+# Configuraciones globales de BOB (T-117, infra/gestion/configuracion.sh): cuando el panel deja una
+# solicitud, el servidor la aplica al .env de BOB y lo reinicia.
+instalar_configuracion_gestion() {
+  mkdir -p "$HOME/.local/bin" "$UNIDADES"
+  install -m 755 infra/gestion/configuracion.sh "$HOME/.local/bin/idiky-gestion-configuracion"
+  cp infra/gestion/idiky-gestion-configuracion.service infra/gestion/idiky-gestion-configuracion.path "$UNIDADES/"
+  systemctl --user daemon-reload
+  systemctl --user enable --now idiky-gestion-configuracion.path >/dev/null 2>&1
+}
+
 #   esperar <nombre> <puerto> [ruta] [segundos]
 esperar() {
   ruta="${3:-/salud}"
@@ -341,6 +358,7 @@ if incluye contable; then levantar contable "$IDIKY_PUERTO_CONTABLE"; fi
 if incluye gestion; then
   levantar_gestion "$IDIKY_PUERTO_GESTION"
   instalar_respaldo_gestion
+  instalar_configuracion_gestion
 fi
 if incluye bloky; then levantar_bloky "$IDIKY_PUERTO_BLOKY"; fi
 if incluye tunel; then levantar_tunel "$IDIKY_PUERTO_TUNEL"; fi
