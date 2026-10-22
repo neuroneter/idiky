@@ -112,6 +112,32 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · El módulo de cuentas usa el directorio; la persona sale de BOB (T-87)
+
+**Qué pidió Daniel:** quitar la colección `persona` de BOB y su relación con el módulo de Justo. Antes
+había que **hacer de verdad** el apuntamiento al middleware: el plugin `cuentas-polygon` la usaba en
+33 lugares, y su identidad en la cadena dependía del correo.
+
+**Qué se hizo:**
+- **Middleware** (`Bloky-Idiky`, `feature/T-87-cuentas-al-middleware` → `develop`): crear una persona
+  sin asignación (gestionada por IDIKY, nace con su `hash_identidad`), leerla por id, listar las
+  recientes y guardar sus dos billeteras (no cambian una vez puestas), en la entrada de administración;
+  5 pasos nuevos en la prueba de humo. Publicado como **`9d9fd77.bloky-b1c232c`**.
+- **BOB** (`BOB-Idiky`, `feature/T-87-cuentas-al-directorio` → `develop` → `main`): el plugin lee y
+  escribe la persona en el directorio; la identidad en las fábricas es `hashIdentidad` (RN-298), las
+  billeteras van al directorio (RN-299), el reto del alta pasa a `v2`, y buscar o transferir es **por
+  documento**. Las respuestas conservan los nombres de antes para no romper el panel ni ALICE. Se quitó
+  `api::persona` (modelo, regla y panel) y el *lifecycle*. De paso, `authorizationList` en
+  `readContract`, que piden los tipos de `viem` 2.5x. Publicado como **`9d9fd77.gestion-e91e8f0`**:
+  respaldo previo (con las 6 personas de prueba), la tabla de personas desapareció, el resto intacto,
+  Strapi sin errores, y **el plugin, dentro del contenedor, habla con el directorio** (encuentra por
+  documento, con su hash, y responde con los dos juegos de nombres). LangFlow igual en los dos
+  despliegues.
+
+**No probado:** la firma real del alta con un teléfono. **El aviso 2 de Justo** dice qué cambia para
+ALICE (consultar y transferir por documento, no por correo). **Sigue abierto (T-87):** cómo se
+identifica la app; las rutas del plugin aún piden sesión de usuarios de Strapi.
+
 ### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · La identidad y las billeteras de cada persona, en el directorio (T-87, RN-298, RN-299)
 
 **Qué se decidió** (para redirigir al middleware el módulo de cuentas de Justo, aviso 2): de todo lo que

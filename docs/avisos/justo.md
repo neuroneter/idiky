@@ -9,7 +9,7 @@
 
 ---
 
-## 1. Las personas ya no viven en BOB — ⏳ abierto (2026-10-20)
+## 1. Las personas ya no viven en BOB — ✅ hecho (2026-10-21)
 
 **Qué se decidió:** [ADR-0025](../adr/0025-directorio-unico-y-mapa-de-ubicaciones.md). Todas las
 personas de IDIKY (también el Administrador y el Delegado) viven **solo en el directorio de BLOKY**.
@@ -31,7 +31,7 @@ cada copropiedad y la página «Personas de IDIKY» del menú, con permisos «Ve
 
 **Para hablar:** si el módulo «Personas del cliente» lo hace Justo o el equipo de BLOKY.
 
-## 2. El plugin `cuentas-polygon` y los datos de la cadena — ⏳ abierto (2026-10-20)
+## 2. El plugin `cuentas-polygon` y los datos de la cadena — 🟡 adaptado; queda cómo se identifica la app (2026-10-21)
 
 Hoy la `persona` de BOB guarda los datos del login con contratos inteligentes (`tipoAutenticador`,
 `cuentaDia`, `hashCorreo`, `cuentaFinanciera`, `estadoCadena`…) y el plugin `cuentas-polygon` atiende
@@ -56,6 +56,33 @@ de IDIKY? Esto resuelve también T-87.
 - Las personas de prueba de BOB **no se migran**: las billeteras se crean de nuevo desde el directorio.
 
 **Sigue para hablar:** si el plugin pasa al middleware, y cómo se identifica la app (T-87).
+
+**Hecho por Daniel con la IA el 2026-10-21 (lee esto antes de tocar ALICE o el plugin):** el plugin
+`cuentas-polygon` **ya no usa la persona de BOB**, y **`persona` se quitó de BOB** (aviso 1 cerrado).
+Publicado en BOB Dev (`9d9fd77.gestion-e91e8f0`) y en el middleware (`9d9fd77.bloky-b1c232c`).
+
+| Antes | Ahora |
+|---|---|
+| La persona en `api::persona.persona` de BOB | En el **directorio del middleware**; el plugin la lee y escribe por su entrada de administración (`server/src/directorio.ts`, con `BLOKY_URL` y `BLOKY_ADMIN_TOKEN`) |
+| Identidad en la cadena = hash del correo | **`hashIdentidad`** (RN-298), que calcula el middleware. Se pasa a `registrar(hash, x, y, tipo)` de las fábricas; **los contratos no cambian** |
+| `cuentaDia`, `cuentaFinanciera` | **`billeteraTransaccional`**, **`billeteraFinanciera`** en la persona del directorio (RN-299). Las respuestas traen **también** los nombres de antes |
+| `telefonoX/Y`, `tipoAutenticador`, `estadoCadena`, `errorCadena` guardados | No se guardan: la passkey viaja en la firma del alta, y `estadoCadena` se deduce (`registrada` si tiene las dos billeteras) |
+| Reto del alta `idiky.alta.v1:<op>:<hashCorreo>` | **`idiky.alta.v2:<op>:<hashIdentidad>`** (lo arma el servidor; el teléfono firma el que recibe) |
+| `GET /api/cuentas-polygon/cuentas?correo=…` y alta por QR por correo | **`?tipoDocumento=CC&numeroDocumento=…`** (por correo responde 400) |
+| Transferir a `correoDestino` | **`tipoDocumentoDestino` + `numeroDocumentoDestino`** |
+| `personaDocumentId` = documentId de BOB | El **id de la persona en el directorio** |
+| Al crear la persona, un *lifecycle* abría las cuentas | `registrar.abrirBilleteras()` al firmar el alta (o al crear con la passkey conocida) |
+
+**Para ALICE (tú):** si la app consultaba cuentas o transfería **por correo**, tiene que pasar a **tipo y
+número de documento**. El resto de las respuestas conserva los nombres de antes.
+
+**No probado:** la firma real con un teléfono (no había uno). Sí se probó en el servidor: el plugin
+habla con el directorio, encuentra a la persona por documento, trae su `hashIdentidad` y responde con
+los dos juegos de nombres.
+
+**Sigue para hablar (T-87):** las rutas de la app (`/api/cuentas-polygon/...`) **siguen pidiendo sesión
+de usuarios de Strapi**, y BOB no tiene usuarios finales. Falta decidir cómo se identifica la app: lo
+natural, con ADR-0025, es que la app entre por el **middleware** con la sesión de la persona.
 
 ## 3. Las reuniones con video son de BLOKY, no de BOB — ⏳ abierto (2026-10-20)
 
