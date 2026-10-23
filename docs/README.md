@@ -27,6 +27,8 @@ aquí antes o junto con el código.
 | 15 | [Resumen de la rama de Mary](./15-resumen-de-la-rama-de-mary.md) | **Corte transversal**: qué contiene la rama hoy, qué se verificó contra la ley y qué está abierto — para revisarla sin leer 91 commits | Es un snapshot fechado: se rehace, no se mantiene |
 | 16 | [Mapa de repositorios](./16-mapa-de-repositorios.md) | **Los seis repositorios de IDIKY**: qué sistema vive en cuál, cómo se relacionan y qué va dónde. `idiky` es el arnés | Al crear o mudar un repositorio |
 | 17 | [Reglas de trabajo](./17-reglas-de-trabajo.md) | **Quién trabaja dónde y con qué ramas**: Mary y Jeimy en `idiky` con su rama y merge a `main`; Justo (APP) y Daniel (BLOKY) con Git Flow | Al cambiar la forma de trabajar |
+| — | [Avisos Justo](./avisos/justo.md) | Temas abiertos de Justo con Daniel (directorio, cadena, Jitsi, ALICE) | Cuando se abre o cierra un aviso |
+| — | [Avisos Daniel](./avisos/daniel.md) | **Estado cadena / contratos / ALICE para que Daniel revise**: hecho, temporal, pendiente de deploy | Cuando Justo deja trabajo a medias o temporal |
 | — | [ADR](./adr/) | Decisiones de arquitectura con su justificación | Al tomar una decisión relevante |
 
 > El **13** está reservado para el sistema de gestión (BOB), que llega desde la rama de

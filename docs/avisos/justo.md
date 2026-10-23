@@ -64,7 +64,7 @@ Publicado en BOB Dev (`9d9fd77.gestion-e91e8f0`) y en el middleware (`9d9fd77.bl
 | Antes | Ahora |
 |---|---|
 | La persona en `api::persona.persona` de BOB | En el **directorio del middleware**; el plugin la lee y escribe por su entrada de administración (`server/src/directorio.ts`, con `BLOKY_URL` y `BLOKY_ADMIN_TOKEN`) |
-| Identidad en la cadena = hash del correo | **`hashIdentidad`** (RN-298), que calcula el middleware. Se pasa a `registrar(hash, x, y, tipo)` de las fábricas; **los contratos no cambian** |
+| Identidad en la cadena = hash del correo | **`hashIdentidad`** (RN-298), que calcula el middleware. Se pasa a `registrar(hashIdentidad, x, y, tipo)`. Los contratos siguen recibiendo un `bytes32`; **2026-10-23** Justo renombró en Solidity `hashCorreo` → `hashIdentidad` (y `cuentaPorIdentidad`). Amoy del 17-oct hay que redeployar (ver [`daniel.md`](./daniel.md) §1) |
 | `cuentaDia`, `cuentaFinanciera` | **`billeteraTransaccional`**, **`billeteraFinanciera`** en la persona del directorio (RN-299). Las respuestas traen **también** los nombres de antes |
 | `telefonoX/Y`, `tipoAutenticador`, `estadoCadena`, `errorCadena` guardados | No se guardan: la passkey viaja en la firma del alta, y `estadoCadena` se deduce (`registrada` si tiene las dos billeteras) |
 | Reto del alta `idiky.alta.v1:<op>:<hashCorreo>` | **`idiky.alta.v2:<op>:<hashIdentidad>`** (lo arma el servidor; el teléfono firma el que recibe) |
@@ -83,6 +83,8 @@ los dos juegos de nombres.
 **Sigue para hablar (T-87):** las rutas de la app (`/api/cuentas-polygon/...`) **siguen pidiendo sesión
 de usuarios de Strapi**, y BOB no tiene usuarios finales. Falta decidir cómo se identifica la app: lo
 natural, con ADR-0025, es que la app entre por el **middleware** con la sesión de la persona.
+**Temporal en ALICE hoy:** JWT de Strapi (`ALTA_QR_JWT`) solo para probar el alta en Dev; no es el
+diseño final. Estado para Daniel: [`daniel.md`](./daniel.md) §2.
 
 ## 3. Las reuniones con video son de BLOKY, no de BOB — ⏳ abierto (2026-10-20)
 
