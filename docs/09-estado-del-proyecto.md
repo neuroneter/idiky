@@ -112,6 +112,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-23 · BLOKY · La QA en Estructura (1): el mapa real con Leaflet (CU-B-09, ADR-0028)
+
+- Primer comentario de la QA: no se entiende cómo se ubica la copropiedad en el mapa, moverse es «súper sensible» y el
+  recuadro del lote es difícil; no hay conexión entre las estructuras y el mapa real. Análisis: 10 a 12 pasos en tres
+  lugares; el visor propio saltaba un nivel de zoom por cada giro de la rueda, hacia el centro y sin pellizco; el lote nacía
+  fijo de 60 × 40 m y se ajustaba esquina por esquina; las torres no se ven en el satélite; «Armar desde documentos» no pide
+  la ubicación y pone las torres en sitios fijos.
+- Daniel eligió **Leaflet** (ADR-0028). **Primera entrega, hecha:** el mapa con Leaflet (zoom suave hacia el cursor,
+  pellizco), el lote que se dibuja arrastrando y se mueve, gira y estira entero, y el lote sugerido por el mapa de la ciudad.
+  Rama `feature/CU-B-09-mapa-leaflet`. Probado en local (ubicar, dibujar, girar, mover; el plano se actualiza). Desplegado
+  (`dab3eb4.bloky-81476d8`). LangFlow igual.
+- **Segunda entrega, pendiente:** el asistente «Ubicar la copropiedad» en tres pasos (dirección → lote → cada torre sobre el
+  satélite), también al terminar «Armar desde documentos».
+
 ### 2026-10-23 · BLOKY · El portal pintado dentro de la puerta (CU-B-16, ADR-0027)
 
 - Daniel: el morado del portal *se está saliendo de la puerta como si fuera un error gráfico*; pidió modificar la puerta misma.

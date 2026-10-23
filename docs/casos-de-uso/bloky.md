@@ -468,6 +468,14 @@ Código: `apps/bloky-api/src/{almacen,documentos}/` y `apps/bloky/src/features/d
 calles de acceso; el catastro abierto; tomar la dirección de la escritura en «Armar desde
 documentos»; las fotos (galería en R2, ADR-0019).
 
+**Comentarios de la QA (2026-10-23)** y lo que se hace, en dos entregas:
+1. ✅ **El mapa con Leaflet** (ADR-0028): zoom suave hacia el cursor, pellizco; el lote se dibuja arrastrando y se mueve (✥),
+   gira (⟳) y estira entero; el lote que ya conoce el mapa de la ciudad se ofrece («Usar este lote»). En BLOKY Dev
+   (`dab3eb4.bloky-81476d8`).
+2. **El asistente «Ubicar la copropiedad»**, en tres pasos y al terminar «Armar desde documentos»: dónde queda (la dirección
+   ya escrita, el mapa abre encima), cuál es el lote (el sugerido o dibujado) y dónde está cada torre (las torres de
+   Estructura sobre el satélite, dentro del lote, para arrastrarlas a su edificio). Pendiente.
+
 **Estado en BLOKY Dev:** 🟡 (2026-10-11) — desplegado (`08eda9a.bloky-6f68e3b`): ubicar, descargar el
 barrio, demarcar el lote y las entradas (RN-250) y ajustar el plano al lote (RN-251). Falta calcar
 los bloques sobre el satélite y tomar la dirección de la escritura. Código:
