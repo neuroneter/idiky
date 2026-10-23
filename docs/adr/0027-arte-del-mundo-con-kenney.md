@@ -36,6 +36,8 @@ Se armó la portería con Kenney y se comparó con la anterior. Daniel: *me gust
 
 - El mundo se ve como un juego de verdad, y cada mueble es una pieza suelta: eso permite que después se decore (T-118).
 - Agregar un mueble es copiar su PNG y ponerlo en el diseño del cuarto; los nombres de los archivos son los del kit.
+- **Se pueden derivar dibujos del kit** (CC0 lo permite): las puertas con el portal pintado dentro del vano salen de
+  `wallDoorway_SE/SW` con `apps/bloky/herramientas/pintar-portales.py` (2026-10-23).
 - Mientras no llegue su arte, el gimnasio, la piscina y el parque son un salón de espera con su tono de piso y su tablero.
 
 ## Alternativas consideradas

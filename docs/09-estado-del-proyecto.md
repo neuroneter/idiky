@@ -112,6 +112,14 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-23 · BLOKY · El portal pintado dentro de la puerta (CU-B-16, ADR-0027)
+
+- Daniel: el morado del portal *se está saliendo de la puerta como si fuera un error gráfico*; pidió modificar la puerta misma.
+- Ya no se sobrepone una luz: `apps/bloky/herramientas/pintar-portales.py` genera, desde la puerta del Furniture Kit, tres
+  versiones con el portal pintado **solo en los píxeles transparentes del vano**: normal, encendida (al acercarse) y cerrada
+  en gris (las torres, «pronto»). La luz respira con la encendida encima; se quitó el resplandor alrededor de la pared.
+- Rama `feature/CU-B-16-puertas-portal`. Probado en local. Desplegado (`e73f977.bloky-b656f1a`). LangFlow igual.
+
 ### 2026-10-23 · BLOKY · Arreglo: decorar decía «Hay un mueble fuera del piso» (RN-301)
 
 - Daniel no podía guardar la decoración y no veía ningún mueble fuera, ni podía mover la barra para mirar debajo. **Causa:** varios
