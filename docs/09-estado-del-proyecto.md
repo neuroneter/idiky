@@ -112,6 +112,26 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-23 · BLOKY · Sesión de IA (Claude) con Daniel · El mundo con puertas, pasillos y el arte de Kenney (CU-B-16, ADR-0027)
+
+- Daniel no se quedó con el plano en cuadrícula: *me gustaba más como antes teníamos las puertas*; faltaba manejar muchas
+  puertas. Se acordaron **pasillos**, como el castillo de un juego, y se escribió **RN-300**: la entrada con una puerta por
+  grupo (zonas comunes, equipo, consejo y comisiones, torres), un pasillo por grupo, nunca más de 6 puertas por cuarto, y
+  «↩ Volver» siempre en el mismo sitio.
+- **El dibujo** (*muy de niño de 5 años*): Daniel pidió integrar **Rosebud** (creó una cuenta). Su herramienta para agentes se
+  compiló desde su código oficial, pero el servicio de recursos **respondía 404**; además su plan gratis prohíbe uso comercial.
+  Se probó **Kenney** (*Furniture Kit*, CC0, 5,1 MB descargados con su permiso): la portería en isométrico gustó (*me gusta
+  mucho la primera imagen*). **ADR-0027.**
+- **Hecho:** cada lugar es un cuarto isométrico con muebles según lo que es (portería, oficina, bodega, jardín, sala de juntas,
+  salón social; gimnasio, piscina y parque como salón de espera mientras llega su arte), con las personas en sus puestos y tu
+  personaje caminando sin atravesar muebles. Se quitaron el plano en cuadrícula y el portal del piso. En BLOKY van solo los
+  47 dibujos que se usan (220 KB) y la licencia.
+- Daniel quiere que después **se pueda decorar** (mover y agregar muebles) quien tenga que ver con cada lugar: **T-118**.
+- Ojo: la carpeta de `Bloky-Idiky` estaba en `develop` (otro trabajo de T-87) y el commit del mundo quedó directo en
+  `develop` (`d510929`, solo archivos del mundo); la rama `feature/CU-B-16-mundo` se puso al día con él.
+- Probado en local (escritorio y celular). Desplegado (`4a4b4f3.bloky-d510929`); los dibujos responden en BLOKY Dev. LangFlow
+  igual.
+
 ### 2026-10-21 · Integración · Sesión de IA (Claude) con Daniel · Configuraciones globales de BOB (T-117)
 
 **Qué pidió Daniel:** editar desde BOB, en su administración, los valores del `.env`, **sin guardarlos

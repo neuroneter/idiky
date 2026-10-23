@@ -606,9 +606,9 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
    herramientas, jardín, recepción, bodega u otro), o la sala de juntas del consejo o de una comisión—. **Tu muñequito**
    —**es tu personaje**: el de la persona que entró, el mismo en todas las copropiedades; tocándolo se personaliza con el
    creador del equipo (RN-297)— se mueve con las flechas (o W A S D) o tocando el piso. **Para ir a otro lugar** se pisa el
-   **portal del piso**, que lleva al plano de la copropiedad (CU-B-16), y desde ahí se camina a cualquier lugar; arriba, la
-   **barra de lugares** salta directo. *(Hasta el 2026-10-21 había una puerta mágica en la pared por cada otro lugar; con
-   muchos lugares no cabían, y se cambiaron por el plano.)* **Sin adornos:** lo que se ve en un
+   **puerta «↩ Volver»**, que lleva al pasillo de su grupo (CU-B-16), y desde ahí se llega a cualquier lugar; arriba, la
+   **barra de lugares** salta directo. *(2026-10-23: cada lugar es un cuarto isométrico con el arte de Kenney y su puerta
+   «↩ Volver» lleva al pasillo de su grupo; la entrada y los pasillos están en CU-B-16, RN-300.)* **Sin adornos:** lo que se ve en un
    lugar tiene que servir para algo (Daniel, 2026-10-21). Todos comparten el espacio: quien
    está **en turno** camina, con su barrita verde; quien está **fuera** queda quieto y tenue, con 🌙 y **cuándo vuelve**
    («Vuelve L 6:00»). La primera vez, BLOKY propone
@@ -658,52 +658,46 @@ y `apps/bloky-api/src/equipo/`.
 
 | Parte | Qué | Estado |
 |---|---|---|
-| 1 | **El plano, nivel 1** (como el mapa de un juego): la plaza en el centro y un camino a cada lugar; se entra a las zonas comunes, a los espacios de trabajo y a las juntas, y se vuelve por el portal del piso | 🟡 BLOKY Dev (2026-10-21) |
-| 1b | **Nivel 2, adentro de una torre**: una ruta que sube piso por piso, con una parada en cada piso que tenga algo (gimnasio, terraza, salón, sótanos); también las etapas | Pendiente |
+| 1 | **La entrada y los pasillos**, en cuartos isométricos con el arte de Kenney (ADR-0027): una puerta por grupo, un pasillo por grupo con las puertas de sus lugares, «Volver» siempre en el mismo sitio (RN-300) | 🟡 BLOKY Dev (2026-10-23) |
+| 1c | **Decorar** cada cuarto: mover, agregar o quitar muebles, quien tenga que ver con el lugar (T-118) | Pendiente |
+| 1b | **Adentro de una torre**: su vestíbulo con la portería y un **ascensor**; en cada piso, las puertas de lo que hay (gimnasio, terraza, salón, sótanos) | Pendiente |
 | 2 | **Acciones en cada lugar**: reservar el salón o el BBQ (con CU-B-13), avisar una visita en la portería, horario y aforo del gimnasio o la piscina | Pendiente |
 | 3 | **Quién ve qué**: colaboradores, consejo y residentes (con CU-B-07 y ALICE) | Pendiente |
 | 4 | **Presencia y chat** con quienes están en un lugar (necesita tiempo real) | Pendiente |
 
 **Flujo principal (parte 1)**
 
-> Cómo se llegó aquí (2026-10-21): primero, un mapa caminable con los dibujos del terreno (*el personaje se ve súper pequeño y
-> los espacios están dispersos, muy desordenados*); luego, una plaza con los portales en fila y un plano pequeño en la esquina
-> (*¿qué pasa si las puertas son demasiadas, muchas zonas en diferentes pisos?… una ruta tipo juego donde todo esté conectado,
-> por niveles*, con el mapa de Super Mario Run de ejemplo); luego, el plano con la plaza en el centro y caminos en estrella
-> (*mover al personaje entre los caminos es casi imposible, siempre agarra para alguno y no para el que le estoy indicando; esa
-> distribución en estrella es muy fea, poco práctica*). Quedó el plano en **cuadrícula de calles**.
+> Cómo se llegó aquí (2026-10-21 a 2026-10-23). Se probaron, en este orden: un mapa caminable con los dibujos del terreno;
+> una plaza con los portales en fila; un plano con caminos en estrella; un plano en cuadrícula de calles. Daniel: *no me gusta
+> como lo estamos planteando, me gustaba más como antes teníamos las puertas, era más sencillo de entender; solo nos faltaría
+> entender cómo manejar la complejidad de muchas puertas*. Se volvió a las puertas, organizadas en pasillos como el castillo de
+> un juego, y con arte de verdad: *la gráfica es muy de niño de 5 años* (ADR-0027).
 
-1. Llega al **plano**: las paradas en **filas y columnas unidas por calles rectas**, con su personaje de buen tamaño al lado de
-   la parada donde está. Cada grupo empieza fila, con su letrero de madera a la izquierda:
-   - **La copropiedad:** las zonas comunes y los elementos donde queda un espacio de trabajo, en el orden en que se lee el
-     terreno (de arriba abajo, de izquierda a derecha). Cada una con su dibujo de Estructura sobre una base de tierra.
-   - **Torres:** torres, manzanas y oficinas.
-   - **Equipo** y **Consejo y comisiones:** casitas (techo azul el equipo, café las juntas).
-   - Las columnas se ajustan al ancho (2 en el celular, hasta 6 en pantalla grande); si hay más filas de las que caben, el
-     plano se desplaza y sigue al personaje.
-2. **Se camina por las calles:** cada flecha lleva **al vecino que está justo en esa dirección**; si no hay calle, no se mueve.
-   Al llegar, una burbuja dice «⏎ Entrar a…» y **Enter** entra. Tocando una parada, camina por la ruta más corta y entra.
-3. **Las torres** son paradas con su camino, marcadas «pronto»: su nivel, piso por piso, es la parte 1b.
-4. **En cada lugar, un portal en el piso** («🗺️ Plano», como el tubo de Mario): al pisarlo o tocarlo vuelve al plano, a la parada
-   de ese lugar. Al llegar a un lugar, sale por ese portal.
-5. **Una zona común** es su escena (el salón con piso de madera, la piscina con su agua…) con un tablero **honesto** de lo que se
-   podrá hacer ahí, marcado «pronto».
-6. **Un espacio de trabajo** queda en un elemento del terreno: en su panel, «Dónde queda en la copropiedad». La garita queda sola
-   en la primera portería del terreno. Al entrar por ahí, ve a quién está de turno (CU-B-08).
+1. Llega a **la entrada**: un cuarto isométrico (piso de baldosas, dos paredes con puertas y ventanas) con **una puerta por
+   grupo** (RN-300): 🌳 Zonas comunes, 🧹 Equipo, 🏛️ Consejo y comisiones, 🏢 Torres. Si un grupo tiene un solo lugar, la
+   puerta lleva directo a él.
+2. Cada grupo es **un pasillo** con las puertas de sus lugares; nunca más de 6 por cuarto (si son más, el grupo se parte).
+3. **«↩ Volver»** está siempre en el mismo sitio (la pared izquierda, adelante) y lleva un nivel atrás; vuelve a salir frente a
+   la puerta del lugar de donde viene. El letrero dice dónde está: «Entrada › Zonas comunes › Salón social».
+4. Se camina con las flechas (↑ hacia el fondo, → a la derecha) o tocando el piso; los muebles no se atraviesan. Al acercarse,
+   la puerta se ilumina; al llegar, entra. Las torres dicen «por dentro llega pronto» (parte 1b).
+5. **Cada lugar es su cuarto**, con muebles que dicen qué es: la portería (mostrador, monitor de cámaras), la oficina, la bodega
+   (cajas, estantes), el jardín, la sala de juntas (mesa, televisor para las reuniones virtuales) y el salón social (sala,
+   mesa, barra con cafetera). El gimnasio, la piscina y el parque, mientras llega su arte, son un salón de espera con su tono.
+   Las personas están en sus puestos (los colaboradores con su turno, los miembros con su cargo).
+6. Una **zona común** muestra su tablero honesto («Aquí podrás… pronto»); la sala de juntas, su próxima reunión.
+7. Arriba, la **barra de lugares** salta directo.
 
-**Reglas de negocio:** las de CU-B-08 y RN-297 (tu personaje); el elemento del espacio se valida con RN-294.
+**Reglas de negocio:** RN-300 (las puertas y los pasillos); las de CU-B-08 y RN-297 (tu personaje); el elemento del espacio se valida con RN-294.
 
-**Lo que queda abierto:** el nivel 2 (las torres por dentro, y las etapas); el plano con la orientación y el plano real
-(CU-B-09); que el plano también lo tenga el negocio «espacio de trabajo» con su planta; qué hacer cuando hay muchísimas
-paradas en el nivel 1 (el plano se alarga; ¿se agrupan por etapa?).
+**Lo que queda abierto:** las torres por dentro con su ascensor (1b) y las etapas; decorar (1c, T-118); el arte del gimnasio,
+la piscina y el parque (otro paquete de Kenney); que el mundo también lo tenga el negocio «espacio de trabajo» con su planta.
 
-**Estado en BLOKY Dev:** 🟡 (2026-10-21) — parte 1 desplegada, ya como plano por niveles (`8f9ba95.bloky-b94f37c`). Probada en
-local con un terreno de ejemplo (dos torres, portería, salón, piscina, gimnasio, parque, parqueaderos) y tres espacios: flecha
-→ lleva al salón, Enter entra, el portal del piso devuelve a la parada del salón; ← dos veces llega a la Torre 2 y Enter avisa
-«pronto»; → ↓ ↓ entra al parque. En el celular cabe sin desbordarse. Código: `apps/bloky/src/features/equipo/mundo.tsx`
-(`paradasDelPlano`, `cuadricula`, `ruta`, `MapaDelMundo`, `PORTAL`, `ZONAS`). En cuadrícula desde `4547c87.bloky-bc11c4d`:
-→ → recorre la primera fila, ↓ sin calle no se mueve, ← ↓ ↓ llega a Administración y Enter entra; tocar el gimnasio desde
-Administración lo lleva por las calles y entra; en el celular, dos columnas y el plano se desplaza.
+**Estado en BLOKY Dev:** 🟡 (2026-10-23) — la entrada y los pasillos con el arte de Kenney, desplegados (`4a4b4f3.bloky-d510929`).
+Probado en local con un terreno de ejemplo, tres espacios y un consejo de prueba: Entrada → Zonas comunes → Salón social →
+«↩ Zonas comunes» (vuelve frente a su puerta) → «↩ Entrada» → Torres → Torre 1 avisa «pronto»; la bodega, la oficina y la sala
+de juntas con sus miembros; en el celular cabe sin desbordarse. Código: `apps/bloky/src/features/equipo/mundo.tsx`
+(`edificio`, `disenoDe`) y `sala-iso.tsx` (`SalaIso`, `acomodarPuertas`, `DISENOS`).
 
 ---
 
