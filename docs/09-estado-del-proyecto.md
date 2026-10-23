@@ -112,6 +112,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-23 · BLOKY · La QA en Estructura (2): confirmar lo leído en un documento se ve (CU-B-10)
+
+- La QA: al «Confirmar y poner en el terreno» *como que no pasa nada*; sí lo hacía, pero no se sabía. Causas: volvía al
+  terreno sin aviso, y si la copropiedad ya estaba ubicada las torres caían en sitios fijos de un terreno sin plano, lejos de
+  la vista; un error al confirmar salía arriba de la página, lejos del botón.
+- **Arreglo:** el terreno muestra «✅ Listo: se pusieron N estructuras y M unidades…, leídas de «archivo»» hasta que la persona
+  lo cierra, y la vista queda sobre lo nuevo; el middleware lleva lo armado al centro del plano si la copropiedad está ubicada
+  (`centrarElementos`); el error de confirmar sale junto al botón. Rama `bugfix/CU-B-10-confirmar-se-ve`. Pruebas del
+  middleware pasan; probado en local. Desplegado (`609e326.bloky-44007e8`). LangFlow igual.
+
 ### 2026-10-23 · BLOKY · La QA en Estructura (1): el mapa real con Leaflet (CU-B-09, ADR-0028)
 
 - Primer comentario de la QA: no se entiende cómo se ubica la copropiedad en el mapa, moverse es «súper sensible» y el
