@@ -112,6 +112,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-23 · BLOKY · Arreglo: decorar decía «Hay un mueble fuera del piso» (RN-301)
+
+- Daniel no podía guardar la decoración y no veía ningún mueble fuera, ni podía mover la barra para mirar debajo. **Causa:** varios
+  muebles de los diseños de BLOKY venían en posiciones como 3,9 o 1,2 baldosas, y el middleware solo aceptaba cuartos de
+  baldosa, con un mensaje que no lo decía.
+- **Arreglo:** los diseños quedaron en la cuadrícula; la app pone todo en ella al empezar a decorar y al guardar; el middleware
+  **redondea** la posición en vez de rechazarla y, si un mueble sí queda fuera, dice cuál; la barra de decorar tiene ⬆/⬇ para
+  pasarla arriba o abajo. Rama `bugfix/CU-B-16-decorar-posiciones`. Pruebas del middleware pasan; probado en local (el salón
+  social guarda con la mesa en 1,25). Desplegado (`859b27a.bloky-7baa6ee`). LangFlow igual.
+
 ### 2026-10-23 · BLOKY · Decorar los cuartos y la piscina (CU-B-16, RN-301, T-118)
 
 - Daniel: *me gusta mucho como quedó… ahora lo importante es permitir que los espacios se puedan personalizar, y la piscina no
