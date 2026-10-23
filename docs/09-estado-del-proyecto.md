@@ -112,6 +112,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-23 · BLOKY · Decorar los cuartos y la piscina (CU-B-16, RN-301, T-118)
+
+- Daniel: *me gusta mucho como quedó… ahora lo importante es permitir que los espacios se puedan personalizar, y la piscina no
+  está muy bien diseñada*.
+- **Decorar (RN-301):** «🛋️ Decorar» en cada cuarto. Los muebles se arrastran o se mueven con las flechas, se giran, se quitan y
+  se agregan de un catálogo de 54 muebles de Kenney en sus cuatro orientaciones; «Como venía» vuelve al diseño de BLOKY. Se
+  guarda por cuarto en el middleware: tabla `cuarto` con su historial, `GET/PUT /api/c/:id/cuartos[/:clave]`, la bitácora.
+  Decora quien entra por la copropiedad; quién decora qué, con los roles (CU-B-07).
+- **La piscina:** el kit no trae piscina, así que se dibuja en el cuarto: agua hundida con borde de piedra, las paredes de
+  adentro, la escalera y un reflejo que se mueve; ducha, bancas y plantas alrededor; no se camina por el agua.
+- Trabajado en una rama propia (`feature/CU-B-16-decorar`, en una copia aparte para no tocar la carpeta en `develop`).
+  Pruebas del middleware pasan; probado en local (decorar, girar, agregar del catálogo, guardar y recargar). Desplegado
+  (`3aabe9d.bloky-7b84adc`): la tabla `cuarto` quedó en las 4 copropiedades de BLOKY Dev. LangFlow igual.
+
 ### 2026-10-23 · BLOKY · Sesión de IA (Claude) con Daniel · El mundo con puertas, pasillos y el arte de Kenney (CU-B-16, ADR-0027)
 
 - Daniel no se quedó con el plano en cuadrícula: *me gustaba más como antes teníamos las puertas*; faltaba manejar muchas

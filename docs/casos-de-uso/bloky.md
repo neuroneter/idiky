@@ -659,7 +659,7 @@ y `apps/bloky-api/src/equipo/`.
 | Parte | Qué | Estado |
 |---|---|---|
 | 1 | **La entrada y los pasillos**, en cuartos isométricos con el arte de Kenney (ADR-0027): una puerta por grupo, un pasillo por grupo con las puertas de sus lugares, «Volver» siempre en el mismo sitio (RN-300) | 🟡 BLOKY Dev (2026-10-23) |
-| 1c | **Decorar** cada cuarto: mover, agregar o quitar muebles, quien tenga que ver con el lugar (T-118) | Pendiente |
+| 1c | **Decorar** cada cuarto: mover, girar, agregar o quitar muebles (T-118, RN-301) | 🟡 BLOKY Dev (2026-10-23); falta quién decora qué con los roles |
 | 1b | **Adentro de una torre**: su vestíbulo con la portería y un **ascensor**; en cada piso, las puertas de lo que hay (gimnasio, terraza, salón, sótanos) | Pendiente |
 | 2 | **Acciones en cada lugar**: reservar el salón o el BBQ (con CU-B-13), avisar una visita en la portería, horario y aforo del gimnasio o la piscina | Pendiente |
 | 3 | **Quién ve qué**: colaboradores, consejo y residentes (con CU-B-07 y ALICE) | Pendiente |
@@ -687,11 +687,16 @@ y `apps/bloky-api/src/equipo/`.
    Las personas están en sus puestos (los colaboradores con su turno, los miembros con su cargo).
 6. Una **zona común** muestra su tablero honesto («Aquí podrás… pronto»); la sala de juntas, su próxima reunión.
 7. Arriba, la **barra de lugares** salta directo.
+8. **Decorar** (RN-301): «🛋️ Decorar» abre la barra de decorar. Toca un mueble y arrástralo (o muévelo con las flechas), gíralo
+   (↻ o R), quítalo (🗑 o Supr), o agrega otro del catálogo (sala, oficina, comedor, plantas y exterior, tapetes, bodega).
+   «Como venía» vuelve al diseño de BLOKY; «Guardar» lo deja así para todos. Lo nuevo no cae en el agua de la piscina.
+9. **La piscina** tiene su agua hundida en el piso, con borde de piedra, las paredes de adentro, la escalera y el reflejo que se
+   mueve; alrededor, la ducha, bancas y plantas. No se camina por el agua.
 
-**Reglas de negocio:** RN-300 (las puertas y los pasillos); las de CU-B-08 y RN-297 (tu personaje); el elemento del espacio se valida con RN-294.
+**Reglas de negocio:** RN-300 (las puertas y los pasillos); RN-301 (decorar); las de CU-B-08 y RN-297 (tu personaje); el elemento del espacio se valida con RN-294.
 
 **Lo que queda abierto:** las torres por dentro con su ascensor (1b) y las etapas; decorar (1c, T-118); el arte del gimnasio,
-la piscina y el parque (otro paquete de Kenney); que el mundo también lo tenga el negocio «espacio de trabajo» con su planta.
+y el parque (otro paquete de Kenney; la piscina ya tiene la suya); que el mundo también lo tenga el negocio «espacio de trabajo» con su planta.
 
 **Estado en BLOKY Dev:** 🟡 (2026-10-23) — la entrada y los pasillos con el arte de Kenney, desplegados (`4a4b4f3.bloky-d510929`).
 Probado en local con un terreno de ejemplo, tres espacios y un consejo de prueba: Entrada → Zonas comunes → Salón social →
