@@ -123,6 +123,9 @@ coeficiente y un acta que resista revisión.
   pellizco), el lote que se dibuja arrastrando y se mueve, gira y estira entero, y el lote sugerido por el mapa de la ciudad.
   Rama `feature/CU-B-09-mapa-leaflet`. Probado en local (ubicar, dibujar, girar, mover; el plano se actualiza). Desplegado
   (`dab3eb4.bloky-81476d8`). LangFlow igual.
+- **Ajuste (Daniel):** el botón del mapa no se leía (texto blanco sobre fondo blanco) y no se notaba que el mapa existe.
+  Ahora el botón tiene su color y, en pantalla grande, **el mapa arranca abierto** al entrar a Estructura; se cierra con
+  «Cerrar el mapa» (en el celular arranca cerrado). Desplegado (`3c97a80.bloky-4f43c11`).
 - **Segunda entrega, pendiente:** el asistente «Ubicar la copropiedad» en tres pasos (dirección → lote → cada torre sobre el
   satélite), también al terminar «Armar desde documentos».
 
