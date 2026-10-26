@@ -113,6 +113,33 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-10-25 · ALICE · Sesión de IA (Cursor) con Justo · Preparar app para pases JWT de reuniones (T-106)
+
+**Qué pidió Justo:** bajar avances de Daniel sobre usuarios con token en video; si no hay, dejar
+ALICE lista para cuando exista el middleware.
+
+**Avances Daniel:** ninguno nuevo. Jitsi Dev sigue en `AUTH_TYPE=internal`; el middleware solo
+entrega enlace sin JWT (T-106 📋).
+
+**Hecho** (`App-Idiky`, `feature/T-106-preparar-reuniones-video`):
+`lib/servicios/reuniones_video/` (cliente middleware + simulado + `SalaJitsi`), contrato en
+`docs/reuniones-video.md`, tests en verde. Avisos Justo §3 y Daniel §7 actualizados con el
+`POST …/reuniones/:id/pase` que ALICE espera.
+
+**Sigue:** middleware firma el pase + Jitsi modo `jwt`; luego pantallas de abrir reunión en ALICE.
+
+### 2026-10-25 · SmartContrat · Sesión de IA (Cursor) con Justo · Implementar contratos de copropiedad (CU-B-17, ADR-0029, T-119)
+
+**Qué pidió Justo:** ejecutar el plan de `contracts/copropiedad/` (un contrato por edificio,
+roles, unidades, visitantes, votaciones, escrow).
+
+**Arnés:** ADR-0029; RN-302; CU-B-17 / T-119.
+**Contratos** (`SmartContrat-Idiky`, `feature/CU-B-17-copropiedad`): `contracts/copropiedad/`
+(factory, roles, unidades, pases, votaciones, escrow, IdikyContable). Tests verdes.
+**Amoy:** IdikyContable `0xF785…0433`, FactoryCopropiedad `0x6eed…CED6`,
+RegistroTiposVotacion `0x917B…96BA`, FactoryVotaciones `0xF11a…c220`
+(ver `docs/DESPLIEGUE-COPROPIEDAD-AMOY.md`).
+
 ### 2026-10-23 · SmartContrat · Sesión de IA (Cursor) con Justo · Plan: contrato por copropiedad y tokens
 
 **Qué pidió Justo:** documentar el esquema para que cada conjunto tenga su propio contrato y se

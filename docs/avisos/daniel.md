@@ -99,6 +99,12 @@ mientras esté abierto ([`avisos/justo.md`](./justo.md) §5).
 Los pases y el cierre de sala van en el **middleware**, no en BOB ([`avisos/justo.md`](./justo.md)
 §3). Justo no crea endpoints de JWT en BOB.
 
+**Qué dejó listo ALICE (2026-10-25)** para cuando exista el pase: contrato y cliente en
+`App-Idiky/docs/reuniones-video.md` — `POST /api/c/:id/reuniones/:reunionId/pase` responde
+`{ sala, servidor, token, rol, venceEn? }` y el teléfono abre con `jitsi_meet_flutter_sdk`
+(`serverURL` + `room` + `token`). Hoy Jitsi Dev sigue en cuentas Prosody; sin tu lado JWT la
+app no puede integrar de punta a punta.
+
 ---
 
 ## Ramas locales de Justo (sin subir / sin merge, estado al 2026-10-23)
@@ -108,6 +114,7 @@ Los pases y el cierre de sala van en el **middleware**, no en BOB ([`avisos/just
 | `SmartContrat-Idiky` | `feature/cuentas-quitar-login` | Renombre identidad + docs; quitar `contracts/login/` (trabajo local mezclado) |
 | `BOB-Idiky` | `feature/T-81-plugin-cuentas` | ABI nuevas + well-known local; el plugin en `develop`/`main` ya usa directorio |
 | `App-Idiky` | `feature/CU-R-01-alta-qr-passkey` | Alta QR + passkey contra bob-dev; JWT Strapi temporal |
+| `App-Idiky` | `feature/T-106-preparar-reuniones-video` | Cliente + contrato del pase JWT (T-106); sin pantalla aún |
 | `idiky` | `Justo_dev` | Bitácora y este aviso; puede ir por delante de `origin/Justo_dev` |
 
 Si algo de esta lista ya lo cerraste o desplegaste, actualiza la marca aquí y una línea en la

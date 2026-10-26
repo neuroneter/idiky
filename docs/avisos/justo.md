@@ -105,6 +105,13 @@ cierre a tiempo, prueba con dos personas), pero **cambia quién hace cada cosa**
 el servicio adicional, copiado en la contratación), y BLOKY ya programa y cancela reuniones dentro del cupo, cada una con
 su sala. **Falta lo tuyo (T-106):** Jitsi en modo `jwt`, que el middleware firme los pases y que la sala se cierre a tiempo.
 
+**2026-10-25 (Justo / ALICE):** no hay avances nuevos de Daniel en JWT (Jitsi sigue en `AUTH_TYPE=internal`; el
+middleware solo entrega el enlace sin token). En `App-Idiky` (`feature/T-106-preparar-reuniones-video`) quedó listo el
+cliente y el contrato que la app espera:
+`POST /api/c/:copropiedadId/reuniones/:reunionId/pase` → `{ sala, servidor, token, rol, venceEn? }` — ver
+`App-Idiky/docs/reuniones-video.md` y `lib/servicios/reuniones_video/`. Cuando el middleware lo implemente, ALICE solo
+engancha; no crear el endpoint en BOB.
+
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 
 ALICE **no tiene directorio propio**: entra por el middleware de IDIKY, el único que sabe dónde vive cada
