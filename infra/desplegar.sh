@@ -12,7 +12,7 @@
 # Servicios: pwa (8080), contable (8081), gestion (8082, BOB), bloky (8083), tunel (ADR-0014) y
 # jitsi (8085 y 10000/udp, ADR-0016). El codigo de gestion, bloky y jitsi vive en su propio
 # repositorio y se trae de su origin/main (ADR-0018). Los que no se nombran siguen como estaban. `todo` NO
-# incluye el tunel ni jitsi: los publica solo el responsable de integracion, nombrandolos.
+# incluye el tunel ni jitsi: los publican solo el responsable de integracion o Justo, nombrandolos.
 # La direccion del servidor no va en el repositorio a proposito.
 set -eu
 

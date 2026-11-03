@@ -62,7 +62,7 @@ despliega sin la clave.
 | **8086 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
 
 - **Para que se vea desde internet** hay que abrir el puerto en el **firewall de la instancia en
-  Lightsail** (hoy: TCP 22, TCP 8080-8085, UDP 10000). Lo hace el **responsable de integración**
+  Lightsail** (hoy: TCP 22, TCP 8080-8085, UDP 10000). Lo hace el **responsable de integración o Justo**
   en la consola de Lightsail. Sin ese paso el puerto no llega desde internet.
 - **Un servicio con audio o video en tiempo real necesita UDP**: es una regla nueva en ese
   firewall, igual que la del 10000 de Jitsi.

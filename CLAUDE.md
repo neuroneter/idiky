@@ -121,7 +121,7 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/m
 
 **Si te piden desplegar**, sigue [`infra/guia-de-despliegue.md`](./infra/guia-de-despliegue.md) al
 pie de la letra: **solo el servicio de quien lo pide** (`pwa` Mary, `contable` Jeimy, `bloky` y
-`gestion` el responsable de integración) y **solo desde `origin/main`** (BLOKY Dev, desde
+`gestion` el responsable de integración o Justo) y **solo desde `origin/main`** (BLOKY Dev, desde
 `origin/develop` de su repo: `IDIKY_REF_BLOKY=origin/develop`). El entorno vive desde el
 2026-11-01 en **AWS Lightsail** (ADR-0029): la dirección se pide al responsable de integración
 y no va en el repositorio. Lo que Mary y Jeimy despliegan hoy son
@@ -138,7 +138,7 @@ persona en su terminal**, nunca la IA ni con la clave escrita en el comando.
 **Si la tarea es crear o cambiar un servicio del entorno**, lee primero
 [`infra/README.md`](./infra/README.md) (cómo está armado, incluido lo que no está en git) y
 sigue [`infra/nuevo-servicio.md`](./infra/nuevo-servicio.md) (el contrato y la receta).
-Un puerto nuevo se abre en el firewall de Lightsail, y lo hace el responsable de integración.
+Un puerto nuevo se abre en el firewall de Lightsail, y lo hace el responsable de integración o Justo.
 
 ## 5. Git y quién trabaja dónde
 
@@ -183,7 +183,7 @@ Un puerto nuevo se abre en el firewall de Lightsail, y lo hace el responsable de
 - No tocar nada del servidor de desarrollo fuera del usuario `idiky`: los servicios corren sin
   root (ADR-0011). Nada de `sudo`, firewall ni paquetes del sistema sin el responsable de
   integración. El servidor ya no es el de Azure con LangFlow: es AWS Lightsail (ADR-0029).
-- No desplegar `gestion` (BOB) ni `todo` salvo que lo pida el responsable de integración, y
+- No desplegar `gestion` (BOB) ni `todo` salvo que lo pida el responsable de integración o Justo, y
   nunca desde algo que no esté en `main`: Strapi borra de la base las tablas y columnas que el
   código con el que arranca no tenga.
 - No meterle compilación, npm ni dependencias a `apps/contable/`: rompe la única condición

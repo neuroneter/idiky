@@ -238,7 +238,7 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/m
   probar otro commit: `IDIKY_REF_BLOKY=<commit> infra/desplegar.sh origin/main bloky`.
 - **`gestion` (BOB) solo desde commits que ya estén en el `origin/main` de `BOB-Idiky`.** Strapi borra de la base
   las tablas y columnas que el código con el que arranca no tenga. Forzarlo exige
-  `IDIKY_GESTION_FUERA_DE_MAIN=si`, y solo lo hace el responsable de integración. Además,
+  `IDIKY_GESTION_FUERA_DE_MAIN=si`, y solo lo hace el responsable de integración o Justo. Además,
   `levantar.sh` **respalda la base antes de recrear el pod**, y si el respaldo falla no sigue.
 - **Un despliegue a la vez.** Si hay otro en curso, el nuevo se detiene sin tocar nada.
 - **Cada despliegue queda registrado** en `~/despliegues/registro.tsv` (fecha, persona, rama,

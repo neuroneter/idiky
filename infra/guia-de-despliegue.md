@@ -10,10 +10,10 @@ demás ni el servidor que compartimos. Si vas a **crear** un servicio nuevo, la 
 |---|---|---|---|---|
 | `pwa` | **La maqueta de Mary**: la PWA (app del propietario y consola del administrador) | Mary | `origin/main` | 8080 |
 | `contable` | **La maqueta de Jeimy**: la aplicación contable | Jeimy | `origin/main` | 8081 |
-| `gestion` | **BOB**, el *back office* de IDIKY (Strapi + PostgreSQL) | **Solo el responsable de integración** | `origin/main` **de `BOB-Idiky`, y nada más** | 8082 |
-| `bloky` | **BLOKY Dev**: el sistema de las copropiedades, construido de cero (app + API + PostgreSQL) | **El responsable de integración** | **`origin/develop`** de `Bloky-Idiky` mientras se construye (`IDIKY_REF_BLOKY=origin/develop`; Daniel, 2026-10-03); `origin/main` para las entregas | 8083 |
-| `jitsi` | **Jitsi** para las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md)), en `https://jitsi-dev.idiky.com`. Desplegado el 2026-10-02; cuentas y uso: [`guia-de-jitsi.md`](./guia-de-jitsi.md) | **Solo el responsable de integración** | `origin/main` de `Jitsi-Streaming-Idiky` | 8085 y **10000/udp** |
-| `tunel` | **El túnel de Cloudflare** que publica BLOKY Dev en `https://bloky-dev.idiky.com` ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)) | **Solo el responsable de integración** | `origin/main` | ninguno hacia internet (`/ready` en 127.0.0.1:8084) |
+| `gestion` | **BOB**, el *back office* de IDIKY (Strapi + PostgreSQL) | **Solo el responsable de integración o Justo** | `origin/main` **de `BOB-Idiky`, y nada más** | 8082 |
+| `bloky` | **BLOKY Dev**: el sistema de las copropiedades, construido de cero (app + API + PostgreSQL) | **El responsable de integración o Justo** | **`origin/develop`** de `Bloky-Idiky` mientras se construye (`IDIKY_REF_BLOKY=origin/develop`; Daniel, 2026-10-03); `origin/main` para las entregas | 8083 |
+| `jitsi` | **Jitsi** para las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md)), en `https://jitsi-dev.idiky.com`. Desplegado el 2026-10-02; cuentas y uso: [`guia-de-jitsi.md`](./guia-de-jitsi.md) | **Solo el responsable de integración o Justo** | `origin/main` de `Jitsi-Streaming-Idiky` | 8085 y **10000/udp** |
+| `tunel` | **El túnel de Cloudflare** que publica BLOKY Dev en `https://bloky-dev.idiky.com` ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)) | **Solo el responsable de integración o Justo** | `origin/main` | ninguno hacia internet (`/ready` en 127.0.0.1:8084) |
 
 > **Las maquetas no son los espacios de desarrollo.** BLOKY (el sistema de las copropiedades)
 > ya tiene el suyo (`bloky`, 8083). ALICE (la app del propietario y residente) **todavía no**:
@@ -99,7 +99,7 @@ publicaste, y la app abre con la clave del entorno. Si tenías la app abierta, r
 
 ## 5. Lo que no se hace
 
-- **No se despliega `gestion` (BOB) ni `todo`**, salvo el responsable de integración.
+- **No se despliega `gestion` (BOB) ni `todo`**, salvo el responsable de integración o Justo.
 - **No se despliegan ramas sin integrar**: lo publicado es lo que está en `main`. La excepción es
   `bloky`: en Git Flow su integración es `develop`, y BLOKY Dev se despliega desde ahí; una
   `feature/` nunca se despliega sin pasar antes a `develop`.

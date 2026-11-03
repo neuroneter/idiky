@@ -14,6 +14,7 @@
 | 3 | **Justo se encarga principalmente de la APP**: ALICE, en `App-Idiky` |
 | 4 | **Daniel se encarga principalmente de BLOKY**: `Bloky-Idiky` (y, como responsable de integración, de BOB, Jitsi, la infraestructura y `main` de `idiky`) |
 | 5 | **Justo y Daniel gestionan sus repositorios con ramas propias, siguiendo Git Flow** (§3) |
+| 6 | **Daniel y Justo operan el entorno de desarrollo al mismo nivel** (Daniel, 2026-11-03): despliegan BOB, BLOKY, Jitsi y el túnel, administran el servidor de AWS y su firewall. Mary y Jeimy despliegan solo su maqueta (`pwa`, `contable`). Antes de desplegar, **se avisan entre ellos**: `desplegar.sh` deja uno a la vez, pero no sabe si el otro está probando algo |
 
 ## 2. Quién, dónde y qué
 

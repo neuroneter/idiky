@@ -78,7 +78,7 @@ navegador ══ audio y video por UDP, directo ══▶ <ip del servidor>:1000
 | Versión | `stable-11031`, igual en las cuatro imágenes | `IDIKY_JITSI_VERSION` en `levantar.sh` |
 | Memoria | proxy 64 MB · web 128 · prosody 192 · jicofo 384 (heap 256) · jvb 640 (heap 512) | `levantar.sh` y `comun.env` |
 
-**Desplegar** (solo el responsable de integración):
+**Desplegar** (solo el responsable de integración o Justo):
 
 ```bash
 IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main jitsi

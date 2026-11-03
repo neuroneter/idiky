@@ -112,6 +112,18 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-03 · Daniel · Infra · Justo opera el entorno al mismo nivel que el responsable de integración
+
+- **Decisión de Daniel:** Justo administra y despliega todo el entorno de desarrollo, igual que él (`docs/17` regla 6). Se avisan
+  antes de desplegar.
+- **Hecho en el servidor:** su llave en `~idiky/.ssh/authorized_keys` (acceso completo como `idiky`) y un usuario `justo` con sudo,
+  solo con esa llave (`infra/README.md` §9).
+- **Documentación:** `CLAUDE.md`, `docs/17`, las guías de `infra/` y los README de BOB-Idiky, Bloky-Idiky y Jitsi-Streaming-Idiky ya
+  dicen «el responsable de integración o Justo»; de paso se quitaron de esos repositorios los pasos de LangFlow, las reglas de Azure y
+  el estado viejo de Jitsi.
+- **Falta, de Daniel:** el usuario IAM de AWS para Justo (con MFA), Cloudflare, GitHub, su usuario de BOB y la clave del entorno por
+  canal privado.
+
 ### 2026-11-03 · Daniel · BOB · Traer la base de la nube a la máquina de quien desarrolla BOB (T-119)
 
 - **Pedido:** Justo desarrolla módulos de BOB en su máquina y quería apuntar su Strapi local a la base de la nube. **No se hace:**
