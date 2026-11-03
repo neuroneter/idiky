@@ -121,9 +121,10 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/m
 
 **Si te piden desplegar**, sigue [`infra/guia-de-despliegue.md`](./infra/guia-de-despliegue.md) al
 pie de la letra: **solo el servicio de quien lo pide** (`pwa` Mary, `contable` Jeimy, `bloky` y
-`gestion` el responsable de integración), **solo desde `origin/main`** (BLOKY Dev, desde
-`origin/develop` de su repo: `IDIKY_REF_BLOKY=origin/develop`), y
-`infra/servidor/verificar-vecino.sh` antes y después. Lo que Mary y Jeimy despliegan hoy son
+`gestion` el responsable de integración) y **solo desde `origin/main`** (BLOKY Dev, desde
+`origin/develop` de su repo: `IDIKY_REF_BLOKY=origin/develop`). El entorno vive desde el
+2026-11-01 en **AWS Lightsail** (ADR-0029): la dirección se pide al responsable de integración
+y no va en el repositorio. Lo que Mary y Jeimy despliegan hoy son
 **maquetas**; BLOKY Dev es el producto real y vive en el 8083. Para `bloky`, `gestion` y `jitsi`,
 `desplegar.sh` trae el `origin/main` de **su** repositorio (ADR-0018).
 
@@ -137,8 +138,7 @@ persona en su terminal**, nunca la IA ni con la clave escrita en el comando.
 **Si la tarea es crear o cambiar un servicio del entorno**, lee primero
 [`infra/README.md`](./infra/README.md) (cómo está armado, incluido lo que no está en git) y
 sigue [`infra/nuevo-servicio.md`](./infra/nuevo-servicio.md) (el contrato y la receta).
-Antes y después de tocar el servidor, `infra/servidor/verificar-vecino.sh` tiene que decir que
-LangFlow sigue igual.
+Un puerto nuevo se abre en el firewall de Lightsail, y lo hace el responsable de integración.
 
 ## 5. Git y quién trabaja dónde
 
@@ -180,9 +180,9 @@ LangFlow sigue igual.
 - No implementar autenticación real, pagos reales ni backend en la fase 1: ese alcance está
   en el roadmap (fases 2 y 4) y hacerlo antes rompe el propósito del demo.
 - No introducir librerías de UI ni de estado global sin ADR.
-- No tocar nada del servidor de desarrollo fuera del usuario `idiky`: lo comparte otro
-  servicio (LangFlow) cuyos consumidores dependen de sus puertos 80, 443, 8443 y 7860 y de
-  sus rutas. Nada de nginx, firewall ni `sudo` para Idiky sin discutirlo antes (ADR-0011).
+- No tocar nada del servidor de desarrollo fuera del usuario `idiky`: los servicios corren sin
+  root (ADR-0011). Nada de `sudo`, firewall ni paquetes del sistema sin el responsable de
+  integración. El servidor ya no es el de Azure con LangFlow: es AWS Lightsail (ADR-0029).
 - No desplegar `gestion` (BOB) ni `todo` salvo que lo pida el responsable de integración, y
   nunca desde algo que no esté en `main`: Strapi borra de la base las tablas y columnas que el
   código con el que arranca no tenga.

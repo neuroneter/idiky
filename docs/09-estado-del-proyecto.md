@@ -25,7 +25,7 @@ nueva o una sesión de IA distinta.
 | **Casos de uso** | 83 documentados: 48 ✅ en el demo, 1 ✅ en BLOKY Dev (CU-B-01: SMS, Google y Microsoft probados con cuentas reales el 2026-09-21), 10 🟡 a medias, 21 ⬜ pendientes (8 de BLOKY desde el 2026-10-03: CU-B-02…09, cuatro escritos y cuatro por escribir), 3 ⛔ retirados |
 | **Reglas de negocio** | 129 del demo (RN-01…RN-129; RN-07, RN-11, RN-41 y RN-55 retiradas) + 27 de BLOKY (RN-160…RN-186). RN-75 a RN-91 vienen de la contable; RN-92 a RN-129, de las asambleas, registros, proyectos, correspondencia, zonas y cartera de Mary |
 | **Compila** | Sí — `cd apps/pwa && npm run build` |
-| **Entorno de desarrollo** | Los dos productos publicados en contenedores, con Podman sin root, en un servidor compartido que no se puede afectar. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
+| **Entorno de desarrollo** | **Desde el 2026-11-01 en AWS Lightsail** (instancia propia `idiky-dev`, [ADR-0029](./adr/0029-entorno-de-desarrollo-en-aws-lightsail.md)); antes, en un servidor compartido de Azure. Los productos publicados en contenedores, con Podman sin root. Abiertos al equipo con clave, por HTTP ([ADR-0011](./adr/0011-entorno-de-desarrollo-en-contenedores.md), [`infra/`](../infra/README.md)) |
 | **Ortografía** | `cd apps/pwa && python3 herramientas/revisar-ortografia.py` — está en la definición de «terminado» |
 | **Despliegue** | Desde `origin/main`, un servicio por persona: `infra/desplegar.sh origin/main contable` ([`infra/guia-de-despliegue.md`](../infra/guia-de-despliegue.md)). Lo propio de la contable, en [`14`](./14-despliegue-de-la-contable.md) |
 
@@ -111,6 +111,51 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-11-03 · Daniel · Infra · La documentación pasa al servidor de AWS (ADR-0029)
+
+- **Hecho:** [ADR-0029](./adr/0029-entorno-de-desarrollo-en-aws-lightsail.md) registra la mudanza a AWS Lightsail. `CLAUDE.md`,
+  `infra/README.md`, la guía de despliegue, la de Jitsi y `nuevo-servicio.md` ya describen el servidor nuevo: sin LangFlow, sin
+  `verificar-vecino.sh` (queda como histórico), firewall de Lightsail, techo de 3,5 GB con swap, reinicio probado, y las dos
+  trampas nuevas (volcados cortados por `podman exec` e ingreso a BLOKY por la IP). Los nombres públicos no cambian; la IP se
+  pide al responsable de integración.
+- **Para el equipo:** traer `main` a su rama. Nadie cambia URLs de `bloky-dev`, `bob-dev` ni `jitsi-dev`; PWA y contable sí
+  cambian de IP. Quien despliegue necesita su llave autorizada en el servidor nuevo (`autorizar-llave.sh`).
+- **Qué sigue:** respaldo diario de BLOKY, corregir `respaldo.sh`, rotar credenciales y la prueba de video en Jitsi.
+
+### 2026-11-01 · Daniel · Infra · Inventario del servidor y plan de migración a AWS Lightsail
+
+- **Decisión de Daniel:** mudar el entorno de desarrollo del servidor de Azure, compartido con LangFlow, a AWS Lightsail
+  (`us-east-1`). Daniel eligió el plan de **4 GB y 24 USD al mes** sobre el de 8 GB por ahorro, con swap de 4 GB obligatorio.
+  Daniel aprobó el plan. Creada la instancia `idiky-dev` en Virginia (`us-east-1a`, Ubuntu 22.04), con IP estática `idiky-dev-ip` y
+  firewall TCP 22, TCP 8080-8085 y UDP 10000; el 80 quedó cerrado. Virginia fue la región más rápida desde Colombia (103 ms).
+- **Hecho:** inventario de solo lectura como `idiky`, sin detener ni cambiar nada: lo único escrito fue la foto
+  `vecino-base.txt`. LangFlow sigue igual en la foto de antes y después. Plan completo en
+  [`infra/migracion-a-aws.md`](../infra/migracion-a-aws.md), **sin ejecutar y pendiente de la aprobación de Daniel**.
+- **Lo que hay:** 3 pods y 3 contenedores sueltos arriba, todos sanos; `~/datos` pesa 137 MB (BOB 13 MB y 55 tablas; BLOKY
+  14 MB, 80 tablas, 7 esquemas); imágenes 4,2 GB; 98 GB de disco libres y 12 GB de memoria disponibles.
+- **Hallazgos que cambian el plan:** **BLOKY no tiene ningún respaldo**, solo BOB; BOB y BLOKY se hablan por la IP privada de
+  Azure, escrita en sus secretos, y `jitsi.env` lleva la pública; BLOKY está publicado desde `develop` (`44007e8`), distinto
+  de su `origin/main`; `authorized_keys` solo tiene una llave, y la `~/.ssh/idiky_despliegue` de la guía no existe en esta
+  máquina (se usó `id_rsa.pem`). El túnel no cambia de rutas: `10.0.2.2` vale igual en AWS, solo se muda el conector.
+- **Ensayo hecho en AWS, sin detener nada en Azure:** datos restaurados antes del primer arranque; conteo igual a Azure antes
+  y después de desplegar (BOB 55 tablas y 442 filas; BLOKY 80 y 1.987). BOB `4352d33`, BLOKY `44007e8` y Jitsi `8d1a8c7`, los
+  mismos commits de Azure. BOB ↔ middleware por la IP privada, respaldo de BOB y los cinco puertos desde fuera: bien. Strapi
+  compiló en 4 GB sin tocar el swap. **Primer reinicio real:** todo volvió solo, sin unidades fallidas. LangFlow sigue igual.
+- **Corte hecho el mismo día (21:55 UTC):** túnel apagado en Azure, copia final, conteo igual a Azure
+  (BOB 443 filas; BLOKY 1.987) y túnel en AWS. `bloky-dev`, `bob-dev` y `jitsi-dev` responden desde AWS. Daniel entró a BLOKY
+  por el nombre y el menú funciona; por la IP no se puede (cookie `Secure`, ya documentado).
+- **Limpieza de Azure, aprobada por Daniel:** antes se comprobó que las bases no cambiaron tras el volcado y se copiaron a AWS
+  los respaldos y el historial de despliegues (`registro-azure.tsv`). Salieron contenedores, pods, volúmenes, imágenes, unidades
+  e `~/.local/bin/idiky-gestion-*`. Daniel pidió después borrar todo lo de IDIKY: salieron `~/datos`, `~/despliegues`,
+  `~/.config/idiky` (con las 8 copias viejas de secretos), los restos de Podman y `/tmp`, y se apagó `linger`. Quedan solo el
+  usuario `idiky`, su `~/.ssh` y el techo del slice (exige sudo). LangFlow sigue igual, antes y después.
+- **Ojo con `podman exec` y salidas grandes (Podman 3.4.4):** dos veces el volcado de BLOKY salió cortado **sin error** (14 y 32
+  de 80 tablas) al sacarlo por la salida estándar. Con `pg_dump -f` dentro del contenedor y `podman cp` salió completo.
+  `respaldo.sh` de BOB usa el método frágil: sus últimos 3 respaldos están completos, pero hay que cambiarlo.
+- **Sin probar:** video en Jitsi con dos personas, Google/Microsoft, documento en R2 y login de BOB por el nombre.
+- **Qué sigue:** Daniel borra las reglas `Dev` y `Dev-Udp` del NSG; ADR del cambio, respaldo diario de BLOKY, corregir `respaldo.sh`
+  y actualizar `CLAUDE.md` y las guías de `infra/`. En AWS, instantáneas automáticas activas a la 1:00 (hora de Colombia).
 
 ### 2026-10-23 · BLOKY · La QA en Estructura (2): confirmar lo leído en un documento se ve (CU-B-10)
 

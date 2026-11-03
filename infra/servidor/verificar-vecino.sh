@@ -2,6 +2,9 @@
 # Comprueba que el otro servicio del servidor (LangFlow, detras de su propio nginx) sigue
 # igual despues de un cambio de Idiky. T-35 · ADR-0011.
 #
+# HISTORICO (ADR-0029): servia mientras Idiky compartio la VM de Azure con LangFlow, hasta el
+# 2026-11-01. En el servidor de Lightsail no hay vecino y no se usa.
+#
 # Corre EN EL SERVIDOR, como `idiky`, sin sudo. Desde tu maquina:
 #
 #   ssh idiky@<ip> 'sh -s -- --base' < infra/servidor/verificar-vecino.sh   # ANTES del cambio

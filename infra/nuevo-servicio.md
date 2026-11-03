@@ -23,11 +23,9 @@ secciones 2, 4 y 6 aplican igual.
       cómo se publica (§3 y §5).
 - [ ] **¿Guarda datos, tiene varias piezas o no es nginx?** Ya hay un ejemplo probado: el
       sistema de gestión (§5). Cópialo.
-- [ ] **¿Cabe?** Todo `idiky` comparte **2 núcleos y 5 GB**; construyendo Strapi llegó a 4,6 GB.
-      En `/` quedan unos 4,9 GB, compartidos con LangFlow, y `levantar.sh` no construye con
-      menos de 3 GB libres.
-- [ ] **Toma la foto de LangFlow** antes de tocar el servidor:
-      `ssh idiky@<ip> 'sh -s -- --base' < infra/servidor/verificar-vecino.sh`
+- [ ] **¿Cabe?** Todo `idiky` comparte **3,5 GB más 4 GB de swap** en una instancia de 4 GB
+      (ADR-0029); con todo arriba se usan unos 0,8 GB. `levantar.sh` no construye con menos de
+      3 GB libres de disco.
 
 ## 2. El contrato de un servicio
 
@@ -44,7 +42,7 @@ despliega sin la clave.
 | **`GET /revision.txt`** | El commit, **sin clave** | Así se sabe qué está publicado. Se escribe con `ARG REVISION` al final del `Containerfile` |
 | **Clave** | Si es nginx: `include /etc/nginx/idiky/*.conf;` en el `server`, y `auth_basic off;` en `/salud` y `/revision.txt` | Es lo que pide la clave del entorno (README §6) |
 | **Imágenes base** | Registro completo y versión fija: `docker.io/library/nginx:1.28-alpine`, nunca `nginx` ni `:latest` | Que la construcción no dependa del servidor ni cambie sola |
-| **Sin privilegios** | Nada de `--privileged`, ni `--network host`, ni puertos del servidor por debajo de 1024 | Podman corre sin root; y 80 y 443 son de LangFlow |
+| **Sin privilegios** | Nada de `--privileged`, ni `--network host`, ni puertos del servidor por debajo de 1024 | Podman corre sin root |
 | **Sin secretos en la imagen** | Ni en el `Containerfile` ni en el repositorio | Van en `~idiky/.config/idiky/` (§5) |
 | **Encabezado** | Cada archivo dice en un comentario qué servicio es, `T-35 · ADR-0011` y el ADR de su tecnología si trae una | Trazabilidad, como las pantallas con su CU |
 | **Comentarios** | Sin tildes en scripts y configuraciones; los `.md`, en español correcto | Convención del repositorio (`docs/08-convenciones.md`) |
@@ -53,26 +51,23 @@ despliega sin la clave.
 
 | Puerto | De quién |
 |---|---|
-| 22, 80, 443, 8443, 7860 | **De LangFlow y del servidor. Prohibidos.** |
+| 22 | SSH del servidor |
 | 8080 | `idiky-pwa` |
 | 8081 | `idiky-contable` |
 | 8082 | Pod `idiky-gestion` (sistema de gestión) |
 | 8083 | Pod `idiky-bloky` (BLOKY Dev: app + API + PostgreSQL) |
 | 8084 | `idiky-tunel`, solo `/ready` y solo en `127.0.0.1` (ADR-0014). El túnel no publica nada hacia internet |
 | 8085 | Pod `idiky-jitsi` (Jitsi, ADR-0016) |
-| **10000/udp** | El **video** de Jitsi. Es el único puerto UDP de Idiky, y **necesita una regla propia en Azure**: la regla `Dev` es solo TCP |
+| **10000/udp** | El **video** de Jitsi. Es el único puerto UDP de Idiky, con su propia regla en el firewall de Lightsail |
 | **8086 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
 
-- **Para que se vea desde internet** hay que agregar el puerto a la regla `Dev` del grupo de
-  seguridad de red en Azure (hoy dice `8080,8081,8082`). Eso lo hace el **responsable de
-  integración** en el portal, en *Intervalos de puertos de destino*: `8080,8081,8082,8083,8084`. Sin ese
-  paso el puerto no llega desde internet.
-- **Un servicio con audio o video en tiempo real necesita UDP**, y eso es una regla nueva en
-  Azure, no un puerto más en la existente. Antes de construir nada, asegúrate de que alguien
-  pueda crearla: el equipo **no administra la suscripción** (ADR-0014, ADR-0016).
-- **Aunque no esté en la regla, escucha en todas las interfaces** mientras
-  `IDIKY_HOST=0.0.0.0`, y la red virtual de Azure sí llega. Un servicio que no debe salir del
-  servidor necesita otro tratamiento (§5).
+- **Para que se vea desde internet** hay que abrir el puerto en el **firewall de la instancia en
+  Lightsail** (hoy: TCP 22, TCP 8080-8085, UDP 10000). Lo hace el **responsable de integración**
+  en la consola de Lightsail. Sin ese paso el puerto no llega desde internet.
+- **Un servicio con audio o video en tiempo real necesita UDP**: es una regla nueva en ese
+  firewall, igual que la del 10000 de Jitsi.
+- **Aunque no esté en el firewall, escucha en todas las interfaces** mientras
+  `IDIKY_HOST=0.0.0.0`. Un servicio que no debe salir del servidor necesita otro tratamiento (§5).
 
 ## 4. Receta: un servicio web nuevo
 
@@ -172,22 +167,19 @@ antes de recrearlo, y piensa desde qué ramas es seguro desplegarlo.
 2. **Opcional, en tu máquina:** `podman build -f infra/docs/Containerfile -t prueba .`
    (o `docker build`, que usa el mismo archivo).
 3. **Commit.** `desplegar.sh` publica lo que está en git.
-4. **Foto de LangFlow**, si no la tomaste en el §1:
-   `ssh idiky@<ip> 'sh -s -- --base' < infra/servidor/verificar-vecino.sh`
-5. **Desplegar solo el servicio nuevo:** `IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh HEAD docs`.
+4. **Desplegar solo el servicio nuevo:** `IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh HEAD docs`.
    Debe terminar con `idiky-docs responde en 0.0.0.0:8084 con la revision <commit>`.
-6. **Comprobar el servicio** desde el servidor (o desde fuera, si ya está en la regla de
-   Azure):
+5. **Comprobar el servicio** desde el servidor (o desde fuera, si ya está abierto en el
+   firewall de Lightsail):
 
    ```bash
    ssh idiky@<ip> 'curl -s -o /dev/null -w "%{http_code}\n" http://127.0.0.1:8084/'   # 401: pide clave
    ssh idiky@<ip> 'curl -s http://127.0.0.1:8084/revision.txt'                       # el commit
    ```
-7. **Comprobar LangFlow:** `ssh idiky@<ip> 'sh -s' < infra/servidor/verificar-vecino.sh` tiene
-   que decir **«sigue igual»**. Si no, se revierte primero y se investiga después.
-8. **Si debe verse desde internet**, pide al responsable que agregue el puerto a la regla `Dev`.
-   Para probar que ya pasa, antes incluso de que el servicio exista: un rechazo **al
-   instante** significa que Azure deja pasar; un **timeout**, que sigue bloqueado.
+6. **Comprobar que lo demás sigue:** `/revision.txt` y la salud de cada servicio.
+7. **Si debe verse desde internet**, pide al responsable que abra el puerto en el firewall de
+   Lightsail. Para probar que ya pasa, antes incluso de que el servicio exista: un rechazo **al
+   instante** significa que el firewall deja pasar; un **timeout**, que sigue bloqueado.
 
 ### 4.5 Documentar
 
@@ -228,12 +220,12 @@ antes de recrearlo, y piensa desde qué ramas es seguro desplegarlo.
 | Necesidad | Hoy | Camino sugerido *(sin probar)* |
 |---|---|---|
 | **Un servicio que no debe salir del servidor, sin pod** | `IDIKY_HOST` es uno solo para todos | Que `levantar()` reciba el host por servicio, o meterlo en un pod sin `--publish` (esto último ya funciona: PostgreSQL) |
-| **Respaldos fuera del servidor** | Quedan en el mismo disco: protegen de un error, no de perder la VM | Copiarlos a un almacenamiento de Azure u otro sitio |
-| **Un disco propio para los datos** | En el disco compartido, con el freno de 3 GB | Disco de datos de Azure montado para `idiky`, y `IDIKY_DATOS` apuntando ahí (ADR-0012) |
-| **HTTPS y dominio** | Pendiente (resto de T-35) | **No por el nginx de LangFlow**: 80 y 443 son suyos. Certificado por validación DNS, o una VM propia (ADR-0011) |
+| **Respaldos fuera del servidor** | Instantáneas diarias de Lightsail (7); los `pg_dump` siguen en el mismo disco, y BLOKY aún no tiene el suyo | Copiar los `pg_dump` fuera (p. ej. R2) y crear el de BLOKY |
+| **Un disco propio para los datos** | En el disco de la instancia, con el freno de 3 GB | Almacenamiento en bloque de Lightsail montado para `idiky`, y `IDIKY_DATOS` apuntando ahí (ADR-0012) |
+| **HTTPS y dominio** | BLOKY, BOB y Jitsi por el túnel de Cloudflare (ADR-0014); PWA y contable aún por IP | Una ruta más en el túnel por servicio |
 | **Compose** | Podman 3.4 no lo trae | No hace falta con pocos servicios. Si llega a hacer falta, ADR |
-| **Limitar la CPU de un contenedor** | Sin root no se puede | El techo es por usuario: 2 núcleos y 5 GB para todo `idiky`. Si no alcanza, se discute subirlo, **sin quitárselo a LangFlow** |
-| **Reinicio del servidor** | Probado reiniciar el pod, no la VM | En una ventana acordada, con `verificar-vecino.sh` antes y después |
+| **Limitar la CPU de un contenedor** | Sin root no se puede | El techo es por usuario: 3,5 GB para todo `idiky`. Si no alcanza, se pasa al plan de 8 GB (ADR-0029) |
+| **Reinicio del servidor** | Probado el 2026-11-01: todo vuelve solo | Avisar al equipo antes: son unos 2 minutos sin servicio |
 
 ## 7. Si algo sale mal
 
@@ -243,7 +235,7 @@ antes de recrearlo, y piensa desde qué ramas es seguro desplegarlo.
 | Faltan secretos | `levantar.sh` se detiene antes de tocar nada; se crean con el script de secretos del servicio |
 | No construye por disco | `levantar.sh` exige 3 GB libres. Revisar `df -h /` y `podman system df`; **nunca** borrar nada fuera de `/home/idiky` |
 | Falla la construcción | Lo publicado sigue en pie. El error sale en la salida de `desplegar.sh` |
-| `verificar-vecino.sh` dice que algo cambió | **Revertir primero**: `git revert` del commit y desplegar de nuevo, o detener el servicio nuevo (`systemctl --user disable --now container-idiky-<nombre>`). Investigar después |
-| Responde 200 sin clave | Falta el `include` o el servicio no es nginx: **quitarlo de la regla de Azure** hasta arreglarlo |
+| Un servicio que ya estaba deja de responder | **Revertir primero**: `git revert` del commit y desplegar de nuevo, o detener el servicio nuevo (`systemctl --user disable --now container-idiky-<nombre>`). Investigar después |
+| Responde 200 sin clave | Falta el `include` o el servicio no es nginx: **cerrarlo en el firewall de Lightsail** hasta arreglarlo |
 | Se acaba el disco | `podman system df` y `df -h /`. Nunca borrar nada fuera de `/home/idiky` |
 | Otras rarezas | La tabla «Trampas conocidas» del README |

@@ -70,15 +70,9 @@ Desde la raíz del repositorio:
 git fetch origin
 git log --oneline -3 origin/main
 
-# 2. Foto de LangFlow, el otro servicio del servidor (obligatoria)
-ssh -i "$IDIKY_LLAVE" "$IDIKY_SERVIDOR" 'sh -s -- --base' < infra/servidor/verificar-vecino.sh
-
-# 3. Publica SOLO tu servicio
+# 2. Publica SOLO tu servicio
 infra/desplegar.sh origin/main pwa          # Mary
 infra/desplegar.sh origin/main contable     # Jeimy
-
-# 4. LangFlow tiene que decir «sigue igual»
-ssh -i "$IDIKY_LLAVE" "$IDIKY_SERVIDOR" 'sh -s' < infra/servidor/verificar-vecino.sh
 ```
 
 **Qué hace `desplegar.sh`:** sube ese commit al servidor, construye solo tu servicio, lo levanta
@@ -102,7 +96,6 @@ publicaste, y la app abre con la clave del entorno. Si tenías la app abierta, r
 | *idiky-pwa no respondió …* | El servicio no arrancó | Mira los registros: `ssh -i "$IDIKY_LLAVE" "$IDIKY_SERVIDOR" 'podman logs --tail 50 idiky-pwa'` |
 | *Permission denied (publickey)* | Tu llave no está autorizada, o no es la que usas | Revisa `IDIKY_LLAVE`, o pide que la autoricen (§2) |
 | *This screen couldn't be loaded* (en BOB) | Tenías BOB abierto durante un despliegue | Recarga la página |
-| `verificar-vecino.sh` dice que algo cambió | Podría estar afectado LangFlow | **Avisa de inmediato al responsable de integración**, con la salida |
 
 ## 5. Lo que no se hace
 
@@ -110,8 +103,8 @@ publicaste, y la app abre con la clave del entorno. Si tenías la app abierta, r
 - **No se despliegan ramas sin integrar**: lo publicado es lo que está en `main`. La excepción es
   `bloky`: en Git Flow su integración es `develop`, y BLOKY Dev se despliega desde ahí; una
   `feature/` nunca se despliega sin pasar antes a `develop`.
-- **Nada fuera del usuario `idiky`**: sin `sudo`, sin tocar nginx, el firewall ni los puertos de
-  LangFlow (22, 80, 443, 8443, 7860), y nada fuera de `/home/idiky`.
+- **Nada fuera del usuario `idiky`**: sin `sudo`, sin tocar el firewall de Lightsail ni nada fuera
+  de `/home/idiky`.
 - **No se borra `~/datos`**: ahí está la base de BOB y sus respaldos.
 - **No se comparten** la llave privada ni la clave del entorno en chats, tickets ni commits.
 
@@ -120,11 +113,10 @@ publicaste, y la app abre con la clave del entorno. Si tenías la app abierta, r
 Con `IDIKY_SERVIDOR` e `IDIKY_LLAVE` ya definidos en tu terminal, basta con decirle:
 
 > Despliega mi maqueta al entorno de desarrollo: servicio `pwa`, desde `origin/main`, siguiendo
-> `infra/guia-de-despliegue.md`. Toma la foto de LangFlow antes y compárala después, y dime la
-> revisión que quedó publicada.
+> `infra/guia-de-despliegue.md`, y dime la revisión que quedó publicada.
 
-La IA tiene que seguir esta guía al pie de la letra: solo tu servicio, solo desde `main`, con
-la verificación de LangFlow antes y después. `CLAUDE.md` se lo recuerda.
+La IA tiene que seguir esta guía al pie de la letra: solo tu servicio y solo desde `main`.
+`CLAUDE.md` se lo recuerda.
 
 ## 7. Quién desplegó qué
 
