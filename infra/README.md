@@ -341,7 +341,9 @@ podman unshare du -sh ~/datos/gestion/postgres       # tamaño real de la base (
 ```
 
 **Dar acceso a otra persona para desplegar:** quien ya tenga acceso corre, en su máquina,
-`infra/servidor/autorizar-llave.sh <su-llave>.pub "Nombre"`, sin sudo. Solo se recibe la llave
+`infra/servidor/autorizar-llave.sh <su-llave>.pub "Nombre"`, sin sudo. **Para que solo pueda
+traer la base de BOB a su máquina** (T-119), lo mismo con `IDIKY_SOLO_VOLCADO_BOB=si` delante:
+esa llave no abre consola, no reenvía puertos y no ejecuta otra cosa. Solo se recibe la llave
 **pública**. Para quitar el acceso se borra su línea (termina en `idiky-<Nombre>`) de
 `/home/idiky/.ssh/authorized_keys`.
 Para **ver** la PWA y la contable basta la clave del §6; para gestión, un usuario de Strapi.
@@ -372,6 +374,7 @@ poner:
 | `~idiky/.config/systemd/user/*.service`, `*.timer` | Las unidades | `levantar.sh`. **No se editan a mano** |
 | `~idiky/.local/bin/idiky-gestion-respaldo` | Copia del script de respaldo | `levantar.sh` |
 | `~idiky/.local/bin/idiky-gestion-configuracion` | Copia del script de configuraciones globales de BOB | `levantar.sh` |
+| `~idiky/.local/bin/idiky-gestion-volcado-desarrollo` | Entrega el volcado de BOB a quien lo desarrolla en su máquina (T-119) | `levantar.sh` (instalado a mano el 2026-11-03, antes de que llegue a `main` de BOB) |
 | `~idiky/.config/idiky/bob-configuracion/` | Solicitudes del panel de BOB, `ultimo.txt` e `historial.log` (sin valores); montada en Strapi | `levantar.sh` |
 | `~idiky/.config/idiky/secretos/respaldos/` | Las últimas 20 copias de `gestion-strapi.env` antes de cada cambio | `idiky-gestion-configuracion` |
 | `~idiky/.config/idiky/jitsi-comun.env` | La configuración común de Jitsi, fuera de la carpeta del despliegue (la unidad de systemd guarda la ruta tal cual) | `levantar.sh` |
@@ -379,7 +382,7 @@ poner:
 | `~idiky/despliegues/` | Las últimas 3 copias del código desplegado y `registro.tsv`, con quién desplegó qué | `desplegar.sh` |
 | `~idiky/.idiky-despliegue.lock` | El candado: un despliegue a la vez | `desplegar.sh` (`flock`) |
 | `~idiky/datos/respaldos/gestion/gestion-predespliegue-*` | Los últimos 5 respaldos tomados antes de recrear BOB (aparte de los 7 diarios) | `levantar.sh` |
-| `~idiky/.ssh/authorized_keys` | Llaves de quienes despliegan | `preparar-servidor.sh` |
+| `~idiky/.ssh/authorized_keys` | Llaves de quienes despliegan, y llaves **restringidas** que solo descargan el volcado de BOB (`restrict,command=…`) | `preparar-servidor.sh` y `autorizar-llave.sh` (`IDIKY_SOLO_VOLCADO_BOB=si`) |
 | `/etc/systemd/system.control/user-1001.slice.d/` | El techo de CPU y memoria | `preparar-servidor.sh` |
 | `/swapfile` y `/etc/fstab` | Swap de 4 GB | `preparar-servidor.sh` con `IDIKY_SWAP_GB=4` |
 | Firewall de la instancia en Lightsail | TCP 22, TCP 8080-8085, UDP 10000 · el 80 cerrado | El responsable, en la consola de Lightsail |

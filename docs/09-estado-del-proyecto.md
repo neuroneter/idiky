@@ -112,6 +112,21 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-03 · Daniel · BOB · Traer la base de la nube a la máquina de quien desarrolla BOB (T-119)
+
+- **Pedido:** Justo desarrolla módulos de BOB en su máquina y quería apuntar su Strapi local a la base de la nube. **No se hace:**
+  en `npm run develop` Strapi borra tablas y columnas según el código de la rama, y lo haría sobre la base compartida.
+- **Hecho:** `BOB-Idiky/infra/gestion/traer-base-de-la-nube.sh` descarga el volcado de BOB, lo verifica y reemplaza la base del
+  contenedor local `gestion-postgres`; `volcado-desarrollo.sh` lo genera en el servidor (con `pg_dump -f` y `podman cp`, no por la
+  salida de `podman exec`). La llave de quien lo use se autoriza **restringida** a ese volcado: `autorizar-llave.sh` con
+  `IDIKY_SOLO_VOLCADO_BOB=si`. `levantar.sh` lo reinstala en cada despliegue de BOB. La IA de Justo lo encuentra en el
+  `CLAUDE.md` de BOB-Idiky.
+- **Probado el 2026-11-03:** descarga completa (55 tablas), restauración en un PostgreSQL de prueba que luego se borró (55 tablas y
+  los 4 usuarios del panel; reemplazó una tabla basura) y una llave restringida de prueba (no abre consola, no reenvía puertos y no
+  lee secretos; se quitó).
+- **Qué sigue:** que Justo envíe su llave pública `.pub` y autorizarla con `IDIKY_SOLO_VOLCADO_BOB=si`; integrar la rama a `main` de
+  BOB en la próxima entrega.
+
 ### 2026-11-03 · Daniel · Infra · La documentación pasa al servidor de AWS (ADR-0029)
 
 - **Hecho:** [ADR-0029](./adr/0029-entorno-de-desarrollo-en-aws-lightsail.md) registra la mudanza a AWS Lightsail. `CLAUDE.md`,
