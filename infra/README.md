@@ -385,6 +385,7 @@ poner:
 | `~idiky/.ssh/authorized_keys` | Llaves de quienes despliegan, y llaves **restringidas** que solo descargan el volcado de BOB (`restrict,command=…`) | `preparar-servidor.sh` y `autorizar-llave.sh` (`IDIKY_SOLO_VOLCADO_BOB=si`) |
 | `/etc/systemd/system.control/user-1001.slice.d/` | El techo de CPU y memoria | `preparar-servidor.sh` |
 | `/swapfile` y `/etc/fstab` | Swap de 4 GB | `preparar-servidor.sh` con `IDIKY_SWAP_GB=4` |
+| Usuario `justo` y `/etc/sudoers.d/90-justo` | Administración del servidor para Justo: solo con su llave, sin contraseña, sudo sin contraseña (2026-11-03). Su llave también está en `~idiky/.ssh/authorized_keys` | A mano, por el responsable de integración. Se quita con `deluser --remove-home justo` y borrando ese archivo |
 | Firewall de la instancia en Lightsail | TCP 22, TCP 8080-8085, UDP 10000 · el 80 cerrado | El responsable, en la consola de Lightsail |
 | IP estática `idiky-dev-ip` e instantáneas automáticas | Diarias a la 1:00 (hora de Colombia), se guardan 7 | El responsable, en la consola de Lightsail |
 | `~idiky/despliegues/registro-azure.tsv` | El historial de despliegues del servidor de Azure | Copiado en la mudanza |
