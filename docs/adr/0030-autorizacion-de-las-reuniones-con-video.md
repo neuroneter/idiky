@@ -74,6 +74,37 @@ siendo un nombre al azar que nadie escribe (RN-280), como segunda protección.
 - **Los poderes tienen plazo:** la Administración define en BLOKY hasta cuándo se pueden otorgar y
   revocar, y **nunca dentro de la ventana de la reunión**. Si no se revocó antes, queda.
 
+## Formato del pase (propuesta, por acordar con Justo)
+
+Para que Jitsi y el middleware encajen a la primera. Firmado con **RS256**; la cabecera lleva `kid`,
+y Jitsi busca la llave pública por ese `kid` (por ejemplo, un servidor de llaves ASAP). **Sin
+probar en `stable-11031`.**
+
+```json
+{
+  "iss": "idiky-middleware",
+  "aud": "jitsi",
+  "sub": "jitsi-dev.idiky.com",
+  "room": "idiky-<20 letras al azar>",
+  "nbf": 0, "exp": 0,
+  "context": {
+    "user": { "id": "<personaId del directorio>", "name": "<nombre>", "moderator": true },
+    "idiky": {
+      "copropiedad": "<id>",
+      "reunion": "<id>",
+      "rol": "anfitrion | suplente | secretario | participante | invitado",
+      "unidad": "<id o null>",
+      "vota": false
+    }
+  }
+}
+```
+
+- `moderator` es `true` solo para el anfitrión, el suplente que asumió y el secretario (RN-313, RN-314).
+- `exp` es corto (minutos): el pase se renueva mientras la reunión esté abierta (RN-312).
+- `vota` y `unidad` son informativos: **la votación no la decide Jitsi**, sino BLOKY y ALICE (RN-310).
+- Una conexión por persona (RN-307): Jitsi saca la conexión anterior del mismo `user.id`.
+
 ## Consecuencias
 
 - **El middleware** (`Bloky-Idiky/apps/bloky-api`) entrega los pases, envía las invitaciones y los

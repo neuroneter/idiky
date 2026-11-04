@@ -111,6 +111,12 @@ middleware quién entra y sale**. **Cambia una cosa de tu plan:** la sala **no s
 anfitrión o el secretario (solo hay avisos). En ALICE: «Entrar a la reunión», «Enviarme el enlace al correo» y la
 votación durante la reunión. Antes de construir, confirma qué de eso trae `stable-11031`.
 
+**Para acordar con Daniel antes de construir:** el **formato del pase** propuesto en
+[ADR-0030](../adr/0030-autorizacion-de-las-reuniones-con-video.md#formato-del-pase-propuesta-por-acordar-con-justo)
+(RS256 con `kid`, `moderator`, el rol y la reunión). Daniel empieza por el lado del middleware
+([plan de CU-B-15](../casos-de-uso/bloky.md#plan-de-construcción-2026-11-03)); tu parte en Jitsi es la que cierra la
+puerta, y ALICE va al final, cuando existan los correos (T-109) y las votaciones en BLOKY.
+
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 
 ALICE **no tiene directorio propio**: entra por el middleware de IDIKY, el único que sabe dónde vive cada

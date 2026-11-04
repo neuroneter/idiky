@@ -112,6 +112,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-03 · Daniel · Plan de T-106 y avisos para todo el equipo
+
+- **T-106 va por partes** ([plan en CU-B-15](./casos-de-uso/bloky.md#plan-de-construcción-2026-11-03)): no se puede hacer
+  completo porque faltan los correos (T-109), las unidades y propietarios (CU-B-06, CU-B-07), las asambleas en BLOKY y
+  la parte de Jitsi y ALICE de Justo. La primera entrega es el middleware y BLOKY: llaves, anfitrión, suplentes y
+  secretario, estados y el pase firmado. El **formato del pase** quedó propuesto en ADR-0030, por acordar con Justo.
+- **Avisos nuevos:** `docs/avisos/mary.md` (la mudanza a AWS y la confirmación de RN-309 y RN-316) y
+  `docs/avisos/jeimy.md` (la mudanza a AWS); el de Justo, con el formato del pase. `CLAUDE.md` 0b ahora muestra los
+  avisos a los tres.
+
 ### 2026-11-03 · Daniel · BLOKY · Quién entra a una reunión con video (CU-B-15, ADR-0030)
 
 - **Decidido con Daniel:** nadie entra sin pase firmado por el middleware; entran por derecho los propietarios o sus

@@ -787,6 +787,32 @@ sala se abre con una cuenta de Jitsi. Código: `apps/bloky/src/features/reunione
 
 **Reglas de negocio:** RN-302 a RN-316.
 
+### Plan de construcción (2026-11-03)
+
+T-106 **no se puede construir completo todavía**: depende de piezas que no existen. Se hace por
+partes, empezando por lo que sí se puede.
+
+| Pieza que falta | Para qué la necesita | Estado | Quién |
+|---|---|---|---|
+| Envío de correos | Invitaciones (RN-305) y «Enviarme el enlace al correo» (RN-311) | ❌ BLOKY no envía correos: es **T-109** | Daniel |
+| Propietarios por unidad y coeficientes | Quién vota por qué unidad (RN-304, RN-308) | ❌ **CU-B-06** y **CU-B-07** por escribir. Hoy el directorio sabe que alguien es propietario de la copropiedad, no de qué unidad | Daniel, con Mary |
+| Asambleas y votaciones en BLOKY | El secretario abre votaciones; se vota en ALICE (RN-310, RN-316) | ❌ Existen en la maqueta (`apps/pwa`), no en BLOKY. RN-309 y RN-316 **por confirmar con Mary** | Mary define, Daniel construye |
+| Jitsi en modo de pases | Que Jitsi rechace a quien no traiga pase | ⏳ Aviso 3 | Justo |
+| ALICE | «Entrar a la reunión», el enlace al correo y votar | ⏳ | Justo |
+
+**Primera entrega (middleware y BLOKY, Daniel):**
+
+1. Par de llaves: la privada en los secretos del middleware, la pública para Jitsi (RN-302).
+2. Al programar: anfitrión, suplentes y secretario opcional, entre personas del directorio (RN-313, RN-314); el título libre (RN-303).
+3. Estados *programada → abierta → cerrada*, con abrir, extender, terminar y asignar secretario solo por el anfitrión o el secretario (RN-312, RN-314).
+4. «Entrar a la reunión»: el middleware comprueba el derecho con lo que hoy existe (su rol en la reunión, invitado, o asignación de propietario en la copropiedad) y entrega el pase firmado con su rol (RN-302, RN-304). El formato, en [ADR-0030](../adr/0030-autorizacion-de-las-reuniones-con-video.md#formato-del-pase-propuesta-por-acordar-con-justo).
+5. Pantallas en BLOKY para todo lo anterior, pruebas del middleware y despliegue en BLOKY Dev.
+
+**Hasta que Justo pase Jitsi a modo de pases, Jitsi sigue aceptando el enlace**: la primera entrega
+deja listo el lado del middleware, pero no cierra la puerta. Después, en este orden: Jitsi (Justo) →
+T-109 (correos: invitaciones y enlace) → CU-B-06 y CU-B-07 (unidades y propietarios) → asambleas y
+votaciones en BLOKY (con Mary) → ALICE (Justo).
+
 ---
 
 ### CU-B-06 a CU-B-08 — por escribir
