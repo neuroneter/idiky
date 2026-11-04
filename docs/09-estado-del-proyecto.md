@@ -112,6 +112,18 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-03 · Daniel · BLOKY · Quién entra a una reunión con video (CU-B-15, ADR-0030)
+
+- **Decidido con Daniel:** nadie entra sin pase firmado por el middleware; entran por derecho los propietarios o sus
+  apoderados, el anfitrión, sus suplentes y el secretario, y los demás solo invitados por correo antes de empezar; una
+  conexión por persona y un votante por unidad (quien dio poder entra sin voto); se vota siempre en ALICE; la reunión
+  la abre el anfitrión y la cierran él o el secretario, no el horario; el secretario conduce votaciones, palabra,
+  cámara y micrófono. Escrito en [ADR-0030](./adr/0030-autorizacion-de-las-reuniones-con-video.md), RN-302 a RN-316 y
+  la segunda parte de CU-B-15. Nada construido todavía (T-106).
+- **Por confirmar con Mary:** el plazo de los poderes (RN-309) y cómo conduce el secretario las votaciones (RN-316),
+  porque tocan sus reglas de asamblea (RN-212 a RN-220).
+- **Para Justo:** actualización del aviso 3, con lo que toca en Jitsi y en ALICE.
+
 ### 2026-11-03 · Daniel · Infra · Justo opera el entorno al mismo nivel que el responsable de integración
 
 - **Decisión de Daniel:** Justo administra y despliega todo el entorno de desarrollo, igual que él (`docs/17` regla 6). Se avisan

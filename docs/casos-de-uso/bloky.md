@@ -751,6 +751,42 @@ la asistencia; y ligarla a las asambleas (RN-92, RN-94: hay decisiones que una r
 **Estado en BLOKY Dev:** 🟡 (2026-10-20) — desplegado (`dd5d598.bloky-c20ca05`, BOB `dd5d598.gestion-021a320`). Hoy la
 sala se abre con una cuenta de Jitsi. Código: `apps/bloky/src/features/reuniones/` y `apps/bloky-api/src/reuniones/`.
 
+### Segunda parte — entrar, conducir y cerrar (definida el 2026-11-03, ADR-0030, T-106)
+
+> Daniel (2026-11-03). Lo de arriba sigue valiendo para programar y cancelar; esto define **quién entra
+> y cómo se conduce**. Reemplaza lo de «Lo que queda abierto». Las reglas de votación (RN-309, RN-316)
+> están **por confirmar con Mary**.
+
+- **Actores:** el anfitrión y sus suplentes, el secretario, los propietarios o sus apoderados, y los
+  invitados.
+- **Precondición nueva:** al programar se definen **el anfitrión y sus suplentes** (RN-313), y si se
+  quiere el secretario (RN-314); las invitaciones se otorgan hasta antes de empezar (RN-305).
+
+**Flujo principal**
+1. **Invitar:** la Administración, la Junta o el anfitrión agregan invitados (nombre y correo); BLOKY
+   les envía el enlace personal por correo, automáticamente (RN-305).
+2. **Entrar:** cada persona pulsa «Entrar a la reunión» en ALICE o BLOKY; el middleware revisa su
+   derecho (RN-304) y le entrega el pase firmado (RN-302). Desde ALICE puede pedir **«Enviarme el
+   enlace al correo»** para entrar desde un computador (RN-311). Una conexión por persona (RN-307).
+3. **Abrir:** quien llega antes espera; la reunión se abre cuando entra el anfitrión (RN-312). Si se
+   desconecta, asume el siguiente suplente (RN-313).
+4. **Conducir:** el anfitrión asigna al secretario si no estaba (RN-314). El secretario admite a los
+   invitados de la sala de espera (RN-306), da la palabra y con ella la cámara y el micrófono, si no los
+   abrió para todos (RN-315).
+5. **Votar:** el secretario abre cada votación con su tiempo máximo (RN-316); se vota **en ALICE**
+   (RN-310), un solo votante por unidad (RN-308).
+6. **Cerrar:** al acercarse la hora prevista hay avisos; el anfitrión o el secretario la extienden o
+   la terminan (RN-312). Al cerrarse salen todos.
+
+**Flujos alternativos**
+- B1. Quien dio poder entra: ve y oye, no vota (RN-308).
+- B2. Revocar un poder dentro de la ventana de la reunión: no se puede (RN-309).
+- B3. La misma persona entra desde otro aparato: la conexión anterior sale (RN-307).
+- B4. Alguien sin derecho ni invitación pide el pase: no se le da (RN-304).
+- B5. Una votación se acaba sin quórum: el secretario la extiende, sin superar su tiempo fijado (RN-316).
+
+**Reglas de negocio:** RN-302 a RN-316.
+
 ---
 
 ### CU-B-06 a CU-B-08 — por escribir

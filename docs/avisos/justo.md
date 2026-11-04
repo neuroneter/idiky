@@ -103,6 +103,14 @@ cierre a tiempo, prueba con dos personas), pero **cambia quién hace cada cosa**
 el servicio adicional, copiado en la contratación), y BLOKY ya programa y cancela reuniones dentro del cupo, cada una con
 su sala. **Falta lo tuyo (T-106):** Jitsi en modo `jwt`, que el middleware firme los pases y que la sala se cierre a tiempo.
 
+**Actualización del 2026-11-03 ([ADR-0030](../adr/0030-autorizacion-de-las-reuniones-con-video.md), RN-302 a RN-316):**
+Daniel definió quién entra y cómo se conduce. Lo que te toca en Jitsi: **modo `jwt` con la llave pública** (el
+middleware firma con la privada), **sin entradas sin pase**, **el rol del pase manda** (anfitrión y secretario son
+moderadores), **la sala espera al anfitrión**, **cámara y micrófono por permiso** del secretario, y **avisar al
+middleware quién entra y sale**. **Cambia una cosa de tu plan:** la sala **no se cierra por horario**; la cierran el
+anfitrión o el secretario (solo hay avisos). En ALICE: «Entrar a la reunión», «Enviarme el enlace al correo» y la
+votación durante la reunión. Antes de construir, confirma qué de eso trae `stable-11031`.
+
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 
 ALICE **no tiene directorio propio**: entra por el middleware de IDIKY, el único que sabe dónde vive cada
