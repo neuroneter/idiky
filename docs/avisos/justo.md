@@ -117,6 +117,10 @@ votación durante la reunión. Antes de construir, confirma qué de eso trae `st
 ([plan de CU-B-15](../casos-de-uso/bloky.md#plan-de-construcción-2026-11-03)); tu parte en Jitsi es la que cierra la
 puerta, y ALICE va al final, cuando existan los correos (T-109) y las votaciones en BLOKY.
 
+**Hecho el 2026-11-03:** el middleware ya firma los pases con ese formato (RS256, `kid` `idiky-reuniones-1`) y sirve la
+llave pública en `https://bloky-dev.idiky.com/api/jitsi/llaves/<sha256 del kid>.pem`, que es como la pide el servidor de
+llaves ASAP de Jitsi. Puedes configurar Jitsi contra esa dirección. El pase sale de `POST /api/c/:id/reuniones/:rid/entrar`.
+
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 
 ALICE **no tiene directorio propio**: entra por el middleware de IDIKY, el único que sabe dónde vive cada

@@ -808,6 +808,15 @@ partes, empezando por lo que sí se puede.
 4. «Entrar a la reunión»: el middleware comprueba el derecho con lo que hoy existe (su rol en la reunión, invitado, o asignación de propietario en la copropiedad) y entrega el pase firmado con su rol (RN-302, RN-304). El formato, en [ADR-0030](../adr/0030-autorizacion-de-las-reuniones-con-video.md#formato-del-pase-propuesta-por-acordar-con-justo).
 5. Pantallas en BLOKY para todo lo anterior, pruebas del middleware y despliegue en BLOKY Dev.
 
+**Estado de la primera entrega (2026-11-03):** ✅ hecha en `Bloky-Idiky` (`develop`, rama
+`feature/T-106-pase-reuniones`) y desplegada en BLOKY Dev. El pase se pide en
+`POST /api/c/:id/reuniones/:rid/entrar` y la llave pública se sirve en
+`/api/jitsi/llaves/<sha256 de idiky-reuniones-1>.pem`. La llave privada la crea `infra/bloky/secretos.sh`. **Detalles
+fijados al construir, por confirmar con Daniel:** la Administración entra por derecho (RN-304); se entra desde 30
+minutos antes (RN-312); hasta 5 suplentes, y el suplente que abre o asume conduce (RN-313); se extiende de a 15
+minutos, hasta 4 horas cada vez (RN-312). Probado con pruebas del middleware (reglas y una firma real verificada con
+la llave pública); **la pantalla no se ha probado con una reunión real**.
+
 **Hasta que Justo pase Jitsi a modo de pases, Jitsi sigue aceptando el enlace**: la primera entrega
 deja listo el lado del middleware, pero no cierra la puerta. Después, en este orden: Jitsi (Justo) →
 T-109 (correos: invitaciones y enlace) → CU-B-06 y CU-B-07 (unidades y propietarios) → asambleas y

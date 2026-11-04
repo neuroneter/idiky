@@ -112,6 +112,18 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-03 · Daniel · BLOKY · Primera entrega de T-106: pase firmado y conducción de las reuniones (CU-B-15)
+
+- **Hecho en `Bloky-Idiky`** (rama `feature/T-106-pase-reuniones`, integrada a `develop` y desplegada en BLOKY Dev): reglas
+  RN-302 a RN-316 en el middleware; migración 014 (suplentes, secretario, estados *abierta* y *cerrada*, extensión); el pase
+  firmado con la llave privada del middleware (RS256) y la llave pública servida para Jitsi; rutas para entrar, abrir,
+  asumir, extender, terminar y asignar secretario; y en la pantalla, elegir anfitrión, suplentes y secretario, y los
+  botones de conducción. La llave la crea `infra/bloky/secretos.sh` (ya creada en el servidor, sin mostrarse).
+- **Probado:** pruebas del middleware (todo pasa, con una firma real verificada con la llave pública y rechazada con otra) y
+  compilación de las dos apps. **Sin probar:** la pantalla con una reunión real.
+- **Por confirmar con Daniel:** detalles fijados al construir (Administración entra por derecho, 30 minutos antes, hasta 5
+  suplentes, extensión de a 15 minutos). Jitsi todavía acepta el enlace sin pase: falta la parte de Justo.
+
 ### 2026-11-03 · Daniel · Plan de T-106 y avisos para todo el equipo
 
 - **T-106 va por partes** ([plan en CU-B-15](./casos-de-uso/bloky.md#plan-de-construcción-2026-11-03)): no se puede hacer
