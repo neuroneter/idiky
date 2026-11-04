@@ -5,6 +5,12 @@
 > el código del servicio, en el repo `Jitsi-Streaming-Idiky` (`infra/jitsi/`), y su registro en
 > el servidor, en [`servidor/levantar.sh`](./servidor/levantar.sh). Tarea: T-78.
 
+> **Desde el 2026-11-04, Jitsi está en modo de pases** (T-106, [ADR-0030](../docs/adr/0030-autorizacion-de-las-reuniones-con-video.md)):
+> **se entra solo con «Entrar» en BLOKY**, que da un enlace con un pase firmado por el middleware y dice
+> quién modera. **Las cuentas con contraseña y los invitados sin pase ya no sirven**; lo que sigue sobre
+> cuentas queda como historia. Si pide usuario y contraseña, se entró sin pase. Si dice «Authentication
+> failed», el pase venció (dura 10 minutos): se vuelve a pulsar «Entrar».
+
 ## 1. Entrar a una sala
 
 **`https://jitsi-dev.idiky.com/<nombre-de-la-sala>`**, por ejemplo

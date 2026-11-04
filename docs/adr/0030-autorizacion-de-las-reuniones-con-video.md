@@ -111,7 +111,9 @@ probar en `stable-11031`.**
   enlaces al correo (T-109), lleva el estado de la reunión, la asistencia y las votaciones.
 - **Jitsi** (`Jitsi-Streaming-Idiky`, Justo): modo de pases con la llave pública, sin invitados sin
   pase, el rol del pase manda, la sala espera al anfitrión, y avisa al middleware quién entra y sale.
-  **Sin probar en `stable-11031`:** cómo se hace cada una de esas cuatro cosas en esta versión.
+  **Probado en `stable-11031` el 2026-11-04** lo primero: `AUTH_TYPE=jwt` con `JWT_ASAP_KEYSERVER`, sin
+  invitados, `token_affiliation` y `JICOFO_ENABLE_AUTH=0` (con autenticación, jicofo hace moderador a todo
+  el que trae pase). Falta que la sala espere al anfitrión y avisar quién entra y sale.
 - **El cierre a tiempo de T-106 cambia**: no lo decide Jitsi por horario, lo decide una persona.
 - **La capacidad** sigue siendo el límite (instancia de 4 GB): la regla de cámaras de §3 es lo que
   permite una asamblea grande sin una instancia aparte.

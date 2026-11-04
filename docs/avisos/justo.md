@@ -84,7 +84,7 @@ los dos juegos de nombres.
 de usuarios de Strapi**, y BOB no tiene usuarios finales. Falta decidir cómo se identifica la app: lo
 natural, con ADR-0025, es que la app entre por el **middleware** con la sesión de la persona.
 
-## 3. Las reuniones con video son de BLOKY, no de BOB — ⏳ abierto (2026-10-20)
+## 3. Las reuniones con video son de BLOKY, no de BOB — 🟡 Jitsi ya en modo de pases; queda el resto (2026-11-04)
 
 Sobre tu propuesta de pasar Jitsi a pases (JWT): el plan técnico está bien (modo `jwt`, sala de espera,
 cierre a tiempo, prueba con dos personas), pero **cambia quién hace cada cosa**:
@@ -121,10 +121,14 @@ puerta, y ALICE va al final, cuando existan los correos (T-109) y las votaciones
 llave pública en `https://bloky-dev.idiky.com/api/jitsi/llaves/<sha256 del kid>.pem`, que es como la pide el servidor de
 llaves ASAP de Jitsi. Puedes configurar Jitsi contra esa dirección. El pase sale de `POST /api/c/:id/reuniones/:rid/entrar`.
 
-> **2026-11-04:** mientras Jitsi siga con cuentas internas, BLOKY manda el enlace **sin** pase
-> (`BLOKY_JITSI_ACEPTA_PASES=no`), porque con el pase Jitsi decía «Authentication failed». Cuando Jitsi quede en
-> modo de pases, avísale a Daniel (o hazlo tú): `BLOKY_JITSI_ACEPTA_PASES=si` en `~/.config/idiky/secretos/bloky-api.env`
-> y se vuelve a levantar `idiky-bloky`.
+**Hecho el 2026-11-04 (Daniel, para poder probar con un anfitrión y un suplente reales): Jitsi ya está en modo
+de pases** en `Jitsi-Streaming-Idiky` (`main` y `develop`, `infra/jitsi/comun.env`): `AUTH_TYPE=jwt` con la llave
+pública de arriba, sin invitados anónimos ni cuentas, `token_affiliation` para que modere solo quien el pase marca, y
+`JICOFO_ENABLE_AUTH=0` (con autenticación, jicofo hacía moderador a todo el que traía pase). Probado: pase de anfitrión
+→ moderador; de participante → participante; sin pase → no entra. En BLOKY, `BLOKY_JITSI_ACEPTA_PASES=si`.
+**Te queda de este aviso:** que la sala espere al anfitrión (hoy quien llega primero con pase entra a la sala vacía),
+cámara y micrófono por permiso del secretario, avisarle al middleware quién entra y sale, y ALICE. Revisa el cambio
+en tu repo antes de seguir: si algo no encaja con lo que tenías pensado, háblalo con Daniel.
 
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 

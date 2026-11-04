@@ -821,11 +821,12 @@ la llave pública); **la pantalla no se ha probado con una reunión real**.
 «Editar» en la lista (`POST /api/c/:id/reuniones/:rid/editar`). Salió al probar: una reunión puesta a otra hora
 por error no tenía arreglo. En BLOKY Dev (`9cb0cbe.bloky-dfc28d4`).
 
-**Hasta que Justo pase Jitsi a modo de pases, el enlace va sin pase** (`BLOKY_JITSI_ACEPTA_PASES=no`, 2026-11-04):
-un Jitsi con cuentas internas rechaza a quien llega con un pase que no sabe leer («Authentication failed»), y así
-le pasó al anfitrión y al suplente en la primera prueba. **Cuando Jitsi acepte pases, se pone en `si`** en los
-secretos de la API de BLOKY y se reinicia `idiky-bloky`; la llave pública ya se sirve. La primera entrega
-deja listo el lado del middleware, pero no cierra la puerta. Después, en este orden: Jitsi (Justo) →
+**Jitsi en modo de pases (2026-11-04):** en la primera prueba, Jitsi aún tenía cuentas internas y no reconocía al
+anfitrión ni al suplente. Se pasó a `AUTH_TYPE=jwt` con la llave pública del middleware (`Jitsi-Streaming-Idiky`,
+`infra/jitsi/comun.env`) y BLOKY manda el pase (`BLOKY_JITSI_ACEPTA_PASES=si`; con `no`, el enlace va sin pase).
+**La puerta ya está cerrada:** probado con pases reales, el anfitrión entra como moderador, el participante como
+participante y sin pase no se entra. **Falta en Jitsi:** que la sala espere al anfitrión, cámara y micrófono por
+permiso y avisar quién entra y sale (Justo). Después, en este orden: lo que falta de Jitsi (Justo) →
 T-109 (correos: invitaciones y enlace) → CU-B-06 y CU-B-07 (unidades y propietarios) → asambleas y
 votaciones en BLOKY (con Mary) → ALICE (Justo).
 

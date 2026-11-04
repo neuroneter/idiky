@@ -112,6 +112,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-04 · Daniel · Jitsi · Jitsi en modo de pases: entra solo quien trae el pase de BLOKY (T-106, RN-302)
+
+- **Por qué:** en la prueba, Jitsi (con cuentas internas) pedía «Log-in» al anfitrión y al suplente: no sabía lo
+  que BLOKY decía de ellos. Daniel pidió pasarlo de una vez (era la parte de Justo, aviso 3).
+- **Qué:** `Jitsi-Streaming-Idiky` `infra/jitsi/comun.env` → `AUTH_TYPE=jwt`, llave pública por ASAP desde el
+  middleware, `ENABLE_GUESTS=0`, `token_affiliation`, `ENABLE_AUTO_OWNER=false` y `JICOFO_ENABLE_AUTH=0`. En
+  `main` y `develop`, desplegado (`jitsi-9a5eac9`). En BLOKY, `BLOKY_JITSI_ACEPTA_PASES=si` (copia previa del
+  archivo de secretos: `.antes-pases`).
+- **Probado con pases reales firmados por el middleware:** anfitrión → moderador; participante → participante;
+  sin pase → pide usuario y no entra. La primera versión hacía moderador al participante (jicofo con
+  autenticación); se corrigió y se volvió a probar.
+- **Qué sigue:** Daniel y Justo entran a su reunión de «Pruebas IDIKY» desde BLOKY. Falta (Justo): la sala espera
+  al anfitrión, cámara y micrófono por permiso, avisar quién entra y sale; aviso 3 actualizado.
+
 ### 2026-11-04 · Daniel · BLOKY · Primera prueba real de reuniones: el pase sin Jitsi listo no deja entrar (CU-B-15)
 
 - **Qué pasó:** Daniel creó el cliente «Pruebas IDIKY» en BOB, pero no se había aprovisionado en BLOKY («IDIKY
