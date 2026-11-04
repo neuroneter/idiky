@@ -785,7 +785,7 @@ sala se abre con una cuenta de Jitsi. Código: `apps/bloky/src/features/reunione
 - B4. Alguien sin derecho ni invitación pide el pase: no se le da (RN-304).
 - B5. Una votación se acaba sin quórum: el secretario la extiende, sin superar su tiempo fijado (RN-316).
 
-**Reglas de negocio:** RN-302 a RN-316.
+**Reglas de negocio:** RN-302 a RN-317.
 
 ### Plan de construcción (2026-11-03)
 
@@ -816,6 +816,10 @@ fijados al construir, por confirmar con Daniel:** la Administración entra por d
 minutos antes (RN-312); hasta 5 suplentes, y el suplente que abre o asume conduce (RN-313); se extiende de a 15
 minutos, hasta 4 horas cada vez (RN-312). Probado con pruebas del middleware (reglas y una firma real verificada con
 la llave pública); **la pantalla no se ha probado con una reunión real**.
+
+**Editar una reunión (2026-11-04, RN-317):** mientras siga programada se corrige todo menos la sala, con
+«Editar» en la lista (`POST /api/c/:id/reuniones/:rid/editar`). Salió al probar: una reunión puesta a otra hora
+por error no tenía arreglo. En BLOKY Dev (`9cb0cbe.bloky-dfc28d4`).
 
 **Hasta que Justo pase Jitsi a modo de pases, Jitsi sigue aceptando el enlace**: la primera entrega
 deja listo el lado del middleware, pero no cierra la puerta. Después, en este orden: Jitsi (Justo) →

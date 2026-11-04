@@ -112,6 +112,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-04 · Daniel · BLOKY · Editar una reunión programada (CU-B-15, RN-317)
+
+- **Por qué:** al probar la primera entrega de T-106, una reunión quedó a otra hora por error y no se podía corregir.
+- **Qué:** botón «Editar» en Reuniones y `POST /api/c/:id/reuniones/:rid/editar`. Se corrige todo menos la sala
+  mientras la reunión siga programada (aunque haya pasado la hora); si cambia de mes, pide cupo en ese mes. Queda en
+  la bitácora con lo de antes y lo de después.
+- **Dónde:** `Bloky-Idiky`, rama `feature/RN-317-editar-reuniones`, integrada en `develop` y desplegada en BLOKY Dev
+  (`9cb0cbe.bloky-dfc28d4`). Pruebas del middleware y compilación de las dos apps, bien; **la pantalla la prueba Daniel**.
+
 ### 2026-11-03 · Daniel · BLOKY · Primera entrega de T-106: pase firmado y conducción de las reuniones (CU-B-15)
 
 - **Hecho en `Bloky-Idiky`** (rama `feature/T-106-pase-reuniones`, integrada a `develop` y desplegada en BLOKY Dev): reglas
