@@ -821,7 +821,10 @@ la llave pública); **la pantalla no se ha probado con una reunión real**.
 «Editar» en la lista (`POST /api/c/:id/reuniones/:rid/editar`). Salió al probar: una reunión puesta a otra hora
 por error no tenía arreglo. En BLOKY Dev (`9cb0cbe.bloky-dfc28d4`).
 
-**Hasta que Justo pase Jitsi a modo de pases, Jitsi sigue aceptando el enlace**: la primera entrega
+**Hasta que Justo pase Jitsi a modo de pases, el enlace va sin pase** (`BLOKY_JITSI_ACEPTA_PASES=no`, 2026-11-04):
+un Jitsi con cuentas internas rechaza a quien llega con un pase que no sabe leer («Authentication failed»), y así
+le pasó al anfitrión y al suplente en la primera prueba. **Cuando Jitsi acepte pases, se pone en `si`** en los
+secretos de la API de BLOKY y se reinicia `idiky-bloky`; la llave pública ya se sirve. La primera entrega
 deja listo el lado del middleware, pero no cierra la puerta. Después, en este orden: Jitsi (Justo) →
 T-109 (correos: invitaciones y enlace) → CU-B-06 y CU-B-07 (unidades y propietarios) → asambleas y
 votaciones en BLOKY (con Mary) → ALICE (Justo).

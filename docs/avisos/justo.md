@@ -121,6 +121,11 @@ puerta, y ALICE va al final, cuando existan los correos (T-109) y las votaciones
 llave pública en `https://bloky-dev.idiky.com/api/jitsi/llaves/<sha256 del kid>.pem`, que es como la pide el servidor de
 llaves ASAP de Jitsi. Puedes configurar Jitsi contra esa dirección. El pase sale de `POST /api/c/:id/reuniones/:rid/entrar`.
 
+> **2026-11-04:** mientras Jitsi siga con cuentas internas, BLOKY manda el enlace **sin** pase
+> (`BLOKY_JITSI_ACEPTA_PASES=no`), porque con el pase Jitsi decía «Authentication failed». Cuando Jitsi quede en
+> modo de pases, avísale a Daniel (o hazlo tú): `BLOKY_JITSI_ACEPTA_PASES=si` en `~/.config/idiky/secretos/bloky-api.env`
+> y se vuelve a levantar `idiky-bloky`.
+
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 
 ALICE **no tiene directorio propio**: entra por el middleware de IDIKY, el único que sabe dónde vive cada

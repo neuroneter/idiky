@@ -112,6 +112,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-04 · Daniel · BLOKY · Primera prueba real de reuniones: el pase sin Jitsi listo no deja entrar (CU-B-15)
+
+- **Qué pasó:** Daniel creó el cliente «Pruebas IDIKY» en BOB, pero no se había aprovisionado en BLOKY («IDIKY
+  todavía está preparando…»); se aprovisionó (es el botón «Aprovisionar en BLOKY» de BOB). Luego, con una reunión
+  de Daniel (anfitrión) y Justo (suplente), Jitsi dijo «Authentication failed» a los dos: sigue con cuentas
+  internas y rechaza un pase que no sabe leer.
+- **Arreglo:** `BLOKY_JITSI_ACEPTA_PASES` (por defecto `no`): el enlace va sin pase hasta que Jitsi esté en modo de
+  pases (aviso 3 de Justo). En BLOKY Dev, `f08bb3d.bloky-4b3f4a7`.
+- **Qué sigue:** volver a entrar; mientras tanto, la sala la abre quien tenga cuenta en Jitsi (guía de Jitsi).
+
 ### 2026-11-04 · Daniel · BLOKY · Editar una reunión programada (CU-B-15, RN-317)
 
 - **Por qué:** al probar la primera entrega de T-106, una reunión quedó a otra hora por error y no se podía corregir.
