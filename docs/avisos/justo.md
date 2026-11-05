@@ -126,6 +126,10 @@ de pases** en `Jitsi-Streaming-Idiky` (`main` y `develop`, `infra/jitsi/comun.en
 pública de arriba, sin invitados anónimos ni cuentas, `token_affiliation` para que modere solo quien el pase marca, y
 `JICOFO_ENABLE_AUTH=0` (con autenticación, jicofo hacía moderador a todo el que traía pase). Probado: pase de anfitrión
 → moderador; de participante → participante; sin pase → no entra. En BLOKY, `BLOKY_JITSI_ACEPTA_PASES=si`.
+**Para ALICE (2026-11-05):** todo lo de Jitsi y el pase, y lo que cambia en tu rama
+`feature/T-106-preparar-reuniones-video` (el camino es `/entrar`, la respuesta trae `enlace` y los roles son cuatro),
+está en [**`docs/18-reuniones-con-video.md`**](../18-reuniones-con-video.md). Lee el §5 antes de empezar.
+
 **Te queda de este aviso:** que la sala espere al anfitrión (hoy quien llega primero con pase entra a la sala vacía),
 cámara y micrófono por permiso del secretario, avisarle al middleware quién entra y sale, y ALICE. Revisa el cambio
 en tu repo antes de seguir: si algo no encaja con lo que tenías pensado, háblalo con Daniel.

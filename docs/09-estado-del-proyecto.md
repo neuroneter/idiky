@@ -112,6 +112,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-04 · Daniel · Docs · Guía de las reuniones con video para conectar ALICE (T-106)
+
+- **Qué:** [`docs/18-reuniones-con-video.md`](./18-reuniones-con-video.md) reúne lo hecho con Jitsi y el pase:
+  cómo funciona, el contrato real de `/entrar`, la configuración de Jitsi y su trampa (`JICOFO_ENABLE_AUTH=0`),
+  cómo firmar un pase de prueba en el servidor, y qué ajustar en la rama de ALICE de Justo (camino, respuesta y
+  roles distintos a los que propuso). Enlazada desde el índice de `docs/` y el aviso 3 de Justo.
+- **Qué sigue:** Justo conecta ALICE el 2026-11-05. Queda abierto cómo entran los propietarios desde ALICE
+  (T-87, aviso 4) y que su celular esté verificado en Twilio (la cuenta está en prueba).
+
 ### 2026-11-04 · Daniel · Jitsi · Jitsi en modo de pases: entra solo quien trae el pase de BLOKY (T-106, RN-302)
 
 - **Por qué:** en la prueba, Jitsi (con cuentas internas) pedía «Log-in» al anfitrión y al suplente: no sabía lo
