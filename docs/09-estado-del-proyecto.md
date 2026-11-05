@@ -129,7 +129,9 @@ coeficiente y un acta que resista revisión.
 - `Bloky-Idiky` `develop` `30d0e99`. Pruebas del middleware pasan; BLOKY compila; probado en local con la API simulada
   (copiar invitación, página del invitado, enlace inválido). Se numeró primero RN-328 y RN-329, pero RN-328 ya era del
   CSV de residentes (otra sesión del mismo día): se renumeró a RN-329 y RN-330 (`3558103`).
-- **Sigue:** desplegar `bloky` desde `develop` y probar con un invitado real; con T-109, enviar este mismo enlace por correo.
+- **Desplegado** en BLOKY Dev (`f532f00.bloky-30d0e99`): la migración 017 corrió en las cinco copropiedades y los 3 invitados
+  que ya existían tienen enlace; la invitación de uno real responde (su reunión ya estaba cerrada: «Esta reunión ya terminó»).
+- **Sigue:** que Daniel pruebe con un invitado de verdad en una reunión nueva; con T-109, enviar este mismo enlace por correo.
 
 ### 2026-11-05 · BLOKY · El primer residente de cada unidad desde un CSV (RN-328)
 
