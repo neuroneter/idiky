@@ -42,7 +42,12 @@ siendo un nombre al azar que nadie escribe (RN-280), como segunda protección.
   para que el propietario que dio poder pueda entrar sin quitarle la pantalla a su apoderado.
 - **Las invitaciones** las otorgan la Administración, la Junta o el anfitrión, desde que se crea la
   reunión hasta antes de que empiece; **solo por correo**, enviadas automáticamente por BLOKY, con un
-  enlace personal. Durante la reunión no se agregan. Los invitados esperan en la **sala de espera**
+  enlace personal. Durante la reunión no se agregan.
+  **2026-11-05 (T-130):** el enlace personal existe desde ya, sin esperar el correo: es
+  `<BLOKY>/invitacion/<copropiedad>/<código>`, con un código al azar que es la única llave (el
+  invitado no tiene usuario, ni contraseña, ni sesión). Al abrirlo, y a la hora, el middleware le firma
+  un pase de invitado con su nombre (RN-329). Mientras no hay correo, quien conduce copia la invitación
+  en BLOKY y la envía a mano; solo la Administración y quien conduce ven los enlaces (RN-330). Los invitados esperan en la **sala de espera**
   hasta que el anfitrión o el secretario los admiten.
 - **Desde ALICE** la persona entra con su sesión. Si prefiere el computador, pide **«Enviarme el
   enlace al correo»**: llega al correo que tiene en el directorio (no a uno que escriba), es de un

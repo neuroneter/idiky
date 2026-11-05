@@ -113,6 +113,24 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-05 · BLOKY · El enlace personal de cada invitado a una reunión (T-130, RN-329, RN-330)
+
+- Daniel: los invitados a una reunión no podían entrar; Jitsi les pedía usuario y contraseña. Causa: desde el 2026-11-04
+  Jitsi solo acepta pases firmados (ADR-0030) y el middleware solo se los daba a quien tiene sesión en BLOKY; los
+  invitados externos no la tienen. Las cuentas con contraseña de Jitsi ya no existen.
+- Ahora cada invitado recibe al guardar la reunión un **código al azar y su enlace**, `/invitacion/<copropiedad>/<código>`
+  (página pública de BLOKY). A la hora, «Entrar a la reunión» le da un pase de invitado con su nombre, sin moderar ni
+  votar. En la lista de reuniones: **«Copiar invitación»** por invitado y **«Copiar todas las invitaciones»** (un mensaje
+  con tema, fecha y enlace para pegar en WhatsApp o correo). Al editar se conservan los enlaces; quitar a alguien
+  invalida el suyo. Solo la Administración y quien conduce ven los enlaces. La migración 017 da código a los invitados
+  de las reuniones que ya existían.
+- Rutas sin sesión: `GET /api/invitacion/:id/:código` y `POST …/entrar` (POST, para que la vista previa de WhatsApp no
+  firme pases). Las entradas quedan en la bitácora como `pase_invitado`.
+- `Bloky-Idiky` `develop` `30d0e99`. Pruebas del middleware pasan; BLOKY compila; probado en local con la API simulada
+  (copiar invitación, página del invitado, enlace inválido). Se numeró primero RN-328 y RN-329, pero RN-328 ya era del
+  CSV de residentes (otra sesión del mismo día): se renumeró a RN-329 y RN-330 (`3558103`).
+- **Sigue:** desplegar `bloky` desde `develop` y probar con un invitado real; con T-109, enviar este mismo enlace por correo.
+
 ### 2026-11-05 · BLOKY · El primer residente de cada unidad desde un CSV (RN-328)
 
 - Daniel: descargar un CSV con todas las unidades, llenar el celular de cada una y volver a cargarlo, para asignar el primer

@@ -10,6 +10,10 @@
 > quién modera. **Las cuentas con contraseña y los invitados sin pase ya no sirven**; lo que sigue sobre
 > cuentas queda como historia. Si pide usuario y contraseña, se entró sin pase. Si dice «Authentication
 > failed», el pase venció (dura 10 minutos): se vuelve a pulsar «Entrar».
+>
+> **Los invitados externos** (sin cuenta en BLOKY) entran con **su enlace personal** (RN-329, T-130):
+> en BLOKY, en la reunión, «Copiar invitación» junto a cada invitado. **No les envíes tu propio
+> enlace de «Entrar»**: entrarían con tu nombre, como moderadores, y vence a los 10 minutos.
 
 ## 1. Entrar a una sala
 

@@ -763,8 +763,13 @@ sala se abre con una cuenta de Jitsi. Código: `apps/bloky/src/features/reunione
   quiere el secretario (RN-314); las invitaciones se otorgan hasta antes de empezar (RN-305).
 
 **Flujo principal**
-1. **Invitar:** la Administración, la Junta o el anfitrión agregan invitados (nombre y correo); BLOKY
-   les envía el enlace personal por correo, automáticamente (RN-305).
+1. **Invitar:** la Administración, la Junta o el anfitrión agregan invitados (nombre y correo o
+   celular). Al guardar, cada uno recibe **su enlace personal** (RN-329). Mientras BLOKY no envía
+   correos (T-109), en la reunión se pulsa **«Copiar invitación»** (o «Copiar todas») y se envía por
+   WhatsApp o correo; después, BLOKY lo enviará solo (RN-305). Los enlaces solo los ven quienes los
+   reparten (RN-330).
+1b. **El invitado entra:** abre su enlace (sin usuario ni contraseña), ve la reunión y, desde 30 minutos
+   antes, pulsa «Entrar a la reunión»: el middleware le da un pase de invitado con su nombre (RN-329).
 2. **Entrar:** cada persona pulsa «Entrar a la reunión» en ALICE o BLOKY; el middleware revisa su
    derecho (RN-304) y le entrega el pase firmado (RN-302). Desde ALICE puede pedir **«Enviarme el
    enlace al correo»** para entrar desde un computador (RN-311). Una conexión por persona (RN-307).
@@ -784,8 +789,10 @@ sala se abre con una cuenta de Jitsi. Código: `apps/bloky/src/features/reunione
 - B3. La misma persona entra desde otro aparato: la conexión anterior sale (RN-307).
 - B4. Alguien sin derecho ni invitación pide el pase: no se le da (RN-304).
 - B5. Una votación se acaba sin quórum: el secretario la extiende, sin superar su tiempo fijado (RN-316).
+- B6. El invitado abre su enlace antes de tiempo: ve a qué hora puede entrar y «Volver a revisar» (RN-312).
+- B7. Se quita a un invitado de la lista, o la reunión se cancela: su enlace deja de servir (RN-329).
 
-**Reglas de negocio:** RN-302 a RN-317.
+**Reglas de negocio:** RN-302 a RN-317, RN-329, RN-330.
 
 ### Plan de construcción (2026-11-03)
 
