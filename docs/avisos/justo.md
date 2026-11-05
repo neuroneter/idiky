@@ -86,6 +86,11 @@ natural, con ADR-0025, es que la app entre por el **middleware** con la sesión 
 **Temporal en ALICE hoy:** JWT de Strapi (`ALTA_QR_JWT`) solo para probar el alta en Dev; no es el
 diseño final. Estado para Daniel: [`daniel.md`](./daniel.md) §2.
 
+**Diagnóstico listo (2026-11-05):** Justo dejó el mapa completo —login doc+SMS como BLOKY, sesión vs
+passkey, y si la firma Polygon puede pasar primero por el middleware— en
+[`19-diagnostico-alice-sesion-y-polygon.md`](../19-diagnostico-alice-sesion-y-polygon.md). Usen ese
+documento en la conversación; no construir otro login ni ampliar `ALTA_QR_JWT` hasta decidir.
+
 ## 3. Las reuniones con video son de BLOKY, no de BOB — 🟡 Jitsi ya en modo de pases; queda el resto (2026-11-04)
 
 Sobre tu propuesta de pasar Jitsi a pases (JWT): el plan técnico está bien (modo `jwt`, sala de espera,

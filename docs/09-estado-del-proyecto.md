@@ -17,7 +17,7 @@ nueva o una sesión de IA distinta.
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | `apps/pwa/` (Mary, la maqueta de ALICE y de la consola), `apps/contable/` (Jeimy), `apps/gestion/` (BOB) y, desde el 2026-09-21, **`apps/bloky/` + `apps/bloky-api/` (BLOKY Dev, el producto real, ADR-0013)** |
 | **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 y **`https://bob-dev.idiky.com`** (ADR-0014) ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) **Desde el 2026-10-19:** con el plugin `cuentas-polygon` (alta de cuentas Polygon por QR) y las claves de **Polygon Amoy** (red de pruebas), publicado como `ad48f90.gestion-12e7c44`; el hash del `rpId` (`bob-dev.idiky.com`) completo desde el 2026-10-21; faltan los usuarios de la app (T-87) |
-| **Cadena / contratos / ALICE (Justo)** | Identidad = `hashIdentidad` (RN-298). Reuniones: Jitsi + middleware en Dev (ADR-0030); ALICE conecta desde `feature/T-106-…` con guía [`18`](./18-reuniones-con-video.md). Contrato on-chain por copropiedad: [ADR-0031](./adr/0031-un-contrato-por-copropiedad.md). Avisos: [`justo.md`](./avisos/justo.md) · [`daniel.md`](./avisos/daniel.md) |
+| **Cadena / contratos / ALICE (Justo)** | Identidad = `hashIdentidad` (RN-298). Reuniones: Jitsi + middleware en Dev (ADR-0030); ALICE conecta desde `feature/T-106-…` con guía [`18`](./18-reuniones-con-video.md). Contrato on-chain por copropiedad: [ADR-0031](./adr/0031-un-contrato-por-copropiedad.md). **T-87:** diagnóstico sesión + Polygon en [`19`](./19-diagnostico-alice-sesion-y-polygon.md). Avisos: [`justo.md`](./avisos/justo.md) · [`daniel.md`](./avisos/daniel.md) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
@@ -112,6 +112,40 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-11-05 · Justo · ALICE · Sección Reuniones + Entrar a Jitsi (T-106)
+
+**Qué** (`App-Idiky`, `feature/T-106-preparar-reuniones-video`): pantalla **Reuniones** (mes,
+tarjetas, Entrar / Asumir), acceso desde el inicio (reemplaza Solicitudes en la rejilla), cliente
+`GET …/reuniones` + `POST …/entrar` + `…/asumir`, roles del pase ampliados, `ContextoMiddleware`
+con `copropiedadId` tras el login. Sin SMS real: lista simulada; Entrar exige cookie. Guía local:
+[`App-Idiky/docs/reuniones-video.md`](https://github.com/neuroneter/App-Idiky/blob/feature/T-106-preparar-reuniones-video/docs/reuniones-video.md)
+(incluye prueba manual). Tests: `reuniones_video_test.dart` (lista + entrar mock).
+
+**Bloqueo para Entrar real:** Twilio / Verified Caller IDs (Daniel). Hasta entonces, `111111` solo
+muestra la UI; no abre Jitsi Dev.
+
+### 2026-11-05 · Justo · ALICE · Puerta Flutter = documento → SMS (como BLOKY, T-106 / T-87)
+
+**Qué** (`App-Idiky`, `feature/T-106-preparar-reuniones-video`): la pantalla de ingreso deja de pedir
+celular + cédula juntos. Ahora es el mismo patrón que la web de BLOKY: **tipo y número de
+documento** → código por SMS al celular registrado. Cliente HTTP del middleware en
+`lib/servicios/acceso/`. **Por defecto habla con Dev** (`ACCESO_MIDDLEWARE=true`):
+`/api/acceso/identificar|enviar-codigo|verificar-codigo` y guarda `bloky_sesion` (la reutiliza
+`/entrar`). Semilla local solo con `ACCESO_MIDDLEWARE=false`. Launch: «ALICE (middleware Dev)».
+Guía: [`App-Idiky/docs/acceso-middleware.md`](https://github.com/neuroneter/App-Idiky/blob/feature/T-106-preparar-reuniones-video/docs/acceso-middleware.md).
+
+### 2026-11-05 · Justo · Docs · Diagnóstico T-87: sesión ALICE + firma Polygon por el middleware
+
+**Qué:** [`docs/19-diagnostico-alice-sesion-y-polygon.md`](./19-diagnostico-alice-sesion-y-polygon.md)
+para discutir con Daniel. Separa **sesión de persona** (documento + SMS, mismo patrón que BLOKY) de
+la **passkey** (firma en el teléfono; la privada no sale). Conclusión técnica: el HTTP de alta y
+movimientos **sí puede pasar primero por el middleware**; el teléfono solo firma el challenge.
+Opciones A–E, preguntas concretas y criterio de cierre de T-87. Enlazado desde el índice, avisos
+Justo/Daniel §2 y la nota de T-87 en el tablero.
+
+**No decide:** sigue abierto si el plugin se muda al middleware o el middleware hace proxy a BOB, y
+si Flutter recibe Bearer además de la cookie.
 
 ### 2026-11-05 · Justo · Arnés · Traer `main` a `Justo_dev` (T-106, ADR-0031)
 

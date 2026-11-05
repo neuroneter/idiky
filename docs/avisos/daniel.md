@@ -59,6 +59,11 @@ ese JWT es solo de laboratorio / Dev.
 **Para ti:** cerrar T-87 (¿el plugin se queda en BOB atendiendo sin guardar personas, o pasa al
 middleware? ¿cómo autentica la app?). Hasta entonces Justo no debe inventar otro login.
 
+**Diagnóstico de Justo (2026-11-05):**
+[`docs/19-diagnostico-alice-sesion-y-polygon.md`](../19-diagnostico-alice-sesion-y-polygon.md) —
+separa sesión (doc+SMS) de passkey (firma en el teléfono), muestra que el HTTP **sí** puede pasar
+primero por el middleware sin sacar la privada, y deja opciones A–E + preguntas concretas (§6).
+
 Ver también [`avisos/justo.md`](./justo.md) §2.
 
 ---
