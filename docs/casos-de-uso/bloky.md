@@ -872,6 +872,9 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 1. En **Residentes**, elige una unidad sin administrador y escribe el **celular** (y, si lo sabe, el nombre) del residente.
 2. BLOKY lo crea como **administrador de la unidad** (RN-320). La persona nace sin documento (RN-322).
 3. Puede **bloquear, desbloquear o finalizar** a cualquier residente, por unidad (RN-324).
+4. **Para muchas unidades a la vez** (RN-328): «⬇ Descargar CSV», llena en Excel el **celular** (y el nombre) del primer
+   residente de cada unidad y «⬆ Cargar CSV». BLOKY muestra qué hará con cada fila —crear, ya estaba, sin celular o error con
+   su línea y motivo— y solo crea al confirmar.
 
 **Flujo principal (ALICE, Justo)**
 1. La persona entra con su **celular** y el código; la primera vez completa su **documento** y su nombre (RN-322, RN-327).
@@ -879,7 +882,7 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 3. Si es administrador de la unidad, agrega **residentes** (administradores o no), **mascotas** (sin usuario) e **invitados**
    con fecha de inicio y de fin (RN-321).
 
-**Reglas de negocio:** RN-320 a RN-327, RN-163, RN-166.
+**Reglas de negocio:** RN-320 a RN-328, RN-163, RN-166.
 
 **Lo que queda abierto:** quién vota en las asambleas, propietario o arrendatario (T-127, con Mary); vincular a los miembros
 del consejo y las comisiones (T-126); las billeteras desde ALICE (T-129).

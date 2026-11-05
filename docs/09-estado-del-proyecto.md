@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-05 · BLOKY · El primer residente de cada unidad desde un CSV (RN-328)
+
+- Daniel: descargar un CSV con todas las unidades, llenar el celular de cada una y volver a cargarlo, para asignar el primer
+  residente sin hacerlo de a uno. En «Unidades»: **«⬇ Descargar CSV»** (punto y coma y BOM, para Excel) y **«⬆ Cargar CSV»**,
+  que revisa fila por fila antes de crear (crear · ya estaba · sin celular · error con línea y motivo) y crea al confirmar.
+- Rama `feature/T-122-csv-residentes`; pruebas del middleware pasan; probado en local (2 por crear, 109 vacías, 1 con error;
+  al confirmar, 2 creados). Desplegado (`eea647c.bloky-a4bf428`).
+- Ojo: la carpeta principal de `Bloky-Idiky` está en `feature/T-130-enlace-de-invitado` con cambios de otra sesión, y
+  `.claude/launch.json` de `idiky` también; no se tocaron. La fusión a `develop` se hizo desde una copia aparte.
+
 ### 2026-11-05 · BLOKY · Unidades, residentes y el ingreso de ALICE construidos (T-120, T-121, T-122, T-124)
 
 - **T-120 (CU-B-06):** cada unidad con su código único (`T2-502`), puesto solo y editable; «Generar desde la estructura»
