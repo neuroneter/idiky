@@ -751,6 +751,85 @@ la asistencia; y ligarla a las asambleas (RN-92, RN-94: hay decisiones que una r
 **Estado en BLOKY Dev:** 🟡 (2026-10-20) — desplegado (`dd5d598.bloky-c20ca05`, BOB `dd5d598.gestion-021a320`). Hoy la
 sala se abre con una cuenta de Jitsi. Código: `apps/bloky/src/features/reuniones/` y `apps/bloky-api/src/reuniones/`.
 
+### Segunda parte — entrar, conducir y cerrar (definida el 2026-11-03, ADR-0030, T-106)
+
+> Daniel (2026-11-03). Lo de arriba sigue valiendo para programar y cancelar; esto define **quién entra
+> y cómo se conduce**. Reemplaza lo de «Lo que queda abierto». Las reglas de votación (RN-309, RN-316)
+> están **por confirmar con Mary**.
+
+- **Actores:** el anfitrión y sus suplentes, el secretario, los propietarios o sus apoderados, y los
+  invitados.
+- **Precondición nueva:** al programar se definen **el anfitrión y sus suplentes** (RN-313), y si se
+  quiere el secretario (RN-314); las invitaciones se otorgan hasta antes de empezar (RN-305).
+
+**Flujo principal**
+1. **Invitar:** la Administración, la Junta o el anfitrión agregan invitados (nombre y correo); BLOKY
+   les envía el enlace personal por correo, automáticamente (RN-305).
+2. **Entrar:** cada persona pulsa «Entrar a la reunión» en ALICE o BLOKY; el middleware revisa su
+   derecho (RN-304) y le entrega el pase firmado (RN-302). Desde ALICE puede pedir **«Enviarme el
+   enlace al correo»** para entrar desde un computador (RN-311). Una conexión por persona (RN-307).
+3. **Abrir:** quien llega antes espera; la reunión se abre cuando entra el anfitrión (RN-312). Si se
+   desconecta, asume el siguiente suplente (RN-313).
+4. **Conducir:** el anfitrión asigna al secretario si no estaba (RN-314). El secretario admite a los
+   invitados de la sala de espera (RN-306), da la palabra y con ella la cámara y el micrófono, si no los
+   abrió para todos (RN-315).
+5. **Votar:** el secretario abre cada votación con su tiempo máximo (RN-316); se vota **en ALICE**
+   (RN-310), un solo votante por unidad (RN-308).
+6. **Cerrar:** al acercarse la hora prevista hay avisos; el anfitrión o el secretario la extienden o
+   la terminan (RN-312). Al cerrarse salen todos.
+
+**Flujos alternativos**
+- B1. Quien dio poder entra: ve y oye, no vota (RN-308).
+- B2. Revocar un poder dentro de la ventana de la reunión: no se puede (RN-309).
+- B3. La misma persona entra desde otro aparato: la conexión anterior sale (RN-307).
+- B4. Alguien sin derecho ni invitación pide el pase: no se le da (RN-304).
+- B5. Una votación se acaba sin quórum: el secretario la extiende, sin superar su tiempo fijado (RN-316).
+
+**Reglas de negocio:** RN-302 a RN-317.
+
+### Plan de construcción (2026-11-03)
+
+T-106 **no se puede construir completo todavía**: depende de piezas que no existen. Se hace por
+partes, empezando por lo que sí se puede.
+
+| Pieza que falta | Para qué la necesita | Estado | Quién |
+|---|---|---|---|
+| Envío de correos | Invitaciones (RN-305) y «Enviarme el enlace al correo» (RN-311) | ❌ BLOKY no envía correos: es **T-109** | Daniel |
+| Propietarios por unidad y coeficientes | Quién vota por qué unidad (RN-304, RN-308) | ❌ **CU-B-06** y **CU-B-07** por escribir. Hoy el directorio sabe que alguien es propietario de la copropiedad, no de qué unidad | Daniel, con Mary |
+| Asambleas y votaciones en BLOKY | El secretario abre votaciones; se vota en ALICE (RN-310, RN-316) | ❌ Existen en la maqueta (`apps/pwa`), no en BLOKY. RN-309 y RN-316 **por confirmar con Mary** | Mary define, Daniel construye |
+| Jitsi en modo de pases | Que Jitsi rechace a quien no traiga pase | ⏳ Aviso 3 | Justo |
+| ALICE | «Entrar a la reunión», el enlace al correo y votar | ⏳ | Justo |
+
+**Primera entrega (middleware y BLOKY, Daniel):**
+
+1. Par de llaves: la privada en los secretos del middleware, la pública para Jitsi (RN-302).
+2. Al programar: anfitrión, suplentes y secretario opcional, entre personas del directorio (RN-313, RN-314); el título libre (RN-303).
+3. Estados *programada → abierta → cerrada*, con abrir, extender, terminar y asignar secretario solo por el anfitrión o el secretario (RN-312, RN-314).
+4. «Entrar a la reunión»: el middleware comprueba el derecho con lo que hoy existe (su rol en la reunión, invitado, o asignación de propietario en la copropiedad) y entrega el pase firmado con su rol (RN-302, RN-304). El formato, en [ADR-0030](../adr/0030-autorizacion-de-las-reuniones-con-video.md#formato-del-pase-propuesta-por-acordar-con-justo).
+5. Pantallas en BLOKY para todo lo anterior, pruebas del middleware y despliegue en BLOKY Dev.
+
+**Estado de la primera entrega (2026-11-03):** ✅ hecha en `Bloky-Idiky` (`develop`, rama
+`feature/T-106-pase-reuniones`) y desplegada en BLOKY Dev. El pase se pide en
+`POST /api/c/:id/reuniones/:rid/entrar` y la llave pública se sirve en
+`/api/jitsi/llaves/<sha256 de idiky-reuniones-1>.pem`. La llave privada la crea `infra/bloky/secretos.sh`. **Detalles
+fijados al construir, por confirmar con Daniel:** la Administración entra por derecho (RN-304); se entra desde 30
+minutos antes (RN-312); hasta 5 suplentes, y el suplente que abre o asume conduce (RN-313); se extiende de a 15
+minutos, hasta 4 horas cada vez (RN-312). Probado con pruebas del middleware (reglas y una firma real verificada con
+la llave pública); **la pantalla no se ha probado con una reunión real**.
+
+**Editar una reunión (2026-11-04, RN-317):** mientras siga programada se corrige todo menos la sala, con
+«Editar» en la lista (`POST /api/c/:id/reuniones/:rid/editar`). Salió al probar: una reunión puesta a otra hora
+por error no tenía arreglo. En BLOKY Dev (`9cb0cbe.bloky-dfc28d4`).
+
+**Jitsi en modo de pases (2026-11-04):** en la primera prueba, Jitsi aún tenía cuentas internas y no reconocía al
+anfitrión ni al suplente. Se pasó a `AUTH_TYPE=jwt` con la llave pública del middleware (`Jitsi-Streaming-Idiky`,
+`infra/jitsi/comun.env`) y BLOKY manda el pase (`BLOKY_JITSI_ACEPTA_PASES=si`; con `no`, el enlace va sin pase).
+**La puerta ya está cerrada:** probado con pases reales, el anfitrión entra como moderador, el participante como
+participante y sin pase no se entra. **Falta en Jitsi:** que la sala espere al anfitrión, cámara y micrófono por
+permiso y avisar quién entra y sale (Justo). Después, en este orden: lo que falta de Jitsi (Justo) →
+T-109 (correos: invitaciones y enlace) → CU-B-06 y CU-B-07 (unidades y propietarios) → asambleas y
+votaciones en BLOKY (con Mary) → ALICE (Justo).
+
 ---
 
 ### CU-B-06 a CU-B-08 — por escribir

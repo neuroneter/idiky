@@ -1,7 +1,8 @@
 # infra — entorno de desarrollo de Idiky
 
-Los servicios de Idiky publicados en contenedores, en un servidor compartido con otro servicio
-que **no puede verse afectado**. Las decisiones y sus porqués están en
+Los servicios de Idiky publicados en contenedores, en **una instancia propia de AWS Lightsail**
+(`idiky-dev`, desde el 2026-11-01). Las decisiones y sus porqués están en
+[ADR-0029](../docs/adr/0029-entorno-de-desarrollo-en-aws-lightsail.md) (el servidor),
 [ADR-0011](../docs/adr/0011-entorno-de-desarrollo-en-contenedores.md) (el entorno) y
 [ADR-0012](../docs/adr/0012-sistema-de-gestion-strapi.md) (el sistema de gestión).
 
@@ -17,18 +18,19 @@ que **no puede verse afectado**. Las decisiones y sus porqués están en
 | Contable | `infra/contable/` | contenedor `idiky-contable` | `8081` | Clave del entorno | Copia `apps/contable` **tal cual** (ADR-0010) y la sirve con nginx. **Demo** |
 | **BOB** | `infra/gestion/` *(repo `BOB-Idiky`)* | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082`, y por nombre **`https://bob-dev.idiky.com`** (ruta del mismo túnel, ADR-0014) | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`BOB-Idiky/apps/gestion`, ADR-0012) |
 | **BLOKY Dev** | `infra/bloky/` *(repo `Bloky-Idiky`)* | **pod** `idiky-bloky`: nginx + middleware de IDIKY (`apps/bloky-api`) + PostgreSQL | `8083`, y por nombre **`https://bloky-dev.idiky.com`** (túnel, ADR-0014). El ingreso solo funciona por el nombre | Clave del entorno, y luego **el ingreso de BLOKY** (código SMS, Google o Microsoft, con lo registrado en BOB) | El sistema de las copropiedades, construido de cero (`Bloky-Idiky`: `apps/bloky`, `apps/bloky-api`; ADR-0008, ADR-0013) |
-| **Jitsi** *(desplegado 2026-10-02, en prueba; [guía](./guia-de-jitsi.md))* | `infra/jitsi/` *(repo `Jitsi-Streaming-Idiky`)* | **pod** `idiky-jitsi`: nginx + web + prosody + jicofo + videobridge | `8085`, y **`10000/udp` para el video** | Cuenta de Jitsi para **abrir** una sala; el enlace basta para entrar | Las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md), `infra/jitsi/README.md` en su repo). **Apagado hasta que Azure deje pasar `10000/udp`**: sin eso la sala abre y no hay ni audio ni video |
+| **Jitsi** *(desplegado 2026-10-02; [guía](./guia-de-jitsi.md))* | `infra/jitsi/` *(repo `Jitsi-Streaming-Idiky`)* | **pod** `idiky-jitsi`: nginx + web + prosody + jicofo + videobridge | `8085`, y **`10000/udp` para el video** | Cuenta de Jitsi para **abrir** una sala; el enlace basta para entrar | Las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md), `infra/jitsi/README.md` en su repo). Falta la prueba con video entre dos personas en el servidor de Lightsail |
 | **Túnel** | `infra/tunel/` | contenedor `idiky-tunel` (`cloudflared`) | ninguno hacia internet; `/ready` en `127.0.0.1:8084` | — | Publica BLOKY Dev en `https://bloky-dev.idiky.com` con certificado de Cloudflare, sin abrir puertos ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)). Su token: `infra/tunel/secretos.sh` |
 
 ## 1. La regla del servidor
 
-**Todo lo de Idiky vive dentro del usuario `idiky`.** No se toca el nginx del servidor, ni el
-firewall, ni los puertos 22, 80, 443, 8443 y 7860, ni nada fuera de `/home/idiky`. En el
-servidor corre LangFlow, de otro proyecto, y **hay servicios que lo consultan**. Si algo de
-Idiky parece necesitar salir de `idiky`, primero se discute con el responsable de
-integración.
+**Todo lo de Idiky vive dentro del usuario `idiky`, sin root.** El servidor es una instancia
+propia de AWS Lightsail (ADR-0029): Ubuntu 22.04, 4 GB de memoria con 4 GB de swap, 2 vCPU y
+80 GB de disco, con IP estática. **La dirección no va en el repositorio**: se pide al responsable
+de integración. Lo que exige `sudo` (paquetes, el techo de memoria, el swap) y el firewall de
+Lightsail los maneja el responsable de integración.
 
-Y **antes y después de cualquier cambio** se verifica que LangFlow siga igual (§8).
+Hasta el 2026-11-01 el entorno vivió en una VM de Azure compartida con LangFlow; de esa época
+quedan `verificar-vecino.sh` y algunas menciones en la bitácora. **Ya no aplican.**
 
 ## 2. Cómo está armado
 
@@ -77,7 +79,7 @@ infra/desplegar.sh
 
 ```
 Navegador
-  └─▶ Azure NSG, regla "Dev" (prioridad 340 · TCP 8080,8081,8082 · cualquier origen)
+  └─▶ Firewall de Lightsail (TCP 22, TCP 8080-8085 y UDP 10000 · cualquier origen IPv4)
       └─▶ VM :8080   (escucha en todas las interfaces porque IDIKY_HOST=0.0.0.0)
           └─▶ rootlessport + slirp4netns   procesos de idiky: la red va en espacio de
               │                            usuario y no toca iptables
@@ -86,11 +88,9 @@ Navegador
                       └─▶ /usr/share/nginx/html
 ```
 
-Los puertos que no están en la regla `Dev` **no llegan desde internet** (comprobado: se quedan
-sin respuesta). 8082 se agregó a la regla el 2026-09-10, y **nginx registra la IP pública real
-de quien llega** (comprobado). Los puertos sí llegan desde la red virtual de Azure (regla por
-defecto `AllowVnetInBound`), así que un puerto que escucha en `0.0.0.0` no está oculto del
-todo.
+Los puertos que no están en el firewall de Lightsail **no llegan desde internet**. El 8084 está
+en el rango, pero el túnel solo lo publica en `127.0.0.1`. nginx registra la IP pública real de
+quien llega.
 
 ### El pod del sistema de gestión
 
@@ -120,7 +120,7 @@ pod idiky-gestion · red propia (slirp4netns, port_handler=slirp4netns: conserva
 ### Los techos de recursos
 
 ```
-user-1001.slice ·············· techo: 2 núcleos de CPU y 5 GB   (systemd, preparar-servidor.sh)
+user-1001.slice ·············· techo: 3,5 GB, sin techo de CPU, y 4 GB de swap   (preparar-servidor.sh)
 └── user@1001.service
     ├── container-idiky-pwa.service ········ 256 MB · 256 procesos
     ├── container-idiky-contable.service ··· 256 MB · 256 procesos
@@ -139,12 +139,13 @@ user-1001.slice ·············· techo: 2 núcleos de CPU y 5 GB   (
 ```
 
 **El techo es por usuario, no por contenedor.** Sin root, Podman no puede limitar la CPU de un
-contenedor, así que la protección de LangFlow está en el slice: pase lo que pase dentro de
-`idiky`, choca contra ese techo. **Todo servicio nuevo comparte esos 5 GB**; construyendo
-Strapi, `idiky` llegó a 4,6 GB.
+contenedor. En Lightsail el techo ya no protege a un vecino: deja memoria al sistema y a `sshd`, y
+lo que lo pasa va al swap. **Todo servicio nuevo comparte esos 3,5 GB**; con todo arriba se usan
+unos 0,8 GB, y compilar Strapi (hasta 3 GB) pasó sin tocar el swap (2026-11-01).
 
-Subió de 1 núcleo y 3 GB a 2 núcleos y 5 GB con el sistema de gestión. Sigue siendo seguro: la
-unidad de LangFlow lo limita a 0,8 núcleos y 4 GB, y el servidor tiene 4 núcleos y 15 GB.
+Los valores salen de `preparar-servidor.sh` con `IDIKY_TECHO_MEMORIA=3584M IDIKY_TECHO_CPU=
+IDIKY_SWAP_GB=4`. Sin esas variables deja los de antes (5 GB y 2 núcleos), pensados para un
+servidor compartido.
 
 ### Las unidades de systemd
 
@@ -174,9 +175,8 @@ WantedBy=default.target
   **No se editan las unidades a mano**: el siguiente despliegue las reescribe.
 - **`--rm` y `--replace`**: el contenedor no guarda nada entre arranques. Lo que persiste va en
   volúmenes, como los de PostgreSQL y los archivos de Strapi.
-- **Arranca con el servidor** gracias a *linger*. **No se ha probado con un reinicio real**,
-  porque reiniciar afecta a LangFlow: la primera vez que pase, hay que comprobar que volvieron.
-  Sí se probó reiniciar el pod de gestión: vuelve en 7 s con sus datos.
+- **Arranca con el servidor** gracias a *linger*. **Probado con un reinicio real** el 2026-11-01:
+  los 13 contenedores volvieron solos en unos 2 minutos, sin unidades fallidas.
 
 ### Las imágenes
 
@@ -216,7 +216,7 @@ Las seis imágenes suman 1,3 GB; la mayor parte es Strapi.
 | `servidor/levantar.sh` | Servidor, como `idiky` | Construye y (re)crea todo. **Aquí se registra cada servicio** |
 | `servidor/clave-acceso.sh` | Servidor, como `idiky` | Pone una clave al azar a la PWA y la contable |
 | `servidor/cargar-integraciones.sh` | Tu máquina | Sube las credenciales de BLOKY (Twilio; luego Google y Microsoft) desde `.env.integraciones.local` al servidor |
-| `servidor/verificar-vecino.sh` | Servidor, como `idiky` | Foto de LangFlow antes y comparación después (§8) |
+| `servidor/verificar-vecino.sh` | — | **Histórico**: comparaba LangFlow antes y después en el servidor de Azure. No aplica en Lightsail |
 | `desplegar.sh` | Tu máquina | Arma la carpeta (idiky + el repo de cada servicio externo), la sube y publica **solo los servicios que se nombran** |
 | `guia-de-despliegue.md` | — | Quién despliega qué, desde dónde y cómo verificarlo |
 | `servidor/autorizar-llave.sh` | Tu máquina | Da acceso de despliegue a una persona, con su llave pública |
@@ -238,7 +238,7 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/m
   probar otro commit: `IDIKY_REF_BLOKY=<commit> infra/desplegar.sh origin/main bloky`.
 - **`gestion` (BOB) solo desde commits que ya estén en el `origin/main` de `BOB-Idiky`.** Strapi borra de la base
   las tablas y columnas que el código con el que arranca no tenga. Forzarlo exige
-  `IDIKY_GESTION_FUERA_DE_MAIN=si`, y solo lo hace el responsable de integración. Además,
+  `IDIKY_GESTION_FUERA_DE_MAIN=si`, y solo lo hace el responsable de integración o Justo. Además,
   `levantar.sh` **respalda la base antes de recrear el pod**, y si el respaldo falla no sigue.
 - **Un despliegue a la vez.** Si hay otro en curso, el nuevo se detiene sin tocar nada.
 - **Cada despliegue queda registrado** en `~/despliegues/registro.tsv` (fecha, persona, rama,
@@ -254,9 +254,16 @@ de tocar nada.
 
 ## 5. Entrar
 
-**PWA y contable**, con la clave del entorno: `http://<ip>:8080` y `http://<ip>:8081`. La regla
-de Azure admite cualquier origen porque el equipo no tiene IP fija; **lo que cierra la puerta
-es la clave**.
+**Los nombres públicos**, con HTTPS por el túnel (no dependen de la IP):
+
+| Sistema | Dirección | Puerta |
+|---|---|---|
+| BLOKY Dev | `https://bloky-dev.idiky.com` | Su ingreso. **Por la IP no se puede entrar**: la cookie de sesión exige HTTPS |
+| BOB | `https://bob-dev.idiky.com/admin` | Login de Strapi |
+| Jitsi | `https://jitsi-dev.idiky.com` | Cuenta de Jitsi para abrir sala |
+
+**PWA y contable**, con la clave del entorno: `http://<ip>:8080` y `http://<ip>:8081`. El firewall
+admite cualquier origen porque el equipo no tiene IP fija; **lo que cierra la puerta es la clave**.
 
 - **Sin clave solo responden** `/salud`, `/revision.txt` y el manifest de la PWA.
 - **Es HTTP, no HTTPS.** La clave viaja sin cifrar, y el navegador apaga el *service worker* y
@@ -334,35 +341,18 @@ podman unshare du -sh ~/datos/gestion/postgres       # tamaño real de la base (
 ```
 
 **Dar acceso a otra persona para desplegar:** quien ya tenga acceso corre, en su máquina,
-`infra/servidor/autorizar-llave.sh <su-llave>.pub "Nombre"`, sin sudo. Solo se recibe la llave
+`infra/servidor/autorizar-llave.sh <su-llave>.pub "Nombre"`, sin sudo. **Para que solo pueda
+traer la base de BOB a su máquina** (T-119), lo mismo con `IDIKY_SOLO_VOLCADO_BOB=si` delante:
+esa llave no abre consola, no reenvía puertos y no ejecuta otra cosa. Solo se recibe la llave
 **pública**. Para quitar el acceso se borra su línea (termina en `idiky-<Nombre>`) de
 `/home/idiky/.ssh/authorized_keys`.
 Para **ver** la PWA y la contable basta la clave del §6; para gestión, un usuario de Strapi.
 
-## 8. Verificar que LangFlow sigue igual
+## 8. Verificar que LangFlow sigue igual (histórico)
 
-**Obligatorio antes y después de cualquier cambio en el servidor**: un despliegue con un
-servicio nuevo, un cambio de `levantar.sh` o de `preparar-servidor.sh`, un reinicio.
-
-```bash
-ssh idiky@<ip> 'sh -s -- --base' < infra/servidor/verificar-vecino.sh   # antes
-# ... el cambio ...
-ssh idiky@<ip> 'sh -s'           < infra/servidor/verificar-vecino.sh   # después: debe decir "sigue igual"
-```
-
-Compara el estado, el PID y los reinicios de `langflow` y `nginx`; los puertos 22, 80, 443,
-8443 y 7860; y el código de las rutas que usan sus consumidores (`/health`, `/api/v1/version`,
-el `OPTIONS` previo a `/api/v1/run`, `/ws`, la página de `8443`). **No ejecuta flujos**, porque
-tendrían efectos.
-
-**Desde fuera**, que esos puertos respondan igual: `http://<ip>/` → 301,
-`https://<ip>/api/v1/version` → 200, `https://<ip>:8443/` → 200.
-
-**Dos falsas alarmas conocidas**, para no perseguirlas:
-
-- **`GET /api/v1/store/tags` → 500** en el log de nginx: es de LangFlow y ya pasaba antes de
-  Idiky. El servicio externo al que consulta tiene un certificado inválido.
-- **`OPTIONS /api/v1/run/...` con agente `curl/7.81.0`**: es el propio verificador.
+Era obligatorio mientras el entorno compartió la VM de Azure con LangFlow (hasta el 2026-11-01).
+**En Lightsail no hay vecino**: después de un cambio basta con `/revision.txt` y la salud de cada
+servicio (`/salud`, `/_health` de BOB, `/api/salud` de BLOKY).
 
 ## 9. Estado del servidor que no está en git
 
@@ -381,10 +371,10 @@ poner:
 | `~idiky/datos/gestion/uploads/` | Archivos subidos a Strapi | Strapi |
 | `~idiky/datos/respaldos/gestion/` | Los últimos 7 respaldos | `respaldo.sh` |
 | El superadministrador de Strapi | Creado el 2026-09-10 como `admin@idiky.local` antes de abrir el puerto; el responsable de integración lo cambió por sus datos | La API de primer uso de Strapi |
-| `~idiky/.config/idiky/vecino-base.txt` | La última foto de LangFlow | `verificar-vecino.sh --base` |
 | `~idiky/.config/systemd/user/*.service`, `*.timer` | Las unidades | `levantar.sh`. **No se editan a mano** |
 | `~idiky/.local/bin/idiky-gestion-respaldo` | Copia del script de respaldo | `levantar.sh` |
 | `~idiky/.local/bin/idiky-gestion-configuracion` | Copia del script de configuraciones globales de BOB | `levantar.sh` |
+| `~idiky/.local/bin/idiky-gestion-volcado-desarrollo` | Entrega el volcado de BOB a quien lo desarrolla en su máquina (T-119) | `levantar.sh` (instalado a mano el 2026-11-03, antes de que llegue a `main` de BOB) |
 | `~idiky/.config/idiky/bob-configuracion/` | Solicitudes del panel de BOB, `ultimo.txt` e `historial.log` (sin valores); montada en Strapi | `levantar.sh` |
 | `~idiky/.config/idiky/secretos/respaldos/` | Las últimas 20 copias de `gestion-strapi.env` antes de cada cambio | `idiky-gestion-configuracion` |
 | `~idiky/.config/idiky/jitsi-comun.env` | La configuración común de Jitsi, fuera de la carpeta del despliegue (la unidad de systemd guarda la ruta tal cual) | `levantar.sh` |
@@ -392,9 +382,13 @@ poner:
 | `~idiky/despliegues/` | Las últimas 3 copias del código desplegado y `registro.tsv`, con quién desplegó qué | `desplegar.sh` |
 | `~idiky/.idiky-despliegue.lock` | El candado: un despliegue a la vez | `desplegar.sh` (`flock`) |
 | `~idiky/datos/respaldos/gestion/gestion-predespliegue-*` | Los últimos 5 respaldos tomados antes de recrear BOB (aparte de los 7 diarios) | `levantar.sh` |
-| `~idiky/.ssh/authorized_keys` | Llaves de quienes despliegan | `preparar-servidor.sh` |
+| `~idiky/.ssh/authorized_keys` | Llaves de quienes despliegan, y llaves **restringidas** que solo descargan el volcado de BOB (`restrict,command=…`) | `preparar-servidor.sh` y `autorizar-llave.sh` (`IDIKY_SOLO_VOLCADO_BOB=si`) |
 | `/etc/systemd/system.control/user-1001.slice.d/` | El techo de CPU y memoria | `preparar-servidor.sh` |
-| El grupo de seguridad de red de la VM, regla `Dev` | Prioridad 340 · TCP 8080,8081,8082 · origen cualquiera | El responsable, en el portal de Azure |
+| `/swapfile` y `/etc/fstab` | Swap de 4 GB | `preparar-servidor.sh` con `IDIKY_SWAP_GB=4` |
+| Usuario `justo` y `/etc/sudoers.d/90-justo` | Administración del servidor para Justo: solo con su llave, sin contraseña, sudo sin contraseña (2026-11-03). Su llave también está en `~idiky/.ssh/authorized_keys` | A mano, por el responsable de integración. Se quita con `deluser --remove-home justo` y borrando ese archivo |
+| Firewall de la instancia en Lightsail | TCP 22, TCP 8080-8085, UDP 10000 · el 80 cerrado | El responsable, en la consola de Lightsail |
+| IP estática `idiky-dev-ip` e instantáneas automáticas | Diarias a la 1:00 (hora de Colombia), se guardan 7 | El responsable, en la consola de Lightsail |
+| `~idiky/despliegues/registro-azure.tsv` | El historial de despliegues del servidor de Azure | Copiado en la mudanza |
 
 ## 10. Trampas conocidas
 
@@ -415,10 +409,10 @@ Cada una ya costó tiempo una vez:
 | `STRAPI_DISABLE_UPDATE_NOTIFICATION` | Ya no existe en Strapi 5.53 | `logger.updates.enabled: false` en `config/server.ts` |
 | Scripts escritos en zsh (macOS) | `"$VAR:e..."` es un modificador de zsh y se come letras: `"$USR:equivocada"` mandó el usuario `quivocada` y curl se quedó pidiendo la clave. Y `set -- $var` no separa palabras | Escribir `"${VAR}:..."`, comillas simples, o `sh -s` en el servidor |
 | Buscar un `curl -u` colgado con `pgrep` | curl borra de sus argumentos el valor de `-u` | Buscar por PID padre |
-| Probar un puerto de Azure | No saber si falla Azure o el servicio | Rechazo **al instante** = Azure deja pasar; **timeout** = Azure bloquea |
-| `/mnt` en Azure | Es un disco temporal: se borra al apagar la VM | Nada que deba persistir va ahí |
-| Disco | Unos 4,9 GB libres en `/`, compartidos con la base de datos de LangFlow | `levantar.sh` no construye con menos de 3 GB; `podman image prune --all` tras cada despliegue |
-| Reinicio del servidor | No probado con Idiky instalado | Hacerlo en una ventana acordada, con `verificar-vecino.sh` antes y después |
+| Probar un puerto | No saber si falla el firewall o el servicio | Rechazo **al instante** = el firewall deja pasar; **timeout** = lo bloquea |
+| Disco | 80 GB, unos 69 GB libres (2026-11-01) | `levantar.sh` no construye con menos de 3 GB; `podman image prune --all` tras cada despliegue |
+| Volcar una base por la salida de `podman exec` (Podman 3.4.4) | **El volcado se corta sin ningún error** (pasó dos veces el 2026-11-01: 14 y 32 de 80 tablas) | `pg_dump -f /tmp/x.sql` dentro del contenedor y `podman cp`. Contar los `COPY` del volcado antes de confiar en él |
+| Entrar a BLOKY por la IP | Ingresa y al primer clic vuelve al login | La cookie es `Secure`: solo por `https://bloky-dev.idiky.com` |
 | Pestaña de BOB abierta durante un despliegue | Al ir a otra pantalla sale *«This screen couldn't be loaded · error loading dynamically imported module …/admin/ListPage-xxxx.js»*. Cada compilación le pone otro nombre a sus archivos, la pestaña pide los de la versión anterior y Strapi responde con su página HTML en vez de un 404 | **Recargar la página** (el botón del aviso o `Cmd + Shift + R`). No es un fallo del servidor: la página del panel se sirve sin caché, así que al recargar toma la versión nueva |
 | Comprobar una lista de archivos desde zsh | `for n in $lista` no separa por líneas en zsh: recorre toda la lista como un solo nombre y da resultados falsos | `while IFS= read -r n; do …; done < archivo` |
 | Desplegar BOB con código que no está en `main` | **Strapi borra las tablas y columnas** que ese código no tenga, y con ellas los datos (lo hace su comparación de esquemas al arrancar) | `desplegar.sh` se niega fuera de `main`, y `levantar.sh` respalda la base antes de recrear el pod |
@@ -443,6 +437,6 @@ sudo apt-get purge podman uidmap slirp4netns fuse-overlayfs conmon crun \
 
 `userdel -r` puede fallar en archivos que quedaron con usuarios del espacio de nombres de
 Podman (los de PostgreSQL); en ese caso, `sudo rm -rf /home/idiky`. Los paquetes se nombran uno
-por uno a propósito: `apt autoremove` podría llevarse cosas que no son de Idiky. En Azure se
-borra la regla `Dev` del grupo de seguridad de red. Si hay servicios nuevos, sus unidades van
+por uno a propósito: `apt autoremove` podría llevarse cosas que no son de Idiky. En Lightsail es
+más simple: la instancia es solo de Idiky y se puede borrar entera, después de sacar sus datos. Si hay servicios nuevos, sus unidades van
 también en la primera línea.

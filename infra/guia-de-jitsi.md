@@ -5,6 +5,12 @@
 > el código del servicio, en el repo `Jitsi-Streaming-Idiky` (`infra/jitsi/`), y su registro en
 > el servidor, en [`servidor/levantar.sh`](./servidor/levantar.sh). Tarea: T-78.
 
+> **Desde el 2026-11-04, Jitsi está en modo de pases** (T-106, [ADR-0030](../docs/adr/0030-autorizacion-de-las-reuniones-con-video.md)):
+> **se entra solo con «Entrar» en BLOKY**, que da un enlace con un pase firmado por el middleware y dice
+> quién modera. **Las cuentas con contraseña y los invitados sin pase ya no sirven**; lo que sigue sobre
+> cuentas queda como historia. Si pide usuario y contraseña, se entró sin pase. Si dice «Authentication
+> failed», el pase venció (dura 10 minutos): se vuelve a pulsar «Entrar».
+
 ## 1. Entrar a una sala
 
 **`https://jitsi-dev.idiky.com/<nombre-de-la-sala>`**, por ejemplo
@@ -64,21 +70,21 @@ navegador ──https──▶ Cloudflare ──túnel idiky-dev──▶ http:/
                                                                               ├─ idiky-jitsi-prosody XMPP y las cuentas (persiste en ~/datos/jitsi/prosody)
                                                                               ├─ idiky-jitsi-jicofo  arma la conferencia
                                                                               └─ idiky-jitsi-jvb     el VIDEO
-navegador ══ audio y video por UDP, directo ══▶ 20.55.251.120:10000/udp ──▶ idiky-jitsi-jvb
+navegador ══ audio y video por UDP, directo ══▶ <ip del servidor>:10000/udp ──▶ idiky-jitsi-jvb
 ```
 
 | Pieza | Valor | Dónde se configura |
 |---|---|---|
 | Dirección pública | `https://jitsi-dev.idiky.com` | Panel de Cloudflare: túnel `idiky-dev`, *Published application routes* |
 | Ruta del túnel | `jitsi-dev.idiky.com` → **`HTTP`** `10.0.2.2:8085` | Igual que `bloky-dev` y `bob-dev`. **Tiene que ser `HTTP`, no `HTTPS`** (§5) |
-| Video | `10000/udp`, abierto en Azure (regla `Dev-Udp`, prioridad 1010, desde cualquier origen) | Grupo de seguridad de red de Azure |
-| Página por IP | `8085/tcp` (regla `Dev`) | Solo sirve para comprobar `/salud`: sin HTTPS no hay cámara |
+| Video | `10000/udp`, abierto desde cualquier origen | Firewall de la instancia en Lightsail (ADR-0029) |
+| Página por IP | `8085/tcp` | Solo sirve para comprobar `/salud`: sin HTTPS no hay cámara |
 | `PUBLIC_URL` | `https://jitsi-dev.idiky.com` | `~idiky/.config/idiky/secretos/jitsi.env` |
 | `JVB_ADVERTISE_IPS` | La IP pública del servidor | El mismo archivo. Sin ella el videobridge anuncia su IP privada y no hay video |
 | Versión | `stable-11031`, igual en las cuatro imágenes | `IDIKY_JITSI_VERSION` en `levantar.sh` |
 | Memoria | proxy 64 MB · web 128 · prosody 192 · jicofo 384 (heap 256) · jvb 640 (heap 512) | `levantar.sh` y `comun.env` |
 
-**Desplegar** (solo el responsable de integración, con la foto de LangFlow antes y después):
+**Desplegar** (solo el responsable de integración o Justo):
 
 ```bash
 IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/main jitsi
@@ -109,7 +115,7 @@ ssh idiky@<ip> 'ss -uln | grep ":10000 "'           # el puerto del video escuch
 
 | Si pasa esto | Es esto |
 |---|---|
-| **La sala abre y nadie se ve ni se oye** | El UDP no llega: la regla `Dev-Udp` de Azure, o `JVB_ADVERTISE_IPS` no es la IP pública |
+| **La sala abre y nadie se ve ni se oye** | El UDP no llega: la regla UDP 10000 del firewall de Lightsail, o `JVB_ADVERTISE_IPS` no es la IP pública (cambia si cambia la IP estática) |
 | El navegador no pide cámara ni micrófono | Se entró por `http://`. Tiene que ser `https://jitsi-dev.idiky.com` |
 | «No se puede crear la sala» o pide usuario sin parar | Nadie con cuenta ha abierto la sala; o se escribió el usuario con `@correo` (§2) |
 | No conecta al servidor | El WebSocket. Se comprueba que `/xmpp-websocket` responda **101** con `Upgrade: websocket`; nunca poner la clave del entorno (`auth_basic`) delante de Jitsi |

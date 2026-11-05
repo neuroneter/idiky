@@ -61,9 +61,11 @@ Estado de los dos demos: **v0.1**, sin backend, con datos simulados. El producto
    `git pull` (o `git merge origin/main`, según el aviso). Mary y Jeimy no son ingenieras: no
    les expliques git, resuélvelo con ellas. Si aparecen conflictos, no los resuelvas a ciegas:
    detente y pídeles que le avisen al responsable de integración (Daniel).
-0b. **Si quien abre la sesión es Justo**, muéstrale primero los avisos abiertos de
-   [`docs/avisos/justo.md`](./docs/avisos/justo.md) (temas pendientes para hablar con Daniel) y no
-   construyas nada que los contradiga. El mismo aviso está en el `CLAUDE.md` de sus repositorios.
+0b. **Si quien abre la sesión es Justo, Mary o Jeimy**, muéstrale primero los avisos abiertos de su
+   página —[`justo.md`](./docs/avisos/justo.md), [`mary.md`](./docs/avisos/mary.md) o
+   [`jeimy.md`](./docs/avisos/jeimy.md), en `docs/avisos/`— (temas pendientes para hablar con
+   Daniel) y no construyas nada que los contradiga. El de Justo está también en el `CLAUDE.md` de sus
+   repositorios.
 0c. **Si quien abre la sesión es Daniel** y la tarea toca cadena, contratos o ALICE, muéstrale
    [`docs/avisos/daniel.md`](./docs/avisos/daniel.md): qué dejó Justo hecho, qué es temporal y qué
    falta desplegar o decidir.
@@ -124,9 +126,10 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> infra/desplegar.sh origin/m
 
 **Si te piden desplegar**, sigue [`infra/guia-de-despliegue.md`](./infra/guia-de-despliegue.md) al
 pie de la letra: **solo el servicio de quien lo pide** (`pwa` Mary, `contable` Jeimy, `bloky` y
-`gestion` el responsable de integración), **solo desde `origin/main`** (BLOKY Dev, desde
-`origin/develop` de su repo: `IDIKY_REF_BLOKY=origin/develop`), y
-`infra/servidor/verificar-vecino.sh` antes y después. Lo que Mary y Jeimy despliegan hoy son
+`gestion` el responsable de integración o Justo) y **solo desde `origin/main`** (BLOKY Dev, desde
+`origin/develop` de su repo: `IDIKY_REF_BLOKY=origin/develop`). El entorno vive desde el
+2026-11-01 en **AWS Lightsail** (ADR-0029): la dirección se pide al responsable de integración
+y no va en el repositorio. Lo que Mary y Jeimy despliegan hoy son
 **maquetas**; BLOKY Dev es el producto real y vive en el 8083. Para `bloky`, `gestion` y `jitsi`,
 `desplegar.sh` trae el `origin/main` de **su** repositorio (ADR-0018).
 
@@ -140,8 +143,7 @@ persona en su terminal**, nunca la IA ni con la clave escrita en el comando.
 **Si la tarea es crear o cambiar un servicio del entorno**, lee primero
 [`infra/README.md`](./infra/README.md) (cómo está armado, incluido lo que no está en git) y
 sigue [`infra/nuevo-servicio.md`](./infra/nuevo-servicio.md) (el contrato y la receta).
-Antes y después de tocar el servidor, `infra/servidor/verificar-vecino.sh` tiene que decir que
-LangFlow sigue igual.
+Un puerto nuevo se abre en el firewall de Lightsail, y lo hace el responsable de integración o Justo.
 
 ## 5. Git y quién trabaja dónde
 
@@ -183,10 +185,10 @@ LangFlow sigue igual.
 - No implementar autenticación real, pagos reales ni backend en la fase 1: ese alcance está
   en el roadmap (fases 2 y 4) y hacerlo antes rompe el propósito del demo.
 - No introducir librerías de UI ni de estado global sin ADR.
-- No tocar nada del servidor de desarrollo fuera del usuario `idiky`: lo comparte otro
-  servicio (LangFlow) cuyos consumidores dependen de sus puertos 80, 443, 8443 y 7860 y de
-  sus rutas. Nada de nginx, firewall ni `sudo` para Idiky sin discutirlo antes (ADR-0011).
-- No desplegar `gestion` (BOB) ni `todo` salvo que lo pida el responsable de integración, y
+- No tocar nada del servidor de desarrollo fuera del usuario `idiky`: los servicios corren sin
+  root (ADR-0011). Nada de `sudo`, firewall ni paquetes del sistema sin el responsable de
+  integración. El servidor ya no es el de Azure con LangFlow: es AWS Lightsail (ADR-0029).
+- No desplegar `gestion` (BOB) ni `todo` salvo que lo pida el responsable de integración o Justo, y
   nunca desde algo que no esté en `main`: Strapi borra de la base las tablas y columnas que el
   código con el que arranca no tenga.
 - No meterle compilación, npm ni dependencias a `apps/contable/`: rompe la única condición

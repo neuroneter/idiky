@@ -262,6 +262,10 @@ levantar_jitsi() {
 instalar_respaldo_gestion() {
   mkdir -p "$HOME/.local/bin" "$UNIDADES"
   install -m 755 infra/gestion/respaldo.sh "$HOME/.local/bin/idiky-gestion-respaldo"
+  # T-119: el volcado que descarga quien desarrolla BOB (BOB-Idiky/infra/gestion/traer-base-de-la-nube.sh)
+  if [ -f infra/gestion/volcado-desarrollo.sh ]; then
+    install -m 755 infra/gestion/volcado-desarrollo.sh "$HOME/.local/bin/idiky-gestion-volcado-desarrollo"
+  fi
   cp infra/gestion/idiky-gestion-respaldo.service infra/gestion/idiky-gestion-respaldo.timer "$UNIDADES/"
   systemctl --user daemon-reload
   systemctl --user enable --now idiky-gestion-respaldo.timer >/dev/null 2>&1

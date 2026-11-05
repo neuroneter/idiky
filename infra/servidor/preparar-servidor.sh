@@ -12,12 +12,20 @@
 #   3. Le activa linger, para que sus contenedores sigan vivos sin sesion abierta.
 #   4. Si recibe una llave publica, la autoriza para entrar como `idiky`.
 #
+# Opcional, para un servidor sin vecinos (AWS Lightsail, 2026-11-01):
+#   IDIKY_TECHO_MEMORIA=3584M   techo de memoria de `idiky` (por omision, 5G)
+#   IDIKY_TECHO_CPU=            techo de CPU; vacio, sin techo (por omision, 200%)
+#   IDIKY_SWAP_GB=4             crea /swapfile de ese tamano, permanente (por omision, ninguno)
+#
 # Lo que NO hace: no toca nginx, ni el firewall, ni iptables, ni ningun servicio que ya
 # corra en el servidor. Los contenedores de Idiky corren con los permisos de `idiky`.
 set -eu
 
 USUARIO=idiky
 LLAVE="${1:-}"
+TECHO_MEMORIA="${IDIKY_TECHO_MEMORIA:-5G}"
+TECHO_CPU="${IDIKY_TECHO_CPU-200%}"
+SWAP_GB="${IDIKY_SWAP_GB:-0}"
 
 [ "$(id -u)" -eq 0 ] || { echo "Se corre con sudo." >&2; exit 1; }
 
@@ -55,7 +63,16 @@ loginctl enable-linger "$USUARIO"
 # servidor. Subio de 1 nucleo y 3 GB con el sistema de gestion (ADR-0012): Strapi pide 2 GB
 # minimo. Sigue siendo seguro: la unidad de LangFlow lo limita a 0,8 nucleos y 4 GB, y el
 # servidor tiene 4 nucleos y 15 GB.
-systemctl set-property "user-$(id -u "$USUARIO").slice" CPUQuota=200% MemoryMax=5G
+systemctl set-property "user-$(id -u "$USUARIO").slice" CPUQuota="$TECHO_CPU" MemoryMax="$TECHO_MEMORIA"
+
+# Con poca memoria, compilar Strapi (hasta 3 GB) con todo arriba puede agotarla.
+if [ "$SWAP_GB" -gt 0 ] && [ ! -f /swapfile ]; then
+  fallocate -l "${SWAP_GB}G" /swapfile
+  chmod 600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  grep -q '^/swapfile ' /etc/fstab || echo '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
 
 if [ -n "$LLAVE" ]; then
   CASA=$(getent passwd "$USUARIO" | cut -d: -f6)

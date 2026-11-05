@@ -1,6 +1,8 @@
 # ADR-0011 — Entorno de desarrollo en contenedores: Podman sin root, en un servidor compartido
 
-- **Estado:** Aceptada
+- **Estado:** Aceptada. **El servidor compartido quedó atrás el 2026-11-01:** el entorno vive ahora en
+  AWS Lightsail ([ADR-0029](./0029-entorno-de-desarrollo-en-aws-lightsail.md)). Lo demás (Podman sin root,
+  un usuario `idiky`, un contenedor por producto) sigue igual.
 - **Fecha:** 2026-09-10
 - **Tarea:** T-35
 

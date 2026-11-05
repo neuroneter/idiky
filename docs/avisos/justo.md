@@ -86,7 +86,7 @@ natural, con ADR-0025, es que la app entre por el **middleware** con la sesión 
 **Temporal en ALICE hoy:** JWT de Strapi (`ALTA_QR_JWT`) solo para probar el alta en Dev; no es el
 diseño final. Estado para Daniel: [`daniel.md`](./daniel.md) §2.
 
-## 3. Las reuniones con video son de BLOKY, no de BOB — ⏳ abierto (2026-10-20)
+## 3. Las reuniones con video son de BLOKY, no de BOB — 🟡 Jitsi ya en modo de pases; queda el resto (2026-11-04)
 
 Sobre tu propuesta de pasar Jitsi a pases (JWT): el plan técnico está bien (modo `jwt`, sala de espera,
 cierre a tiempo, prueba con dos personas), pero **cambia quién hace cada cosa**:
@@ -105,12 +105,30 @@ cierre a tiempo, prueba con dos personas), pero **cambia quién hace cada cosa**
 el servicio adicional, copiado en la contratación), y BLOKY ya programa y cancela reuniones dentro del cupo, cada una con
 su sala. **Falta lo tuyo (T-106):** Jitsi en modo `jwt`, que el middleware firme los pases y que la sala se cierre a tiempo.
 
-**2026-10-25 (Justo / ALICE):** no hay avances nuevos de Daniel en JWT (Jitsi sigue en `AUTH_TYPE=internal`; el
-middleware solo entrega el enlace sin token). En `App-Idiky` (`feature/T-106-preparar-reuniones-video`) quedó listo el
-cliente y el contrato que la app espera:
-`POST /api/c/:copropiedadId/reuniones/:reunionId/pase` → `{ sala, servidor, token, rol, venceEn? }` — ver
-`App-Idiky/docs/reuniones-video.md` y `lib/servicios/reuniones_video/`. Cuando el middleware lo implemente, ALICE solo
-engancha; no crear el endpoint en BOB.
+**Actualización del 2026-11-03 ([ADR-0030](../adr/0030-autorizacion-de-las-reuniones-con-video.md), RN-302 a RN-316):**
+Daniel definió quién entra y cómo se conduce. Lo que te toca en Jitsi: **modo `jwt` con la llave pública** (el
+middleware firma con la privada), **sin entradas sin pase**, **el rol del pase manda** (anfitrión y secretario son
+moderadores), **la sala espera al anfitrión**, **cámara y micrófono por permiso** del secretario, y **avisar al
+middleware quién entra y sale**. **Cambia una cosa de tu plan:** la sala **no se cierra por horario**; la cierran el
+anfitrión o el secretario (solo hay avisos). En ALICE: «Entrar a la reunión», «Enviarme el enlace al correo» y la
+votación durante la reunión. Antes de construir, confirma qué de eso trae `stable-11031`.
+
+**Hecho el 2026-11-03:** el middleware ya firma los pases con ese formato (RS256, `kid` `idiky-reuniones-1`) y sirve la
+llave pública en `https://bloky-dev.idiky.com/api/jitsi/llaves/<sha256 del kid>.pem`, que es como la pide el servidor de
+llaves ASAP de Jitsi. El pase sale de `POST /api/c/:id/reuniones/:rid/entrar`.
+
+**Hecho el 2026-11-04 (Daniel): Jitsi ya está en modo de pases** en `Jitsi-Streaming-Idiky` (`main` y `develop`):
+`AUTH_TYPE=jwt`, sin invitados anónimos ni cuentas. Probado: anfitrión → moderador; participante → participante;
+sin pase → no entra. En BLOKY, `BLOKY_JITSI_ACEPTA_PASES=si`.
+
+**Para ALICE (2026-11-05):** todo lo de Jitsi y el pase, y lo que cambia en tu rama
+`feature/T-106-preparar-reuniones-video` (el camino es **`/entrar`** —no `/pase`—; roles: anfitrión, suplente,
+secretario, participante; la respuesta trae `servidor`, `sala` y `token`), está en
+[**`docs/18-reuniones-con-video.md`**](../18-reuniones-con-video.md). Lee el §5 antes de empezar. El cliente
+preparado el 2026-10-25 en `App-Idiky` hay que alinearlo a ese contrato.
+
+**Te queda de este aviso:** que la sala espere al anfitrión (hoy quien llega primero con pase entra a la sala vacía),
+cámara y micrófono por permiso del secretario, avisarle al middleware quién entra y sale, y conectar ALICE.
 
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 

@@ -1,4 +1,4 @@
-# ADR-0029 — Un contrato on-chain por cada copropiedad
+# ADR-0031 — Un contrato on-chain por cada copropiedad
 
 - **Estado:** Aceptada (2026-10-25)
 - **Fecha:** 2026-10-25
