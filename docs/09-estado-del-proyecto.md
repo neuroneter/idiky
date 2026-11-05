@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-05 · BLOKY · El CSV de residentes como plantilla (RN-328)
+
+- Daniel: el CSV debe traer **todas las unidades ya listadas**, como una plantilla para llenar y cargar, aunque no se hayan
+  generado. Ahora la descarga incluye las que salen de la estructura con el código que van a tener (el mismo cálculo da los
+  mismos códigos), el botón aparece aunque no haya unidades, y al cargar se generan primero las que falten. Probado en local
+  con una copropiedad sin unidades: 112 listadas, un celular llenado → 112 unidades y 1 administrador creados.
+- Rama `feature/T-122-csv-plantilla`, fusionada a `develop` desde una copia aparte (la carpeta principal la usaba otra
+  sesión, que renumeró su enlace de invitado a RN-329 y RN-330). Desplegado (`f532f00.bloky-9b128bc`). Un despliegue mío
+  coincidió con uno de esa sesión y el candado lo detuvo sin tocar nada (`fallo-75` en el registro).
+
 ### 2026-11-05 · BLOKY · El enlace personal de cada invitado a una reunión (T-130, RN-329, RN-330)
 
 - Daniel: los invitados a una reunión no podían entrar; Jitsi les pedía usuario y contraseña. Causa: desde el 2026-11-04

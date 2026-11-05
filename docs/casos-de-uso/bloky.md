@@ -880,8 +880,9 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 2. BLOKY lo crea como **administrador de la unidad** (RN-320). La persona nace sin documento (RN-322).
 3. Puede **bloquear, desbloquear o finalizar** a cualquier residente, por unidad (RN-324).
 4. **Para muchas unidades a la vez** (RN-328): «⬇ Descargar CSV», llena en Excel el **celular** (y el nombre) del primer
-   residente de cada unidad y «⬆ Cargar CSV». BLOKY muestra qué hará con cada fila —crear, ya estaba, sin celular o error con
-   su línea y motivo— y solo crea al confirmar.
+   residente de cada unidad y «⬆ Cargar CSV». El CSV es una **plantilla**: trae todas las unidades, también las que faltan por
+   generar desde la estructura. BLOKY muestra qué hará con cada fila —crear, ya estaba, sin celular o error con su línea y
+   motivo— y solo crea al confirmar (si hace falta, genera primero las unidades).
 
 **Flujo principal (ALICE, Justo)**
 1. La persona entra con su **celular** y el código; la primera vez completa su **documento** y su nombre (RN-322, RN-327).
