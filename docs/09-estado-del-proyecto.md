@@ -17,6 +17,7 @@ nueva o una sesión de IA distinta.
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | `apps/pwa/` (Mary, la maqueta de ALICE y de la consola), `apps/contable/` (Jeimy), `apps/gestion/` (BOB) y, desde el 2026-09-21, **`apps/bloky/` + `apps/bloky-api/` (BLOKY Dev, el producto real, ADR-0013)** |
 | **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 y **`https://bob-dev.idiky.com`** (ADR-0014) ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) **Desde el 2026-10-19:** con el plugin `cuentas-polygon` (alta de cuentas Polygon por QR) y las claves de **Polygon Amoy** (red de pruebas), publicado como `ad48f90.gestion-12e7c44`; el hash del `rpId` (`bob-dev.idiky.com`) completo desde el 2026-10-21; faltan los usuarios de la app (T-87) |
+| **Cadena / contratos / ALICE (Justo)** | Identidad = `hashIdentidad` (RN-298). Reuniones: Jitsi + middleware en Dev (ADR-0030); ALICE conecta desde `feature/T-106-…` con guía [`18`](./18-reuniones-con-video.md). Contrato on-chain por copropiedad: [ADR-0031](./adr/0031-un-contrato-por-copropiedad.md). **T-87:** diagnóstico sesión + Polygon en [`19`](./19-diagnostico-alice-sesion-y-polygon.md). Avisos: [`justo.md`](./avisos/justo.md) · [`daniel.md`](./avisos/daniel.md) |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
@@ -111,6 +112,50 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-11-05 · Justo · ALICE · Sección Reuniones + Entrar a Jitsi (T-106)
+
+**Qué** (`App-Idiky`, `feature/T-106-preparar-reuniones-video`): pantalla **Reuniones** (mes,
+tarjetas, Entrar / Asumir), acceso desde el inicio (reemplaza Solicitudes en la rejilla), cliente
+`GET …/reuniones` + `POST …/entrar` + `…/asumir`, roles del pase ampliados, `ContextoMiddleware`
+con `copropiedadId` tras el login. Sin SMS real: lista simulada; Entrar exige cookie. Guía local:
+[`App-Idiky/docs/reuniones-video.md`](https://github.com/neuroneter/App-Idiky/blob/feature/T-106-preparar-reuniones-video/docs/reuniones-video.md)
+(incluye prueba manual). Tests: `reuniones_video_test.dart` (lista + entrar mock).
+
+**Bloqueo para Entrar real:** Twilio / Verified Caller IDs (Daniel). Hasta entonces, `111111` solo
+muestra la UI; no abre Jitsi Dev.
+
+### 2026-11-05 · Justo · ALICE · Puerta Flutter = documento → SMS (como BLOKY, T-106 / T-87)
+
+**Qué** (`App-Idiky`, `feature/T-106-preparar-reuniones-video`): la pantalla de ingreso deja de pedir
+celular + cédula juntos. Ahora es el mismo patrón que la web de BLOKY: **tipo y número de
+documento** → código por SMS al celular registrado. Cliente HTTP del middleware en
+`lib/servicios/acceso/`. **Por defecto habla con Dev** (`ACCESO_MIDDLEWARE=true`):
+`/api/acceso/identificar|enviar-codigo|verificar-codigo` y guarda `bloky_sesion` (la reutiliza
+`/entrar`). Semilla local solo con `ACCESO_MIDDLEWARE=false`. Launch: «ALICE (middleware Dev)».
+Guía: [`App-Idiky/docs/acceso-middleware.md`](https://github.com/neuroneter/App-Idiky/blob/feature/T-106-preparar-reuniones-video/docs/acceso-middleware.md).
+
+### 2026-11-05 · Justo · Docs · Diagnóstico T-87: sesión ALICE + firma Polygon por el middleware
+
+**Qué:** [`docs/19-diagnostico-alice-sesion-y-polygon.md`](./19-diagnostico-alice-sesion-y-polygon.md)
+para discutir con Daniel. Separa **sesión de persona** (documento + SMS, mismo patrón que BLOKY) de
+la **passkey** (firma en el teléfono; la privada no sale). Conclusión técnica: el HTTP de alta y
+movimientos **sí puede pasar primero por el middleware**; el teléfono solo firma el challenge.
+Opciones A–E, preguntas concretas y criterio de cierre de T-87. Enlazado desde el índice, avisos
+Justo/Daniel §2 y la nota de T-87 en el tablero.
+
+**No decide:** sigue abierto si el plugin se muda al middleware o el middleware hace proxy a BOB, y
+si Flutter recibe Bearer además de la cookie.
+
+### 2026-11-05 · Justo · Arnés · Traer `main` a `Justo_dev` (T-106, ADR-0031)
+
+**Qué:** merge de `origin/main` en `Justo_dev` para trabajar las reuniones con video desde la rama
+propia. El ADR local «un contrato por copropiedad» pasó de **0029 → 0031** (en `main`, el 0029 es
+Lightsail y el 0030 es la autorización de reuniones). Quedan en la rama la guía
+[`18-reuniones-con-video.md`](./18-reuniones-con-video.md), RN-302…317 y el aviso 3 actualizado.
+
+**Sigue:** alinear ALICE (`feature/T-106-preparar-reuniones-video`) al contrato `/entrar` y construir
+la entrada a la reunión.
 
 ### 2026-11-04 · Daniel · Docs · Guía de las reuniones con video para conectar ALICE (T-106)
 
@@ -259,6 +304,64 @@ coeficiente y un acta que resista revisión.
 - **Sin probar:** video en Jitsi con dos personas, Google/Microsoft, documento en R2 y login de BOB por el nombre.
 - **Qué sigue:** Daniel borra las reglas `Dev` y `Dev-Udp` del NSG; ADR del cambio, respaldo diario de BLOKY, corregir `respaldo.sh`
   y actualizar `CLAUDE.md` y las guías de `infra/`. En AWS, instantáneas automáticas activas a la 1:00 (hora de Colombia).
+
+### 2026-10-25 · ALICE · Sesión de IA (Cursor) con Justo · Preparar app para pases JWT de reuniones (T-106)
+
+**Qué pidió Justo:** bajar avances de Daniel sobre usuarios con token en video; si no hay, dejar
+ALICE lista para cuando exista el middleware.
+
+**Avances Daniel:** ninguno nuevo. Jitsi Dev sigue en `AUTH_TYPE=internal`; el middleware solo
+entrega enlace sin JWT (T-106 📋).
+
+**Hecho** (`App-Idiky`, `feature/T-106-preparar-reuniones-video`):
+`lib/servicios/reuniones_video/` (cliente middleware + simulado + `SalaJitsi`), contrato en
+`docs/reuniones-video.md`, tests en verde. Avisos Justo §3 y Daniel §7 actualizados con el
+`POST …/reuniones/:id/pase` que ALICE espera.
+
+**Sigue:** middleware firma el pase + Jitsi modo `jwt`; luego pantallas de abrir reunión en ALICE.
+
+### 2026-10-25 · SmartContrat · Sesión de IA (Cursor) con Justo · Implementar contratos de copropiedad (CU-B-17, ADR-0031, T-119)
+
+**Qué pidió Justo:** ejecutar el plan de `contracts/copropiedad/` (un contrato por edificio,
+roles, unidades, visitantes, votaciones, escrow).
+
+**Arnés:** ADR-0031; RN-302; CU-B-17 / T-119.
+**Contratos** (`SmartContrat-Idiky`, `feature/CU-B-17-copropiedad`): `contracts/copropiedad/`
+(factory, roles, unidades, pases, votaciones, escrow, IdikyContable). Tests verdes.
+**Amoy:** IdikyContable `0xF785…0433`, FactoryCopropiedad `0x6eed…CED6`,
+RegistroTiposVotacion `0x917B…96BA`, FactoryVotaciones `0xF11a…c220`
+(ver `docs/DESPLIEGUE-COPROPIEDAD-AMOY.md`).
+
+### 2026-10-23 · SmartContrat · Sesión de IA (Cursor) con Justo · Plan: contrato por copropiedad y tokens
+
+**Qué pidió Justo:** documentar el esquema para que cada conjunto tenga su propio contrato y se
+manejen con tokens (unidades, visitantes, recibos) sobre las billeteras ya definidas.
+
+**Hecho** (`SmartContrat-Idiky`, rama `feature/cuentas-quitar-login`): documento
+`docs/PLAN-COPROPIEDAD.md` — diseño, no implementación. Enlazado desde el README y el
+`CLAUDE.md` del repo de contratos. Pendiente: hablarlo con Daniel (y ADR en el arnés si se acepta).
+
+### 2026-10-23 · SmartContrat + arnés · Sesión de IA (Cursor) con Justo · Identidad hashIdentidad y tablero para Daniel
+
+**Qué pidió Justo:** (1) docs de contratos alineadas a RN-298; (2) renombrar identificadores on-chain;
+(3) dejar en el arnés lo temporal y lo pendiente para que Daniel lo revise en cualquier momento.
+
+**Contratos** (`SmartContrat-Idiky`, `feature/cuentas-quitar-login`, sin merge):
+
+| Antes | Ahora |
+|---|---|
+| `hashCorreo` | `hashIdentidad` |
+| `cuentaPorHash` | `cuentaPorIdentidad` |
+| `hashPorCuenta` | `identidadPorCuenta` |
+| `calcularHash(string correo)` | eliminado |
+| `MigracionCorreo.t.sol` | `MigracionActivos.t.sol` |
+
+`forge test` en verde. ABI de BOB local actualizadas. **Amoy 17-oct:** redeploy pendiente.
+
+**En el arnés (para Daniel):** página nueva [`docs/avisos/daniel.md`](./avisos/daniel.md) — qué está
+hecho, qué es temporal (JWT Strapi en ALICE, lab `cadena`, vocabulario «API de BLOKY»), qué falta
+(redeploy Amoy, T-87, T-106, firma blockchain del contrato). Actualizados aviso 2 de Justo, RN-298,
+T-81 y la fila «Cadena / contratos / ALICE» del estado actual.
 
 ### 2026-10-23 · BLOKY · La QA en Estructura (2): confirmar lo leído en un documento se ve (CU-B-10)
 
@@ -1814,6 +1917,38 @@ abierta A1 de CU-A-18). En la semilla (v35), la asamblea en curso se instaló co
 mayoría; T-46 (el poder que aprueba el apoderado).
 
 ---
+
+### 2026-10-19 · ALICE + BOB · Sesión de IA (Cursor) con Justo · RP ID bob-dev.idiky.com para firmar el alta
+
+**Decisión:** el `rpId` de las passkeys de ALICE en BOB Dev es `bob-dev.idiky.com`
+(`RP_ID_HASH=0xfab6a761f3eb155407ddadfba5200a1004a18bb075d69da61fb17e158453933f`).
+
+**Qué se hizo**
+
+- `App-Idiky` (`feature/CU-R-01-alta-qr-passkey`): defaults `ALTA_QR_BASE_URL=https://bob-dev.idiky.com`
+  y `ALTA_QR_RP_ID=bob-dev.idiky.com`; JWT solo por `--dart-define` / `.vscode/alta_qr.local.json`
+  (gitignorado); entitlements iOS `webcredentials:bob-dev.idiky.com`; mensaje claro para
+  `NoCreateOptionException`.
+- `BOB-Idiky` (`feature/T-81-plugin-cuentas`): nginx del proxy sirve
+  `/.well-known/assetlinks.json` (package `com.example.app_idiky`, huella debug) y
+  `apple-app-site-association`; docs y `.env.example` con el `RP_ID_HASH` anterior.
+
+**Avance 2026-10-19 (misma sesión, Justo):** las dos fábricas de Amoy ya tienen
+`rpIdHash = 0xfab6a761…` (`actualizarRpIdHash` desde el owner; txs
+`0x25aaf8b7…` día y `0x35174782…` financiera). Script reutilizable:
+`BOB-Idiky/apps/gestion/scripts/fijar-rp-id-hash-amoy.mjs`. También se copió
+`assetlinks.json` a `apps/gestion/public/.well-known/` (Strapi lo sirve sin
+cambiar nginx).
+
+**Qué falta para firmar de punta a punta**
+
+1. **Desplegar BOB** para que `https://bob-dev.idiky.com/.well-known/assetlinks.json`
+   responda 200 (hoy 404). Basta con publicar `gestion` con `public/.well-known/`
+   o la imagen proxy. Sin esto Android lanza `NoCreateOptionException`.
+2. En el servidor, `RP_ID_HASH=0xfab6a761…` en `gestion-strapi.env` y recrear el pod
+   (`cargar-cadena-amoy.sh`).
+3. En iOS, sustituir `TEAMID` en `apple-app-site-association`.
+4. Probar en teléfono físico (mejor que emulador) con `ALTA_QR_JWT`.
 
 ### 2026-10-18 · BOB · Sesión de IA (Cursor) con Justo · Amoy listo para cargar en BOB Dev, con custodia temporal explícita
 

@@ -64,7 +64,7 @@ Publicado en BOB Dev (`9d9fd77.gestion-e91e8f0`) y en el middleware (`9d9fd77.bl
 | Antes | Ahora |
 |---|---|
 | La persona en `api::persona.persona` de BOB | En el **directorio del middleware**; el plugin la lee y escribe por su entrada de administración (`server/src/directorio.ts`, con `BLOKY_URL` y `BLOKY_ADMIN_TOKEN`) |
-| Identidad en la cadena = hash del correo | **`hashIdentidad`** (RN-298), que calcula el middleware. Se pasa a `registrar(hash, x, y, tipo)` de las fábricas; **los contratos no cambian** |
+| Identidad en la cadena = hash del correo | **`hashIdentidad`** (RN-298), que calcula el middleware. Se pasa a `registrar(hashIdentidad, x, y, tipo)`. Los contratos siguen recibiendo un `bytes32`; **2026-10-23** Justo renombró en Solidity `hashCorreo` → `hashIdentidad` (y `cuentaPorIdentidad`). Amoy del 17-oct hay que redeployar (ver [`daniel.md`](./daniel.md) §1) |
 | `cuentaDia`, `cuentaFinanciera` | **`billeteraTransaccional`**, **`billeteraFinanciera`** en la persona del directorio (RN-299). Las respuestas traen **también** los nombres de antes |
 | `telefonoX/Y`, `tipoAutenticador`, `estadoCadena`, `errorCadena` guardados | No se guardan: la passkey viaja en la firma del alta, y `estadoCadena` se deduce (`registrada` si tiene las dos billeteras) |
 | Reto del alta `idiky.alta.v1:<op>:<hashCorreo>` | **`idiky.alta.v2:<op>:<hashIdentidad>`** (lo arma el servidor; el teléfono firma el que recibe) |
@@ -83,6 +83,13 @@ los dos juegos de nombres.
 **Sigue para hablar (T-87):** las rutas de la app (`/api/cuentas-polygon/...`) **siguen pidiendo sesión
 de usuarios de Strapi**, y BOB no tiene usuarios finales. Falta decidir cómo se identifica la app: lo
 natural, con ADR-0025, es que la app entre por el **middleware** con la sesión de la persona.
+**Temporal en ALICE hoy:** JWT de Strapi (`ALTA_QR_JWT`) solo para probar el alta en Dev; no es el
+diseño final. Estado para Daniel: [`daniel.md`](./daniel.md) §2.
+
+**Diagnóstico listo (2026-11-05):** Justo dejó el mapa completo —login doc+SMS como BLOKY, sesión vs
+passkey, y si la firma Polygon puede pasar primero por el middleware— en
+[`19-diagnostico-alice-sesion-y-polygon.md`](../19-diagnostico-alice-sesion-y-polygon.md). Usen ese
+documento en la conversación; no construir otro login ni ampliar `ALTA_QR_JWT` hasta decidir.
 
 ## 3. Las reuniones con video son de BLOKY, no de BOB — 🟡 Jitsi ya en modo de pases; queda el resto (2026-11-04)
 
@@ -111,28 +118,22 @@ middleware quién entra y sale**. **Cambia una cosa de tu plan:** la sala **no s
 anfitrión o el secretario (solo hay avisos). En ALICE: «Entrar a la reunión», «Enviarme el enlace al correo» y la
 votación durante la reunión. Antes de construir, confirma qué de eso trae `stable-11031`.
 
-**Para acordar con Daniel antes de construir:** el **formato del pase** propuesto en
-[ADR-0030](../adr/0030-autorizacion-de-las-reuniones-con-video.md#formato-del-pase-propuesta-por-acordar-con-justo)
-(RS256 con `kid`, `moderator`, el rol y la reunión). Daniel empieza por el lado del middleware
-([plan de CU-B-15](../casos-de-uso/bloky.md#plan-de-construcción-2026-11-03)); tu parte en Jitsi es la que cierra la
-puerta, y ALICE va al final, cuando existan los correos (T-109) y las votaciones en BLOKY.
-
 **Hecho el 2026-11-03:** el middleware ya firma los pases con ese formato (RS256, `kid` `idiky-reuniones-1`) y sirve la
 llave pública en `https://bloky-dev.idiky.com/api/jitsi/llaves/<sha256 del kid>.pem`, que es como la pide el servidor de
-llaves ASAP de Jitsi. Puedes configurar Jitsi contra esa dirección. El pase sale de `POST /api/c/:id/reuniones/:rid/entrar`.
+llaves ASAP de Jitsi. El pase sale de `POST /api/c/:id/reuniones/:rid/entrar`.
 
-**Hecho el 2026-11-04 (Daniel, para poder probar con un anfitrión y un suplente reales): Jitsi ya está en modo
-de pases** en `Jitsi-Streaming-Idiky` (`main` y `develop`, `infra/jitsi/comun.env`): `AUTH_TYPE=jwt` con la llave
-pública de arriba, sin invitados anónimos ni cuentas, `token_affiliation` para que modere solo quien el pase marca, y
-`JICOFO_ENABLE_AUTH=0` (con autenticación, jicofo hacía moderador a todo el que traía pase). Probado: pase de anfitrión
-→ moderador; de participante → participante; sin pase → no entra. En BLOKY, `BLOKY_JITSI_ACEPTA_PASES=si`.
+**Hecho el 2026-11-04 (Daniel): Jitsi ya está en modo de pases** en `Jitsi-Streaming-Idiky` (`main` y `develop`):
+`AUTH_TYPE=jwt`, sin invitados anónimos ni cuentas. Probado: anfitrión → moderador; participante → participante;
+sin pase → no entra. En BLOKY, `BLOKY_JITSI_ACEPTA_PASES=si`.
+
 **Para ALICE (2026-11-05):** todo lo de Jitsi y el pase, y lo que cambia en tu rama
-`feature/T-106-preparar-reuniones-video` (el camino es `/entrar` y los roles son cuatro; la respuesta ya trae `servidor`, `sala` y `token` como los esperas),
-está en [**`docs/18-reuniones-con-video.md`**](../18-reuniones-con-video.md). Lee el §5 antes de empezar.
+`feature/T-106-preparar-reuniones-video` (el camino es **`/entrar`** —no `/pase`—; roles: anfitrión, suplente,
+secretario, participante; la respuesta trae `servidor`, `sala` y `token`), está en
+[**`docs/18-reuniones-con-video.md`**](../18-reuniones-con-video.md). Lee el §5 antes de empezar. El cliente
+preparado el 2026-10-25 en `App-Idiky` hay que alinearlo a ese contrato.
 
 **Te queda de este aviso:** que la sala espere al anfitrión (hoy quien llega primero con pase entra a la sala vacía),
-cámara y micrófono por permiso del secretario, avisarle al middleware quién entra y sale, y ALICE. Revisa el cambio
-en tu repo antes de seguir: si algo no encaja con lo que tenías pensado, háblalo con Daniel.
+cámara y micrófono por permiso del secretario, avisarle al middleware quién entra y sale, y conectar ALICE.
 
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 
