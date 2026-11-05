@@ -49,6 +49,9 @@ la persona (cookie `bloky_sesion`, ver §5.2).
 ```json
 {
   "enlace": "https://jitsi-dev.idiky.com/idiky-<20 letras>?jwt=<pase>",
+  "servidor": "https://jitsi-dev.idiky.com",
+  "sala": "idiky-<20 letras>",
+  "token": "<pase>",
   "rol": "anfitrion | suplente | secretario | participante",
   "modera": true,
   "conPase": true,
@@ -57,8 +60,8 @@ la persona (cookie `bloky_sesion`, ver §5.2).
 }
 ```
 
-- `enlace` ya trae todo: el servidor (`https://jitsi-dev.idiky.com`), la sala (el camino, sin la
-  barra) y el pase (el parámetro `jwt`). `conPase: false` significa que el middleware no está
+- **ALICE usa `servidor`, `sala` y `token`**, que es lo que piden los SDK de Jitsi. **BLOKY usa
+  `enlace`**, que lleva los tres juntos para abrirlo en el navegador. `token` es `null` y `conPase: false` significa que el middleware no está
   mandando pase (`BLOKY_JITSI_ACEPTA_PASES=no`): con Jitsi en modo de pases, ese enlace no entra.
 - **Errores:** `401` sin sesión · `403` sin derecho o todavía temprano (el `mensaje` dice cuál) ·
   `404` no existe · `409` el cliente no está listo en BLOKY · `503` Jitsi no configurado. Todos traen
@@ -125,25 +128,23 @@ contenedor ni se imprime.
 
 La rama `feature/T-106-preparar-reuniones-video` de `App-Idiky` ya trae el cliente, el SDK
 (`jitsi_meet_flutter_sdk`) y un contrato propuesto (`docs/reuniones-video.md`). **El contrato real
-quedó distinto en tres cosas:**
+quedó distinto en dos cosas:**
 
 | En la rama de ALICE | Lo que hay en el middleware | Qué hacer en ALICE |
 |---|---|---|
 | `POST …/reuniones/:rid/pase` | `POST …/reuniones/:rid/entrar` | Cambiar el camino |
-| `{ servidor, sala, token, rol }` | `{ enlace, rol, modera, conPase, venceEn, estado }` | Sacar `servidor`, `sala` y `token` del `enlace` (§5.1) |
+| `{ servidor, sala, token, rol }` | Los mismos (desde el 2026-11-04), más `enlace`, `modera`, `conPase`, `venceEn` y `estado` | Nada: `PaseSala.desdeJson` los lee directo. Si quieres, usa `modera` |
 | `rol`: `anfitrion \| invitado` | `anfitrion \| suplente \| secretario \| participante` | Ampliar el tipo; `invitado` llega con T-109 |
 
-Si prefieres que el middleware devuelva también `servidor`, `sala` y `token` por separado, se agrega
-sin romper BLOKY: pídeselo a Daniel.
 
-### 5.1 Del enlace al SDK
+### 5.1 Al SDK
 
 ```dart
-final uri = Uri.parse(respuesta['enlace'] as String);
-final servidor = '${uri.scheme}://${uri.host}';          // https://jitsi-dev.idiky.com
-final sala = uri.pathSegments.first;                     // idiky-xxxxxxxxxxxxxxxxxxxx (tal cual, en minúsculas)
-final token = uri.queryParameters['jwt'];                // null si conPase es false
-await JitsiMeet().join(JitsiMeetConferenceOptions(serverURL: servidor, room: sala, token: token));
+await JitsiMeet().join(JitsiMeetConferenceOptions(
+  serverURL: respuesta['servidor'],   // https://jitsi-dev.idiky.com
+  room: respuesta['sala'],            // idiky-xxxxxxxxxxxxxxxxxxxx (tal cual, en minúsculas)
+  token: respuesta['token'],          // null si conPase es false
+));
 ```
 
 - **La sala va exacta:** el pase solo vale para esa `room`. Otra sala, o la misma con otro nombre,
