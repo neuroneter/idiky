@@ -35,3 +35,16 @@ las de asamblea que tú definiste (RN-212 a RN-220), y **necesitan tu confirmaci
 las reuniones con video las necesitan
 ([plan de CU-B-15](../casos-de-uso/bloky.md#plan-de-construcción-2026-11-03)). Conviene hablar con Daniel
 del orden en que se pasan.
+
+## 3. Residentes: quién crea a quién, y quién vota — ⏳ abierto (2026-11-05)
+
+Daniel decidió cómo se crean los residentes en BLOKY y ALICE
+([ADR-0032](../adr/0032-residentes-colaboradores-e-ingreso-de-alice.md)):
+
+- La Administración crea **un residente por unidad**, con unidad y celular: el **administrador de la unidad** (RN-320). Él
+  agrega a los demás de su unidad: residentes (administradores o no), **mascotas** (perfil sin usuario) e **invitados** con
+  fecha de inicio y de fin (RN-321). Es la misma idea de tu **RN-63**, con estos nombres; si tu demo la muestra, conviene
+  alinearla.
+- **Para decidir contigo (T-127):** el rol de la unidad no dice si alguien es **propietario o arrendatario**, y eso importa
+  para votar en asambleas (RN-51, RN-304). ¿Se pregunta al crear al residente, o lo marca después la Administración?
+

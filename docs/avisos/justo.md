@@ -160,3 +160,26 @@ servicio que entra o sale?) y dónde vive esa lógica (¿`SmartContrat-Idiky`, e
 [`docs/diagramas/reuniones-y-usuarios.drawio`](../diagramas/reuniones-y-usuarios.drawio) (se abre en
 app.diagrams.net → Abrir existente → GitHub). Página 1: quién guarda qué. Página 2: una reunión paso a
 paso. Página 3: el mapa de dónde vive cada cliente.
+
+## 6. Residentes, colaboradores y el ingreso de ALICE — ⏳ abierto (2026-11-05)
+
+Daniel decidió el 2026-11-05 cómo se crean los residentes y los colaboradores y cómo entra ALICE
+([ADR-0032](../adr/0032-residentes-colaboradores-e-ingreso-de-alice.md)). **El contrato exacto de la API está en
+[docs/20](../20-alta-e-ingreso-desde-alice.md)**; el middleware lo construye en T-124. Lo que te toca saber:
+
+- **Responde tus preguntas 2 y 3 de [docs/19](../19-diagnostico-alice-sesion-y-polygon.md):** ALICE recibe un **token Bearer**
+  de 30 días que se renueva (no la cookie), y entran a ALICE los **residentes** (con su unidad y su rol) y los
+  **colaboradores** (RN-327). Las preguntas 1, 4 y 5 siguen abiertas (T-129).
+- **Cambia lo que dejaste hoy:** el residente **nace sin documento** (la Administración solo pone unidad y celular), así que
+  **el primer ingreso es por celular**; la primera vez ALICE le pide el **documento** y el nombre (`POST /api/app/yo/documento`),
+  y si ya existía en otra copropiedad se unen. Después puede entrar con documento o celular. El ingreso por documento que
+  hiciste sigue sirviendo para el segundo caso.
+- **Las billeteras las manda crear ALICE** después de completar el documento, con la passkey (RN-322).
+- **El ingreso devuelve dónde está la persona** (`lugares`): por copropiedad, sus unidades con el código (`T2-502`) y el rol
+  en cada una, o su cargo si es colaborador. La persona elige la unidad y puede saltar sin volver a pedir código (RN-326).
+  Tu `selector_residencias` encaja: ahora la lista viene del middleware y abarca varias copropiedades.
+- **El administrador de la unidad gestiona a los suyos desde ALICE:** residentes (administradores o no), **mascotas** (perfil
+  sin usuario) e **invitados con fecha de inicio y de fin** (RN-321). Se bloquea por unidad, no a la persona entera (RN-324).
+- **Reuniones:** `…/reuniones` y `…/entrar` aceptarán el token; tu cliente de reuniones debe usar `/entrar` (no `/pase`).
+- Tu tarea es **T-125**. Mientras T-124 no esté en Dev, construye contra el contrato de docs/20 con datos simulados.
+

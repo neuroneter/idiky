@@ -832,9 +832,56 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 
 ---
 
-### CU-B-06 a CU-B-08 — por escribir
+### CU-B-06
+## CU-B-06 — Las unidades de la copropiedad, con su código
 
-Los demás pasos de la puesta en marcha (CU-B-02) tienen número reservado y se escriben cuando
-se construyan: **CU-B-06** Unidades y coeficientes (con la carga masiva desde Excel y la
-propuesta de coeficiente por área para comparar, docs/09 2026-09-21) · **CU-B-07** Propietarios y
-residentes · **CU-B-08** Tu equipo y sus grupos de colaboradores. (CU-B-09 ya está escrito arriba.)
+> Daniel (2026-11-05): *el proceso para crear residentes inicia por crear la distribución de la propiedad, generando cada unidad
+> con su código dentro de la propiedad; esto se puede hacer una vez esté definida toda la estructura, también si se hace
+> cargando el documento de reglamento en PDF*. Decisión: [ADR-0032](../adr/0032-residentes-colaboradores-e-ingreso-de-alice.md).
+
+- **Actor principal:** Administrador o Delegado
+- **Precondiciones:** CU-B-03 (la estructura armada) o CU-B-10 (el reglamento confirmado).
+- **Resultado esperado:** cada unidad (apartamento, casa, oficina, local, parqueadero, depósito…) existe con un **código único
+  en la copropiedad** (`T2-502`, RN-318), lista para crearle su residente (CU-B-07).
+
+**Flujo principal**
+1. Abre **Unidades**: ve las unidades por estructura, con su código, piso, tipo, área y coeficiente.
+2. Si salieron del reglamento (CU-B-10), ya están. Si la estructura se armó a mano, pulsa **«Generar desde la estructura»**:
+   BLOKY crea las que faltan con su identificador y su código (RN-319), sin tocar las que existen.
+3. Puede **editar el código** de una unidad (RN-318).
+
+**Lo que queda abierto:** el coeficiente a mano y el sugerido por área; la carga desde Excel; la matrícula inmobiliaria.
+
+**Estado:** 📋 por construir (T-120, T-122).
+
+---
+
+### CU-B-07
+## CU-B-07 — Los residentes de cada unidad
+
+> Daniel (2026-11-05): *se crean desde BLOKY y solo los puede crear el Administrador y el Delegado, pero solo se crea un residente
+> por unidad; este residente obtiene el rol administrador de su unidad y puede crear otros residentes solo de su unidad…*
+> Decisión: [ADR-0032](../adr/0032-residentes-colaboradores-e-ingreso-de-alice.md). Contrato con ALICE:
+> [docs/20](../20-alta-e-ingreso-desde-alice.md).
+
+- **Actor principal:** Administrador o Delegado (en BLOKY); el administrador de la unidad (en ALICE)
+- **Precondiciones:** CU-B-06 (la unidad existe con su código).
+- **Resultado esperado:** cada unidad tiene su administrador, que entra a ALICE y gestiona a los de su unidad.
+
+**Flujo principal (BLOKY)**
+1. En **Residentes**, elige una unidad sin administrador y escribe el **celular** (y, si lo sabe, el nombre) del residente.
+2. BLOKY lo crea como **administrador de la unidad** (RN-320). La persona nace sin documento (RN-322).
+3. Puede **bloquear, desbloquear o finalizar** a cualquier residente, por unidad (RN-324).
+
+**Flujo principal (ALICE, Justo)**
+1. La persona entra con su **celular** y el código; la primera vez completa su **documento** y su nombre (RN-322, RN-327).
+2. Ve **dónde está** —sus copropiedades, sus unidades y su rol en cada una— y elige a qué unidad entrar (RN-326).
+3. Si es administrador de la unidad, agrega **residentes** (administradores o no), **mascotas** (sin usuario) e **invitados**
+   con fecha de inicio y de fin (RN-321).
+
+**Reglas de negocio:** RN-320 a RN-327, RN-163, RN-166.
+
+**Lo que queda abierto:** quién vota en las asambleas, propietario o arrendatario (T-127, con Mary); vincular a los miembros
+del consejo y las comisiones (T-126); las billeteras desde ALICE (T-129).
+
+**Estado:** 📋 por construir (T-121, T-122, T-124; ALICE: T-125).

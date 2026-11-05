@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-05 · Daniel · Residentes, colaboradores y el ingreso de ALICE (ADR-0032, RN-318 a RN-327)
+
+- Daniel pidió el módulo para crear residentes y colaboradores, sus roles, y el ingreso único de ALICE con la lista de
+  copropiedades y roles. Revisión de lo que había: el directorio sin roles de la copropiedad en uso, el ingreso solo para
+  Administrador y Delegado y solo con cookie, la tabla `unidad` sin código único ni quien la lea, colaboradores sin ser
+  personas, miembros de juntas por vincular.
+- **Decidido (ADR-0032):** unidad con código `T2-502` (del PDF o generada desde la estructura); la Administración crea un
+  residente por unidad (administrador de la unidad) y él agrega residentes, mascotas (sin usuario) e invitados con fechas;
+  la persona nace sin documento y lo completa en ALICE la primera vez (si ya existía, se une), y ALICE manda crear sus
+  billeteras; el colaborador es persona (documento, celular, correo; su rol es su cargo); se bloquea por unidad; ALICE tiene
+  token de 30 días que se renueva, vale para las reuniones; el ingreso devuelve dónde está y con qué rol.
+- Escritos: CU-B-06 y CU-B-07, RN-318 a RN-327, **docs/20** (contrato de la API para ALICE), tareas **T-120 a T-129** (rango
+  ampliado a T-120 … T-159), aviso 6 para Justo y aviso 3 para Mary (quién vota, T-127). Por construir: T-120 a T-124.
+
 ### 2026-11-05 · Justo · ALICE · Sección Reuniones + Entrar a Jitsi (T-106)
 
 **Qué** (`App-Idiky`, `feature/T-106-preparar-reuniones-video`): pantalla **Reuniones** (mes,
