@@ -852,7 +852,7 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 
 **Lo que queda abierto:** el coeficiente a mano y el sugerido por área; la carga desde Excel; la matrícula inmobiliaria.
 
-**Estado:** 📋 por construir (T-120, T-122).
+**Estado:** 🟡 BLOKY Dev (2026-11-05): ficha «Unidades» con el código, «Generar desde la estructura» y editar el código (T-120).
 
 ---
 
@@ -884,4 +884,4 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 **Lo que queda abierto:** quién vota en las asambleas, propietario o arrendatario (T-127, con Mary); vincular a los miembros
 del consejo y las comisiones (T-126); las billeteras desde ALICE (T-129).
 
-**Estado:** 📋 por construir (T-121, T-122, T-124; ALICE: T-125).
+**Estado:** 🟡 BLOKY Dev (2026-11-05): en «Unidades», crear al administrador de cada unidad, bloquearlo y retirarlo (T-121, T-122); el ingreso de ALICE y la gestión de la unidad en el middleware (T-124, docs/20). Falta ALICE (T-125, Justo).

@@ -113,6 +113,25 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-05 · BLOKY · Unidades, residentes y el ingreso de ALICE construidos (T-120, T-121, T-122, T-124)
+
+- **T-120 (CU-B-06):** cada unidad con su código único (`T2-502`), puesto solo y editable; «Generar desde la estructura»
+  crea las que faltan (pisos y unidades por piso, casas, locales, parqueaderos, depósitos), nunca sobre lo del reglamento.
+  Migración `015`; ficha «Unidades» en BLOKY.
+- **T-121 / T-122 (CU-B-07):** en «Unidades», la Administración crea al administrador de cada unidad con su celular (y su
+  nombre si lo sabe), y lo bloquea, desbloquea o retira con motivo. La persona nace sin documento en el directorio
+  (migración común `009`), con asignación `residente` de origen `bloky`; su unidad y rol en la tabla `residencia`
+  (migración `016`).
+- **T-124 (docs/20 §1 a §5):** `/api/app/acceso/*` por celular o documento, token de ALICE de 30 días (audiencia propia:
+  no se cruza con la cookie de BLOKY), `/api/app/yo` con los lugares (copropiedades → unidades con código y rol, o cargo),
+  completar el documento uniendo personas (migración común `010`, `unida_a`), y la gestión de la unidad (residentes,
+  invitados con fechas, mascotas; bloquear y retirar sin dejarla sin administrador).
+- Ramas `feature/T-120-unidades`, `feature/T-121-residentes`, `feature/T-124-ingreso-alice`; pruebas del middleware pasan;
+  probado en local con la API simulada. Desplegado en AWS (`a2e7311.bloky-015ee35`); las migraciones corrieron en las cinco
+  copropiedades. **Falta:** el token en las reuniones (docs/20 §6), los colaboradores como personas (T-123), cerrar sesiones
+  desde BLOKY (T-128), ALICE (T-125, Justo) y una prueba real con SMS (Twilio en modo de prueba).
+- Ojo: por error se subió `.claude/launch.json` con rutas locales (`f90880f`); se devolvió a como estaba (`6757b8a`).
+
 ### 2026-11-05 · Daniel · Residentes, colaboradores y el ingreso de ALICE (ADR-0032, RN-318 a RN-327)
 
 - Daniel pidió el módulo para crear residentes y colaboradores, sus roles, y el ingreso único de ALICE con la lista de

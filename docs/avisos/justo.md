@@ -181,5 +181,7 @@ Daniel decidió el 2026-11-05 cómo se crean los residentes y los colaboradores 
 - **El administrador de la unidad gestiona a los suyos desde ALICE:** residentes (administradores o no), **mascotas** (perfil
   sin usuario) e **invitados con fecha de inicio y de fin** (RN-321). Se bloquea por unidad, no a la persona entera (RN-324).
 - **Reuniones:** `…/reuniones` y `…/entrar` aceptarán el token; tu cliente de reuniones debe usar `/entrar` (no `/pase`).
-- Tu tarea es **T-125**. Mientras T-124 no esté en Dev, construye contra el contrato de docs/20 con datos simulados.
+- Tu tarea es **T-125**. **Actualización (2026-11-05, tarde): docs/20 §1 a §5 ya están en BLOKY Dev** (ingreso, token,
+  documento, listado y gestión de la unidad). Falta el token en las reuniones (§6). Para probar con SMS real necesitas un
+  número verificado en Twilio y que la Administración te cree como administrador de una unidad en BLOKY.
 

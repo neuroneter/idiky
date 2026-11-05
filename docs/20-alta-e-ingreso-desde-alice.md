@@ -3,8 +3,12 @@
 > **Para quién:** Justo (ALICE) y quien construya el lado del middleware.
 > **Decisión:** [ADR-0032](./adr/0032-residentes-colaboradores-e-ingreso-de-alice.md) · reglas RN-318 a RN-327 · tareas
 > T-120 a T-129.
-> **Estado:** contrato acordado el 2026-11-05; **por construir** en el middleware (T-124). Si algo de aquí cambia al
-> construirlo, se corrige este documento y se avisa en [`avisos/justo.md`](./avisos/justo.md).
+> **Estado (2026-11-05):** **§1 a §5 construidos y desplegados en BLOKY Dev** (`a2e7311.bloky-015ee35`). Falta el §6 (el
+> token en las reuniones) y cerrar sesiones desde BLOKY (T-128). Si algo de aquí cambia, se corrige este documento y se
+> avisa en [`avisos/justo.md`](./avisos/justo.md).
+>
+> **Para probar en Dev:** Twilio está en modo de prueba y solo manda SMS a números verificados; la persona debe existir
+> (la crea la Administración en BLOKY → Unidades → «Crear administrador», con un celular verificado).
 
 Todas las rutas son del **middleware de IDIKY** (BLOKY Dev: `https://bloky-dev.idiky.com`). ALICE no habla con BOB ni con
 ninguna base.
@@ -49,7 +53,9 @@ Responde:
 }
 ```
 
-- `token` va en **cada** llamada siguiente: `Authorization: Bearer <token>`. Dura 30 días y se renueva solo (§3).
+- `token` va en **cada** llamada siguiente: `Authorization: Bearer <token>`. Dura 30 días; antes de que venza, ALICE pide otro
+  con `POST /api/app/sesion/renovar` (§3). Es solo de ALICE: no abre BLOKY, y la cookie de BLOKY no abre ALICE.
+- `persona` trae también `hashIdentidad` y las dos billeteras (vacías hasta crearlas), para el alta en la cadena (T-129).
 - `documentoCompleto: false` → ALICE pide el documento antes de seguir (§2).
 - `lugares` es el listado de RN-326 (§4).
 
@@ -123,7 +129,7 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
 
 ## 6. Reuniones con video
 
-Las rutas de [docs/18](./18-reuniones-con-video.md) aceptan también el token de ALICE:
+**Pendiente (T-124, segunda parte):** las rutas de [docs/18](./18-reuniones-con-video.md) aceptarán también el token de ALICE:
 `GET /api/c/:id/reuniones` y `POST /api/c/:id/reuniones/:rid/entrar` (con `Authorization: Bearer`). El rol en la reunión sale
 de la persona en esa copropiedad (ADR-0030). **Quién vota** (el propietario) está por definir con Mary (T-127).
 
