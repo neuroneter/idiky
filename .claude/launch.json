@@ -4,8 +4,33 @@
     {
       "name": "prototipos",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8090", "--directory", "docs/prototipos"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8090",
+        "--directory",
+        "docs/prototipos"
+      ],
       "port": 8090
+    },
+    {
+      "name": "bloky-api-simulada",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "/Users/neuroneter/Documents/WorkSapce/Bloky-Idiky-residentes/apps/bloky/pruebas/api-simulada.mjs"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "bloky-app",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "--prefix",
+        "/Users/neuroneter/Documents/WorkSapce/Bloky-Idiky-residentes/apps/bloky",
+        "run",
+        "dev"
+      ],
+      "port": 5173
     }
   ]
 }
