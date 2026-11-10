@@ -40,7 +40,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-16 | Recibir notificaciones push | 3 | ⬜ Pendiente | — |
 | CU-R-17 | Directorio de contactos útiles y emergencias | 3 | ⬜ Pendiente | — |
 | CU-R-18 | **Descargar el informe de estado de cuenta** | 1 | ✅ Demo (se emite con consecutivo y código, y se imprime o guarda en PDF desde la app — RN-127) | [ver](./casos-de-uso/residente.md#cu-r-18) |
-| CU-R-19 | **Consultar y descargar mis comprobantes de pago** | 1 | 🟡 Parcial | [ver](./casos-de-uso/residente.md#cu-r-19) |
+| CU-R-19 | **Consultar y descargar mis comprobantes de pago** | 1 | ✅ Demo (2026-11-10: lista de recibos de caja, hoja del recibo y descarga en PDF; también desde la consola) | [ver](./casos-de-uso/residente.md#cu-r-19) |
 | CU-R-20 | **Recibir la citación a asamblea** | 1 | ✅ Demo (ve e imprime la citación que le llegó, CU-A-12). Confirmar asistencia **no se pide** (Mary, 2026-10-12) | [ver](./casos-de-uso/residente.md#cu-r-20) |
 | CU-R-21 | **Entrar a la asamblea y marcar mi asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-21) |
 | CU-R-22 | ~~Otorgar poder a otro copropietario~~ | — | ⛔ Retirado (2026-10-02, puesta al día del catálogo): lo cubren CU-R-23 —dar poder desde la app—, CU-R-31 —enviar el papel en foto— y CU-A-19 —registrarlo en papel—. Lo que dejaba abierto (tope y firma) son preguntas jurídicas de §3 bis | [ver](./casos-de-uso/residente.md#cu-r-22) |

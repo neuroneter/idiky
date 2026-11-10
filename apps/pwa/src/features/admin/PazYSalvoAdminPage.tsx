@@ -205,7 +205,7 @@ export function PazYSalvoAdminPage() {
               {/* Imprimir es como se obtiene el PDF (ADR-0006). */}
               <button className="boton boton--primario" onClick={() => window.print()}>
                 <Icono nombre="certificado" tamano={18} />
-                Imprimir o guardar en PDF
+                Descargar PDF
               </button>
             </div>
           </div>

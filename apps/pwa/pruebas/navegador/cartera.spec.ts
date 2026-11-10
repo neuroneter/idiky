@@ -48,7 +48,7 @@ test("estado de cuenta descargable con consecutivo y código (CU-R-18, RN-127)",
   // reimprimir
   await p.goto(URL + '#/app/cuenta/estado'); await p.waitForTimeout(300)
   await p.getByRole('button', { name: 'Ver' }).first().click(); await p.waitForTimeout(200)
-  check((await texto()).includes('Imprimir o guardar en PDF'), 'un emitido antes se vuelve a ver e imprimir')
+  check((await texto()).includes('Descargar PDF'), 'un emitido antes se vuelve a ver y descargar')
 })
 
 test("paz y salvo desde la consola, con anulación con motivo (CU-A-13)", async ({ page }) => {
@@ -76,7 +76,7 @@ test("paz y salvo desde la consola, con anulación con motivo (CU-A-13)", async 
   check((await fila.textContent()).includes('Al día'), 'muestra el saldo antes de emitir: al día')
   await fila.getByRole('button', { name: 'Emitir paz y salvo' }).click(); await p.waitForTimeout(700)
   let t = await texto()
-  check(/PS-\d{4}-0001/.test(t) && t.includes('PAZ Y SALVO') && t.includes('Imprimir o guardar en PDF'), 'emite con consecutivo y muestra la hoja para imprimir')
+  check(/PS-\d{4}-0001/.test(t) && t.includes('PAZ Y SALVO') && t.includes('Descargar PDF'), 'emite con consecutivo y muestra la hoja para imprimir')
   // unidad con saldo
   await p.fill('#pys-buscar', '901'); await p.waitForTimeout(200)
   const deuda = p.locator('tr', { hasText: '901' }).first()

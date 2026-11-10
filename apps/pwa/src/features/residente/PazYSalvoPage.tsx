@@ -173,7 +173,7 @@ export function PazYSalvoPage() {
               onClick={() => window.print()}
             >
               <Icono nombre="certificado" tamano={18} />
-              Imprimir o guardar en PDF
+              Descargar PDF
             </button>
           </div>
         </div>
@@ -214,7 +214,7 @@ export function PazYSalvoPage() {
       </div>
 
       <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
-        Al imprimir, tu teléfono ofrece «Guardar como PDF»: el certificado queda como archivo
+        Al descargar, tu teléfono ofrece «Guardar como PDF»: el certificado queda como archivo
         para adjuntarlo a tu trámite. Con el número y el código, quien lo reciba puede
         confirmarlo con la administración.
       </p>

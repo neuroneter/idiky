@@ -95,6 +95,11 @@ export function CuentaPage() {
           <Icono nombre="certificado" tamano={16} />
           Descargar estado de cuenta
         </Link>
+        {/* CU-R-19 — Los recibos de caja de todos los pagos, para descargarlos cuando haga falta. */}
+        <Link to="/app/cuenta/pagos" className="boton boton--bloque" style={{ marginTop: 'var(--e2)' }}>
+          <Icono nombre="pagos" tamano={16} />
+          Mis comprobantes de pago
+        </Link>
       </div>
 
       {procesosAbiertos.length > 0 && (

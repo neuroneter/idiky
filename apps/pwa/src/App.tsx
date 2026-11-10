@@ -18,6 +18,7 @@ import { PersonasPage } from './features/residente/PersonasPage'
 import { CuentaPage } from './features/residente/CuentaPage'
 import { PagoPage } from './features/residente/PagoPage'
 import { InformarAbonoPage } from './features/residente/InformarAbonoPage'
+import { ComprobantesPage } from './features/residente/ComprobantesPage'
 import { EstadoCuentaPage } from './features/residente/EstadoCuentaPage'
 import { ReservasPage } from './features/residente/ReservasPage'
 import { PqrsPage } from './features/residente/PqrsPage'
@@ -94,6 +95,7 @@ export function App() {
         <Route path="cuenta/pagar" element={<PagoPage />} />
         <Route path="cuenta/informar" element={<InformarAbonoPage />} />
         <Route path="cuenta/estado" element={<EstadoCuentaPage />} />
+        <Route path="cuenta/pagos" element={<ComprobantesPage />} />
         {/* Solicitudes: reservar, radicar una PQRS y pedir el paz y salvo viven
             bajo un mismo icono (Mary, 2026-08-27). Cada una conserva su ruta
             propia para poder enlazarla desde el inicio y para que "atras"

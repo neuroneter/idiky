@@ -119,7 +119,7 @@ export function CitacionAsamblea({ asamblea }: { asamblea: Asamblea }) {
         </button>
         {viendo && (
           <button className="boton boton--primario" onClick={() => window.print()}>
-            Imprimir o guardar en PDF
+            Descargar PDF
           </button>
         )}
       </div>

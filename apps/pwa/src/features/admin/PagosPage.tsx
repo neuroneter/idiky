@@ -28,6 +28,7 @@ import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { ChipPago } from '../../componentes/Etiquetas'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
+import { HojaReciboCaja } from '../../componentes/HojaReciboCaja'
 
 type Pestana = 'conciliar' | 'recibos'
 
@@ -617,6 +618,26 @@ export function PagosPage() {
               >
                 {sePuedeAnular(reciboAbierto) ? 'Anular recibo' : 'Descartar abono informado'}
               </button>
+            </>
+          )}
+
+          {/* CU-A-27, CU-R-19 — El mismo recibo que descarga el propietario. */}
+          {reciboAbierto.recibo && (
+            <>
+              <div className="separador" />
+              <button className="boton boton--bloque" onClick={() => window.print()}>
+                <Icono nombre="certificado" tamano={16} />
+                Descargar PDF
+              </button>
+              <div className="previsualizacion-hoja" style={{ marginTop: 'var(--e3)' }}>
+                <HojaReciboCaja
+                  pago={reciboAbierto}
+                  copropiedad={sel.copropiedad(bd, sesion.copropiedadId)}
+                  unidad={sel.unidad(bd, reciboAbierto.unidadId)}
+                  propietarios={sel.propietariosDeUnidad(bd, reciboAbierto.unidadId)}
+                  cuotaDe={(id) => bd.cuotas.find((c) => c.id === id)}
+                />
+              </div>
             </>
           )}
         </Modal>
