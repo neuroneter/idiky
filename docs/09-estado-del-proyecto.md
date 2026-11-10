@@ -116,7 +116,8 @@ coeficiente y un acta que resista revisión.
 ### 2026-11-10 · Mary + IA (Claude) · En BLOKY, la Administración crea al propietario (aviso 3, T-127)
 
 Mary: *«la persona que crea BLOKY es el propietario»*. El residente que crea la Administración
-en BLOKY (RN-320) es el **propietario** de la unidad, como en su RN-63; los demás los agrega él
+en BLOKY (RN-320) es el **propietario** de la unidad, como en su RN-63, y **puede ser residente o
+no** (RN-68); los demás los agrega él
 (RN-321). Anotado en `docs/avisos/mary.md` para Daniel, que cierra el aviso.
 
 ### 2026-11-10 · Mary + IA (Claude) · Fecha límite de poderes y el apoderado permanente (aviso 2, RN-309)
