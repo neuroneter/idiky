@@ -1321,52 +1321,60 @@ enlace desde `/app/comunicados`.
 ---
 
 ### CU-R-33
-## CU-R-33 — Dejar a un representante que maneje mi unidad (inmobiliaria o apoderado)
+## CU-R-33 — Mi apartamento lo maneja una inmobiliaria
 
 - **Actor principal:** Propietario.
 - **Precondiciones:** Es propietario vigente de la unidad.
 - **Disparador:** El propietario se va del país, tiene muchas propiedades o arrienda por medio de
-  una inmobiliaria, y deja a alguien que se encargue (Mary, 2026-11-10: *«hay propietarios que se
-  van del país o tienen muchas propiedades y dejan a un apoderado para que les administre»*).
-- **Resultado esperado:** Esa persona o inmobiliaria **hace todo lo que haría el propietario** con
-  esa unidad (Mary, 2026-11-10: *«entiendo que hacen todo»*).
+  una inmobiliaria (Mary, 2026-11-10: *«hay propietarios que se van del país o tienen muchas
+  propiedades y dejan a un apoderado para que les administre»*).
+- **Resultado esperado:** Queda registrada la inmobiliaria y **qué hace ella**: si asiste a las
+  asambleas y si paga la administración (Mary, 2026-11-10: *«en las opciones para el propietario,
+  crear la opción para elegir si tiene el apartamento por inmobiliaria y si esta es la que asiste a
+  asambleas y paga la administración»*).
 
 **Cómo trabaja una inmobiliaria** (para entender el caso): el propietario le firma un contrato de
 administración o mandato; ella arrienda, cobra el canon, le gira al dueño su parte, paga o
 supervisa la cuota de administración según lo pactado, atiende las reparaciones y habla con la
 administración. **El dueño sigue siendo el propietario**, y para votar en la asamblea la
-inmobiliaria necesita su **poder**.
+inmobiliaria necesita su poder.
 
 **Flujo principal**
-1. En Mi unidad, el propietario deja a su **representante**: una persona o una inmobiliaria, con
-   nombre, documento (o NIT) y celular, y **adjunta la foto del soporte**: el poder (general o de
-   notaría) o el contrato con la inmobiliaria. **Sin soporte no se puede crear** (Mary, 2026-11-10:
-   *«pero debe existir algún soporte, porque cómo lo creas»*).
-2. La administración **mira el soporte** y lo recibe, o lo rechaza con motivo (como el poder en
-   foto, RN-96).
-3. Desde su app, el representante hace **todo lo del propietario en esa unidad**: ve el estado de
-   cuenta y paga, recibe los recordatorios de pago y las citaciones, registra y da de baja al
-   arrendatario y a las demás personas, reserva zonas comunes y radica PQRS.
-4. **Para votar**, queda como su **apoderado permanente** (RN-227): cada asamblea le crea el poder
-   solo.
+1. En **Mi unidad → Inmobiliaria**, el propietario toca «Mi apartamento lo maneja una
+   inmobiliaria» y escribe su nombre, NIT, celular y correo.
+2. Marca **si la inmobiliaria asiste a las asambleas por él** y **si paga la administración**.
+3. Adjunta la **foto del soporte**: el contrato con la inmobiliaria o el poder. **Sin soporte no se
+   puede registrar** (Mary: *«debe existir algún soporte, porque cómo lo creas»*).
+4. En la consola, **Unidades → Inmobiliarias**, la administración mira el soporte y la
+   **recibe**, o la rechaza con motivo.
+5. Recibida:
+   - **si asiste a las asambleas**, cada asamblea le crea su poder sola, como un apoderado
+     permanente (RN-227), y también le llega la citación;
+   - **si paga la administración**, a ella le llegan los recordatorios de pago y las gracias
+     (RN-226), en vez de al propietario.
 
 **Flujos alternativos**
-- A1. **Un propietario con varias unidades** deja al mismo representante en todas → para el tope
-  de poderes (RN-220), **las unidades de un mismo propietario cuentan como un solo poder**.
+- A1. **Un propietario con varias unidades** deja la misma inmobiliaria en todas → para el tope de
+  poderes (RN-220), **sus unidades cuentan como un solo poder** (RN-229).
 - A2. **Una inmobiliaria representa a muchos propietarios** del edificio → **cada propietario
   cuenta** para el tope: es lo que el reglamento busca limitar.
-- A3. El propietario lo retira → deja de manejar la unidad y se revocan sus poderes de las
-  asambleas abiertas (RN-227).
+- A3. La administración no la recibe → el propietario ve el motivo y la puede registrar de nuevo.
+- A4. En una asamblea puntual el propietario prefiere ir él → «Esta vez voy yo» (RN-227).
+- A5. Ya no la maneja la inmobiliaria → «Ya no la maneja una inmobiliaria»: se revocan sus poderes
+  de las asambleas abiertas; los de las cerradas quedan (RN-61).
+- A6. Si la inmobiliaria asiste a las asambleas, no se deja además un apoderado permanente: hay un
+  solo representante.
 
 **Reglas de negocio**
-- RN-228: el representante hace todo lo del propietario en esa unidad; vota por poder (RN-227).
-  Exige soporte (poder o contrato), que la administración revisa antes de recibirlo.
+- RN-228: la inmobiliaria de la unidad, con soporte revisado; asiste a las asambleas y/o paga la
+  administración.
 - RN-229: para el tope (RN-220), las unidades de un mismo propietario cuentan como un solo poder.
-- RN-51 sigue: el voto es del propietario, y el representante lo ejerce por él.
+- RN-51 sigue: el voto es del propietario, y la inmobiliaria lo ejerce por poder.
 
 **Para el abogado:** qué soporte vale —poder general de notaría, poder simple o el contrato con la
-inmobiliaria— y si el reglamento puede limitar los poderes de una inmobiliaria. Mientras tanto, se
-exige uno y lo revisa la administración.
+inmobiliaria— y si el reglamento puede limitar los poderes de una inmobiliaria.
 
-**Estado en el demo:** ⬜ — documentado el 2026-11-10; por construir.
+**Estado en el demo:** ✅ — `features/residente/InmobiliariaUnidad.tsx` (Mi unidad) y
+`features/admin/InmobiliariasPorRevisar.tsx` (Unidades de la consola). En el demo la inmobiliaria
+no entra a la app: sus avisos se guardan como mensajes a su celular.
 

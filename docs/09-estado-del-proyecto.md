@@ -113,6 +113,24 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · Mi apartamento lo maneja una inmobiliaria (CU-R-33, RN-228, RN-229)
+
+Mary: *«en las opciones para el propietario, crear la opción para elegir si tiene el apartamento
+por inmobiliaria y si esta es la que asiste a asambleas y paga la administración»*. Reemplaza el
+«representante que hace todo» documentado antes. En **Mi unidad → Inmobiliaria** el propietario
+la registra (nombre, NIT, celular, correo), marca si **asiste a las asambleas** y si **paga la
+administración**, y adjunta el **soporte**, que es obligatorio. En **Unidades** de la consola la
+administración lo revisa y la recibe o la rechaza con motivo. Recibida, si asiste, cada asamblea le
+crea su poder y le llega la citación; si paga, le llegan los recordatorios y las gracias. Para el
+tope de poderes, las unidades de un mismo propietario cuentan como una (RN-229).
+Archivos: `apps/pwa/src/features/residente/InmobiliariaUnidad.tsx` y
+`apps/pwa/src/features/admin/InmobiliariasPorRevisar.tsx` (nuevos),
+`apps/pwa/src/features/residente/{MiUnidadPage,ApoderadoPermanente,AsambleaDetallePage}.tsx`,
+`apps/pwa/src/features/admin/UnidadesPage.tsx`, `apps/pwa/src/dominio/{tipos,reglas}.ts`,
+`apps/pwa/src/datos/repositorio.ts`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/inmobiliaria.spec.ts` (3 nuevas); **71 en verde**.
+
 ### 2026-11-10 · Mary + IA (Claude) · El representante del propietario: inmobiliaria o apoderado (CU-R-33)
 
 Mary: *«hay propietarios que se van del país o tienen muchas propiedades y dejan a un apoderado

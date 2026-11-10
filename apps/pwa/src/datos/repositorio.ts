@@ -28,6 +28,7 @@ import type {
   MayoriaExigida,
   ModalidadAsamblea,
   Persona,
+  InmobiliariaDeUnidad,
   Poder,
   Unidad,
   TipoAsamblea,
@@ -160,6 +161,7 @@ import {
   periodoAGenerar,
   recordatorioQueToca,
   apoderadoPermanenteVigente,
+  inmobiliariaVigente,
   estaEnMora,
   diferenciaCoeficientes,
   canalesDeCitacion,
@@ -681,7 +683,7 @@ function enviarRecordatoriosDePago(bd: BaseDatos, momento: string = ahoraISO()):
     if (!unidad) continue
     const copropiedad = bd.copropiedades.find((c) => c.id === unidad.copropiedadId)
     if (!recordatorioQueToca(cuota, copropiedad?.recordatorioPago)) continue
-    for (const persona of propietariosVigentes(bd, unidad.id)) {
+    for (const persona of quienPagaLaUnidad(bd, unidad.id)) {
       avisarAPersona(bd, {
         copropiedadId: unidad.copropiedadId,
         personaId: persona.id,
@@ -698,6 +700,27 @@ function enviarRecordatoriosDePago(bd: BaseDatos, momento: string = ahoraISO()):
     cambio = true
   }
   return cambio
+}
+
+/** La inmobiliaria registrada de la residencia, si no está retirada ni rechazada. */
+function inmobiliariaActiva(residencia: Residencia): InmobiliariaDeUnidad | undefined {
+  const i = residencia.inmobiliaria
+  return i && !i.retiradaEn && i.revision.estado !== 'rechazada' ? i : undefined
+}
+
+/**
+ * RN-226, RN-228 — A quién le llegan los mensajes de pago: a la inmobiliaria
+ * que paga la administración, si la hay y fue recibida; si no, a los
+ * propietarios.
+ */
+function quienPagaLaUnidad(bd: BaseDatos, unidadId: string): Persona[] {
+  const inmobiliarias = bd.residencias
+    .filter((r) => r.unidadId === unidadId && r.rol === 'propietario' && !r.cierre && residenciaVigente(r))
+    .map((r) => r.inmobiliaria)
+    .filter((i): i is InmobiliariaDeUnidad => !!i && inmobiliariaVigente(i) && i.pagaAdministracion)
+    .map((i) => bd.personas.find((p) => p.id === i.personaId))
+    .filter((p): p is Persona => !!p)
+  return inmobiliarias.length > 0 ? inmobiliarias : propietariosVigentes(bd, unidadId)
 }
 
 /** Los propietarios vigentes de una unidad, como personas. */
@@ -719,7 +742,7 @@ function agradecerPago(bd: BaseDatos, pago: Pago): void {
   const copropiedad = bd.copropiedades.find((c) => c.id === unidad?.copropiedadId)
   if (!unidad || !copropiedad?.recordatorioPago?.activo) return
   const alDia = !estaEnMora(cuotasDe(bd, unidad.id))
-  for (const persona of propietariosVigentes(bd, unidad.id)) {
+  for (const persona of quienPagaLaUnidad(bd, unidad.id)) {
     avisarAPersona(bd, {
       copropiedadId: unidad.copropiedadId,
       personaId: persona.id,
@@ -2566,7 +2589,19 @@ function emitirCitacionEn(
           canales: canalesDeCitacion(persona ?? { email: '' }),
           enviadoEn: ahora,
         }
-      }),
+      })
+      // RN-228 — Si la inmobiliaria asiste a las asambleas, también le llega la citación.
+      .concat(
+        bd.residencias
+          .filter((r) => r.unidadId === unidad.id && r.rol === 'propietario' && !r.cierre && residenciaVigente(r))
+          .flatMap((r) => (r.inmobiliaria && inmobiliariaVigente(r.inmobiliaria) && r.inmobiliaria.asisteAsambleas ? [r.inmobiliaria.personaId] : []))
+          .map((personaId) => ({
+            unidadId: unidad.id,
+            personaId,
+            canales: canalesDeCitacion(bd.personas.find((p) => p.id === personaId) ?? { email: '' }),
+            enviadoEn: ahora,
+          })),
+      ),
   )
 
   if (opciones.publicarEnCartelera) {
@@ -3242,7 +3277,7 @@ function prepararPoder(
   // RN-220 — El tope del reglamento, si el edificio lo configuró.
   if (existente) {
     const copropiedad = bd.copropiedades.find((c) => c.id === asamblea.copropiedadId)
-    const tope = motivoTopePoderes(bd.poderes, asamblea.id, existente.id, copropiedad?.topePoderes)
+    const tope = motivoTopePoderes(bd.poderes, asamblea.id, existente.id, copropiedad?.topePoderes, propietario.personaId)
     if (tope) throw new ErrorDeNegocio(tope)
   }
   if (!existente) bd.personas.push(apoderado)
@@ -3614,11 +3649,28 @@ function residenciaDePropietario(bd: BaseDatos, unidadId: string, personaId: str
  * en que el propietario prefirió ir él, ni pasa el tope del edificio (RN-220).
  * Devuelve si creó alguno.
  */
+/**
+ * RN-227, RN-228 — Quién representa siempre a esta unidad en las asambleas: la
+ * inmobiliaria, si el propietario marcó que asiste; si no, su apoderado
+ * permanente. Con sus «esta vez voy yo».
+ */
+function representanteEnAsambleas(residencia: Residencia): { apoderadoId: string; excepciones?: string[]; porInmobiliaria: boolean } | undefined {
+  const inmobiliaria = residencia.inmobiliaria
+  if (inmobiliaria && inmobiliariaVigente(inmobiliaria) && inmobiliaria.asisteAsambleas) {
+    return { apoderadoId: inmobiliaria.personaId, excepciones: inmobiliaria.excepciones, porInmobiliaria: true }
+  }
+  const permanente = residencia.apoderadoPermanente
+  if (permanente && apoderadoPermanenteVigente(permanente)) {
+    return { apoderadoId: permanente.apoderadoId, excepciones: permanente.excepciones, porInmobiliaria: false }
+  }
+  return undefined
+}
+
 function aplicarApoderadosPermanentes(bd: BaseDatos): boolean {
   let cambio = false
   for (const residencia of bd.residencias) {
-    const permanente = residencia.apoderadoPermanente
-    if (!apoderadoPermanenteVigente(permanente) || residencia.cierre || !residenciaVigente(residencia)) continue
+    const permanente = representanteEnAsambleas(residencia)
+    if (!permanente || residencia.cierre || !residenciaVigente(residencia)) continue
     const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
     if (!unidad) continue
     const copropiedad = bd.copropiedades.find((c) => c.id === unidad.copropiedadId)
@@ -3627,7 +3679,7 @@ function aplicarApoderadosPermanentes(bd: BaseDatos): boolean {
       if (asamblea.estado !== 'convocada' && asamblea.estado !== 'instalada') continue
       if (permanente!.excepciones?.includes(asamblea.id)) continue
       if (poderEnCursoDeUnidad(bd.poderes, asamblea.id, unidad.id)) continue
-      if (motivoTopePoderes(bd.poderes, asamblea.id, permanente!.apoderadoId, copropiedad?.topePoderes)) continue
+      if (motivoTopePoderes(bd.poderes, asamblea.id, permanente!.apoderadoId, copropiedad?.topePoderes, residencia.personaId)) continue
       const hoy = hoyISO()
       const consecutivo = bd.consecutivos.poder
       const documento: Documento = {
@@ -3654,6 +3706,7 @@ function aplicarApoderadosPermanentes(bd: BaseDatos): boolean {
         registradoPor: residencia.personaId,
         registradoEn: ahoraISO(),
         permanente: true,
+        ...(permanente.porInmobiliaria ? { porInmobiliaria: true } : {}),
       })
       cambio = true
     }
@@ -3681,6 +3734,9 @@ export async function registrarApoderadoPermanente(
   const residencia = residenciaDePropietario(bd, parametros.unidadId, parametros.personaId)
   if (residencia.apoderadoPermanente && !residencia.apoderadoPermanente.retiradoEn) {
     throw new ErrorDeNegocio('Ya tienes un apoderado permanente. Retíralo antes de dejar otro.')
+  }
+  if (inmobiliariaActiva(residencia)?.asisteAsambleas) {
+    throw new ErrorDeNegocio('Tu inmobiliaria es la que asiste a las asambleas. Si quieres otro apoderado, cambia esa opción primero.')
   }
   const documento = parametros.documentoApoderado.trim()
   if (documento.length < 5) throw new ErrorDeNegocio('Falta el documento del apoderado.')
@@ -3761,9 +3817,9 @@ export async function noUsarApoderadoEnAsamblea(
   const poder = bd.poderes.find((p) => p.id === parametros.poderId)
   if (!poder || !poder.permanente) throw new ErrorDeNegocio('Ese poder no es del apoderado permanente.')
   const residencia = residenciaDePropietario(bd, poder.unidadId, parametros.personaId)
-  const permanente = residencia.apoderadoPermanente
-  if (!permanente) throw new ErrorDeNegocio('Esa unidad no tiene apoderado permanente.')
-  permanente.excepciones = [...(permanente.excepciones ?? []), poder.asambleaId]
+  const origen = poder.porInmobiliaria ? residencia.inmobiliaria : residencia.apoderadoPermanente
+  if (!origen) throw new ErrorDeNegocio('Esa unidad no tiene apoderado permanente.')
+  origen.excepciones = [...(origen.excepciones ?? []), poder.asambleaId]
   poder.revocadoEn = ahoraISO()
   const documento = bd.documentos.find((d) => d.id === poder.documentoId)
   if (documento) documento.estado = 'anulado'
@@ -3788,6 +3844,119 @@ export async function retirarApoderadoPermanente(
   permanente.retiradoEn = ahora
   for (const poder of bd.poderes) {
     if (!poder.permanente || poder.unidadId !== residencia.unidadId || poder.revocadoEn) continue
+    const asamblea = bd.asambleas.find((a) => a.id === poder.asambleaId)
+    if (asamblea?.estado !== 'convocada' && asamblea?.estado !== 'instalada') continue
+    poder.revocadoEn = ahora
+    const documento = bd.documentos.find((d) => d.id === poder.documentoId)
+    if (documento) documento.estado = 'anulado'
+  }
+  return persistir(bd, residencia)
+}
+
+// ---------------------------------------------------------------------------
+// RN-228 — La inmobiliaria de la unidad
+// ---------------------------------------------------------------------------
+
+/**
+ * RN-228 — El propietario marca que tiene el apartamento por inmobiliaria, con
+ * qué hace ella y **el soporte** (contrato o poder). Queda esperando a que la
+ * administración lo revise.
+ */
+export async function registrarInmobiliaria(
+  bdActual: BaseDatos,
+  parametros: {
+    unidadId: string
+    personaId: string
+    nombre: string
+    nit: string
+    telefono: string
+    email?: string
+    asisteAsambleas: boolean
+    pagaAdministracion: boolean
+    imagen: string
+  },
+): Promise<Resultado<Residencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const residencia = residenciaDePropietario(bd, parametros.unidadId, parametros.personaId)
+  if (inmobiliariaActiva(residencia)) {
+    throw new ErrorDeNegocio('Ya tienes una inmobiliaria registrada. Retírala antes de registrar otra.')
+  }
+  if (parametros.nombre.trim().length < 3) throw new ErrorDeNegocio('Escribe el nombre de la inmobiliaria.')
+  const nit = parametros.nit.trim()
+  if (nit.length < 5) throw new ErrorDeNegocio('Falta el NIT de la inmobiliaria.')
+  if (parametros.telefono.trim().length < 7) throw new ErrorDeNegocio('Falta el celular de la inmobiliaria: es por donde le llegan los avisos.')
+  if (!parametros.imagen) {
+    throw new ErrorDeNegocio('Falta el soporte: la foto del contrato con la inmobiliaria o del poder. Sin él no se puede registrar.')
+  }
+  if (parametros.asisteAsambleas && residencia.apoderadoPermanente && !residencia.apoderadoPermanente.retiradoEn) {
+    throw new ErrorDeNegocio('Ya tienes un apoderado permanente. Si la inmobiliaria va a asistir a las asambleas, retíralo primero.')
+  }
+  const existente = bd.personas.find((p) => p.documento === nit)
+  const persona: Persona = existente ?? {
+    id: nuevoId('per'),
+    nombres: parametros.nombre.trim(),
+    apellidos: '',
+    documento: nit,
+    email: parametros.email?.trim() ?? '',
+    telefono: parametros.telefono.trim(),
+  }
+  if (!existente) bd.personas.push(persona)
+  const ahora = ahoraISO()
+  residencia.inmobiliaria = {
+    personaId: persona.id,
+    asisteAsambleas: parametros.asisteAsambleas,
+    pagaAdministracion: parametros.pagaAdministracion,
+    soporte: { imagen: parametros.imagen, adjuntadoEn: ahora },
+    registradaEn: ahora,
+    revision: { estado: 'esperando' },
+  }
+  return persistir(bd, residencia)
+}
+
+/** RN-228 — La administración revisa el soporte: la recibe, o la rechaza con motivo. */
+export async function revisarInmobiliaria(
+  bdActual: BaseDatos,
+  parametros: { residenciaId: string; personaId: string; recibe: boolean; motivo?: string },
+): Promise<Resultado<Residencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const residencia = bd.residencias.find((r) => r.id === parametros.residenciaId)
+  const inmobiliaria = residencia?.inmobiliaria
+  if (!residencia || !inmobiliaria || inmobiliaria.retiradaEn) throw new ErrorDeNegocio('Esa inmobiliaria no está registrada.')
+  const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
+  if (!unidad || !esAdministracion(bd, parametros.personaId, unidad.copropiedadId)) {
+    throw new ErrorDeNegocio('El soporte de la inmobiliaria lo revisa la administración.')
+  }
+  if (inmobiliaria.revision.estado !== 'esperando') throw new ErrorDeNegocio('Esa inmobiliaria ya fue revisada.')
+  const motivo = parametros.motivo?.trim() ?? ''
+  if (!parametros.recibe && motivo.length < 5) {
+    throw new ErrorDeNegocio('Escribe por qué no se recibe: es lo que el propietario va a corregir.')
+  }
+  inmobiliaria.revision = parametros.recibe
+    ? { estado: 'recibida', por: parametros.personaId, en: ahoraISO() }
+    : { estado: 'rechazada', por: parametros.personaId, en: ahoraISO(), motivo }
+  if (parametros.recibe) aplicarApoderadosPermanentes(bd)
+  return persistir(bd, residencia)
+}
+
+/**
+ * RN-228 — El propietario retira su inmobiliaria. Si asistía a las asambleas,
+ * sus poderes de las asambleas abiertas se revocan; los de las cerradas quedan.
+ */
+export async function retirarInmobiliaria(
+  bdActual: BaseDatos,
+  parametros: { unidadId: string; personaId: string },
+): Promise<Resultado<Residencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const residencia = residenciaDePropietario(bd, parametros.unidadId, parametros.personaId)
+  const inmobiliaria = residencia.inmobiliaria
+  if (!inmobiliaria || inmobiliaria.retiradaEn) throw new ErrorDeNegocio('No tienes una inmobiliaria registrada.')
+  const ahora = ahoraISO()
+  inmobiliaria.retiradaEn = ahora
+  for (const poder of bd.poderes) {
+    if (!poder.porInmobiliaria || poder.unidadId !== residencia.unidadId || poder.revocadoEn) continue
     const asamblea = bd.asambleas.find((a) => a.id === poder.asambleaId)
     if (asamblea?.estado !== 'convocada' && asamblea?.estado !== 'instalada') continue
     poder.revocadoEn = ahora

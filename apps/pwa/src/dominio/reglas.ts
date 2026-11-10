@@ -1790,13 +1790,35 @@ export function motivoTopePoderes(
   asambleaId: string,
   apoderadoId: string,
   tope: number | undefined,
+  /** RN-229 — Quién otorga el nuevo: las unidades de un mismo propietario cuentan como uno. */
+  otorgadoPor?: string,
 ): string | undefined {
   if (!tope) return undefined
-  const lleva = poderes.filter(
-    (p) => p.asambleaId === asambleaId && p.apoderadoId === apoderadoId && poderEnCurso(p),
-  ).length
+  // RN-229 — Se cuentan **propietarios** representados, no unidades (Mary, 2026-11-10).
+  const propietarios = new Set(
+    poderes
+      .filter((p) => p.asambleaId === asambleaId && p.apoderadoId === apoderadoId && poderEnCurso(p))
+      .map((p) => p.otorgadoPor),
+  )
+  if (otorgadoPor && propietarios.has(otorgadoPor)) return undefined
+  const lleva = propietarios.size
   if (lleva < tope) return undefined
-  return `Esa persona ya lleva ${lleva} ${lleva === 1 ? 'poder' : 'poderes'} en esta asamblea, y el reglamento del edificio permite ${tope} por persona.`
+  return `Esa persona ya representa a ${lleva} ${lleva === 1 ? 'propietario' : 'propietarios'} en esta asamblea, y el reglamento del edificio permite ${tope} por persona.`
+}
+
+/**
+ * RN-228 — **La inmobiliaria de la unidad** (Mary, 2026-11-10: *«en las
+ * opciones para el propietario, crear la opción para elegir si tiene el
+ * apartamento por inmobiliaria y si esta es la que asiste a asambleas y paga la
+ * administración»*). Exige soporte, que la administración revisa (*«debe
+ * existir algún soporte»*). Recibida: si asiste a las asambleas, es el
+ * apoderado de la unidad en cada una (como RN-227); si paga la administración,
+ * a ella le llegan los recordatorios y las gracias (RN-226).
+ */
+export function inmobiliariaVigente(
+  inmobiliaria: { retiradaEn?: string; revision: { estado: string } } | undefined,
+): boolean {
+  return !!inmobiliaria && !inmobiliaria.retiradaEn && inmobiliaria.revision.estado === 'recibida'
 }
 
 /**

@@ -17,6 +17,7 @@ import { Icono } from '../../componentes/Icono'
 import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ApoderadoPermanente } from './ApoderadoPermanente'
+import { InmobiliariaUnidad } from './InmobiliariaUnidad'
 
 /** El coeficiente se expresa en porcentaje con cuatro decimales (docs/05, RN-19). */
 function formatearCoeficiente(coeficiente: number): string {
@@ -139,6 +140,7 @@ export function MiUnidadPage() {
       </div>
 
       {/* RN-227 — El apoderado permanente: el voto es del coeficiente de esta unidad. */}
+      <InmobiliariaUnidad />
       <ApoderadoPermanente />
 
       {/* Quien vive aqui es parte de «mi unidad» tanto como el coeficiente, y
