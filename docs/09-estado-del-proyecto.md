@@ -119,7 +119,9 @@ Mary: *«hay propietarios que se van del país o tienen muchas propiedades y dej
 para que les administre»*; sobre las inmobiliarias: *«entiendo que hacen todo»*. Documentado
 **CU-R-33**: el propietario deja un **representante** (persona o inmobiliaria) que hace todo lo
 suyo en esa unidad (RN-228) y vota como su apoderado permanente (RN-227); para el tope, las
-unidades de un mismo propietario cuentan como una (RN-229). **Por construir.**
+unidades de un mismo propietario cuentan como una (RN-229). **El soporte es obligatorio** (foto del
+poder o del contrato), y la administración lo revisa antes de recibirlo (Mary: *«debe existir
+algún soporte, porque cómo lo creas»*). **Por construir.**
 **Para el abogado:** si basta registrarlo en la app o hay que ver el poder general o el contrato.
 
 ### 2026-11-10 · Mary + IA (Claude) · El apoderado permanente (CU-R-23 A6, RN-227)
