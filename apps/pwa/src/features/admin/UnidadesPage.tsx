@@ -27,6 +27,7 @@ import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { CorregirCoeficientes } from './CorregirCoeficientes'
+import { InmobiliariasPorRevisar } from './InmobiliariasPorRevisar'
 
 export function UnidadesPage() {
   const { bd, ejecutar, cargando, mostrarAviso } = useDatos()
@@ -110,6 +111,9 @@ export function UnidadesPage() {
       </div>
 
       {corrigiendo && <CorregirCoeficientes alCerrar={() => setCorrigiendo(false)} />}
+
+      {/* RN-228 — Las unidades que maneja una inmobiliaria, y el soporte por revisar. */}
+      <InmobiliariasPorRevisar />
 
       <div className="tarjeta" style={{ padding: 0 }}>
         <div className="contenedor-tabla">

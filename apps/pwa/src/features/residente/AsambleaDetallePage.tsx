@@ -677,7 +677,9 @@ export function AsambleaDetallePage() {
                   para esta asamblea, y en las demás sigue. */}
               {miPoder.permanente ? (
                 <>
-                  <span className="subtitulo">Es tu apoderado permanente: lo cambias en Mi unidad.</span>
+                  <span className="subtitulo">
+                    {miPoder.porInmobiliaria ? 'Es tu inmobiliaria' : 'Es tu apoderado permanente'}: lo cambias en Mi unidad.
+                  </span>
                   <button
                     className="boton"
                     disabled={cargando}

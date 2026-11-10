@@ -219,6 +219,12 @@ export interface Residencia {
    * residencia del propietario.
    */
   apoderadoPermanente?: ApoderadoPermanente
+  /**
+   * RN-228 — Si el propietario tiene el apartamento por **inmobiliaria**, y qué
+   * hace ella: asistir a las asambleas y pagar la administración (Mary,
+   * 2026-11-10). Solo en la residencia del propietario.
+   */
+  inmobiliaria?: InmobiliariaDeUnidad
 }
 
 // ---------------------------------------------------------------------------
@@ -1315,6 +1321,24 @@ export interface ApoderadoPermanente {
   retiradoEn?: FechaHoraISO
 }
 
+/**
+ * RN-228 — La inmobiliaria que maneja la unidad. Es una persona del sistema (la
+ * razón social en `nombres`, el NIT en `documento`). Vale cuando la
+ * administración revisó el soporte y la recibió. Nada se borra: se retira.
+ */
+export interface InmobiliariaDeUnidad {
+  personaId: string
+  asisteAsambleas: boolean
+  pagaAdministracion: boolean
+  /** El contrato con la inmobiliaria o el poder: sin soporte no se crea (Mary, 2026-11-10). */
+  soporte: Soporte
+  registradaEn: FechaHoraISO
+  revision: { estado: 'esperando' | 'recibida' | 'rechazada'; por?: string; en?: FechaHoraISO; motivo?: string }
+  /** Asambleas a las que el propietario prefirió ir él. */
+  excepciones?: string[]
+  retiradaEn?: FechaHoraISO
+}
+
 /** RN-217 — Lo que decidio el apoderado. Con «no acepto», el motivo es opcional. */
 export interface AceptacionPoder {
   estado: 'esperando' | 'aceptado' | 'no_aceptado'
@@ -1390,6 +1414,8 @@ export interface Poder {
   recepcion?: RecepcionPoder
   /** RN-227 — Lo creó solo el apoderado permanente del propietario. */
   permanente?: boolean
+  /** RN-228 — El apoderado es la inmobiliaria de la unidad. */
+  porInmobiliaria?: boolean
   /** Cuando se revoco. Presente = ya no representa (RN-61). */
   revocadoEn?: FechaHoraISO
 }

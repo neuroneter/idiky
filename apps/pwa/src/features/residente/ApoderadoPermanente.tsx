@@ -30,6 +30,9 @@ export function ApoderadoPermanente() {
   )
   // Solo el propietario: el voto es suyo (RN-51).
   if (!residencia) return null
+  // RN-228 — Si la inmobiliaria asiste a las asambleas, ella es la que representa.
+  const inm = residencia.inmobiliaria
+  if (inm && !inm.retiradaEn && inm.revision.estado !== 'rechazada' && inm.asisteAsambleas) return null
   const permanente = residencia.apoderadoPermanente && !residencia.apoderadoPermanente.retiradoEn ? residencia.apoderadoPermanente : undefined
   const apoderado = permanente ? sel.persona(bd, permanente.apoderadoId) : undefined
   const falta = permanente ? faltaAlApoderadoPermanente(permanente) : undefined
