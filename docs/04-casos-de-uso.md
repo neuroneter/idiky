@@ -131,7 +131,7 @@ con datos reales.
 
 | ID | Caso de uso | Fase | Estado |
 |---|---|---|---|
-| CU-S-01 | Generar cuotas ordinarias mensuales | 2 | ⬜ Pendiente (hoy es manual, CU-A-05) |
+| CU-S-01 | **Generar cuotas ordinarias mensuales** | 2 | ✅ Demo (2026-11-10: el administrador la configura una vez —valor por punto y día del mes— y se genera sola cada mes, una vez por periodo; RN-225; ver CU-A-05) |
 | CU-S-02 | Marcar cuotas vencidas y calcular interés de mora | 1 | 🟡 Parcial (el vencimiento se marca; el interés no se calcula — **solo si la copropiedad lo activó**, RN-42) |
 | CU-S-03 | **Liberar reservas no confirmadas** | 2 | ✅ Demo (vence la solicitud sin respuesta al llegar su turno y avisa al residente; el tablero alerta las que vencen en menos de 48 h — RN-122) |
 | CU-S-04 | Vencer códigos de visitante | 1 | ✅ Demo (por fecha de vigencia) |

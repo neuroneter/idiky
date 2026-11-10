@@ -76,6 +76,12 @@ export interface Copropiedad {
   /** Quién cambió por última vez si se cobra, y cuándo: afecta a todos los propietarios. */
   cambioInteresMora?: { por: string; en: FechaHoraISO }
   /**
+   * RN-225 — La cuota ordinaria que Idiky genera sola cada mes (CU-S-01; Mary,
+   * 2026-11-10). Ausente o `activa: false` = la genera el administrador a mano
+   * (CU-A-05).
+   */
+  cuotaAutomatica?: CuotaAutomatica
+  /**
    * Meses que un antecedente en firme sigue agravando la multa (RN-72).
    *
    * Parametro por la misma razon que los plazos del debido proceso: **la
@@ -1150,6 +1156,20 @@ export interface Asamblea {
   citacionDocumentoId?: string
   /** RN-219 — La constancia de envio: a quien, cuando y por donde. */
   envioCitacion?: EnvioCitacion[]
+}
+
+/** RN-225 — La configuracion de la cuota ordinaria automatica de un edificio. */
+export interface CuotaAutomatica {
+  activa: boolean
+  concepto: string
+  /** Valor por punto de coeficiente, como en la generacion manual (CU-A-05). */
+  valorPorPunto: Dinero
+  /** Dia del mes en que se genera: de 1 a 28, para que exista en todos los meses. */
+  dia: number
+  configuradaPor: string
+  configuradaEn: FechaHoraISO
+  /** Lo que ya genero sola: un periodo, cuando y cuantas cuotas. No se borra. */
+  generadas?: Array<{ periodo: Periodo; en: FechaHoraISO; cuotas: number }>
 }
 
 /** RN-222 — Una correccion del coeficiente: de cuanto a cuanto, por que y quien. */

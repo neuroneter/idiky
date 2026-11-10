@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · La cuota ordinaria se genera sola cada mes (CU-S-01, RN-225)
+
+Mary: *«constrúyela, por favor»*. En la consola, **Cartera → Cuota mensual automática**: el
+administrador la configura una vez (concepto, valor por punto de coeficiente y día del mes, de
+1 a 28) y desde ese día Idiky genera sola la ordinaria del mes para todas las unidades, con el
+mismo cálculo que la manual y nunca dos veces el mismo mes (RN-22). Se puede apagar; lo generado
+queda en su historial. Las extraordinarias siguen siendo a mano (necesitan acta). En el demo el
+proceso corre al abrir la app y al guardar; en BLOKY lo correrá el servidor (**T-49**, Daniel y
+Jeimy).
+Archivos: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/{repositorio,selectores}.ts`,
+`apps/pwa/src/features/admin/CarteraPage.tsx`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/cuota-automatica.spec.ts` (2 nuevas); **63 en verde**.
+
 ### 2026-11-10 · Mary + IA (Claude) · La opción «cobra interés de mora» en la consola (RN-42, T-48)
 
 Mary: *«si está en BLOKY está bien; para el administrador debe estar la opción si aplica o no

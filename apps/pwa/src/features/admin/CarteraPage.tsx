@@ -16,9 +16,10 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { configurarInteresMora, generarCuotas, previsualizarCuotas, type ParametrosGeneracion } from '../../datos/repositorio'
+import { configurarCuotaAutomatica, configurarInteresMora, generarCuotas, previsualizarCuotas, type ParametrosGeneracion } from '../../datos/repositorio'
 import {
   cobraInteresMora,
+  proximaGeneracion,
   abonadoDeCuota,
   calcularSaldo,
   calcularSaldoVencido,
@@ -143,6 +144,9 @@ export function CarteraPage() {
     <>
       {/* RN-42, CU-A-25 — Si este edificio cobra interés de mora. La tasa la fija la ley. */}
       <InteresMora />
+
+      {/* RN-225, CU-S-01 — La cuota ordinaria que se genera sola cada mes. */}
+      <CuotaAutomaticaTarjeta />
 
       <div className="fila">
         <div className="filtros">
@@ -551,6 +555,96 @@ function InteresMora() {
           : 'Sin cambios: rige lo que dice la ley (se cobra).'}{' '}
         El cálculo del interés en la cartera llega cuando se acuerde con la aplicación contable.
       </p>
+    </div>
+  )
+}
+
+/** RN-225 — Configurar la cuota ordinaria que Idiky genera sola cada mes. */
+function CuotaAutomaticaTarjeta() {
+  const { bd, ejecutar, cargando } = useDatos()
+  const { sesion } = useSesion()
+  const config = sesion ? sel.copropiedad(bd, sesion.copropiedadId)?.cuotaAutomatica : undefined
+  const [editando, setEditando] = useState(false)
+  const [concepto, setConcepto] = useState(config?.concepto ?? 'Cuota de administración')
+  const [valor, setValor] = useState(String(config?.valorPorPunto ?? 45000))
+  const [dia, setDia] = useState(String(config?.dia ?? 1))
+  if (!sesion) return null
+
+  const activa = !!config?.activa
+  const tiene = (periodo: string) => sel.tieneOrdinariaDelPeriodo(bd, sesion.copropiedadId, periodo)
+  const proxima = config ? proximaGeneracion(config, tiene) : undefined
+  const ultimas = [...(config?.generadas ?? [])].reverse().slice(0, 3)
+
+  async function guardar(nuevaActiva: boolean) {
+    const hecho = await ejecutar(
+      (base) =>
+        configurarCuotaAutomatica(base, {
+          copropiedadId: sesion!.copropiedadId,
+          personaId: sesion!.personaId,
+          activa: nuevaActiva,
+          concepto,
+          valorPorPunto: Number(valor),
+          dia: Number(dia),
+        }),
+      nuevaActiva ? 'Cuota automática guardada.' : 'Cuota automática apagada: se vuelve a generar a mano.',
+    )
+    if (hecho) setEditando(false)
+  }
+
+  return (
+    <div className="tarjeta">
+      <div className="fila">
+        <strong>Cuota mensual automática</strong>
+        <span className={activa ? 'chip chip--exito' : 'chip'}>{activa ? 'Activa' : 'Apagada'}</span>
+      </div>
+      <p className="subtitulo">
+        {activa && config
+          ? `Cada mes, el día ${config.dia}, Idiky genera «${config.concepto}» para todas las unidades: ${formatearDinero(config.valorPorPunto)} por punto de coeficiente.${proxima ? ` Próxima: ${formatearFecha(proxima)}.` : ''}`
+          : 'Hoy la cuota ordinaria se genera a mano cada mes. Actívala para que Idiky la genere sola. Las extraordinarias siguen siendo a mano: cada una necesita su acta.'}
+      </p>
+
+      {editando ? (
+        <div className="columna" style={{ gap: 'var(--e2)' }}>
+          <div className="campo">
+            <label htmlFor="auto-concepto">Concepto</label>
+            <input id="auto-concepto" value={concepto} onChange={(e) => setConcepto(e.target.value)} />
+          </div>
+          <div className="campo">
+            <label htmlFor="auto-valor">Valor por punto de coeficiente</label>
+            <input id="auto-valor" inputMode="numeric" value={valor} onChange={(e) => setValor(e.target.value)} />
+          </div>
+          <div className="campo">
+            <label htmlFor="auto-dia">Día del mes en que se genera (1 a 28)</label>
+            <input id="auto-dia" type="number" min={1} max={28} value={dia} onChange={(e) => setDia(e.target.value)} />
+          </div>
+          <div className="grupo-botones">
+            <button className="boton boton--primario" disabled={cargando} onClick={() => void guardar(true)}>
+              {activa ? 'Guardar cambios' : 'Activar'}
+            </button>
+            <button className="boton" disabled={cargando} onClick={() => setEditando(false)}>
+              Cancelar
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="grupo-botones">
+          <button className="boton" onClick={() => setEditando(true)}>
+            {activa ? 'Cambiar' : 'Configurar'}
+          </button>
+          {activa && (
+            <button className="boton" disabled={cargando} onClick={() => void guardar(false)}>
+              Apagar
+            </button>
+          )}
+        </div>
+      )}
+
+      {ultimas.length > 0 && (
+        <p className="tenue" style={{ fontSize: 'var(--texto-xs)', marginTop: 'var(--e2)' }}>
+          Generadas solas:{' '}
+          {ultimas.map((g) => `${formatearPeriodo(g.periodo)} (${g.cuotas} cuotas)`).join(' · ')}
+        </p>
+      )}
     </div>
   )
 }

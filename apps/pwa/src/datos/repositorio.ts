@@ -157,6 +157,7 @@ import {
   motivoTopePoderes,
   motivoNoVotaPorMora,
   motivoNoCorrigeCoeficientes,
+  periodoAGenerar,
   diferenciaCoeficientes,
   canalesDeCitacion,
   fechaSegundaConvocatoria,
@@ -285,6 +286,8 @@ function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boo
     })
   }
   if (avisarFinesDeEstadia(bd, momento)) cambio = true
+  // RN-225 — La cuota ordinaria del mes, si el edificio la tiene automática.
+  if (generarCuotasAutomaticas(bd, momento)) cambio = true
   return cambio
 }
 
@@ -595,8 +598,15 @@ export async function generarCuotas(
     )
   }
 
+  const nuevas = construirCuotas(bd, parametros)
+  bd.cuotas.push(...nuevas)
+  return persistir(bd, nuevas)
+}
+
+/** Las cuotas de un periodo, tal como las genera CU-A-05 (y RN-225, sola). */
+function construirCuotas(bd: BaseDatos, parametros: ParametrosGeneracion): Cuota[] {
   const esExtraordinaria = parametros.tipo === 'extraordinaria'
-  const nuevas: Cuota[] = previsualizarCuotas(bd, parametros).map((linea) => ({
+  return previsualizarCuotas(bd, parametros).map((linea) => ({
     id: nuevoId('cuo'),
     unidadId: linea.unidadId,
     periodo: parametros.periodo,
@@ -618,9 +628,80 @@ export async function generarCuotas(
         }
       : {}),
   }))
+}
 
-  bd.cuotas.push(...nuevas)
-  return persistir(bd, nuevas)
+/** RN-22 — Si el periodo ya tiene sus ordinarias en esa copropiedad. */
+function tieneOrdinaria(bd: BaseDatos, copropiedadId: string, periodo: string): boolean {
+  const unidades = new Set(bd.unidades.filter((u) => u.copropiedadId === copropiedadId).map((u) => u.id))
+  return bd.cuotas.some((c) => c.periodo === periodo && c.tipo === 'ordinaria' && unidades.has(c.unidadId))
+}
+
+/**
+ * RN-225 — El proceso que genera sola la cuota ordinaria del mes. En la fase 2
+ * lo corre un servidor a su hora; el demo lo aplica al abrir la app y al
+ * guardar la configuración. Devuelve si generó algo.
+ */
+function generarCuotasAutomaticas(bd: BaseDatos, momento: string = ahoraISO()): boolean {
+  let cambio = false
+  for (const copropiedad of bd.copropiedades) {
+    const config = copropiedad.cuotaAutomatica
+    const periodo = periodoAGenerar(config, (p) => tieneOrdinaria(bd, copropiedad.id, p))
+    if (!config || !periodo) continue
+    const nuevas = construirCuotas(bd, {
+      copropiedadId: copropiedad.id,
+      periodo,
+      tipo: 'ordinaria',
+      concepto: config.concepto,
+      valor: config.valorPorPunto,
+    })
+    bd.cuotas.push(...nuevas)
+    config.generadas = [...(config.generadas ?? []), { periodo, en: momento, cuotas: nuevas.length }]
+    cambio = true
+  }
+  return cambio
+}
+
+/**
+ * RN-225 — El administrador configura (o apaga) la cuota ordinaria automática.
+ * Al guardarla corre el proceso: si hoy ya pasó el día y el mes no tiene su
+ * ordinaria, se genera de una vez.
+ */
+export async function configurarCuotaAutomatica(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    personaId: string
+    activa: boolean
+    concepto: string
+    valorPorPunto: number
+    dia: number
+  },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('La cuota automática la configura la administración (RN-49).')
+  }
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  if (parametros.activa) {
+    if (parametros.concepto.trim().length < 4) throw new ErrorDeNegocio('Escribe el concepto de la cuota.')
+    if (!(parametros.valorPorPunto > 0)) throw new ErrorDeNegocio('El valor por punto de coeficiente tiene que ser mayor que cero.')
+    if (!Number.isInteger(parametros.dia) || parametros.dia < 1 || parametros.dia > 28) {
+      throw new ErrorDeNegocio('El día del mes va de 1 a 28, para que exista en todos los meses.')
+    }
+  }
+  copropiedad.cuotaAutomatica = {
+    ...(copropiedad.cuotaAutomatica ?? {}),
+    activa: parametros.activa,
+    concepto: parametros.concepto.trim() || copropiedad.cuotaAutomatica?.concepto || 'Cuota de administración',
+    valorPorPunto: parametros.valorPorPunto,
+    dia: parametros.dia,
+    configuradaPor: parametros.personaId,
+    configuradaEn: ahoraISO(),
+  }
+  generarCuotasAutomaticas(bd)
+  return persistir(bd, copropiedad)
 }
 
 // ---------------------------------------------------------------------------
