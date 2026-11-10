@@ -119,6 +119,15 @@ e inhabilitar con motivo).
 5. El administrador confirma; el sistema crea las cuotas en estado `pendiente`, y las
    extraordinarias quedan con su acta guardada.
 
+**Cuota ordinaria automática (CU-S-01, RN-225; Mary, 2026-11-10).** En Cartera, la tarjeta
+**«Cuota mensual automática»** se configura una vez: concepto, valor por punto de coeficiente y
+día del mes (1 a 28). Desde ese día, si el mes todavía no tiene su ordinaria, Idiky la genera
+sola para todas las unidades, con el mismo cálculo y vencimiento que la generación manual, y
+**nunca dos veces el mismo mes** (RN-22). Se apaga cuando se quiera, y lo generado queda en su
+historial. Las **extraordinarias siguen siendo a mano**: cada una necesita su acta. En el demo
+el proceso corre al abrir la app y al guardar la configuración; en la fase 2 lo corre el
+servidor. Como toca la cartera, se acuerda con la contable de Jeimy; en BLOKY: T-49.
+
 > **Una cuota extraordinaria siempre se aprueba en asamblea** (decisión del equipo,
 > 2026-08-27), y el soporte es **el acta**. A diferencia de las multas o de la tasa de interés,
 > aquí **no existe la opción «reglamento»**.

@@ -405,3 +405,9 @@ export function administradorDe(bd: BaseDatos): Persona | undefined {
   return persona(bd, bd.perfilesDemo.find((perfil) => perfil.rol === 'admin')?.personaId)
 }
 
+
+/** RN-22, RN-225 — Si el periodo ya tiene sus cuotas ordinarias en la copropiedad. */
+export function tieneOrdinariaDelPeriodo(bd: BaseDatos, copropiedadId: string, periodo: string): boolean {
+  const unidades = new Set(unidadesDe(bd, copropiedadId).map((u) => u.id))
+  return bd.cuotas.some((c) => c.periodo === periodo && c.tipo === 'ordinaria' && unidades.has(c.unidadId))
+}

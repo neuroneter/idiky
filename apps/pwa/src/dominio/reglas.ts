@@ -295,6 +295,40 @@ export function cobraInteresMora(copropiedad: { cobraInteresMora?: boolean } | u
   return copropiedad?.cobraInteresMora ?? true
 }
 
+/**
+ * RN-225 — **La cuota ordinaria se genera sola cada mes** (CU-S-01; Mary,
+ * 2026-11-10: *«constrúyela»*). El administrador configura una vez el valor por
+ * punto de coeficiente y el dia del mes (1 a 28); desde ese dia, si el periodo
+ * todavia no tiene su ordinaria, Idiky la genera para todas las unidades, igual
+ * que la generacion manual (CU-A-05). Nunca dos veces el mismo periodo (RN-22).
+ * Las extraordinarias siguen siendo manuales: cada una necesita su acta (RN-46).
+ */
+export function periodoAGenerar(
+  config: { activa: boolean; dia: number } | undefined,
+  yaTieneOrdinaria: (periodo: string) => boolean,
+  hoy: FechaISO = hoyISO(),
+): string | undefined {
+  if (!config?.activa) return undefined
+  const periodo = hoy.slice(0, 7)
+  if (Number(hoy.slice(8, 10)) < config.dia) return undefined
+  return yaTieneOrdinaria(periodo) ? undefined : periodo
+}
+
+/** RN-225 — La próxima fecha en que se generará sola, para decirla en pantalla. */
+export function proximaGeneracion(
+  config: { activa: boolean; dia: number },
+  yaTieneOrdinaria: (periodo: string) => boolean,
+  hoy: FechaISO = hoyISO(),
+): FechaISO | undefined {
+  if (!config.activa) return undefined
+  const dia = String(config.dia).padStart(2, '0')
+  const esteMes = `${hoy.slice(0, 7)}-${dia}`
+  if (!yaTieneOrdinaria(hoy.slice(0, 7))) return esteMes < hoy ? hoy : esteMes
+  const [a, m] = hoy.slice(0, 7).split('-').map(Number)
+  const siguiente = m === 12 ? `${a + 1}-01` : `${a}-${String(m + 1).padStart(2, '0')}`
+  return `${siguiente}-${dia}`
+}
+
 /** RN-05 — Prorrateo de una cuota extraordinaria por coeficiente. */
 export function prorratearPorCoeficiente(valorTotal: number, coeficiente: number): number {
   return Math.round((valorTotal * coeficiente) / 100)
