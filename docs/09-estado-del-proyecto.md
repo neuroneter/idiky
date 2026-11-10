@@ -113,6 +113,13 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · La tasa de mora la registra el administrador (CU-A-25)
+
+Mary: *«el interés de mora lo debe registrar el administrador en la parametrización»*. Cambia lo
+decidido el 2026-10-15: ya no la carga IDIKY desde BOB, sino el administrador en la
+parametrización de su edificio. T-47 queda retirada; CU-A-25 y §3 quinquies, actualizados.
+Solo documentación por ahora.
+
 ### 2026-11-10 · Mary + IA (Claude) · Mis comprobantes de pago (CU-R-19)
 
 Mary: *«sí, vamos con los comprobantes»*. En **Mi cuenta → Mis comprobantes de pago** el

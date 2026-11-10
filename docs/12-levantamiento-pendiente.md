@@ -323,9 +323,8 @@ suponer sin equivocarnos**:
 - **¿La asamblea puede bajarla a cero (no cobrar)?** La ley dice «un interés inferior». →
   **Para el abogado.**
 - ~~**Quién carga cada periodo el interés bancario corriente**~~ → ✅ **Respondido (Mary,
-  2026-10-15):** **IDIKY, una vez al mes para todos los edificios**, desde BOB (T-47); el
-  administrador no lo carga. Más adelante, automático desde la publicación de la
-  Superintendencia Financiera.
+  2026-10-15), cambiado el 2026-11-10:** **el administrador, en la parametrización del
+  edificio** (CU-A-25). T-47 queda retirada.
 - ~~**Quién mantiene la tasa actualizada.**~~ → ✅ **Respondido (Mary, 2026-08-27):** la
   registra **el administrador de cada copropiedad**.
   *Consecuencia:* la tasa la teclea una persona, así que la app tiene que protegerla de
