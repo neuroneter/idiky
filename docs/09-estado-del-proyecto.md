@@ -113,6 +113,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · El representante del propietario: inmobiliaria o apoderado (CU-R-33)
+
+Mary: *«hay propietarios que se van del país o tienen muchas propiedades y dejan a un apoderado
+para que les administre»*; sobre las inmobiliarias: *«entiendo que hacen todo»*. Documentado
+**CU-R-33**: el propietario deja un **representante** (persona o inmobiliaria) que hace todo lo
+suyo en esa unidad (RN-228) y vota como su apoderado permanente (RN-227); para el tope, las
+unidades de un mismo propietario cuentan como una (RN-229). **Por construir.**
+**Para el abogado:** si basta registrarlo en la app o hay que ver el poder general o el contrato.
+
 ### 2026-11-10 · Mary + IA (Claude) · El apoderado permanente (CU-R-23 A6, RN-227)
 
 Mary: *«sí, construye la propuesta del apoderado»*. En **Mi unidad → Apoderado permanente** el
