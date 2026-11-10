@@ -28,8 +28,14 @@ const CUOTA: Record<EstadoCuota, [string, Variante]> = {
   vencida: ['Vencida', 'error'],
 }
 
-export function ChipCuota({ estado }: { estado: EstadoCuota }) {
-  const [texto, variante] = CUOTA[estado]
+/**
+ * `paraPropietario`: en la app del propietario la vencida se dice «Pendiente»,
+ * sin rojo: se le recuerda, no se le juzga (`docs/08-convenciones.md` §6 bis).
+ * La consola sigue diciendo «Vencida»: allá es dato de trabajo.
+ */
+export function ChipCuota({ estado, paraPropietario }: { estado: EstadoCuota; paraPropietario?: boolean }) {
+  const [texto, variante] =
+    paraPropietario && estado === 'vencida' ? (['Pendiente', 'alerta'] as [string, Variante]) : CUOTA[estado]
   return <Chip texto={texto} variante={variante} />
 }
 

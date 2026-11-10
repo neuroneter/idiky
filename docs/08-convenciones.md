@@ -227,8 +227,9 @@ documentos—:
 - **Agradecer.** Quien paga recibe las gracias, y si quedó al día se le dice (RN-226).
 - **Sin reproche.** Nada de «moroso», «deudor» ni mayúsculas de alarma. Se dice qué hay y cómo
   resolverlo: «tienes una cuota pendiente», «la puedes pagar en la app».
-- **El lenguaje contable se queda en la consola.** El administrador lee «saldo» y «mora»; el
-  propietario, «valor adeudado» y «pendiente».
+- **El lenguaje contable se queda en la consola.** El administrador lee «saldo», «vencida» y
+  «mora»; el propietario, «valor adeudado» y «pendiente desde el …», sin rojo (`ChipCuota
+  paraPropietario`, `pendienteDesde`).
 
 ## 7. Definición de "terminado"
 

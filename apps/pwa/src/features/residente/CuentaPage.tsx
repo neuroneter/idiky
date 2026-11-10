@@ -13,7 +13,7 @@ import {
   calcularSaldo,
   calcularSaldoVencido,
   cuotaPendiente,
-  diasDeMora,
+  pendienteDesde,
   estadoRealCuota,
   sancionEnCurso,
 } from '../../dominio/reglas'
@@ -39,7 +39,7 @@ export function CuentaPage() {
   const cuotas = sel.cuotasDeUnidad(bd, sesion.unidadActivaId)
   const saldo = calcularSaldo(cuotas)
   const vencido = calcularSaldoVencido(cuotas)
-  const mora = diasDeMora(cuotas)
+  const desde = pendienteDesde(cuotas)
   // Los procesos abiertos NO suman al valor adeudado: una multa se convierte en
   // cuota solo al quedar en firme (RN-39). Se enlazan desde aqui —que es donde
   // la persona viene a ver que debe— justamente para dejar claro que todavia no
@@ -72,13 +72,15 @@ export function CuentaPage() {
         <div className="dato-grande" style={{ margin: 'var(--e1) 0' }}>
           {formatearDinero(saldo)}
         </div>
+        {/* Sin «días de mora» ni rojo: se dice qué hay pendiente y desde cuándo
+            (docs/08-convenciones.md §6 bis). */}
         {vencido > 0 ? (
           <p className="subtitulo">
-            De ese total, <strong>{formatearDinero(vencido)}</strong> está vencido
-            {mora > 0 && ` (${mora} dias de mora)`}.
+            De ese total, <strong>{formatearDinero(vencido)}</strong> está pendiente
+            {desde ? ` desde el ${formatearFecha(desde)}` : ''}. Puedes ponerte al día cuando quieras.
           </p>
         ) : (
-          <p className="subtitulo">Tu unidad no tiene cuotas vencidas.</p>
+          <p className="subtitulo">No tienes cuotas pendientes de meses anteriores. ¡Gracias por estar al día!</p>
         )}
         {saldo > 0 && (
           <Link
@@ -232,7 +234,7 @@ export function CuentaPage() {
                     <strong className="numerico">
                       {formatearDinero(cuotaPendiente(cuota) ? cuota.saldo : cuota.valor)}
                     </strong>
-                    <ChipCuota estado={estado} />
+                    <ChipCuota estado={estado} paraPropietario />
                   </div>
                 </div>
               </div>
