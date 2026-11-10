@@ -132,7 +132,8 @@ del propietario. Para cada asamblea, Idiky le crea el poder de esa asamblea solo
 fecha límite. Así cada asamblea sigue teniendo su poder (RN-31 se conserva), pero el propietario no
 lo tiene que pedir cada vez. Puede quitarlo para una asamblea puntual, o del todo.
 **Para el abogado:** si un poder general, que sirve para varias asambleas, es válido o lo debe
-permitir el reglamento. No se construye hasta confirmarlo.
+permitir el reglamento. **Mary, 2026-11-10: de acuerdo con la propuesta** (*«de acuerdo con lo de
+los poderes»*). Falta que Daniel la lleve a BLOKY junto con RN-309.
 
 ### 2026-11-10 · Mary + IA (Claude) · Portería es de Jeimy
 
