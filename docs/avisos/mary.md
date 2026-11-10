@@ -18,6 +18,8 @@ Desde el 2026-11-01 el entorno vive en **AWS Lightsail**
   IDIKY. Los pasos están en [`infra/guia-de-despliegue.md`](../../infra/guia-de-despliegue.md).
 - **Tu llave de despliegue** hay que autorizarla en el servidor nuevo, si vas a desplegar.
 
+**Mary, 2026-11-10:** *«de acuerdo»*. Queda pendiente que Daniel le pase la dirección nueva de la PWA por un canal privado. (El aviso lo cierra Daniel.)
+
 ## 2. Reuniones con video: dos reglas tuyas por confirmar — ⏳ abierto (2026-11-03)
 
 Daniel definió quién entra a una reunión y cómo se conduce
