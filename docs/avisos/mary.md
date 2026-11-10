@@ -28,6 +28,12 @@ las de asamblea que tú definiste (RN-212 a RN-220), y **necesitan tu confirmaci
 
 - **RN-309, el plazo de los poderes:** la administración define hasta cuándo se puede otorgar y revocar
   un poder antes de la reunión, y nunca dentro de su ventana; si no se revocó antes, queda.
+
+  **Mary, 2026-11-10:** de acuerdo con la fecha límite: *«para cada reunión hay una fecha límite
+  para la entrega de poderes»*. Y pide algo más: *«si hay un propietario el cual tiene apoderado,
+  debe quedar parametrizado en su perfil para evitar cada asamblea solicitar el poder»*. Esto
+  **cambia RN-31** (hoy cada asamblea tiene sus propios poderes) y está por definir con Daniel: ver
+  la propuesta del apoderado permanente en `docs/09-estado-del-proyecto.md` (2026-11-10).
 - **RN-316, el secretario conduce las votaciones:** las abre con un tiempo máximo y puede extenderlo si
   no hay quórum, sin superar ese tiempo; puede corregir la redacción antes de abrirlas y luego quedan
   bloqueadas, con historia para el acta. En una extraordinaria, solo lo del orden del día; en una
