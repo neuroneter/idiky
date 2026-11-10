@@ -113,6 +113,13 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · Cobrar o no el interés de mora lo decide el edificio (RN-42)
+
+Mary: *«los intereses de mora están parametrizados por ley, no obstante hay edificios en que se
+cobra o no»*. En la parametrización, el administrador marca si su edificio **cobra interés de
+mora (Sí/No)**; la tasa es la de la ley, o una inferior aprobada por la asamblea. Actualizados
+CU-A-25 (paso 1 y A1) y RN-42. **Para el abogado:** si «no cobrar» exige acta de asamblea.
+
 ### 2026-11-10 · Mary + IA (Claude) · La tasa de mora la registra el administrador (CU-A-25)
 
 Mary: *«el interés de mora lo debe registrar el administrador en la parametrización»*. Cambia lo

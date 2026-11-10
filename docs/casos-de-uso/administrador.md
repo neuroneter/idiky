@@ -897,7 +897,10 @@ real que este caso de uso estaba tapando.
 > causa la ley**; lo que decide la copropiedad es **bajar la tasa**, por asamblea.
 
 **Flujo principal**
-1. El administrador ve la configuración de cartera de su copropiedad.
+1. El administrador ve la configuración de cartera de su copropiedad y escoge **si el edificio
+   cobra interés de mora: Sí o No** (Mary, 2026-11-10: *«los intereses de mora están
+   parametrizados por ley, no obstante hay edificios en que se cobra o no»*). La tasa la fija la
+   ley; si se cobra o no, lo decide el edificio.
 2. **Por defecto rige la tasa de la ley**: 1,5 veces el interés bancario corriente certificado
    por la Superintendencia Financiera para el periodo. Ese es también el **tope** (RN-43). **La
    registra el administrador en la parametrización del edificio** (Mary, 2026-11-10: *«el
@@ -911,9 +914,10 @@ real que este caso de uso estaba tapando.
    tipo `interes` (RN-44).
 
 **Flujos alternativos**
-- A1. La asamblea aprueba **no cobrar** (tasa en cero) → **pregunta para el abogado**: la ley
-  habla de «un interés inferior», no de suprimirlo. Mientras no se responda, se registra como
-  cualquier tasa inferior, con su acta, y queda la advertencia.
+- A1. El edificio **no cobra** interés de mora → el administrador marca «No» y no se genera
+  ningún interés. Se registra quién lo marcó y cuándo, y se puede adjuntar el acta que lo
+  decidió. Queda para el abogado si eso necesita aprobación de asamblea, porque la ley dice que
+  el retardo «causará» intereses.
 - A2. Se baja la tasa → **los intereses ya generados no cambian**: son cuotas, y se anulan una
   por una si así se decide (O3).
 - A3. Se intenta registrar una tasa **por encima de la de la ley** → se rechaza (RN-43): pasaría
