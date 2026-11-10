@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · Vehículos y mascotas (CU-R-15, RN-230, RN-231)
+
+Mary: *«vamos con vehículos y mascotas»*. En **Mi unidad → Vehículos y mascotas** el propietario
+o el arrendatario registra carros, motos y bicicletas —placa con formato colombiano, única en el
+edificio, y el parqueadero de la unidad— y mascotas —nombre, especie, raza y foto, **sin usuario**,
+como en BLOKY (RN-321)—. Se dan de baja, no se borran. La administración los ve en el detalle de
+cada unidad. La semilla sube a la versión 36 con un carro y una perra de ejemplo en la 402.
+Archivos: `apps/pwa/src/features/residente/VehiculosMascotasPage.tsx` (nuevo),
+`apps/pwa/src/features/residente/MiUnidadPage.tsx`, `apps/pwa/src/features/admin/UnidadesPage.tsx`,
+`apps/pwa/src/App.tsx`, `apps/pwa/src/dominio/{tipos,reglas}.ts`,
+`apps/pwa/src/datos/{repositorio,selectores,semilla}.ts`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/vehiculos-mascotas.spec.ts` (2 nuevas); **73 en verde**.
+
 ### 2026-11-10 · Mary + IA (Claude) · Mi apartamento lo maneja una inmobiliaria (CU-R-33, RN-228, RN-229)
 
 Mary: *«en las opciones para el propietario, crear la opción para elegir si tiene el apartamento

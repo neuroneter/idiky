@@ -362,6 +362,25 @@ export function recordatorioQueToca(
 
 export const DIAS_RECORDATORIO_PAGO = 2
 
+/**
+ * RN-230 — **La placa** (CU-R-15). Carro y moto la llevan; la bicicleta, no. Se
+ * guarda en mayúsculas y sin espacios ni guiones, para que la portería la
+ * encuentre como la lea. Formato colombiano: tres letras y tres números en el
+ * carro (ABC123); tres letras, dos números y una letra en la moto (ABC12D).
+ */
+export function normalizarPlaca(placa: string): string {
+  return placa.toUpperCase().replace(/[^A-Z0-9]/g, '')
+}
+
+export function motivoPlacaInvalida(tipo: 'carro' | 'moto' | 'bicicleta', placa: string | undefined): string | undefined {
+  if (tipo === 'bicicleta') return undefined
+  const p = normalizarPlaca(placa ?? '')
+  if (!p) return tipo === 'carro' ? 'Falta la placa del carro.' : 'Falta la placa de la moto.'
+  if (tipo === 'carro' && !/^[A-Z]{3}\d{3}$/.test(p)) return 'La placa de un carro son tres letras y tres números, como ABC123.'
+  if (tipo === 'moto' && !/^[A-Z]{3}\d{2}[A-Z]?$/.test(p)) return 'La placa de una moto son tres letras, dos números y una letra, como ABC12D.'
+  return undefined
+}
+
 /** RN-05 — Prorrateo de una cuota extraordinaria por coeficiente. */
 export function prorratearPorCoeficiente(valorTotal: number, coeficiente: number): number {
   return Math.round((valorTotal * coeficiente) / 100)

@@ -1378,3 +1378,39 @@ inmobiliaria— y si el reglamento puede limitar los poderes de una inmobiliaria
 `features/admin/InmobiliariasPorRevisar.tsx` (Unidades de la consola). En el demo la inmobiliaria
 no entra a la app: sus avisos se guardan como mensajes a su celular.
 
+---
+
+### CU-R-15
+## CU-R-15 — Registrar mis vehículos y mascotas
+
+- **Actor principal:** Propietario o arrendatario de la unidad.
+- **Precondiciones:** Tiene una residencia vigente en la unidad.
+- **Disparador:** Llega un carro, una moto, una bicicleta o una mascota nueva a la unidad.
+- **Resultado esperado:** La administración (y la portería) saben qué vehículos y qué mascotas
+  son de cada unidad (Mary, 2026-11-10: *«vamos con vehículos y mascotas»*).
+
+**Flujo principal**
+1. En **Mi unidad → Vehículos y mascotas** ve los de su unidad.
+2. **Registrar un vehículo:** tipo (carro, moto o bicicleta), placa —obligatoria en carro y moto—,
+   marca y color opcionales, y uno de los parqueaderos de la unidad.
+3. **Registrar una mascota:** nombre, especie (perro, gato u otra), raza y foto opcionales. La
+   mascota tiene **perfil y no usuario**: no entra a la app (como en BLOKY, RN-321).
+4. La administración los ve en el detalle de cada unidad (Unidades de la consola).
+
+**Flujos alternativos**
+- A1. La placa no tiene el formato colombiano → se dice cuál es (ABC123 en carro, ABC12D en moto).
+- A2. La placa ya está registrada en otra unidad del edificio → se dice en cuál; primero se da de
+  baja allá (RN-230).
+- A3. El vehículo se vendió o la mascota ya no está → **Dar de baja**: no se borra (RN-61), y la
+  placa queda libre.
+
+**Reglas de negocio**
+- RN-230: placa obligatoria en carro y moto, en mayúsculas y sin espacios, única en la copropiedad
+  mientras esté vigente; el parqueadero tiene que ser de la unidad.
+- RN-231: la mascota es un perfil sin usuario; la registran el propietario o el arrendatario.
+- RN-61: se da de baja, no se borra.
+
+**Estado en el demo:** ✅ — `features/residente/VehiculosMascotasPage.tsx` (ruta
+`/app/unidad/vehiculos-mascotas`) y el detalle de la unidad en `features/admin/UnidadesPage.tsx`.
+La portería (de Jeimy) puede usar las placas para reconocer vehículos.
+

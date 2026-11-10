@@ -211,6 +211,28 @@ export function UnidadesPage() {
                 ))}
               </div>
             )}
+            {/* CU-R-15 — Lo que la portería y la administración necesitan reconocer. */}
+            <div>
+              <span className="titulo-seccion">Vehículos y mascotas</span>
+              {sel.vehiculosDeUnidad(bd, unidadDetalle.id).length + sel.mascotasDeUnidad(bd, unidadDetalle.id).length === 0 ? (
+                <p className="subtitulo" style={{ marginTop: 'var(--e1)' }}>Sin registrar.</p>
+              ) : (
+                <div className="lista lista--compacta" style={{ marginTop: 'var(--e2)' }}>
+                  {sel.vehiculosDeUnidad(bd, unidadDetalle.id).map((v) => (
+                    <div key={v.id} className="fila">
+                      <span className="subtitulo">{capitalizar(v.tipo)}{v.marca ? ` · ${v.marca}` : ''}{v.color ? ` · ${v.color}` : ''}</span>
+                      <strong>{v.placa ?? '—'}{v.parqueadero ? ` · ${v.parqueadero}` : ''}</strong>
+                    </div>
+                  ))}
+                  {sel.mascotasDeUnidad(bd, unidadDetalle.id).map((m) => (
+                    <div key={m.id} className="fila">
+                      <span className="subtitulo">{capitalizar(m.especie)}{m.raza ? ` · ${m.raza}` : ''}</span>
+                      <strong>{m.nombre}</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <div>
               <span className="titulo-seccion">Cartera</span>
               <div className="fila" style={{ marginTop: 'var(--e2)' }}>

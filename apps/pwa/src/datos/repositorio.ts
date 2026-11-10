@@ -29,6 +29,10 @@ import type {
   ModalidadAsamblea,
   Persona,
   InmobiliariaDeUnidad,
+  TipoVehiculo,
+  Vehiculo,
+  EspecieMascota,
+  Mascota,
   Poder,
   Unidad,
   TipoAsamblea,
@@ -162,6 +166,8 @@ import {
   recordatorioQueToca,
   apoderadoPermanenteVigente,
   inmobiliariaVigente,
+  motivoPlacaInvalida,
+  normalizarPlaca,
   estaEnMora,
   diferenciaCoeficientes,
   canalesDeCitacion,
@@ -3964,6 +3970,105 @@ export async function retirarInmobiliaria(
     if (documento) documento.estado = 'anulado'
   }
   return persistir(bd, residencia)
+}
+
+// ---------------------------------------------------------------------------
+// CU-R-15 — Vehículos y mascotas de la unidad (RN-230, RN-231)
+// ---------------------------------------------------------------------------
+
+/**
+ * Quién registra vehículos y mascotas: quien maneja la unidad, el propietario o
+ * el arrendatario (como el administrador de la unidad de BLOKY, RN-321).
+ */
+function puedeManejarUnidad(bd: BaseDatos, unidadId: string, personaId: string): boolean {
+  return bd.residencias.some(
+    (r) => r.unidadId === unidadId && r.personaId === personaId && (r.rol === 'propietario' || r.rol === 'arrendatario') && !r.cierre && residenciaVigente(r),
+  )
+}
+
+/** RN-230 — Registra un vehículo. La placa se normaliza y no se repite en la copropiedad. */
+export async function registrarVehiculo(
+  bdActual: BaseDatos,
+  parametros: { unidadId: string; personaId: string; tipo: TipoVehiculo; placa?: string; marca?: string; color?: string; parqueadero?: string },
+): Promise<Resultado<Vehiculo>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!puedeManejarUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('Los vehículos de la unidad los registra el propietario o el arrendatario.')
+  }
+  const invalida = motivoPlacaInvalida(parametros.tipo, parametros.placa)
+  if (invalida) throw new ErrorDeNegocio(invalida)
+  const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
+  if (!unidad) throw new ErrorDeNegocio('Esa unidad no existe.')
+  const placa = parametros.tipo === 'bicicleta' ? undefined : normalizarPlaca(parametros.placa ?? '')
+  if (placa) {
+    const repetida = (bd.vehiculos ?? []).find((v) => {
+      const deEsta = bd.unidades.find((u) => u.id === v.unidadId)?.copropiedadId === unidad.copropiedadId
+      return deEsta && !v.bajaEn && v.placa === placa
+    })
+    if (repetida) {
+      const otra = bd.unidades.find((u) => u.id === repetida.unidadId)
+      throw new ErrorDeNegocio(`La placa ${placa} ya está registrada${otra ? ` en ${etiquetaUnidad(otra)}` : ''}. Si cambió de unidad, primero se da de baja allá.`)
+    }
+  }
+  if (parametros.parqueadero && !unidad.parqueaderos.includes(parametros.parqueadero)) {
+    throw new ErrorDeNegocio('Ese parqueadero no es de esta unidad.')
+  }
+  const vehiculo: Vehiculo = {
+    id: nuevoId('veh'),
+    unidadId: unidad.id,
+    tipo: parametros.tipo,
+    ...(placa ? { placa } : {}),
+    ...(parametros.marca?.trim() ? { marca: parametros.marca.trim() } : {}),
+    ...(parametros.color?.trim() ? { color: parametros.color.trim() } : {}),
+    ...(parametros.parqueadero ? { parqueadero: parametros.parqueadero } : {}),
+    registradoPor: parametros.personaId,
+    registradoEn: ahoraISO(),
+  }
+  bd.vehiculos = [...(bd.vehiculos ?? []), vehiculo]
+  return persistir(bd, vehiculo)
+}
+
+/** RN-231 — Registra una mascota: perfil sin usuario. */
+export async function registrarMascota(
+  bdActual: BaseDatos,
+  parametros: { unidadId: string; personaId: string; nombre: string; especie: EspecieMascota; raza?: string; foto?: string },
+): Promise<Resultado<Mascota>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!puedeManejarUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('Las mascotas de la unidad las registra el propietario o el arrendatario.')
+  }
+  if (parametros.nombre.trim().length < 2) throw new ErrorDeNegocio('Escribe el nombre de la mascota.')
+  const mascota: Mascota = {
+    id: nuevoId('mas'),
+    unidadId: parametros.unidadId,
+    nombre: parametros.nombre.trim(),
+    especie: parametros.especie,
+    ...(parametros.raza?.trim() ? { raza: parametros.raza.trim() } : {}),
+    ...(parametros.foto ? { foto: parametros.foto } : {}),
+    registradoPor: parametros.personaId,
+    registradoEn: ahoraISO(),
+  }
+  bd.mascotas = [...(bd.mascotas ?? []), mascota]
+  return persistir(bd, mascota)
+}
+
+/** RN-61 — Un vehículo o una mascota no se borra: se da de baja, con fecha. */
+export async function darDeBajaVehiculoOMascota(
+  bdActual: BaseDatos,
+  parametros: { tipo: 'vehiculo' | 'mascota'; id: string; personaId: string },
+): Promise<Resultado<Vehiculo | Mascota>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const lista: Array<Vehiculo | Mascota> = parametros.tipo === 'vehiculo' ? bd.vehiculos ?? [] : bd.mascotas ?? []
+  const item = lista.find((x) => x.id === parametros.id)
+  if (!item || item.bajaEn) throw new ErrorDeNegocio('Ese registro no está vigente.')
+  if (!puedeManejarUnidad(bd, item.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('Lo da de baja el propietario o el arrendatario de la unidad.')
+  }
+  item.bajaEn = ahoraISO()
+  return persistir(bd, item)
 }
 
 /** RN-61 — Un poder no se borra: se revoca, y queda en el expediente. */

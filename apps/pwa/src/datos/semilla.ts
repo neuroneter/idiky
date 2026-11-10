@@ -73,7 +73,8 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      trae una que no lo es (mascotas), que se cuenta por unidad (RN-211).
 // 35 — la asamblea en curso se instaló con quórum (51,8 %), que queda guardado
 //      (RN-215); se agrega la asistencia de la Torre 1 · 302.
-export const VERSION_ESQUEMA = 35
+// 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
+export const VERSION_ESQUEMA = 36
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1519,6 +1520,31 @@ export function crearSemilla(): BaseDatos {
     // en la semilla es peso muerto en el paquete del demo para todo el que lo
     // abra (ADR-0009). Que el primer poder del demo sea el de quien lo prueba.
     poderes: [],
+    // CU-R-15 — Un carro y una mascota en la 402 de María Camila, para verlos en el demo.
+    vehiculos: [
+      {
+        id: 'veh-1',
+        unidadId: 'uni-torre1-402',
+        tipo: 'carro',
+        placa: 'KHT482',
+        marca: 'Mazda',
+        color: 'Gris',
+        parqueadero: 'P-06',
+        registradoPor: 'per-1',
+        registradoEn: `${sumarDias(hoyISO(), -120)}T10:00:00-05:00`,
+      },
+    ],
+    mascotas: [
+      {
+        id: 'mas-1',
+        unidadId: 'uni-torre1-402',
+        nombre: 'Lupe',
+        especie: 'perro',
+        raza: 'Criolla',
+        registradoPor: 'per-1',
+        registradoEn: `${sumarDias(hoyISO(), -200)}T10:00:00-05:00`,
+      },
+    ],
     // Sin actas de ejemplo: el acta se genera de una asamblea cerrada, y que la
     // primera del demo sea la que arme quien lo prueba.
     actas: [],

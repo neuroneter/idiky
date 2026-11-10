@@ -36,7 +36,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-12 | **Descargar el paz y salvo** | 1 | ✅ Demo (se emite e imprime a PDF desde el teléfono) | [ver](./casos-de-uso/residente.md#cu-r-12) |
 | CU-R-13 | **Votar en una asamblea** | 1 | ✅ Demo (mayoría y quórum citando la ley; RN-74, RN-94; vota también el apoderado por la unidad que representa) | [ver](./casos-de-uso/residente.md#cu-r-13) |
 | CU-R-14 | Reportar una novedad con foto (daño, ruido) | 3 | ⬜ Pendiente | — |
-| CU-R-15 | Registrar mis vehículos y mascotas | 3 | ⬜ Pendiente | — |
+| CU-R-15 | **Registrar mis vehículos y mascotas** | 3 | ✅ Demo (2026-11-10: placa válida y única en el edificio, mascota sin usuario, se dan de baja; RN-230, RN-231) | [ver](./casos-de-uso/residente.md#cu-r-15) |
 | CU-R-16 | Recibir notificaciones push | 3 | ⬜ Pendiente | — |
 | CU-R-17 | Directorio de contactos útiles y emergencias | 3 | ⬜ Pendiente | — |
 | CU-R-18 | **Descargar el informe de estado de cuenta** | 1 | ✅ Demo (se emite con consecutivo y código, y se imprime o guarda en PDF desde la app — RN-127) | [ver](./casos-de-uso/residente.md#cu-r-18) |
