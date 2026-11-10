@@ -54,6 +54,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-30 | **Informar un abono ya consignado** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-30) |
 | CU-R-31 | **Enviar el poder firmado en foto** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-31) |
 | CU-R-32 | **Seguir el avance de los proyectos de la copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-32) |
+| CU-R-33 | **Dejar a un representante que maneje mi unidad (inmobiliaria o apoderado)** | 1 | ⬜ Pendiente (documentado el 2026-11-10; RN-228, RN-229) | [ver](./casos-de-uso/residente.md#cu-r-33) |
 
 ## 2. Administrador — consola web
 
