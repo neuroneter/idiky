@@ -16,9 +16,10 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { configurarCuotaAutomatica, configurarInteresMora, generarCuotas, previsualizarCuotas, type ParametrosGeneracion } from '../../datos/repositorio'
+import { configurarCuotaAutomatica, configurarInteresMora, configurarRecordatorioPago, generarCuotas, previsualizarCuotas, type ParametrosGeneracion } from '../../datos/repositorio'
 import {
   cobraInteresMora,
+  DIAS_RECORDATORIO_PAGO,
   proximaGeneracion,
   abonadoDeCuota,
   calcularSaldo,
@@ -147,6 +148,9 @@ export function CarteraPage() {
 
       {/* RN-225, CU-S-01 — La cuota ordinaria que se genera sola cada mes. */}
       <CuotaAutomaticaTarjeta />
+
+      {/* RN-226, CU-S-06 — Recordatorios de pago a los propietarios. */}
+      <RecordatoriosPago />
 
       <div className="fila">
         <div className="filtros">
@@ -643,6 +647,73 @@ function CuotaAutomaticaTarjeta() {
         <p className="tenue" style={{ fontSize: 'var(--texto-xs)', marginTop: 'var(--e2)' }}>
           Generadas solas:{' '}
           {ultimas.map((g) => `${formatearPeriodo(g.periodo)} (${g.cuotas} cuotas)`).join(' · ')}
+        </p>
+      )}
+    </div>
+  )
+}
+
+/** RN-226 — Mensajes de pago: un recordatorio amable antes de vencer, y las gracias al pagar. */
+function RecordatoriosPago() {
+  const { bd, ejecutar, cargando } = useDatos()
+  const { sesion } = useSesion()
+  const config = sesion ? sel.copropiedad(bd, sesion.copropiedadId)?.recordatorioPago : undefined
+  const [diasAntes, setDiasAntes] = useState(String(config?.diasAntes ?? DIAS_RECORDATORIO_PAGO))
+  if (!sesion) return null
+  const activo = !!config?.activo
+  const deEsteEdificio = bd.mensajes.filter((m) => m.copropiedadId === sesion.copropiedadId)
+  const recordatorios = deEsteEdificio.filter((m) => m.motivo === 'recordatorio_pago')
+  const gracias = deEsteEdificio.filter((m) => m.motivo === 'agradecimiento_pago')
+
+  function guardar(nuevoActivo: boolean) {
+    void ejecutar(
+      (base) =>
+        configurarRecordatorioPago(base, {
+          copropiedadId: sesion!.copropiedadId,
+          personaId: sesion!.personaId,
+          activo: nuevoActivo,
+          diasAntes: Number(diasAntes),
+        }),
+      nuevoActivo ? 'Mensajes de pago activos.' : 'Mensajes de pago apagados.',
+    )
+  }
+
+  return (
+    <div className="tarjeta">
+      <div className="fila">
+        <strong>Recordatorios de pago</strong>
+        <span className={activo ? 'chip chip--exito' : 'chip'}>{activo ? 'Activos' : 'Apagados'}</span>
+      </div>
+      <p className="subtitulo">
+        Un solo mensaje amable a los propietarios, un par de días antes de que venza una cuota con
+        saldo, y las <strong>gracias</strong> cuando pagan. No se mandan mensajes de cuota vencida.
+      </p>
+      <label className="fila" style={{ gap: 'var(--e1)', justifyContent: 'flex-start' }}>
+        <input
+          type="number"
+          min={1}
+          max={5}
+          aria-label="Días antes del vencimiento"
+          value={diasAntes}
+          onChange={(e) => setDiasAntes(e.target.value)}
+          style={{ width: '5rem' }}
+        />
+        <span className="subtitulo">días antes del vencimiento</span>
+      </label>
+      <div className="grupo-botones" style={{ marginTop: 'var(--e2)' }}>
+        <button className="boton boton--primario" disabled={cargando} onClick={() => guardar(true)}>
+          {activo ? 'Guardar cambios' : 'Activar'}
+        </button>
+        {activo && (
+          <button className="boton" disabled={cargando} onClick={() => guardar(false)}>
+            Apagar
+          </button>
+        )}
+      </div>
+      {(recordatorios.length > 0 || gracias.length > 0) && (
+        <p className="tenue" style={{ fontSize: 'var(--texto-xs)', marginTop: 'var(--e2)' }}>
+          Enviados: {recordatorios.length} recordatorios · {gracias.length} agradecimientos.
+          {recordatorios[0] ? ` Así se ven: «${recordatorios[0].texto}»` : ''}
         </p>
       )}
     </div>

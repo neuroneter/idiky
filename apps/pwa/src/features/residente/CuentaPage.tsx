@@ -50,6 +50,13 @@ export function CuentaPage() {
     .pagosDeUnidad(bd, sesion.unidadActivaId)
     .filter((pago) => pago.estado === 'reportado')
 
+  // RN-226 — Los recordatorios de pago que le llegaron, los más recientes primero.
+  const misCuotas = new Set(cuotas.map((c) => c.id))
+  const misPagos = new Set(sel.pagosDeUnidad(bd, sesion.unidadActivaId).map((p) => p.id))
+  const recordatorios = bd.mensajes
+    .filter((m) => (m.cuotaId && misCuotas.has(m.cuotaId)) || (m.pagoId && misPagos.has(m.pagoId)))
+    .slice(0, 3)
+
   const visibles = cuotas.filter((cuota) => {
     if (filtro === 'pendientes') return cuotaPendiente(cuota)
     if (filtro === 'pagadas') return !cuotaPendiente(cuota)
@@ -123,6 +130,19 @@ export function CuentaPage() {
             <Icono nombre="chevron" tamano={16} className="tenue" />
           </div>
         </Link>
+      )}
+
+      {recordatorios.length > 0 && (
+        <div className="tarjeta">
+          <span className="titulo-seccion">Mensajes que te enviamos</span>
+          <div className="lista lista--compacta" style={{ marginTop: 'var(--e2)' }}>
+            {recordatorios.map((m) => (
+              <p key={m.id} className="subtitulo">
+                {formatearFecha(m.enviadoEn.slice(0, 10))}: {m.texto.replace(/^Idiky: /, '')}
+              </p>
+            ))}
+          </div>
+        </div>
       )}
 
       {porConciliar.length > 0 && (

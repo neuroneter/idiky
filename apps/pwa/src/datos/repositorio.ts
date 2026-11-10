@@ -158,6 +158,8 @@ import {
   motivoNoVotaPorMora,
   motivoNoCorrigeCoeficientes,
   periodoAGenerar,
+  recordatorioQueToca,
+  estaEnMora,
   diferenciaCoeficientes,
   canalesDeCitacion,
   fechaSegundaConvocatoria,
@@ -192,7 +194,7 @@ import {
   yaVoto,
 } from '../dominio/reglas'
 import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajeria'
-import { finDePeriodo, formatearDinero, formatearFecha } from '../utilidades/formato'
+import { finDePeriodo, formatearDinero, formatearFecha, formatearPeriodo } from '../utilidades/formato'
 import { guardar, leer, sembrar, ocupacion } from './almacen'
 import { responsablesDeRegistro, responsablesDeVisita, responsablesDelVinculo, unidadTienePropietario } from './selectores'
 
@@ -288,6 +290,8 @@ function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boo
   if (avisarFinesDeEstadia(bd, momento)) cambio = true
   // RN-225 — La cuota ordinaria del mes, si el edificio la tiene automática.
   if (generarCuotasAutomaticas(bd, momento)) cambio = true
+  // RN-226 — Los recordatorios de pago, después: así alcanzan a la cuota recién generada.
+  if (enviarRecordatoriosDePago(bd, momento)) cambio = true
   return cambio
 }
 
@@ -463,6 +467,7 @@ export async function registrarPago(
 
   moverSaldos(bd, pago.imputaciones, 1)
   bd.pagos.unshift(pago)
+  agradecerPago(bd, pago)
   return persistir(bd, pago)
 }
 
@@ -502,6 +507,7 @@ export async function aplicarPago(
   pago.registradoPor = parametros.aplicadoPor
 
   moverSaldos(bd, pago.imputaciones, 1)
+  agradecerPago(bd, pago)
   return persistir(bd, pago)
 }
 
@@ -659,6 +665,88 @@ function generarCuotasAutomaticas(bd: BaseDatos, momento: string = ahoraISO()): 
     cambio = true
   }
   return cambio
+}
+
+/**
+ * RN-226 — Manda los recordatorios de pago que tocan hoy, a los propietarios de
+ * cada unidad. El tono es de recordatorio, no de cobro. Devuelve si mandó algo.
+ */
+function enviarRecordatoriosDePago(bd: BaseDatos, momento: string = ahoraISO()): boolean {
+  let cambio = false
+  for (const cuota of bd.cuotas) {
+    const unidad = bd.unidades.find((u) => u.id === cuota.unidadId)
+    if (!unidad) continue
+    const copropiedad = bd.copropiedades.find((c) => c.id === unidad.copropiedadId)
+    if (!recordatorioQueToca(cuota, copropiedad?.recordatorioPago)) continue
+    for (const persona of propietariosVigentes(bd, unidad.id)) {
+      avisarAPersona(bd, {
+        copropiedadId: unidad.copropiedadId,
+        personaId: persona.id,
+        texto:
+          `Idiky: hola, ${persona.nombres.split(' ')[0]}. Te recordamos que la ${cuota.concepto.toLowerCase()} de ` +
+          `${formatearPeriodo(cuota.periodo).toLowerCase()} de ${etiquetaUnidad(unidad)} (${formatearDinero(cuota.saldo)}) ` +
+          `vence el ${fechaCorta(cuota.fechaVencimiento)}. La puedes pagar en la app en un minuto. ¡Gracias!`,
+        motivo: 'recordatorio_pago',
+        cuotaId: cuota.id,
+        ahora: momento,
+      })
+    }
+    cuota.recordatorios = { ...(cuota.recordatorios ?? {}), antes: momento }
+    cambio = true
+  }
+  return cambio
+}
+
+/** Los propietarios vigentes de una unidad, como personas. */
+function propietariosVigentes(bd: BaseDatos, unidadId: string): Persona[] {
+  return bd.residencias
+    .filter((r) => r.unidadId === unidadId && r.rol === 'propietario' && !r.cierre && residenciaVigente(r))
+    .map((r) => bd.personas.find((p) => p.id === r.personaId))
+    .filter((p): p is Persona => !!p)
+}
+
+/**
+ * RN-226 — Al aplicarse un pago, **las gracias** a los propietarios (Mary,
+ * 2026-11-10: *«si está al día, agradecer por el pago»*). Si con el pago la
+ * unidad quedó sin nada vencido, se lo dice. Solo si el edificio tiene los
+ * mensajes de pago activos.
+ */
+function agradecerPago(bd: BaseDatos, pago: Pago): void {
+  const unidad = bd.unidades.find((u) => u.id === pago.unidadId)
+  const copropiedad = bd.copropiedades.find((c) => c.id === unidad?.copropiedadId)
+  if (!unidad || !copropiedad?.recordatorioPago?.activo) return
+  const alDia = !estaEnMora(cuotasDe(bd, unidad.id))
+  for (const persona of propietariosVigentes(bd, unidad.id)) {
+    avisarAPersona(bd, {
+      copropiedadId: unidad.copropiedadId,
+      personaId: persona.id,
+      texto:
+        `Idiky: ¡gracias, ${persona.nombres.split(' ')[0]}! Recibimos tu pago de ${formatearDinero(pago.valor)} ` +
+        `para ${etiquetaUnidad(unidad)}.${alDia ? ' Tu unidad está al día.' : ''} Tu recibo de caja ${pago.recibo} ya está en la app.`,
+      motivo: 'agradecimiento_pago',
+      pagoId: pago.id,
+    })
+  }
+}
+
+/** RN-226 — La administración enciende o apaga los mensajes de pago de su edificio. */
+export async function configurarRecordatorioPago(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; activo: boolean; diasAntes: number },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('Los recordatorios de pago los configura la administración (RN-226).')
+  }
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  if (!Number.isInteger(parametros.diasAntes) || parametros.diasAntes < 1 || parametros.diasAntes > 5) {
+    throw new ErrorDeNegocio('El recordatorio se manda entre 1 y 5 días antes del vencimiento.')
+  }
+  copropiedad.recordatorioPago = { activo: parametros.activo, diasAntes: parametros.diasAntes }
+  enviarRecordatoriosDePago(bd)
+  return persistir(bd, copropiedad)
 }
 
 /**
@@ -3640,6 +3728,8 @@ function avisarAPersona(
     zonaId?: string
     proyectoId?: string
     registroId?: string
+    cuotaId?: string
+    pagoId?: string
     ahora?: string
   },
 ): boolean {
@@ -3657,6 +3747,8 @@ function avisarAPersona(
     ahora: aviso.ahora ?? ahoraISO(),
   })
   if (!mensaje) return false
+  if (aviso.cuotaId) mensaje.cuotaId = aviso.cuotaId
+  if (aviso.pagoId) mensaje.pagoId = aviso.pagoId
   bd.mensajes.unshift(mensaje)
   return true
 }

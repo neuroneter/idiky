@@ -213,6 +213,23 @@ el estilo. Tres decisiones, todas en `tokens.css`:
   en 2,92:1 y se usa en fechas y notas al pie, o sea en texto chico. Si se retocan estos
   valores hay que **volver a medirlos**, no ajustarlos a ojo.
 
+## 6 bis. Tono con el propietario
+
+> **Siempre cuidamos al propietario para que no se sienta juzgado: la app debe ser muy amigable**
+> (Mary, 2026-11-10). *«Con los propietarios debemos ser cuidadosos y estratégicos para el pago de
+> las cuotas.»*
+
+Vale para todo lo que lee el propietario o el residente —pantallas, mensajes, recordatorios,
+documentos—:
+
+- **Recordar, no cobrar.** Los mensajes de pago son uno solo y amable, un par de días antes de
+  vencer; **no hay mensaje de cuota vencida** (RN-226).
+- **Agradecer.** Quien paga recibe las gracias, y si quedó al día se le dice (RN-226).
+- **Sin reproche.** Nada de «moroso», «deudor» ni mayúsculas de alarma. Se dice qué hay y cómo
+  resolverlo: «tienes una cuota pendiente», «la puedes pagar en la app».
+- **El lenguaje contable se queda en la consola.** El administrador lee «saldo» y «mora»; el
+  propietario, «valor adeudado» y «pendiente».
+
 ## 7. Definición de "terminado"
 
 Una funcionalidad está terminada cuando:
