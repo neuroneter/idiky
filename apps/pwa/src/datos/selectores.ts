@@ -411,3 +411,13 @@ export function tieneOrdinariaDelPeriodo(bd: BaseDatos, copropiedadId: string, p
   const unidades = new Set(unidadesDe(bd, copropiedadId).map((u) => u.id))
   return bd.cuotas.some((c) => c.periodo === periodo && c.tipo === 'ordinaria' && unidades.has(c.unidadId))
 }
+
+/** CU-R-15 — Los vehículos vigentes de la unidad. */
+export function vehiculosDeUnidad(bd: BaseDatos, unidadId?: string) {
+  return (bd.vehiculos ?? []).filter((v) => v.unidadId === unidadId && !v.bajaEn)
+}
+
+/** CU-R-15 — Las mascotas vigentes de la unidad. */
+export function mascotasDeUnidad(bd: BaseDatos, unidadId?: string) {
+  return (bd.mascotas ?? []).filter((m) => m.unidadId === unidadId && !m.bajaEn)
+}

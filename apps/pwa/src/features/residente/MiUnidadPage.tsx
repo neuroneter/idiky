@@ -160,6 +160,24 @@ export function MiUnidadPage() {
         </div>
       </Link>
 
+      {/* CU-R-15 — Los vehículos y las mascotas de la unidad. */}
+      <Link to="/app/unidad/vehiculos-mascotas" className="tarjeta tarjeta--accion">
+        <div className="fila">
+          <div className="tarjeta__cuerpo">
+            <span className="marca-tarjeta">
+              <Icono nombre="unidades" tamano={20} />
+            </span>
+            <div className="columna">
+              <strong>Vehículos y mascotas</strong>
+              <span className="subtitulo">
+                {sel.vehiculosDeUnidad(bd, unidad.id).length} vehículos · {sel.mascotasDeUnidad(bd, unidad.id).length} mascotas
+              </span>
+            </div>
+          </div>
+          <Icono nombre="chevron" tamano={16} className="tenue" />
+        </div>
+      </Link>
+
       <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
         El coeficiente lo fija el reglamento de propiedad horizontal. Si crees que el tuyo no
         corresponde, radica una solicitud a la administración.

@@ -1680,9 +1680,47 @@ export interface Sesion {
 // ---------------------------------------------------------------------------
 // Estado completo persistido del demo
 // ---------------------------------------------------------------------------
+/** RN-230 — Un vehículo de la unidad (CU-R-15). */
+export type TipoVehiculo = 'carro' | 'moto' | 'bicicleta'
+export interface Vehiculo {
+  id: string
+  unidadId: string
+  tipo: TipoVehiculo
+  /** Obligatoria en carro y moto; única en la copropiedad mientras esté vigente. */
+  placa?: string
+  marca?: string
+  color?: string
+  /** Uno de los parqueaderos de la unidad, si tiene. */
+  parqueadero?: string
+  registradoPor: string
+  registradoEn: FechaHoraISO
+  /** Nada se borra (RN-61): se da de baja. */
+  bajaEn?: FechaHoraISO
+}
+
+/**
+ * RN-231 — Una mascota de la unidad (CU-R-15). Tiene perfil y **no usuario**: no
+ * entra a la app (como en BLOKY, RN-321).
+ */
+export type EspecieMascota = 'perro' | 'gato' | 'otro'
+export interface Mascota {
+  id: string
+  unidadId: string
+  nombre: string
+  especie: EspecieMascota
+  raza?: string
+  foto?: string
+  registradoPor: string
+  registradoEn: FechaHoraISO
+  bajaEn?: FechaHoraISO
+}
+
 export interface BaseDatos {
   /** Version del esquema; si cambia, la semilla se regenera. */
   version: number
+  /** CU-R-15 — Los vehículos y las mascotas de cada unidad. */
+  vehiculos: Vehiculo[]
+  mascotas: Mascota[]
   copropiedades: Copropiedad[]
   unidades: Unidad[]
   personas: Persona[]

@@ -18,6 +18,7 @@ import { PersonasPage } from './features/residente/PersonasPage'
 import { CuentaPage } from './features/residente/CuentaPage'
 import { PagoPage } from './features/residente/PagoPage'
 import { InformarAbonoPage } from './features/residente/InformarAbonoPage'
+import { VehiculosMascotasPage } from './features/residente/VehiculosMascotasPage'
 import { ComprobantesPage } from './features/residente/ComprobantesPage'
 import { EstadoCuentaPage } from './features/residente/EstadoCuentaPage'
 import { ReservasPage } from './features/residente/ReservasPage'
@@ -119,6 +120,7 @@ export function App() {
         <Route path="procesos" element={<ProcesosPage />} />
         <Route path="unidad" element={<MiUnidadPage />} />
         <Route path="unidad/personas" element={<PersonasPage />} />
+        <Route path="unidad/vehiculos-mascotas" element={<VehiculosMascotasPage />} />
       </Route>
 
       {/* Consola de administracion — CU-A-xx */}
