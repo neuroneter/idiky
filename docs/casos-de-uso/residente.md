@@ -1339,8 +1339,11 @@ inmobiliaria necesita su **poder**.
 
 **Flujo principal**
 1. En Mi unidad, el propietario deja a su **representante**: una persona o una inmobiliaria, con
-   nombre, documento (o NIT) y celular.
-2. La administración lo recibe (como el poder, RN-218).
+   nombre, documento (o NIT) y celular, y **adjunta la foto del soporte**: el poder (general o de
+   notaría) o el contrato con la inmobiliaria. **Sin soporte no se puede crear** (Mary, 2026-11-10:
+   *«pero debe existir algún soporte, porque cómo lo creas»*).
+2. La administración **mira el soporte** y lo recibe, o lo rechaza con motivo (como el poder en
+   foto, RN-96).
 3. Desde su app, el representante hace **todo lo del propietario en esa unidad**: ve el estado de
    cuenta y paga, recibe los recordatorios de pago y las citaciones, registra y da de baja al
    arrendatario y a las demás personas, reserva zonas comunes y radica PQRS.
@@ -1357,12 +1360,13 @@ inmobiliaria necesita su **poder**.
 
 **Reglas de negocio**
 - RN-228: el representante hace todo lo del propietario en esa unidad; vota por poder (RN-227).
+  Exige soporte (poder o contrato), que la administración revisa antes de recibirlo.
 - RN-229: para el tope (RN-220), las unidades de un mismo propietario cuentan como un solo poder.
 - RN-51 sigue: el voto es del propietario, y el representante lo ejerce por él.
 
-**Para el abogado:** si basta registrarlo en la app o la administración debe ver el poder general
-de notaría o el contrato con la inmobiliaria, y si el reglamento puede limitar los poderes de una
-inmobiliaria.
+**Para el abogado:** qué soporte vale —poder general de notaría, poder simple o el contrato con la
+inmobiliaria— y si el reglamento puede limitar los poderes de una inmobiliaria. Mientras tanto, se
+exige uno y lo revisa la administración.
 
 **Estado en el demo:** ⬜ — documentado el 2026-11-10; por construir.
 
