@@ -56,3 +56,9 @@ Daniel decidió cómo se crean los residentes en BLOKY y ALICE
 - **Para decidir contigo (T-127):** el rol de la unidad no dice si alguien es **propietario o arrendatario**, y eso importa
   para votar en asambleas (RN-51, RN-304). ¿Se pregunta al crear al residente, o lo marca después la Administración?
 
+  **Mary, 2026-11-10:** *«la persona que crea BLOKY es el propietario»*. El residente que crea la
+  Administración en BLOKY (el administrador de la unidad, RN-320) **es el propietario**, como en su
+  RN-63. Los arrendatarios y demás los agrega después el propietario desde ALICE (RN-321). Queda por
+  definir con Daniel cómo se marca, en BLOKY, a un arrendatario que agrega el propietario, para que no
+  vote (RN-51).
+
