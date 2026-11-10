@@ -113,6 +113,13 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · Portería es de Jeimy
+
+Mary: *«es de Jeimy, lo que defina ella se debe ver en la app de ese perfil»*. Portería (T-08,
+T-19: minuta, registro de entrada y salida, turnos) la define **Jeimy**; lo que ella decida se
+construye en la consola de portería (`apps/pwa/src/features/porteria/`). Mary no la toca.
+Las cuatro decisiones abiertas siguen en `docs/casos-de-uso/porteria.md`, «Lo que falta decidir».
+
 ### 2026-11-10 · Mary + IA (Claude) · Textos amables para el propietario (convenciones §6 bis)
 
 Mary: *«sí, me gusta»*, sobre cambiar «$… vencido · N días de mora» por algo amable. En la app
