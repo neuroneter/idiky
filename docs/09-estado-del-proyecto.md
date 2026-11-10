@@ -113,6 +113,12 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · Mary está de acuerdo con RN-316 (aviso 2)
+
+Mary: *«sí, de acuerdo con lo propuesto en votaciones»*: el secretario abre cada votación con un
+tiempo máximo, puede extenderlo sin pasarlo y corrige la redacción solo antes de abrirla (RN-316).
+Con esto Mary respondió los tres avisos de `docs/avisos/mary.md`; los cierra Daniel.
+
 ### 2026-11-10 · Mary + IA (Claude) · En BLOKY, la Administración crea al propietario (aviso 3, T-127)
 
 Mary: *«la persona que crea BLOKY es el propietario»*. El residente que crea la Administración

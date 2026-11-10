@@ -40,6 +40,9 @@ las de asamblea que tú definiste (RN-212 a RN-220), y **necesitan tu confirmaci
   bloqueadas, con historia para el acta. En una extraordinaria, solo lo del orden del día; en una
   ordinaria, el punto de proposiciones puede terminar en votación.
 
+  **Mary, 2026-11-10:** *«sí, de acuerdo con lo propuesto en votaciones»*. Con esto, Mary respondió
+  los tres avisos; los cierra Daniel.
+
 **Además:** las asambleas y votaciones que construiste en la maqueta todavía **no están en BLOKY**, y
 las reuniones con video las necesitan
 ([plan de CU-B-15](../casos-de-uso/bloky.md#plan-de-construcción-2026-11-03)). Conviene hablar con Daniel
