@@ -558,7 +558,7 @@ test("el repositorio revisa mora, anticipación y cupo al reservar (CU-R-05)", a
     }
   })
   const check = (c, m) => expect.soft(c, m).toBeTruthy()
-  check(!r.mora.ok && /cuotas vencidas/.test(r.mora.msg), 'mora: se rechaza en el repositorio')
+  check(!r.mora.ok && /estar al día con las cuotas/.test(r.mora.msg), 'mora: se rechaza en el repositorio')
   check(!r.anticipacion.ok && /anticipacion/.test(r.anticipacion.msg), 'anticipación: se rechaza')
   check(!r.cupo.ok && /cupo/.test(r.cupo.msg), 'cupo mensual: se rechaza')
   check(!r.aforo.ok, 'más personas que cupos: se rechaza')

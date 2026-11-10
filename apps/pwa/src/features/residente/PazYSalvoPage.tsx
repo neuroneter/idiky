@@ -72,7 +72,7 @@ export function PazYSalvoPage() {
                 dejarla adivinando (RN-26). */}
             {!alDia && vencido === 0 && (
               <span className="subtitulo">
-                No estás en mora: es la cuota del periodo, que ya está facturada aunque todavía
+                Vas al día: es la cuota de este periodo, que ya está facturada aunque todavía
                 no venza. El certificado dice que no debes nada, y esa también cuenta.
               </span>
             )}

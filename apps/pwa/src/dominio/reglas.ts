@@ -263,6 +263,18 @@ export function diasDeMora(cuotas: Cuota[], hoy: FechaISO = hoyISO()): number {
 }
 
 /**
+ * Desde cuándo hay algo pendiente: el vencimiento de la cuota vencida más
+ * antigua. Es lo que se le dice al propietario en vez de «N días de mora»
+ * (`docs/08-convenciones.md` §6 bis: que no se sienta juzgado).
+ */
+export function pendienteDesde(cuotas: Cuota[], hoy: FechaISO = hoyISO()): FechaISO | undefined {
+  return cuotas
+    .filter((cuota) => estadoRealCuota(cuota, hoy) === 'vencida')
+    .map((cuota) => cuota.fechaVencimiento)
+    .sort()[0]
+}
+
+/**
  * Una unidad esta en mora si tiene al menos una cuota vencida. RN-71: no
  * distingue el origen —ordinaria, extraordinaria, multa en firme o uso de
  * zona—; la vencida pesa igual.
@@ -283,7 +295,7 @@ export function motivoNoVotaPorMora(
   hoy: FechaISO = hoyISO(),
 ): string | undefined {
   if (!copropiedad?.morososNoVotan || !estaEnMora(cuotasDeLaUnidad, hoy)) return undefined
-  return 'Esta unidad está en mora y el reglamento del edificio no permite votar a las unidades en mora. Puede asistir y opinar; para votar, tiene que ponerse al día.'
+  return 'El reglamento de este edificio pide estar al día con las cuotas para votar. Puedes asistir y opinar como siempre, y en cuanto te pongas al día podrás votar.'
 }
 
 /**
@@ -549,7 +561,7 @@ export function validarReserva(parametros: {
   if (estaEnMora(cuotasDeLaUnidad)) {
     return {
       valido: false,
-      motivo: 'La unidad tiene cuotas vencidas. Ponte al dia para reservar zonas comunes.',
+      motivo: 'Para reservar zonas comunes, el reglamento pide estar al día con las cuotas. En cuanto te pongas al día, podrás reservar.',
     }
   }
   const motivoFranja = motivoFranjaNoDisponible(zona, reservas, fecha, horaInicio, unidadId, personas)

@@ -10,7 +10,7 @@ import * as sel from '../../datos/selectores'
 import {
   calcularSaldo,
   calcularSaldoVencido,
-  diasDeMora,
+  pendienteDesde,
   estadoRealVisitante,
   etiquetaUnidad,
   hoyISO,
@@ -36,7 +36,7 @@ export function InicioPage() {
   const cuotas = sel.cuotasDeUnidad(bd, unidadId)
   const saldo = calcularSaldo(cuotas)
   const vencido = calcularSaldoVencido(cuotas)
-  const mora = diasDeMora(cuotas)
+  const desde = pendienteDesde(cuotas)
   const proximaCuota = cuotas
     .filter((cuota) => cuota.estado !== 'pagada')
     .sort((a, b) => a.fechaVencimiento.localeCompare(b.fechaVencimiento))[0]
@@ -78,7 +78,7 @@ export function InicioPage() {
         {vencido > 0 ? (
           /* Blanco sobre el degradado: el rojo no se lee sobre fucsia. */
           <span className="cartera-inicio__alerta">
-            {formatearDinero(vencido)} vencido · {mora} dias de mora
+            {formatearDinero(vencido)} pendiente{desde ? ` desde el ${formatearFechaCorta(desde)}` : ''}
           </span>
         ) : proximaCuota ? (
           <span className="cartera-inicio__etiqueta">

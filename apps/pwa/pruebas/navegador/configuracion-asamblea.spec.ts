@@ -52,7 +52,7 @@ test('la unidad en mora vota, salvo que el reglamento diga otra cosa (RN-221)', 
     return { porDefecto, enMora, alDia: typeof alDia === 'object', enMoraSinRestriccion: typeof enMoraSinRestriccion === 'object' }
   })
   expect(r.porDefecto).toBe(true)
-  expect(r.enMora).toMatch(/está en mora/)
+  expect(r.enMora).toMatch(/pide estar al día con las cuotas para votar/)
   expect(r.alDia).toBe(true)
   expect(r.enMoraSinRestriccion).toBe(true)
 })

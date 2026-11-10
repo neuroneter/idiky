@@ -153,7 +153,7 @@ export function PagoPage() {
       <div className="pila">
         <span className="titulo-seccion">Qué vas a pagar</span>
         <p className="subtitulo">
-          Los pagos se aplican primero a la deuda más antigua. Toca una cuota para pagar hasta
+          Los pagos se aplican primero a la cuota más antigua. Toca una cuota para pagar hasta
           esa fecha.
         </p>
         <div className="lista lista--compacta">
@@ -178,7 +178,7 @@ export function PagoPage() {
                     {incluida ? (
                       <span className="chip chip--marca">Incluida</span>
                     ) : (
-                      <ChipCuota estado={estadoRealCuota(cuota)} />
+                      <ChipCuota estado={estadoRealCuota(cuota)} paraPropietario />
                     )}
                   </div>
                 </div>

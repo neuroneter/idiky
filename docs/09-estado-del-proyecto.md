@@ -113,6 +113,21 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · Textos amables para el propietario (convenciones §6 bis)
+
+Mary: *«sí, me gusta»*, sobre cambiar «$… vencido · N días de mora» por algo amable. En la app
+del propietario:
+- Inicio y Mi cuenta dicen **«$… pendiente desde el …»** en vez de «vencido · N días de mora»; al
+  día: «¡Gracias por estar al día!».
+- La etiqueta de la cuota vencida dice **«Pendiente»**, sin rojo (`ChipCuota paraPropietario`); la
+  consola sigue diciendo «Vencida».
+- Reservas: «Para reservar, ponte al día», sin rojo ni «bloqueadas».
+- Asamblea con restricción de voto (RN-221) y paz y salvo, reescritos sin «mora».
+Ninguna regla cambia: solo las palabras. Archivos: `apps/pwa/src/dominio/reglas.ts`
+(`pendienteDesde` y dos mensajes), `apps/pwa/src/componentes/Etiquetas.tsx`,
+`apps/pwa/src/features/residente/{InicioPage,CuentaPage,PagoPage,PazYSalvoPage,ReservasPage}.tsx`.
+**66 en verde.**
+
 ### 2026-11-10 · Mary + IA (Claude) · Recordatorios de pago amables, y el tono con el propietario (CU-S-06, RN-226)
 
 Mary: *«vamos con el recordatorio de pagos»*, y en el camino: *«solamente recordar un par de
@@ -129,8 +144,7 @@ Archivos: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/reposito
 **Pruebas:** `apps/pwa/pruebas/navegador/recordatorio-pago.spec.ts` (3 nuevas) y
 `cuota-automatica.spec.ts` (la tarjeta); **66 en verde**.
 
-**Por revisar con Mary:** el demo todavía le muestra al propietario «N días de mora» en su
-inicio y en Mi cuenta; con la regla nueva habría que suavizarlo.
+**Resuelto el mismo día:** los textos del propietario se suavizaron (entrada de arriba).
 
 ### 2026-11-10 · Mary + IA (Claude) · La cuota ordinaria se genera sola cada mes (CU-S-01, RN-225)
 
