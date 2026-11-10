@@ -37,6 +37,7 @@ import {
   revocarPoder,
   validarPoder,
   recibirPoder,
+  recibirApoderadoPermanente,
   rechazarPoder,
   configurarVotoNoEconomico,
   configurarTopePoderes,
@@ -202,6 +203,9 @@ export function AsambleasAdminPage() {
           </li>
         </ul>
       </div>
+
+      {/* RN-227 — Apoderados permanentes que esperan a la administración. */}
+      <PermanentesPorRecibir />
 
       {/* RN-221 — Si las unidades en mora votan. Por defecto sí (art. 37); se
           restringe solo si el reglamento lo dice (T-633 de 2003). */}
@@ -2056,6 +2060,55 @@ function TopePoderes({
           </button>
         )}
       </div>
+    </div>
+  )
+}
+
+/**
+ * RN-227 — Los apoderados permanentes que esperan a la administración. Se
+ * reciben una vez; desde ahí cada asamblea crea su poder sola.
+ */
+function PermanentesPorRecibir() {
+  const { bd, ejecutar, cargando } = useDatos()
+  const { sesion } = useSesion()
+  if (!sesion) return null
+  const unidadesDelEdificio = new Set(sel.unidadesDe(bd, sesion.copropiedadId).map((u) => u.id))
+  const permanentes = bd.residencias.filter((r) => r.apoderadoPermanente && !r.apoderadoPermanente.retiradoEn && unidadesDelEdificio.has(r.unidadId))
+  const porRecibir = permanentes.filter((r) => r.apoderadoPermanente!.recepcion?.estado === 'esperando' && r.apoderadoPermanente!.aceptacion?.estado !== 'no_aceptado')
+  if (permanentes.length === 0) return null
+  return (
+    <div className="tarjeta">
+      <strong>Apoderados permanentes</strong>
+      <p className="subtitulo">
+        {permanentes.length === 1 ? 'Un propietario tiene' : `${permanentes.length} propietarios tienen`} apoderado
+        permanente: en cada asamblea su poder se crea solo. Se reciben una vez.
+      </p>
+      {porRecibir.map((r) => {
+        const unidad = sel.unidad(bd, r.unidadId)
+        const apoderado = sel.persona(bd, r.apoderadoPermanente!.apoderadoId)
+        const esperaAceptacion = r.apoderadoPermanente!.aceptacion?.estado === 'esperando'
+        return (
+          <div key={r.id} className="fila" style={{ marginTop: 'var(--e2)' }}>
+            <span>
+              {unidad ? etiquetaUnidad(unidad) : '—'}: {nombreCompleto(sel.persona(bd, r.personaId))} →{' '}
+              <strong>{nombreCompleto(apoderado)}</strong>
+              {esperaAceptacion ? ' (falta que lo acepte)' : ''}
+            </span>
+            <button
+              className="boton boton--pequeno"
+              disabled={cargando}
+              onClick={() =>
+                void ejecutar(
+                  (base) => recibirApoderadoPermanente(base, { residenciaId: r.id, recibidoPor: sesion.personaId }),
+                  'Apoderado permanente recibido.',
+                )
+              }
+            >
+              Dar por recibido
+            </button>
+          </div>
+        )
+      })}
     </div>
   )
 }

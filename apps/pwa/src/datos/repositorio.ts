@@ -159,6 +159,7 @@ import {
   motivoNoCorrigeCoeficientes,
   periodoAGenerar,
   recordatorioQueToca,
+  apoderadoPermanenteVigente,
   estaEnMora,
   diferenciaCoeficientes,
   canalesDeCitacion,
@@ -292,6 +293,8 @@ function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boo
   if (generarCuotasAutomaticas(bd, momento)) cambio = true
   // RN-226 — Los recordatorios de pago, después: así alcanzan a la cuota recién generada.
   if (enviarRecordatoriosDePago(bd, momento)) cambio = true
+  // RN-227 — El poder de cada asamblea para quien tiene apoderado permanente.
+  if (aplicarApoderadosPermanentes(bd)) cambio = true
   return cambio
 }
 
@@ -2515,6 +2518,8 @@ export async function convocarAsamblea(
   }
   bd.asambleas.push(asamblea)
   emitirCitacionEn(bd, asamblea, parametros.convocadaPor, { publicarEnCartelera: true })
+  // RN-227 — Los apoderados permanentes ya quedan con su poder para esta asamblea.
+  aplicarApoderadosPermanentes(bd)
   return persistir(bd, asamblea)
 }
 
@@ -2842,6 +2847,8 @@ export async function citarSegundaConvocatoria(
   bd.asambleas.push(segunda)
   // RN-219 — La segunda lleva su propia citación; el aviso de la cartelera es el de abajo.
   emitirCitacionEn(bd, segunda, parametros.personaId, { publicarEnCartelera: false })
+  // RN-227 — La segunda es otra asamblea (RN-31): el apoderado permanente recibe su poder nuevo.
+  aplicarApoderadosPermanentes(bd)
   primera.estado = 'sin_quorum'
   primera.segundaConvocatoriaId = segunda.id
   const cuando = formatearFecha(fechaHora.slice(0, 10))
@@ -3586,6 +3593,208 @@ export async function rechazarPoder(
     motivo,
   }
   return persistir(bd, poder)
+}
+
+// ---------------------------------------------------------------------------
+// RN-227 — El apoderado permanente del propietario
+// ---------------------------------------------------------------------------
+
+/** La residencia de propietario vigente de esa persona en esa unidad. */
+function residenciaDePropietario(bd: BaseDatos, unidadId: string, personaId: string): Residencia {
+  const residencia = bd.residencias.find(
+    (r) => r.unidadId === unidadId && r.personaId === personaId && r.rol === 'propietario' && !r.cierre && residenciaVigente(r),
+  )
+  if (!residencia) throw new ErrorDeNegocio('Solo el propietario de la unidad puede tener un apoderado permanente.')
+  return residencia
+}
+
+/**
+ * RN-227 — Crea, a quien tiene apoderado permanente vigente, el poder de cada
+ * asamblea convocada o instalada que todavía no lo tenga. No toca las asambleas
+ * en que el propietario prefirió ir él, ni pasa el tope del edificio (RN-220).
+ * Devuelve si creó alguno.
+ */
+function aplicarApoderadosPermanentes(bd: BaseDatos): boolean {
+  let cambio = false
+  for (const residencia of bd.residencias) {
+    const permanente = residencia.apoderadoPermanente
+    if (!apoderadoPermanenteVigente(permanente) || residencia.cierre || !residenciaVigente(residencia)) continue
+    const unidad = bd.unidades.find((u) => u.id === residencia.unidadId)
+    if (!unidad) continue
+    const copropiedad = bd.copropiedades.find((c) => c.id === unidad.copropiedadId)
+    for (const asamblea of bd.asambleas) {
+      if (asamblea.copropiedadId !== unidad.copropiedadId) continue
+      if (asamblea.estado !== 'convocada' && asamblea.estado !== 'instalada') continue
+      if (permanente!.excepciones?.includes(asamblea.id)) continue
+      if (poderEnCursoDeUnidad(bd.poderes, asamblea.id, unidad.id)) continue
+      if (motivoTopePoderes(bd.poderes, asamblea.id, permanente!.apoderadoId, copropiedad?.topePoderes)) continue
+      const hoy = hoyISO()
+      const consecutivo = bd.consecutivos.poder
+      const documento: Documento = {
+        id: nuevoId('doc'),
+        tipo: 'poder',
+        numero: `POD-${hoy.slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`,
+        codigoVerificacion: nuevoCodigoVerificacion(),
+        copropiedadId: asamblea.copropiedadId,
+        unidadId: unidad.id,
+        asambleaId: asamblea.id,
+        emitidoEn: hoy,
+        estado: 'vigente',
+      }
+      bd.documentos.push(documento)
+      bd.consecutivos.poder = consecutivo + 1
+      bd.poderes.push({
+        id: nuevoId('pod'),
+        asambleaId: asamblea.id,
+        unidadId: unidad.id,
+        otorgadoPor: residencia.personaId,
+        apoderadoId: permanente!.apoderadoId,
+        origen: 'app',
+        documentoId: documento.id,
+        registradoPor: residencia.personaId,
+        registradoEn: ahoraISO(),
+        permanente: true,
+      })
+      cambio = true
+    }
+  }
+  return cambio
+}
+
+/**
+ * RN-227 — El propietario deja su apoderado permanente. Lo acepta el apoderado
+ * si tiene la app (RN-217) y lo recibe la administración (RN-218), una vez.
+ */
+export async function registrarApoderadoPermanente(
+  bdActual: BaseDatos,
+  parametros: {
+    unidadId: string
+    personaId: string
+    nombresApoderado: string
+    apellidosApoderado: string
+    documentoApoderado: string
+    telefonoApoderado?: string
+  },
+): Promise<Resultado<Residencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const residencia = residenciaDePropietario(bd, parametros.unidadId, parametros.personaId)
+  if (residencia.apoderadoPermanente && !residencia.apoderadoPermanente.retiradoEn) {
+    throw new ErrorDeNegocio('Ya tienes un apoderado permanente. Retíralo antes de dejar otro.')
+  }
+  const documento = parametros.documentoApoderado.trim()
+  if (documento.length < 5) throw new ErrorDeNegocio('Falta el documento del apoderado.')
+  if (parametros.nombresApoderado.trim().length < 2) throw new ErrorDeNegocio('Falta el nombre del apoderado.')
+  const dueno = bd.personas.find((p) => p.id === parametros.personaId)
+  if (dueno?.documento === documento) throw new ErrorDeNegocio('No hace falta un poder para votar por tu propia unidad.')
+  const existente = bd.personas.find((p) => p.documento === documento)
+  const apoderado: Persona = existente ?? {
+    id: nuevoId('per'),
+    nombres: parametros.nombresApoderado.trim(),
+    apellidos: parametros.apellidosApoderado.trim(),
+    documento,
+    email: '',
+    telefono: parametros.telefonoApoderado?.trim() ?? '',
+  }
+  if (!existente) bd.personas.push(apoderado)
+  residencia.apoderadoPermanente = {
+    apoderadoId: apoderado.id,
+    registradoEn: ahoraISO(),
+    ...(tieneLaApp(bd.residencias, apoderado.id) ? { aceptacion: { estado: 'esperando' as const } } : {}),
+    recepcion: { estado: 'esperando' },
+  }
+  return persistir(bd, residencia)
+}
+
+function permanentePorDecidir(bd: BaseDatos, residenciaId: string): { residencia: Residencia; permanente: NonNullable<Residencia['apoderadoPermanente']> } {
+  const residencia = bd.residencias.find((r) => r.id === residenciaId)
+  const permanente = residencia?.apoderadoPermanente
+  if (!residencia || !permanente || permanente.retiradoEn) throw new ErrorDeNegocio('Ese apoderado permanente no está vigente.')
+  return { residencia, permanente }
+}
+
+/** RN-227 — El apoderado acepta, una vez, representar siempre a esa unidad. */
+export async function aceptarApoderadoPermanente(
+  bdActual: BaseDatos,
+  parametros: { residenciaId: string; personaId: string; acepta: boolean; motivo?: string },
+): Promise<Resultado<Residencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const { residencia, permanente } = permanentePorDecidir(bd, parametros.residenciaId)
+  if (permanente.apoderadoId !== parametros.personaId) {
+    throw new ErrorDeNegocio('Solo la persona a quien se le dio el poder puede responderlo.')
+  }
+  if (permanente.aceptacion?.estado !== 'esperando') throw new ErrorDeNegocio('Ese poder no está esperando tu respuesta.')
+  const motivo = parametros.motivo?.trim()
+  permanente.aceptacion = parametros.acepta
+    ? { estado: 'aceptado', decididoEn: ahoraISO() }
+    : { estado: 'no_aceptado', decididoEn: ahoraISO(), ...(motivo ? { motivo } : {}) }
+  aplicarApoderadosPermanentes(bd)
+  return persistir(bd, residencia)
+}
+
+/** RN-227 — La administración lo da por recibido, una vez. */
+export async function recibirApoderadoPermanente(
+  bdActual: BaseDatos,
+  parametros: { residenciaId: string; recibidoPor: string },
+): Promise<Resultado<Residencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const { residencia, permanente } = permanentePorDecidir(bd, parametros.residenciaId)
+  if (permanente.recepcion?.estado !== 'esperando') throw new ErrorDeNegocio('Ese poder no está esperando recibirse.')
+  permanente.recepcion = { estado: 'recibido', recibidoPor: parametros.recibidoPor, recibidoEn: ahoraISO() }
+  aplicarApoderadosPermanentes(bd)
+  return persistir(bd, residencia)
+}
+
+/**
+ * RN-227 — «Esta vez voy yo»: el propietario quita el poder que creó su
+ * apoderado permanente para una asamblea. Se revoca (RN-61) y esa asamblea no
+ * se lo vuelve a crear.
+ */
+export async function noUsarApoderadoEnAsamblea(
+  bdActual: BaseDatos,
+  parametros: { poderId: string; personaId: string },
+): Promise<Resultado<Poder>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const poder = bd.poderes.find((p) => p.id === parametros.poderId)
+  if (!poder || !poder.permanente) throw new ErrorDeNegocio('Ese poder no es del apoderado permanente.')
+  const residencia = residenciaDePropietario(bd, poder.unidadId, parametros.personaId)
+  const permanente = residencia.apoderadoPermanente
+  if (!permanente) throw new ErrorDeNegocio('Esa unidad no tiene apoderado permanente.')
+  permanente.excepciones = [...(permanente.excepciones ?? []), poder.asambleaId]
+  poder.revocadoEn = ahoraISO()
+  const documento = bd.documentos.find((d) => d.id === poder.documentoId)
+  if (documento) documento.estado = 'anulado'
+  return persistir(bd, poder)
+}
+
+/**
+ * RN-227 — El propietario retira su apoderado permanente. Los poderes que creó
+ * para asambleas que no han terminado se revocan con él; los de asambleas
+ * cerradas quedan como fueron (RN-61).
+ */
+export async function retirarApoderadoPermanente(
+  bdActual: BaseDatos,
+  parametros: { unidadId: string; personaId: string },
+): Promise<Resultado<Residencia>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const residencia = residenciaDePropietario(bd, parametros.unidadId, parametros.personaId)
+  const permanente = residencia.apoderadoPermanente
+  if (!permanente || permanente.retiradoEn) throw new ErrorDeNegocio('No tienes un apoderado permanente.')
+  const ahora = ahoraISO()
+  permanente.retiradoEn = ahora
+  for (const poder of bd.poderes) {
+    if (!poder.permanente || poder.unidadId !== residencia.unidadId || poder.revocadoEn) continue
+    const asamblea = bd.asambleas.find((a) => a.id === poder.asambleaId)
+    if (asamblea?.estado !== 'convocada' && asamblea?.estado !== 'instalada') continue
+    poder.revocadoEn = ahora
+    const documento = bd.documentos.find((d) => d.id === poder.documentoId)
+    if (documento) documento.estado = 'anulado'
+  }
+  return persistir(bd, residencia)
 }
 
 /** RN-61 — Un poder no se borra: se revoca, y queda en el expediente. */

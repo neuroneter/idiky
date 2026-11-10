@@ -16,6 +16,7 @@ import { capitalizar, formatearDinero, formatearPeriodo } from '../../utilidades
 import { Icono } from '../../componentes/Icono'
 import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
+import { ApoderadoPermanente } from './ApoderadoPermanente'
 
 /** El coeficiente se expresa en porcentaje con cuatro decimales (docs/05, RN-19). */
 function formatearCoeficiente(coeficiente: number): string {
@@ -136,6 +137,9 @@ export function MiUnidadPage() {
           </p>
         </div>
       </div>
+
+      {/* RN-227 — El apoderado permanente: el voto es del coeficiente de esta unidad. */}
+      <ApoderadoPermanente />
 
       {/* Quien vive aqui es parte de «mi unidad» tanto como el coeficiente, y
           este es el sitio donde alguien lo va a buscar (CU-R-27). */}

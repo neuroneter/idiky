@@ -212,6 +212,13 @@ export interface Residencia {
     cerradoPor: string
     cerradoEn: string
   }
+  /**
+   * RN-227 — El apoderado permanente del propietario (Mary, 2026-11-10: *«si hay
+   * un propietario el cual tiene apoderado, debe quedar parametrizado en su
+   * perfil para evitar cada asamblea solicitar el poder»*). Solo en la
+   * residencia del propietario.
+   */
+  apoderadoPermanente?: ApoderadoPermanente
 }
 
 // ---------------------------------------------------------------------------
@@ -1293,6 +1300,21 @@ export type OrigenPoder = 'papel' | 'app'
  * Un rechazo lleva **motivo** siempre, y no se borra (RN-61): el propietario
  * tiene que saber que corregir, y el expediente que se rechazo y por que.
  */
+/**
+ * RN-227 — Quien representa siempre al propietario. Se acepta (si el apoderado
+ * tiene la app) y se recibe **una vez**; desde ahi, cada asamblea nueva le crea
+ * su poder sola. Nada se borra: se retira con fecha (RN-61).
+ */
+export interface ApoderadoPermanente {
+  apoderadoId: string
+  registradoEn: FechaHoraISO
+  aceptacion?: AceptacionPoder
+  recepcion?: RecepcionPoder
+  /** Las asambleas en las que el propietario prefirió ir él: «esta vez voy yo». */
+  excepciones?: string[]
+  retiradoEn?: FechaHoraISO
+}
+
 /** RN-217 — Lo que decidio el apoderado. Con «no acepto», el motivo es opcional. */
 export interface AceptacionPoder {
   estado: 'esperando' | 'aceptado' | 'no_aceptado'
@@ -1366,6 +1388,8 @@ export interface Poder {
    * que la propia administracion registro).
    */
   recepcion?: RecepcionPoder
+  /** RN-227 — Lo creó solo el apoderado permanente del propietario. */
+  permanente?: boolean
   /** Cuando se revoco. Presente = ya no representa (RN-61). */
   revocadoEn?: FechaHoraISO
 }

@@ -1152,6 +1152,14 @@ administración.
   (RN-28, RN-29).
 - A3. Es arrendatario → no puede dar poder: no puede ceder un voto que no tiene (RN-51).
 - A4. El poder llegó en papel → lo registra el administrador (CU-A-19), no esta pantalla.
+- A6. **Apoderado permanente** (RN-227; Mary, 2026-11-10: *«si hay un propietario el cual tiene
+  apoderado, debe quedar parametrizado en su perfil para evitar cada asamblea solicitar el poder»*).
+  En **Mi unidad → Apoderado permanente**, el propietario lo deja una vez. Lo acepta el apoderado
+  si tiene la app y lo recibe la administración, **una vez**. Desde ahí, cada asamblea convocada o
+  instalada le crea **su poder sola**, así que cada asamblea sigue teniendo el suyo (RN-31). En una
+  asamblea puntual, **«Esta vez voy yo»** lo quita solo para esa; «Retirar» lo quita del todo.
+  Respeta el tope del edificio (RN-220). **Para el abogado:** si un poder que sirve para varias
+  asambleas es válido.
 - A5. **El apoderado no lo acepta** (RN-217) → puede decir por qué; el documento se anula, el
   propietario ve «no aceptó» con el motivo y **puede darle poder a otra persona**. No se borra
   (RN-61).

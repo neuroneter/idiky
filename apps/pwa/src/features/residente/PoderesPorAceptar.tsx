@@ -12,7 +12,7 @@ import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
-import { aceptarPoder, noAceptarPoder } from '../../datos/repositorio'
+import { aceptarApoderadoPermanente, aceptarPoder, noAceptarPoder } from '../../datos/repositorio'
 import { etiquetaUnidad, poderEsperandoAceptacion } from '../../dominio/reglas'
 import { formatearFechaHora } from '../../utilidades/formato'
 
@@ -101,5 +101,64 @@ export function PoderesPorAceptar() {
         )
       })}
     </div>
+  )
+}
+
+/** RN-227 — Te piden ser apoderado permanente: se acepta una vez, para todas las asambleas. */
+export function PermanentesPorAceptar() {
+  const { bd, ejecutar, cargando } = useDatos()
+  const { sesion } = useSesion()
+  if (!sesion) return null
+  // RN-227 — Los permanentes: se aceptan una vez y valen para todas las asambleas.
+  const permanentes = bd.residencias.filter(
+    (r) =>
+      r.apoderadoPermanente?.apoderadoId === sesion.personaId &&
+      !r.apoderadoPermanente.retiradoEn &&
+      r.apoderadoPermanente.aceptacion?.estado === 'esperando',
+  )
+  if (permanentes.length === 0) return null
+  return (
+      <div className="tarjeta tarjeta--alerta">
+        <strong>Te piden ser apoderado permanente</strong>
+        {permanentes.map((r) => {
+          const unidad = sel.unidad(bd, r.unidadId)
+          const otorgante = sel.persona(bd, r.personaId)
+          return (
+            <div key={r.id} className="columna" style={{ gap: 'var(--e2)', marginTop: 'var(--e3)' }}>
+              <span>
+                <strong>{otorgante ? sel.nombreCompleto(otorgante) : 'Un propietario'}</strong> quiere que lo
+                representes en <strong>todas</strong> las asambleas, por{' '}
+                <strong>{unidad ? etiquetaUnidad(unidad) : 'su unidad'}</strong>. Lo aceptas una vez.
+              </span>
+              <div className="grupo-botones">
+                <button
+                  className="boton boton--primario"
+                  disabled={cargando}
+                  onClick={() =>
+                    void ejecutar(
+                      (base) => aceptarApoderadoPermanente(base, { residenciaId: r.id, personaId: sesion.personaId, acepta: true }),
+                      'Aceptado. Falta que la administración lo reciba.',
+                    )
+                  }
+                >
+                  Aceptar
+                </button>
+                <button
+                  className="boton"
+                  disabled={cargando}
+                  onClick={() =>
+                    void ejecutar(
+                      (base) => aceptarApoderadoPermanente(base, { residenciaId: r.id, personaId: sesion.personaId, acepta: false }),
+                      'Listo. Le avisamos al propietario.',
+                    )
+                  }
+                >
+                  No acepto
+                </button>
+              </div>
+            </div>
+          )
+        })}
+      </div>
   )
 }
