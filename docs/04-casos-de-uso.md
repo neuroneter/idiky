@@ -136,7 +136,7 @@ con datos reales.
 | CU-S-03 | **Liberar reservas no confirmadas** | 2 | ✅ Demo (vence la solicitud sin respuesta al llegar su turno y avisa al residente; el tablero alerta las que vencen en menos de 48 h — RN-122) |
 | CU-S-04 | Vencer códigos de visitante | 1 | ✅ Demo (por fecha de vigencia) |
 | CU-S-05 | Alertar PQRS próximas a vencer SLA | 2 | 🟡 Parcial (se muestra el indicador de vencida) |
-| CU-S-06 | Enviar recordatorios de pago | 3 | ⬜ Pendiente |
+| CU-S-06 | **Enviar recordatorios de pago** | 3 | ✅ Demo (2026-11-10: un recordatorio amable un par de días antes de vencer y las gracias al pagar; sin mensaje de cuota vencida; RN-226) |
 | CU-S-07 | **Calcular el quórum en vivo por coeficientes (presentes + representados)** | 1 | ✅ Demo (en la asamblea instalada, la consola muestra unidades, coeficiente reunido —presentes y representadas por poder— y cuánto falta, según la convocatoria: `hayQuorum`, `faltaParaQuorum`, RN-28, RN-92) |
 | CU-S-08 | **Consolidar el resultado de una votación ponderado por coeficiente** | 1 | ✅ Demo (se calcula por coeficiente **o por unidad** —RN-211, C-522 de 2002— con la mayoría y la base que exige la ley —`contarVotacion`, `resultadoVotacion`, RN-74— y se ve en la app del residente, en el acta y, mientras se vota, en la consola —CU-A-18, `VotacionPunto.tsx`—)
 | CU-S-09 | **Vencer los poderes al cerrarse la asamblea** | 1 | ✅ Demo (por construcción, RN-31: cada poder está atado a una sola asamblea y no se registra ni se otorga en una cerrada; el usuario temporal del apoderado no sirve para ninguna otra) |

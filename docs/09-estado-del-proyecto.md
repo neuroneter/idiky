@@ -113,6 +113,25 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · Recordatorios de pago amables, y el tono con el propietario (CU-S-06, RN-226)
+
+Mary: *«vamos con el recordatorio de pagos»*, y en el camino: *«solamente recordar un par de
+días antes del vencimiento»*, *«si está al día, agradecer por el pago»*, *«con los propietarios
+debemos ser cuidadosos y estratégicos»* y *«siempre debemos cuidar al propietario para que no se
+sienta juzgado, la app debe ser muy amigable»*. En la consola, **Cartera → Recordatorios de
+pago** (apagados por defecto; 2 días antes, de 1 a 5): un solo mensaje amable a los propietarios
+antes de vencer, y **las gracias** cuando se aplica un pago. **No hay mensaje de cuota vencida.**
+El propietario los ve en Mi cuenta, «Mensajes que te enviamos». El tono quedó como regla del
+proyecto en `docs/08-convenciones.md` §6 bis.
+Archivos: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/repositorio.ts`,
+`apps/pwa/src/features/admin/CarteraPage.tsx`, `apps/pwa/src/features/residente/CuentaPage.tsx`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/recordatorio-pago.spec.ts` (3 nuevas) y
+`cuota-automatica.spec.ts` (la tarjeta); **66 en verde**.
+
+**Por revisar con Mary:** el demo todavía le muestra al propietario «N días de mora» en su
+inicio y en Mi cuenta; con la regla nueva habría que suavizarlo.
+
 ### 2026-11-10 · Mary + IA (Claude) · La cuota ordinaria se genera sola cada mes (CU-S-01, RN-225)
 
 Mary: *«constrúyela, por favor»*. En la consola, **Cartera → Cuota mensual automática**: el

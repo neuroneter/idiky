@@ -82,6 +82,11 @@ export interface Copropiedad {
    */
   cuotaAutomatica?: CuotaAutomatica
   /**
+   * RN-226 — Mensajes de pago a los propietarios: un recordatorio un par de
+   * días antes de vencer, y las gracias al pagar. Ausente = apagados.
+   */
+  recordatorioPago?: { activo: boolean; diasAntes: number }
+  /**
    * Meses que un antecedente en firme sigue agravando la multa (RN-72).
    *
    * Parametro por la misma razon que los plazos del debido proceso: **la
@@ -255,6 +260,8 @@ export interface Cuota {
    * explicar en una frase es un cobro que va a terminar en una PQRS.
    */
   justificacion?: string
+  /** RN-226 — Cuándo se recordó, para no repetir. */
+  recordatorios?: { antes?: FechaHoraISO }
 }
 
 /**
@@ -986,6 +993,8 @@ export type MotivoMensaje =
   | 'estadia_por_aprobar'
   | 'estadia_decidida'
   | 'fin_de_estadia'
+  | 'recordatorio_pago'
+  | 'agradecimiento_pago'
 
 export interface Mensaje {
   id: string
@@ -1002,6 +1011,10 @@ export interface Mensaje {
   reservaId?: string
   /** La zona cuyo cierre por mantenimiento se aviso a todos (RN-117). */
   zonaId?: string
+  /** RN-226 — La cuota que se recuerda. */
+  cuotaId?: string
+  /** RN-226 — El pago que se agradece. */
+  pagoId?: string
   enviadoEn: FechaHoraISO
 }
 

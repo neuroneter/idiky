@@ -329,6 +329,27 @@ export function proximaGeneracion(
   return `${siguiente}-${dia}`
 }
 
+/**
+ * RN-226 — **Recordatorio de pago, con cuidado** (CU-S-06; Mary, 2026-11-10:
+ * *«solamente recordar un par de días antes del vencimiento»* y *«con los
+ * propietarios debemos ser cuidadosos y estratégicos»*). Si el edificio lo
+ * activó, a los propietarios les llega **un solo** mensaje amable unos días
+ * antes de que venza una cuota con saldo (dos, por defecto). **No hay mensaje
+ * de cuota vencida**, y una cuota pagada no se recuerda: a quien paga se le
+ * dan las gracias (ver `registrarPago`).
+ */
+export function recordatorioQueToca(
+  cuota: { saldo: number; fechaVencimiento: FechaISO; recordatorios?: { antes?: string } },
+  config: { activo: boolean; diasAntes: number } | undefined,
+  hoy: FechaISO = hoyISO(),
+): 'antes' | undefined {
+  if (!config?.activo || cuota.saldo <= 0 || cuota.recordatorios?.antes) return undefined
+  const vence = cuota.fechaVencimiento.slice(0, 10)
+  return hoy <= vence && hoy >= sumarDias(vence, -config.diasAntes) ? 'antes' : undefined
+}
+
+export const DIAS_RECORDATORIO_PAGO = 2
+
 /** RN-05 — Prorrateo de una cuota extraordinaria por coeficiente. */
 export function prorratearPorCoeficiente(valorTotal: number, coeficiente: number): number {
   return Math.round((valorTotal * coeficiente) / 100)
