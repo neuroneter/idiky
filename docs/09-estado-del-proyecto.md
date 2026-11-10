@@ -130,8 +130,8 @@ Archivos: `apps/pwa/src/componentes/HojaReciboCaja.tsx` y
 **Pruebas:** `apps/pwa/pruebas/navegador/comprobantes.spec.ts` (2 nuevas) y `cartera.spec.ts`
 (el nombre del botón); **59 en verde**.
 
-**Pendiente de confirmar con Mary:** si «impresión obsoleta» alcanza también la **citación
-impresa** que se entrega en mano a quien no tiene correo (RN-219).
+**Decidido (Mary, 2026-11-10):** la **citación impresa** para quien no tiene correo se queda
+como opción (RN-219), aunque *«hoy todo el mundo tiene correo»*: es el caso raro, no el normal.
 
 ### 2026-11-05 · BLOKY · El CSV de residentes como plantilla (RN-328)
 
