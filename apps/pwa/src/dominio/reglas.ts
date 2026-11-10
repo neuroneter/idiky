@@ -1799,6 +1799,29 @@ export function motivoTopePoderes(
   return `Esa persona ya lleva ${lleva} ${lleva === 1 ? 'poder' : 'poderes'} en esta asamblea, y el reglamento del edificio permite ${tope} por persona.`
 }
 
+/**
+ * RN-227 — **El apoderado permanente** (Mary, 2026-11-10). El propietario lo
+ * deja en su perfil una vez; lo acepta el apoderado si tiene la app (RN-217) y
+ * lo recibe la administración (RN-218), **una sola vez**. Desde ahí, en cada
+ * asamblea convocada o instalada, Idiky le crea a la unidad el poder de esa
+ * asamblea: cada asamblea sigue teniendo su poder (RN-31), pero el propietario
+ * no lo pide cada vez. Si una vez prefiere ir él, lo quita para esa asamblea; o
+ * lo retira del todo. Respeta el tope del edificio (RN-220).
+ */
+export function faltaAlApoderadoPermanente(
+  apoderado: { aceptacion?: { estado: string }; recepcion?: { estado: string } },
+): 'aceptacion' | 'recepcion' | undefined {
+  if (apoderado.aceptacion?.estado === 'esperando') return 'aceptacion'
+  if (apoderado.recepcion?.estado === 'esperando') return 'recepcion'
+  return undefined
+}
+
+export function apoderadoPermanenteVigente(
+  apoderado: { retiradoEn?: string; aceptacion?: { estado: string }; recepcion?: { estado: string } } | undefined,
+): boolean {
+  return !!apoderado && !apoderado.retiradoEn && apoderado.aceptacion?.estado !== 'no_aceptado' && !faltaAlApoderadoPermanente(apoderado)
+}
+
 /** Los poderes vigentes de una asamblea. */
 export function poderesDeAsamblea(poderes: Poder[], asambleaId: string): Poder[] {
   return poderes.filter((poder) => poder.asambleaId === asambleaId && poderVigente(poder))

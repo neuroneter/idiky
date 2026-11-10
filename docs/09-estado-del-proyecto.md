@@ -113,6 +113,22 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · El apoderado permanente (CU-R-23 A6, RN-227)
+
+Mary: *«sí, construye la propuesta del apoderado»*. En **Mi unidad → Apoderado permanente** el
+propietario deja a quien lo representa siempre. Lo acepta el apoderado una vez, si tiene la app
+(«Te piden ser apoderado permanente», en su inicio), y la administración lo recibe una vez
+(Asambleas de la consola). Desde ahí, cada asamblea convocada o instalada le crea **su poder
+sola**. En la asamblea, **«Esta vez voy yo»** lo quita solo para esa; «Retirar» lo quita del todo y
+revoca los poderes de las asambleas abiertas. Cada asamblea sigue teniendo su poder (RN-31) y se
+respeta el tope (RN-220). Para BLOKY va con RN-309, a Daniel (aviso 2).
+Archivos: `apps/pwa/src/features/residente/ApoderadoPermanente.tsx` (nuevo),
+`apps/pwa/src/features/residente/{MiUnidadPage,PoderesPorAceptar,InicioPage,AsambleaDetallePage}.tsx`,
+`apps/pwa/src/features/admin/AsambleasAdminPage.tsx`, `apps/pwa/src/dominio/{tipos,reglas}.ts`,
+`apps/pwa/src/datos/repositorio.ts`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/apoderado-permanente.spec.ts` (2 nuevas); **68 en verde**.
+
 ### 2026-11-10 · Mary + IA (Claude) · Mary está de acuerdo con RN-316 (aviso 2)
 
 Mary: *«sí, de acuerdo con lo propuesto en votaciones»*: el secretario abre cada votación con un

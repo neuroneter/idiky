@@ -24,6 +24,7 @@ import {
   enviarPoderEnPapel,
   marcarAsistencia,
   otorgarPoder,
+  noUsarApoderadoEnAsamblea,
   revocarPoder,
 } from '../../datos/repositorio'
 import {
@@ -672,18 +673,38 @@ export function AsambleaDetallePage() {
                 <Icono nombre={viendoHoja ? 'cerrar' : 'buscar'} tamano={16} />
                 {viendoHoja ? 'Ocultar el poder' : 'Ver el poder'}
               </button>
-              <button
-                className="boton"
-                disabled={cargando}
-                onClick={() =>
-                  void ejecutar(
-                    (base) => revocarPoder(base, { poderId: miPoder!.id }),
-                    'Poder revocado. Vuelves a votar tú.',
-                  )
-                }
-              >
-                Revocar el poder
-              </button>
+              {/* RN-227 — El del apoderado permanente no se revoca aquí: se quita
+                  para esta asamblea, y en las demás sigue. */}
+              {miPoder.permanente ? (
+                <>
+                  <span className="subtitulo">Es tu apoderado permanente: lo cambias en Mi unidad.</span>
+                  <button
+                    className="boton"
+                    disabled={cargando}
+                    onClick={() =>
+                      void ejecutar(
+                        (base) => noUsarApoderadoEnAsamblea(base, { poderId: miPoder!.id, personaId: sesion!.personaId }),
+                        'Listo: en esta asamblea votas tú. En las demás te sigue representando.',
+                      )
+                    }
+                  >
+                    Esta vez voy yo
+                  </button>
+                </>
+              ) : (
+                <button
+                  className="boton"
+                  disabled={cargando}
+                  onClick={() =>
+                    void ejecutar(
+                      (base) => revocarPoder(base, { poderId: miPoder!.id }),
+                      'Poder revocado. Vuelves a votar tú.',
+                    )
+                  }
+                >
+                  Revocar el poder
+                </button>
+              )}
             </div>
           ) : (
             <div className="columna" style={{ gap: 'var(--e2)' }}>
