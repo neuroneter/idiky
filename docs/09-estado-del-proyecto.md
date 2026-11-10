@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · La opción «cobra interés de mora» en la consola (RN-42, T-48)
+
+Mary: *«si está en BLOKY está bien; para el administrador debe estar la opción si aplica o no
+para el edificio»*. En la consola del demo, **Cartera → Interés de mora: «Se cobra» / «No se
+cobra»**, por defecto «Se cobra» (art. 30), con quién la cambió y cuándo. El cálculo no se
+construye todavía (se acuerda con la contable). Para BLOKY queda **T-48** a Daniel.
+Archivos: `apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/repositorio.ts`,
+`apps/pwa/src/features/admin/CarteraPage.tsx`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/interes-mora.spec.ts` (2 nuevas); **62 en verde**.
+
 ### 2026-11-10 · Mary + IA (Claude) · Cobrar o no el interés de mora lo decide el edificio (RN-42)
 
 Mary: *«los intereses de mora están parametrizados por ley, no obstante hay edificios en que se

@@ -68,6 +68,14 @@ export interface Copropiedad {
    */
   morososNoVotan?: boolean
   /**
+   * RN-42 — Si el edificio cobra interés de mora (Mary, 2026-11-10: *«para el
+   * administrador debe estar la opción si aplica o no para el edificio»*). La
+   * tasa la fija la ley (art. 30). Ausente = sí: es lo que dice la ley.
+   */
+  cobraInteresMora?: boolean
+  /** Quién cambió por última vez si se cobra, y cuándo: afecta a todos los propietarios. */
+  cambioInteresMora?: { por: string; en: FechaHoraISO }
+  /**
    * Meses que un antecedente en firme sigue agravando la multa (RN-72).
    *
    * Parametro por la misma razon que los plazos del debido proceso: **la

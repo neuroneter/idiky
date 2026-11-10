@@ -286,6 +286,15 @@ export function motivoNoVotaPorMora(
   return 'Esta unidad está en mora y el reglamento del edificio no permite votar a las unidades en mora. Puede asistir y opinar; para votar, tiene que ponerse al día.'
 }
 
+/**
+ * RN-42 — Si el edificio cobra interés de mora. Por defecto sí (Ley 675,
+ * art. 30: el retardo «causará» intereses); el administrador puede marcar que
+ * su edificio no lo cobra.
+ */
+export function cobraInteresMora(copropiedad: { cobraInteresMora?: boolean } | undefined): boolean {
+  return copropiedad?.cobraInteresMora ?? true
+}
+
 /** RN-05 — Prorrateo de una cuota extraordinaria por coeficiente. */
 export function prorratearPorCoeficiente(valorTotal: number, coeficiente: number): number {
   return Math.round((valorTotal * coeficiente) / 100)
