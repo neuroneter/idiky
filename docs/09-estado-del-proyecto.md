@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · Fecha límite de poderes y el apoderado permanente (aviso 2, RN-309)
+
+Mary, sobre RN-309 de Daniel: de acuerdo con la fecha límite de entrega de poderes en cada
+reunión. Y pide: *«si hay un propietario el cual tiene apoderado, debe quedar parametrizado en su
+perfil para evitar cada asamblea solicitar el poder»*.
+
+**Choca con lo decidido el 2026-10-11** (*«los poderes para cada asamblea son independientes»*,
+RN-31). **Propuesta, por confirmar con Mary y Daniel:** un **apoderado permanente** en el perfil
+del propietario. Para cada asamblea, Idiky le crea el poder de esa asamblea solo, antes de la
+fecha límite. Así cada asamblea sigue teniendo su poder (RN-31 se conserva), pero el propietario no
+lo tiene que pedir cada vez. Puede quitarlo para una asamblea puntual, o del todo.
+**Para el abogado:** si un poder general, que sirve para varias asambleas, es válido o lo debe
+permitir el reglamento. No se construye hasta confirmarlo.
+
 ### 2026-11-10 · Mary + IA (Claude) · Portería es de Jeimy
 
 Mary: *«es de Jeimy, lo que defina ella se debe ver en la app de ese perfil»*. Portería (T-08,
