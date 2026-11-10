@@ -16,8 +16,9 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { generarCuotas, previsualizarCuotas, type ParametrosGeneracion } from '../../datos/repositorio'
+import { configurarInteresMora, generarCuotas, previsualizarCuotas, type ParametrosGeneracion } from '../../datos/repositorio'
 import {
+  cobraInteresMora,
   abonadoDeCuota,
   calcularSaldo,
   calcularSaldoVencido,
@@ -140,6 +141,9 @@ export function CarteraPage() {
 
   return (
     <>
+      {/* RN-42, CU-A-25 — Si este edificio cobra interés de mora. La tasa la fija la ley. */}
+      <InteresMora />
+
       <div className="fila">
         <div className="filtros">
           {(
@@ -494,5 +498,59 @@ export function CarteraPage() {
         </Modal>
       )}
     </>
+  )
+}
+
+/** RN-42 — La opción del edificio: cobra o no interés de mora. */
+function InteresMora() {
+  const { bd, ejecutar, cargando } = useDatos()
+  const { sesion } = useSesion()
+  if (!sesion) return null
+  const copropiedad = sel.copropiedad(bd, sesion.copropiedadId)
+  const cobra = cobraInteresMora(copropiedad)
+  const cambio = copropiedad?.cambioInteresMora
+  return (
+    <div className="tarjeta">
+      <strong>Interés de mora</strong>
+      <p className="subtitulo">
+        La tasa la fija la ley: 1,5 veces el interés bancario corriente que certifica la
+        Superintendencia Financiera (Ley 675, art. 30). Aquí se escoge si este edificio lo cobra.
+      </p>
+      <span className="segmentos" style={{ display: 'inline-flex' }}>
+        {(
+          [
+            [true, 'Se cobra'],
+            [false, 'No se cobra'],
+          ] as const
+        ).map(([valor, texto]) => (
+          <button
+            key={texto}
+            type="button"
+            className="segmento"
+            disabled={cargando}
+            aria-current={cobra === valor ? 'page' : undefined}
+            onClick={() =>
+              void ejecutar(
+                (base) =>
+                  configurarInteresMora(base, {
+                    copropiedadId: sesion.copropiedadId,
+                    personaId: sesion.personaId,
+                    cobra: valor,
+                  }),
+                valor ? 'Este edificio cobra interés de mora.' : 'Este edificio no cobra interés de mora.',
+              )
+            }
+          >
+            {texto}
+          </button>
+        ))}
+      </span>
+      <p className="tenue" style={{ fontSize: 'var(--texto-xs)', marginTop: 'var(--e2)' }}>
+        {cambio
+          ? `Último cambio: ${nombreCompleto(sel.persona(bd, cambio.por))}, el ${formatearFechaHora(cambio.en)}.`
+          : 'Sin cambios: rige lo que dice la ley (se cobra).'}{' '}
+        El cálculo del interés en la cartera llega cuando se acuerde con la aplicación contable.
+      </p>
+    </div>
   )
 }

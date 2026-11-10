@@ -937,7 +937,7 @@ real que este caso de uso estaba tapando.
 > contable de Jeimy (`apps/contable/`). Las reglas RN-42 a RN-44 tienen que quedar **iguales en
 > las dos** el mismo día: antes de construir el cálculo, se acuerda con Jeimy y con Daniel.
 
-**Estado en el demo:** ⬜ — hoy no se calcula ningún interés (CU-S-02 está parcial).
+**Estado en el demo:** 🟡 — la opción **Sí / No** está en la consola, en Cartera (`features/admin/CarteraPage.tsx`, `InteresMora`), con quién la cambió y cuándo. Falta registrar una tasa inferior aprobada por la asamblea y **calcular** el interés en la cartera, que se acuerda con la contable. En BLOKY: T-48.
 
 ---
 

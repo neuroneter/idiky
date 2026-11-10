@@ -4083,6 +4083,26 @@ export async function corregirCoeficientes(
 }
 
 /**
+ * RN-42 — La administración marca si su edificio cobra interés de mora. Queda
+ * quién y cuándo: es un cambio que afecta a todos los propietarios.
+ */
+export async function configurarInteresMora(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; cobra: boolean },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('Esta opción la cambia la administración del edificio (RN-42).')
+  }
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  copropiedad.cobraInteresMora = parametros.cobra
+  copropiedad.cambioInteresMora = { por: parametros.personaId, en: ahoraISO() }
+  return persistir(bd, copropiedad)
+}
+
+/**
  * RN-221 — La administración indica si su reglamento no deja votar a las
  * unidades en mora. Por defecto votan (Ley 675, art. 37).
  */
