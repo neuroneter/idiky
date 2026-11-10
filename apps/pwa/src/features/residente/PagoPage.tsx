@@ -94,7 +94,7 @@ export function PagoPage() {
             <Icono nombre="check" tamano={28} />
           </div>
           <h2 className="titulo">Pago exitoso</h2>
-          <p className="subtitulo">Guarda este comprobante para tus registros.</p>
+          <p className="subtitulo">Tu recibo queda guardado en «Mis comprobantes de pago».</p>
           <div className="separador" />
           <div className="lista lista--compacta" style={{ textAlign: 'left' }}>
             <div className="fila">
@@ -119,7 +119,14 @@ export function PagoPage() {
             </div>
           </div>
         </div>
-        <button className="boton boton--primario boton--bloque" onClick={() => navegar('/app/cuenta')}>
+        {/* CU-R-19 — El comprobante no se pierde al salir: queda en «Mis comprobantes». */}
+        <button
+          className="boton boton--primario boton--bloque"
+          onClick={() => navegar(`/app/cuenta/pagos?pago=${comprobante.id}`)}
+        >
+          Descargar el comprobante
+        </button>
+        <button className="boton boton--bloque" onClick={() => navegar('/app/cuenta')}>
           Volver a mi cuenta
         </button>
       </div>

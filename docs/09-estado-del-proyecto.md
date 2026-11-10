@@ -113,6 +113,26 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-10 · Mary + IA (Claude) · Mis comprobantes de pago (CU-R-19)
+
+Mary: *«sí, vamos con los comprobantes»*. En **Mi cuenta → Mis comprobantes de pago** el
+propietario ve todos sus recibos de caja (RN-77), abre cualquiera y lo **descarga en PDF**; al
+terminar de pagar, «Descargar el comprobante» lo lleva a su recibo. Los anulados se ven marcados
+con su motivo (RN-78). La misma hoja se descarga desde la consola (Pagos). Además, Mary: *«el
+tema de impresión ya es obsoleto»*: todos los botones «Imprimir o guardar en PDF» del demo pasan
+a **«Descargar PDF»** (comprobante, estado de cuenta, paz y salvo y citación); el mecanismo no
+cambia.
+Archivos: `apps/pwa/src/componentes/HojaReciboCaja.tsx` y
+`apps/pwa/src/features/residente/ComprobantesPage.tsx` (nuevos), `apps/pwa/src/App.tsx`,
+`apps/pwa/src/features/residente/{CuentaPage,PagoPage,EstadoCuentaPage,PazYSalvoPage,AsambleaDetallePage}.tsx`,
+`apps/pwa/src/features/admin/{PagosPage,PazYSalvoAdminPage,CitacionAsamblea}.tsx`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/comprobantes.spec.ts` (2 nuevas) y `cartera.spec.ts`
+(el nombre del botón); **59 en verde**.
+
+**Pendiente de confirmar con Mary:** si «impresión obsoleta» alcanza también la **citación
+impresa** que se entrega en mano a quien no tiene correo (RN-219).
+
 ### 2026-11-05 · BLOKY · El CSV de residentes como plantilla (RN-328)
 
 - Daniel: el CSV debe traer **todas las unidades ya listadas**, como una plantilla para llenar y cargar, aunque no se hayan

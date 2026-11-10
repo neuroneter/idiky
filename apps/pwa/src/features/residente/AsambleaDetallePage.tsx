@@ -422,7 +422,7 @@ export function AsambleaDetallePage() {
             </button>
             {viendoCitacion && (
               <button className="boton boton--primario" onClick={() => window.print()}>
-                Imprimir o guardar en PDF
+                Descargar PDF
               </button>
             )}
           </div>

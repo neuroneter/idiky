@@ -150,13 +150,13 @@ export function EstadoCuentaPage() {
           {/* Imprimir es como se obtiene el PDF: el sistema ofrece «Guardar como PDF» (ADR-0006). */}
           <button className="boton boton--primario boton--bloque" onClick={() => window.print()}>
             <Icono nombre="certificado" tamano={18} />
-            Imprimir o guardar en PDF
+            Descargar PDF
           </button>
         </div>
       )}
 
       <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
-        Al imprimir, tu teléfono ofrece «Guardar como PDF». Con el número y el código, quien lo
+        Al descargar, tu teléfono ofrece «Guardar como PDF». Con el número y el código, quien lo
         reciba puede confirmarlo con la administración.
       </p>
 

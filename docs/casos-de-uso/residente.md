@@ -527,19 +527,28 @@ revisión, se imprime desde la app, sin servidor ni librerías.
   comprobante.
 
 **Flujo principal**
-1. El sistema lista los pagos de la unidad: fecha, valor, medio, cuotas cubiertas y número
-   de comprobante.
-2. El copropietario abre uno y descarga el PDF.
+1. En **Mi cuenta → Mis comprobantes de pago**, el sistema lista los pagos de la unidad, del más
+   reciente al más antiguo: fecha, valor, medio, cuotas cubiertas y número de recibo de caja.
+2. El copropietario abre uno: ve la hoja del **recibo de caja** —la misma que ve la
+   administración— y la **descarga en PDF** (Mary, 2026-11-10: *«el tema de impresión ya es
+   obsoleto»*).
+3. Al terminar de pagar en la app, «Descargar el comprobante» lo lleva directo a su recibo.
 
 **Flujos alternativos**
 - A1. El pago lo registró la administración manualmente (CU-A-04) → aparece igual, marcado
   con quién lo registró.
+- A2. El recibo se anuló (RN-78) → se sigue viendo, marcado **ANULADO** con su motivo: no se
+  borra, y quien lo presente tiene que ver que ya no vale.
+- A3. Un abono informado que la administración todavía no aplica (CU-R-30) no tiene recibo:
+  se ve en Mi cuenta, en «Abonos que informaste».
 
 **Reglas de negocio**
 - RN-77: todo pago aplicado tiene recibo de caja con consecutivo único (antes RN-07, retirada por repetida).
 
-**Estado en el demo:** 🟡 — el comprobante se muestra **una sola vez**, al terminar el pago
-(`PagoPage.tsx`); después no hay forma de volver a verlo ni de descargarlo.
+**Estado en el demo:** ✅ — `features/residente/ComprobantesPage.tsx` (ruta `/app/cuenta/pagos`)
+con la hoja `componentes/HojaReciboCaja.tsx`, que también se descarga desde la consola
+(Pagos, CU-A-27). El PDF sale con el «Guardar como PDF» del teléfono; el PDF de servidor
+espera a ADR-0006.
 
 ---
 
