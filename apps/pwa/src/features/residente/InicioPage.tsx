@@ -133,6 +133,17 @@ export function InicioPage() {
         </Link>
       </div>
 
+      {/* CU-R-17 — Los teléfonos útiles, a un toque: en una emergencia nadie busca. */}
+      <Link to="/app/directorio" className="tarjeta tarjeta--accion tarjeta--plana">
+        <div className="fila">
+          <div className="columna">
+            <strong>Teléfonos útiles y emergencias</strong>
+            <span className="subtitulo">Administración, portería, emergencias y servicios</span>
+          </div>
+          <Icono nombre="chevron" tamano={16} className="tenue" />
+        </div>
+      </Link>
+
       {/* Comunicado destacado — CU-R-09, RN-15 */}
       {destacado && (
         <div className="pila">

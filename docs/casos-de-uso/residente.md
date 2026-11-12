@@ -1414,3 +1414,35 @@ no entra a la app: sus avisos se guardan como mensajes a su celular.
 `/app/unidad/vehiculos-mascotas`) y el detalle de la unidad en `features/admin/UnidadesPage.tsx`.
 La portería (de Jeimy) puede usar las placas para reconocer vehículos.
 
+---
+
+### CU-R-17
+## CU-R-17 — Directorio de contactos útiles y emergencias
+
+- **Actor principal:** Propietario o residente; la administración lo arma.
+- **Precondiciones:** La administración cargó los contactos.
+- **Disparador:** Necesita llamar a alguien: una emergencia, la portería, un daño del servicio.
+- **Resultado esperado:** Encuentra el teléfono y llama con un toque.
+
+**Flujo principal**
+1. En el inicio, **«Teléfonos útiles y emergencias»** abre el directorio.
+2. Los contactos van por grupos: **Emergencias** (primero y resaltadas, con el 123), **El
+   edificio** (administración, portería), **Servicios públicos** (energía, gas, acueducto).
+3. Cada uno tiene **«Llamar»**, que abre el marcador del celular.
+
+**En la consola** (Directorio): la administración agrega, cambia y **desactiva** contactos (no se
+borran, RN-61), y marca quiénes son del **consejo de administración**.
+
+**Flujos alternativos**
+- A1. **Proveedores** (ascensores, plomero, planta eléctrica) → solo los ven **la administración y
+  el consejo** (Mary, 2026-11-12: *«los proveedores solo los viera el administrador y consejo»*,
+  RN-233).
+
+**Reglas de negocio**
+- RN-232: el directorio por grupos, las emergencias primero; se desactiva, no se borra.
+- RN-233: a los proveedores solo los ven la administración y el consejo.
+
+**Estado en el demo:** ✅ — `features/residente/DirectorioPage.tsx` (`/app/directorio`),
+`features/admin/DirectorioAdminPage.tsx` (`/admin/directorio`) y la lista común
+`componentes/ListaDirectorio.tsx`. En el demo, Andrés es del consejo.
+

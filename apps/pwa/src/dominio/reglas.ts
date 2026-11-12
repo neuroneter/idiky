@@ -381,6 +381,30 @@ export function motivoPlacaInvalida(tipo: 'carro' | 'moto' | 'bicicleta', placa:
   return undefined
 }
 
+/**
+ * RN-232 — **El directorio** (CU-R-17). Lo arma la administración, en grupos:
+ * el edificio, emergencias, servicios públicos y proveedores. Las emergencias
+ * van primero. Se desactiva, no se borra.
+ *
+ * RN-233 — **A los proveedores solo los ven la administración y el consejo**
+ * (Mary, 2026-11-12: *«los proveedores solo los viera el administrador y
+ * consejo»*): son información de trabajo, no del residente.
+ */
+export const GRUPOS_CONTACTO: ReadonlyArray<{ id: 'edificio' | 'emergencias' | 'servicios' | 'proveedores'; texto: string }> = [
+  { id: 'emergencias', texto: 'Emergencias' },
+  { id: 'edificio', texto: 'El edificio' },
+  { id: 'servicios', texto: 'Servicios públicos' },
+  { id: 'proveedores', texto: 'Proveedores' },
+]
+
+export function veProveedores(
+  copropiedad: { consejo?: string[] } | undefined,
+  personaId: string,
+  esAdministracion: boolean,
+): boolean {
+  return esAdministracion || !!copropiedad?.consejo?.includes(personaId)
+}
+
 /** RN-05 — Prorrateo de una cuota extraordinaria por coeficiente. */
 export function prorratearPorCoeficiente(valorTotal: number, coeficiente: number): number {
   return Math.round((valorTotal * coeficiente) / 100)

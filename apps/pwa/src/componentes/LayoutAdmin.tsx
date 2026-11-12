@@ -31,6 +31,7 @@ const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta
   // (CU-A-28). Va junto a comunicados porque cada avance es uno.
   { ruta: '/admin/proyectos', texto: 'Proyectos', icono: 'tablero' },
   { ruta: '/admin/correspondencia', texto: 'Correspondencia', icono: 'correspondencia' },
+  { ruta: '/admin/directorio', texto: 'Directorio', icono: 'personas' },
 ]
 
 const TITULOS: Record<string, string> = {
@@ -51,6 +52,7 @@ const TITULOS: Record<string, string> = {
   '/admin/comunicados': 'Comunicados',
   '/admin/proyectos': 'Proyectos y obras',
   '/admin/correspondencia': 'Correspondencia',
+  '/admin/directorio': 'Directorio',
 }
 
 export function LayoutAdmin() {

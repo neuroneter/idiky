@@ -81,6 +81,8 @@ export interface Copropiedad {
    * (CU-A-05).
    */
   cuotaAutomatica?: CuotaAutomatica
+  /** RN-233 — Los miembros del consejo de administración: ven a los proveedores. */
+  consejo?: string[]
   /**
    * RN-226 — Mensajes de pago a los propietarios: un recordatorio un par de
    * días antes de vencer, y las gracias al pagar. Ausente = apagados.
@@ -1715,12 +1717,28 @@ export interface Mascota {
   bajaEn?: FechaHoraISO
 }
 
+/** RN-232 — Los grupos del directorio. Los proveedores no los ven todos (RN-233). */
+export type GrupoContacto = 'edificio' | 'emergencias' | 'servicios' | 'proveedores'
+export interface Contacto {
+  id: string
+  copropiedadId: string
+  grupo: GrupoContacto
+  nombre: string
+  /** Qué hace o para qué se llama: «Ascensores», «Reportar fugas». */
+  descripcion?: string
+  telefono: string
+  /** Nada se borra (RN-61): se desactiva. */
+  desactivadoEn?: FechaHoraISO
+}
+
 export interface BaseDatos {
   /** Version del esquema; si cambia, la semilla se regenera. */
   version: number
   /** CU-R-15 — Los vehículos y las mascotas de cada unidad. */
   vehiculos: Vehiculo[]
   mascotas: Mascota[]
+  /** CU-R-17 — El directorio de teléfonos útiles de cada copropiedad. */
+  contactos: Contacto[]
   copropiedades: Copropiedad[]
   unidades: Unidad[]
   personas: Persona[]
