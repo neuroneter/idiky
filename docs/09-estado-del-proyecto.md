@@ -113,6 +113,12 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-12 · Mary + IA (Claude) · Portería pasa a Mary
+
+Mary: *«hablé con Jeimy y me corresponde hacer lo de portería»*. Reemplaza la nota del
+2026-11-10 («Portería es de Jeimy»): T-08 y T-19 quedan a nombre de Mary. Las decisiones abiertas
+están en `docs/casos-de-uso/porteria.md`, «Lo que falta decidir».
+
 ### 2026-11-12 · Mary + IA (Claude) · Directorio de teléfonos útiles (CU-R-17, RN-232, RN-233)
 
 Mary: *«le agregaría que los proveedores solo los viera el administrador y el consejo»*. En el
