@@ -42,9 +42,10 @@ administrador.
    confirma desde su app con **Recibido** (CU-R-11, RN-103), y la lista lo muestra como
    «Confirmado por el residente»: es la otra mitad de la cadena de custodia.
 
-**Estado:** 🟡 — `src/features/porteria/CorrespondenciaPage.tsx`. Registra, entrega y guarda
+**Estado:** ✅ — `src/features/porteria/CorrespondenciaPage.tsx`. Registra, entrega y guarda
 quién recibió del mensajero (RN-52). El administrador entra a la misma pantalla desde su
-consola, de respaldo (CU-A-09).
+consola, de respaldo (CU-A-09). Lo recibido y lo entregado queda en **la minuta del turno**
+(RN-236, ver abajo).
 
 ---
 
@@ -59,27 +60,43 @@ consola, de respaldo (CU-A-09).
 1. La portería lee el QR o teclea el código.
 2. El sistema responde con el veredicto y los datos: visitante, documento, placa, unidad y
    quién lo autorizó (RN-16, RN-17).
-3. Si es válido, autoriza el ingreso.
+3. Si es válido y el turno está abierto, marca **«Entró»**: a pie o **en vehículo, con placa**
+   (RN-235). Queda en la minuta con la hora.
+4. Mientras el visitante está adentro, aparece en **«Adentro ahora»** del inicio; al irse, el
+   portero marca **«Salió»**.
 
 **Flujos alternativos**
 - A1. Código vencido, aún no vigente o revocado → el sistema dice cuál de los tres es. No es lo
   mismo «todavía no» que «ya no».
 - A2. El código no existe → se llama al residente. La app no conoce esa autorización.
+- A3. El visitante ya está adentro → no se registra otra entrada hasta marcar la salida.
+- A4. No hay turno abierto → no se registra la entrada: primero se abre el turno.
 
-**Estado:** 🟡 — `src/features/porteria/ValidarVisitantePage.tsx`. Da el veredicto y los datos
-del visitante, y distingue las tres formas de no servir: todavía no, ya venció, o revocado.
-**No registra el ingreso**: hora de entrada, salida y vehículo son la minuta, que sigue sin
-definir. Con esto CU-R-10 deja de tener una mitad en el aire.
+**Estado:** ✅ — `src/features/porteria/ValidarVisitantePage.tsx`. Da el veredicto y los datos
+del visitante, distingue las tres formas de no servir (todavía no, ya venció, o revocado) y
+**registra la entrada** (RN-235).
 
 ---
 
-## Lo que falta decidir
+## El turno y la minuta (decidido con Mary, 2026-11-12)
 
-- **La minuta del turno** (T-08): qué se anota, quién la lee, cuánto se conserva.
-- **Registrar el ingreso**, no solo validarlo: hora de entrada y de salida, vehículo.
-- **Los turnos**: si la sesión es de la persona o del puesto, y qué pasa al cambiar de turno
-  con lo que quedó registrado.
-- **Peatonal y vehicular**: ¿el mismo flujo?
+Las cuatro preguntas que estaban abiertas, respondidas (Mary: *«sí, constrúyelo»*):
+
+- **Los turnos (RN-234):** el portero **abre y cierra su turno** en el inicio del puesto. Hay un
+  turno abierto a la vez; sin turno no se registran entradas ni novedades. Al cerrarlo deja
+  escrito lo que el siguiente debe saber, y el siguiente lo ve antes de abrir el suyo («Lo que
+  dejó el turno anterior»). «Salir» de la app no cierra el turno.
+- **Registrar el ingreso (RN-235):** con el código válido, «Entró» (hora, forma y placa) y luego
+  «Salió». «Adentro ahora» muestra a quién falta marcarle la salida.
+- **Peatonal y vehicular:** el **mismo flujo**; en vehículo se pide la placa.
+- **La minuta (RN-236):** es todo lo del turno, en orden de hora: entradas y salidas, paquetes
+  recibidos y entregados, y las **novedades** que escribe el portero. **La lee la
+  administración** en su consola (Portería → minuta de cada turno). No se borra (RN-61).
+- **La placa (RN-237):** «¿De quién es esta placa?» dice si es de un residente (CU-R-15), de un
+  visitante autorizado hoy, o desconocida («llama a la unidad antes de dejarla entrar»).
+
+Archivos: `src/features/porteria/GestionTurno.tsx`, `src/componentes/MinutaTurno.tsx`,
+`src/features/admin/MinutasPage.tsx`.
 
 ---
 

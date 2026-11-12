@@ -17,10 +17,12 @@ import { useDatos } from '../../estado/DatosContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
 import { estadoRealVisitante, etiquetaUnidad, hoyISO } from '../../dominio/reglas'
-import { formatearFecha } from '../../utilidades/formato'
+import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
 import { ChipVisitante } from '../../componentes/Etiquetas'
-import type { Visitante } from '../../dominio/tipos'
+import type { FormaIngreso, Visitante } from '../../dominio/tipos'
+import { useSesion } from '../../estado/SesionContext'
+import { registrarEntrada } from '../../datos/repositorio'
 
 /**
  * El veredicto, en una palabra y con lo que hay que hacer.
@@ -155,11 +157,8 @@ export function ValidarVisitantePage() {
             </div>
           </div>
 
-          <div className="separador" />
-          <p className="subtitulo">
-            El ingreso se sigue anotando en la minuta física: registrarlo dentro de la app está
-            pendiente de definir.
-          </p>
+          {/* RN-235 — Con el código válido, se registra la entrada: queda en la minuta. */}
+          {veredicto.pasa && <RegistrarEntrada visitante={visitante} />}
         </div>
       )}
 
@@ -212,5 +211,67 @@ function VigentesHoy() {
         </table>
       </div>
     </div>
+  )
+}
+
+/** RN-235 — Marcar «Entró»: a pie o en vehículo, con placa. Solo con el turno abierto. */
+function RegistrarEntrada({ visitante }: { visitante: Visitante }) {
+  const { bd, ejecutar, cargando } = useDatos()
+  const { sesion } = useSesion()
+  const [forma, setForma] = useState<FormaIngreso>(visitante.placa ? 'vehicular' : 'peatonal')
+  const [placa, setPlaca] = useState(visitante.placa ?? '')
+  if (!sesion) return null
+  const turno = sel.turnoAbierto(bd, sesion.copropiedadId)
+  const adentro = sel.visitantesAdentro(bd, sesion.copropiedadId).find((i) => i.visitanteId === visitante.id)
+
+  return (
+    <>
+      <div className="separador" />
+      {!turno ? (
+        <p className="subtitulo">Abre tu turno en el inicio para registrar la entrada en la minuta.</p>
+      ) : adentro ? (
+        <p className="subtitulo">Ya está adentro desde {formatearFechaHora(adentro.entradaEn)}. Su salida se marca en el inicio.</p>
+      ) : (
+        <div className="columna" style={{ gap: 'var(--e2)' }}>
+          <span className="segmentos" style={{ display: 'inline-flex' }}>
+            {(
+              [
+                ['peatonal', 'A pie'],
+                ['vehicular', 'En vehículo'],
+              ] as const
+            ).map(([f, texto]) => (
+              <button key={f} type="button" className="segmento" aria-current={forma === f ? 'page' : undefined} onClick={() => setForma(f)}>
+                {texto}
+              </button>
+            ))}
+          </span>
+          {forma === 'vehicular' && (
+            <div className="campo" style={{ marginBottom: 0 }}>
+              <label htmlFor="placa-ingreso">Placa</label>
+              <input id="placa-ingreso" value={placa} onChange={(e) => setPlaca(e.target.value)} style={{ textTransform: 'uppercase' }} />
+            </div>
+          )}
+          <button
+            className="boton boton--primario boton--bloque"
+            disabled={cargando}
+            onClick={() =>
+              void ejecutar(
+                (b) =>
+                  registrarEntrada(b, {
+                    copropiedadId: sesion.copropiedadId,
+                    personaId: sesion.personaId,
+                    visitanteId: visitante.id,
+                    forma,
+                    placa,
+                  }),
+                `Entrada de ${visitante.nombre} registrada.`,
+              )
+            }
+          >
+            Entró
+          </button>
+        </div>
+      )}
+    </>
   )
 }

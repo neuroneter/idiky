@@ -28,6 +28,7 @@ import { nombreCompleto } from '../../datos/selectores'
 import { estadoRealVisitante, etiquetaUnidad, hoyISO, reservasDeHoyParaPorteria } from '../../dominio/reglas'
 import { formatearFechaHora } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
+import { GestionTurno } from './GestionTurno'
 
 export function TurnoPage() {
   const { bd } = useDatos()
@@ -60,6 +61,9 @@ export function TurnoPage() {
           </div>
         </div>
       </div>
+
+      {/* CU-P-01, CU-P-02 — El turno, quién está adentro, las novedades y la minuta (RN-234 a RN-237). */}
+      <GestionTurno parte="arriba" />
 
       {/* Las dos acciones del día, grandes y antes que cualquier lista. */}
       <div className="acciones-turno">
@@ -161,11 +165,8 @@ export function TurnoPage() {
         )}
       </div>
 
-      {/* Se dice lo que falta en vez de dejar creer que la app ya lo hace. */}
-      <p className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
-        El registro de ingresos y salidas —la minuta del turno— todavía no existe: falta decidir
-        qué se anota, quién la lee y cuánto se conserva.
-      </p>
+      {/* CU-P-01, CU-P-02 — Placa, novedades, minuta y cierre del turno (RN-234 a RN-237). */}
+      <GestionTurno parte="abajo" />
     </div>
   )
 }

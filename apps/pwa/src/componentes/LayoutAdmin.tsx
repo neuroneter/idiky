@@ -32,6 +32,7 @@ const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta
   { ruta: '/admin/proyectos', texto: 'Proyectos', icono: 'tablero' },
   { ruta: '/admin/correspondencia', texto: 'Correspondencia', icono: 'correspondencia' },
   { ruta: '/admin/directorio', texto: 'Directorio', icono: 'personas' },
+  { ruta: '/admin/porteria', texto: 'Portería', icono: 'visitantes' },
 ]
 
 const TITULOS: Record<string, string> = {
@@ -53,6 +54,7 @@ const TITULOS: Record<string, string> = {
   '/admin/proyectos': 'Proyectos y obras',
   '/admin/correspondencia': 'Correspondencia',
   '/admin/directorio': 'Directorio',
+  '/admin/porteria': 'Minuta de portería',
 }
 
 export function LayoutAdmin() {

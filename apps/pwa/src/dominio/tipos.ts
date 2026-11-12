@@ -1717,6 +1717,48 @@ export interface Mascota {
   bajaEn?: FechaHoraISO
 }
 
+/**
+ * RN-234 — El turno de portería: lo abre y lo cierra quien está en el puesto.
+ * Todo lo que pasa entre una hora y otra es su minuta (RN-236).
+ */
+export interface TurnoPorteria {
+  id: string
+  copropiedadId: string
+  personaId: string
+  abiertoEn: FechaHoraISO
+  cerradoEn?: FechaHoraISO
+  /** Lo que deja escrito al cerrar, para quien sigue. */
+  entrega?: string
+}
+
+/** RN-235 — Una entrada (y su salida) de un visitante, peatonal o vehicular. */
+export type FormaIngreso = 'peatonal' | 'vehicular'
+export interface IngresoVisitante {
+  id: string
+  copropiedadId: string
+  turnoId: string
+  visitanteId: string
+  unidadId: string
+  nombre: string
+  documento: string
+  forma: FormaIngreso
+  /** Obligatoria si es vehicular. */
+  placa?: string
+  entradaEn: FechaHoraISO
+  salidaEn?: FechaHoraISO
+  registradoPor: string
+}
+
+/** RN-236 — Una novedad que el portero escribe en su turno. No se borra. */
+export interface NovedadPorteria {
+  id: string
+  copropiedadId: string
+  turnoId: string
+  texto: string
+  registradaEn: FechaHoraISO
+  registradaPor: string
+}
+
 /** RN-232 — Los grupos del directorio. Los proveedores no los ven todos (RN-233). */
 export type GrupoContacto = 'edificio' | 'emergencias' | 'servicios' | 'proveedores'
 export interface Contacto {
@@ -1739,6 +1781,10 @@ export interface BaseDatos {
   mascotas: Mascota[]
   /** CU-R-17 — El directorio de teléfonos útiles de cada copropiedad. */
   contactos: Contacto[]
+  /** CU-P-01, CU-P-02 — Turnos, ingresos y novedades de portería: la minuta (RN-234 a RN-237). */
+  turnos: TurnoPorteria[]
+  ingresos: IngresoVisitante[]
+  novedades: NovedadPorteria[]
   copropiedades: Copropiedad[]
   unidades: Unidad[]
   personas: Persona[]
