@@ -32,6 +32,8 @@ import type {
   TipoVehiculo,
   Vehiculo,
   EspecieMascota,
+  Contacto,
+  GrupoContacto,
   Mascota,
   Poder,
   Unidad,
@@ -4069,6 +4071,77 @@ export async function darDeBajaVehiculoOMascota(
   }
   item.bajaEn = ahoraISO()
   return persistir(bd, item)
+}
+
+// ---------------------------------------------------------------------------
+// CU-R-17 — El directorio de teléfonos útiles (RN-232, RN-233)
+// ---------------------------------------------------------------------------
+
+/** RN-232 — La administración agrega un contacto, o cambia uno que ya está. */
+export async function guardarContacto(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    personaId: string
+    id?: string
+    grupo: GrupoContacto
+    nombre: string
+    descripcion?: string
+    telefono: string
+  },
+): Promise<Resultado<Contacto>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('El directorio lo arma la administración (RN-232).')
+  }
+  if (parametros.nombre.trim().length < 2) throw new ErrorDeNegocio('Escribe el nombre del contacto.')
+  const telefono = parametros.telefono.trim()
+  if (telefono.replace(/\D/g, '').length < 3) throw new ErrorDeNegocio('Escribe el teléfono.')
+  bd.contactos = bd.contactos ?? []
+  const existente = parametros.id ? bd.contactos.find((c) => c.id === parametros.id && c.copropiedadId === parametros.copropiedadId) : undefined
+  if (parametros.id && !existente) throw new ErrorDeNegocio('Ese contacto no existe.')
+  const contacto: Contacto = existente ?? { id: nuevoId('con'), copropiedadId: parametros.copropiedadId, grupo: parametros.grupo, nombre: '', telefono: '' }
+  contacto.grupo = parametros.grupo
+  contacto.nombre = parametros.nombre.trim()
+  contacto.telefono = telefono
+  if (parametros.descripcion?.trim()) contacto.descripcion = parametros.descripcion.trim()
+  else delete contacto.descripcion
+  if (!existente) bd.contactos.push(contacto)
+  return persistir(bd, contacto)
+}
+
+/** RN-61 — Un contacto no se borra: se desactiva, o se vuelve a activar. */
+export async function cambiarActivoContacto(
+  bdActual: BaseDatos,
+  parametros: { contactoId: string; personaId: string; activo: boolean },
+): Promise<Resultado<Contacto>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const contacto = (bd.contactos ?? []).find((c) => c.id === parametros.contactoId)
+  if (!contacto) throw new ErrorDeNegocio('Ese contacto no existe.')
+  if (!esAdministracion(bd, parametros.personaId, contacto.copropiedadId)) {
+    throw new ErrorDeNegocio('El directorio lo arma la administración (RN-232).')
+  }
+  if (parametros.activo) delete contacto.desactivadoEn
+  else contacto.desactivadoEn = ahoraISO()
+  return persistir(bd, contacto)
+}
+
+/** RN-233 — La administración marca quiénes son del consejo: ellos ven a los proveedores. */
+export async function configurarConsejo(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; miembros: string[] },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('El consejo lo marca la administración.')
+  }
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  copropiedad.consejo = [...new Set(parametros.miembros)]
+  return persistir(bd, copropiedad)
 }
 
 /** RN-61 — Un poder no se borra: se revoca, y queda en el expediente. */

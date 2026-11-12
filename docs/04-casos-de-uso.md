@@ -38,7 +38,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-14 | Reportar una novedad con foto (daño, ruido) | 3 | ⬜ Pendiente | — |
 | CU-R-15 | **Registrar mis vehículos y mascotas** | 3 | ✅ Demo (2026-11-10: placa válida y única en el edificio, mascota sin usuario, se dan de baja; RN-230, RN-231) | [ver](./casos-de-uso/residente.md#cu-r-15) |
 | CU-R-16 | Recibir notificaciones push | 3 | ⬜ Pendiente | — |
-| CU-R-17 | Directorio de contactos útiles y emergencias | 3 | ⬜ Pendiente | — |
+| CU-R-17 | **Directorio de contactos útiles y emergencias** | 3 | ✅ Demo (2026-11-12: por grupos con «Llamar», las emergencias primero; los proveedores solo para administración y consejo; RN-232, RN-233) | [ver](./casos-de-uso/residente.md#cu-r-17) |
 | CU-R-18 | **Descargar el informe de estado de cuenta** | 1 | ✅ Demo (se emite con consecutivo y código, y se imprime o guarda en PDF desde la app — RN-127) | [ver](./casos-de-uso/residente.md#cu-r-18) |
 | CU-R-19 | **Consultar y descargar mis comprobantes de pago** | 1 | ✅ Demo (2026-11-10: lista de recibos de caja, hoja del recibo y descarga en PDF; también desde la consola) | [ver](./casos-de-uso/residente.md#cu-r-19) |
 | CU-R-20 | **Recibir la citación a asamblea** | 1 | ✅ Demo (ve e imprime la citación que le llegó, CU-A-12). Confirmar asistencia **no se pide** (Mary, 2026-10-12) | [ver](./casos-de-uso/residente.md#cu-r-20) |

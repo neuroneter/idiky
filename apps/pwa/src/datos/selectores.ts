@@ -29,7 +29,7 @@ import type {
   Voto,
   ZonaComun,
 } from '../dominio/tipos'
-import { hoyISO, ordenAsamblea, proyectosOrdenados, registroEnCurso, residenciaVigente, votacionVigente } from '../dominio/reglas'
+import { hoyISO, ordenAsamblea, proyectosOrdenados, registroEnCurso, residenciaVigente, veProveedores, votacionVigente } from '../dominio/reglas'
 
 // RN-01 — Todo se lee filtrado por copropiedad: un selector nunca mezcla dos.
 
@@ -420,4 +420,16 @@ export function vehiculosDeUnidad(bd: BaseDatos, unidadId?: string) {
 /** CU-R-15 — Las mascotas vigentes de la unidad. */
 export function mascotasDeUnidad(bd: BaseDatos, unidadId?: string) {
   return (bd.mascotas ?? []).filter((m) => m.unidadId === unidadId && !m.bajaEn)
+}
+
+/**
+ * RN-232, RN-233 — Los contactos activos que esta persona puede ver: los
+ * proveedores, solo la administración y el consejo.
+ */
+export function contactosVisibles(bd: BaseDatos, copropiedadId: string, personaId: string, esAdministracion: boolean) {
+  const cop = copropiedad(bd, copropiedadId)
+  const proveedores = veProveedores(cop, personaId, esAdministracion)
+  return (bd.contactos ?? []).filter(
+    (c) => c.copropiedadId === copropiedadId && !c.desactivadoEn && (c.grupo !== 'proveedores' || proveedores),
+  )
 }

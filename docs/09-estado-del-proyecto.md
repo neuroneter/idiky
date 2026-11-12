@@ -113,6 +113,24 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-12 · Mary + IA (Claude) · Directorio de teléfonos útiles (CU-R-17, RN-232, RN-233)
+
+Mary: *«le agregaría que los proveedores solo los viera el administrador y el consejo»*. En el
+inicio del residente, **«Teléfonos útiles y emergencias»**: por grupos, con «Llamar», y las
+emergencias primero (el 123). En la consola, **Directorio**: la administración agrega, cambia y
+desactiva contactos, y marca a los miembros del **consejo**, que ven a los proveedores. La
+semilla sube a la versión 37 con contactos de ejemplo y Andrés en el consejo. Además se corrigió
+una citación de ejemplo de la cartelera que decía «las unidades en mora no tienen voto»
+(contradecía RN-221 y el tono de §6 bis).
+Archivos: `apps/pwa/src/componentes/ListaDirectorio.tsx`,
+`apps/pwa/src/features/residente/DirectorioPage.tsx` y
+`apps/pwa/src/features/admin/DirectorioAdminPage.tsx` (nuevos), `apps/pwa/src/App.tsx`,
+`apps/pwa/src/componentes/{LayoutAdmin,LayoutResidente}.tsx`,
+`apps/pwa/src/features/residente/InicioPage.tsx`, `apps/pwa/src/dominio/{tipos,reglas}.ts`,
+`apps/pwa/src/datos/{repositorio,selectores,semilla}.ts`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/directorio.spec.ts` (2 nuevas); **75 en verde**.
+
 ### 2026-11-10 · Mary + IA (Claude) · Vehículos y mascotas (CU-R-15, RN-230, RN-231)
 
 Mary: *«vamos con vehículos y mascotas»*. En **Mi unidad → Vehículos y mascotas** el propietario

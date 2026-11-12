@@ -74,7 +74,8 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 35 — la asamblea en curso se instaló con quórum (51,8 %), que queda guardado
 //      (RN-215); se agrega la asistencia de la Torre 1 · 302.
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
-export const VERSION_ESQUEMA = 36
+// 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
+export const VERSION_ESQUEMA = 37
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -893,7 +894,7 @@ function construirComunicados(): Comunicado[] {
       copropiedadId: COPROPIEDAD_ID,
       titulo: 'Convocatoria a asamblea ordinaria',
       cuerpo:
-        'Se convoca a todos los copropietarios a la asamblea ordinaria que se realizará en el salón social. Orden del día: informe de gestión, estados financieros, presupuesto y elección del consejo de administración. Se recuerda que las unidades en mora no tienen voto.',
+        'Se convoca a todos los copropietarios a la asamblea ordinaria que se realizará en el salón social. Orden del día: informe de gestión, estados financieros, presupuesto y elección del consejo de administración. Quien no pueda asistir puede dar poder desde la app.',
       categoria: 'asamblea',
       fijado: true,
       fechaPublicacion: `${sumarDias(hoy, -6)}T12:00:00.000Z`,
@@ -1489,6 +1490,8 @@ export function crearSemilla(): BaseDatos {
         mesesReincidencia: 12,
         // Ley 675 art. 45: «mas de la mitad». Es el piso legal — el reglamento
         // puede exigir mas, nunca menos (RN-28).
+        // RN-233 — Andrés es del consejo: ve a los proveedores en el directorio.
+        consejo: ['per-2'],
         quorumMinimo: 50,
       },
     ],
@@ -1533,6 +1536,20 @@ export function crearSemilla(): BaseDatos {
         registradoPor: 'per-1',
         registradoEn: `${sumarDias(hoyISO(), -120)}T10:00:00-05:00`,
       },
+    ],
+    // CU-R-17 — El directorio. El 123 es la línea única de emergencias de Colombia;
+    // los demás números son de ejemplo.
+    contactos: [
+      { id: 'con-1', copropiedadId: COPROPIEDAD_ID, grupo: 'emergencias', nombre: 'Línea de emergencias', descripcion: 'Policía, bomberos y ambulancia', telefono: '123' },
+      { id: 'con-2', copropiedadId: COPROPIEDAD_ID, grupo: 'emergencias', nombre: 'Cuadrante de policía', descripcion: 'El del barrio', telefono: '+57 310 555 0110' },
+      { id: 'con-3', copropiedadId: COPROPIEDAD_ID, grupo: 'emergencias', nombre: 'Clínica más cercana', descripcion: 'Urgencias', telefono: '+57 604 555 0120' },
+      { id: 'con-4', copropiedadId: COPROPIEDAD_ID, grupo: 'edificio', nombre: 'Administración', descripcion: 'Lunes a viernes, 8:00 a. m. a 5:00 p. m.', telefono: '+57 320 555 2000' },
+      { id: 'con-5', copropiedadId: COPROPIEDAD_ID, grupo: 'edificio', nombre: 'Portería', descripcion: 'Las 24 horas', telefono: '+57 320 555 2020' },
+      { id: 'con-6', copropiedadId: COPROPIEDAD_ID, grupo: 'servicios', nombre: 'Energía', descripcion: 'Reportar daños y cortes', telefono: '+57 604 555 0130' },
+      { id: 'con-7', copropiedadId: COPROPIEDAD_ID, grupo: 'servicios', nombre: 'Gas', descripcion: 'Reportar fugas', telefono: '+57 604 555 0140' },
+      { id: 'con-8', copropiedadId: COPROPIEDAD_ID, grupo: 'servicios', nombre: 'Acueducto', descripcion: 'Daños y falta de agua', telefono: '+57 604 555 0150' },
+      { id: 'con-9', copropiedadId: COPROPIEDAD_ID, grupo: 'proveedores', nombre: 'Ascensores Andinos', descripcion: 'Mantenimiento de ascensores', telefono: '+57 311 555 0160' },
+      { id: 'con-10', copropiedadId: COPROPIEDAD_ID, grupo: 'proveedores', nombre: 'Plomería La Llave', descripcion: 'Plomero de turno', telefono: '+57 312 555 0170' },
     ],
     mascotas: [
       {
