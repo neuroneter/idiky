@@ -75,7 +75,8 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 //      (RN-215); se agrega la asistencia de la Torre 1 · 302.
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
-export const VERSION_ESQUEMA = 37
+// 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
+export const VERSION_ESQUEMA = 38
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1550,6 +1551,28 @@ export function crearSemilla(): BaseDatos {
       { id: 'con-8', copropiedadId: COPROPIEDAD_ID, grupo: 'servicios', nombre: 'Acueducto', descripcion: 'Daños y falta de agua', telefono: '+57 604 555 0150' },
       { id: 'con-9', copropiedadId: COPROPIEDAD_ID, grupo: 'proveedores', nombre: 'Ascensores Andinos', descripcion: 'Mantenimiento de ascensores', telefono: '+57 311 555 0160' },
       { id: 'con-10', copropiedadId: COPROPIEDAD_ID, grupo: 'proveedores', nombre: 'Plomería La Llave', descripcion: 'Plomero de turno', telefono: '+57 312 555 0170' },
+    ],
+    // RN-234 — El turno de anoche, ya cerrado, con lo que dejó para el siguiente.
+    turnos: [
+      {
+        id: 'tur-1',
+        copropiedadId: COPROPIEDAD_ID,
+        personaId: 'per-porteria',
+        abiertoEn: `${sumarDias(hoyISO(), -1)}T18:00:00-05:00`,
+        cerradoEn: `${hoyISO()}T06:00:00-05:00`,
+        entrega: 'Sin novedades graves. El citófono de la Torre 2 está fallando: ya se le avisó a la administración.',
+      },
+    ],
+    ingresos: [],
+    novedades: [
+      {
+        id: 'nov-1',
+        copropiedadId: COPROPIEDAD_ID,
+        turnoId: 'tur-1',
+        texto: 'A las 11:40 p. m. se activó la alarma del parqueadero. Se revisó: fue un gato. Sin daños.',
+        registradaEn: `${sumarDias(hoyISO(), -1)}T23:45:00-05:00`,
+        registradaPor: 'per-porteria',
+      },
     ],
     mascotas: [
       {

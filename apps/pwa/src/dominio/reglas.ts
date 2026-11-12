@@ -405,6 +405,25 @@ export function veProveedores(
   return esAdministracion || !!copropiedad?.consejo?.includes(personaId)
 }
 
+/**
+ * RN-234 a RN-237 — **La portería** (Mary, 2026-11-12: *«sí, constrúyelo»*).
+ *
+ * - RN-234: el portero **abre y cierra su turno**. Hay un turno abierto a la
+ *   vez por copropiedad; sin turno abierto no se registran ingresos ni
+ *   novedades. Al cerrarlo puede dejar escrita la entrega para quien sigue.
+ * - RN-235: el ingreso de un visitante se registra **solo con su código
+ *   válido**, peatonal o **vehicular, con placa**. Mientras está adentro no se
+ *   vuelve a registrar su entrada; al irse se marca la salida.
+ * - RN-236: **la minuta del turno** es todo lo que pasó entre la apertura y el
+ *   cierre: entradas y salidas, paquetes recibidos y entregados, y novedades.
+ *   La lee la administración; nada se borra (RN-61).
+ * - RN-237: por la **placa** la portería reconoce un vehículo: de un residente
+ *   (CU-R-15) o de un visitante autorizado hoy.
+ */
+export function enTurno(fecha: string, turno: { abiertoEn: string; cerradoEn?: string }): boolean {
+  return fecha >= turno.abiertoEn && (!turno.cerradoEn || fecha <= turno.cerradoEn)
+}
+
 /** RN-05 — Prorrateo de una cuota extraordinaria por coeficiente. */
 export function prorratearPorCoeficiente(valorTotal: number, coeficiente: number): number {
   return Math.round((valorTotal * coeficiente) / 100)

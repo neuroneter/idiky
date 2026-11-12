@@ -102,10 +102,12 @@ export function LayoutPorteria() {
       <div className="consola__principal">
         <header className="consola__barra">
           <h1 className="titulo">{TITULOS[pathname] ?? 'Portería'}</h1>
-          {/* Sin «reiniciar demo»: borrar los datos de todos no es de la porteria. */}
+          {/* Sin «reiniciar demo»: borrar los datos de todos no es de la porteria.
+              «Salir» y no «Cerrar turno»: el turno se cierra en el inicio, con su
+              minuta (RN-234); salir de la app no lo cierra. */}
           <button className="boton boton--pequeno" onClick={cerrar}>
             <Icono nombre="salir" tamano={14} />
-            Cerrar turno
+            Salir
           </button>
         </header>
 

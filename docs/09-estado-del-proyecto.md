@@ -113,6 +113,24 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-12 · Mary + IA (Claude) · Portería: turno, entradas y salidas, minuta (CU-P-01, CU-P-02, RN-234 a RN-237)
+
+Mary: *«sí, constrúyelo»*, sobre la propuesta de cuatro puntos. En el puesto de portería:
+**abrir y cerrar el turno** (con la entrega para el siguiente, y «Lo que dejó el turno anterior»);
+al validar un código, **«Entró»** a pie o en vehículo con placa, y **«Salió»** desde «Adentro
+ahora»; **novedades**; **«¿De quién es esta placa?»** (residente, visitante de hoy o desconocida);
+y la **minuta** del turno. La administración la lee en la consola (**Portería**). El botón de la
+barra de portería que decía «Cerrar turno» y solo salía de la app ahora dice «Salir». La semilla
+sube a la versión 38 con el turno de anoche cerrado. T-08 y T-19 quedan ✅. No se abrió un CU
+nuevo (CU-P-04 es del rango de integración): la minuta completa CU-P-01 y CU-P-02.
+Archivos: `apps/pwa/src/features/porteria/GestionTurno.tsx`, `apps/pwa/src/componentes/MinutaTurno.tsx`
+y `apps/pwa/src/features/admin/MinutasPage.tsx` (nuevos),
+`apps/pwa/src/features/porteria/{TurnoPage,ValidarVisitantePage}.tsx`,
+`apps/pwa/src/componentes/{LayoutPorteria,LayoutAdmin}.tsx`, `apps/pwa/src/App.tsx`,
+`apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/{repositorio,selectores,semilla}.ts`.
+
+**Pruebas:** `apps/pwa/pruebas/navegador/porteria.spec.ts` (3 nuevas); **78 en verde**.
+
 ### 2026-11-12 · Mary + IA (Claude) · Portería pasa a Mary
 
 Mary: *«hablé con Jeimy y me corresponde hacer lo de portería»*. Reemplaza la nota del

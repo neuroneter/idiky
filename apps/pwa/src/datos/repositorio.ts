@@ -34,6 +34,10 @@ import type {
   EspecieMascota,
   Contacto,
   GrupoContacto,
+  TurnoPorteria,
+  IngresoVisitante,
+  FormaIngreso,
+  NovedadPorteria,
   Mascota,
   Poder,
   Unidad,
@@ -170,6 +174,7 @@ import {
   inmobiliariaVigente,
   motivoPlacaInvalida,
   normalizarPlaca,
+  estadoRealVisitante,
   estaEnMora,
   diferenciaCoeficientes,
   canalesDeCitacion,
@@ -4142,6 +4147,134 @@ export async function configurarConsejo(
   if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
   copropiedad.consejo = [...new Set(parametros.miembros)]
   return persistir(bd, copropiedad)
+}
+
+// ---------------------------------------------------------------------------
+// CU-P-01, CU-P-02 — Portería: turno, ingresos, novedades y minuta (RN-234 a RN-237)
+// ---------------------------------------------------------------------------
+
+/** Quién atiende la portería: el perfil de portería, o la administración de respaldo. */
+function atiendePorteria(bd: BaseDatos, personaId: string, copropiedadId: string): boolean {
+  return (
+    bd.perfilesDemo.some((p) => p.rol === 'porteria' && p.personaId === personaId && p.copropiedadId === copropiedadId) ||
+    esAdministracion(bd, personaId, copropiedadId)
+  )
+}
+
+/** RN-234 — El turno abierto de la copropiedad, si hay uno. */
+function turnoAbiertoDe(bd: BaseDatos, copropiedadId: string): TurnoPorteria | undefined {
+  return (bd.turnos ?? []).find((t) => t.copropiedadId === copropiedadId && !t.cerradoEn)
+}
+
+function exigirTurnoAbierto(bd: BaseDatos, copropiedadId: string, personaId: string): TurnoPorteria {
+  if (!atiendePorteria(bd, personaId, copropiedadId)) throw new ErrorDeNegocio('Esto lo registra la portería.')
+  const turno = turnoAbiertoDe(bd, copropiedadId)
+  if (!turno) throw new ErrorDeNegocio('Primero abre tu turno: todo lo que registres queda en su minuta.')
+  return turno
+}
+
+/** RN-234 — El portero abre su turno. Uno abierto a la vez. */
+export async function abrirTurno(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string },
+): Promise<Resultado<TurnoPorteria>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!atiendePorteria(bd, parametros.personaId, parametros.copropiedadId)) throw new ErrorDeNegocio('El turno lo abre la portería.')
+  const abierto = turnoAbiertoDe(bd, parametros.copropiedadId)
+  if (abierto) {
+    const quien = bd.personas.find((p) => p.id === abierto.personaId)
+    throw new ErrorDeNegocio(`Ya hay un turno abierto${quien ? `, de ${quien.nombres}` : ''}. Hay que cerrarlo antes de abrir otro.`)
+  }
+  const turno: TurnoPorteria = { id: nuevoId('tur'), copropiedadId: parametros.copropiedadId, personaId: parametros.personaId, abiertoEn: ahoraISO() }
+  bd.turnos = [...(bd.turnos ?? []), turno]
+  return persistir(bd, turno)
+}
+
+/** RN-234 — Cierra el turno, con lo que deja escrito para quien sigue. */
+export async function cerrarTurno(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; entrega?: string },
+): Promise<Resultado<TurnoPorteria>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const turno = exigirTurnoAbierto(bd, parametros.copropiedadId, parametros.personaId)
+  turno.cerradoEn = ahoraISO()
+  if (parametros.entrega?.trim()) turno.entrega = parametros.entrega.trim()
+  return persistir(bd, turno)
+}
+
+/** RN-235 — Entra un visitante con su código válido: peatonal o vehicular, con placa. */
+export async function registrarEntrada(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; visitanteId: string; forma: FormaIngreso; placa?: string },
+): Promise<Resultado<IngresoVisitante>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const turno = exigirTurnoAbierto(bd, parametros.copropiedadId, parametros.personaId)
+  const visitante = bd.visitantes.find((v) => v.id === parametros.visitanteId)
+  if (!visitante) throw new ErrorDeNegocio('Ese visitante no existe.')
+  if (estadoRealVisitante(visitante, hoyISO()) !== 'activo') {
+    throw new ErrorDeNegocio('El código no está vigente: no se puede registrar la entrada.')
+  }
+  const adentro = (bd.ingresos ?? []).find((i) => i.visitanteId === visitante.id && !i.salidaEn)
+  if (adentro) throw new ErrorDeNegocio(`${visitante.nombre} ya está adentro: marca su salida antes de una nueva entrada.`)
+  const placa = parametros.forma === 'vehicular' ? normalizarPlaca(parametros.placa ?? visitante.placa ?? '') : undefined
+  if (parametros.forma === 'vehicular' && (!placa || placa.length < 5)) {
+    throw new ErrorDeNegocio('Si entra en vehículo, escribe la placa.')
+  }
+  const ingreso: IngresoVisitante = {
+    id: nuevoId('ing'),
+    copropiedadId: parametros.copropiedadId,
+    turnoId: turno.id,
+    visitanteId: visitante.id,
+    unidadId: visitante.unidadId,
+    nombre: visitante.nombre,
+    documento: visitante.documento,
+    forma: parametros.forma,
+    ...(placa ? { placa } : {}),
+    entradaEn: ahoraISO(),
+    registradoPor: parametros.personaId,
+  }
+  bd.ingresos = [...(bd.ingresos ?? []), ingreso]
+  return persistir(bd, ingreso)
+}
+
+/** RN-235 — Sale el visitante. */
+export async function registrarSalida(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; ingresoId: string },
+): Promise<Resultado<IngresoVisitante>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirTurnoAbierto(bd, parametros.copropiedadId, parametros.personaId)
+  const ingreso = (bd.ingresos ?? []).find((i) => i.id === parametros.ingresoId)
+  if (!ingreso) throw new ErrorDeNegocio('Esa entrada no existe.')
+  if (ingreso.salidaEn) throw new ErrorDeNegocio('Esa salida ya se registró.')
+  ingreso.salidaEn = ahoraISO()
+  return persistir(bd, ingreso)
+}
+
+/** RN-236 — El portero escribe una novedad en su turno. */
+export async function registrarNovedad(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; texto: string },
+): Promise<Resultado<NovedadPorteria>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const turno = exigirTurnoAbierto(bd, parametros.copropiedadId, parametros.personaId)
+  const texto = parametros.texto.trim()
+  if (texto.length < 5) throw new ErrorDeNegocio('Escribe qué pasó.')
+  const novedad: NovedadPorteria = {
+    id: nuevoId('nov'),
+    copropiedadId: parametros.copropiedadId,
+    turnoId: turno.id,
+    texto,
+    registradaEn: ahoraISO(),
+    registradaPor: parametros.personaId,
+  }
+  bd.novedades = [...(bd.novedades ?? []), novedad]
+  return persistir(bd, novedad)
 }
 
 /** RN-61 — Un poder no se borra: se revoca, y queda en el expediente. */

@@ -29,7 +29,7 @@ import type {
   Voto,
   ZonaComun,
 } from '../dominio/tipos'
-import { hoyISO, ordenAsamblea, proyectosOrdenados, registroEnCurso, residenciaVigente, veProveedores, votacionVigente } from '../dominio/reglas'
+import { hoyISO, ordenAsamblea, proyectosOrdenados, registroEnCurso, residenciaVigente, veProveedores, votacionVigente, enTurno, estadoRealVisitante } from '../dominio/reglas'
 
 // RN-01 — Todo se lee filtrado por copropiedad: un selector nunca mezcla dos.
 
@@ -432,4 +432,67 @@ export function contactosVisibles(bd: BaseDatos, copropiedadId: string, personaI
   return (bd.contactos ?? []).filter(
     (c) => c.copropiedadId === copropiedadId && !c.desactivadoEn && (c.grupo !== 'proveedores' || proveedores),
   )
+}
+
+/** RN-234 — El turno abierto de la copropiedad, si hay uno. */
+export function turnoAbierto(bd: BaseDatos, copropiedadId: string) {
+  return (bd.turnos ?? []).find((t) => t.copropiedadId === copropiedadId && !t.cerradoEn)
+}
+
+/** RN-234 — Los turnos de la copropiedad, el más reciente primero. */
+export function turnosDe(bd: BaseDatos, copropiedadId: string) {
+  return (bd.turnos ?? []).filter((t) => t.copropiedadId === copropiedadId).sort((a, b) => b.abiertoEn.localeCompare(a.abiertoEn))
+}
+
+/** RN-235 — Los visitantes que entraron y no han salido. */
+export function visitantesAdentro(bd: BaseDatos, copropiedadId: string) {
+  return (bd.ingresos ?? []).filter((i) => i.copropiedadId === copropiedadId && !i.salidaEn)
+}
+
+/**
+ * RN-236 — **La minuta de un turno**: entradas y salidas, paquetes recibidos y
+ * entregados, y novedades, en orden de hora. Se arma con lo que pasó entre la
+ * apertura y el cierre; nada se escribe dos veces.
+ */
+export function minutaDeTurno(bd: BaseDatos, turno: { id: string; copropiedadId: string; abiertoEn: string; cerradoEn?: string }) {
+  const lineas: Array<{ en: string; tipo: 'entrada' | 'salida' | 'paquete' | 'entrega' | 'novedad'; texto: string }> = []
+  const unidadTexto = (id: string) => {
+    const u = unidad(bd, id)
+    return u ? `${u.torre} · ${u.numero}` : 'unidad'
+  }
+  for (const i of bd.ingresos ?? []) {
+    if (i.copropiedadId !== turno.copropiedadId) continue
+    const como = i.forma === 'vehicular' ? `en vehículo ${i.placa}` : 'a pie'
+    if (enTurno(i.entradaEn, turno)) lineas.push({ en: i.entradaEn, tipo: 'entrada', texto: `Entró ${i.nombre} (${i.documento}), ${como}, a ${unidadTexto(i.unidadId)}` })
+    if (i.salidaEn && enTurno(i.salidaEn, turno)) lineas.push({ en: i.salidaEn, tipo: 'salida', texto: `Salió ${i.nombre}, de ${unidadTexto(i.unidadId)}` })
+  }
+  const deLaCopropiedad = new Set(unidadesDe(bd, turno.copropiedadId).map((u) => u.id))
+  for (const c of bd.correspondencia) {
+    if (!deLaCopropiedad.has(c.unidadId)) continue
+    if (enTurno(c.fechaRecepcion, turno)) lineas.push({ en: c.fechaRecepcion, tipo: 'paquete', texto: `Llegó ${c.tipo} de ${c.remitente} para ${unidadTexto(c.unidadId)}` })
+    if (c.fechaEntrega && enTurno(c.fechaEntrega, turno)) lineas.push({ en: c.fechaEntrega, tipo: 'entrega', texto: `Se entregó ${c.tipo} de ${unidadTexto(c.unidadId)}${c.recibidoPor ? ` a ${c.recibidoPor}` : ''}` })
+  }
+  for (const n of bd.novedades ?? []) {
+    if (n.turnoId === turno.id) lineas.push({ en: n.registradaEn, tipo: 'novedad', texto: n.texto })
+  }
+  return lineas.sort((a, b) => a.en.localeCompare(b.en))
+}
+
+/**
+ * RN-237 — De quién es una placa: un vehículo de residente vigente, o un
+ * visitante autorizado hoy.
+ */
+export function quienEsLaPlaca(bd: BaseDatos, copropiedadId: string, placaEscrita: string) {
+  const placa = placaEscrita.toUpperCase().replace(/[^A-Z0-9]/g, '')
+  if (placa.length < 5) return undefined
+  const vehiculo = (bd.vehiculos ?? []).find(
+    (v) => !v.bajaEn && v.placa === placa && unidad(bd, v.unidadId)?.copropiedadId === copropiedadId,
+  )
+  if (vehiculo) return { tipo: 'residente' as const, placa, unidadId: vehiculo.unidadId, vehiculo }
+  const hoy = hoyISO()
+  const visitante = bd.visitantes.find(
+    (v) => (v.placa ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '') === placa && estadoRealVisitante(v, hoy) === 'activo',
+  )
+  if (visitante) return { tipo: 'visitante' as const, placa, unidadId: visitante.unidadId, visitante }
+  return { tipo: 'desconocida' as const, placa }
 }

@@ -18,6 +18,7 @@ import { PersonasPage } from './features/residente/PersonasPage'
 import { CuentaPage } from './features/residente/CuentaPage'
 import { PagoPage } from './features/residente/PagoPage'
 import { InformarAbonoPage } from './features/residente/InformarAbonoPage'
+import { MinutasPage } from './features/admin/MinutasPage'
 import { DirectorioAdminPage } from './features/admin/DirectorioAdminPage'
 import { DirectorioPage } from './features/residente/DirectorioPage'
 import { VehiculosMascotasPage } from './features/residente/VehiculosMascotasPage'
@@ -159,6 +160,7 @@ export function App() {
         <Route path="proyectos" element={<ProyectosAdminPage />} />
         <Route path="correspondencia" element={<CorrespondenciaGestionPage />} />
         <Route path="directorio" element={<DirectorioAdminPage />} />
+        <Route path="porteria" element={<MinutasPage />} />
       </Route>
 
       {/* Puesto de porteria — CU-P-xx */}

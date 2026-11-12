@@ -99,8 +99,8 @@ minuta del turno. Detalle en [`casos-de-uso/porteria.md`](./casos-de-uso/porteri
 
 | ID | Caso de uso | Fase | Estado | Detalle |
 |---|---|---|---|---|
-| CU-P-01 | **Registrar y entregar correspondencia** | 2 | 🟡 Parcial (falta la minuta) | [ver](./casos-de-uso/porteria.md#cu-p-01) |
-| CU-P-02 | **Validar el código de un visitante** | 2 | 🟡 Parcial (valida; no registra el ingreso) | [ver](./casos-de-uso/porteria.md#cu-p-02) |
+| CU-P-01 | **Registrar y entregar correspondencia** | 2 | ✅ Demo (2026-11-12: con la minuta del turno, RN-236) | [ver](./casos-de-uso/porteria.md#cu-p-01) |
+| CU-P-02 | **Validar el código de un visitante** | 2 | ✅ Demo (2026-11-12: registra entrada y salida, peatonal o vehicular, en el turno; RN-234 a RN-237) | [ver](./casos-de-uso/porteria.md#cu-p-02) |
 | CU-P-03 | **Reconocer a quien vive aquí** | 1 | ✅ Demo | [ver](./casos-de-uso/porteria.md#cu-p-03) |
 
 ## 4. BLOKY — el sistema de las copropiedades (producto real)
