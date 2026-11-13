@@ -19,6 +19,7 @@ Los servicios de Idiky publicados en contenedores, en **una instancia propia de 
 | **BOB** | `infra/gestion/` *(repo `BOB-Idiky`)* | **pod** `idiky-gestion`: nginx + Strapi + PostgreSQL | `8082`, y por nombre **`https://bob-dev.idiky.com`** (ruta del mismo túnel, ADR-0014) | **Login de Strapi** | El *back office* con el que IDIKY administra su negocio (`BOB-Idiky/apps/gestion`, ADR-0012) |
 | **BLOKY Dev** | `infra/bloky/` *(repo `Bloky-Idiky`)* | **pod** `idiky-bloky`: nginx + middleware de IDIKY (`apps/bloky-api`) + PostgreSQL | `8083`, y por nombre **`https://bloky-dev.idiky.com`** (túnel, ADR-0014). El ingreso solo funciona por el nombre | Clave del entorno, y luego **el ingreso de BLOKY** (código SMS, Google o Microsoft, con lo registrado en BOB) | El sistema de las copropiedades, construido de cero (`Bloky-Idiky`: `apps/bloky`, `apps/bloky-api`; ADR-0008, ADR-0013) |
 | **Jitsi** *(desplegado 2026-10-02; [guía](./guia-de-jitsi.md))* | `infra/jitsi/` *(repo `Jitsi-Streaming-Idiky`)* | **pod** `idiky-jitsi`: nginx + web + prosody + jicofo + videobridge | `8085`, y **`10000/udp` para el video** | Cuenta de Jitsi para **abrir** una sala; el enlace basta para entrar | Las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md), `infra/jitsi/README.md` en su repo). Falta la prueba con video entre dos personas en el servidor de Lightsail |
+| **Evolution** *(WhatsApp Dev; [ADR-0033](../docs/adr/0033-evolution-api-para-whatsapp.md))* | `infra/evolution/` | **pod** `idiky-evolution`: nginx + Evolution API + PostgreSQL + Redis | `8086` | API key (`AUTHENTICATION_API_KEY`) | Piloto de WhatsApp vía Evolution API. Guía: [`evolution/README.md`](./evolution/README.md). **No va dentro de BOB** |
 | **Túnel** | `infra/tunel/` | contenedor `idiky-tunel` (`cloudflared`) | ninguno hacia internet; `/ready` en `127.0.0.1:8084` | — | Publica BLOKY Dev en `https://bloky-dev.idiky.com` con certificado de Cloudflare, sin abrir puertos ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)). Su token: `infra/tunel/secretos.sh` |
 
 ## 1. La regla del servidor
@@ -79,7 +80,7 @@ infra/desplegar.sh
 
 ```
 Navegador
-  └─▶ Firewall de Lightsail (TCP 22, TCP 8080-8085 y UDP 10000 · cualquier origen IPv4)
+  └─▶ Firewall de Lightsail (TCP 22, TCP 8080-8086 y UDP 10000 · cualquier origen IPv4; el 8086 es Evolution)
       └─▶ VM :8080   (escucha en todas las interfaces porque IDIKY_HOST=0.0.0.0)
           └─▶ rootlessport + slirp4netns   procesos de idiky: la red va en espacio de
               │                            usuario y no toca iptables
@@ -386,7 +387,7 @@ poner:
 | `/etc/systemd/system.control/user-1001.slice.d/` | El techo de CPU y memoria | `preparar-servidor.sh` |
 | `/swapfile` y `/etc/fstab` | Swap de 4 GB | `preparar-servidor.sh` con `IDIKY_SWAP_GB=4` |
 | Usuario `justo` y `/etc/sudoers.d/90-justo` | Administración del servidor para Justo: solo con su llave, sin contraseña, sudo sin contraseña (2026-11-03). Su llave también está en `~idiky/.ssh/authorized_keys` | A mano, por el responsable de integración. Se quita con `deluser --remove-home justo` y borrando ese archivo |
-| Firewall de la instancia en Lightsail | TCP 22, TCP 8080-8085, UDP 10000 · el 80 cerrado | El responsable, en la consola de Lightsail |
+| Firewall de la instancia en Lightsail | TCP 22, TCP 8080-8086, UDP 10000 · el 80 cerrado | El responsable o Justo, en la consola de Lightsail |
 | IP estática `idiky-dev-ip` e instantáneas automáticas | Diarias a la 1:00 (hora de Colombia), se guardan 7 | El responsable, en la consola de Lightsail |
 | `~idiky/despliegues/registro-azure.tsv` | El historial de despliegues del servidor de Azure | Copiado en la mudanza |
 

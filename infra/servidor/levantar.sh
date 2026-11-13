@@ -7,9 +7,9 @@
 #
 #   REVISION=abc1234 IDIKY_SERVICIOS="pwa contable" sh infra/servidor/levantar.sh
 #
-# IDIKY_SERVICIOS dice cuales se publican (pwa, contable, gestion, bloky, tunel, jitsi); los
-# demas no se tocan. Sin la variable se publican los cuatro de siempre (el tunel y jitsi solo
-# si se nombran).
+# IDIKY_SERVICIOS dice cuales se publican (pwa, contable, gestion, bloky, tunel, jitsi,
+# evolution); los demas no se tocan. Sin la variable se publican los cuatro de siempre (el
+# tunel, jitsi y evolution solo si se nombran).
 #
 # Configuracion opcional, fuera del repositorio, en ~/.config/idiky/entorno:
 #   IDIKY_HOST=127.0.0.1         # 0.0.0.0 para publicar hacia la red
@@ -20,7 +20,9 @@
 #   IDIKY_PUERTO_TUNEL=8084      # solo /ready del tunel, y solo en 127.0.0.1 (ADR-0014)
 #   IDIKY_PUERTO_JITSI=8085      # la sala de Jitsi por HTTP (ADR-0016)
 #   IDIKY_PUERTO_JITSI_UDP=10000 # el VIDEO de Jitsi. Necesita una regla UDP en Azure
+#   IDIKY_PUERTO_EVOLUTION=8086  # Evolution API / WhatsApp (ADR-0033)
 #   IDIKY_JITSI_VERSION=stable-11031   # la version de las cuatro imagenes de Jitsi
+#   IDIKY_EVOLUTION_VERSION=v2.2.3     # imagen evoapicloud/evolution-api
 #   IDIKY_DATOS=$HOME/datos      # lo que persiste: PostgreSQL, archivos subidos, respaldos
 #   IDIKY_MINIMO_DISCO_MB=3000   # con menos espacio libre no se construye nada
 set -eu
@@ -41,7 +43,9 @@ IDIKY_PUERTO_BLOKY="${IDIKY_PUERTO_BLOKY:-8083}"
 IDIKY_PUERTO_TUNEL="${IDIKY_PUERTO_TUNEL:-8084}"
 IDIKY_PUERTO_JITSI="${IDIKY_PUERTO_JITSI:-8085}"
 IDIKY_PUERTO_JITSI_UDP="${IDIKY_PUERTO_JITSI_UDP:-10000}"
+IDIKY_PUERTO_EVOLUTION="${IDIKY_PUERTO_EVOLUTION:-8086}"
 IDIKY_JITSI_VERSION="${IDIKY_JITSI_VERSION:-stable-11031}"
+IDIKY_EVOLUTION_VERSION="${IDIKY_EVOLUTION_VERSION:-v2.2.3}"
 IDIKY_DATOS="${IDIKY_DATOS:-$HOME/datos}"
 IDIKY_MINIMO_DISCO_MB="${IDIKY_MINIMO_DISCO_MB:-3000}"
 UNIDADES="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
@@ -50,8 +54,8 @@ CONFIGURACION_BOB="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/bob-configuracion"
 
 for servicio in $IDIKY_SERVICIOS; do
   case "$servicio" in
-    pwa | contable | gestion | bloky | tunel | jitsi) ;;
-    *) echo "Servicio desconocido: $servicio. Son pwa, contable, gestion, bloky, tunel y jitsi." >&2; exit 2 ;;
+    pwa | contable | gestion | bloky | tunel | jitsi | evolution) ;;
+    *) echo "Servicio desconocido: $servicio. Son pwa, contable, gestion, bloky, tunel, jitsi y evolution." >&2; exit 2 ;;
   esac
 done
 incluye() {
@@ -257,6 +261,43 @@ levantar_jitsi() {
   systemctl --user enable --now "pod-$pod.service"
 }
 
+# Evolution API (WhatsApp) es un pod aparte: no se mete en BOB (ADR-0033, T-131).
+# nginx publica el 80; la API, Postgres y Redis solo hablan dentro del pod.
+levantar_evolution() {
+  pod="idiky-evolution"
+  echo "==> Levantando el pod $pod en $IDIKY_HOST:$1"
+  COMUN="${XDG_CONFIG_HOME:-$HOME/.config}/idiky/evolution-comun.env"
+  install -m 644 infra/evolution/comun.env "$COMUN"
+  mkdir -p \
+    "$IDIKY_DATOS/evolution/postgres" \
+    "$IDIKY_DATOS/evolution/redis" \
+    "$IDIKY_DATOS/evolution/instances"
+  chmod 700 "$IDIKY_DATOS" "$IDIKY_DATOS/evolution"
+  systemctl --user stop "pod-$pod.service" 2>/dev/null || true
+  podman pod rm --force --ignore "$pod" >/dev/null
+  podman pod create --name "$pod" --network slirp4netns:port_handler=slirp4netns \
+    --publish "$IDIKY_HOST:$1:80" >/dev/null
+  podman create --pod "$pod" --name "$pod-postgres" --memory 256m --pids-limit 256 \
+    --env-file "$SECRETOS/evolution-postgres.env" \
+    --volume "$IDIKY_DATOS/evolution/postgres:/var/lib/postgresql/data" \
+    docker.io/library/postgres:15-alpine >/dev/null
+  podman create --pod "$pod" --name "$pod-redis" --memory 128m --pids-limit 128 \
+    --volume "$IDIKY_DATOS/evolution/redis:/data" \
+    docker.io/library/redis:7-alpine \
+    redis-server --appendonly yes >/dev/null
+  podman create --pod "$pod" --name "$pod-api" --memory 768m --pids-limit 512 \
+    --env-file "$COMUN" --env-file "$SECRETOS/evolution.env" \
+    --volume "$IDIKY_DATOS/evolution/instances:/evolution/instances" \
+    "docker.io/evoapicloud/evolution-api:$IDIKY_EVOLUTION_VERSION" >/dev/null
+  podman create --pod "$pod" --name "$pod-proxy" --memory 64m --pids-limit 64 \
+    "localhost/idiky-evolution-proxy:actual" >/dev/null
+  mkdir -p "$UNIDADES"
+  (cd "$UNIDADES" && podman generate systemd --new --files --name "$pod" >/dev/null)
+  podman pod rm --force "$pod" >/dev/null
+  systemctl --user daemon-reload
+  systemctl --user enable --now "pod-$pod.service"
+}
+
 # Respaldo diario de la base (infra/gestion/respaldo.sh). Se copia fuera de la carpeta del
 # despliegue porque esa carpeta se reemplaza en cada despliegue.
 instalar_respaldo_gestion() {
@@ -327,6 +368,15 @@ if incluye jitsi && grep -q 'CAMBIAR-POR' "$SECRETOS/jitsi.env"; then
   echo "JVB_ADVERTISE_IPS es la IP publica del servidor; sin ella no hay video." >&2
   exit 1
 fi
+if incluye evolution && { [ ! -f "$SECRETOS/evolution.env" ] || [ ! -f "$SECRETOS/evolution-postgres.env" ]; }; then
+  echo "Faltan los secretos de Evolution. Se crean una vez: ssh idiky@<ip> 'sh -s' < infra/evolution/secretos.sh" >&2
+  exit 1
+fi
+if incluye evolution && grep -q 'CAMBIAR-POR' "$SECRETOS/evolution.env"; then
+  echo "Los secretos de Evolution tienen valores sin completar (CAMBIAR-POR...): editar $SECRETOS/evolution.env." >&2
+  echo "SERVER_URL es la URL publica (http://<ip>:8086 o el nombre del tunel)." >&2
+  exit 1
+fi
 if incluye tunel && [ ! -f "$SECRETOS/tunel.env" ]; then
   echo "Falta el token del tunel. Se crea una vez con infra/tunel/secretos.sh (ver su encabezado: el script se copia y el token va por stdin)" >&2
   exit 1
@@ -356,6 +406,13 @@ if incluye jitsi; then
     podman pull --quiet "docker.io/jitsi/$imagen:$IDIKY_JITSI_VERSION" >/dev/null
   done
 fi
+if incluye evolution; then
+  construir evolution-proxy evolution/proxy.Containerfile
+  echo "==> Trayendo evoapicloud/evolution-api:$IDIKY_EVOLUTION_VERSION"
+  podman pull --quiet "docker.io/evoapicloud/evolution-api:$IDIKY_EVOLUTION_VERSION" >/dev/null
+  podman pull --quiet docker.io/library/postgres:15-alpine >/dev/null
+  podman pull --quiet docker.io/library/redis:7-alpine >/dev/null
+fi
 
 if incluye pwa; then levantar pwa "$IDIKY_PUERTO_PWA"; fi
 if incluye contable; then levantar contable "$IDIKY_PUERTO_CONTABLE"; fi
@@ -367,6 +424,7 @@ fi
 if incluye bloky; then levantar_bloky "$IDIKY_PUERTO_BLOKY"; fi
 if incluye tunel; then levantar_tunel "$IDIKY_PUERTO_TUNEL"; fi
 if incluye jitsi; then levantar_jitsi "$IDIKY_PUERTO_JITSI" "$IDIKY_PUERTO_JITSI_UDP"; fi
+if incluye evolution; then levantar_evolution "$IDIKY_PUERTO_EVOLUTION"; fi
 
 if incluye pwa; then esperar pwa "$IDIKY_PUERTO_PWA"; fi
 if incluye contable; then esperar contable "$IDIKY_PUERTO_CONTABLE"; fi
@@ -389,6 +447,11 @@ if incluye jitsi; then
   # config.js lo genera jitsi/web al arrancar: si responde, la sala ya se puede abrir.
   esperar jitsi "$IDIKY_PUERTO_JITSI" /config.js 120
 fi
+if incluye evolution; then
+  esperar evolution "$IDIKY_PUERTO_EVOLUTION"
+  # La API tarda en conectar a Postgres/Redis la primera vez.
+  esperar evolution "$IDIKY_PUERTO_EVOLUTION" / 180
+fi
 
 # El disco del servidor es compartido y escaso: se borra toda imagen que no use un
 # contenedor en marcha, incluidos Node y las capas de construccion. Lo publicado queda; el
@@ -397,9 +460,12 @@ podman image prune --all --force >/dev/null
 
 echo "==> Lo que queda publicado (cada servicio con su revision)"
 PARES="pwa:$IDIKY_PUERTO_PWA contable:$IDIKY_PUERTO_CONTABLE gestion:$IDIKY_PUERTO_GESTION bloky:$IDIKY_PUERTO_BLOKY"
-# jitsi solo aparece si esta instalado: hasta entonces no tiene sentido decir que no responde.
+# jitsi y evolution solo aparecen si estan instalados: hasta entonces no tiene sentido decir que no responden.
 if incluye jitsi || podman pod exists idiky-jitsi 2>/dev/null; then
   PARES="$PARES jitsi:$IDIKY_PUERTO_JITSI"
+fi
+if incluye evolution || podman pod exists idiky-evolution 2>/dev/null; then
+  PARES="$PARES evolution:$IDIKY_PUERTO_EVOLUTION"
 fi
 for par in $PARES; do
   printf '    %-9s %s\n' "${par%%:*}" "$(curl -fsS --max-time 3 "http://$LOCAL:${par#*:}/revision.txt" 2>/dev/null || echo 'no responde')"

@@ -13,6 +13,7 @@ demás ni el servidor que compartimos. Si vas a **crear** un servicio nuevo, la 
 | `gestion` | **BOB**, el *back office* de IDIKY (Strapi + PostgreSQL) | **Solo el responsable de integración o Justo** | `origin/main` **de `BOB-Idiky`, y nada más** | 8082 |
 | `bloky` | **BLOKY Dev**: el sistema de las copropiedades, construido de cero (app + API + PostgreSQL) | **El responsable de integración o Justo** | **`origin/develop`** de `Bloky-Idiky` mientras se construye (`IDIKY_REF_BLOKY=origin/develop`; Daniel, 2026-10-03); `origin/main` para las entregas | 8083 |
 | `jitsi` | **Jitsi** para las asambleas virtuales ([ADR-0016](../docs/adr/0016-jitsi-propio-para-las-asambleas-virtuales.md)), en `https://jitsi-dev.idiky.com`. Desplegado el 2026-10-02; cuentas y uso: [`guia-de-jitsi.md`](./guia-de-jitsi.md) | **Solo el responsable de integración o Justo** | `origin/main` de `Jitsi-Streaming-Idiky` | 8085 y **10000/udp** |
+| `evolution` | **Evolution API** (WhatsApp en Dev, [ADR-0033](../docs/adr/0033-evolution-api-para-whatsapp.md)). Guía: [`evolution/README.md`](./evolution/README.md) | **Solo el responsable de integración o Justo** | `origin/main` de `idiky` | 8086 |
 | `tunel` | **El túnel de Cloudflare** que publica BLOKY Dev en `https://bloky-dev.idiky.com` ([ADR-0014](../docs/adr/0014-https-para-bloky-dev-con-tunel-de-cloudflare.md)) | **Solo el responsable de integración o Justo** | `origin/main` | ninguno hacia internet (`/ready` en 127.0.0.1:8084) |
 
 > **Las maquetas no son los espacios de desarrollo.** BLOKY (el sistema de las copropiedades)

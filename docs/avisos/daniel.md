@@ -112,6 +112,20 @@ app no puede integrar de punta a punta.
 
 ---
 
+## 8. Evolution API en Dev (T-131, ADR-0033) — ⏳ firewall + túnel
+
+Justo dejó escrito el servicio **`evolution`** (pod `idiky-evolution`, puerto **8086**), **aparte
+de BOB**. Para que quede vivo en Lightsail hace falta:
+
+1. Abrir **TCP 8086** en el firewall de la instancia (consola AWS).
+2. (Opcional) ruta del túnel `evolution-dev.idiky.com` → `10.0.2.2:8086`.
+3. En el servidor: `infra/evolution/secretos.sh` + `SERVER_URL`, luego
+   `infra/desplegar.sh origin/main evolution`.
+
+Guía: [`infra/evolution/README.md`](../../infra/evolution/README.md).
+
+---
+
 ## Ramas locales de Justo (sin subir / sin merge, estado al 2026-10-23)
 
 | Repo | Rama | Qué hay |
