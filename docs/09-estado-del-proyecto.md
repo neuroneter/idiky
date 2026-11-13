@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-12 · Justo · Infra · Evolution API (WhatsApp) como servicio Idiky (T-131, ADR-0033)
+
+**Qué:** servicio **`evolution`** en pod propio `idiky-evolution`, puerto **8086** — no dentro de
+BOB. Piezas: nginx + `evoapicloud/evolution-api:v2.2.3` + PostgreSQL 15 + Redis 7.
+`infra/evolution/` (proxy, secretos, comun.env, README), registrado en `levantar.sh` y
+`desplegar.sh`. ADR-0033.
+
+**Sigue:** en el servidor, `secretos.sh` + completar `SERVER_URL`; abrir **TCP 8086** en el
+firewall de Lightsail; `infra/desplegar.sh origin/main evolution`; crear instancia y escanear QR
+con un número de prueba. Opcional: ruta `evolution-dev.idiky.com` en el túnel.
+
 ### 2026-11-12 · Mary + IA (Claude) · Portería: turno, entradas y salidas, minuta (CU-P-01, CU-P-02, RN-234 a RN-237)
 
 Mary: *«sí, constrúyelo»*, sobre la propuesta de cuatro puntos. En el puesto de portería:

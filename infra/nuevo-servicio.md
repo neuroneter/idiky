@@ -59,7 +59,8 @@ despliega sin la clave.
 | 8084 | `idiky-tunel`, solo `/ready` y solo en `127.0.0.1` (ADR-0014). El túnel no publica nada hacia internet |
 | 8085 | Pod `idiky-jitsi` (Jitsi, ADR-0016) |
 | **10000/udp** | El **video** de Jitsi. Es el único puerto UDP de Idiky, con su propia regla en el firewall de Lightsail |
-| **8086 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
+| 8086 | Pod `idiky-evolution` (Evolution API / WhatsApp, ADR-0033) |
+| **8087 – 8099** | **Libres para servicios nuevos de Idiky.** Toma el siguiente y anótalo en esta tabla y en la del README |
 
 - **Para que se vea desde internet** hay que abrir el puerto en el **firewall de la instancia en
   Lightsail** (hoy: TCP 22, TCP 8080-8085, UDP 10000). Lo hace el **responsable de integración o Justo**
