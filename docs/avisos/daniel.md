@@ -112,7 +112,12 @@ app no puede integrar de punta a punta.
 
 ---
 
-## 8. Evolution API en Dev (T-131, ADR-0033) — ⏳ firewall + túnel
+## 8. Evolution API en Dev (T-131, ADR-0033) — 🟡 servidor listo; falta desplegar (2026-11-13)
+
+**Hecho el 2026-11-13 (Daniel):** TCP 8086 abierto en Lightsail **solo a las IP de Justo y de
+Daniel**; llave `idiky-Justo` verificada sin restricciones; secretos creados y `SERVER_URL` puesto
+(bitácora 2026-11-13). **Falta:** que Justo despliegue y, si hace falta HTTPS, la ruta del túnel
+`evolution-dev.idiky.com`. Lo de abajo es el pedido original.
 
 Justo dejó escrito el servicio **`evolution`** (pod `idiky-evolution`, puerto **8086**), **aparte
 de BOB**. Para que quede vivo en Lightsail hace falta:

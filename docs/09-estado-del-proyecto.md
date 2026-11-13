@@ -113,6 +113,48 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-13 · Daniel + IA (Claude) · Infra · Servidor listo para Evolution API (T-131, ADR-0033)
+
+**Qué:** se dejó `idiky-dev` (Lightsail) preparado para que Justo despliegue `evolution`. **No se
+desplegó ni se reinició nada.**
+
+- **Firewall de Lightsail:** regla nueva **TCP 8086**, abierta **solo a las IP de Justo y de Daniel**
+  (no a todo internet: Evolution controla el WhatsApp de IDIKY). 8080–8085, 22 y UDP 10000 siguen igual.
+  Si alguien cambia de red, Daniel actualiza la regla.
+- **Llave de Justo:** verificada en `/home/idiky/.ssh/authorized_keys` (comentario `idiky-Justo`,
+  ED25519), **sin restricción de comando**: sirve para desplegar, no solo para el volcado de T-119.
+- **Secretos:** `infra/evolution/secretos.sh` del commit `761470a` (comprobado idéntico al del
+  repositorio antes de correrlo), como `idiky`. Quedaron `evolution.env` y `evolution-postgres.env`
+  (600) y `SERVER_URL=http://<ip-del-servidor>:8086`, sin `CAMBIAR-POR`. **No se vuelve a correr.**
+- **Capacidad:** 8086 libre; unos 2,2 GB de RAM disponibles y 4 GB de swap, suficiente para los
+  ~1,2 GB de Evolution.
+
+**Sigue (Justo):** `infra/desplegar.sh origin/main evolution`, comprobar `/salud` y la memoria, crear
+la instancia y escanear el QR con un número de prueba. **Sigue (Daniel):** la ruta del túnel
+`evolution-dev.idiky.com` si hace falta HTTPS (al crearla, cambiar `SERVER_URL` y redesplegar); y el
+reinicio pendiente del servidor con sus actualizaciones de seguridad (28, Lightsail avisa
+CVE-2026-98432), en un momento sin pruebas.
+
+### 2026-11-12 · Daniel + IA (Claude) · Acceso · Twilio falla en Colombia: se prepara Amazon SNS para el SMS (T-18, T-109)
+
+**Qué:** Twilio no entregó los códigos de verificación a celulares colombianos (cuenta de prueba;
+en ella los caller IDs solo se verifican por SMS). Se decidió **cambiar el SMS de BLOKY a Amazon SNS**,
+**pero solo cuando AWS apruebe la cuenta**:
+
+- **SNS (us-east-1):** en el entorno de pruebas (sandbox), con dos celulares verificados (el código de
+  AWS sí llegó), tipo de mensaje **Transaccional**, registro de entregas en CloudWatch y límite de gasto
+  de USD 1 (AWS no deja subirlo sin soporte).
+- **Caso de soporte de AWS `179452787500566`** (2026-11-12): salida del sandbox (*SMS Production
+  Access*) y límite a USD 5. OTP a Colombia, unos 100 SMS al mes. Sin respuesta al 2026-11-13.
+- **Cómo es hoy en BLOKY** (`Bloky-Idiky/apps/bloky-api/src/acceso/twilio.ts`): Twilio Verify genera,
+  envía y valida el código. **SNS solo envía**, así que BLOKY tendrá que generar el código, guardarlo
+  con hash y vencimiento en PostgreSQL y validarlo, manteniendo el bloqueo por intentos de
+  `servicio.ts`. Se descartaron Pinpoint OTP (AWS lo retiró el 2026-10-30) y Cognito (rehacer el ingreso).
+
+**Sigue:** cuando AWS apruebe, ADR del cambio de proveedor y el cambio en `Bloky-Idiky` (un
+`acceso/sns.ts` con la misma interfaz `EnviadorCodigos`), en una `feature/` desde `develop`. Hasta
+entonces **Twilio sigue en uso**: no quitarlo.
+
 ### 2026-11-12 · Justo · Infra · Evolution API (WhatsApp) como servicio Idiky (T-131, ADR-0033)
 
 **Qué:** servicio **`evolution`** en pod propio `idiky-evolution`, puerto **8086** — no dentro de

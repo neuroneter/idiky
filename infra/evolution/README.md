@@ -22,6 +22,8 @@ Datos en `~/datos/evolution/{postgres,redis,instances}`.
 1. **Firewall Lightsail:** abrir **TCP 8086** (Justo o Daniel en la consola de AWS), si se va a
    usar por IP. Con túnel Cloudflare (`evolution-dev.idiky.com` → `10.0.2.2:8086`) el puerto
    público puede no hacer falta, pero conviene dejarlo para depurar.
+   **Hecho el 2026-11-13:** la regla abre el 8086 **solo a las IP de Justo y de Daniel**, no a
+   todo internet. Si cambias de red, pídele a Daniel que actualice la regla.
 
 2. **Secretos, una vez**, desde una copia de `idiky` con `infra/evolution/`:
 
