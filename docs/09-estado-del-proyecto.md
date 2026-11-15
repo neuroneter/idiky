@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-14 · Justo · Infra · Guía Evolution para el equipo + prueba WhatsApp ok (T-131)
+
+**Qué:** se escribió [`infra/guia-de-evolution.md`](../infra/guia-de-evolution.md) para que Daniel
+(y cualquiera) sepa entrar al Manager, dónde leer la API key (sin ponerla en git), cómo mandar un
+`sendText` en UTF-8 y el estado actual. Mensaje de prueba **llegó** al celular. Avisos Justo §7 y
+Daniel §8 actualizados.
+
+**Sigue (mañana):** número telefónico dedicado de IDIKY, vincularlo en Evolution y documentarlo en
+la guía. Túnel `evolution-dev` opcional.
+
 ### 2026-11-14 · Justo · Infra · Evolution: QR no salía; subir a v2.3.7 y aligerar Baileys (T-131)
 
 **Qué:** en el Manager aparecía «Scan the QR code» sin código. En el servidor,

@@ -32,6 +32,7 @@ aquí antes o junto con el código.
 | 20 | [El alta y el ingreso desde ALICE](./20-alta-e-ingreso-desde-alice.md) | **Contrato de la API del middleware para ALICE** (ADR-0032): ingreso por celular o documento, token de 30 días, completar el documento, el listado de copropiedades y unidades con su rol, la gestión de la unidad y las reuniones | Al construir T-124 o cambiar el contrato |
 | — | [Avisos Justo](./avisos/justo.md) | Temas abiertos de Justo con Daniel (directorio, cadena, Jitsi, ALICE) | Cuando se abre o cierra un aviso |
 | — | [Avisos Daniel](./avisos/daniel.md) | **Estado cadena / contratos / ALICE para que Daniel revise**: hecho, temporal, pendiente de deploy | Cuando Justo deja trabajo a medias o temporal |
+| — | [Guía Evolution / WhatsApp](../infra/guia-de-evolution.md) | **Cómo entrar al Manager y mandar mensajes** en Dev (T-131, ADR-0033); la API key solo en el servidor | Al cambiar Evolution o el número de IDIKY |
 | — | [ADR](./adr/) | Decisiones de arquitectura con su justificación | Al tomar una decisión relevante |
 
 > El **13** está reservado para el sistema de gestión (BOB), que llega desde la rama de

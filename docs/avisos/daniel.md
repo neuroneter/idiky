@@ -112,22 +112,17 @@ app no puede integrar de punta a punta.
 
 ---
 
-## 8. Evolution API en Dev (T-131, ADR-0033) — 🟡 servidor listo; falta desplegar (2026-11-13)
+## 8. Evolution API / WhatsApp en Dev (T-131, ADR-0033) — 🟡 desplegado; falta número IDIKY
 
-**Hecho el 2026-11-13 (Daniel):** TCP 8086 abierto en Lightsail **solo a las IP de Justo y de
-Daniel**; llave `idiky-Justo` verificada sin restricciones; secretos creados y `SERVER_URL` puesto
-(bitácora 2026-11-13). **Falta:** que Justo despliegue y, si hace falta HTTPS, la ruta del túnel
-`evolution-dev.idiky.com`. Lo de abajo es el pedido original.
+**Cómo entrar y mandar mensajes:** [`infra/guia-de-evolution.md`](../../infra/guia-de-evolution.md)
+(Manager en `/manager/`, API key en el servidor, ejemplo `sendText` con UTF-8).
 
-Justo dejó escrito el servicio **`evolution`** (pod `idiky-evolution`, puerto **8086**), **aparte
-de BOB**. Para que quede vivo en Lightsail hace falta:
+**Hecho:** firewall 8086 (solo IP Justo/Daniel); secretos; pod desplegado (`v2.3.7`); mensaje de
+prueba **llegó** por WhatsApp (instancia de prueba «Justo Soto»).
 
-1. Abrir **TCP 8086** en el firewall de la instancia (consola AWS).
-2. (Opcional) ruta del túnel `evolution-dev.idiky.com` → `10.0.2.2:8086`.
-3. En el servidor: `infra/evolution/secretos.sh` + `SERVER_URL`, luego
-   `infra/desplegar.sh origin/main evolution`.
-
-Guía: [`infra/evolution/README.md`](../../infra/evolution/README.md).
+**Sigue (Justo + Daniel):** vincular un **número telefónico dedicado de IDIKY** y documentarlo en
+la guía. Opcional: túnel `evolution-dev.idiky.com` → `10.0.2.2:8086` (luego cambiar `SERVER_URL` y
+redesplegar).
 
 ---
 
