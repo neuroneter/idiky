@@ -113,6 +113,21 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-13 · Justo · Infra · Evolution API desplegado en Dev (T-131, ADR-0033)
+
+**Qué:** desplegado `origin/main` (`f21acfc`) con `infra/desplegar.sh … evolution` desde la máquina
+de Justo. Pod `idiky-evolution` en **8086**: `/salud` → `ok`, `/revision.txt` → `f21acfc`. Memoria
+tras el despliegue: ~2,1 GB disponibles; el pod usa ~260 MB (API ~176 MB). Instancia WhatsApp
+`prueba-idiky` creada (Baileys); el endpoint `/instance/connect` aún no devolvió QR (`count:0`) —
+suele hacer falta el túnel HTTPS o reintentar el emparejamiento.
+
+**Fix de camino:** el primer intento falló porque Windows metía CRLF en los scripts al armar el
+tar (`set: Illegal option -`). Quedó en `desplegar.sh` (rama Justo, a integrar a `main`) quitar
+los CR antes de subir.
+
+**Sigue:** escanear QR con número de prueba cuando Evolution lo entregue; túnel
+`evolution-dev.idiky.com` con Daniel si hace falta; marcar T-131 ✅ al vincular.
+
 ### 2026-11-13 · Daniel + IA (Claude) · Infra · Servidor listo para Evolution API (T-131, ADR-0033)
 
 **Qué:** se dejó `idiky-dev` (Lightsail) preparado para que Justo despliegue `evolution`. **No se

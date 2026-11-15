@@ -186,29 +186,13 @@ Daniel decidió el 2026-11-05 cómo se crean los residentes y los colaboradores 
   número verificado en Twilio y que la Administración te cree como administrador de una unidad en BLOKY.
 
 
-## 7. Evolution API: el servidor está listo, te toca desplegar — ⏳ abierto (2026-11-13)
+## 7. Evolution API: desplegado; falta vincular WhatsApp — 🟡 (2026-11-13)
 
-Daniel dejó `idiky-dev` preparado para T-131 ([ADR-0033](../adr/0033-evolution-api-para-whatsapp.md);
-bitácora del 2026-11-13). **No vuelvas a hacer** lo que ya está:
+Pod `idiky-evolution` en Dev (`f21acfc`): `/salud` ok. Instancia `prueba-idiky` creada. **Falta**
+obtener el QR y escanearlo con un número de prueba (el `connect` aún respondió `count:0`).
 
-- **Firewall:** TCP **8086** abierto **solo a tu IP y a la de Daniel**. Si cambias de red, avísale para
-  actualizar la regla.
-- **Tu llave** (`idiky-Justo`, ED25519) está autorizada para `idiky` **sin restricciones**: sirve para
-  desplegar. Compara la huella con `ssh-keygen -lf <tu llave>.pub`; Daniel te la pasa por privado.
-- **Secretos:** ya creados (`evolution.env`, `evolution-postgres.env`) y `SERVER_URL` puesto con la IP del
-  servidor. **No corras otra vez `secretos.sh`.** La API key está en `evolution.env`: no la pegues en chats
-  ni en commits.
-
-**Lo que sigue (tú):**
-
-1. `IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<tu llave> infra/desplegar.sh origin/main evolution`
-2. Comprobar `curl -s http://127.0.0.1:8086/salud` (→ `ok`) y `/revision.txt` en el servidor, y la memoria
-   (`free -h`): si queda corta, apagar `evolution` (ADR-0033), no meterlo en BOB.
-3. Crear la instancia y escanear el QR **con un número de prueba**.
-4. Anotar en la bitácora y en T-131.
-
-**Para hablar con Daniel:** si necesitas HTTPS para el QR o los webhooks, la ruta del túnel
-`evolution-dev.idiky.com` (al crearla cambia `SERVER_URL` y se redespliega).
+**Para hablar con Daniel:** túnel `evolution-dev.idiky.com` si el QR/webhooks lo piden; al crearlo
+cambiar `SERVER_URL` y redesplegar.
 
 **Aparte, el SMS de BLOKY:** Twilio no entrega a Colombia y se pasará a **Amazon SNS cuando AWS apruebe la
 cuenta** (bitácora 2026-11-12, T-18). Mientras tanto Twilio sigue: no lo quites ni construyas sobre SNS.

@@ -136,6 +136,16 @@ for par in $EXTERNOS; do
   echo "    $repositorio en ${par#*:}"
 done
 
+# En Windows, tar a veces deja CRLF en scripts (.sh se rompe en el servidor: «set: Illegal
+# option -»). Se quitan los CR antes de subir. En macOS/Linux no cambia nada.
+# Portable (GNU/BSD sed y Git Bash): reescribe cada archivo de texto del despliegue.
+find "$ARMADO" -type f \( -name '*.sh' -o -name '*.env' -o -name 'Containerfile' \
+  -o -name '*.Containerfile' -o -name 'nginx.conf' -o -name '*.service' -o -name '*.timer' \
+  -o -name '*.path' -o -name '*.conf' \) -print \
+  | while IFS= read -r f; do
+      tr -d '\r' < "$f" > "$f.idiky-lf" && mv "$f.idiky-lf" "$f"
+    done
+
 echo "==> Subiendo $REF ($REVISION) a $IDIKY_SERVIDOR · servicios: $SERVICIOS"
 # COPYFILE_DISABLE: el tar de macOS agrega un archivo ._<nombre> por cada archivo con metadatos
 # del sistema, y en el servidor parecen codigo (un ._001-inicial.sql tumbo la API de BLOKY el
