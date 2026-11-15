@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-14 · Justo · Infra · Evolution: QR no salía; subir a v2.3.7 y aligerar Baileys (T-131)
+
+**Qué:** en el Manager aparecía «Scan the QR code» sin código. En el servidor,
+`/instance/connect` devolvía `{"count":0}` y Baileys entraba en bucle de arranque (v2.2.3).
+Ajuste según issues de Evolution (#2437): imagen **v2.3.7**, `CONFIG_SESSION_PHONE_VERSION`,
+cache local (sin Redis para Baileys), menos historial en Dev, `NODE_OPTIONS=ipv4first`.
+
+**Sigue:** redesplegar `evolution`, borrar instancias viejas en el Manager y crear una nueva para
+escanear el QR.
+
 ### 2026-11-13 · Justo · Infra · Evolution API desplegado en Dev (T-131, ADR-0033)
 
 **Qué:** desplegado `origin/main` (`f21acfc`) con `infra/desplegar.sh … evolution` desde la máquina

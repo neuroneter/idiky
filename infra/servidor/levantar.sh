@@ -22,7 +22,7 @@
 #   IDIKY_PUERTO_JITSI_UDP=10000 # el VIDEO de Jitsi. Necesita una regla UDP en Azure
 #   IDIKY_PUERTO_EVOLUTION=8086  # Evolution API / WhatsApp (ADR-0033)
 #   IDIKY_JITSI_VERSION=stable-11031   # la version de las cuatro imagenes de Jitsi
-#   IDIKY_EVOLUTION_VERSION=v2.2.3     # imagen evoapicloud/evolution-api
+#   IDIKY_EVOLUTION_VERSION=v2.3.7     # imagen evoapicloud/evolution-api (QR; ADR-0033)
 #   IDIKY_DATOS=$HOME/datos      # lo que persiste: PostgreSQL, archivos subidos, respaldos
 #   IDIKY_MINIMO_DISCO_MB=3000   # con menos espacio libre no se construye nada
 set -eu
@@ -45,7 +45,7 @@ IDIKY_PUERTO_JITSI="${IDIKY_PUERTO_JITSI:-8085}"
 IDIKY_PUERTO_JITSI_UDP="${IDIKY_PUERTO_JITSI_UDP:-10000}"
 IDIKY_PUERTO_EVOLUTION="${IDIKY_PUERTO_EVOLUTION:-8086}"
 IDIKY_JITSI_VERSION="${IDIKY_JITSI_VERSION:-stable-11031}"
-IDIKY_EVOLUTION_VERSION="${IDIKY_EVOLUTION_VERSION:-v2.2.3}"
+IDIKY_EVOLUTION_VERSION="${IDIKY_EVOLUTION_VERSION:-v2.3.7}"
 IDIKY_DATOS="${IDIKY_DATOS:-$HOME/datos}"
 IDIKY_MINIMO_DISCO_MB="${IDIKY_MINIMO_DISCO_MB:-3000}"
 UNIDADES="${XDG_CONFIG_HOME:-$HOME/.config}/systemd/user"
