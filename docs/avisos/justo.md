@@ -186,13 +186,13 @@ Daniel decidió el 2026-11-05 cómo se crean los residentes y los colaboradores 
   número verificado en Twilio y que la Administración te cree como administrador de una unidad en BLOKY.
 
 
-## 7. Evolution API: desplegado; falta vincular WhatsApp — 🟡 (2026-11-13)
+## 7. Evolution API / WhatsApp — 🟡 desplegado; mañana número IDIKY (2026-11-14)
 
-Pod `idiky-evolution` en Dev (`f21acfc`): `/salud` ok. Instancia `prueba-idiky` creada. **Falta**
-obtener el QR y escanearlo con un número de prueba (el `connect` aún respondió `count:0`).
+Pod en Dev (`v2.3.7`); Manager y envío de texto **probados**. Guía para ti y Daniel:
+[`infra/guia-de-evolution.md`](../../infra/guia-de-evolution.md).
 
-**Para hablar con Daniel:** túnel `evolution-dev.idiky.com` si el QR/webhooks lo piden; al crearlo
-cambiar `SERVER_URL` y redesplegar.
+**Mañana:** vincular el **número telefónico especial de IDIKY** y anotarlo en esa guía (la instancia
+personal de prueba no es la de producto).
 
 **Aparte, el SMS de BLOKY:** Twilio no entrega a Colombia y se pasará a **Amazon SNS cuando AWS apruebe la
 cuenta** (bitácora 2026-11-12, T-18). Mientras tanto Twilio sigue: no lo quites ni construyas sobre SNS.
