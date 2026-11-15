@@ -11,7 +11,7 @@ Contrato del entorno: [`../nuevo-servicio.md`](../nuevo-servicio.md).
 | Contenedor | Imagen | Memoria | Qué hace |
 |---|---|---|---|
 | `idiky-evolution-proxy` | `nginx:1.28-alpine` | 64 MB | Único con puerto: `/salud`, `/revision.txt`, reenvía a la API |
-| `idiky-evolution-api` | `evoapicloud/evolution-api:v2.2.3` | 768 MB | Evolution API (Baileys / WhatsApp) |
+| `idiky-evolution-api` | `evoapicloud/evolution-api:v2.3.7` | 768 MB | Evolution API (Baileys / WhatsApp) |
 | `idiky-evolution-postgres` | `postgres:15-alpine` | 256 MB | Base de Evolution (solo dentro del pod) |
 | `idiky-evolution-redis` | `redis:7-alpine` | 128 MB | Caché / pub-sub (solo dentro del pod) |
 

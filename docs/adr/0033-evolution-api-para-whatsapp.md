@@ -26,7 +26,7 @@ sesiones de WhatsApp), pelearía por RAM con Strapi y rompería el contrato de u
 | Carpeta | `infra/evolution/` (en el arnés `idiky`) |
 | Pod | `idiky-evolution` |
 | Puerto | **8086** (TCP; libre en 8086–8099) |
-| Imagen API | `docker.io/evoapicloud/evolution-api:v2.2.3` (versión fija) |
+| Imagen API | `docker.io/evoapicloud/evolution-api:v2.3.7` (versión fija; QR estable) |
 | Piezas | nginx (proxy) · Evolution API · PostgreSQL 15 · Redis 7 |
 
 ```
@@ -34,7 +34,7 @@ pod idiky-evolution · red propia (slirp4netns)
 │  publica :8086 → :80
 ├── idiky-evolution-proxy     nginx:1.28-alpine · 64 MB
 │     /salud, /revision.txt; reenvia el resto a :8080
-├── idiky-evolution-api       evoapicloud/evolution-api:v2.2.3 · 768 MB
+├── idiky-evolution-api       evoapicloud/evolution-api:v2.3.7 · 768 MB
 │     volumen ~/datos/evolution/instances
 ├── idiky-evolution-postgres  postgres:15-alpine · 256 MB
 │     volumen ~/datos/evolution/postgres
