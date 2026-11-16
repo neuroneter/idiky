@@ -41,8 +41,12 @@ contraseña y no entra (ya no hay cuentas).
 
 ## 3. El pase
 
-**Pedirlo:** `POST /api/c/:copropiedadId/reuniones/:reunionId/entrar`, sin cuerpo, con la sesión de
-la persona (cookie `bloky_sesion`, ver §5.2).
+**Pedirlo:** `POST /api/c/:copropiedadId/reuniones/:reunionId/entrar` con cuerpo
+`{ "dispositivoId": "…", "cliente": "alice" | "bloky", "trasladar"?: true }` y la sesión de la
+persona (cookie BLOKY o Bearer ALICE, §5.2). **RN-190:** una persona, un dispositivo; si ya hay
+presencia en otro → **409** `{ error: "ya_en_otro_dispositivo", mensaje, clienteActual }`. Con
+`trasladar: true` se reemplaza. Latido: `POST …/presencia/latido` `{ dispositivoId }` →
+`{ estado: "activa" | "reemplazada" }`. Salir: `POST …/presencia/salir`.
 
 **Respuesta 200:**
 

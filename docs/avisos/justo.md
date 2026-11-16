@@ -129,10 +129,14 @@ sin pase → no entra. En BLOKY, `BLOKY_JITSI_ACEPTA_PASES=si`.
 **Para ALICE (2026-11-05):** contrato en [`docs/18`](../18-reuniones-con-video.md) §5 (`/entrar`, roles, `servidor`/`sala`/`token`).
 
 **Hecho 2026-11-15:** pestaña **Asambleas** lista reuniones reales del middleware con Bearer ALICE (RN-325);
-Entrar abre Jitsi con el SDK. Falta afinar sala de espera / cámara por permiso / asistencia (lo de arriba).
+Entrar abre Jitsi con el SDK.
+
+**Hecho 2026-11-15 (RN-190):** una persona no puede estar dos veces en la misma reunión: el segundo dispositivo
+pregunta si desea **trasladar**; el primero cierra por latido (ALICE hangUp / BLOKY cierra la pestaña). Falta el
+kick forzado desde Prosody cuando Jitsi avise quién entra y sale.
 
 **Te queda de este aviso:** que la sala espere al anfitrión (hoy quien llega primero con pase entra a la sala vacía),
-cámara y micrófono por permiso del secretario, avisarle al middleware quién entra y sale, y conectar ALICE.
+cámara y micrófono por permiso del secretario, y el webhook de asistencia hacia el middleware.
 
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 

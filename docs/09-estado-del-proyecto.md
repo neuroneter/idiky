@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-15 · Justo · Reuniones · Un dispositivo por persona (RN-190, T-106)
+
+**Qué:** si ya estás en la reunión (ALICE o BLOKY) y entras desde otro sitio, el middleware responde
+`409 ya_en_otro_dispositivo`; el cliente pregunta si trasladar; al confirmar, el primero cierra por latido
+(15 s). Presencia en `presencia_reunion`, TTL 60 s sin latido. Código: `Bloky-Idiky`
+`feature/T-106-presencia-traslado` · ALICE `feature/T-106-preparar-reuniones-video`.
+
+**Para probar:** entrar en el teléfono y luego en la web (o al revés) → diálogo → Trasladar → en ≤15 s
+queda un solo «Justo» en participantes.
+
 ### 2026-11-15 · Justo · ALICE · Asambleas = reuniones del middleware + Bearer (T-106, RN-325)
 
 **Problema:** la pestaña Asambleas mostraba maqueta local; las reuniones de BLOKY no aparecían.
