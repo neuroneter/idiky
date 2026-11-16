@@ -119,9 +119,9 @@ app no puede integrar de punta a punta.
 
 **Hecho:** firewall 8086; pod `v2.3.7`; mensaje de prueba ok (instancia «Justo Soto»).
 
-**T-132 (Justo, 2026-11-15):** `POST /api/app/whatsapp/enviar` busca por celular en el directorio y
-avisa por Evolution (RN-331). Código en ramas `feature/T-132-…` de BLOKY y ALICE; falta secretos
-`EVOLUTION_*` en `bloky-api.env`, merge y redespliegue.
+**T-132 (Justo, 2026-11-15):** OTP de ALICE por WhatsApp en `/api/app/acceso/*` (Evolution) +
+`POST /api/app/whatsapp/enviar` para texto libre. BLOKY Dev `a75333d.bloky-18ca2c7`; ALICE en
+`feature/T-106-…`. Secretos `EVOLUTION_*` ya en el servidor.
 
 **Sigue:** número **dedicado de IDIKY** + documentarlo; opcional túnel `evolution-dev.idiky.com`.
 
