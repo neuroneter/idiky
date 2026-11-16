@@ -7,8 +7,9 @@
 > token en las reuniones) y cerrar sesiones desde BLOKY (T-128). Si algo de aquí cambia, se corrige este documento y se
 > avisa en [`avisos/justo.md`](./avisos/justo.md).
 >
-> **Para probar en Dev:** Twilio está en modo de prueba y solo manda SMS a números verificados; la persona debe existir
-> (la crea la Administración en BLOKY → Unidades → «Crear administrador», con un celular verificado).
+> **Para probar en Dev (2026-11-15):** el código de ALICE va por **WhatsApp** (Evolution, T-132) cuando el
+> middleware tiene `EVOLUTION_*`. La persona debe existir (BLOKY → Unidades → «Crear administrador», con ese celular).
+> Twilio sigue para el ingreso de BLOKY; no se quita.
 
 Todas las rutas son del **middleware de IDIKY** (BLOKY Dev: `https://bloky-dev.idiky.com`). ALICE no habla con BOB ni con
 ninguna base.
@@ -30,7 +31,8 @@ o, cuando la persona ya completó su documento:
 ```
 
 - Busca a la persona por su celular registrado o por su documento. El código va **siempre al celular registrado** (RN-163).
-- Responde `200 { "pista": "••• •• 4567" }` (y `codigoSimulado` solo en desarrollo).
+- En Dev con Evolution, el canal es **WhatsApp** (`canal: "whatsapp"` en la respuesta); si no hay Evolution, SMS/simulado.
+- Responde `200 { "pista": "••• •• 4567", "canal": "whatsapp" }` (y `codigoSimulado` solo si el enviador lo expone fuera de producción).
 - `404 no_existe` si no hay nadie con ese dato; `403 sin_acceso` si existe pero no tiene nada vigente para ALICE (RN-327);
   `429 bloqueado` tras cinco errores en 15 minutos (RN-166).
 

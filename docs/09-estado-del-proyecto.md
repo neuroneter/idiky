@@ -113,6 +113,14 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-15 · Justo · ALICE · Login celular + código WhatsApp (T-132, docs/20)
+
+**Middleware** (\Bloky-Idiky\ 8ca2c7\ en Dev): \/api/app/acceso/enviar-codigo\ genera OTP propio y lo manda por Evolution cuando hay \EVOLUTION_*\ (Twilio intacto para BLOKY).
+
+**ALICE** (\App-Idiky\ \eature/T-106-preparar-reuniones-video\ b15fdb\): puerta pide solo celular; Bearer de ALICE; textos de WhatsApp.
+
+**Para probar:** administrador de unidad en BLOKY con el celular del teléfono de prueba → Continuar → código por WhatsApp → Entrar.
+
 ### 2026-11-15 · Justo · Middleware · WhatsApp por celular del directorio (T-132, RN-331)
 
 **Hecho y desplegado en BLOKY Dev** (4d0507c.bloky-b9dbe8c): el middleware busca a la persona con `porCelular` y manda

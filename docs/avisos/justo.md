@@ -186,16 +186,15 @@ Daniel decidió el 2026-11-05 cómo se crean los residentes y los colaboradores 
   número verificado en Twilio y que la Administración te cree como administrador de una unidad en BLOKY.
 
 
-## 7. Evolution API / WhatsApp — 🟡 desplegado; middleware T-132 en curso (2026-11-15)
+## 7. Evolution API / WhatsApp — 🟡 código de ALICE por WhatsApp (2026-11-15)
 
-Pod en Dev (`v2.3.7`); Manager y envío de texto **probados**. Guía:
-[`infra/guia-de-evolution.md`](../../infra/guia-de-evolution.md) (incluye §8: endpoint del middleware).
+Pod en Dev; guía [`infra/guia-de-evolution.md`](../../infra/guia-de-evolution.md).
 
-**T-132:** `POST /api/app/whatsapp/enviar` — busca por celular y manda WhatsApp (RN-331). Ramas
-`feature/T-132-whatsapp-por-celular` (BLOKY) y `feature/T-132-cliente-whatsapp` (ALICE). Falta
-poner `EVOLUTION_*` en secretos de BLOKY, merge y redesplegar.
+**Hecho (T-132):** el ingreso de ALICE (`/api/app/acceso/*`) manda el **código por WhatsApp** si hay
+Evolution. La app en `feature/T-106-preparar-reuniones-video` pide solo celular. Texto libre:
+`POST /api/app/whatsapp/enviar`.
 
-**Pendiente:** número **especial de IDIKY** y anotarlo en la guía (la instancia «Justo Soto» es solo prueba).
+**Pendiente:** número **especial de IDIKY** (hoy instancia «Justo Soto»).
 
 **Aparte, el SMS de BLOKY:** Twilio no entrega a Colombia y se pasará a **Amazon SNS cuando AWS apruebe la
 cuenta** (bitácora 2026-11-12, T-18). Mientras tanto Twilio sigue: no lo quites ni construyas sobre SNS.
