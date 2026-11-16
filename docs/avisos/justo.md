@@ -186,6 +186,18 @@ Daniel decidió el 2026-11-05 cómo se crean los residentes y los colaboradores 
   número verificado en Twilio y que la Administración te cree como administrador de una unidad en BLOKY.
 
 
+## 6b. Delegado ≠ residente en ALICE — ⏳ documentado; espera decisión de Daniel (2026-11-15)
+
+Si entras a BLOKY como **Delegado** (o Administrador) y ALICE dice que no tienes unidad: **no es un
+bug de datos**. RN-327 / ADR-0032 abren ALICE solo a residente/colaborador con unidad o cargo. El
+Delegado abre la consola BLOKY, no la app.
+
+Caso tuyo (CC 80821419): Delegado vigente en Pruebas IDIKY → BLOKY sí; ALICE `403 sin_acceso`.
+
+Detalle y opciones para Daniel: [`21-delegado-en-bloky-sin-acceso-a-alice.md`](../21-delegado-en-bloky-sin-acceso-a-alice.md).
+**Mientras esté abierto:** no aflojes RN-327 en el middleware sin su decisión. Para probar ALICE hoy:
+créate también como administrador de una unidad con tu celular.
+
 ## 7. Evolution API / WhatsApp — 🟡 código de ALICE por WhatsApp (2026-11-15)
 
 Pod en Dev; guía [`infra/guia-de-evolution.md`](../../infra/guia-de-evolution.md).
