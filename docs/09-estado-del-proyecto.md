@@ -113,6 +113,14 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-15 · Justo · Reuniones · Diálogo de traslado en la web (RN-190)
+
+**Problema:** de la app al computador, «Entrar» en BLOKY abría la sala y cerraba el teléfono sin preguntar
+(`window.confirm` tras abrir pestaña en blanco no se veía bien).
+
+**Hecho:** la consola pregunta en la página («Trasladar aquí» / Cancelar) y solo entonces abre la sala.
+Rama `feature/T-106-presencia-traslado` → `develop`.
+
 ### 2026-11-15 · Justo · Reuniones · Un dispositivo por persona (RN-190, T-106)
 
 **Qué:** si ya estás en la reunión (ALICE o BLOKY) y entras desde otro sitio, el middleware responde
