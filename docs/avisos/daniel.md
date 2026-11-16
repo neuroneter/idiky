@@ -99,16 +99,19 @@ mientras esté abierto ([`avisos/justo.md`](./justo.md) §5).
 
 ---
 
-## 7. Jitsi / pases JWT (T-106) — ⏳ abierto
+## 7. Jitsi / pases JWT (T-106) — 🟡 ALICE y presencia hechos (2026-11-15); queda sala de espera y webhooks
 
-Los pases y el cierre de sala van en el **middleware**, no en BOB ([`avisos/justo.md`](./justo.md)
-§3). Justo no crea endpoints de JWT en BOB.
+Los pases van en el **middleware** (ya firmados) y Jitsi Dev ya está en modo JWT. Justo no crea
+endpoints de JWT en BOB.
 
-**Qué dejó listo ALICE (2026-10-25)** para cuando exista el pase: contrato y cliente en
-`App-Idiky/docs/reuniones-video.md` — `POST /api/c/:id/reuniones/:reunionId/pase` responde
-`{ sala, servidor, token, rol, venceEn? }` y el teléfono abre con `jitsi_meet_flutter_sdk`
-(`serverURL` + `room` + `token`). Hoy Jitsi Dev sigue en cuentas Prosody; sin tu lado JWT la
-app no puede integrar de punta a punta.
+**Hecho en ALICE (2026-11-15):** Asambleas lista reuniones reales (`GET …/reuniones`), Entrar pide
+pase (`POST …/entrar`) y abre Jitsi con el SDK. Guía [`18`](../18-reuniones-con-video.md) §5.
+
+**Hecho en middleware + BLOKY + ALICE (RN-190):** una persona, un dispositivo por reunión; traslado
+con diálogo. Desplegado en BLOKY Dev (`394a419.bloky-c5b887a`).
+
+**Te queda del aviso 3 de Justo:** sala espera al anfitrión; cámara/mic por permiso del secretario;
+webhook de asistencia (entra/sale) hacia el middleware; kick forzado desde Prosody.
 
 ---
 
@@ -134,22 +137,67 @@ votación de unidad no). El ingreso ya no bloquea.
 **Hecho:** firewall 8086; pod `v2.3.7`; mensaje de prueba ok (instancia «Justo Soto»).
 
 **T-132 (Justo, 2026-11-15):** OTP de ALICE por WhatsApp en `/api/app/acceso/*` (Evolution) +
-`POST /api/app/whatsapp/enviar` para texto libre. BLOKY Dev `a75333d.bloky-18ca2c7`; ALICE en
-`feature/T-106-…`. Secretos `EVOLUTION_*` ya en el servidor.
+`POST /api/app/whatsapp/enviar` para texto libre. Middleware en BLOKY Dev; ALICE en
+`feature/T-106-preparar-reuniones-video` (también en `develop` de App-Idiky tras el merge de hoy).
+Secretos `EVOLUTION_*` ya en el servidor.
 
 **Sigue:** número **dedicado de IDIKY** + documentarlo; opcional túnel `evolution-dev.idiky.com`.
 
 ---
 
-## Ramas locales de Justo (sin subir / sin merge, estado al 2026-10-23)
+## 9. Resumen para Daniel — sesión Justo 2026-11-15 (subido a GitHub)
+
+> Léelo primero si retomas ALICE / reuniones / login. Detalle día a día en la bitácora
+> ([`09`](../09-estado-del-proyecto.md)).
+
+### Qué quedó hecho y dónde está
+
+| Tema | Dónde | Estado |
+|---|---|---|
+| **Admin/Delegado entran a ALICE** (RN-327 ampliada) | `Bloky-Idiky` `develop` · BLOKY Dev | ✅ Desplegado |
+| **OTP ALICE por WhatsApp** (T-132, Evolution) | Middleware + ALICE | ✅ Middleware en Dev; app en rama |
+| **Asambleas = reuniones reales + Jitsi** (T-106, RN-325 Bearer en `/api/c`) | `App-Idiky` `feature/T-106-…` → `develop` | ✅ En GitHub |
+| **Una persona, un dispositivo** (RN-190): 409 + traslado + latido 15 s | Middleware + ALICE + BLOKY web | ✅ BLOKY Dev `394a419.bloky-c5b887a` |
+| **Diálogo de traslado en la web** (no `window.confirm`) | BLOKY `develop` | ✅ Desplegado |
+| **Sesión persistente ALICE** (Bearer en Keystore/Keychain; `GET /yo` al abrir; Cerrar sesión) | `App-Idiky` | ✅ En GitHub (docs/20 §3) |
+
+### Ramas / revisiones (2026-11-15 noche)
+
+| Repo | Rama / revisión | Notas |
+|---|---|---|
+| `Bloky-Idiky` | `develop` @ `c5b887a` (feature `T-106-presencia-traslado` mergeada) | Desplegado como `394a419.bloky-c5b887a` |
+| `App-Idiky` | `feature/T-106-preparar-reuniones-video` @ `3337794` → merge a `develop` | Probar en teléfono/emulador |
+| `idiky` (arnés) | `Justo_dev` → `main` | Bitácora, RN-190, docs/18·20·21, este aviso |
+
+### Qué NO tocó Justo (sigue tuyo o abierto)
+
+- Redeploy Amoy / `hashIdentidad` (§1).
+- T-87: cómo firma ALICE Polygon sin JWT Strapi (§2).
+- Pantallas de quien entra a ALICE **solo** como Admin/Delegado (§8b).
+- Jitsi: sala espera anfitrión, permisos de cámara/mic, webhook asistencia (§7).
+- Número WhatsApp dedicado de IDIKY (§8).
+- Renovación automática del Bearer a los 30 días (`POST /api/app/sesion/renovar`).
+- Cerrar sesiones de ALICE desde BLOKY (T-128).
+
+### Cómo probar en 2 minutos
+
+1. ALICE: celular + código WhatsApp → Asambleas → Prueba1 → Entrar.
+2. Matar la app y abrirla: debe entrar **sin** pedir código (sesión segura).
+3. Cuenta → Cerrar sesión → vuelve a pedir celular.
+4. En reunión en el teléfono → en BLOKY web «Entrar» → diálogo **Trasladar aquí** (no abre a ciegas).
+
+---
+
+## Ramas de Justo (estado 2026-11-15)
 
 | Repo | Rama | Qué hay |
 |---|---|---|
-| `SmartContrat-Idiky` | `feature/cuentas-quitar-login` | Renombre identidad + docs; quitar `contracts/login/` (trabajo local mezclado) |
-| `BOB-Idiky` | `feature/T-81-plugin-cuentas` | ABI nuevas + well-known local; el plugin en `develop`/`main` ya usa directorio |
-| `App-Idiky` | `feature/CU-R-01-alta-qr-passkey` | Alta QR + passkey contra bob-dev; JWT Strapi temporal |
-| `App-Idiky` | `feature/T-106-preparar-reuniones-video` | Cliente + contrato del pase JWT (T-106); sin pantalla aún |
-| `idiky` | `Justo_dev` | Bitácora y este aviso; puede ir por delante de `origin/Justo_dev` |
+| `SmartContrat-Idiky` | `feature/cuentas-quitar-login` | Renombre identidad + docs; sin merge aún (§1) |
+| `BOB-Idiky` | `feature/T-81-plugin-cuentas` | ABI locales; plugin en `main` ya usa directorio |
+| `App-Idiky` | `feature/T-106-preparar-reuniones-video` | Login WhatsApp, Asambleas/Jitsi, RN-190, sesión persistente — **en `develop`** |
+| `App-Idiky` | `feature/CU-R-01-alta-qr-passkey` | Alta QR + passkey; JWT Strapi temporal (T-87) |
+| `Bloky-Idiky` | `feature/T-106-presencia-traslado` | Presencia/traslado — **mergeada a `develop`** |
+| `idiky` | `Justo_dev` | Docs de esta sesión → `main` |
 
 Si algo de esta lista ya lo cerraste o desplegaste, actualiza la marca aquí y una línea en la
 bitácora.
