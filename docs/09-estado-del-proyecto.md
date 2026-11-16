@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-15 · Justo · Middleware · WhatsApp por celular del directorio (T-132, RN-331)
+
+**Hecho (código, sin desplegar aún):** el middleware busca a la persona con `porCelular` y manda
+un texto por Evolution (`POST /api/app/whatsapp/enviar`). Cliente en ALICE:
+`lib/servicios/whatsapp/cliente.dart`. Vars `EVOLUTION_URL` / `EVOLUTION_API_KEY` /
+`EVOLUTION_INSTANCE` en secretos de BLOKY (no en git). BLOKY llega a Evolution por
+`10.0.2.2:8086` (`allow_host_loopback` en el pod). Guía: [`infra/guia-de-evolution.md`](../infra/guia-de-evolution.md) §8.
+
+**Ramas:** `Bloky-Idiky` `feature/T-132-whatsapp-por-celular` · `App-Idiky` `feature/T-132-cliente-whatsapp` ·
+docs en `idiky` `Justo_dev`.
+
+**Sigue:** completar `EVOLUTION_*` en el servidor (copiar la key desde `evolution.env`), merge y
+desplegar BLOKY; mañana el número dedicado de IDIKY.
+
 ### 2026-11-14 · Justo · Infra · Guía Evolution para el equipo + prueba WhatsApp ok (T-131)
 
 **Qué:** se escribió [`infra/guia-de-evolution.md`](../infra/guia-de-evolution.md) para que Daniel

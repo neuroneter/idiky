@@ -112,17 +112,18 @@ app no puede integrar de punta a punta.
 
 ---
 
-## 8. Evolution API / WhatsApp en Dev (T-131, ADR-0033) — 🟡 desplegado; falta número IDIKY
+## 8. Evolution API / WhatsApp en Dev (T-131, T-132, ADR-0033) — 🟡 desplegado; middleware en curso
 
 **Cómo entrar y mandar mensajes:** [`infra/guia-de-evolution.md`](../../infra/guia-de-evolution.md)
-(Manager en `/manager/`, API key en el servidor, ejemplo `sendText` con UTF-8).
+(Manager, API key en el servidor, `sendText`, y **§8** el endpoint del middleware).
 
-**Hecho:** firewall 8086 (solo IP Justo/Daniel); secretos; pod desplegado (`v2.3.7`); mensaje de
-prueba **llegó** por WhatsApp (instancia de prueba «Justo Soto»).
+**Hecho:** firewall 8086; pod `v2.3.7`; mensaje de prueba ok (instancia «Justo Soto»).
 
-**Sigue (Justo + Daniel):** vincular un **número telefónico dedicado de IDIKY** y documentarlo en
-la guía. Opcional: túnel `evolution-dev.idiky.com` → `10.0.2.2:8086` (luego cambiar `SERVER_URL` y
-redesplegar).
+**T-132 (Justo, 2026-11-15):** `POST /api/app/whatsapp/enviar` busca por celular en el directorio y
+avisa por Evolution (RN-331). Código en ramas `feature/T-132-…` de BLOKY y ALICE; falta secretos
+`EVOLUTION_*` en `bloky-api.env`, merge y redespliegue.
+
+**Sigue:** número **dedicado de IDIKY** + documentarlo; opcional túnel `evolution-dev.idiky.com`.
 
 ---
 
