@@ -67,9 +67,9 @@ presencia en otro → **409** `{ error: "ya_en_otro_dispositivo", mensaje, clien
 - **ALICE usa `servidor`, `sala` y `token`**, que es lo que piden los SDK de Jitsi. **BLOKY usa
   `enlace`**, que lleva los tres juntos para abrirlo en el navegador. `token` es `null` y `conPase: false` significa que el middleware no está
   mandando pase (`BLOKY_JITSI_ACEPTA_PASES=no`): con Jitsi en modo de pases, ese enlace no entra.
-- **Errores:** `401` sin sesión · `403` sin derecho o todavía temprano (el `mensaje` dice cuál) ·
-  `404` no existe · `409` el cliente no está listo en BLOKY · `503` Jitsi no configurado. Todos traen
-  `{ error, mensaje }`; `mensaje` está en español y se le puede mostrar a la persona.
+- **Errores:** `401` sin sesión · `403` sin derecho o todavía temprano · `404` no existe ·
+  `409 ya_en_otro_dispositivo` (RN-190) o `no_lista` · `422` sin dispositivo · `503` Jitsi. Todos
+  traen `{ error, mensaje }` en español.
 
 **Quién entra y quién modera** (RN-302 a RN-314):
 
