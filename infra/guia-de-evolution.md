@@ -107,7 +107,13 @@ No uses números de clientes reales en Dev.
 
 Logs: `podman logs --tail 80 idiky-evolution-api` (no copiar líneas con secretos al chat).
 
-## 8. Desde el middleware (buscar por celular y avisar)
+## 8. Código de ingreso de ALICE (OTP por WhatsApp)
+
+Con `EVOLUTION_*` en `bloky-api.env`, el middleware usa Evolution para el código de
+`POST /api/app/acceso/enviar-codigo` (no Twilio). ALICE pide solo el celular y verifica con
+`POST /api/app/acceso/verificar-codigo` → Bearer (docs/20, T-132).
+
+## 8b. Desde el middleware (buscar por celular y avisar texto libre)
 
 **T-132 · RN-331.** El middleware no habla con WhatsApp a mano: busca a la persona en el
 directorio y Evolution manda el texto a **su** celular registrado.
