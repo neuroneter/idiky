@@ -112,6 +112,22 @@ app no puede integrar de punta a punta.
 
 ---
 
+## 8b. Delegado en BLOKY sin puerta a ALICE — ⏳ abierto (Justo, 2026-11-15)
+
+**Hecho comprobado:** Justo Soto (CC 80821419) es **Delegado vigente** de Pruebas IDIKY: entra a BLOKY,
+crea/ve reuniones y es suplente. El mismo celular en ALICE recibe **`403 sin_acceso`** (RN-327: solo
+residente/colaborador con unidad o cargo).
+
+**Por qué:** ADR-0032 separó a propósito BLOKY (Administrador/Delegado) y ALICE (residente/colaborador).
+Justo lo ve **ilógico** para videoconferencia y votación: quien opera la copropiedad no debería parecer
+externo en la app.
+
+**Diagnóstico y opciones A/B/C:** [`21-delegado-en-bloky-sin-acceso-a-alice.md`](../21-delegado-en-bloky-sin-acceso-a-alice.md).
+
+**Para ti:** ¿ampliar RN-327 (Administrador/Delegado también entran a ALICE) o mantener y exigir residencia?
+
+---
+
 ## 8. Evolution API / WhatsApp en Dev (T-131, T-132, ADR-0033) — 🟡 desplegado; middleware en curso
 
 **Cómo entrar y mandar mensajes:** [`infra/guia-de-evolution.md`](../../infra/guia-de-evolution.md)

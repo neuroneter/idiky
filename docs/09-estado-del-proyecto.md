@@ -113,6 +113,13 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-15 · Justo · Docs · Delegado en BLOKY sin acceso a ALICE (RN-327)
+
+Justo Soto (Delegado de Pruebas IDIKY) entra a BLOKY y es suplente en reuniones; ALICE responde
+`403 sin_acceso` porque RN-327 no cuenta Administrador/Delegado. No es dato malo: son dos puertas.
+Diagnóstico y decisión para Daniel: [`21-delegado-en-bloky-sin-acceso-a-alice.md`](./21-delegado-en-bloky-sin-acceso-a-alice.md).
+Avisos §8b (Daniel) y §6b (Justo).
+
 ### 2026-11-15 · Justo · ALICE · Login celular + código WhatsApp (T-132, docs/20)
 
 **Middleware** (\Bloky-Idiky\ 8ca2c7\ en Dev): \/api/app/acceso/enviar-codigo\ genera OTP propio y lo manda por Evolution cuando hay \EVOLUTION_*\ (Twilio intacto para BLOKY).
