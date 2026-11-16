@@ -115,7 +115,7 @@ coeficiente y un acta que resista revisión.
 
 ### 2026-11-15 · Justo · Middleware · WhatsApp por celular del directorio (T-132, RN-331)
 
-**Hecho (código, sin desplegar aún):** el middleware busca a la persona con `porCelular` y manda
+**Hecho y desplegado en BLOKY Dev** (4d0507c.bloky-b9dbe8c): el middleware busca a la persona con `porCelular` y manda
 un texto por Evolution (`POST /api/app/whatsapp/enviar`). Cliente en ALICE:
 `lib/servicios/whatsapp/cliente.dart`. Vars `EVOLUTION_URL` / `EVOLUTION_API_KEY` /
 `EVOLUTION_INSTANCE` en secretos de BLOKY (no en git). BLOKY llega a Evolution por
