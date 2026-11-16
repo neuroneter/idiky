@@ -78,8 +78,10 @@ correo** (RN-323): queda en el directorio con una asignación `colaborador` en e
 - **El ingreso devuelve el listado** de dónde está la persona (RN-326): por copropiedad, sus unidades con el código y el rol
   en cada una (y las fechas si es invitado), o su cargo si es colaborador, y la dirección del middleware que la atiende. ALICE
   muestra el listado y la persona elige a qué unidad entrar; puede saltar a otra sin volver a pedir código.
-- **Entra a ALICE** quien tenga al menos una residencia vigente (el invitado, solo entre sus fechas) o una asignación de
-  colaborador vigente, en una copropiedad activa (RN-327). Administrador y Delegado siguen entrando a BLOKY.
+- **Entra a ALICE** quien tenga al menos una residencia vigente (el invitado, solo entre sus fechas), una asignación de
+  colaborador vigente, **o Administrador/Delegado vigente** de la copropiedad, en una copropiedad activa (RN-327;
+  ampliada 2026-11-15, [docs/21](../21-delegado-en-bloky-sin-acceso-a-alice.md)). Administrador y Delegado siguen entrando
+  también a BLOKY.
 
 ### 7. El primer ingreso es por celular
 

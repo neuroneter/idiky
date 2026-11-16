@@ -113,20 +113,28 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-15 · Justo · Middleware · Admin/Delegado entran a ALICE (RN-327 ampliada, T-132)
+
+**Opción B de docs/21:** Administrador y Delegado vigentes cuentan para ALICE. `lugares` trae
+`administracion: { rol }` aunque no haya unidad ni colaborador. Código en `Bloky-Idiky`
+`feature/T-132-alice-admin-delegado` → `develop` → BLOKY Dev. Contrato docs/20 §4, RN-327, ADR-0032 §6.
+Aviso a Daniel en `avisos/daniel.md` §8b (pendiente: qué pantallas ve quien entra solo por administración).
+
+**Para probar:** celular `3053996759` (Delegado Pruebas IDIKY) → Continuar → código WhatsApp (ya no `403`).
+
 ### 2026-11-15 · Justo · Docs · Delegado en BLOKY sin acceso a ALICE (RN-327)
 
-Justo Soto (Delegado de Pruebas IDIKY) entra a BLOKY y es suplente en reuniones; ALICE responde
-`403 sin_acceso` porque RN-327 no cuenta Administrador/Delegado. No es dato malo: son dos puertas.
-Diagnóstico y decisión para Daniel: [`21-delegado-en-bloky-sin-acceso-a-alice.md`](./21-delegado-en-bloky-sin-acceso-a-alice.md).
-Avisos §8b (Daniel) y §6b (Justo).
+Diagnóstico del hueco (antes del arreglo): [`21-delegado-en-bloky-sin-acceso-a-alice.md`](./21-delegado-en-bloky-sin-acceso-a-alice.md).
+Cerrado el mismo día con la ampliación de RN-327 (entrada de arriba).
 
 ### 2026-11-15 · Justo · ALICE · Login celular + código WhatsApp (T-132, docs/20)
 
-**Middleware** (\Bloky-Idiky\ 8ca2c7\ en Dev): \/api/app/acceso/enviar-codigo\ genera OTP propio y lo manda por Evolution cuando hay \EVOLUTION_*\ (Twilio intacto para BLOKY).
+**Middleware** (`Bloky-Idiky`, Dev): `/api/app/acceso/enviar-codigo` genera OTP y lo manda por Evolution
+cuando hay `EVOLUTION_*` (Twilio intacto para BLOKY).
 
-**ALICE** (\App-Idiky\ \eature/T-106-preparar-reuniones-video\ b15fdb\): puerta pide solo celular; Bearer de ALICE; textos de WhatsApp.
+**ALICE** (`App-Idiky` `feature/T-106-preparar-reuniones-video`): puerta pide solo celular; Bearer de ALICE.
 
-**Para probar:** administrador de unidad en BLOKY con el celular del teléfono de prueba → Continuar → código por WhatsApp → Entrar.
+**Para probar:** celular registrado en el directorio (residente, colaborador, Administrador o Delegado) → Continuar → código por WhatsApp → Entrar.
 
 ### 2026-11-15 · Justo · Middleware · WhatsApp por celular del directorio (T-132, RN-331)
 

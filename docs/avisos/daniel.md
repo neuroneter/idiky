@@ -112,19 +112,17 @@ app no puede integrar de punta a punta.
 
 ---
 
-## 8b. Delegado en BLOKY sin puerta a ALICE — ⏳ abierto (Justo, 2026-11-15)
+## 8b. Delegado / Administrador también en ALICE — ✅ aplicado; te enteramos (Justo, 2026-11-15)
 
-**Hecho comprobado:** Justo Soto (CC 80821419) es **Delegado vigente** de Pruebas IDIKY: entra a BLOKY,
-crea/ve reuniones y es suplente. El mismo celular en ALICE recibe **`403 sin_acceso`** (RN-327: solo
-residente/colaborador con unidad o cargo).
+**Qué había:** Delegado vigente (caso Justo Soto, CC 80821419) entraba a BLOKY y ALICE respondía
+`403 sin_acceso` (RN-327 solo contaba residente/colaborador).
 
-**Por qué:** ADR-0032 separó a propósito BLOKY (Administrador/Delegado) y ALICE (residente/colaborador).
-Justo lo ve **ilógico** para videoconferencia y votación: quien opera la copropiedad no debería parecer
-externo en la app.
+**Qué se hizo (opción B de [`docs/21`](../21-delegado-en-bloky-sin-acceso-a-alice.md)):** se amplió RN-327.
+Administrador y Delegado vigentes entran a ALICE; `lugares` trae `administracion: { rol }` aunque no
+tengan unidad. Middleware en `Bloky-Idiky` (T-132) + contrato en docs/20 §4.
 
-**Diagnóstico y opciones A/B/C:** [`21-delegado-en-bloky-sin-acceso-a-alice.md`](../21-delegado-en-bloky-sin-acceso-a-alice.md).
-
-**Para ti:** ¿ampliar RN-327 (Administrador/Delegado también entran a ALICE) o mantener y exigir residencia?
+**Para ti (cuando puedas):** qué pantallas ve quien entra **solo** por administración (reuniones sí /
+votación de unidad no). El ingreso ya no bloquea.
 
 ---
 
