@@ -153,26 +153,19 @@ await JitsiMeet().join(JitsiMeetConferenceOptions(
   están disponibles todavía.
 - El nombre lo pone el pase (`context.user.name`); la app no necesita pedirlo.
 
-### 5.2 La sesión ante el middleware (lo que falta decidir)
+### 5.2 La sesión ante el middleware (RN-325)
 
-Hoy el middleware solo reconoce la cookie **`bloky_sesion`** (httpOnly, `Secure`, 12 h), que pone al
-ingresar:
+Hay **dos** sesiones; no se mezclan:
 
-1. `POST /api/acceso/identificar` `{ tipoDocumento, numeroDocumento }` → nombre y canales.
-2. `POST /api/acceso/enviar-codigo` (mismo cuerpo) → el SMS con el código.
-3. `POST /api/acceso/verificar-codigo` `{ tipoDocumento, numeroDocumento, codigo }` → `Set-Cookie: bloky_sesion=…`.
+| Quién | Cómo autentica | Rutas |
+|---|---|---|
+| **BLOKY** (consola) | Cookie `bloky_sesion` (httpOnly, `Secure`) tras `/api/acceso/verificar-codigo` | Toda `/api/c/…` |
+| **ALICE** (app) | `Authorization: Bearer` con audiencia `alice` tras `/api/app/acceso/verificar-codigo` (código por WhatsApp en Dev, T-132) | Rutas `/api/app/…` **y** reuniones (`…/reuniones`, `…/entrar`, `…/asumir`) |
 
-En Flutter, el cliente HTTP guarda esa cookie y la reenvía (`cookie: bloky_sesion=…`) en
-`/entrar`. **No hay bearer**: el `MIDDLEWARE_BEARER` de laboratorio de la rama no lo entiende el
-middleware. **Siempre por `https://bloky-dev.idiky.com`**, no por la IP: la cookie es `Secure`.
+El middleware acepta **cookie o Bearer** en la guardia de `/api/c/:copropiedadId/…` (2026-11-15). ALICE
+guarda el token en almacenamiento seguro y lo reenvía; **siempre** `https://bloky-dev.idiky.com`.
 
-**Lo abierto:** el ingreso de hoy es el de BLOKY (Administrador, Delegado y los perfiles que ellos
-crean). **Cómo entran los propietarios y residentes desde ALICE** es T-87 y el aviso 4: mientras no
-se decida, prueba con tu propia persona, que ya entra a «Pruebas IDIKY» y es suplente de la reunión de
-prueba. **No construyas otro mecanismo de sesión sin hablarlo con Daniel.**
-
-**Ojo con Twilio:** la cuenta está en prueba y solo manda SMS a **números verificados** (Phone
-Numbers → Manage → Verified Caller IDs). Si tu celular no está ahí, no te llega el código.
+**Probar:** login ALICE con celular → pestaña **Asambleas** (lista del mes + Entrar a Jitsi).
 
 ### 5.3 Cómo probar de punta a punta
 

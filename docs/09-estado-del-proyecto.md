@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-15 · Justo · ALICE · Asambleas = reuniones del middleware + Bearer (T-106, RN-325)
+
+**Problema:** la pestaña Asambleas mostraba maqueta local; las reuniones de BLOKY no aparecían.
+
+**Hecho:**
+- Middleware: la guardia de `/api/c/…` acepta cookie BLOKY **o** Bearer ALICE (RN-325).
+- ALICE (`feature/T-106-preparar-reuniones-video`): Asambleas usa `ReunionesPage` (lista del mes, pull-to-refresh, Entrar a Jitsi).
+- docs/18 §5.2 actualizado.
+
+**Para probar:** login con celular → Asambleas → debe verse Prueba1 (y las del mes); deslizar para refrescar; Entrar pide pase (desde 30 min antes).
+
 ### 2026-11-15 · Justo · Middleware · Admin/Delegado entran a ALICE (RN-327 ampliada, T-132)
 
 **Opción B de docs/21:** Administrador y Delegado vigentes cuentan para ALICE. `lugares` trae

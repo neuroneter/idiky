@@ -126,11 +126,10 @@ llaves ASAP de Jitsi. El pase sale de `POST /api/c/:id/reuniones/:rid/entrar`.
 `AUTH_TYPE=jwt`, sin invitados anónimos ni cuentas. Probado: anfitrión → moderador; participante → participante;
 sin pase → no entra. En BLOKY, `BLOKY_JITSI_ACEPTA_PASES=si`.
 
-**Para ALICE (2026-11-05):** todo lo de Jitsi y el pase, y lo que cambia en tu rama
-`feature/T-106-preparar-reuniones-video` (el camino es **`/entrar`** —no `/pase`—; roles: anfitrión, suplente,
-secretario, participante; la respuesta trae `servidor`, `sala` y `token`), está en
-[**`docs/18-reuniones-con-video.md`**](../18-reuniones-con-video.md). Lee el §5 antes de empezar. El cliente
-preparado el 2026-10-25 en `App-Idiky` hay que alinearlo a ese contrato.
+**Para ALICE (2026-11-05):** contrato en [`docs/18`](../18-reuniones-con-video.md) §5 (`/entrar`, roles, `servidor`/`sala`/`token`).
+
+**Hecho 2026-11-15:** pestaña **Asambleas** lista reuniones reales del middleware con Bearer ALICE (RN-325);
+Entrar abre Jitsi con el SDK. Falta afinar sala de espera / cámara por permiso / asistencia (lo de arriba).
 
 **Te queda de este aviso:** que la sala espere al anfitrión (hoy quien llega primero con pase entra a la sala vacía),
 cámara y micrófono por permiso del secretario, avisarle al middleware quién entra y sale, y conectar ALICE.
