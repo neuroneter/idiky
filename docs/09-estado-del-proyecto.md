@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-15 · Justo · ALICE · Sesión persistente en almacén seguro (docs/20 §3)
+
+**Qué:** el Bearer de ALICE ya se guardaba tras el código, pero al reiniciar la app se pedía
+login otra vez. Ahora al abrir se llama `GET /api/app/yo`; si el token sigue vivo, entra sin
+WhatsApp. **Cerrar sesión** (Cuenta) llama `POST /api/app/salir` y borra el token del Keystore /
+Keychain. Rama `App-Idiky` `feature/T-106-preparar-reuniones-video`.
+
+**Para probar:** ingresar → matar la app → abrir de nuevo → debe entrar solo; Cuenta → Cerrar sesión
+→ vuelve a pedir celular y código.
+
 ### 2026-11-15 · Justo · Reuniones · Diálogo de traslado en la web (RN-190)
 
 **Problema:** de la app al computador, «Entrar» en BLOKY abría la sala y cerraba el teléfono sin preguntar
