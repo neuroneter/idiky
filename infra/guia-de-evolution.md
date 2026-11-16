@@ -107,8 +107,34 @@ No uses números de clientes reales en Dev.
 
 Logs: `podman logs --tail 80 idiky-evolution-api` (no copiar líneas con secretos al chat).
 
-## 8. Pendiente (próximo paso)
+## 8. Desde el middleware (buscar por celular y avisar)
+
+**T-132 · RN-331.** El middleware no habla con WhatsApp a mano: busca a la persona en el
+directorio y Evolution manda el texto a **su** celular registrado.
+
+```http
+POST https://bloky-dev.idiky.com/api/app/whatsapp/enviar
+Content-Type: application/json; charset=utf-8
+
+{ "celular": "3001234567", "texto": "Hola desde IDIKY (prueba)" }
+```
+
+- `200` → `{ ok, persona: { id, nombre }, pista }`
+- `404 no_existe` · `422 invalido` · `502 whatsapp_fallo` · `503 sin_whatsapp`
+
+Variables en `~/.config/idiky/secretos/bloky-api.env` (no en git):
+
+| Variable | Valor típico en Dev |
+|---|---|
+| `EVOLUTION_URL` | `http://10.0.2.2:8086` (host desde el pod de BLOKY) |
+| `EVOLUTION_API_KEY` | la misma `AUTHENTICATION_API_KEY` de `evolution.env` |
+| `EVOLUTION_INSTANCE` | hoy `Justo Soto` (prueba); mañana la de IDIKY |
+
+En ALICE: `lib/servicios/whatsapp/cliente.dart` (`App-Idiky`).
+
+## 9. Pendiente (próximo paso)
 
 1. **Número telefónico especial de IDIKY** para WhatsApp (Justo + Daniel).
-2. Vincularlo en Evolution y anotar en esta guía el nombre de la instancia «oficial» de Dev.
-3. (Opcional) Túnel `evolution-dev.idiky.com` y actualizar `SERVER_URL`.
+2. Vincularlo en Evolution y anotar en esta guía el nombre de la instancia «oficial» de Dev;
+   actualizar `EVOLUTION_INSTANCE` en `bloky-api.env`.
+3. (Opcional) Túnel `evolution-dev.idiky.com` y actualizar `SERVER_URL` / `EVOLUTION_URL`.

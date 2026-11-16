@@ -167,7 +167,8 @@ levantar_bloky() {
   chmod 700 "$IDIKY_DATOS" "$IDIKY_DATOS/bloky"
   systemctl --user stop "pod-$pod.service" 2>/dev/null || true
   podman pod rm --force --ignore "$pod" >/dev/null
-  podman pod create --name "$pod" --network slirp4netns:port_handler=slirp4netns \
+  # allow_host_loopback: BOB y Evolution estan en otros pods del host (10.0.2.2:8082 / :8086).
+  podman pod create --name "$pod" --network slirp4netns:port_handler=slirp4netns,allow_host_loopback=true \
     --publish "$IDIKY_HOST:$1:80" >/dev/null
   podman create --pod "$pod" --name "$pod-postgres" --memory 384m --pids-limit 256 \
     --env-file "$SECRETOS/bloky-postgres.env" \
