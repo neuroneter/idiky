@@ -98,20 +98,30 @@ Responde:
       { "unidadId": "…", "codigo": "T2-502", "rol": "administrador" },
       { "unidadId": "…", "codigo": "T1-101", "rol": "invitado", "desde": "2026-11-10", "hasta": "2026-11-20" }
     ],
-    "colaborador": null
+    "colaborador": null,
+    "administracion": null
   },
   {
     "copropiedadId": "cp-456", "nombre": "Edificio Torres del Parque", "api": "https://bloky-dev.idiky.com",
     "unidades": [],
-    "colaborador": { "cargo": "vigilante", "espacio": "Portería y vigilancia" }
+    "colaborador": { "cargo": "vigilante", "espacio": "Portería y vigilancia" },
+    "administracion": null
+  },
+  {
+    "copropiedadId": "cp-789", "nombre": "Pruebas IDIKY", "api": "https://bloky-dev.idiky.com",
+    "unidades": [],
+    "colaborador": null,
+    "administracion": { "rol": "delegado" }
   }
 ]
 ```
 
 - Solo lo **vigente**: el invitado aparece solo entre `desde` y `hasta`; lo bloqueado o finalizado no aparece.
 - `api`: la dirección del middleware que atiende esa copropiedad (ADR-0025 §4). Hoy es siempre la misma.
-- ALICE muestra el listado; la persona elige **una unidad** (o su lugar de trabajo, si es colaborador) y puede saltar a otra
-  sin volver a pedir código.
+- `administracion`: si la persona es **Administrador o Delegado** vigente de esa copropiedad (RN-327 ampliada); puede ir
+  sin `unidades` ni `colaborador`.
+- ALICE muestra el listado; la persona elige **una unidad** (o su lugar de trabajo, si es colaborador, o la
+  copropiedad por administración) y puede saltar a otra sin volver a pedir código.
 
 ## 5. La unidad: residentes, mascotas e invitados (RN-321, solo el administrador de la unidad)
 

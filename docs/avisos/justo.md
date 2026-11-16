@@ -126,14 +126,19 @@ llaves ASAP de Jitsi. El pase sale de `POST /api/c/:id/reuniones/:rid/entrar`.
 `AUTH_TYPE=jwt`, sin invitados anónimos ni cuentas. Probado: anfitrión → moderador; participante → participante;
 sin pase → no entra. En BLOKY, `BLOKY_JITSI_ACEPTA_PASES=si`.
 
-**Para ALICE (2026-11-05):** todo lo de Jitsi y el pase, y lo que cambia en tu rama
-`feature/T-106-preparar-reuniones-video` (el camino es **`/entrar`** —no `/pase`—; roles: anfitrión, suplente,
-secretario, participante; la respuesta trae `servidor`, `sala` y `token`), está en
-[**`docs/18-reuniones-con-video.md`**](../18-reuniones-con-video.md). Lee el §5 antes de empezar. El cliente
-preparado el 2026-10-25 en `App-Idiky` hay que alinearlo a ese contrato.
+**Para ALICE (2026-11-05):** contrato en [`docs/18`](../18-reuniones-con-video.md) §5 (`/entrar`, roles, `servidor`/`sala`/`token`).
+
+**Hecho 2026-11-15:** pestaña **Asambleas** lista reuniones reales del middleware con Bearer ALICE (RN-325);
+Entrar abre Jitsi con el SDK. **Sesión persistente** (Bearer en almacén seguro + `GET /yo` al abrir).
+
+**Hecho 2026-11-15 (RN-190):** una persona no puede estar dos veces en la misma reunión: el segundo dispositivo
+pregunta si desea **trasladar**; el primero cierra por latido (ALICE hangUp / BLOKY cierra la pestaña). Diálogo
+en la web (no `window.confirm`). BLOKY Dev `394a419.bloky-c5b887a`. Falta el kick forzado desde Prosody cuando
+Jitsi avise quién entra y sale.
 
 **Te queda de este aviso:** que la sala espere al anfitrión (hoy quien llega primero con pase entra a la sala vacía),
-cámara y micrófono por permiso del secretario, avisarle al middleware quién entra y sale, y conectar ALICE.
+cámara y micrófono por permiso del secretario, y el webhook de asistencia hacia el middleware.
+Resumen para Daniel: [`daniel.md`](./daniel.md) §9.
 
 ## 4. ALICE usa el mismo directorio y nunca toca una base — ⏳ abierto (2026-10-20)
 
@@ -186,17 +191,17 @@ Daniel decidió el 2026-11-05 cómo se crean los residentes y los colaboradores 
   número verificado en Twilio y que la Administración te cree como administrador de una unidad en BLOKY.
 
 
-## 6b. Delegado ≠ residente en ALICE — ⏳ documentado; espera decisión de Daniel (2026-11-15)
+## 6b. Delegado / Administrador también en ALICE — ✅ RN-327 ampliada (2026-11-15)
 
-Si entras a BLOKY como **Delegado** (o Administrador) y ALICE dice que no tienes unidad: **no es un
-bug de datos**. RN-327 / ADR-0032 abren ALICE solo a residente/colaborador con unidad o cargo. El
-Delegado abre la consola BLOKY, no la app.
+**Hecho:** Administrador y Delegado vigentes entran a ALICE por defecto (opción B, docs/21). En
+`lugares` llega `administracion: { rol }` aunque no haya unidad. Ya no hace falta crearte como
+administrador de una unidad solo para probar el login.
 
-Caso tuyo (CC 80821419): Delegado vigente en Pruebas IDIKY → BLOKY sí; ALICE `403 sin_acceso`.
+**Aviso a Daniel:** en [`avisos/daniel.md`](./daniel.md) §8b — enterado; pendiente qué pantallas ve
+quien entra solo por administración.
 
-Detalle y opciones para Daniel: [`21-delegado-en-bloky-sin-acceso-a-alice.md`](../21-delegado-en-bloky-sin-acceso-a-alice.md).
-**Mientras esté abierto:** no aflojes RN-327 en el middleware sin su decisión. Para probar ALICE hoy:
-créate también como administrador de una unidad con tu celular.
+Caso tuyo (CC 80821419 / `3053996759`): tras el despliegue de BLOKY Dev con el cambio, Continuar →
+código por WhatsApp debe pasar (ya no `403 sin_acceso`).
 
 ## 7. Evolution API / WhatsApp — 🟡 código de ALICE por WhatsApp (2026-11-15)
 

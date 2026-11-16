@@ -17,7 +17,7 @@ nueva o una sesión de IA distinta.
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | `apps/pwa/` (Mary, la maqueta de ALICE y de la consola), `apps/contable/` (Jeimy), `apps/gestion/` (BOB) y, desde el 2026-09-21, **`apps/bloky/` + `apps/bloky-api/` (BLOKY Dev, el producto real, ADR-0013)** |
 | **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 y **`https://bob-dev.idiky.com`** (ADR-0014) ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) **Desde el 2026-10-19:** con el plugin `cuentas-polygon` (alta de cuentas Polygon por QR) y las claves de **Polygon Amoy** (red de pruebas), publicado como `ad48f90.gestion-12e7c44`; el hash del `rpId` (`bob-dev.idiky.com`) completo desde el 2026-10-21; faltan los usuarios de la app (T-87) |
-| **Cadena / contratos / ALICE (Justo)** | Identidad = `hashIdentidad` (RN-298). Reuniones: Jitsi + middleware en Dev (ADR-0030); ALICE conecta desde `feature/T-106-…` con guía [`18`](./18-reuniones-con-video.md). Contrato on-chain por copropiedad: [ADR-0031](./adr/0031-un-contrato-por-copropiedad.md). **T-87:** diagnóstico sesión + Polygon en [`19`](./19-diagnostico-alice-sesion-y-polygon.md). Avisos: [`justo.md`](./avisos/justo.md) · [`daniel.md`](./avisos/daniel.md) |
+| **Cadena / contratos / ALICE (Justo)** | Identidad = `hashIdentidad` (RN-298). **2026-11-15:** ALICE con WhatsApp (T-132), Asambleas→Jitsi, RN-190 (un dispositivo), sesión persistente (Keystore); Admin/Delegado en ALICE (RN-327). Resumen para Daniel: [`avisos/daniel.md`](./avisos/daniel.md) §9. Guía reuniones [`18`](./18-reuniones-con-video.md). **T-87** sigue abierto ([`19`](./19-diagnostico-alice-sesion-y-polygon.md)). |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
@@ -113,20 +113,76 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-15 · Justo · Cierre de sesión · Todo en GitHub + aviso a Daniel
+
+**Repos:** `Bloky-Idiky` `develop` `c5b887a` (presencia RN-190 + diálogo web) desplegado
+`394a419.bloky-c5b887a`. `App-Idiky` `feature/T-106-…` `3337794` mergeada a `develop` (Asambleas,
+traslado, sesión persistente). Arnés `Justo_dev` → `main` (bitácora, RN-190, docs/18·20·21,
+[`avisos/daniel.md`](./avisos/daniel.md) §9).
+
+**Para el equipo / Daniel:** leer §9 de `avisos/daniel.md` (qué quedó, qué no, cómo probar).
+
+### 2026-11-15 · Justo · ALICE · Sesión persistente en almacén seguro (docs/20 §3)
+
+**Qué:** el Bearer de ALICE ya se guardaba tras el código, pero al reiniciar la app se pedía
+login otra vez. Ahora al abrir se llama `GET /api/app/yo`; si el token sigue vivo, entra sin
+WhatsApp. **Cerrar sesión** (Cuenta) llama `POST /api/app/salir` y borra el token del Keystore /
+Keychain. Rama `App-Idiky` `feature/T-106-preparar-reuniones-video`.
+
+**Para probar:** ingresar → matar la app → abrir de nuevo → debe entrar solo; Cuenta → Cerrar sesión
+→ vuelve a pedir celular y código.
+
+### 2026-11-15 · Justo · Reuniones · Diálogo de traslado en la web (RN-190)
+
+**Problema:** de la app al computador, «Entrar» en BLOKY abría la sala y cerraba el teléfono sin preguntar
+(`window.confirm` tras abrir pestaña en blanco no se veía bien).
+
+**Hecho:** la consola pregunta en la página («Trasladar aquí» / Cancelar) y solo entonces abre la sala.
+Rama `feature/T-106-presencia-traslado` → `develop`.
+
+### 2026-11-15 · Justo · Reuniones · Un dispositivo por persona (RN-190, T-106)
+
+**Qué:** si ya estás en la reunión (ALICE o BLOKY) y entras desde otro sitio, el middleware responde
+`409 ya_en_otro_dispositivo`; el cliente pregunta si trasladar; al confirmar, el primero cierra por latido
+(15 s). Presencia en `presencia_reunion`, TTL 60 s sin latido. Código: `Bloky-Idiky`
+`feature/T-106-presencia-traslado` · ALICE `feature/T-106-preparar-reuniones-video`.
+
+**Para probar:** entrar en el teléfono y luego en la web (o al revés) → diálogo → Trasladar → en ≤15 s
+queda un solo «Justo» en participantes.
+
+### 2026-11-15 · Justo · ALICE · Asambleas = reuniones del middleware + Bearer (T-106, RN-325)
+
+**Problema:** la pestaña Asambleas mostraba maqueta local; las reuniones de BLOKY no aparecían.
+
+**Hecho:**
+- Middleware: la guardia de `/api/c/…` acepta cookie BLOKY **o** Bearer ALICE (RN-325).
+- ALICE (`feature/T-106-preparar-reuniones-video`): Asambleas usa `ReunionesPage` (lista del mes, pull-to-refresh, Entrar a Jitsi).
+- docs/18 §5.2 actualizado.
+
+**Para probar:** login con celular → Asambleas → debe verse Prueba1 (y las del mes); deslizar para refrescar; Entrar pide pase (desde 30 min antes).
+
+### 2026-11-15 · Justo · Middleware · Admin/Delegado entran a ALICE (RN-327 ampliada, T-132)
+
+**Opción B de docs/21:** Administrador y Delegado vigentes cuentan para ALICE. `lugares` trae
+`administracion: { rol }` aunque no haya unidad ni colaborador. Código en `Bloky-Idiky`
+`feature/T-132-alice-admin-delegado` → `develop` → BLOKY Dev. Contrato docs/20 §4, RN-327, ADR-0032 §6.
+Aviso a Daniel en `avisos/daniel.md` §8b (pendiente: qué pantallas ve quien entra solo por administración).
+
+**Para probar:** celular `3053996759` (Delegado Pruebas IDIKY) → Continuar → código WhatsApp (ya no `403`).
+
 ### 2026-11-15 · Justo · Docs · Delegado en BLOKY sin acceso a ALICE (RN-327)
 
-Justo Soto (Delegado de Pruebas IDIKY) entra a BLOKY y es suplente en reuniones; ALICE responde
-`403 sin_acceso` porque RN-327 no cuenta Administrador/Delegado. No es dato malo: son dos puertas.
-Diagnóstico y decisión para Daniel: [`21-delegado-en-bloky-sin-acceso-a-alice.md`](./21-delegado-en-bloky-sin-acceso-a-alice.md).
-Avisos §8b (Daniel) y §6b (Justo).
+Diagnóstico del hueco (antes del arreglo): [`21-delegado-en-bloky-sin-acceso-a-alice.md`](./21-delegado-en-bloky-sin-acceso-a-alice.md).
+Cerrado el mismo día con la ampliación de RN-327 (entrada de arriba).
 
 ### 2026-11-15 · Justo · ALICE · Login celular + código WhatsApp (T-132, docs/20)
 
-**Middleware** (\Bloky-Idiky\ 8ca2c7\ en Dev): \/api/app/acceso/enviar-codigo\ genera OTP propio y lo manda por Evolution cuando hay \EVOLUTION_*\ (Twilio intacto para BLOKY).
+**Middleware** (`Bloky-Idiky`, Dev): `/api/app/acceso/enviar-codigo` genera OTP y lo manda por Evolution
+cuando hay `EVOLUTION_*` (Twilio intacto para BLOKY).
 
-**ALICE** (\App-Idiky\ \eature/T-106-preparar-reuniones-video\ b15fdb\): puerta pide solo celular; Bearer de ALICE; textos de WhatsApp.
+**ALICE** (`App-Idiky` `feature/T-106-preparar-reuniones-video`): puerta pide solo celular; Bearer de ALICE.
 
-**Para probar:** administrador de unidad en BLOKY con el celular del teléfono de prueba → Continuar → código por WhatsApp → Entrar.
+**Para probar:** celular registrado en el directorio (residente, colaborador, Administrador o Delegado) → Continuar → código por WhatsApp → Entrar.
 
 ### 2026-11-15 · Justo · Middleware · WhatsApp por celular del directorio (T-132, RN-331)
 
