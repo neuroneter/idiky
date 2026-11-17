@@ -1446,3 +1446,65 @@ borran, RN-61), y marca quiénes son del **consejo de administración**.
 `features/admin/DirectorioAdminPage.tsx` (`/admin/directorio`) y la lista común
 `componentes/ListaDirectorio.tsx`. En el demo, Andrés es del consejo.
 
+---
+
+### CU-R-34
+## CU-R-34 — Personalizar mi avatar en ALICE
+
+> Justo, 2026-11-16: *todos los usuarios —colaboradores, residentes, trabajadores— van a usar la
+> aplicación desde sus teléfonos*; si no tienen avatar lo crean, y si el sistema les armó uno por
+> defecto lo pueden editar. Reutiliza el personaje de BLOKY (RN-261, RN-297); no se inventa otro.
+
+- **Actor principal:** Cualquier persona que entra a ALICE (propietario, residente, invitado vigente,
+  colaborador, Administrador o Delegado — RN-327).
+- **Precondiciones:** Tiene sesión en ALICE (CU-R-01 / docs/20).
+- **Disparador:** Toca su avatar en la barra superior (o «Mi avatar» en su perfil).
+- **Resultado esperado:** Su personaje queda guardado en el directorio (`persona.apariencia`) y se
+  ve igual en ALICE y en BLOKY, en todas las copropiedades a las que entra.
+
+**Flujo principal**
+1. Entra a ALICE. Si todavía **no tiene** apariencia guardada, la app (o el middleware) le arma un
+   personaje por defecto a partir de su nombre (como ya hace BLOKY con «Tú») y lo muestra en la
+   barra; **no** obliga a personalizarlo para entrar.
+2. Toca el avatar → abre el **editor** (las mismas partes que BLOKY: cuerpo, piel, pelo, ojos, boca,
+   barba, gafas, cabeza, ropa, color, lo que lleva en la mano, insignia — RN-261).
+3. Cambia lo que quiera (galerías por parte, vista previa del personaje, opción «al azar»).
+4. Guarda. El middleware valida (RN-261) y deja la apariencia en `directorio.persona`.
+5. Vuelve a la app: la barra y el perfil muestran el personaje nuevo. Si después entra a BLOKY, ve
+   el mismo.
+
+**Flujos alternativos**
+- A1. **Ya tenía apariencia** (la armó en BLOKY o en un ingreso anterior) → el editor abre con esa;
+  puede cambiarla y volver a guardar.
+- A2. **Solo mira** y cancela → no se guarda nada; sigue el personaje que tenía (o el por defecto
+  local si aún no había guardado).
+- A3. La apariencia llega mal formada → el middleware responde error; la app no guarda y avisa.
+- A4. Sin red al guardar → avisa; no inventa un guardado local que contradiga el directorio.
+
+**Decisiones de interfaz**
+- **Mismas partes que BLOKY**, no un set distinto: un solo lenguaje visual (RN-261).
+- **No bloquea el ingreso:** crear billeteras sí puede ser del primer login (T-129); el avatar no.
+- **Entrada clara:** el círculo de iniciales de hoy pasa a mostrar el personaje (o iniciales mientras
+  carga); un toque abre el editor.
+- **Colaborador:** su cargo en el equipo (RN-261) puede sugerir ropa al armar el por defecto; al
+  editar «su» personaje en ALICE guarda en la persona, no un disfraz distinto por copropiedad
+  (RN-297).
+
+**Reglas de negocio:** RN-261 (partes), RN-297 (de la persona), RN-191 (ALICE crea, muestra y edita).
+
+**Contrato:** [`docs/20`](../20-alta-e-ingreso-desde-alice.md) §3 (rutas `…/yo/apariencia`).
+
+**Estado:** ⬜ Pendiente — plan abajo. Demo PWA: solo iniciales. BLOKY: editor en Equipo (`EditorAvatar`).
+
+### Plan de construcción — CU-R-34 (2026-11-16)
+
+| Paso | Qué | Dónde | Notas |
+|---|---|---|---|
+| 1 | `GET` / `PUT /api/app/yo/apariencia` con Bearer de ALICE; si no hay guardada, `GET` puede devolver `null` o un por defecto calculado (sin persistir hasta el `PUT`) | `Bloky-Idiky` middleware | ✅ Hecho (2026-11-16): rutas en `alice/rutas.ts`; `GET` devuelve `null` hasta el `PUT` |
+| 2 | Pintar el personaje en Flutter con las mismas partes (RN-261) | `App-Idiky` | Portar la lógica de `Personaje.tsx` / catálogo; no hace falta el mundo isométrico |
+| 3 | Pantalla editor (galerías + vista previa + al azar + Guardar) | `App-Idiky` | Como `EditorAvatar`, en móvil |
+| 4 | Sustituir iniciales de la barra por el personaje; toque → editor | `App-Idiky` | `BarraSuperior` / `Avatar` |
+| 5 | Probar: persona sin apariencia → default → guardar; editar de nuevo; ver lo mismo en BLOKY | Dev | Una sola fila en `directorio.persona.apariencia` |
+
+**Fuera de este CU:** decorar cuartos (RN-301), fotos de perfil reales, avatares 3D.
+
