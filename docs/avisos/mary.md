@@ -7,15 +7,15 @@
 
 ---
 
-## 0. Borrador CU-R-34 (avatar en ALICE) — ⏳ abierto (2026-11-16)
+## 0. CU-R-34 (avatar en ALICE) — ⏳ revisar textos (2026-11-16)
 
-Justo escribió el caso de uso **CU-R-34 — Personalizar mi avatar en ALICE** (rango CU-R tuyo) y el
-plan de construcción: crear el personaje si no lo tienen y editar el que sale por defecto; mismas
-partes que el de BLOKY; se guarda en el directorio y lo ven igual en el teléfono y en la web.
+Justo escribió el caso de uso **CU-R-34 — Personalizar mi avatar en ALICE** (rango CU-R tuyo) y ya
+lo dejó en código (middleware + app en `develop`, T-90): crear el personaje si no lo tienen y
+editar el que sale por defecto; mismas partes que el de BLOKY; se guarda en el directorio y lo
+ven igual en el teléfono y en la web.
 
 **Para ti:** léelo en [`casos-de-uso/residente.md`](../casos-de-uso/residente.md#cu-r-34) y dile a
-Daniel o a Justo si lo dejas como está o quieres cambiar el flujo / los textos. Mientras no digas lo
-contrario, Justo puede implementarlo (T-90).
+Daniel o a Justo si lo dejas como está o quieres cambiar el flujo / los textos.
 
 ## 1. El entorno de desarrollo se mudó a AWS — ⏳ abierto (2026-11-03)
 

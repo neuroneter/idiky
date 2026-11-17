@@ -145,12 +145,55 @@ Secretos `EVOLUTION_*` ya en el servidor.
 
 ---
 
-## 9c. Avatar en ALICE (CU-R-34 / T-90) — 📋 documentado (2026-11-16)
+## 10. Resumen para Daniel — sesión Justo 2026-11-16 (cierre del día)
 
-Justo dejó el **caso de uso y el plan** (no código aún): personalizar el personaje desde el teléfono
-(crear si falta, editar el por defecto), mismas partes que BLOKY, guardado en `persona.apariencia`
-(RN-191 + RN-297). Contrato: docs/20 `GET`/`PUT /api/app/yo/apariencia`. Aviso a Mary del borrador
-CU-R-34. Cuando se implemente: middleware + Flutter (T-90).
+> Léelo primero si retomas ALICE / cadena / avatar. Detalle en la bitácora
+> ([`09`](../09-estado-del-proyecto.md)).
+
+### Qué quedó hecho hoy
+
+| Tema | Dónde | Estado |
+|---|---|---|
+| **Alta billeteras primer login** (T-129 A2, sin QR) | Middleware + BOB servicio + ALICE + secreto | ✅ En Dev; ver §9b |
+| **Secreto `IDIKY_CADENA_PROXY_TOKEN`** | `levantar.sh` + `conectar-cadena-proxy.sh` | ✅ Inyectado (= `BOB_API_TOKEN`); BOB y BLOKY publicados |
+| **Billeteras de prueba** (3053996759 · Justo Soto) | `directorio.persona` en BLOKY Dev | ✅ Dos billeteras guardadas (2026-11-17 ~02:45 UTC) |
+| **CU-R-34 + RN-191 + plan** (avatar en ALICE) | Arnés `docs/` · aviso Mary §0 | ✅ Documentado |
+| **Avatar middleware** (T-90) | `Bloky-Idiky` `develop` · Dev `…bloky-180c909` | ✅ `GET`/`PUT /api/app/yo/apariencia` |
+| **Avatar app** (T-90) | `App-Idiky` `develop` | ✅ Personaje + editor + barra; **falta probar en teléfono** |
+
+### Ramas / revisiones (noche del 2026-11-16)
+
+| Repo | Rama / revisión | Notas |
+|---|---|---|
+| `Bloky-Idiky` | `develop` @ `180c909` (T-90) · antes T-129 en `d187292` | Middleware Dev: billeteras + apariencia |
+| `BOB-Idiky` | `develop` @ `561d905` | Rutas `/servicio/alta*` + script secreto; desplegado fuera de main (`IDIKY_GESTION_FUERA_DE_MAIN`) |
+| `App-Idiky` | `develop` @ `85d89c7` (T-90 avatar; incluye T-129 billeteras) | Probar avatar y passkey en teléfono físico |
+| `idiky` (arnés) | `main` | Bitácora, CU-R-34, RN-191, docs/20, este aviso, Mary §0 |
+
+### Notas útiles
+
+- **Passkey en emulador:** `NoCreateOptionException` casi siempre es PIN/cuenta Google/Play Services; `assetlinks.json` en `bob-dev.idiky.com` **sí** está bien. Tras crear billeteras en el teléfono, el mismo número en emulador **no** vuelve a pedir passkey.
+- **Avatar:** no bloquea el ingreso; toque en la barra → editor. Mismo `persona.apariencia` que BLOKY.
+- **Mary:** borrador CU-R-34 en su rango; aviso §0 en [`mary.md`](./mary.md).
+
+### Qué NO cerró Justo (sigue abierto)
+
+- A1 / T-87 (plugin en el middleware), RP ID → dominio del middleware, redeploy Amoy (§1).
+- Probar avatar en teléfono y, si hace falta, pulir el dibujo.
+- Número WhatsApp dedicado de IDIKY (T-132).
+
+## 9c. Avatar en ALICE (CU-R-34 / T-90) — 🟡 código en `develop` (2026-11-16)
+
+**CU-R-34** + **RN-191** + plan en [`residente.md`](../casos-de-uso/residente.md#cu-r-34). Contrato docs/20
+`GET`/`PUT /api/app/yo/apariencia`.
+
+| Pieza | Dónde |
+|---|---|
+| Middleware | `Bloky-Idiky` `develop` @ `180c909` — desplegado en Dev |
+| ALICE | `App-Idiky` `develop` @ `85d89c7` — personaje, editor, barra |
+| Guardado | `directorio.persona.apariencia` (RN-297) |
+
+**Falta:** probar en teléfono; Mary puede revisar el texto del CU (aviso §0).
 
 ## 9b. Alta de billeteras en el primer login (T-129, A2) — ✅ listo en Dev (2026-11-16)
 
@@ -160,7 +203,7 @@ billeteras va en el primer login (después de WhatsApp), con passkey en el telé
 
 | Pieza | Dónde |
 |---|---|
-| ALICE | `App-Idiky` `feature/T-106-preparar-reuniones-video` — pasos Documento + Billeteras |
+| ALICE | `App-Idiky` `develop` — pasos Documento + Billeteras (tras WhatsApp) |
 | Middleware | `Bloky-Idiky` `develop` — `POST /api/app/cadena/alta` y `…/firma` |
 | BOB (servicio) | `BOB-Idiky` `develop` — `/api/cuentas-polygon/servicio/alta*` |
 | Secreto | `IDIKY_CADENA_PROXY_TOKEN` = `BOB_API_TOKEN` (inyecta `levantar.sh`; también `infra/gestion/conectar-cadena-proxy.sh`) |
@@ -189,14 +232,15 @@ middleware, redeploy Amoy (§1), movimientos día a día por middleware.
 | **Diálogo de traslado en la web** (no `window.confirm`) | BLOKY `develop` | ✅ Desplegado |
 | **Sesión persistente ALICE** (Bearer en Keystore/Keychain; `GET /yo` al abrir; Cerrar sesión) | `App-Idiky` | ✅ En GitHub (docs/20 §3) |
 | **Alta billeteras primer login** (T-129 A2, sin QR) | Middleware + BOB servicio + ALICE | ✅ En Dev; ver §9b |
+| **Avatar en ALICE** (CU-R-34 / T-90) | Middleware + app | 🟡 Código en `develop`; ver §9c y §10 |
 
-### Ramas / revisiones (2026-11-15 noche)
+### Ramas / revisiones (2026-11-15 noche; **actualizado 2026-11-16 en §10**)
 
 | Repo | Rama / revisión | Notas |
 |---|---|---|
-| `Bloky-Idiky` | `develop` @ `c5b887a` (feature `T-106-presencia-traslado` mergeada) | Desplegado como `394a419.bloky-c5b887a` |
-| `App-Idiky` | `feature/T-106-preparar-reuniones-video` @ `3337794` → merge a `develop` | Probar en teléfono/emulador |
-| `idiky` (arnés) | `Justo_dev` → `main` | Bitácora, RN-190, docs/18·20·21, este aviso |
+| `Bloky-Idiky` | `develop` (ver §10: `180c909`) | Middleware Dev |
+| `App-Idiky` | `develop` (ver §10: `85d89c7`) | Probar en teléfono |
+| `idiky` (arnés) | `main` | Bitácora + avisos |
 
 ### Qué NO tocó Justo (sigue tuyo o abierto)
 
@@ -217,16 +261,16 @@ middleware, redeploy Amoy (§1), movimientos día a día por middleware.
 
 ---
 
-## Ramas de Justo (estado 2026-11-15)
+## Ramas de Justo (estado 2026-11-16)
 
 | Repo | Rama | Qué hay |
 |---|---|---|
 | `SmartContrat-Idiky` | `feature/cuentas-quitar-login` | Renombre identidad + docs; sin merge aún (§1) |
-| `BOB-Idiky` | `feature/T-81-plugin-cuentas` | ABI locales; plugin en `main` ya usa directorio |
-| `App-Idiky` | `feature/T-106-preparar-reuniones-video` | Login WhatsApp, Asambleas/Jitsi, RN-190, sesión persistente — **en `develop`** |
+| `BOB-Idiky` | `develop` @ `561d905` | T-129 servicio alta + script secreto — **en Dev** |
+| `App-Idiky` | `develop` @ `85d89c7` | WhatsApp, Asambleas/Jitsi, RN-190, sesión, T-129 billeteras, T-90 avatar |
 | `App-Idiky` | `feature/CU-R-01-alta-qr-passkey` | Alta QR + passkey; JWT Strapi temporal (T-87) |
-| `Bloky-Idiky` | `feature/T-106-presencia-traslado` | Presencia/traslado — **mergeada a `develop`** |
-| `idiky` | `Justo_dev` | Docs de esta sesión → `main` |
+| `Bloky-Idiky` | `develop` @ `180c909` | T-129 billeteras + T-90 apariencia — **en Dev** |
+| `idiky` | `Justo_dev` → `main` | Docs del día (CU-R-34, RN-191, §10) |
 
 Si algo de esta lista ya lo cerraste o desplegaste, actualiza la marca aquí y una línea en la
 bitácora.
