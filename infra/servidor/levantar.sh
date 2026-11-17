@@ -145,28 +145,27 @@ levantar_gestion() {
     --volume "$IDIKY_DATOS/gestion/postgres:/var/lib/postgresql/data" \
     docker.io/library/postgres:17-alpine >/dev/null
   # T-129: el middleware llama a /api/cuentas-polygon/servicio/* con BOB_API_TOKEN;
-  # BOB exige el mismo valor en IDIKY_CADENA_PROXY_TOKEN (docs/20 §2b).
-  GESTION_ENV="$SECRETOS/gestion-strapi.env"
-  CADENA_TMP=""
+  # BOB exige el mismo valor en IDIKY_CADENA_PROXY_TOKEN (docs/20 §2b). Se deja
+  # persistente en gestion-strapi.env: con `podman generate systemd --new` el
+  # --env-file se relee al arrancar; un temporal borrado rompe el pod.
   if [ -f "$SECRETOS/bloky-api.env" ]; then
     tok=$(grep '^BOB_API_TOKEN=' "$SECRETOS/bloky-api.env" | tail -n1 | cut -d= -f2-)
     case "$tok" in
       ''|CAMBIAR-POR*) ;;
       *)
-        CADENA_TMP=$(mktemp "$SECRETOS/.gestion-cadena.XXXXXX")
-        grep -v '^IDIKY_CADENA_PROXY_TOKEN=' "$GESTION_ENV" > "$CADENA_TMP" || true
-        printf 'IDIKY_CADENA_PROXY_TOKEN=%s\n' "$tok" >> "$CADENA_TMP"
-        chmod 600 "$CADENA_TMP"
-        GESTION_ENV="$CADENA_TMP"
+        tmp=$(mktemp "$SECRETOS/.gestion-strapi.XXXXXX")
+        grep -v '^IDIKY_CADENA_PROXY_TOKEN=' "$SECRETOS/gestion-strapi.env" > "$tmp" || true
+        printf 'IDIKY_CADENA_PROXY_TOKEN=%s\n' "$tok" >> "$tmp"
+        chmod 600 "$tmp"
+        mv "$tmp" "$SECRETOS/gestion-strapi.env"
         ;;
     esac
   fi
   podman create --pod "$pod" --name "$pod-strapi" --memory 1536m --pids-limit 512 \
-    --env-file "$GESTION_ENV" \
+    --env-file "$SECRETOS/gestion-strapi.env" \
     --volume "$IDIKY_DATOS/gestion/uploads:/opt/app/public/uploads" \
     --volume "$CONFIGURACION_BOB:/opt/app/configuracion" \
     "localhost/idiky-gestion:actual" >/dev/null
-  [ -n "$CADENA_TMP" ] && rm -f "$CADENA_TMP"
   podman create --pod "$pod" --name "$pod-proxy" --memory 64m --pids-limit 64 \
     "localhost/idiky-gestion-proxy:actual" >/dev/null
   mkdir -p "$UNIDADES"
