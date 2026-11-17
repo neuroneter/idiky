@@ -109,7 +109,9 @@ Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` + B
 
 | Ruta | Qué hace |
 |---|---|
-| `GET /api/app/yo` | La persona y sus `lugares` recalculados (útil al abrir la app) |
+| `GET /api/app/yo` | La persona y sus `lugares` recalculados (útil al abrir la app); `persona.apariencia` puede ser `null` |
+| `GET /api/app/yo/apariencia` | La apariencia guardada, o `null` si aún no la armó (CU-R-34, RN-191) |
+| `PUT /api/app/yo/apariencia` | `{ "apariencia": { … } }` — valida RN-261 y guarda en el directorio (mismo campo que BLOKY) |
 | `POST /api/app/sesion/renovar` | Un token nuevo con otros 30 días (el anterior queda cerrado) |
 | `POST /api/app/salir` | Cierra la sesión |
 | `POST /api/app/cadena/alta` | Abre el alta de billeteras (§2b) |
