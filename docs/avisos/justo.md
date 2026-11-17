@@ -80,11 +80,10 @@ número de documento**. El resto de las respuestas conserva los nombres de antes
 habla con el directorio, encuentra a la persona por documento, trae su `hashIdentidad` y responde con
 los dos juegos de nombres.
 
-**Sigue para hablar (T-87):** las rutas de la app (`/api/cuentas-polygon/...`) **siguen pidiendo sesión
-de usuarios de Strapi**, y BOB no tiene usuarios finales. Falta decidir cómo se identifica la app: lo
-natural, con ADR-0025, es que la app entre por el **middleware** con la sesión de la persona.
-**Temporal en ALICE hoy:** JWT de Strapi (`ALTA_QR_JWT`) solo para probar el alta en Dev; no es el
-diseño final. Estado para Daniel: [`daniel.md`](./daniel.md) §2.
+**Sigue para hablar (T-87 / A1):** si el plugin `cuentas-polygon` **se muda** al middleware. Mientras,
+**A2 hecho en código (2026-11-16, T-129):** ALICE crea billeteras en el primer login solo por el
+middleware (`/api/app/cadena/alta*`); BOB expone rutas de servicio con `IDIKY_CADENA_PROXY_TOKEN`.
+Ya no hace falta `ALTA_QR_JWT` ni el QR en el ingreso. Detalle: [`daniel.md`](./daniel.md) §9b.
 
 **Diagnóstico listo (2026-11-05):** Justo dejó el mapa completo —login doc+SMS como BLOKY, sesión vs
 passkey, y si la firma Polygon puede pasar primero por el middleware— en

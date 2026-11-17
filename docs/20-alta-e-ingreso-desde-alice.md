@@ -74,7 +74,35 @@ Responde:
   un **token nuevo** (el anterior queda cerrado).
 - Responde `200 { persona, lugares, token? }`. `409 documento_de_otra_persona` si ese documento ya tiene otro celular y no
   se pudo confirmar que es la misma persona (en ese caso, la Administración lo resuelve).
-- Después, ALICE manda crear las billeteras con la passkey (RN-299, T-87; el camino lo cierran Daniel y Justo, docs/19).
+- Después, ALICE crea las billeteras con la passkey por las rutas de §2b (T-129, opción A2 de docs/19: el middleware
+  proxifica a BOB; la app **no** habla con BOB ni usa `ALTA_QR_JWT`).
+
+## 2b. Alta de billeteras (primer ingreso, T-129)
+
+Con el Bearer de ALICE. Si `persona` ya trae las dos billeteras, se salta.
+
+`POST /api/app/cadena/alta`
+
+- Abre la operación de alta en la cadena (detrás: plugin de BOB con token de servicio).
+- Responde `201 { id, challenge, venceEn, estado, tipo }`.
+- `422 sin_documento` si aún no hay documento/`hashIdentidad`. `409 ya_tiene_billeteras` si ya existen.
+
+`POST /api/app/cadena/alta/:id/firma`
+
+```json
+{
+  "telefonoX": "0x…", "telefonoY": "0x…", "tipoAutenticador": "dispositivo",
+  "firma": { "r": "…", "s": "…", "challengeIndex": 0, "typeIndex": 0, "authenticatorData": "…", "clientDataJSON": "…" }
+}
+```
+
+- El teléfono firma el `challenge` con la passkey (RP ID hoy: `bob-dev.idiky.com`).
+- Responde `200 { operacion, persona, billeteraTransaccional, billeteraFinanciera, cuentaDia, cuentaFinanciera }`.
+- Tras esto, ALICE entra a la app. No hay botón de QR en el ingreso.
+
+**Secreto de servicio (middleware → BOB):** `IDIKY_CADENA_PROXY_TOKEN` en el pod de BOB = el mismo valor que
+`BOB_API_TOKEN` en el pod del middleware. Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` +
+Bearer de servicio).
 
 ## 3. La sesión
 
@@ -83,6 +111,8 @@ Responde:
 | `GET /api/app/yo` | La persona y sus `lugares` recalculados (útil al abrir la app) |
 | `POST /api/app/sesion/renovar` | Un token nuevo con otros 30 días (el anterior queda cerrado) |
 | `POST /api/app/salir` | Cierra la sesión |
+| `POST /api/app/cadena/alta` | Abre el alta de billeteras (§2b) |
+| `POST /api/app/cadena/alta/:id/firma` | Firma del teléfono → billeteras en el directorio |
 
 - **Cada petición recalcula los permisos** con lo vigente: si la Administración bloquea a la persona en una unidad, esa
   unidad desaparece de `lugares` y sus rutas responden `403`, aunque el token siga vivo (RN-324, RN-325).
