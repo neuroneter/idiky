@@ -1494,7 +1494,7 @@ borran, RN-61), y marca quiénes son del **consejo de administración**.
 
 **Contrato:** [`docs/20`](../20-alta-e-ingreso-desde-alice.md) §3 (rutas `…/yo/apariencia`).
 
-**Estado:** ⬜ Pendiente — plan abajo. Demo PWA: solo iniciales. BLOKY: editor en Equipo (`EditorAvatar`).
+**Estado:** 🟡 Código en `develop` (2026-11-16) — middleware Dev + app; falta probar en teléfono. Demo PWA: solo iniciales. BLOKY: editor en Equipo (`EditorAvatar`).
 
 ### Plan de construcción — CU-R-34 (2026-11-16)
 
