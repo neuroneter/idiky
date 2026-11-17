@@ -1501,9 +1501,9 @@ borran, RN-61), y marca quiénes son del **consejo de administración**.
 | Paso | Qué | Dónde | Notas |
 |---|---|---|---|
 | 1 | `GET` / `PUT /api/app/yo/apariencia` con Bearer de ALICE; si no hay guardada, `GET` puede devolver `null` o un por defecto calculado (sin persistir hasta el `PUT`) | `Bloky-Idiky` middleware | ✅ Hecho (2026-11-16): rutas en `alice/rutas.ts`; `GET` devuelve `null` hasta el `PUT` |
-| 2 | Pintar el personaje en Flutter con las mismas partes (RN-261) | `App-Idiky` | Portar la lógica de `Personaje.tsx` / catálogo; no hace falta el mundo isométrico |
-| 3 | Pantalla editor (galerías + vista previa + al azar + Guardar) | `App-Idiky` | Como `EditorAvatar`, en móvil |
-| 4 | Sustituir iniciales de la barra por el personaje; toque → editor | `App-Idiky` | `BarraSuperior` / `Avatar` |
+| 2 | Pintar el personaje en Flutter con las mismas partes (RN-261) | `App-Idiky` | ✅ `presentacion/compartido/avatar/personaje.dart` |
+| 3 | Pantalla editor (galerías + vista previa + al azar + Guardar) | `App-Idiky` | ✅ `vistas/avatar/editor_avatar_page.dart` |
+| 4 | Sustituir iniciales de la barra por el personaje; toque → editor | `App-Idiky` | ✅ `BarraSuperior` |
 | 5 | Probar: persona sin apariencia → default → guardar; editar de nuevo; ver lo mismo en BLOKY | Dev | Una sola fila en `directorio.persona.apariencia` |
 
 **Fuera de este CU:** decorar cuartos (RN-301), fotos de perfil reales, avatares 3D.

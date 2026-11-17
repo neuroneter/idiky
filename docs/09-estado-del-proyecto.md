@@ -113,6 +113,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-16 · Justo · ALICE · App del avatar (T-90, pasos 2–4)
+
+**Qué:** en `App-Idiky` `feature/T-90-avatar-alice-app`: modelo RN-261, `Personaje`,
+`EditorAvatarPage` (galerías, al azar, hombre/mujer, Guardar → `PUT /api/app/yo/apariencia`) y
+toque en la barra superior. Si no hay apariencia guardada, muestra un por defecto por nombre
+sin obligar a guardar.
+
+**Sigue:** probar en emulador/teléfono; merge a `develop`.
+
 ### 2026-11-16 · Justo · ALICE · Middleware del avatar (T-90, paso 1)
 
 **Qué:** `GET` / `PUT /api/app/yo/apariencia` con Bearer de ALICE (RN-191); guarda en
