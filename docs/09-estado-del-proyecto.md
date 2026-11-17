@@ -120,12 +120,12 @@ billeteras → passkey en el teléfono y `POST /api/app/cadena/alta` + `…/firm
 BOB (`/api/cuentas-polygon/servicio/alta*`) con `IDIKY_CADENA_PROXY_TOKEN` (= `BOB_API_TOKEN` del
 middleware). ALICE **no** usa `ALTA_QR_JWT` en el flujo feliz.
 
-**Ramas:** `Bloky-Idiky` `feature/T-129-alta-billeteras-middleware` · `BOB-Idiky`
-`feature/T-129-cadena-servicio-middleware` · `App-Idiky` `feature/T-106-preparar-reuniones-video`.
-Contrato: docs/20 §2b. Aviso: [`daniel.md`](./avisos/daniel.md) §9b.
+**Ramas:** `Bloky-Idiky` `develop` · `BOB-Idiky` `develop` · `App-Idiky`
+`feature/T-106-preparar-reuniones-video`. Contrato: docs/20 §2b. Aviso: [`daniel.md`](./avisos/daniel.md) §9b.
 
-**Para desplegar:** en BOB Dev poner `IDIKY_CADENA_PROXY_TOKEN` con el mismo valor que `BOB_API_TOKEN`
-del pod `idiky-bloky`; publicar BOB + BLOKY; probar login sin billeteras → huella → entrar.
+**Despliegue Dev:** `levantar.sh` inyecta `IDIKY_CADENA_PROXY_TOKEN` desde `BOB_API_TOKEN`; script
+`BOB-Idiky/infra/gestion/conectar-cadena-proxy.sh` para fijarlo en secretos. Publicar `bloky` +
+`gestion` desde `develop`. Probar: login sin billeteras → huella → entrar.
 
 ### 2026-11-15 · Justo · Cierre de sesión · Todo en GitHub + aviso a Daniel
 

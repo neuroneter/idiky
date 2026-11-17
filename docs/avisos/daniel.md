@@ -145,7 +145,7 @@ Secretos `EVOLUTION_*` ya en el servidor.
 
 ---
 
-## 9b. Alta de billeteras en el primer login (T-129, A2) — 🟡 código listo; falta secret + deploy (2026-11-16)
+## 9b. Alta de billeteras en el primer login (T-129, A2) — ✅ listo en Dev (2026-11-16)
 
 **Decisión de Justo (alineada con docs/19 A2):** ALICE solo habla con el middleware. El alta de
 billeteras va en el primer login (después de WhatsApp), con passkey en el teléfono. **Sin QR** y
@@ -154,15 +154,12 @@ billeteras va en el primer login (después de WhatsApp), con passkey en el telé
 | Pieza | Dónde |
 |---|---|
 | ALICE | `App-Idiky` `feature/T-106-preparar-reuniones-video` — pasos Documento + Billeteras |
-| Middleware | `Bloky-Idiky` `feature/T-129-alta-billeteras-middleware` — `POST /api/app/cadena/alta` y `…/firma` |
-| BOB (servicio) | `BOB-Idiky` `feature/T-129-cadena-servicio-middleware` — `/api/cuentas-polygon/servicio/alta*` |
+| Middleware | `Bloky-Idiky` `develop` — `POST /api/app/cadena/alta` y `…/firma` |
+| BOB (servicio) | `BOB-Idiky` `develop` — `/api/cuentas-polygon/servicio/alta*` |
+| Secreto | `IDIKY_CADENA_PROXY_TOKEN` = `BOB_API_TOKEN` (inyecta `levantar.sh`; también `infra/gestion/conectar-cadena-proxy.sh`) |
 | Contrato | [`docs/20`](../20-alta-e-ingreso-desde-alice.md) §2b |
 
-**Para ti al desplegar:**
-
-1. En el pod de BOB: `IDIKY_CADENA_PROXY_TOKEN` = el mismo valor que `BOB_API_TOKEN` del middleware.
-2. Merge/desplegar BOB + BLOKY (`IDIKY_REF_BLOKY=origin/develop` cuando la feature esté en `develop`).
-3. Probar con una persona **sin** billeteras: WhatsApp → (documento si falta) → Crear billeteras → huella → entrar.
+**Probar:** persona **sin** billeteras → WhatsApp → (documento si falta) → Crear billeteras → huella → entrar.
 
 **Sigue abierto (no bloquea este flujo):** A1 (mudar el plugin al middleware), RP ID → dominio del
 middleware, redeploy Amoy (§1), movimientos día a día por middleware.
@@ -184,7 +181,7 @@ middleware, redeploy Amoy (§1), movimientos día a día por middleware.
 | **Una persona, un dispositivo** (RN-190): 409 + traslado + latido 15 s | Middleware + ALICE + BLOKY web | ✅ BLOKY Dev `394a419.bloky-c5b887a` |
 | **Diálogo de traslado en la web** (no `window.confirm`) | BLOKY `develop` | ✅ Desplegado |
 | **Sesión persistente ALICE** (Bearer en Keystore/Keychain; `GET /yo` al abrir; Cerrar sesión) | `App-Idiky` | ✅ En GitHub (docs/20 §3) |
-| **Alta billeteras primer login** (T-129 A2, sin QR) | Middleware + BOB servicio + ALICE | 🟡 Código; ver §9b (secret + deploy) |
+| **Alta billeteras primer login** (T-129 A2, sin QR) | Middleware + BOB servicio + ALICE | ✅ En Dev; ver §9b |
 
 ### Ramas / revisiones (2026-11-15 noche)
 

@@ -101,8 +101,9 @@ Con el Bearer de ALICE. Si `persona` ya trae las dos billeteras, se salta.
 - Tras esto, ALICE entra a la app. No hay botón de QR en el ingreso.
 
 **Secreto de servicio (middleware → BOB):** `IDIKY_CADENA_PROXY_TOKEN` en el pod de BOB = el mismo valor que
-`BOB_API_TOKEN` en el pod del middleware. Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` +
-Bearer de servicio).
+`BOB_API_TOKEN` en el pod del middleware. `infra/servidor/levantar.sh` lo inyecta al crear BOB (lee
+`bloky-api.env`); también se puede fijar a mano con `infra/gestion/conectar-cadena-proxy.sh` (repo `BOB-Idiky`).
+Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` + Bearer de servicio).
 
 ## 3. La sesión
 
