@@ -145,6 +145,13 @@ Secretos `EVOLUTION_*` ya en el servidor.
 
 ---
 
+## 9c. Avatar en ALICE (CU-R-34 / T-90) — 📋 documentado (2026-11-16)
+
+Justo dejó el **caso de uso y el plan** (no código aún): personalizar el personaje desde el teléfono
+(crear si falta, editar el por defecto), mismas partes que BLOKY, guardado en `persona.apariencia`
+(RN-191 + RN-297). Contrato: docs/20 `GET`/`PUT /api/app/yo/apariencia`. Aviso a Mary del borrador
+CU-R-34. Cuando se implemente: middleware + Flutter (T-90).
+
 ## 9b. Alta de billeteras en el primer login (T-129, A2) — ✅ listo en Dev (2026-11-16)
 
 **Decisión de Justo (alineada con docs/19 A2):** ALICE solo habla con el middleware. El alta de

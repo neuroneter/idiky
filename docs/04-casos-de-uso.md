@@ -55,6 +55,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-31 | **Enviar el poder firmado en foto** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-31) |
 | CU-R-32 | **Seguir el avance de los proyectos de la copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-32) |
 | CU-R-33 | **Mi apartamento lo maneja una inmobiliaria** | 1 | ✅ Demo (2026-11-10: el propietario la registra con soporte y escoge si asiste a asambleas y paga la administración; la administración la revisa; RN-228, RN-229) | [ver](./casos-de-uso/residente.md#cu-r-33) |
+| CU-R-34 | **Personalizar mi avatar en ALICE** (crear si no hay; editar el por defecto o el de BLOKY) | 1 | ⬜ Pendiente (Justo, 2026-11-16; plan en el CU) | [ver](./casos-de-uso/residente.md#cu-r-34) |
 
 ## 2. Administrador — consola web
 
