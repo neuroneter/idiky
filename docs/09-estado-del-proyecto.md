@@ -113,6 +113,22 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-16 · Justo · ALICE · Middleware del avatar (T-90, paso 1)
+
+**Qué:** `GET` / `PUT /api/app/yo/apariencia` con Bearer de ALICE (RN-191); guarda en
+`directorio.persona.apariencia` (mismo campo que BLOKY). Prueba de humo OK.
+
+**Sigue:** app Flutter (personaje + editor + barra). CU-R-34 / plan en `residente.md`.
+
+### 2026-11-16 · Justo · ALICE · Caso de uso y plan del avatar (CU-R-34, T-90)
+
+**Qué:** documentado **CU-R-34** (personalizar mi avatar en ALICE: crear si no hay, editar el por
+defecto), **RN-191**, contrato en docs/20 (`GET`/`PUT /api/app/yo/apariencia`) y plan de
+construcción en cinco pasos. Reutiliza RN-261 / RN-297 (`persona.apariencia` en el directorio): el
+mismo personaje en el teléfono y en BLOKY, para residente, colaborador, Administrador y Delegado.
+
+**Sigue:** implementar T-90 (middleware + Flutter). Avisar a Mary del borrador CU-R-34 (rango CU-R).
+
 ### 2026-11-16 · Justo · ALICE · Alta de billeteras en el primer login vía middleware (T-129, A2)
 
 **Qué:** se quitó «Leer código QR» del ingreso. Tras WhatsApp: si falta documento → lo pide; si faltan
