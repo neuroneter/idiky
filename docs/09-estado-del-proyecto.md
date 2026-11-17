@@ -17,7 +17,7 @@ nueva o una sesión de IA distinta.
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | `apps/pwa/` (Mary, la maqueta de ALICE y de la consola), `apps/contable/` (Jeimy), `apps/gestion/` (BOB) y, desde el 2026-09-21, **`apps/bloky/` + `apps/bloky-api/` (BLOKY Dev, el producto real, ADR-0013)** |
 | **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 y **`https://bob-dev.idiky.com`** (ADR-0014) ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) **Desde el 2026-10-19:** con el plugin `cuentas-polygon` (alta de cuentas Polygon por QR) y las claves de **Polygon Amoy** (red de pruebas), publicado como `ad48f90.gestion-12e7c44`; el hash del `rpId` (`bob-dev.idiky.com`) completo desde el 2026-10-21; faltan los usuarios de la app (T-87) |
-| **Cadena / contratos / ALICE (Justo)** | Identidad = `hashIdentidad` (RN-298). **2026-11-15:** ALICE con WhatsApp (T-132), Asambleas→Jitsi, RN-190 (un dispositivo), sesión persistente (Keystore); Admin/Delegado en ALICE (RN-327). Resumen para Daniel: [`avisos/daniel.md`](./avisos/daniel.md) §9. Guía reuniones [`18`](./18-reuniones-con-video.md). **T-87** sigue abierto ([`19`](./19-diagnostico-alice-sesion-y-polygon.md)). |
+| **Cadena / contratos / ALICE (Justo)** | Identidad = `hashIdentidad` (RN-298). **2026-11-16:** alta de billeteras en el primer login vía middleware (T-129 A2, sin QR); ver [`daniel.md`](./avisos/daniel.md) §9b. También: WhatsApp, Asambleas/Jitsi, RN-190, sesión persistente, Admin/Delegado (RN-327). **T-87** A1 (mudar plugin) sigue abierto ([`19`](./19-diagnostico-alice-sesion-y-polygon.md)). |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
@@ -112,6 +112,20 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-11-16 · Justo · ALICE · Alta de billeteras en el primer login vía middleware (T-129, A2)
+
+**Qué:** se quitó «Leer código QR» del ingreso. Tras WhatsApp: si falta documento → lo pide; si faltan
+billeteras → passkey en el teléfono y `POST /api/app/cadena/alta` + `…/firma`. El middleware proxifica a
+BOB (`/api/cuentas-polygon/servicio/alta*`) con `IDIKY_CADENA_PROXY_TOKEN` (= `BOB_API_TOKEN` del
+middleware). ALICE **no** usa `ALTA_QR_JWT` en el flujo feliz.
+
+**Ramas:** `Bloky-Idiky` `feature/T-129-alta-billeteras-middleware` · `BOB-Idiky`
+`feature/T-129-cadena-servicio-middleware` · `App-Idiky` `feature/T-106-preparar-reuniones-video`.
+Contrato: docs/20 §2b. Aviso: [`daniel.md`](./avisos/daniel.md) §9b.
+
+**Para desplegar:** en BOB Dev poner `IDIKY_CADENA_PROXY_TOKEN` con el mismo valor que `BOB_API_TOKEN`
+del pod `idiky-bloky`; publicar BOB + BLOKY; probar login sin billeteras → huella → entrar.
 
 ### 2026-11-15 · Justo · Cierre de sesión · Todo en GitHub + aviso a Daniel
 
