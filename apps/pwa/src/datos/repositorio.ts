@@ -58,6 +58,8 @@ import type {
   ZonaComun,
   Proyecto,
   AvanceProyecto,
+  FinanciacionProyecto,
+  PreguntaProyecto,
   MedioPago,
   MotivoMensaje,
   Imputacion,
@@ -143,6 +145,8 @@ import {
   admiteGrabacion,
   motivoAvanceInvalido,
   textoAvanceProyecto,
+  textoRespuestaProyecto,
+  motivoPreguntaInvalida,
   comisionVencida,
   motivoPlazoComisionInvalido,
   puedeGenerarActa,
@@ -1261,6 +1265,7 @@ export async function crearProyecto(
     fechaInicio?: FechaISO
     fechaFinPrevista?: FechaISO
     presupuesto?: number
+    financiacion?: FinanciacionProyecto
     creadoPor: string
   },
 ): Promise<Resultado<Proyecto>> {
@@ -1289,7 +1294,11 @@ export async function crearProyecto(
     fechaInicio: parametros.fechaInicio || undefined,
     fechaFinPrevista: parametros.fechaFinPrevista || undefined,
     presupuesto: parametros.presupuesto,
+    financiacion: parametros.financiacion
+      ? { fuente: parametros.financiacion.fuente, detalle: parametros.financiacion.detalle?.trim() || undefined }
+      : undefined,
     avances: [],
+    preguntas: [],
     creadoPor: parametros.creadoPor,
     creadoEn: ahoraISO(),
   }
@@ -1314,6 +1323,8 @@ export async function registrarAvanceProyecto(
     titulo: string
     detalle: string
     foto?: string
+    /** RN-238 — Lo pagado acumulado de la obra, si se sabe. */
+    pagado?: number
     registradoPor: string
   },
 ): Promise<Resultado<{ proyecto: Proyecto; avance: AvanceProyecto; avisados: number; sinCelular: number }>> {
@@ -1352,6 +1363,7 @@ export async function registrarAvanceProyecto(
     foto: parametros.foto ? { imagen: parametros.foto, adjuntadoEn: ahora } : undefined,
     registradoPor: parametros.registradoPor,
     comunicadoId: comunicado.id,
+    pagado: parametros.pagado,
   }
   proyecto.avances.push(avance)
 
@@ -1380,6 +1392,67 @@ export async function registrarAvanceProyecto(
   }
 
   return persistir(bd, { proyecto, avance, avisados, sinCelular })
+}
+
+/**
+ * CU-R-32 · RN-239 — Un propietario (o arrendatario) pregunta sobre la obra.
+ * La pregunta queda en el proyecto; solo la ve quien la hizo hasta que la
+ * administracion responda.
+ */
+export async function preguntarSobreProyecto(
+  bdActual: BaseDatos,
+  parametros: { proyectoId: string; personaId: string; unidadId: string; texto: string },
+): Promise<Resultado<PreguntaProyecto>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const proyecto = bd.proyectos.find((p) => p.id === parametros.proyectoId)
+  if (!proyecto) throw new ErrorDeNegocio('Ese proyecto no existe.')
+  if (!puedeManejarUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('Las preguntas sobre las obras las hacen el propietario o el arrendatario.')
+  }
+  const motivo = motivoPreguntaInvalida(parametros.texto)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const pregunta: PreguntaProyecto = {
+    id: nuevoId('prg'),
+    personaId: parametros.personaId,
+    unidadId: parametros.unidadId,
+    texto: parametros.texto.trim(),
+    fecha: ahoraISO(),
+  }
+  proyecto.preguntas = [...(proyecto.preguntas ?? []), pregunta]
+  return persistir(bd, pregunta)
+}
+
+/**
+ * CU-A-28 · RN-239 — La administracion responde. La respuesta queda a la vista
+ * de todos los propietarios (sin el nombre de quien pregunto) y a quien
+ * pregunto le llega un mensaje. No se edita: si hay algo que agregar, se
+ * publica en el siguiente avance.
+ */
+export async function responderPreguntaProyecto(
+  bdActual: BaseDatos,
+  parametros: { proyectoId: string; preguntaId: string; personaId: string; texto: string },
+): Promise<Resultado<PreguntaProyecto>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const proyecto = bd.proyectos.find((p) => p.id === parametros.proyectoId)
+  const pregunta = proyecto?.preguntas?.find((p) => p.id === parametros.preguntaId)
+  if (!proyecto || !pregunta) throw new ErrorDeNegocio('Esa pregunta no existe.')
+  if (pregunta.respuesta) throw new ErrorDeNegocio('Esa pregunta ya tiene respuesta.')
+  const motivo = motivoPreguntaInvalida(parametros.texto, 'respuesta')
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const ahora = ahoraISO()
+  pregunta.respuesta = { texto: parametros.texto.trim(), respondidoPor: parametros.personaId, fecha: ahora }
+  const copropiedad = bd.copropiedades.find((c) => c.id === proyecto.copropiedadId)
+  avisarAPersona(bd, {
+    copropiedadId: proyecto.copropiedadId,
+    personaId: pregunta.personaId,
+    texto: textoRespuestaProyecto(proyecto, copropiedad?.nombre ?? 'La copropiedad'),
+    motivo: 'respuesta_proyecto',
+    proyectoId: proyecto.id,
+    ahora,
+  })
+  return persistir(bd, pregunta)
 }
 
 export async function marcarComunicadoLeido(

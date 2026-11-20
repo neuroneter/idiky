@@ -656,6 +656,11 @@
 .app-movil--marca .encabezado-seccion h2 {
   color: var(--color-texto-inverso);
 }
+/* El titulo de cada pantalla («Proyectos de la copropiedad», «Mi unidad»…)
+   tambien va suelto sobre el degradado: en negro no se leia (Mary, 2026-11-20). */
+.app-movil--marca .encabezado-pagina .titulo {
+  color: var(--color-texto-inverso);
+}
 .app-movil--marca .encabezado-seccion a,
 .app-movil--marca .encabezado-seccion .enlace {
   color: var(--color-texto-inverso);

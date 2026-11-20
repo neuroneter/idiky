@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 38
+export const VERSION_ESQUEMA = 39
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -824,6 +824,7 @@ function construirProyectos(): Proyecto[] {
       fechaInicio: sumarDias(hoy, -20),
       fechaFinPrevista: sumarDias(hoy, 40),
       presupuesto: 40000000,
+      financiacion: { fuente: 'cuota_extraordinaria', detalle: 'Aprobada por la asamblea general' },
       avances: [
         {
           id: 'avn-1',
@@ -832,6 +833,7 @@ function construirProyectos(): Proyecto[] {
           titulo: 'Retiro del manto viejo en la Torre 1',
           detalle: 'Se retiró el manto deteriorado de la cubierta de la Torre 1 y se limpió la placa.',
           registradoPor: 'per-admin',
+          pagado: 12000000,
         },
         {
           id: 'avn-2',
@@ -841,6 +843,22 @@ function construirProyectos(): Proyecto[] {
           detalle:
             'Se repararon las grietas de la placa de la Torre 1 y se selló la junta de dilatación. La semana entrante empieza la Torre 2.',
           registradoPor: 'per-admin',
+          pagado: 18000000,
+        },
+      ],
+      // RN-239 — Una pregunta ya respondida: la ven todos, sin el nombre de quien preguntó.
+      preguntas: [
+        {
+          id: 'prg-1',
+          personaId: 'per-2',
+          unidadId: 'uni-torre2-901',
+          texto: '¿Durante la obra se puede seguir usando la terraza de la Torre 2?',
+          fecha: `${sumarDias(hoy, -5)}T13:00:00.000Z`,
+          respuesta: {
+            texto: 'Sí, hasta que empiece la Torre 2. Avisaremos con una semana de anticipación cuando se cierre.',
+            respondidoPor: 'per-admin',
+            fecha: `${sumarDias(hoy, -4)}T10:00:00.000Z`,
+          },
         },
       ],
       creadoPor: 'per-admin',
@@ -858,6 +876,7 @@ function construirProyectos(): Proyecto[] {
       fechaInicio: sumarDias(hoy, -35),
       fechaFinPrevista: sumarDias(hoy, 25),
       presupuesto: 18000000,
+      financiacion: { fuente: 'fondo_imprevistos' },
       avances: [
         {
           id: 'avn-3',

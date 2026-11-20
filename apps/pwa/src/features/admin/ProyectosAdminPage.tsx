@@ -20,11 +20,15 @@ import {
   diasSinAvance,
   estadoProyecto,
   motivoAvanceInvalido,
+  TEXTO_FUENTE_PROYECTO,
+  pagadoProyecto,
   porcentajeProyecto,
+  preguntasPorResponder,
   ultimoAvance,
 } from '../../dominio/reglas'
+import { PreguntasPorResponder } from './PreguntasPorResponder'
 import { formatearFechaCorta } from '../../utilidades/formato'
-import type { Proyecto } from '../../dominio/tipos'
+import type { FuenteProyecto, Proyecto } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
@@ -97,6 +101,13 @@ export function ProyectosAdminPage() {
                   <div className="grupo-botones">
                     {/* RN-102 — El silencio se ve desde la lista, no solo en el tablero. */}
                     {debeAvance && <span className="chip chip--alerta">{callado} días sin avance</span>}
+                    {preguntasPorResponder(proyecto).length > 0 && (
+                      <span className="chip chip--info">
+                        {preguntasPorResponder(proyecto).length === 1
+                          ? '1 pregunta'
+                          : `${preguntasPorResponder(proyecto).length} preguntas`}
+                      </span>
+                    )}
                     <ChipProyecto proyecto={proyecto} />
                   </div>
                 </div>
@@ -188,6 +199,7 @@ function FormularioProyecto({
     fechaInicio?: string
     fechaFinPrevista?: string
     presupuesto?: number
+    financiacion?: { fuente: FuenteProyecto; detalle?: string }
   }) => Promise<void>
   alCerrar: () => void
 }) {
@@ -197,6 +209,8 @@ function FormularioProyecto({
   const [inicio, setInicio] = useState('')
   const [fin, setFin] = useState('')
   const [presupuesto, setPresupuesto] = useState('')
+  const [fuente, setFuente] = useState<FuenteProyecto | ''>('')
+  const [detalleFuente, setDetalleFuente] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   return (
@@ -221,6 +235,7 @@ function FormularioProyecto({
             fechaInicio: inicio || undefined,
             fechaFinPrevista: fin || undefined,
             presupuesto: monto,
+            financiacion: fuente ? { fuente, detalle: detalleFuente.trim() || undefined } : undefined,
           })
         }}
       >
@@ -249,11 +264,31 @@ function FormularioProyecto({
         <div className="campo">
           <label htmlFor="presupuesto-proyecto">Presupuesto (opcional)</label>
           <input id="presupuesto-proyecto" inputMode="numeric" value={presupuesto} onChange={(e) => setPresupuesto(e.target.value)} placeholder="40000000" />
-          <span className="ayuda-campo">
-            En pesos, sin puntos. Si lo paga una cuota extraordinaria, dilo en la descripción: el
-            propietario quiere saber en qué se va su plata.
-          </span>
+          <span className="ayuda-campo">En pesos, sin puntos.</span>
         </div>
+        <div className="fila-campos">
+          <div className="campo">
+            <label htmlFor="fuente-proyecto">Se paga con</label>
+            <select id="fuente-proyecto" value={fuente} onChange={(e) => setFuente(e.target.value as FuenteProyecto | '')}>
+              <option value="">Sin definir</option>
+              {(Object.keys(TEXTO_FUENTE_PROYECTO) as FuenteProyecto[]).map((f) => (
+                <option key={f} value={f}>
+                  {TEXTO_FUENTE_PROYECTO[f]}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="campo">
+            <label htmlFor="detalle-fuente-proyecto">Aclaración (opcional)</label>
+            <input
+              id="detalle-fuente-proyecto"
+              value={detalleFuente}
+              onChange={(e) => setDetalleFuente(e.target.value)}
+              placeholder="Aprobada en la asamblea de marzo"
+            />
+          </div>
+        </div>
+        <span className="ayuda-campo">El propietario quiere saber en qué se va su plata.</span>
         {error && <p className="acceso__error">{error}</p>}
         <button className="boton boton--primario boton--bloque" type="submit">
           Crear el proyecto
@@ -278,7 +313,7 @@ function DetalleProyecto({
   /** Cuánto del almacenamiento del demo va ocupado (ADR-0009). */
   ocupacion: { porcentaje: number; usadoKB: number; limiteKB: number }
   personaDe: (id: string) => ReturnType<typeof sel.persona>
-  alRegistrarAvance: (datos: { porcentaje: number; titulo: string; detalle: string; foto?: string }) => Promise<boolean>
+  alRegistrarAvance: (datos: { porcentaje: number; titulo: string; detalle: string; foto?: string; pagado?: number }) => Promise<boolean>
   alCerrar: () => void
 }) {
   const terminado = estadoProyecto(proyecto) === 'terminado'
@@ -286,9 +321,16 @@ function DetalleProyecto({
   const [titulo, setTitulo] = useState('')
   const [detalle, setDetalle] = useState('')
   const [foto, setFoto] = useState<string | null>(null)
+  const [pagado, setPagado] = useState('')
   const [registrando, setRegistrando] = useState(false)
 
-  const borrador = { porcentaje: Number(porcentaje), titulo, detalle }
+  const pagadoAntes = pagadoProyecto(proyecto)
+  const borrador = {
+    porcentaje: Number(porcentaje),
+    titulo,
+    detalle,
+    pagado: pagado.trim() ? Number(pagado.replace(/[^\d]/g, '')) : undefined,
+  }
   // RN-100 — El motivo se calcula con la misma regla que usa el repositorio,
   // y se muestra junto al botón en vez de esperar al error.
   const motivo = terminado ? null : motivoAvanceInvalido(proyecto, borrador)
@@ -313,6 +355,10 @@ function DetalleProyecto({
         <HistoriaProyecto proyecto={proyecto} personaDe={personaDe} />
       </div>
 
+      <div className="separador" />
+      <div style={{ marginBottom: 'var(--e3)' }}>
+        <PreguntasPorResponder proyecto={proyecto} />
+      </div>
       <div className="separador" />
 
       {/* RN-102 — Al abrir un proyecto callado, se dice antes del botón. */}
@@ -362,6 +408,21 @@ function DetalleProyecto({
             <label htmlFor="detalle-avance">Detalle (opcional, salvo si el avance baja)</label>
             <textarea id="detalle-avance" value={detalle} onChange={(e) => setDetalle(e.target.value)} placeholder="Lo que el propietario querría saber: qué falta, qué sigue, si hubo un imprevisto." />
           </div>
+          <div className="campo">
+            <label htmlFor="pagado-avance">Pagado hasta hoy (opcional)</label>
+            <input
+              id="pagado-avance"
+              inputMode="numeric"
+              value={pagado}
+              onChange={(e) => setPagado(e.target.value)}
+              placeholder={pagadoAntes !== undefined ? String(pagadoAntes) : '12000000'}
+            />
+            <span className="ayuda-campo">
+              Lo pagado de toda la obra, acumulado, en pesos sin puntos
+              {pagadoAntes !== undefined ? ` (hoy: ${pagadoAntes.toLocaleString('es-CO')})` : ''}. Si lo
+              dejas vacío, sigue lo último que se dijo (RN-238).
+            </span>
+          </div>
           <CapturaFoto
             etiqueta="Foto de la obra (opcional)"
             ayuda="Una foto vale más que el porcentaje: el propietario ve la cubierta sin subir a mirarla. Se guarda reducida, unos 60 KB."
@@ -395,6 +456,7 @@ function DetalleProyecto({
                   setTitulo('')
                   setDetalle('')
                   setFoto(null)
+                  setPagado('')
                   setPorcentaje(String(Math.min(100, borrador.porcentaje + 10)))
                 }
               }}

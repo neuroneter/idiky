@@ -1010,6 +1010,7 @@ export type MotivoMensaje =
   | 'fin_de_estadia'
   | 'recordatorio_pago'
   | 'agradecimiento_pago'
+  | 'respuesta_proyecto'
 
 export interface Mensaje {
   id: string
@@ -1062,6 +1063,36 @@ export interface AvanceProyecto {
   registradoPor: string
   /** El comunicado que se publico con este avance (RN-101). */
   comunicadoId?: string
+  /**
+   * RN-238 — Lo pagado de la obra **hasta este avance**, acumulado. Opcional:
+   * si no se dice, vale lo del avance anterior. Hoy lo escribe el
+   * administrador; con backend saldra de los pagos de la contable (T-50).
+   */
+  pagado?: number
+}
+
+/** Con que se paga la obra (CU-A-28): lo primero que pregunta quien la paga. */
+export type FuenteProyecto = 'cuota_extraordinaria' | 'fondo_imprevistos' | 'presupuesto_ordinario' | 'otro'
+
+export interface FinanciacionProyecto {
+  fuente: FuenteProyecto
+  /** Lo que aclara: «aprobada en la asamblea de marzo», «3 cuotas de $250.000». */
+  detalle?: string
+}
+
+/**
+ * RN-239 — Una pregunta de un propietario sobre la obra. **No se borra ni se
+ * edita.** La respuesta la ven todos los propietarios, **sin el nombre de quien
+ * pregunto**: la duda de uno suele ser la de muchos, y nadie debe sentirse
+ * señalado por preguntar (docs/08-convenciones.md §6 bis).
+ */
+export interface PreguntaProyecto {
+  id: string
+  personaId: string
+  unidadId: string
+  texto: string
+  fecha: FechaHoraISO
+  respuesta?: { texto: string; respondidoPor: string; fecha: FechaHoraISO }
 }
 
 export interface Proyecto {
@@ -1074,8 +1105,12 @@ export interface Proyecto {
   fechaInicio?: FechaISO
   fechaFinPrevista?: FechaISO
   presupuesto?: number
+  /** Con que se paga. Opcional en los proyectos viejos. */
+  financiacion?: FinanciacionProyecto
   /** El estado **se deriva** de los avances (`estadoProyecto`); no se guarda. */
   avances: AvanceProyecto[]
+  /** RN-239 — Las preguntas de los propietarios y sus respuestas. */
+  preguntas?: PreguntaProyecto[]
   creadoPor: string
   creadoEn: FechaHoraISO
 }
