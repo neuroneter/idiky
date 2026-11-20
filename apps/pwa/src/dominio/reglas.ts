@@ -62,6 +62,7 @@ import type {
 } from './tipos'
 import { formatearFecha } from '../utilidades/formato'
 import type {
+  ObjetoEncontrado,
   CanalAviso,
   MotivoMensaje,
   PreferenciasAvisos,
@@ -4647,4 +4648,52 @@ export function canalDelAviso(persona: { email: string; telefono: string; prefer
 export function quiereElAviso(preferencias: PreferenciasAvisos | undefined, motivo: MotivoMensaje): boolean {
   const tema = temaDelAviso(motivo)
   return tema === null || preferencias?.temas?.[tema] !== false
+}
+
+// ---------------------------------------------------------------------------
+// Objetos perdidos — PN-17 · CU-R-49
+// ---------------------------------------------------------------------------
+
+/** PN-17 — Días que un objeto espera a su dueño en portería antes de poder darse de baja. */
+export const DIAS_OBJETO_EN_PORTERIA = 60
+
+export type EstadoObjeto = 'en_porteria' | 'reclamado' | 'entregado' | 'dado_de_baja'
+
+/** PN-17 — En qué va el objeto. */
+export function estadoObjeto(objeto: ObjetoEncontrado): EstadoObjeto {
+  if (objeto.entrega) return 'entregado'
+  if (objeto.baja) return 'dado_de_baja'
+  return objeto.reclamos.length > 0 ? 'reclamado' : 'en_porteria'
+}
+
+export const TEXTO_ESTADO_OBJETO: Record<EstadoObjeto, string> = {
+  en_porteria: 'En portería',
+  reclamado: 'Alguien dice que es suyo',
+  entregado: 'Entregado a su dueño',
+  dado_de_baja: 'Dado de baja',
+}
+
+/** PN-17 — Sigue esperando a su dueño: ni entregado ni dado de baja. */
+export function objetoPendiente(objeto: ObjetoEncontrado): boolean {
+  return !objeto.entrega && !objeto.baja
+}
+
+/** PN-17 — Por qué no se puede registrar el objeto, o `null`. */
+export function motivoObjetoInvalido(objeto: { descripcion: string; lugar: string }): string | null {
+  if (objeto.descripcion.trim().length < 4) return 'Describe el objeto: «llaves con llavero rojo», «chaqueta azul».'
+  if (objeto.lugar.trim().length < 3) return 'Di dónde se encontró.'
+  return null
+}
+
+/**
+ * PN-17 — Por qué no se puede dar de baja, o `null`. Solo después del plazo, sin
+ * reclamos pendientes, y con motivo (donado, desechado…).
+ */
+export function motivoBajaObjetoInvalida(objeto: ObjetoEncontrado, motivo: string, hoy: FechaISO): string | null {
+  if (!objetoPendiente(objeto)) return 'Ese objeto ya se cerró.'
+  if (objeto.reclamos.length > 0) return 'Alguien dijo que es suyo: primero hay que resolver ese reclamo.'
+  const desde = sumarDias(fechaLocalDe(objeto.encontradoEn), DIAS_OBJETO_EN_PORTERIA)
+  if (hoy < desde) return `Espera a su dueño hasta el ${formatearFecha(desde)}.`
+  if (motivo.trim().length < 5) return 'Di qué se hizo con el objeto: donado, desechado…'
+  return null
 }

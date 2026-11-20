@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom'
 import { useDatos } from '../../../estado/DatosContext'
 import { useSesion } from '../../../estado/SesionContext'
 import * as sel from '../../../datos/selectores'
-import { encuestaAbierta, hoyISO, respuestaDeUnidad } from '../../../dominio/reglas'
+import { encuestaAbierta, hoyISO, objetoPendiente, respuestaDeUnidad } from '../../../dominio/reglas'
 import { BotonVolver } from '../../../componentes/BotonVolver'
 import { Icono, type NombreIcono } from '../../../componentes/Icono'
 
@@ -21,6 +21,7 @@ export function EdificioPage() {
   const encuestasPorResponder = sel
     .encuestasDe(bd, sesion.copropiedadId)
     .filter((e) => encuestaAbierta(e, hoy) && !respuestaDeUnidad(e, sesion.unidadActivaId ?? '')).length
+  const objetosEnPorteria = (bd.objetosEncontrados ?? []).filter((o) => o.copropiedadId === sesion.copropiedadId && objetoPendiente(o)).length
   const proximos = sel.calendarioDelEdificio(bd, sesion.copropiedadId, sesion.unidadActivaId).length
 
   const opciones: Array<{ a: string; titulo: string; detalle: string; icono: NombreIcono; contador?: number }> = [
@@ -29,6 +30,7 @@ export function EdificioPage() {
     { a: '/app/edificio/encuestas', titulo: 'Encuestas', detalle: 'Opina sobre lo que se decide en el edificio', icono: 'voto', contador: encuestasPorResponder },
     { a: '/app/edificio/documentos', titulo: 'Documentos', detalle: 'Reglamento, manual, actas y pólizas', icono: 'certificado' },
     { a: '/app/edificio/clasificados', titulo: 'Clasificados', detalle: 'Vendo, regalo, busco y servicios entre vecinos', icono: 'comunicados' },
+    { a: '/app/edificio/objetos', titulo: 'Objetos perdidos', detalle: 'Lo que se encontró y espera a su dueño en portería', icono: 'buscar', contador: objetosEnPorteria },
     { a: '/app/directorio', titulo: 'Teléfonos útiles', detalle: 'Portería, administración y emergencias', icono: 'personas' },
   ]
 

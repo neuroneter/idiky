@@ -1757,6 +1757,35 @@ WhatsApp, SMS o correo (T-18).
 
 ---
 
+### CU-R-49
+## CU-R-49 — Objetos perdidos
+
+- **Actor principal:** Quien vive o es dueño en el edificio. **Secundarios:** portería y la
+  administración.
+- **Resultado esperado:** Lo que se encuentra en el edificio vuelve a su dueño, y lo que nadie
+  reclama se da de baja con constancia.
+
+> Mary, 2026-11-20: *«sigamos con la 9»* (objetos perdidos).
+
+**Flujo principal**
+1. Portería (en **Objetos perdidos** de su consola) o la administración (en **Edificio → Objetos
+   perdidos**) registra lo encontrado: qué es, dónde se encontró y una foto si quiere.
+2. Los residentes lo ven en **Tu edificio → Objetos perdidos**, con la foto, el lugar y la fecha.
+3. «Es mío» pide **una seña** («tiene tres llaves y una es de candado») y queda: «Pasa por portería
+   con tu documento».
+4. Portería ve quién lo reclamó, de qué unidad y con qué señas, comprueba y toca **«Entregar»**.
+
+**Flujos alternativos**
+- A1. Pasan **60 días** sin que nadie lo reclame → portería o la administración lo **da de baja**
+  diciendo qué se hizo (donado, desechado). Antes del plazo o con reclamos pendientes, no se puede.
+- A2. Varias personas dicen que es suyo → portería ve las señas de cada una y lo entrega a quien
+  corresponde.
+- A3. Nada se borra: lo entregado y lo dado de baja quedan en «Cerrados».
+
+**Reglas:** PN-17. **Estado:** ✅ — `/app/edificio/objetos`, `/porteria/objetos` y `/admin/edificio`.
+
+---
+
 ### CU-R-34
 ## CU-R-34 — Personalizar mi avatar en ALICE
 

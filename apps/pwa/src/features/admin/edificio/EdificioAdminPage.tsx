@@ -4,6 +4,7 @@
  * CU-A-35 (calendario), CU-A-36 (clasificados) y CU-R-43 (pedidos de ayuda).
  */
 
+import { GestionObjetos } from '../../../componentes/GestionObjetos'
 import { PermisosAdmin } from './PermisosAdmin'
 import { useState } from 'react'
 import { useDatos } from '../../../estado/DatosContext'
@@ -23,6 +24,7 @@ const SECCIONES = {
   calendario: 'Calendario',
   clasificados: 'Clasificados',
   permisos: 'Trasteos y obras',
+  objetos: 'Objetos perdidos',
   ayuda: 'Pedidos de ayuda',
 } as const
 type Seccion = keyof typeof SECCIONES
@@ -54,6 +56,7 @@ export function EdificioAdminPage() {
       {seccion === 'calendario' && <CalendarioAdmin />}
       {seccion === 'clasificados' && <ClasificadosAdmin />}
       {seccion === 'permisos' && <PermisosAdmin />}
+      {seccion === 'objetos' && <GestionObjetos />}
       {seccion === 'ayuda' && <AlertasAyuda incluirAtendidas />}
     </div>
   )
