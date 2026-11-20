@@ -1254,6 +1254,7 @@ consola del administrador (T-45).
 > edificio va la opción **«¿Aplica descuento por pronto pago? Sí / No»**, como la del interés de
 > mora (T-48). Solo con **Sí** se piden el % y el día límite. Por defecto, **No**: es algo que
 > aprueba cada asamblea. Queda guardado quién la cambió y cuándo.
+> El descuento tiene un **tope de 30 %**, para evitar un error al escribirlo (Mary, 2026-11-20: *«sí, perfecto»*).
 
 > Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
 
