@@ -238,7 +238,7 @@ import type {
   TipoEventoEdificio,
 } from '../dominio/tipos'
 import {
-  REGLAS_TRASTEO_POR_DEFECTO,
+  reglasTrasteoDe,
   motivoReglasTrasteoInvalidas,
   motivoCierreDepositoInvalido,
   motivoPermisoObraInvalido,
@@ -6019,7 +6019,7 @@ export async function solicitarTrasteo(
   if (!esDeLaUnidad(bd, parametros.unidadId, parametros.personaId)) {
     throw new ErrorDeNegocio('El trasteo lo pide quien vive o es dueño de la unidad.')
   }
-  const reglas = bd.copropiedades.find((c) => c.id === copropiedadId)?.reglasTrasteo ?? REGLAS_TRASTEO_POR_DEFECTO
+  const reglas = reglasTrasteoDe(bd.copropiedades.find((c) => c.id === copropiedadId))
   const motivo = motivoTrasteoInvalido(
     parametros,
     reglas,
@@ -6178,7 +6178,8 @@ export async function configurarReglasTrasteo(
     diasAnticipacion: parametros.reglas.diasAnticipacion,
     sabados: parametros.reglas.sabados,
     deposito: parametros.reglas.deposito || undefined,
-    ascensores: (parametros.reglas.ascensores ?? []).map((a) => ({
+    // Sin ascensores en el edificio, no se guardan ascensores para trasteos.
+    ascensores: (copropiedad.tieneAscensores === false ? [] : parametros.reglas.ascensores ?? []).map((a) => ({
       id: a.id || nuevoId('asc'),
       nombre: a.nombre.trim(),
       habilitado: a.habilitado,

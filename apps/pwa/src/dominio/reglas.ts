@@ -4495,3 +4495,13 @@ export function motivoCierreDepositoInvalido(
   }
   return null
 }
+
+/**
+ * PN-10 — **Las reglas de trasteo que valen para este edificio.** Si el edificio
+ * no tiene ascensores, no hay ascensores para trasteos aunque se hubieran
+ * guardado antes: una sola agenda y nada que elegir.
+ */
+export function reglasTrasteoDe(copropiedad?: { tieneAscensores?: boolean; reglasTrasteo?: ReglasTrasteo }): ReglasTrasteo {
+  const reglas = copropiedad?.reglasTrasteo ?? REGLAS_TRASTEO_POR_DEFECTO
+  return copropiedad?.tieneAscensores === false ? { ...reglas, ascensores: [] } : reglas
+}

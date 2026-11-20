@@ -113,6 +113,13 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Edificio sin ascensores (CU-A-37, PN-10)
+
+Mary: *«si la propiedad por ejemplo no tiene ascensores no se debe habilitar esa pregunta para el
+administrador»*. El edificio guarda si tiene ascensores (`tieneAscensores`, se define al crearlo en
+BLOKY). Sin ascensores, la parametrización de trasteos no los pregunta, el residente no elige
+ascensor y los trasteos van uno a la vez (`reglasTrasteoDe`). La semilla sube a la versión 44.
+
 ### 2026-11-20 · Mary + IA (Claude) · Depósito del trasteo (CU-A-37, CU-R-44, PN-13)
 
 Mary: *«el depósito también lo parametriza el administrador»* (ya estaba en la parametrización) y

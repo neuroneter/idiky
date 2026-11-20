@@ -172,3 +172,24 @@ test('portería recibe y devuelve el depósito del trasteo de hoy (PN-13)', asyn
   await expect(page.getByText('Depósito devuelto', { exact: true })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Retener por daños' })).toHaveCount(0)
 })
+
+test('sin ascensores en el edificio, no se preguntan ni se eligen (PN-10)', async ({ page }) => {
+  await entrarComo(page, /Olga Lucia Henao/)
+  const r = await page.evaluate(async () => {
+    const repo = await import('/src/datos/repositorio.ts')
+    let bd = await repo.cargar()
+    bd.copropiedades[0].tieneAscensores = false
+    const reglas = bd.copropiedades[0].reglasTrasteo!
+    bd = (await repo.configurarReglasTrasteo(bd, { copropiedadId: 'cop-1', personaId: 'per-admin', reglas })).bd
+    const guardados = bd.copropiedades[0].reglasTrasteo?.ascensores?.length
+    const res = await repo.solicitarTrasteo(bd, { unidadId: 'uni-torre1-402', personaId: 'per-1', sentido: 'llegada', fecha: '2026-10-14', horaInicio: '09:00', horaFin: '11:00' })
+    return { guardados, ascensor: res.datos.ascensorId ?? null }
+  })
+  expect(r.guardados).toBe(0)
+  expect(r.ascensor).toBeNull()
+  await page.reload()
+  await page.goto('/#/admin/edificio')
+  await page.getByRole('tab', { name: /Trasteos y obras/ }).click()
+  await expect(page.getByText(/Este edificio no tiene ascensores/)).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Agregar ascensor' })).toHaveCount(0)
+})

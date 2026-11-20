@@ -12,13 +12,16 @@ import { useDatos } from '../../../estado/DatosContext'
 import { useSesion } from '../../../estado/SesionContext'
 import * as sel from '../../../datos/selectores'
 import { configurarReglasTrasteo } from '../../../datos/repositorio'
-import { REGLAS_TRASTEO_POR_DEFECTO, motivoReglasTrasteoInvalidas } from '../../../dominio/reglas'
+import { motivoReglasTrasteoInvalidas, reglasTrasteoDe } from '../../../dominio/reglas'
 import type { AscensorTrasteo } from '../../../dominio/tipos'
 
 export function ReglasTrasteoAdmin() {
   const { bd, ejecutar, cargando } = useDatos()
   const { sesion } = useSesion()
-  const actuales = (sesion && sel.copropiedad(bd, sesion.copropiedadId)?.reglasTrasteo) || REGLAS_TRASTEO_POR_DEFECTO
+  const copropiedad = sesion ? sel.copropiedad(bd, sesion.copropiedadId) : undefined
+  // Sin ascensores en el edificio, la pregunta de los ascensores no aparece.
+  const tieneAscensores = copropiedad?.tieneAscensores !== false
+  const actuales = reglasTrasteoDe(copropiedad)
   const [horaDesde, setHoraDesde] = useState(actuales.horaDesde)
   const [horaHasta, setHoraHasta] = useState(actuales.horaHasta)
   const [dias, setDias] = useState(String(actuales.diasAnticipacion))
@@ -67,11 +70,13 @@ export function ReglasTrasteoAdmin() {
         <span>Se puede trastear los sábados (domingos y festivos, nunca)</span>
       </label>
 
+      {tieneAscensores ? (
+        <>
       <span className="titulo-seccion" style={{ display: 'block', marginTop: 'var(--e3)' }}>
         Ascensores para trasteos
       </span>
       {ascensores.length === 0 && (
-        <p className="subtitulo">Sin ascensores: los trasteos van uno a la vez.</p>
+        <p className="subtitulo">Sin ascensores habilitados: los trasteos van uno a la vez.</p>
       )}
       {ascensores.map((a, i) => (
         <div key={a.id || i} className="fila" style={{ marginTop: 'var(--e2)' }}>
@@ -89,6 +94,12 @@ export function ReglasTrasteoAdmin() {
       >
         Agregar ascensor
       </button>
+        </>
+      ) : (
+        <p className="subtitulo" style={{ marginTop: 'var(--e3)' }}>
+          Este edificio no tiene ascensores (se definió al crearlo): los trasteos van uno a la vez.
+        </p>
+      )}
 
       {motivo && <p className="acceso__nota" style={{ marginTop: 'var(--e2)' }}>{motivo}</p>}
       <button

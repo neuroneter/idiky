@@ -88,6 +88,12 @@ export interface Copropiedad {
    * días antes de vencer, y las gracias al pagar. Ausente = apagados.
    */
   recordatorioPago?: { activo: boolean; diasAntes: number }
+  /**
+   * Si el edificio tiene ascensores. Es de cómo está construido: se define al
+   * crearlo (BLOKY, «Arma tu copropiedad»). Sin ascensores, la parametrización
+   * de trasteos no pregunta por ellos (Mary, 2026-11-20). Si falta, se asume que sí.
+   */
+  tieneAscensores?: boolean
   /** CU-R-44 · PN-10 — Horario y anticipación de los trasteos. Sin esto, los valores por defecto. */
   reglasTrasteo?: ReglasTrasteo
   /** CU-A-31 · PN-01 — Descuento por pronto pago de la cuota ordinaria. */
