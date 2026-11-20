@@ -3,6 +3,7 @@
  * Doc: docs/casos-de-uso/residente.md#cu-r-03
  */
 
+import { AcuerdoPago } from './AcuerdoPago'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
@@ -114,6 +115,7 @@ export function CuentaPage() {
       </div>
 
       <AvisoProntoPago cuotas={cuotas.filter(cuotaPendiente)} config={sel.copropiedad(bd, sesion.copropiedadId)?.prontoPago} />
+      <AcuerdoPago />
       <PagoProgramado />
 
       {procesosAbiertos.length > 0 && (

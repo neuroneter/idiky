@@ -1395,3 +1395,42 @@ PQRS calificada ve las estrellas y el comentario.
 
 **Reglas:** PN-15. **Estado:** ✅ — `/admin/pqrs`.
 
+---
+
+### CU-A-39
+## CU-A-39 — Acuerdos de pago
+
+- **Actor principal:** Administrador. **Secundario:** el propietario o el arrendatario que propone.
+- **Precondiciones:** En la parametrización, el edificio **permite acuerdos de pago**.
+- **Resultado esperado:** Quien está atrasado se pone al día en cuotas pactadas, sin sentirse
+  juzgado, y la administración sabe si el acuerdo se cumple.
+
+> Mary, 2026-11-20: *«sigamos con el acuerdo de pago, pero hay que crear en la parametrización si
+> en el edificio es viable que el administrador haga acuerdos de pago»*.
+
+**Parametrización:** en **Cartera**, tarjeta «Acuerdos de pago»: **¿se permiten? Sí / No** (por
+defecto No) y hasta cuántas cuotas mensuales (de 2 a 24). Con No, el propietario no ve la opción.
+
+**Flujo principal**
+1. El propietario con cuotas vencidas ve en **Cuenta**: «¿Te queda difícil pagar todo de una vez?
+   Propón un acuerdo». Elige cuántas cuotas (hasta el máximo del edificio) y la fecha de la primera
+   (dentro de los próximos 30 días); ve el calendario antes de enviarlo y puede dejar una nota.
+2. La administración lo ve en Cartera y lo **aprueba** o **no lo aprueba** explicando por qué con
+   amabilidad (mínimo 10 caracteres). Al propietario le llega un mensaje.
+3. Aprobado, el propietario ve «Vas al día» o «Te falta ponerte al día con $X», lo que lleva pagado
+   y la próxima cuota; la administración ve lo mismo (al día, atrasado o cumplido).
+
+**Flujos alternativos**
+- A1. Sin cuotas vencidas, o ya hay un acuerdo en curso → no se propone otro.
+- A2. Quien lo propuso puede **retirar la propuesta** mientras no se haya aprobado. Uno aprobado
+  solo lo cancela la administración. Nada se borra.
+
+**Decisiones**
+- **La deuda no cambia ni se borran cuotas**: el acuerdo es un calendario. Los pagos entran a la
+  cartera como siempre (RN-06) y se miden contra ese calendario desde que se aprobó.
+- Mientras dure, el propietario sigue pagando la cuota de cada mes; se le dice al proponerlo.
+- Si se suspenden o no los intereses de mora durante el acuerdo es decisión del edificio y de la
+  contable (T-57; pregunta también para el abogado).
+
+**Reglas:** PN-19. **Estado:** ✅ — `/admin/cartera` y `/app/cuenta`.
+

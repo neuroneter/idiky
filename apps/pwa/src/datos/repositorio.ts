@@ -219,6 +219,7 @@ import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajer
 import { finDePeriodo, formatearDinero, formatearFecha, formatearPeriodo } from '../utilidades/formato'
 import { guardar, leer, sembrar, ocupacion } from './almacen'
 import type {
+  AcuerdoPago,
   ObjetoEncontrado,
   CanalAviso,
   TemaAviso,
@@ -242,6 +243,11 @@ import type {
 } from '../dominio/tipos'
 import {
   reglasTrasteoDe,
+  acuerdoEnCurso,
+  calcularSaldoVencido,
+  calendarioAcuerdo,
+  motivoAcuerdoInvalido,
+  motivoConfigAcuerdosInvalida,
   motivoObjetoInvalido,
   motivoBajaObjetoInvalida,
   objetoPendiente,
@@ -6454,4 +6460,109 @@ export async function darDeBajaObjeto(
   if (motivo) throw new ErrorDeNegocio(motivo)
   objeto.baja = { motivo: parametros.motivo.trim(), por: parametros.personaId, en: ahoraISO() }
   return persistir(bd, objeto)
+}
+
+// ---------------------------------------------------------------------------
+// Acuerdos de pago — Mary, 2026-11-20 · CU-A-39 · PN-19
+// ---------------------------------------------------------------------------
+
+/** CU-A-39 · PN-19 — En la parametrización: si el edificio permite acuerdos y hasta cuántas cuotas. */
+export async function configurarAcuerdosPago(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; activo: boolean; cuotasMaximas: number },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Parametrizar los acuerdos de pago')
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  if (parametros.activo) {
+    const motivo = motivoConfigAcuerdosInvalida(parametros.cuotasMaximas)
+    if (motivo) throw new ErrorDeNegocio(motivo)
+  }
+  copropiedad.acuerdosPago = {
+    activo: parametros.activo,
+    cuotasMaximas: parametros.cuotasMaximas,
+    cambiadoPor: parametros.personaId,
+    cambiadoEn: ahoraISO(),
+  }
+  return persistir(bd, copropiedad)
+}
+
+/** CU-A-39 · PN-19 — El propietario o el arrendatario propone ponerse al día en cuotas. */
+export async function proponerAcuerdoPago(
+  bdActual: BaseDatos,
+  parametros: { unidadId: string; personaId: string; cuotas: number; primera: FechaISO; nota?: string },
+): Promise<Resultado<AcuerdoPago>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const copropiedadId = copropiedadDeUnidad(bd, parametros.unidadId)
+  if (!puedeManejarUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('El acuerdo lo propone el propietario o el arrendatario.')
+  }
+  const config = bd.copropiedades.find((c) => c.id === copropiedadId)?.acuerdosPago
+  const deuda = calcularSaldoVencido(cuotasDe(bd, parametros.unidadId))
+  const hayOtro = bd.acuerdosPago.some((a) => a.unidadId === parametros.unidadId && acuerdoEnCurso(a))
+  const motivo = motivoAcuerdoInvalido({ cuotas: parametros.cuotas, primera: parametros.primera, deuda }, config, hayOtro, hoyISO())
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const acuerdo: AcuerdoPago = {
+    id: nuevoId('acu'),
+    copropiedadId,
+    unidadId: parametros.unidadId,
+    personaId: parametros.personaId,
+    deudaAcordada: deuda,
+    cuotas: calendarioAcuerdo(deuda, parametros.cuotas, parametros.primera),
+    nota: parametros.nota?.trim() || undefined,
+    estado: 'propuesto',
+    creadoEn: ahoraISO(),
+  }
+  bd.acuerdosPago.push(acuerdo)
+  return persistir(bd, acuerdo)
+}
+
+/** CU-A-39 · PN-19 — La administración aprueba o no; si no, explica por qué con amabilidad. */
+export async function decidirAcuerdoPago(
+  bdActual: BaseDatos,
+  parametros: { acuerdoId: string; personaId: string; aprobar: boolean; motivo?: string },
+): Promise<Resultado<AcuerdoPago>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const acuerdo = bd.acuerdosPago.find((a) => a.id === parametros.acuerdoId)
+  if (!acuerdo) throw new ErrorDeNegocio('Ese acuerdo no existe.')
+  exigirAdministracion(bd, parametros.personaId, acuerdo.copropiedadId, 'Aprobar acuerdos de pago')
+  if (acuerdo.estado !== 'propuesto') throw new ErrorDeNegocio('Ese acuerdo ya fue decidido.')
+  if (!parametros.aprobar && (parametros.motivo ?? '').trim().length < 10) {
+    throw new ErrorDeNegocio('Explica con amabilidad por qué no se aprueba y qué se podría proponer.')
+  }
+  acuerdo.estado = parametros.aprobar ? 'aprobado' : 'rechazado'
+  acuerdo.decision = { por: parametros.personaId, en: ahoraISO(), motivo: parametros.motivo?.trim() || undefined }
+  const unidad = bd.unidades.find((u) => u.id === acuerdo.unidadId)
+  avisarAPersona(bd, {
+    copropiedadId: acuerdo.copropiedadId,
+    personaId: acuerdo.personaId,
+    motivo: 'acuerdo_pago',
+    texto: parametros.aprobar
+      ? `Idiky: la administración aprobó tu acuerdo de pago para ${unidad ? etiquetaUnidad(unidad) : 'tu unidad'}: ${acuerdo.cuotas.length} cuotas de ${formatearDinero(acuerdo.cuotas[0].valor)}, la primera el ${fechaCorta(acuerdo.cuotas[0].fecha)}. ¡Gracias por ponerte al día!`
+      : `Idiky: la administración no pudo aprobar tu acuerdo de pago: ${acuerdo.decision.motivo}. Puedes proponer otro en la app.`,
+  })
+  return persistir(bd, acuerdo)
+}
+
+/** CU-A-39 — Quien lo propuso (mientras está propuesto) o la administración lo cancela. Queda guardado. */
+export async function cancelarAcuerdoPago(
+  bdActual: BaseDatos,
+  parametros: { acuerdoId: string; personaId: string },
+): Promise<Resultado<AcuerdoPago>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const acuerdo = bd.acuerdosPago.find((a) => a.id === parametros.acuerdoId)
+  if (!acuerdo) throw new ErrorDeNegocio('Ese acuerdo no existe.')
+  const admin = esAdministracion(bd, parametros.personaId, acuerdo.copropiedadId)
+  if (!admin && !(acuerdo.personaId === parametros.personaId && acuerdo.estado === 'propuesto')) {
+    throw new ErrorDeNegocio('Un acuerdo aprobado lo cancela la administración.')
+  }
+  if (!acuerdoEnCurso(acuerdo)) throw new ErrorDeNegocio('Ese acuerdo ya está cerrado.')
+  acuerdo.estado = 'cancelado'
+  acuerdo.cancelacion = { por: parametros.personaId, en: ahoraISO() }
+  return persistir(bd, acuerdo)
 }

@@ -114,6 +114,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-36 | **Cuidar los clasificados** | 1 | ✅ Demo (2026-11-20, PN-08) | [ver](./casos-de-uso/administrador.md#cu-a-36) |
 | CU-A-37 | **Aprobar los trasteos y las obras en los apartamentos** | 1 | ✅ Demo (2026-11-20, PN-10, PN-11) | [ver](./casos-de-uso/administrador.md#cu-a-37) |
 | CU-A-38 | **Ver cómo califican la atención** | 1 | ✅ Demo (2026-11-20, PN-15) | [ver](./casos-de-uso/administrador.md#cu-a-38) |
+| CU-A-39 | **Acuerdos de pago** (con la opción Sí/No en la parametrización) | 1 | ✅ Demo (2026-11-20, PN-19) | [ver](./casos-de-uso/administrador.md#cu-a-39) |
 
 
 ## 3. Portería — consola de la entrada

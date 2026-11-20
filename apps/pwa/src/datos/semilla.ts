@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 47
+export const VERSION_ESQUEMA = 48
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1535,6 +1535,8 @@ export function crearSemilla(): BaseDatos {
         quorumMinimo: 50,
         // PN-01 — Aprobado en la asamblea: 5 % de descuento pagando hasta el día 5.
         prontoPago: { activo: true, porcentaje: 5, diaLimite: 5 },
+        // PN-19 — Lo parametriza la administración: este edificio sí hace acuerdos, hasta 6 cuotas.
+        acuerdosPago: { activo: true, cuotasMaximas: 6 },
         // Se define al crear el edificio: con ascensores, la parametrización de trasteos los pregunta.
         tieneAscensores: true,
         // PN-10 — Lo parametriza la administración: horario y ascensores para trasteos.
@@ -1905,6 +1907,7 @@ function construirParaCompetir() {
         deposito: { valor: 200000 },
       },
     ],
+    acuerdosPago: [],
     // CU-R-49 — Dos objetos en portería: uno ya reclamado y uno viejo, que se puede dar de baja.
     objetosEncontrados: [
       {
