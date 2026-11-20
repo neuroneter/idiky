@@ -219,6 +219,8 @@ import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajer
 import { finDePeriodo, formatearDinero, formatearFecha, formatearPeriodo } from '../utilidades/formato'
 import { guardar, leer, sembrar, ocupacion } from './almacen'
 import type {
+  CanalAviso,
+  TemaAviso,
   PermisoObra,
   ReglasTrasteo,
   TrabajadorObra,
@@ -239,6 +241,8 @@ import type {
 } from '../dominio/tipos'
 import {
   reglasTrasteoDe,
+  canalDelAviso,
+  quiereElAviso,
   motivoCalificacionInvalida,
   pagosDelAnio,
   motivoCertificadoPagosInvalido,
@@ -4575,10 +4579,13 @@ function avisarAPersona(
   },
 ): boolean {
   const persona = bd.personas.find((p) => p.id === aviso.personaId)
+  // PN-16 — Lo que la persona apagó no se le manda; respetar eso también es avisar bien.
+  if (persona && !quiereElAviso(persona.preferenciasAvisos, aviso.motivo)) return true
+  const salida = canalDelAviso(persona)
   const mensaje = redactar({
     id: nuevoId('msj'),
     copropiedadId: aviso.copropiedadId,
-    destino: persona?.telefono ?? '',
+    destino: salida?.destino ?? '',
     texto: aviso.texto,
     motivo: aviso.motivo,
     reservaId: aviso.reservaId,
@@ -4588,6 +4595,8 @@ function avisarAPersona(
     ahora: aviso.ahora ?? ahoraISO(),
   })
   if (!mensaje) return false
+  mensaje.personaId = aviso.personaId
+  mensaje.canal = salida?.canal
   if (aviso.cuotaId) mensaje.cuotaId = aviso.cuotaId
   if (aviso.pagoId) mensaje.pagoId = aviso.pagoId
   bd.mensajes.unshift(mensaje)
@@ -6336,4 +6345,23 @@ export async function calificarAtencion(
     fecha: ahoraISO(),
   }
   return persistir(bd, pqrs)
+}
+
+/** CU-R-48 · PN-16 — La persona elige por dónde le avisamos y qué temas quiere. */
+export async function configurarAvisos(
+  bdActual: BaseDatos,
+  parametros: { personaId: string; canal: CanalAviso; temas: Partial<Record<TemaAviso, boolean>> },
+): Promise<Resultado<Persona>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const persona = bd.personas.find((p) => p.id === parametros.personaId)
+  if (!persona) throw new ErrorDeNegocio('Esa persona no existe.')
+  if (parametros.canal === 'correo' && !persona.email?.trim()) {
+    throw new ErrorDeNegocio('No tenemos tu correo. Pídele a la administración que lo registre, o elige otro canal.')
+  }
+  if ((parametros.canal === 'whatsapp' || parametros.canal === 'sms') && !persona.telefono?.trim()) {
+    throw new ErrorDeNegocio('No tenemos tu celular. Pídele a la administración que lo registre, o elige otro canal.')
+  }
+  persona.preferenciasAvisos = { canal: parametros.canal, temas: { ...parametros.temas }, cambiadoEn: ahoraISO() }
+  return persistir(bd, persona)
 }

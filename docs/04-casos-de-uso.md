@@ -68,6 +68,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-45 | **Pedir permiso para una obra en el apartamento** | 1 | ✅ Demo (2026-11-20, PN-11) | [ver](./casos-de-uso/residente.md#cu-r-45) |
 | CU-R-46 | **Descargar el certificado de pagos del año** | 1 | ✅ Demo (2026-11-20, PN-14) | [ver](./casos-de-uso/residente.md#cu-r-46) |
 | CU-R-47 | **Calificar la atención de una PQRS** | 1 | ✅ Demo (2026-11-20, PN-15) | [ver](./casos-de-uso/residente.md#cu-r-47) |
+| CU-R-48 | **Elegir por dónde y de qué me avisan** | 1 | ✅ Demo (2026-11-20, PN-16) | [ver](./casos-de-uso/residente.md#cu-r-48) |
 | CU-R-34 | **Personalizar mi avatar en ALICE** (crear si no hay; editar el por defecto o el de BLOKY) | 1 | 🟡 Código en `develop` (2026-11-16; falta probar en teléfono) | [ver](./casos-de-uso/residente.md#cu-r-34) |
 
 ## 2. Administrador — consola web

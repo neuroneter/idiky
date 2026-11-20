@@ -62,6 +62,10 @@ import type {
 } from './tipos'
 import { formatearFecha } from '../utilidades/formato'
 import type {
+  CanalAviso,
+  MotivoMensaje,
+  PreferenciasAvisos,
+  TemaAviso,
   AlertaAyuda,
   AvisoClasificado,
   AscensorTrasteo,
@@ -4579,4 +4583,68 @@ export function resumenCalificaciones(pqrs: Pqrs[]): { calificadas: number; prom
       : 0,
     porCalificar: pqrs.filter((p) => (p.estado === 'resuelta' || p.estado === 'cerrada') && !p.calificacion).length,
   }
+}
+
+// ---------------------------------------------------------------------------
+// Por dónde me avisan — PN-16 · CU-R-48
+// ---------------------------------------------------------------------------
+
+export const TEXTO_CANAL_AVISO: Record<CanalAviso, string> = {
+  whatsapp: 'WhatsApp',
+  sms: 'Mensaje de texto (SMS)',
+  correo: 'Correo electrónico',
+  app: 'Solo en la app',
+}
+
+export const TEXTO_TEMA_AVISO: Record<TemaAviso, { titulo: string; detalle: string }> = {
+  pagos: { titulo: 'Pagos', detalle: 'El recordatorio antes de que venza la cuota y las gracias cuando pagas' },
+  obras: { titulo: 'Obras del edificio', detalle: 'Cada avance de las obras y proyectos' },
+  reservas: { titulo: 'Zonas comunes', detalle: 'El recordatorio de tu reserva y los cierres por mantenimiento' },
+}
+
+/**
+ * PN-16 — **De qué tema es cada aviso.** Los que no tienen tema **no se pueden
+ * apagar**: responden a algo que la persona pidió (un registro, una reserva, un
+ * permiso, una pregunta) o le cuentan un cobro que se hizo a su nombre (el pago
+ * programado). Esos le llegan siempre.
+ */
+export function temaDelAviso(motivo: MotivoMensaje): TemaAviso | null {
+  switch (motivo) {
+    case 'recordatorio_pago':
+    case 'agradecimiento_pago':
+      return 'pagos'
+    case 'avance_proyecto':
+      return 'obras'
+    case 'recordatorio_reserva':
+    case 'cierre_zona':
+      return 'reservas'
+    default:
+      return null
+  }
+}
+
+/**
+ * PN-16 — **Por dónde sale un aviso y a qué dirección.** El canal que eligió la
+ * persona (WhatsApp si no ha elegido). Si le falta el dato —correo sin correo,
+ * WhatsApp o SMS sin celular— se usa el otro que sí tenga. Sin ninguno, `null`:
+ * no hay a dónde mandarlo. «Solo en la app» queda en la app.
+ */
+export function canalDelAviso(persona: { email: string; telefono: string; preferenciasAvisos?: PreferenciasAvisos } | undefined): { canal: CanalAviso; destino: string } | null {
+  if (!persona) return null
+  const elegido = persona.preferenciasAvisos?.canal ?? 'whatsapp'
+  const celular = persona.telefono?.trim()
+  const correo = persona.email?.trim()
+  if (elegido === 'app') return { canal: 'app', destino: 'En la app' }
+  if (elegido === 'correo') {
+    if (correo) return { canal: 'correo', destino: correo }
+    return celular ? { canal: 'whatsapp', destino: celular } : null
+  }
+  if (celular) return { canal: elegido, destino: celular }
+  return correo ? { canal: 'correo', destino: correo } : null
+}
+
+/** PN-16 — Si la persona quiere recibir este aviso. */
+export function quiereElAviso(preferencias: PreferenciasAvisos | undefined, motivo: MotivoMensaje): boolean {
+  const tema = temaDelAviso(motivo)
+  return tema === null || preferencias?.temas?.[tema] !== false
 }

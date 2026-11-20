@@ -1727,6 +1727,36 @@ cambia.
 
 ---
 
+### CU-R-48
+## CU-R-48 — Elegir por dónde y de qué me avisan
+
+- **Actor principal:** Cualquier persona con cuenta (propietario, arrendatario, residente).
+- **Resultado esperado:** Los avisos le llegan por donde quiere, y solo los temas que quiere.
+
+> Mary, 2026-11-20: *«con el 6 por favor»* (elegir por dónde me avisan).
+
+**Flujo principal**
+1. En el **perfil** (el círculo con sus iniciales), «Mis avisos».
+2. **¿Por dónde te avisamos?** WhatsApp, mensaje de texto (SMS), correo o solo en la app; cada
+   opción muestra a qué número o correo. Sin el dato, la opción no se puede elegir.
+3. **¿De qué te avisamos?** Pagos (recordatorio y gracias), obras del edificio (avances) y zonas
+   comunes (recordatorio de la reserva y cierres). Se pueden apagar.
+4. «Guardar». Abajo ve **lo último que le enviamos**, con el canal y la fecha.
+
+**Flujos alternativos**
+- A1. Sin elegir nada → por WhatsApp y de todo.
+- A2. Falta el dato del canal elegido (por ejemplo, el correo) → sale por el otro que sí tenga;
+  sin ninguno, no hay a dónde mandarlo (como antes).
+
+**Decisión:** **no se pueden apagar** los avisos que responden a algo que la persona pidió
+(registros, reservas, permisos de trasteo u obra, sus preguntas) ni los pagos que se hagan a su
+nombre (pago programado): son respuesta, no publicidad. En la app ve todo, elija lo que elija.
+
+**Reglas:** PN-16, RN-64. **Estado:** ✅ — `/app/avisos`. Con backend, el envío real por
+WhatsApp, SMS o correo (T-18).
+
+---
+
 ### CU-R-34
 ## CU-R-34 — Personalizar mi avatar en ALICE
 
