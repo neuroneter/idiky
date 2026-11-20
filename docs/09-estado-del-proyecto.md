@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Acuerdos de pago (CU-A-39, PN-19)
+
+Mary: *«sigamos con el acuerdo de pago, pero hay que crear en la parametrización si en el edificio
+es viable que el administrador haga acuerdos de pago»*. En **Cartera**, «Acuerdos de pago»: Sí/No
+(por defecto No) y hasta cuántas cuotas. Con Sí, el propietario con algo vencido ve en Cuenta
+«¿Te queda difícil pagar todo de una vez?», propone las cuotas y la primera fecha, y la
+administración lo aprueba o no (con motivo). La deuda no cambia: se mide lo pagado contra el
+calendario («vas al día», «te falta ponerte al día con $X»). T-57 para Jeimy y Daniel (intereses
+durante el acuerdo; llevarlo a BLOKY). **Con CU-A-39 se agotó también el rango CU-A de Mary.**
+La semilla sube a la versión 48 (el demo los permite, hasta 6 cuotas). Archivos:
+`apps/pwa/src/features/admin/AcuerdosPagoAdmin.tsx`, `apps/pwa/src/features/residente/AcuerdoPago.tsx`
+y `apps/pwa/pruebas/navegador/acuerdos.spec.ts` (nuevos), `CarteraPage`, `CuentaPage`,
+`dominio/{tipos,reglas}.ts`, `datos/{repositorio,semilla}.ts`.
+
 ### 2026-11-20 · Mary + IA (Claude) · Todas mis propiedades (CU-R-01 A6, PN-18)
 
 Mary: *«sigamos con el 8»*. Quien tiene varias unidades ve en el inicio «Tus N propiedades» y en

@@ -62,6 +62,7 @@ import type {
 } from './tipos'
 import { formatearFecha } from '../utilidades/formato'
 import type {
+  AcuerdoPago,
   ObjetoEncontrado,
   CanalAviso,
   MotivoMensaje,
@@ -4709,4 +4710,71 @@ export function motivoBajaObjetoInvalida(objeto: ObjetoEncontrado, motivo: strin
  */
 export function veLaCuentaDe(rol: Residencia['rol']): boolean {
   return rol === 'propietario' || rol === 'arrendatario'
+}
+
+// ---------------------------------------------------------------------------
+// Acuerdos de pago — PN-19 · CU-A-39
+// ---------------------------------------------------------------------------
+
+/** PN-19 — Entre 2 y 24 cuotas mensuales: lo que el edificio fije dentro de ese rango. */
+export const CUOTAS_ACUERDO = { minimo: 2, maximo: 24 }
+
+/**
+ * PN-19 — **El calendario de un acuerdo**: la deuda en `cuotas` mensuales
+ * iguales desde la primera fecha; la última absorbe el redondeo, para que la
+ * suma dé exacta.
+ */
+export function calendarioAcuerdo(deuda: number, cuotas: number, primera: FechaISO): Array<{ numero: number; fecha: FechaISO; valor: number }> {
+  const base = Math.floor(deuda / cuotas)
+  const [anio, mes, dia] = primera.split('-').map(Number)
+  return Array.from({ length: cuotas }, (_, i) => {
+    const fecha = new Date(anio, mes - 1 + i, Math.min(dia, 28))
+    const iso = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`
+    return { numero: i + 1, fecha: iso, valor: i === cuotas - 1 ? deuda - base * (cuotas - 1) : base }
+  })
+}
+
+/** PN-19 — Por qué no se puede proponer este acuerdo, o `null`. */
+export function motivoAcuerdoInvalido(
+  propuesta: { cuotas: number; primera: FechaISO; deuda: number },
+  config: { activo: boolean; cuotasMaximas: number } | undefined,
+  hayOtro: boolean,
+  hoy: FechaISO,
+): string | null {
+  if (!config?.activo) return 'En este edificio no se hacen acuerdos de pago desde la app. Habla con la administración.'
+  if (propuesta.deuda <= 0) return 'No tienes cuotas vencidas: no hace falta un acuerdo.'
+  if (hayOtro) return 'Ya tienes un acuerdo de pago en curso.'
+  if (!Number.isInteger(propuesta.cuotas) || propuesta.cuotas < CUOTAS_ACUERDO.minimo || propuesta.cuotas > config.cuotasMaximas) {
+    return `Elige entre ${CUOTAS_ACUERDO.minimo} y ${config.cuotasMaximas} cuotas.`
+  }
+  if (!propuesta.primera || propuesta.primera < hoy || propuesta.primera > sumarDias(hoy, 30)) {
+    return 'La primera cuota va dentro de los próximos 30 días.'
+  }
+  return null
+}
+
+/** PN-19 — Por qué no se puede guardar la parametrización, o `null`. */
+export function motivoConfigAcuerdosInvalida(cuotasMaximas: number): string | null {
+  return Number.isInteger(cuotasMaximas) && cuotasMaximas >= CUOTAS_ACUERDO.minimo && cuotasMaximas <= CUOTAS_ACUERDO.maximo
+    ? null
+    : `El máximo de cuotas va de ${CUOTAS_ACUERDO.minimo} a ${CUOTAS_ACUERDO.maximo}.`
+}
+
+/**
+ * PN-19 — **Cómo va el acuerdo**: lo que debía haberse pagado hasta hoy según
+ * el calendario, lo que se ha pagado desde que se aprobó, y si va al día o se
+ * cumplió. Se dice en positivo: «vas al día», «te falta ponerte al día con $X».
+ */
+export function avanceAcuerdo(acuerdo: AcuerdoPago, pagos: Pago[], hoy: FechaISO): { debido: number; pagado: number; alDia: boolean; cumplido: boolean } {
+  const desde = acuerdo.decision?.en ?? acuerdo.creadoEn
+  const pagado = pagos
+    .filter((p) => p.unidadId === acuerdo.unidadId && p.estado === 'aplicado' && p.fecha >= desde)
+    .reduce((s, p) => s + p.valor, 0)
+  const debido = acuerdo.cuotas.filter((c) => c.fecha <= hoy).reduce((s, c) => s + c.valor, 0)
+  return { debido, pagado, alDia: pagado >= debido, cumplido: pagado >= acuerdo.deudaAcordada }
+}
+
+/** PN-19 — Un acuerdo en curso: propuesto o aprobado. */
+export function acuerdoEnCurso(acuerdo: AcuerdoPago): boolean {
+  return acuerdo.estado === 'propuesto' || acuerdo.estado === 'aprobado'
 }

@@ -96,6 +96,11 @@ export interface Copropiedad {
   tieneAscensores?: boolean
   /** CU-R-44 · PN-10 — Horario y anticipación de los trasteos. Sin esto, los valores por defecto. */
   reglasTrasteo?: ReglasTrasteo
+  /**
+   * CU-A-39 · PN-19 — Si el edificio permite acuerdos de pago y hasta cuántas
+   * cuotas (Mary, 2026-11-20). Sin esto, no se permiten.
+   */
+  acuerdosPago?: { activo: boolean; cuotasMaximas: number; cambiadoPor?: string; cambiadoEn?: FechaHoraISO }
   /** CU-A-31 · PN-01 — Descuento por pronto pago de la cuota ordinaria. */
   prontoPago?: ProntoPago
   /**
@@ -1045,6 +1050,7 @@ export type MotivoMensaje =
   | 'respuesta_proyecto'
   | 'pago_programado'
   | 'permiso_decidido'
+  | 'acuerdo_pago'
 
 export interface Mensaje {
   id: string
@@ -1896,6 +1902,8 @@ export interface BaseDatos {
   permisosObra: PermisoObra[]
   /** CU-R-49 — Objetos encontrados en el edificio. */
   objetosEncontrados: ObjetoEncontrado[]
+  /** CU-A-39 — Acuerdos de pago. */
+  acuerdosPago: AcuerdoPago[]
   accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
   asistencias: Asistencia[]
@@ -2234,4 +2242,31 @@ export interface ObjetoEncontrado {
   reclamos: ReclamoObjeto[]
   entrega?: { personaId: string; por: string; en: FechaHoraISO }
   baja?: { motivo: string; por: string; en: FechaHoraISO }
+}
+
+// ---------------------------------------------------------------------------
+// Acuerdos de pago — Mary, 2026-11-20 · CU-A-39 · PN-19
+// ---------------------------------------------------------------------------
+
+export type EstadoAcuerdo = 'propuesto' | 'aprobado' | 'rechazado' | 'cancelado'
+
+/**
+ * PN-19 — Un acuerdo de pago: quien está atrasado propone ponerse al día en
+ * cuotas y la administración lo aprueba. **No cambia la deuda ni borra cuotas**:
+ * es un calendario pactado; lo que se paga entra a la cartera como siempre
+ * (RN-06) y se mide contra ese calendario.
+ */
+export interface AcuerdoPago {
+  id: string
+  copropiedadId: string
+  unidadId: string
+  personaId: string
+  /** Lo vencido al proponerlo: lo que se pacta pagar. */
+  deudaAcordada: Dinero
+  cuotas: Array<{ numero: number; fecha: FechaISO; valor: Dinero }>
+  nota?: string
+  estado: EstadoAcuerdo
+  creadoEn: FechaHoraISO
+  decision?: { por: string; en: FechaHoraISO; motivo?: string }
+  cancelacion?: { por: string; en: FechaHoraISO }
 }

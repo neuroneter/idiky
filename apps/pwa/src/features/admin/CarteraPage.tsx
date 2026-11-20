@@ -10,6 +10,7 @@
  * entra es el otro modulo (`PagosPage`), para no mezclar la consulta con la caja.
  */
 
+import { AcuerdosPagoAdmin } from './AcuerdosPagoAdmin'
 import { ProntoPagoTarjeta } from './ProntoPagoTarjeta'
 import { useMemo, useState } from 'react'
 import { Link, NavLink, Outlet } from 'react-router-dom'
@@ -153,6 +154,7 @@ export function CarteraPage() {
       {/* RN-226, CU-S-06 — Recordatorios de pago a los propietarios. */}
       <RecordatoriosPago />
       <ProntoPagoTarjeta />
+      <AcuerdosPagoAdmin />
 
       <div className="fila">
         <div className="filtros">
