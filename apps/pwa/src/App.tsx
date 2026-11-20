@@ -55,6 +55,13 @@ import { TurnoPage } from './features/porteria/TurnoPage'
 import { ValidarVisitantePage } from './features/porteria/ValidarVisitantePage'
 import { ResidentesPage } from './features/porteria/ResidentesPage'
 import { AvisoVersionNueva } from './componentes/AvisoVersionNueva'
+import { EdificioPage } from './features/residente/edificio/EdificioPage'
+import { CuentasClarasPage } from './features/residente/edificio/CuentasClarasPage'
+import { DocumentosPage } from './features/residente/edificio/DocumentosPage'
+import { EncuestasPage } from './features/residente/edificio/EncuestasPage'
+import { CalendarioPage } from './features/residente/edificio/CalendarioPage'
+import { ClasificadosPage } from './features/residente/edificio/ClasificadosPage'
+import { EdificioAdminPage } from './features/admin/edificio/EdificioAdminPage'
 
 /** Deja pasar solo si hay sesion con el rol esperado (ADR-0004). */
 function Protegida({
@@ -125,6 +132,13 @@ export function App() {
         <Route path="unidad/personas" element={<PersonasPage />} />
         <Route path="unidad/vehiculos-mascotas" element={<VehiculosMascotasPage />} />
         <Route path="directorio" element={<DirectorioPage />} />
+        {/* Para competir — Mary, 2026-11-20 (CU-R-37 … CU-R-42). */}
+        <Route path="edificio" element={<EdificioPage />} />
+        <Route path="edificio/cuentas" element={<CuentasClarasPage />} />
+        <Route path="edificio/documentos" element={<DocumentosPage />} />
+        <Route path="edificio/encuestas" element={<EncuestasPage />} />
+        <Route path="edificio/calendario" element={<CalendarioPage />} />
+        <Route path="edificio/clasificados" element={<ClasificadosPage />} />
       </Route>
 
       {/* Consola de administracion — CU-A-xx */}
@@ -161,6 +175,7 @@ export function App() {
         <Route path="correspondencia" element={<CorrespondenciaGestionPage />} />
         <Route path="directorio" element={<DirectorioAdminPage />} />
         <Route path="porteria" element={<MinutasPage />} />
+        <Route path="edificio" element={<EdificioAdminPage />} />
       </Route>
 
       {/* Puesto de porteria — CU-P-xx */}

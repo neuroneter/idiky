@@ -21,6 +21,8 @@ import { formatearDinero, formatearFecha, formatearPeriodo } from '../../utilida
 import { ChipCuota, ChipPago } from '../../componentes/Etiquetas'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
+import { AvisoProntoPago } from '../../componentes/AvisoProntoPago'
+import { PagoProgramado } from './PagoProgramado'
 
 type Filtro = 'todas' | 'pendientes' | 'pagadas'
 
@@ -110,6 +112,9 @@ export function CuentaPage() {
           Mis comprobantes de pago
         </Link>
       </div>
+
+      <AvisoProntoPago cuotas={cuotas.filter(cuotaPendiente)} config={sel.copropiedad(bd, sesion.copropiedadId)?.prontoPago} />
+      <PagoProgramado />
 
       {procesosAbiertos.length > 0 && (
         <Link to="/app/procesos" className="tarjeta tarjeta--accion tarjeta--plana">

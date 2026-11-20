@@ -88,6 +88,8 @@ export interface Copropiedad {
    * días antes de vencer, y las gracias al pagar. Ausente = apagados.
    */
   recordatorioPago?: { activo: boolean; diasAntes: number }
+  /** CU-A-31 · PN-01 — Descuento por pronto pago de la cuota ordinaria. */
+  prontoPago?: ProntoPago
   /**
    * Meses que un antecedente en firme sigue agravando la multa (RN-72).
    *
@@ -305,6 +307,12 @@ export type OrigenPago = 'residente' | 'administracion'
 export interface Imputacion {
   cuotaId: string
   valor: Dinero
+  /**
+   * PN-01 — Descuento por pronto pago que se concedio sobre esta cuota. Baja
+   * el saldo junto con `valor`, pero **no es plata recibida**: el recibo lo
+   * muestra aparte y la contable lo registra como descuento (T-51).
+   */
+  descuento?: Dinero
 }
 
 /**
@@ -742,6 +750,10 @@ export interface Pqrs {
   /** Vencimiento del SLA (RN-13). */
   fechaLimite: FechaISO
   mensajes: MensajePqrs[]
+  /** CU-R-40 — La foto del daño, cuando se reportó con ella. */
+  foto?: Soporte
+  /** CU-R-40 — Dónde está el daño: «piso 4, pasillo», «parqueadero P-06». */
+  ubicacion?: string
 }
 
 // ---------------------------------------------------------------------------
@@ -1011,6 +1023,7 @@ export type MotivoMensaje =
   | 'recordatorio_pago'
   | 'agradecimiento_pago'
   | 'respuesta_proyecto'
+  | 'pago_programado'
 
 export interface Mensaje {
   id: string
@@ -1837,6 +1850,20 @@ export interface BaseDatos {
   registros: RegistroPersona[]
   mensajes: Mensaje[]
   proyectos: Proyecto[]
+  /** CU-R-36 — Pagos programados de la cuota ordinaria. */
+  pagosProgramados: PagoProgramado[]
+  /** CU-A-32 — Las cuentas claras de cada mes. */
+  informesMensuales: InformeMensual[]
+  /** CU-A-33 — Reglamento, manual, actas, pólizas. */
+  documentosEdificio: DocumentoEdificio[]
+  /** CU-A-34 — Encuestas rápidas. */
+  encuestas: Encuesta[]
+  /** CU-A-35 — Lo que se programa en el edificio. */
+  eventosEdificio: EventoEdificio[]
+  /** CU-R-42 — Clasificados entre vecinos. */
+  clasificados: AvisoClasificado[]
+  /** CU-R-43 — Pedidos de ayuda a portería. */
+  alertasAyuda: AlertaAyuda[]
   accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
   asistencias: Asistencia[]
@@ -1859,4 +1886,156 @@ export interface BaseDatos {
     /** Consecutivo de la citacion a asamblea (RN-36, RN-219). Ausente en bases viejas: empieza en 1. */
     citacion?: number
   }
+}
+
+// ---------------------------------------------------------------------------
+// Para competir — Mary, 2026-11-20 · CU-R-35…43, CU-A-31…36
+//
+// «La idea es salir siendo competitivos.» Lo que traen las apps de propiedad
+// horizontal del mercado, con el trato de IDIKY: cuidar al propietario. Las
+// reglas van como PN-01…PN-09 (pendientes de número) hasta que el integrador
+// le asigne a Mary un rango nuevo de RN.
+// ---------------------------------------------------------------------------
+
+/** PN-01 — Descuento por pronto pago (lo aprueba la asamblea). */
+export interface ProntoPago {
+  activo: boolean
+  /** Porcentaje sobre el valor de la cuota ordinaria. */
+  porcentaje: number
+  /** Hasta qué día del mes de la cuota aplica (1 a 28). */
+  diaLimite: number
+  cambiadoPor?: string
+  cambiadoEn?: FechaHoraISO
+}
+
+export type MedioProgramado = 'pse' | 'tarjeta'
+
+/** PN-02 — El propietario deja programado el pago de la ordinaria de cada mes. */
+export interface PagoProgramado {
+  id: string
+  unidadId: string
+  personaId: string
+  medio: MedioProgramado
+  /** Día del mes en que se paga (1 a 28). */
+  dia: number
+  activo: boolean
+  creadoEn: FechaHoraISO
+  desactivadoEn?: FechaHoraISO
+  /** El último periodo que ya se pagó: una vez por mes. */
+  ultimoPeriodo?: Periodo
+}
+
+export interface RubroInforme {
+  rubro: string
+  valor: Dinero
+}
+
+/**
+ * PN-03 — Las cuentas claras del mes: cuánto entró, en qué se gastó y cuánto
+ * hay en el fondo. Una por periodo; si se corrige, la nueva **reemplaza** a la
+ * anterior y la anterior queda guardada (nada se borra).
+ */
+export interface InformeMensual {
+  id: string
+  copropiedadId: string
+  periodo: Periodo
+  ingresos: Dinero
+  gastos: RubroInforme[]
+  saldoFondo: Dinero
+  nota?: string
+  publicadoPor: string
+  publicadoEn: FechaHoraISO
+  reemplazadoPor?: string
+}
+
+export type CategoriaDocumentoEdificio = 'reglamento' | 'manual' | 'acta' | 'poliza' | 'presupuesto' | 'otro'
+
+/** PN-04 — Un documento del edificio. Se retira (con motivo), no se borra. */
+export interface DocumentoEdificio {
+  id: string
+  copropiedadId: string
+  titulo: string
+  categoria: CategoriaDocumentoEdificio
+  descripcion?: string
+  fecha: FechaISO
+  /** El archivo, como data URL en el demo (ADR-0009). */
+  archivo?: { nombre: string; tipo: string; datos: string }
+  publicadoPor: string
+  publicadoEn: FechaHoraISO
+  retiro?: { por: string; en: FechaHoraISO; motivo: string }
+}
+
+export interface OpcionEncuesta {
+  id: string
+  texto: string
+}
+
+/**
+ * PN-05 — Una encuesta rápida. **No es una votación de asamblea**: no obliga.
+ * Una respuesta por unidad, sin nombre a la vista de los demás.
+ */
+export interface Encuesta {
+  id: string
+  copropiedadId: string
+  pregunta: string
+  descripcion?: string
+  opciones: OpcionEncuesta[]
+  cierraEl: FechaISO
+  creadaPor: string
+  creadaEn: FechaHoraISO
+  respuestas: Array<{ unidadId: string; personaId: string; opcionId: string; fecha: FechaHoraISO }>
+  cerradaAntes?: { por: string; en: FechaHoraISO }
+}
+
+export type TipoEventoEdificio = 'mantenimiento' | 'corte' | 'reunion' | 'fumigacion' | 'otro'
+
+/** PN-07 — Algo que pasa en el edificio y conviene saber de antemano. Se cancela, no se borra. */
+export interface EventoEdificio {
+  id: string
+  copropiedadId: string
+  titulo: string
+  tipo: TipoEventoEdificio
+  fecha: FechaISO
+  horaInicio?: string
+  horaFin?: string
+  detalle?: string
+  creadoPor: string
+  creadoEn: FechaHoraISO
+  cancelacion?: { por: string; en: FechaHoraISO; motivo: string }
+}
+
+export type TipoAviso = 'vendo' | 'regalo' | 'busco' | 'servicio'
+
+/** PN-08 — Un aviso de clasificados entre vecinos. Vence a los 30 días. */
+export interface AvisoClasificado {
+  id: string
+  copropiedadId: string
+  unidadId: string
+  personaId: string
+  tipo: TipoAviso
+  titulo: string
+  descripcion: string
+  precio?: Dinero
+  foto?: Soporte
+  /** Si deja ver su celular para que le escriban. */
+  mostrarCelular: boolean
+  publicadoEn: FechaHoraISO
+  venceEl: FechaISO
+  cierre?: { motivo: 'resuelto' | 'retirado' | 'retirado_admin'; por: string; en: FechaHoraISO; detalle?: string }
+}
+
+export type TipoAyuda = 'salud' | 'seguridad' | 'otro'
+
+/** PN-09 — Un pedido de ayuda a portería desde la app. */
+export interface AlertaAyuda {
+  id: string
+  copropiedadId: string
+  unidadId: string
+  personaId: string
+  tipo: TipoAyuda
+  detalle?: string
+  creadaEn: FechaHoraISO
+  /** Portería la vio y va en camino. */
+  vista?: { por: string; en: FechaHoraISO }
+  atendida?: { por: string; en: FechaHoraISO; nota?: string }
 }

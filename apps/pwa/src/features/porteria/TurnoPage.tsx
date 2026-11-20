@@ -20,6 +20,7 @@
  *    con la lista de sus nombres si quien reservó la escribió (RN-126).
  */
 
+import { AlertasAyuda } from '../../componentes/AlertasAyuda'
 import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
@@ -44,6 +45,8 @@ export function TurnoPage() {
 
   return (
     <div className="pila">
+      {/* CU-R-43 — Un pedido de ayuda va antes que todo lo demás. */}
+      <AlertasAyuda />
       <div className="tarjeta tarjeta--marca">
         <span className="subtitulo">Turno de {nombreCompleto(persona)}</span>
         <div className="fila" style={{ marginTop: 'var(--e3)', gap: 'var(--e4)' }}>

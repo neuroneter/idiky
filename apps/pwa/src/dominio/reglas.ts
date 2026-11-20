@@ -61,6 +61,20 @@ import type {
   Copropiedad,
 } from './tipos'
 import { formatearFecha } from '../utilidades/formato'
+import type {
+  AlertaAyuda,
+  AvisoClasificado,
+  CategoriaDocumentoEdificio,
+  Encuesta,
+  InformeMensual,
+  OpcionEncuesta,
+  PagoProgramado,
+  ProntoPago,
+  RubroInforme,
+  TipoAviso,
+  TipoAyuda,
+  TipoEventoEdificio,
+} from './tipos'
 
 /** Resultado de validar una operacion contra las reglas del dominio. */
 export interface ResultadoValidacion {
@@ -4132,4 +4146,185 @@ export function reservaMueveDinero(reserva: Reserva, zona: Pick<ZonaComun, 'mult
 export function debeCerrarseSola(reserva: Reserva, zona: Pick<ZonaComun, 'multaNoCancelar'> | undefined, ahora: Date = new Date()): boolean {
   if (reserva.estado !== 'confirmada' || reserva.cierre || reservaMueveDinero(reserva, zona)) return false
   return finDeReserva(reserva) <= ahora.getTime()
+}
+
+// ---------------------------------------------------------------------------
+// Para competir — Mary, 2026-11-20 · CU-R-35…43, CU-A-31…36
+// Reglas PN-01…PN-09: pendientes de número RN (el rango de Mary se agotó).
+// ---------------------------------------------------------------------------
+
+/** La fecha local (AAAA-MM-DD) de un instante ISO. */
+export function fechaLocalDe(instante: string): FechaISO {
+  const d = new Date(instante)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/** PN-01 — Hasta qué fecha aplica el pronto pago de una cuota del periodo. */
+export function fechaLimiteProntoPago(periodo: Periodo, diaLimite: number): FechaISO {
+  return `${periodo}-${String(diaLimite).padStart(2, '0')}`
+}
+
+/**
+ * PN-01 — **El descuento por pronto pago.** Solo la cuota **ordinaria**, solo si
+ * se paga **completa** (sin abonos previos) y **hasta el día límite** de su mes.
+ * Se calcula sobre el valor facturado y se redondea al peso. Si no aplica, 0.
+ */
+export function descuentoProntoPago(cuota: Cuota, config: ProntoPago | undefined, fecha: FechaISO): number {
+  if (!config?.activo || cuota.tipo !== 'ordinaria') return 0
+  if (cuota.saldo !== cuota.valor || cuota.saldo <= 0) return 0
+  if (fecha > fechaLimiteProntoPago(cuota.periodo, config.diaLimite)) return 0
+  return Math.round((cuota.valor * config.porcentaje) / 100)
+}
+
+/** PN-01 — Por qué no se puede guardar esta configuración, o `null`. */
+export function motivoProntoPagoInvalido(porcentaje: number, diaLimite: number): string | null {
+  if (!Number.isFinite(porcentaje) || porcentaje <= 0 || porcentaje > 30) {
+    return 'El descuento va entre 0,1 % y 30 %.'
+  }
+  if (!Number.isInteger(diaLimite) || diaLimite < 1 || diaLimite > 28) {
+    return 'El día límite va del 1 al 28, para que exista en todos los meses.'
+  }
+  return null
+}
+
+/** PN-02 — Día válido para el pago programado: del 1 al 28. */
+export function motivoPagoProgramadoInvalido(dia: number): string | null {
+  return Number.isInteger(dia) && dia >= 1 && dia <= 28
+    ? null
+    : 'Elige un día del 1 al 28, para que exista en todos los meses.'
+}
+
+/**
+ * PN-02 — **Qué cuota paga hoy un pago programado**: la ordinaria del mes en
+ * curso con saldo, si ya llegó el día y ese mes no se pagó. Solo la ordinaria:
+ * lo demás (extraordinarias, sanciones) lo decide el propietario.
+ */
+export function cuotaQuePagaElProgramado(programado: PagoProgramado, cuotas: Cuota[], hoy: FechaISO): Cuota | undefined {
+  if (!programado.activo) return undefined
+  const periodo = hoy.slice(0, 7)
+  if (programado.ultimoPeriodo === periodo) return undefined
+  if (Number(hoy.slice(8, 10)) < programado.dia) return undefined
+  return cuotas.find(
+    (c) => c.unidadId === programado.unidadId && c.tipo === 'ordinaria' && c.periodo === periodo && c.saldo > 0,
+  )
+}
+
+/** PN-03 — Total de gastos de un informe. */
+export function totalGastos(informe: InformeMensual): number {
+  return informe.gastos.reduce((suma, g) => suma + g.valor, 0)
+}
+
+/** PN-03 — Por qué no se puede publicar el informe, o `null`. */
+export function motivoInformeInvalido(informe: { ingresos: number; gastos: RubroInforme[]; saldoFondo: number }): string | null {
+  if (!Number.isFinite(informe.ingresos) || informe.ingresos < 0) return 'Escribe cuánto entró en el mes.'
+  if (informe.gastos.length === 0) return 'Agrega al menos un gasto, con su rubro.'
+  if (informe.gastos.some((g) => g.rubro.trim().length < 3 || !Number.isFinite(g.valor) || g.valor < 0)) {
+    return 'Cada gasto lleva rubro y un valor en pesos.'
+  }
+  if (!Number.isFinite(informe.saldoFondo) || informe.saldoFondo < 0) return 'Escribe el saldo del fondo.'
+  return null
+}
+
+/** PN-03 — Los informes vigentes (los no reemplazados), del más reciente al más viejo. */
+export function informesVigentes(informes: InformeMensual[], copropiedadId: string): InformeMensual[] {
+  return informes
+    .filter((i) => i.copropiedadId === copropiedadId && !i.reemplazadoPor)
+    .sort((a, b) => b.periodo.localeCompare(a.periodo))
+}
+
+export const TEXTO_CATEGORIA_DOCUMENTO: Record<CategoriaDocumentoEdificio, string> = {
+  reglamento: 'Reglamento de propiedad horizontal',
+  manual: 'Manual de convivencia',
+  acta: 'Actas de asamblea',
+  poliza: 'Pólizas y seguros',
+  presupuesto: 'Presupuesto',
+  otro: 'Otros documentos',
+}
+
+/** PN-04 — Tamaño máximo de un archivo en el demo (el navegador se llena, ADR-0009). */
+export const MAXIMO_ARCHIVO_DOCUMENTO_KB = 400
+
+/** PN-05 — Por qué no se puede crear la encuesta, o `null`. */
+export function motivoEncuestaInvalida(encuesta: { pregunta: string; opciones: string[]; cierraEl: FechaISO }, hoy: FechaISO): string | null {
+  if (encuesta.pregunta.trim().length < 8) return 'Escribe la pregunta completa.'
+  const opciones = encuesta.opciones.map((o) => o.trim()).filter(Boolean)
+  if (opciones.length < 2) return 'Pon al menos dos opciones.'
+  if (opciones.length > 6) return 'Máximo seis opciones: más se vuelve difícil de responder.'
+  if (new Set(opciones.map((o) => o.toLowerCase())).size !== opciones.length) return 'Hay opciones repetidas.'
+  if (!encuesta.cierraEl || encuesta.cierraEl < hoy) return 'La fecha de cierre debe ser hoy o después.'
+  return null
+}
+
+/** PN-05 — La encuesta recibe respuestas hasta su día de cierre, inclusive. */
+export function encuestaAbierta(encuesta: Encuesta, hoy: FechaISO): boolean {
+  return !encuesta.cerradaAntes && hoy <= encuesta.cierraEl
+}
+
+/** PN-05 — Lo que respondió la unidad, si ya respondió. */
+export function respuestaDeUnidad(encuesta: Encuesta, unidadId: string) {
+  return encuesta.respuestas.find((r) => r.unidadId === unidadId)
+}
+
+/** PN-05 — El conteo por opción, con su porcentaje sobre las respuestas. */
+export function resultadosEncuesta(encuesta: Encuesta): Array<{ opcion: OpcionEncuesta; votos: number; porcentaje: number }> {
+  const total = encuesta.respuestas.length
+  return encuesta.opciones.map((opcion) => {
+    const votos = encuesta.respuestas.filter((r) => r.opcionId === opcion.id).length
+    return { opcion, votos, porcentaje: total === 0 ? 0 : Math.round((votos / total) * 100) }
+  })
+}
+
+export const TEXTO_TIPO_EVENTO: Record<TipoEventoEdificio, string> = {
+  mantenimiento: 'Mantenimiento',
+  corte: 'Corte de servicio',
+  reunion: 'Reunión',
+  fumigacion: 'Fumigación',
+  otro: 'Otro',
+}
+
+/** PN-07 — Por qué no se puede programar el evento, o `null`. */
+export function motivoEventoInvalido(evento: { titulo: string; fecha: FechaISO; horaInicio?: string; horaFin?: string }, hoy: FechaISO): string | null {
+  if (evento.titulo.trim().length < 4) return 'Escribe qué va a pasar.'
+  if (!evento.fecha || evento.fecha < hoy) return 'La fecha debe ser hoy o después.'
+  if (evento.horaInicio && evento.horaFin && evento.horaFin <= evento.horaInicio) {
+    return 'La hora de fin debe ser después de la de inicio.'
+  }
+  return null
+}
+
+export const TEXTO_TIPO_AVISO: Record<TipoAviso, string> = {
+  vendo: 'Vendo',
+  regalo: 'Regalo',
+  busco: 'Busco',
+  servicio: 'Servicio',
+}
+
+/** PN-08 — Un aviso de clasificados dura 30 días. */
+export const DIAS_VIGENCIA_AVISO = 30
+
+/** PN-08 — El aviso se ve mientras no esté cerrado ni vencido. */
+export function avisoVigente(aviso: AvisoClasificado, hoy: FechaISO): boolean {
+  return !aviso.cierre && hoy <= aviso.venceEl
+}
+
+/** PN-08 — Por qué no se puede publicar el aviso, o `null`. */
+export function motivoAvisoInvalido(aviso: { tipo: TipoAviso; titulo: string; descripcion: string; precio?: number }): string | null {
+  if (aviso.titulo.trim().length < 4) return 'Ponle un título a tu aviso.'
+  if (aviso.descripcion.trim().length < 10) return 'Cuenta un poco más en la descripción.'
+  if (aviso.precio !== undefined && (!Number.isFinite(aviso.precio) || aviso.precio < 0)) return 'El precio va en pesos.'
+  if (aviso.tipo === 'regalo' && aviso.precio) return 'Un regalo no lleva precio.'
+  return null
+}
+
+export const TEXTO_TIPO_AYUDA: Record<TipoAyuda, string> = {
+  salud: 'Una emergencia de salud',
+  seguridad: 'Un problema de seguridad',
+  otro: 'Otra cosa urgente',
+}
+
+/** PN-09 — Las alertas que portería no ha atendido, la más vieja primero. */
+export function alertasPendientes(alertas: AlertaAyuda[], copropiedadId: string): AlertaAyuda[] {
+  return alertas
+    .filter((a) => a.copropiedadId === copropiedadId && !a.atendida)
+    .sort((a, b) => a.creadaEn.localeCompare(b.creadaEn))
 }

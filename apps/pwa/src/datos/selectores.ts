@@ -6,6 +6,15 @@
  */
 
 import type {
+  AvisoClasificado,
+  DocumentoEdificio,
+  Encuesta,
+  FechaISO,
+  PagoProgramado,
+} from '../dominio/tipos'
+import { TEXTO_TIPO_EVENTO, avisoVigente, encuestaAbierta, fechaLocalDe } from '../dominio/reglas'
+import { formatearFechaHora } from '../utilidades/formato'
+import type {
   Asamblea,
   BaseDatos,
   Comunicado,
@@ -495,4 +504,109 @@ export function quienEsLaPlaca(bd: BaseDatos, copropiedadId: string, placaEscrit
   )
   if (visitante) return { tipo: 'visitante' as const, placa, unidadId: visitante.unidadId, visitante }
   return { tipo: 'desconocida' as const, placa }
+}
+
+// ---------------------------------------------------------------------------
+// Para competir — Mary, 2026-11-20 · CU-R-35…43, CU-A-31…36
+// ---------------------------------------------------------------------------
+
+/** CU-R-36 — El pago programado activo de la unidad, si lo hay. */
+export function pagoProgramadoDe(bd: BaseDatos, unidadId?: string): PagoProgramado | undefined {
+  return (bd.pagosProgramados ?? []).find((p) => p.unidadId === unidadId && p.activo)
+}
+
+/** CU-R-38 — Los documentos vigentes del edificio, del más nuevo al más viejo. */
+export function documentosEdificioDe(bd: BaseDatos, copropiedadId: string, incluirRetirados = false): DocumentoEdificio[] {
+  return (bd.documentosEdificio ?? [])
+    .filter((d) => d.copropiedadId === copropiedadId && (incluirRetirados || !d.retiro))
+    .sort((a, b) => b.fecha.localeCompare(a.fecha))
+}
+
+/** CU-R-39 — Las encuestas, las abiertas primero. */
+export function encuestasDe(bd: BaseDatos, copropiedadId: string): Encuesta[] {
+  const hoy = hoyISO()
+  return (bd.encuestas ?? [])
+    .filter((e) => e.copropiedadId === copropiedadId)
+    .sort((a, b) => Number(encuestaAbierta(b, hoy)) - Number(encuestaAbierta(a, hoy)) || b.creadaEn.localeCompare(a.creadaEn))
+}
+
+/** CU-R-42 — Los avisos vigentes de clasificados. */
+export function clasificadosVigentes(bd: BaseDatos, copropiedadId: string): AvisoClasificado[] {
+  const hoy = hoyISO()
+  return (bd.clasificados ?? []).filter((a) => a.copropiedadId === copropiedadId && avisoVigente(a, hoy))
+}
+
+/** Una fila del calendario del edificio. */
+export interface FilaCalendario {
+  id: string
+  fecha: FechaISO
+  hora?: string
+  titulo: string
+  detalle?: string
+  tipo: 'evento' | 'asamblea' | 'vencimiento' | 'reserva'
+  etiqueta: string
+  enlace?: string
+  cancelado?: string
+}
+
+/**
+ * CU-R-41 · PN-07 — **El calendario del edificio**: lo que programó la
+ * administración, las asambleas, el vencimiento de las cuotas de la unidad y
+ * sus reservas confirmadas. Desde hoy, en orden.
+ */
+export function calendarioDelEdificio(bd: BaseDatos, copropiedadId: string, unidadId?: string): FilaCalendario[] {
+  const hoy = hoyISO()
+  const filas: FilaCalendario[] = []
+  for (const evento of bd.eventosEdificio ?? []) {
+    if (evento.copropiedadId !== copropiedadId || evento.fecha < hoy) continue
+    filas.push({
+      id: evento.id,
+      fecha: evento.fecha,
+      hora: evento.horaInicio ? `${evento.horaInicio}${evento.horaFin ? ` a ${evento.horaFin}` : ''}` : undefined,
+      titulo: evento.titulo,
+      detalle: evento.detalle,
+      tipo: 'evento',
+      etiqueta: TEXTO_TIPO_EVENTO[evento.tipo],
+      cancelado: evento.cancelacion?.motivo,
+    })
+  }
+  for (const a of asambleasDe(bd, copropiedadId)) {
+    const fecha = fechaLocalDe(a.fechaHora)
+    if (fecha < hoy || a.estado === 'cancelada') continue
+    filas.push({
+      id: a.id,
+      fecha,
+      hora: formatearFechaHora(a.fechaHora).split(', ')[1],
+      titulo: `Asamblea ${a.tipo}`,
+      tipo: 'asamblea',
+      etiqueta: 'Asamblea',
+      enlace: `/app/asambleas/${a.id}`,
+    })
+  }
+  if (unidadId) {
+    for (const c of cuotasDeUnidad(bd, unidadId)) {
+      if (c.saldo <= 0 || c.fechaVencimiento < hoy) continue
+      filas.push({
+        id: c.id,
+        fecha: c.fechaVencimiento,
+        titulo: `Vence ${c.concepto.toLowerCase()}`,
+        tipo: 'vencimiento',
+        etiqueta: 'Tu cuota',
+        enlace: '/app/cuenta',
+      })
+    }
+    for (const r of reservasDeUnidad(bd, unidadId)) {
+      if (r.estado !== 'confirmada' || r.fecha < hoy) continue
+      filas.push({
+        id: r.id,
+        fecha: r.fecha,
+        hora: r.horaInicio,
+        titulo: `Tu reserva: ${zona(bd, r.zonaId)?.nombre ?? 'zona común'}`,
+        tipo: 'reserva',
+        etiqueta: 'Tu reserva',
+        enlace: '/app/solicitudes/reservas',
+      })
+    }
+  }
+  return filas.sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.hora ?? '').localeCompare(b.hora ?? ''))
 }
