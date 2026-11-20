@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Parametrización de trasteos (CU-A-37, PN-10)
+
+Mary: *«los horarios de trasteos y los ascensores habilitados para los trasteos los parametriza el
+administrador»* y *«también los días de anticipación»*. En **Edificio → Trasteos y obras** el
+administrador fija el horario, los días de anticipación, los sábados, el depósito y los ascensores
+(cada uno se habilita o se deshabilita, no se borra). El residente elige el ascensor, y cada uno
+lleva su propia agenda. La semilla sube a la versión 42 con los ascensores de servicio de las dos
+torres. Archivos: `apps/pwa/src/features/admin/edificio/ReglasTrasteoAdmin.tsx` (nuevo),
+`PermisosAdmin`, `PermisosPage`, `HoyEnElEdificio`, `dominio/{tipos,reglas}.ts`,
+`datos/{repositorio,semilla}.ts`, `pruebas/navegador/permisos-qr.spec.ts`.
+
 ### 2026-11-20 · Mary + IA (Claude) · Trasteos, obras en el apartamento y QR real (CU-R-44, CU-R-45, CU-A-37, CU-R-10)
 
 Mary: *«1, 2 y 3 por favor»*. Quedan tres cosas en el demo:

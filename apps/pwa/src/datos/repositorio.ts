@@ -220,6 +220,7 @@ import { finDePeriodo, formatearDinero, formatearFecha, formatearPeriodo } from 
 import { guardar, leer, sembrar, ocupacion } from './almacen'
 import type {
   PermisoObra,
+  ReglasTrasteo,
   TrabajadorObra,
   Trasteo,
   AlertaAyuda,
@@ -238,6 +239,7 @@ import type {
 } from '../dominio/tipos'
 import {
   REGLAS_TRASTEO_POR_DEFECTO,
+  motivoReglasTrasteoInvalidas,
   motivoPermisoObraInvalido,
   motivoTrasteoInvalido,
   DIAS_VIGENCIA_AVISO,
@@ -6004,6 +6006,7 @@ export async function solicitarTrasteo(
     fecha: FechaISO
     horaInicio: string
     horaFin: string
+    ascensorId?: string
     empresa?: string
     placa?: string
     observaciones?: string
@@ -6032,6 +6035,7 @@ export async function solicitarTrasteo(
     fecha: parametros.fecha,
     horaInicio: parametros.horaInicio,
     horaFin: parametros.horaFin,
+    ascensorId: parametros.ascensorId || undefined,
     empresa: parametros.empresa?.trim() || undefined,
     placa: parametros.placa ? normalizarPlaca(parametros.placa) || undefined : undefined,
     observaciones: parametros.observaciones?.trim() || undefined,
@@ -6147,4 +6151,37 @@ export async function marcarTrasteoRealizado(
   if (trasteo.realizado) throw new ErrorDeNegocio('Ese trasteo ya está marcado.')
   trasteo.realizado = { por: parametros.personaId, en: ahoraISO() }
   return persistir(bd, trasteo)
+}
+
+/**
+ * CU-A-37 · PN-10 — La administración parametriza los trasteos: horario,
+ * anticipación, sábados, depósito y los ascensores habilitados. Lo ya
+ * aprobado no cambia.
+ */
+export async function configurarReglasTrasteo(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; reglas: ReglasTrasteo },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Parametrizar los trasteos')
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  const motivo = motivoReglasTrasteoInvalidas(parametros.reglas)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  copropiedad.reglasTrasteo = {
+    horaDesde: parametros.reglas.horaDesde,
+    horaHasta: parametros.reglas.horaHasta,
+    diasAnticipacion: parametros.reglas.diasAnticipacion,
+    sabados: parametros.reglas.sabados,
+    deposito: parametros.reglas.deposito || undefined,
+    ascensores: (parametros.reglas.ascensores ?? []).map((a) => ({
+      id: a.id || nuevoId('asc'),
+      nombre: a.nombre.trim(),
+      habilitado: a.habilitado,
+    })),
+    cambiadoPor: parametros.personaId,
+    cambiadoEn: ahoraISO(),
+  }
+  return persistir(bd, copropiedad)
 }

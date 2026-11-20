@@ -1636,19 +1636,21 @@ borran, RN-61), y marca quiénes son del **consejo de administración**.
 
 **Flujo principal**
 1. En **Mi unidad → Trasteos y obras**, «Pedir permiso de trasteo»: llego o me voy, fecha, desde y
-   hasta, empresa y placa del camión (opcionales). Se le dice el horario del edificio, la
+   hasta, **por cuál ascensor** (entre los habilitados), empresa y placa del camión (opcionales). Se le dice el horario del edificio, la
    anticipación y, si lo pide, el depósito.
 2. Queda **por aprobar**. La administración lo aprueba (CU-A-37) y le llega un mensaje.
 3. El día del trasteo, portería lo ve en **Hoy en el edificio** y marca «Se hizo».
 
 **Flujos alternativos**
 - A1. Sin la anticipación, en domingo o festivo, en sábado si el edificio no lo permite, fuera del
-  horario o cruzado con otro trasteo de ese día → no se puede pedir, y se dice por qué.
+  horario o cruzado con otro trasteo de ese día **por el mismo ascensor** → no se puede pedir, y se
+  dice por qué. Por ascensores distintos sí puede haber dos a la misma hora.
 - A2. No se aprueba → la administración dice por qué, con amabilidad, y se puede pedir de nuevo.
 - A3. Quien lo pidió lo cancela; queda guardado.
 
-**Reglas:** PN-10. **Estado:** ✅ — `/app/unidad/permisos`. Horario por defecto: 8:00 a 17:00,
-2 días de anticipación, sábados sí (cada edificio puede fijar el suyo, `reglasTrasteo`).
+**Reglas:** PN-10. **Estado:** ✅ — `/app/unidad/permisos`. El horario, los días de anticipación,
+los sábados, el depósito y los ascensores los **parametriza el administrador** (CU-A-37). En el
+demo: 8:00 a 17:00, 2 días, sábados sí y los ascensores de servicio de las dos torres.
 
 ---
 

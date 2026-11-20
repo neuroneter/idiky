@@ -64,6 +64,7 @@ import { formatearFecha } from '../utilidades/formato'
 import type {
   AlertaAyuda,
   AvisoClasificado,
+  AscensorTrasteo,
   EstadoPermiso,
   PermisoObra,
   ReglasTrasteo,
@@ -4358,7 +4359,7 @@ export function esDiaDeDescanso(fecha: FechaISO): boolean {
  * pedido o aprobado ese día: hay un solo ascensor de carga.
  */
 export function motivoTrasteoInvalido(
-  trasteo: { fecha: FechaISO; horaInicio: string; horaFin: string },
+  trasteo: { fecha: FechaISO; horaInicio: string; horaFin: string; ascensorId?: string },
   reglas: ReglasTrasteo,
   otros: Trasteo[],
   hoy: FechaISO,
@@ -4372,14 +4373,44 @@ export function motivoTrasteoInvalido(
   if (trasteo.horaInicio < reglas.horaDesde || trasteo.horaFin > reglas.horaHasta) {
     return `El horario de trasteos es de ${reglas.horaDesde} a ${reglas.horaHasta}.`
   }
+  // Con ascensores habilitados, se elige uno y cada uno tiene su agenda.
+  const habilitados = ascensoresHabilitados(reglas)
+  if (habilitados.length > 0 && !habilitados.some((a) => a.id === trasteo.ascensorId)) {
+    return 'Elige por cuál ascensor va el trasteo.'
+  }
   const cruce = otros.find(
     (o) =>
       o.fecha === trasteo.fecha &&
+      (habilitados.length === 0 || o.ascensorId === trasteo.ascensorId) &&
       (o.estado === 'solicitado' || o.estado === 'aprobado') &&
       o.horaInicio < trasteo.horaFin &&
       trasteo.horaInicio < o.horaFin,
   )
-  if (cruce) return `Ese día ya hay un trasteo de ${cruce.horaInicio} a ${cruce.horaFin}. Elige otro horario.`
+  if (cruce) {
+    return habilitados.length > 0
+      ? `Ese día ya hay un trasteo por ese ascensor de ${cruce.horaInicio} a ${cruce.horaFin}. Elige otro horario u otro ascensor.`
+      : `Ese día ya hay un trasteo de ${cruce.horaInicio} a ${cruce.horaFin}. Elige otro horario.`
+  }
+  return null
+}
+
+/** PN-10 — Los ascensores habilitados para trasteos. */
+export function ascensoresHabilitados(reglas: ReglasTrasteo): AscensorTrasteo[] {
+  return (reglas.ascensores ?? []).filter((a) => a.habilitado)
+}
+
+/** PN-10 — Por qué no se pueden guardar las reglas de trasteo, o `null`. */
+export function motivoReglasTrasteoInvalidas(reglas: ReglasTrasteo): string | null {
+  if (!/^\d{2}:\d{2}$/.test(reglas.horaDesde) || !/^\d{2}:\d{2}$/.test(reglas.horaHasta) || reglas.horaHasta <= reglas.horaDesde) {
+    return 'La hora de cierre de trasteos debe ser después de la de inicio.'
+  }
+  if (!Number.isInteger(reglas.diasAnticipacion) || reglas.diasAnticipacion < 0 || reglas.diasAnticipacion > 15) {
+    return 'La anticipación va de 0 a 15 días.'
+  }
+  if (reglas.deposito !== undefined && (!Number.isFinite(reglas.deposito) || reglas.deposito < 0)) return 'El depósito va en pesos.'
+  const nombres = (reglas.ascensores ?? []).map((a) => a.nombre.trim().toLowerCase())
+  if (nombres.some((n) => n.length < 3)) return 'Cada ascensor lleva un nombre, por ejemplo «Ascensor de servicio Torre 1».'
+  if (new Set(nombres).size !== nombres.length) return 'Hay dos ascensores con el mismo nombre.'
   return null
 }
 

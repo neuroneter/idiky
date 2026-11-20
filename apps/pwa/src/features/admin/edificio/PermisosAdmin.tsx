@@ -5,6 +5,7 @@
  * Si no se aprueba, se explica con amabilidad para que lo puedan pedir de nuevo.
  */
 
+import { ReglasTrasteoAdmin } from './ReglasTrasteoAdmin'
 import { useState } from 'react'
 import { useDatos } from '../../../estado/DatosContext'
 import { useSesion } from '../../../estado/SesionContext'
@@ -55,8 +56,12 @@ export function PermisosAdmin() {
     </>
   )
 
+  const ascensor = (id?: string) =>
+    sel.copropiedad(bd, sesion.copropiedadId)?.reglasTrasteo?.ascensores?.find((a) => a.id === id)?.nombre
+
   return (
     <div className="rejilla-dos">
+      <ReglasTrasteoAdmin />
       <div className="tarjeta">
         <strong>Trasteos</strong>
         <div className="lista lista--compacta" style={{ marginTop: 'var(--e2)' }}>
@@ -73,6 +78,7 @@ export function PermisosAdmin() {
                 </div>
                 <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
                   {sel.nombreCompleto(sel.persona(bd, t.personaId))}
+                  {ascensor(t.ascensorId) ? ` · ${ascensor(t.ascensorId)}` : ''}
                   {t.empresa ? ` · ${t.empresa}` : ''}
                   {t.placa ? ` · placa ${t.placa}` : ''}
                 </span>

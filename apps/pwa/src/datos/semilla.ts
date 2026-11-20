@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 41
+export const VERSION_ESQUEMA = 42
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1515,6 +1515,17 @@ export function crearSemilla(): BaseDatos {
         quorumMinimo: 50,
         // PN-01 — Aprobado en la asamblea: 5 % de descuento pagando hasta el día 5.
         prontoPago: { activo: true, porcentaje: 5, diaLimite: 5 },
+        // PN-10 — Lo parametriza la administración: horario y ascensores para trasteos.
+        reglasTrasteo: {
+          horaDesde: '08:00',
+          horaHasta: '17:00',
+          diasAnticipacion: 2,
+          sabados: true,
+          ascensores: [
+            { id: 'asc-t1', nombre: 'Ascensor de servicio Torre 1', habilitado: true },
+            { id: 'asc-t2', nombre: 'Ascensor de servicio Torre 2', habilitado: true },
+          ],
+        },
       },
     ],
     unidades,
@@ -1848,6 +1859,7 @@ function construirParaCompetir() {
         fecha: hoy,
         horaInicio: '09:00',
         horaFin: '12:00',
+        ascensorId: 'asc-t1',
         empresa: 'Mudanzas El Roble',
         placa: 'TRK512',
         estado: 'aprobado' as const,
@@ -1863,6 +1875,7 @@ function construirParaCompetir() {
         fecha: sumarDias(hoy, 4),
         horaInicio: '08:00',
         horaFin: '11:00',
+        ascensorId: 'asc-t2',
         estado: 'solicitado' as const,
         creadoEn: `${sumarDias(hoy, -1)}T14:00:00.000Z`,
       },
