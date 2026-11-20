@@ -4,7 +4,8 @@
  *
  * Todos los pagos de la unidad, del más reciente al más antiguo, con su recibo
  * de caja (RN-77). Cada uno se abre, se ve como la hoja que firma la
- * administración y se imprime o guarda en PDF (ADR-0006). Los anulados se
+ * administración y se descarga en PDF (ADR-0006). Arriba, el certificado de
+ * pagos del año (CU-R-46). Los anulados se
  * siguen viendo, marcados (RN-78); los abonos por conciliar todavía no tienen
  * recibo y se ven en Mi cuenta.
  */
@@ -19,12 +20,15 @@ import { ChipPago } from '../../componentes/Etiquetas'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { HojaReciboCaja, TEXTO_MEDIO_PAGO } from '../../componentes/HojaReciboCaja'
+import { CertificadoPagos } from './CertificadoPagos'
 
 export function ComprobantesPage() {
   const { bd } = useDatos()
   const { sesion } = useSesion()
   const [parametros] = useSearchParams()
   const [abierto, setAbierto] = useState<string | null>(parametros.get('pago'))
+  // CU-R-46 — El certificado abierto. Una sola hoja montada a la vez.
+  const [certificado, setCertificado] = useState<string | null>(null)
   if (!sesion) return null
 
   const pagos = sel
@@ -40,6 +44,14 @@ export function ComprobantesPage() {
         Mi cuenta
       </Link>
 
+      <CertificadoPagos
+        viendo={certificado}
+        alVer={(id) => {
+          setCertificado(id)
+          if (id) setAbierto(null)
+        }}
+      />
+
       {pagos.length === 0 ? (
         <EstadoVacio titulo="Todavía no hay pagos" detalle="Cuando pagues, aquí quedará tu recibo de caja." />
       ) : (
@@ -50,7 +62,10 @@ export function ComprobantesPage() {
               className="tarjeta tarjeta--accion tarjeta--plana"
               style={{ textAlign: 'left' }}
               aria-pressed={p.id === abierto}
-              onClick={() => setAbierto(p.id === abierto ? null : p.id)}
+              onClick={() => {
+                setAbierto(p.id === abierto ? null : p.id)
+                setCertificado(null)
+              }}
             >
               <div className="fila fila-inicio">
                 <div className="columna" style={{ flex: 1 }}>

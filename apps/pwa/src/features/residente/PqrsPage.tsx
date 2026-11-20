@@ -19,6 +19,7 @@ import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipPqrs, ChipTipoPqrs } from '../../componentes/Etiquetas'
 import { FotoDano } from '../../componentes/FotoDano'
 import { ReportarDano } from './ReportarDano'
+import { CalificarAtencion } from './CalificarAtencion'
 
 const TIPOS: Array<{ id: TipoPqrs; texto: string; ayuda: string }> = [
   { id: 'peticion', texto: 'Petición', ayuda: 'Solicitas algo a la administración' },
@@ -179,6 +180,8 @@ export function PqrsPage() {
                         ))}
                       </div>
                     )}
+
+                    <CalificarAtencion pqrs={pqrs} />
 
                     {pqrs.estado !== 'cerrada' && (
                       <div style={{ marginTop: 'var(--e3)' }}>

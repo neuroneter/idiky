@@ -239,6 +239,9 @@ import type {
 } from '../dominio/tipos'
 import {
   reglasTrasteoDe,
+  motivoCalificacionInvalida,
+  pagosDelAnio,
+  motivoCertificadoPagosInvalido,
   motivoReglasTrasteoInvalidas,
   motivoCierreDepositoInvalido,
   motivoPermisoObraInvalido,
@@ -6249,4 +6252,88 @@ export async function cerrarDepositoTrasteo(
           `${devuelto > 0 ? `Te devolvemos ${formatearDinero(devuelto)}. ` : ''}Si tienes dudas, escríbenos por la app.`,
   })
   return persistir(bd, trasteo)
+}
+
+/**
+ * CU-R-46 · PN-14 — El certificado de pagos de un año, para la declaración de
+ * renta o para quien lo pida. Lo emite el propietario (o el arrendatario) desde
+ * su app, o la administración. Queda numerado y con código de verificación, y
+ * lo que certifica se congela al emitirlo.
+ */
+export async function emitirCertificadoPagos(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; unidadId: string; anio: number; personaId: string },
+): Promise<Resultado<Documento>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!puedeManejarUnidad(bd, parametros.unidadId, parametros.personaId) && !esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('El certificado lo pide el propietario, el arrendatario o la administración.')
+  }
+  const pagos = pagosDelAnio(bd.pagos, parametros.unidadId, parametros.anio)
+  const hoy = hoyISO()
+  const motivo = motivoCertificadoPagosInvalido(parametros.anio, pagos, hoy)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const filas = pagos.map((p) => ({
+    fecha: fechaLocalDe(p.fecha),
+    recibo: p.recibo ?? '',
+    valor: p.valor,
+    descuento: p.imputaciones.reduce((s, l) => s + (l.descuento ?? 0), 0),
+    medio: p.medio,
+    conceptos: [
+      ...new Set(
+        p.imputaciones.map((l) => {
+          const cuota = bd.cuotas.find((c) => c.id === l.cuotaId)
+          return cuota ? `${cuota.concepto} ${formatearPeriodo(cuota.periodo)}` : 'Cuota'
+        }),
+      ),
+    ].join(', '),
+  }))
+  const consecutivo = bd.consecutivos.certificadoPagos ?? 1
+  const documento: Documento = {
+    id: nuevoId('doc'),
+    tipo: 'certificado_pagos',
+    numero: `CP-${hoy.slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`,
+    codigoVerificacion: nuevoCodigoVerificacion(),
+    copropiedadId: parametros.copropiedadId,
+    unidadId: parametros.unidadId,
+    emitidoEn: hoy,
+    certificadoPagos: {
+      anio: parametros.anio,
+      pagos: filas,
+      total: filas.reduce((s, f) => s + f.valor, 0),
+      descuentos: filas.reduce((s, f) => s + f.descuento, 0),
+      solicitadoPor: parametros.personaId,
+    },
+    emitidoPor: parametros.personaId,
+    estado: 'vigente',
+  }
+  bd.documentos.push(documento)
+  bd.consecutivos.certificadoPagos = consecutivo + 1
+  return persistir(bd, documento)
+}
+
+/**
+ * CU-R-47 · PN-15 — Quien radicó la PQRS (o quien maneja la unidad) califica la
+ * atención cuando quedó resuelta. Una vez; no se cambia.
+ */
+export async function calificarAtencion(
+  bdActual: BaseDatos,
+  parametros: { pqrsId: string; personaId: string; puntaje: number; comentario?: string },
+): Promise<Resultado<Pqrs>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const pqrs = bd.pqrs.find((p) => p.id === parametros.pqrsId)
+  if (!pqrs) throw new ErrorDeNegocio('Esa solicitud no existe.')
+  if (pqrs.personaId !== parametros.personaId && !puedeManejarUnidad(bd, pqrs.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('La califica quien la radicó.')
+  }
+  const motivo = motivoCalificacionInvalida(pqrs, parametros.puntaje, parametros.comentario)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  pqrs.calificacion = {
+    puntaje: parametros.puntaje,
+    comentario: parametros.comentario?.trim() || undefined,
+    personaId: parametros.personaId,
+    fecha: ahoraISO(),
+  }
+  return persistir(bd, pqrs)
 }

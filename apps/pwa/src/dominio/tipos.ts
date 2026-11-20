@@ -762,6 +762,16 @@ export interface Pqrs {
   foto?: Soporte
   /** CU-R-40 — Dónde está el daño: «piso 4, pasillo», «parqueadero P-06». */
   ubicacion?: string
+  /** CU-R-47 · PN-15 — Cómo calificó la atención quien la radicó. Una vez, no se cambia. */
+  calificacion?: CalificacionAtencion
+}
+
+/** PN-15 — De 1 a 5, con un comentario opcional. */
+export interface CalificacionAtencion {
+  puntaje: number
+  comentario?: string
+  personaId: string
+  fecha: FechaHoraISO
 }
 
 // ---------------------------------------------------------------------------
@@ -1625,7 +1635,7 @@ export interface Voto {
 // ---------------------------------------------------------------------------
 // Documentos formales — CU-R-12
 // ---------------------------------------------------------------------------
-export type TipoDocumento = 'paz_y_salvo' | 'acta' | 'poder' | 'estado_cuenta' | 'citacion'
+export type TipoDocumento = 'paz_y_salvo' | 'acta' | 'poder' | 'estado_cuenta' | 'citacion' | 'certificado_pagos'
 
 export interface Documento {
   id: string
@@ -1661,6 +1671,8 @@ export interface Documento {
    * emitirlo. Reimprimirlo da el mismo papel aunque la cartera siga su curso.
    */
   estadoCuenta?: EstadoCuentaCongelado
+  /** Solo en el certificado de pagos (CU-R-46, PN-14): lo que certifica, congelado al emitirlo. */
+  certificadoPagos?: CertificadoPagosCongelado
   /** Quien lo emitio: el residente desde su app (CU-R-12) o la administracion (CU-A-13). */
   emitidoPor?: string
   estado: 'vigente' | 'anulado'
@@ -1898,6 +1910,8 @@ export interface BaseDatos {
     estadoCuenta?: number
     /** Consecutivo de la citacion a asamblea (RN-36, RN-219). Ausente en bases viejas: empieza en 1. */
     citacion?: number
+    /** Consecutivo del certificado de pagos (RN-36, PN-14). Ausente en bases viejas: empieza en 1. */
+    certificadoPagos?: number
   }
 }
 
@@ -2154,4 +2168,16 @@ export interface PermisoObra {
   creadoEn: FechaHoraISO
   decision?: DecisionPermiso
   cancelacion?: { por: string; en: FechaHoraISO }
+}
+
+/**
+ * PN-14 — Lo que dice el certificado de pagos de un año, **congelado al emitirlo**:
+ * reimprimirlo da el mismo papel aunque después se anule un recibo.
+ */
+export interface CertificadoPagosCongelado {
+  anio: number
+  pagos: Array<{ fecha: FechaISO; recibo: string; valor: Dinero; descuento: Dinero; medio: MedioPago; conceptos: string }>
+  total: Dinero
+  descuentos: Dinero
+  solicitadoPor: string
 }
