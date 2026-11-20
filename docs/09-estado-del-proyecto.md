@@ -117,7 +117,9 @@ coeficiente y un acta que resista revisión.
 
 Mary: *«el que define el % de descuento es el administrador cuando crea el edificio»*. Queda en
 CU-A-31, PN-01 (`docs/05`) y T-54: en BLOKY va en la creación del edificio («Arma tu
-copropiedad», CU-B-03). Sin cambios de código: en el demo el administrador ya lo define en Cartera.
+copropiedad», CU-B-03). Y *«en la parametrización debe tener la opción»*: «¿Aplica descuento por
+pronto pago? Sí / No», por defecto No, como el interés de mora. Sin cambios de código: en el demo el
+administrador ya lo activa o lo apaga en Cartera.
 
 ### 2026-11-20 · Mary + IA (Claude) · Para competir: nueve funciones nuevas (CU-R-35 … CU-R-43, CU-A-31 … CU-A-36)
 
