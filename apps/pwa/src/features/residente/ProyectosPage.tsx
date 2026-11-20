@@ -18,6 +18,7 @@ import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { Icono } from '../../componentes/Icono'
 import { BarraAvance, ChipProyecto, FichaProyecto, HistoriaProyecto } from '../../componentes/TableroProyecto'
+import { PreguntasProyecto } from './PreguntasProyecto'
 
 export function ProyectosPage() {
   const { bd } = useDatos()
@@ -81,6 +82,8 @@ export function ProyectosPage() {
                     <div className="separador" />
                     <span className="titulo-seccion">Avances ({proyecto.avances.length})</span>
                     <HistoriaProyecto proyecto={proyecto} personaDe={(id) => sel.persona(bd, id)} />
+                    <div className="separador" />
+                    <PreguntasProyecto proyecto={proyecto} />
                   </>
                 )}
               </div>

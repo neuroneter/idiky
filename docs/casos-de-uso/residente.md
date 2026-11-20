@@ -1295,11 +1295,23 @@ poder firmado». La validación vive en `/admin/asambleas`, sección **Poderes**
    más nuevo al más viejo.
 5. En la **cartelera**, cada avance es además un comunicado de categoría *Proyecto*, con un
    enlace al tablero.
+6. En la ficha de la obra ve **con qué se paga** (cuota extraordinaria, fondo de imprevistos,
+   presupuesto del año u otra, con una aclaración) y **lo pagado hasta hoy frente al
+   presupuesto** —«$18.000.000 de $40.000.000, 45 % del presupuesto; la obra va en 40 %»—, con su
+   barra (RN-238). Mary, 2026-11-20.
+7. **Preguntas sobre la obra:** «Hacer una pregunta» deja la duda a la administración. Mientras
+   espera, solo la ve quien preguntó («La administración te responde pronto»); respondida, la
+   ven **todos los propietarios sin el nombre de quien preguntó**, y a quien preguntó le llega
+   un mensaje (RN-239).
 
 **Flujos alternativos**
 - A1. El avance **bajó** respecto al anterior → el porcentaje se ve en amarillo y el detalle dice
   por qué: la administración no puede registrar un retroceso sin explicarlo (RN-100).
 - A2. No hay proyectos → el tablero lo dice y el inicio no muestra la sección.
+- A3. Lo pagado **pasa el presupuesto** → se dice sin alarma («va un X % por encima; la
+  administración lo explica en los avances»). Si no hay dato de lo pagado, no se muestra.
+- A4. La pregunta es muy corta (menos de 10 caracteres) o muy larga (más de 500) → no se envía,
+  y se pide con amabilidad que la complete (RN-239).
 
 **Decisiones de interfaz**
 - **Es el mismo tablero que ve la administración** (`componentes/TableroProyecto.tsx`). Si cada
@@ -1313,7 +1325,8 @@ poder firmado». La validación vive en `/admin/asambleas`, sección **Poderes**
 **Reglas de negocio**
 - RN-100 (el avance es el último registrado, no se edita ni se borra, retroceder exige
   explicación), RN-101 (cada avance se cuenta: comunicado y mensaje), RN-64 (el mensaje queda
-  guardado con su texto), RN-61 (nada se borra).
+  guardado con su texto), RN-61 (nada se borra), **RN-238** (lo pagado de la obra),
+  **RN-239** (preguntas sobre la obra).
 
 **Estado en el demo:** ✅ — `/app/proyectos`, la sección «Obras en marcha» de `/app` y el
 enlace desde `/app/comunicados`.

@@ -15,6 +15,8 @@ import type {
   Correspondencia,
   Residencia,
   AvanceProyecto,
+  FuenteProyecto,
+  PreguntaProyecto,
   Proyecto,
   VerificacionActa,
   Asamblea,
@@ -2794,7 +2796,7 @@ export function estadoProyecto(proyecto: Proyecto): EstadoProyecto {
  */
 export function motivoAvanceInvalido(
   proyecto: Proyecto,
-  avance: { porcentaje: number; titulo: string; detalle: string },
+  avance: { porcentaje: number; titulo: string; detalle: string; pagado?: number },
 ): string | null {
   if (!Number.isInteger(avance.porcentaje) || avance.porcentaje < 0 || avance.porcentaje > 100) {
     return 'El avance es un número entero entre 0 y 100.'
@@ -2804,10 +2806,79 @@ export function motivoAvanceInvalido(
   if (avance.porcentaje < anterior && avance.detalle.trim().length < 10) {
     return `El proyecto iba en ${anterior} %. Si retrocede, explica por qué en el detalle.`
   }
+  // RN-238 — Lo pagado es acumulado: no es negativo y, si baja, se explica.
+  if (avance.pagado !== undefined) {
+    if (!Number.isFinite(avance.pagado) || avance.pagado < 0) return 'Lo pagado no puede ser negativo.'
+    const pagadoAntes = pagadoProyecto(proyecto)
+    if (pagadoAntes !== undefined && avance.pagado < pagadoAntes && avance.detalle.trim().length < 10) {
+      return 'Lo pagado es lo acumulado de la obra: si es menor que antes, explica por qué en el detalle.'
+    }
+  }
   if (estadoProyecto(proyecto) === 'terminado') {
     return 'El proyecto ya está terminado. Si hay algo más que hacer, es otro proyecto.'
   }
   return null
+}
+
+/**
+ * RN-238 — **Lo pagado de la obra es lo del ultimo avance que lo dijo.** Es un
+ * acumulado, como el porcentaje: el avance que no lo trae no lo cambia. Sin
+ * ningun dato, `undefined` (no es lo mismo «no se ha pagado» que «no se sabe»).
+ */
+export function pagadoProyecto(proyecto: Proyecto): number | undefined {
+  const conPago = avancesDelProyecto(proyecto).filter((a) => a.pagado !== undefined)
+  return conPago.length > 0 ? conPago[conPago.length - 1].pagado : undefined
+}
+
+/** RN-238 — Que parte del presupuesto va pagada, en %, o `null` si falta un dato. */
+export function porcentajePagado(proyecto: Proyecto): number | null {
+  const pagado = pagadoProyecto(proyecto)
+  if (pagado === undefined || !proyecto.presupuesto) return null
+  return Math.round((pagado / proyecto.presupuesto) * 100)
+}
+
+export const TEXTO_FUENTE_PROYECTO: Record<FuenteProyecto, string> = {
+  cuota_extraordinaria: 'Cuota extraordinaria',
+  fondo_imprevistos: 'Fondo de imprevistos',
+  presupuesto_ordinario: 'Presupuesto del año (cuota de administración)',
+  otro: 'Otra fuente',
+}
+
+/** RN-239 — Largo de una pregunta o una respuesta sobre la obra. */
+export const LARGO_PREGUNTA_PROYECTO = { minimo: 10, maximo: 500 }
+
+/** RN-239 — Por que no se puede enviar esta pregunta (o respuesta), o `null`. */
+export function motivoPreguntaInvalida(texto: string, que: 'pregunta' | 'respuesta' = 'pregunta'): string | null {
+  const largo = texto.trim().length
+  if (largo < LARGO_PREGUNTA_PROYECTO.minimo) {
+    return que === 'pregunta' ? 'Cuéntanos un poco más tu pregunta.' : 'Escribe la respuesta completa.'
+  }
+  if (largo > LARGO_PREGUNTA_PROYECTO.maximo) {
+    return `Máximo ${LARGO_PREGUNTA_PROYECTO.maximo} caracteres.`
+  }
+  return null
+}
+
+/**
+ * RN-239 — **Que preguntas ve un propietario**: todas las respondidas (sin el
+ * nombre de quien pregunto) y las suyas que esperan respuesta. Las pendientes
+ * de otros no: una pregunta sin respuesta a la vista de todos se lee como
+ * reclamo, y el propietario que pregunto no queda expuesto.
+ */
+export function preguntasVisibles(proyecto: Proyecto, personaId: string): PreguntaProyecto[] {
+  return [...(proyecto.preguntas ?? [])]
+    .filter((p) => p.respuesta || p.personaId === personaId)
+    .sort((a, b) => b.fecha.localeCompare(a.fecha))
+}
+
+/** RN-239 — Las que la administracion debe responder, la mas vieja primero. */
+export function preguntasPorResponder(proyecto: Proyecto): PreguntaProyecto[] {
+  return [...(proyecto.preguntas ?? [])].filter((p) => !p.respuesta).sort((a, b) => a.fecha.localeCompare(b.fecha))
+}
+
+/** RN-239 — El mensaje a quien pregunto: corto y cordial, cabe en un SMS. */
+export function textoRespuestaProyecto(proyecto: Proyecto, copropiedad: string): string {
+  return `${copropiedad}: la administración respondió tu pregunta sobre «${proyecto.nombre}». Gracias por preguntar. Míralo en Idiky.`
 }
 
 /** Los proyectos de una copropiedad, primero los que estan en marcha. */

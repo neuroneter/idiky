@@ -113,6 +113,24 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Proyectos: lo pagado, con qué se paga y preguntas (CU-R-32, CU-A-28, RN-238, RN-239)
+
+Mary: *«me gustó la propuesta de los 3 primeros numerales, por favor aplicar»*. En el tablero de
+cada obra el propietario ve ahora **con qué se paga** y **lo pagado hasta hoy frente al
+presupuesto** (RN-238; hoy lo escribe el administrador en cada avance, con backend saldrá de la
+contable: T-50). Y puede **preguntar sobre la obra**: la administración responde desde la consola
+y la respuesta la ven todos **sin el nombre de quien preguntó** (RN-239), para que nadie se
+sienta señalado. Además, *«el título está en negro y no se ve por el fondo en degradé»*: los
+títulos de las pantallas de la app (`.encabezado-pagina .titulo`) van en blanco sobre el
+degradado. La semilla sube a la versión 39. **Rango de reglas de Mary agotado** (RN-239): las
+siguientes se piden al integrador.
+Archivos: `apps/pwa/src/features/residente/PreguntasProyecto.tsx` y
+`apps/pwa/src/features/admin/PreguntasPorResponder.tsx` (nuevos),
+`apps/pwa/src/componentes/TableroProyecto.tsx`, `apps/pwa/src/features/residente/ProyectosPage.tsx`,
+`apps/pwa/src/features/admin/ProyectosAdminPage.tsx`, `apps/pwa/src/estilos/layout.css`,
+`apps/pwa/src/dominio/{tipos,reglas}.ts`, `apps/pwa/src/datos/{repositorio,semilla}.ts`,
+`apps/pwa/pruebas/navegador/proyectos.spec.ts` (nuevo).
+
 ### 2026-11-16 · Justo · Cierre de sesión · Documentación para el equipo
 
 **Qué:** resumen del día en [`daniel.md`](./avisos/daniel.md) §10 (billeteras T-129 en Dev, secreto

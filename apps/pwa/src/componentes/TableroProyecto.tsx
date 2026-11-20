@@ -8,7 +8,14 @@
  */
 
 import type { Persona, Proyecto } from '../dominio/tipos'
-import { avancesDelProyecto, estadoProyecto, porcentajeProyecto } from '../dominio/reglas'
+import {
+  TEXTO_FUENTE_PROYECTO,
+  avancesDelProyecto,
+  estadoProyecto,
+  pagadoProyecto,
+  porcentajePagado,
+  porcentajeProyecto,
+} from '../dominio/reglas'
 import { formatearDinero, formatearFecha, formatearFechaHora } from '../utilidades/formato'
 import { nombreCompleto } from '../datos/selectores'
 
@@ -128,6 +135,62 @@ export function FichaProyecto({ proyecto }: { proyecto: Proyecto }) {
           <span className="subtitulo">Presupuesto</span>
           <strong className="numerico">{formatearDinero(proyecto.presupuesto)}</strong>
         </div>
+      )}
+      {/* Lo primero que pregunta quien paga una obra: con qué se paga. */}
+      {proyecto.financiacion && (
+        <div className="fila fila-inicio">
+          <span className="subtitulo">Se paga con</span>
+          <strong style={{ textAlign: 'right' }}>
+            {TEXTO_FUENTE_PROYECTO[proyecto.financiacion.fuente]}
+            {proyecto.financiacion.detalle && (
+              <span className="tenue" style={{ display: 'block', fontWeight: 400, fontSize: 'var(--texto-xs)' }}>
+                {proyecto.financiacion.detalle}
+              </span>
+            )}
+          </strong>
+        </div>
+      )}
+      <PagadoProyecto proyecto={proyecto} />
+    </div>
+  )
+}
+
+/**
+ * RN-238 — Lo pagado frente al presupuesto: «llevamos $18 millones de $40».
+ * Junto al avance de la obra se lee si la plata va al ritmo del trabajo. Si
+ * pasa el presupuesto se dice sin alarma: el detalle lo explica el avance.
+ */
+export function PagadoProyecto({ proyecto }: { proyecto: Proyecto }) {
+  const pagado = pagadoProyecto(proyecto)
+  if (pagado === undefined) return null
+  const porcentaje = porcentajePagado(proyecto)
+  return (
+    <div className="columna" style={{ gap: 'var(--e1)' }}>
+      <div className="fila">
+        <span className="subtitulo">Pagado hasta hoy</span>
+        <strong className="numerico">
+          {formatearDinero(pagado)}
+          {proyecto.presupuesto ? ` de ${formatearDinero(proyecto.presupuesto)}` : ''}
+        </strong>
+      </div>
+      {porcentaje !== null && (
+        <>
+          <div
+            className="medidor"
+            role="progressbar"
+            aria-label="Pagado del presupuesto"
+            aria-valuenow={Math.min(porcentaje, 100)}
+            aria-valuemin={0}
+            aria-valuemax={100}
+          >
+            <div className="medidor__relleno" style={{ width: `${Math.min(porcentaje, 100)}%` }} />
+          </div>
+          <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+            {porcentaje > 100
+              ? `Va ${porcentaje - 100} % por encima del presupuesto. La administración lo explica en los avances.`
+              : `${porcentaje} % del presupuesto. La obra va en ${porcentajeProyecto(proyecto)} %.`}
+          </span>
+        </>
       )}
     </div>
   )
