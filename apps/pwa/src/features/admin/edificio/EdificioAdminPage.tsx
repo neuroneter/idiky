@@ -4,6 +4,7 @@
  * CU-A-35 (calendario), CU-A-36 (clasificados) y CU-R-43 (pedidos de ayuda).
  */
 
+import { PermisosAdmin } from './PermisosAdmin'
 import { useState } from 'react'
 import { useDatos } from '../../../estado/DatosContext'
 import { useSesion } from '../../../estado/SesionContext'
@@ -21,6 +22,7 @@ const SECCIONES = {
   encuestas: 'Encuestas',
   calendario: 'Calendario',
   clasificados: 'Clasificados',
+  permisos: 'Trasteos y obras',
   ayuda: 'Pedidos de ayuda',
 } as const
 type Seccion = keyof typeof SECCIONES
@@ -31,6 +33,9 @@ export function EdificioAdminPage() {
   const [seccion, setSeccion] = useState<Seccion>('cuentas')
   if (!sesion) return null
   const pendientes = alertasPendientes(bd.alertasAyuda ?? [], sesion.copropiedadId).length
+  const porAprobar = [...(bd.trasteos ?? []), ...(bd.permisosObra ?? [])].filter(
+    (p) => p.copropiedadId === sesion.copropiedadId && p.estado === 'solicitado',
+  ).length
 
   return (
     <div className="pila">
@@ -39,6 +44,7 @@ export function EdificioAdminPage() {
           <button key={s} className="filtro" role="tab" aria-pressed={seccion === s} onClick={() => setSeccion(s)}>
             {SECCIONES[s]}
             {s === 'ayuda' && pendientes > 0 ? ` (${pendientes})` : ''}
+            {s === 'permisos' && porAprobar > 0 ? ` (${porAprobar})` : ''}
           </button>
         ))}
       </div>
@@ -47,6 +53,7 @@ export function EdificioAdminPage() {
       {seccion === 'encuestas' && <EncuestasAdmin />}
       {seccion === 'calendario' && <CalendarioAdmin />}
       {seccion === 'clasificados' && <ClasificadosAdmin />}
+      {seccion === 'permisos' && <PermisosAdmin />}
       {seccion === 'ayuda' && <AlertasAyuda incluirAtendidas />}
     </div>
   )

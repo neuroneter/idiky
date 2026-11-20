@@ -1335,3 +1335,21 @@ consola del administrador (T-45).
 **Flujo principal:** en **Edificio → Clasificados** ve los avisos vigentes con quién los publicó; «Retirar» exige un motivo respetuoso (mínimo 10 caracteres). Nada se borra.
 
 **Reglas:** PN-08. **Estado:** ✅ — `/admin/edificio`.
+
+---
+
+### CU-A-37
+## CU-A-37 — Aprobar los trasteos y las obras en los apartamentos
+
+- **Actor principal:** Administrador.
+- **Resultado esperado:** Cada trasteo y cada obra pedidos desde la app quedan aprobados o no, con
+  el motivo, y quien los pidió se entera.
+
+> Mary, 2026-11-20: *«1, 2 y 3 por favor»* (trasteos, obras en el apartamento y QR para visitantes), sobre lo que más puede requerir el propietario en la app.
+
+**Flujo principal:** en **Edificio → Trasteos y obras** (con el número de los que esperan) ve los
+trasteos próximos —unidad, llega o se va, fecha, horario, empresa y placa— y las obras —qué, fechas
+y trabajadores—. «Aprobar» o «No aprobar»; para no aprobar escribe por qué (mínimo 10 caracteres),
+con amabilidad, para que lo puedan pedir de nuevo. A quien lo pidió le llega un mensaje.
+
+**Reglas:** PN-10, PN-11. **Estado:** ✅ — `/admin/edificio`.

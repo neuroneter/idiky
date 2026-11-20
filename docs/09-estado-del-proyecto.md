@@ -113,6 +113,28 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Trasteos, obras en el apartamento y QR real (CU-R-44, CU-R-45, CU-A-37, CU-R-10)
+
+Mary: *«1, 2 y 3 por favor»*. Quedan tres cosas en el demo:
+- **Trasteos:** el residente pide el permiso en Mi unidad → Trasteos y obras, con el horario, la
+  anticipación, sin domingos ni festivos y sin cruzarse con otro trasteo.
+- **Obras en el apartamento:** el permiso lleva los trabajadores con su documento.
+- **Aprobación y portería:** la administración los aprueba o no (con motivo) en Edificio. Portería
+  los ve en **Hoy en el edificio** y marca el trasteo como hecho.
+- **QR real y escaneable:** el código del visitante es un QR de verdad, generado sin librerías
+  (`utilidades/qr.ts`, ADR-0005 actualizado). Se comprobó con un lector estándar. Se puede
+  compartir como imagen o por WhatsApp, y portería lo escanea con la cámara donde el navegador
+  lo permite.
+
+Reglas PN-10 a PN-12, a la espera de número (T-55). La semilla sube a la versión 41.
+Archivos nuevos: `apps/pwa/src/utilidades/qr.ts`,
+`apps/pwa/src/features/residente/{PermisosPage,CompartirCodigo}.tsx`,
+`apps/pwa/src/features/admin/edificio/PermisosAdmin.tsx`,
+`apps/pwa/src/features/porteria/{EscanearQr,HoyEnElEdificio}.tsx`,
+`apps/pwa/pruebas/navegador/permisos-qr.spec.ts`. Cambiados: `componentes/CodigoVisual.tsx`,
+`VisitantesPage`, `ValidarVisitantePage`, `TurnoPage`, `MiUnidadPage`, `EdificioAdminPage`,
+`App.tsx`, `LayoutResidente`, `dominio/{tipos,reglas}.ts`, `datos/{repositorio,semilla}.ts`.
+
 ### 2026-11-20 · Mary + IA (Claude) · Quién define el pronto pago (CU-A-31, PN-01)
 
 Mary: *«el que define el % de descuento es el administrador cuando crea el edificio»*. Queda en

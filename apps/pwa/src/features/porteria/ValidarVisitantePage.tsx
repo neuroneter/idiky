@@ -12,6 +12,7 @@
  * es peor que ninguno.
  */
 
+import { EscanearQr } from './EscanearQr'
 import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import * as sel from '../../datos/selectores'
@@ -74,6 +75,12 @@ export function ValidarVisitantePage() {
           setBuscado(codigo)
         }}
       >
+        <EscanearQr
+          alLeer={(texto) => {
+            setCodigo(texto)
+            setBuscado(texto)
+          }}
+        />
         <div className="campo">
           <label htmlFor="codigo">Código del visitante</label>
           <input

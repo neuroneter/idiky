@@ -31,7 +31,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-07 | Radicar una PQRS | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-07) |
 | CU-R-08 | Seguir una PQRS radicada | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-08) |
 | CU-R-09 | Leer comunicados de la cartelera | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-09) |
-| CU-R-10 | Autorizar un visitante y generar su código | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-10) |
+| CU-R-10 | Autorizar un visitante y generar su código | 1 | ✅ Demo (QR real y escaneable desde el 2026-11-20, PN-12) | [ver](./casos-de-uso/residente.md#cu-r-10) |
 | CU-R-11 | Ver correspondencia pendiente | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-11) |
 | CU-R-12 | **Descargar el paz y salvo** | 1 | ✅ Demo (se emite e imprime a PDF desde el teléfono) | [ver](./casos-de-uso/residente.md#cu-r-12) |
 | CU-R-13 | **Votar en una asamblea** | 1 | ✅ Demo (mayoría y quórum citando la ley; RN-74, RN-94; vota también el apoderado por la unidad que representa) | [ver](./casos-de-uso/residente.md#cu-r-13) |
@@ -64,6 +64,8 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-41 | **Ver el calendario del edificio** | 1 | ✅ Demo (2026-11-20, PN-07) | [ver](./casos-de-uso/residente.md#cu-r-41) |
 | CU-R-42 | **Clasificados entre vecinos** | 1 | ✅ Demo (2026-11-20, PN-08) | [ver](./casos-de-uso/residente.md#cu-r-42) |
 | CU-R-43 | **Pedir ayuda a portería desde la app** | 1 | ✅ Demo (2026-11-20, PN-09) | [ver](./casos-de-uso/residente.md#cu-r-43) |
+| CU-R-44 | **Pedir permiso para un trasteo** | 1 | ✅ Demo (2026-11-20, PN-10) | [ver](./casos-de-uso/residente.md#cu-r-44) |
+| CU-R-45 | **Pedir permiso para una obra en el apartamento** | 1 | ✅ Demo (2026-11-20, PN-11) | [ver](./casos-de-uso/residente.md#cu-r-45) |
 | CU-R-34 | **Personalizar mi avatar en ALICE** (crear si no hay; editar el por defecto o el de BLOKY) | 1 | 🟡 Código en `develop` (2026-11-16; falta probar en teléfono) | [ver](./casos-de-uso/residente.md#cu-r-34) |
 
 ## 2. Administrador — consola web
@@ -106,6 +108,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-34 | **Crear encuestas rápidas** | 1 | ✅ Demo (2026-11-20, PN-05) | [ver](./casos-de-uso/administrador.md#cu-a-34) |
 | CU-A-35 | **Programar el calendario del edificio** | 1 | ✅ Demo (2026-11-20, PN-07) | [ver](./casos-de-uso/administrador.md#cu-a-35) |
 | CU-A-36 | **Cuidar los clasificados** | 1 | ✅ Demo (2026-11-20, PN-08) | [ver](./casos-de-uso/administrador.md#cu-a-36) |
+| CU-A-37 | **Aprobar los trasteos y las obras en los apartamentos** | 1 | ✅ Demo (2026-11-20, PN-10, PN-11) | [ver](./casos-de-uso/administrador.md#cu-a-37) |
 
 
 ## 3. Portería — consola de la entrada
