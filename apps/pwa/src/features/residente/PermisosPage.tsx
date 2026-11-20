@@ -16,7 +16,7 @@ import * as sel from '../../datos/selectores'
 import { cancelarPermiso, solicitarPermisoObra, solicitarTrasteo } from '../../datos/repositorio'
 import {
   HORARIO_OBRAS,
-  REGLAS_TRASTEO_POR_DEFECTO,
+  reglasTrasteoDe,
   ascensoresHabilitados,
   TEXTO_ESTADO_PERMISO,
   hoyISO,
@@ -123,7 +123,7 @@ export function PermisosPage() {
 function PedirTrasteo({ unidadId, alCerrar }: { unidadId: string; alCerrar: () => void }) {
   const { bd, ejecutar, cargando } = useDatos()
   const { sesion } = useSesion()
-  const reglas = (sesion && sel.copropiedad(bd, sesion.copropiedadId)?.reglasTrasteo) || REGLAS_TRASTEO_POR_DEFECTO
+  const reglas = reglasTrasteoDe(sesion ? sel.copropiedad(bd, sesion.copropiedadId) : undefined)
   const hoy = hoyISO()
   const [sentido, setSentido] = useState<'llegada' | 'salida'>('llegada')
   const [fecha, setFecha] = useState(sumarDias(hoy, reglas.diasAnticipacion))

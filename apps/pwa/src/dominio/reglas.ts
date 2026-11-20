@@ -4495,3 +4495,88 @@ export function motivoCierreDepositoInvalido(
   }
   return null
 }
+
+/**
+ * PN-10 — **Las reglas de trasteo que valen para este edificio.** Si el edificio
+ * no tiene ascensores, no hay ascensores para trasteos aunque se hubieran
+ * guardado antes: una sola agenda y nada que elegir.
+ */
+export function reglasTrasteoDe(copropiedad?: { tieneAscensores?: boolean; reglasTrasteo?: ReglasTrasteo }): ReglasTrasteo {
+  const reglas = copropiedad?.reglasTrasteo ?? REGLAS_TRASTEO_POR_DEFECTO
+  return copropiedad?.tieneAscensores === false ? { ...reglas, ascensores: [] } : reglas
+}
+
+// ---------------------------------------------------------------------------
+// Certificado de pagos del año — PN-14 · CU-R-46
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-14 — **Los pagos que certifica el año**: los aplicados, por la fecha en que
+ * se pagaron, del más viejo al más nuevo. Los anulados no cuentan y los abonos
+ * por conciliar todavía no tienen recibo.
+ */
+export function pagosDelAnio(pagos: Pago[], unidadId: string, anio: number): Pago[] {
+  return pagos
+    .filter((p) => p.unidadId === unidadId && p.estado === 'aplicado' && p.recibo && fechaLocalDe(p.fecha).startsWith(`${anio}-`))
+    .sort((a, b) => a.fecha.localeCompare(b.fecha))
+}
+
+/** PN-14 — Los años con pagos de la unidad, el más reciente primero. */
+export function aniosConPagos(pagos: Pago[], unidadId: string): number[] {
+  const anios = new Set(
+    pagos
+      .filter((p) => p.unidadId === unidadId && p.estado === 'aplicado' && p.recibo)
+      .map((p) => Number(fechaLocalDe(p.fecha).slice(0, 4))),
+  )
+  return [...anios].sort((a, b) => b - a)
+}
+
+/** PN-14 — Por qué no se puede emitir el certificado de ese año, o `null`. */
+export function motivoCertificadoPagosInvalido(anio: number, pagosDelAnio: Pago[], hoy: FechaISO): string | null {
+  if (!Number.isInteger(anio) || anio > Number(hoy.slice(0, 4))) return 'Elige un año que ya haya empezado.'
+  if (pagosDelAnio.length === 0) return `En ${anio} no hay pagos aplicados de esta unidad.`
+  return null
+}
+
+// ---------------------------------------------------------------------------
+// Calificar la atención — PN-15 · CU-R-47, CU-A-38
+// ---------------------------------------------------------------------------
+
+/** PN-15 — Lo que dice cada puntaje, para que la escala se entienda sin pensar. */
+export const TEXTO_PUNTAJE: Record<number, string> = {
+  1: 'Muy mala',
+  2: 'Mala',
+  3: 'Regular',
+  4: 'Buena',
+  5: 'Excelente',
+}
+
+/**
+ * PN-15 — Por qué no se puede calificar, o `null`. Se califica cuando la
+ * administración la dio por resuelta o cerrada, una sola vez, de 1 a 5.
+ */
+export function motivoCalificacionInvalida(pqrs: Pqrs, puntaje: number, comentario?: string): string | null {
+  if (pqrs.estado !== 'resuelta' && pqrs.estado !== 'cerrada') return 'Se califica cuando la administración la resuelve.'
+  if (pqrs.calificacion) return 'Ya calificaste esta atención. ¡Gracias!'
+  if (!Number.isInteger(puntaje) || puntaje < 1 || puntaje > 5) return 'Elige de 1 a 5 estrellas.'
+  if ((comentario ?? '').length > 500) return 'Máximo 500 caracteres en el comentario.'
+  return null
+}
+
+/**
+ * PN-15 — **La satisfacción de la atención**: cuántas se calificaron, el
+ * promedio y qué parte quedó satisfecha (4 o 5). Es lo que el administrador le
+ * muestra al consejo.
+ */
+export function resumenCalificaciones(pqrs: Pqrs[]): { calificadas: number; promedio: number; satisfechos: number; porCalificar: number } {
+  const calificadas = pqrs.filter((p) => p.calificacion)
+  const total = calificadas.reduce((s, p) => s + (p.calificacion?.puntaje ?? 0), 0)
+  return {
+    calificadas: calificadas.length,
+    promedio: calificadas.length ? Math.round((total / calificadas.length) * 10) / 10 : 0,
+    satisfechos: calificadas.length
+      ? Math.round((calificadas.filter((p) => (p.calificacion?.puntaje ?? 0) >= 4).length / calificadas.length) * 100)
+      : 0,
+    porCalificar: pqrs.filter((p) => (p.estado === 'resuelta' || p.estado === 'cerrada') && !p.calificacion).length,
+  }
+}

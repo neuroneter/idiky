@@ -113,6 +113,27 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Certificado de pagos y calificar la atención (CU-R-46, CU-R-47, CU-A-38)
+
+Mary: *«sigamos con el punto 5, certificado de pagos, y luego con el 7, calificar la atención»*.
+- **Certificado de pagos del año** (en Mis comprobantes de pago): documento CP numerado y con código
+  de verificación, recibo por recibo y con su total; se congela al emitirlo (PN-14).
+- **Calificar la atención**: al quedar resuelta una PQRS, «¿Cómo te atendimos?» con 5 estrellas y
+  un comentario (PN-15). La administración ve en la bandeja de PQRS el promedio, la parte
+  satisfecha y cuántas faltan.
+
+La semilla sube a la versión 45. Archivos nuevos: `apps/pwa/src/componentes/HojaCertificadoPagos.tsx`,
+`apps/pwa/src/features/residente/{CertificadoPagos,CalificarAtencion}.tsx`,
+`apps/pwa/pruebas/navegador/certificado-calificacion.spec.ts`. Cambiados: `ComprobantesPage`,
+`PqrsPage`, `PqrsAdminPage`, `dominio/{tipos,reglas}.ts`, `datos/{repositorio,semilla}.ts`.
+
+### 2026-11-20 · Mary + IA (Claude) · Edificio sin ascensores (CU-A-37, PN-10)
+
+Mary: *«si la propiedad por ejemplo no tiene ascensores no se debe habilitar esa pregunta para el
+administrador»*. El edificio guarda si tiene ascensores (`tieneAscensores`, se define al crearlo en
+BLOKY). Sin ascensores, la parametrización de trasteos no los pregunta, el residente no elige
+ascensor y los trasteos van uno a la vez (`reglasTrasteoDe`). La semilla sube a la versión 44.
+
 ### 2026-11-20 · Mary + IA (Claude) · Depósito del trasteo (CU-A-37, CU-R-44, PN-13)
 
 Mary: *«el depósito también lo parametriza el administrador»* (ya estaba en la parametrización) y

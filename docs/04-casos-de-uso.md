@@ -66,6 +66,8 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-43 | **Pedir ayuda a portería desde la app** | 1 | ✅ Demo (2026-11-20, PN-09) | [ver](./casos-de-uso/residente.md#cu-r-43) |
 | CU-R-44 | **Pedir permiso para un trasteo** | 1 | ✅ Demo (2026-11-20, PN-10) | [ver](./casos-de-uso/residente.md#cu-r-44) |
 | CU-R-45 | **Pedir permiso para una obra en el apartamento** | 1 | ✅ Demo (2026-11-20, PN-11) | [ver](./casos-de-uso/residente.md#cu-r-45) |
+| CU-R-46 | **Descargar el certificado de pagos del año** | 1 | ✅ Demo (2026-11-20, PN-14) | [ver](./casos-de-uso/residente.md#cu-r-46) |
+| CU-R-47 | **Calificar la atención de una PQRS** | 1 | ✅ Demo (2026-11-20, PN-15) | [ver](./casos-de-uso/residente.md#cu-r-47) |
 | CU-R-34 | **Personalizar mi avatar en ALICE** (crear si no hay; editar el por defecto o el de BLOKY) | 1 | 🟡 Código en `develop` (2026-11-16; falta probar en teléfono) | [ver](./casos-de-uso/residente.md#cu-r-34) |
 
 ## 2. Administrador — consola web
@@ -109,6 +111,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-35 | **Programar el calendario del edificio** | 1 | ✅ Demo (2026-11-20, PN-07) | [ver](./casos-de-uso/administrador.md#cu-a-35) |
 | CU-A-36 | **Cuidar los clasificados** | 1 | ✅ Demo (2026-11-20, PN-08) | [ver](./casos-de-uso/administrador.md#cu-a-36) |
 | CU-A-37 | **Aprobar los trasteos y las obras en los apartamentos** | 1 | ✅ Demo (2026-11-20, PN-10, PN-11) | [ver](./casos-de-uso/administrador.md#cu-a-37) |
+| CU-A-38 | **Ver cómo califican la atención** | 1 | ✅ Demo (2026-11-20, PN-15) | [ver](./casos-de-uso/administrador.md#cu-a-38) |
 
 
 ## 3. Portería — consola de la entrada

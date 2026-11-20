@@ -1680,6 +1680,53 @@ demo: 8:00 a 17:00, 2 días, sábados sí y los ascensores de servicio de las do
 
 ---
 
+### CU-R-46
+## CU-R-46 — Descargar el certificado de pagos del año
+
+- **Actor principal:** Propietario o arrendatario (también la administración).
+- **Resultado esperado:** Tiene un certificado numerado y verificable de lo que pagó en el año,
+  recibo por recibo, para la declaración de renta o para quien se lo pida.
+
+> Mary, 2026-11-20: *«de acuerdo contigo, sigamos con el punto 5, certificado de pagos, y luego con el 7, calificar la atención»*.
+
+**Flujo principal**
+1. En **Cuenta → Mis comprobantes de pago**, tarjeta «Certificado de pagos del año»: elige el año
+   (los que tienen pagos) y «Generar el certificado».
+2. Se emite el documento **CP-AAAA-NNNN** con su código de verificación: la unidad, los
+   propietarios, cada pago (fecha, recibo, concepto, medio y valor) y el total. Si hubo descuentos
+   por pronto pago, se dicen aparte (no suman al total pagado).
+3. «Descargar PDF». Los certificados emitidos quedan en la lista.
+
+**Flujos alternativos**
+- A1. Un año futuro o sin pagos aplicados → no se emite, y se dice por qué.
+- A2. Después se anula un recibo → el certificado ya emitido **no cambia** (lo que certifica se
+  congela al emitirlo); se puede emitir uno nuevo.
+
+**Reglas:** PN-14, RN-36 (consecutivo y código), RN-77, RN-78. **Estado:** ✅ — `/app/cuenta/pagos`.
+
+---
+
+### CU-R-47
+## CU-R-47 — Calificar la atención de una PQRS
+
+- **Actor principal:** Quien radicó la PQRS (o quien maneja la unidad).
+- **Resultado esperado:** La administración sabe cómo se sintió atendido.
+
+> Mary, 2026-11-20: *«de acuerdo contigo, sigamos con el punto 5, certificado de pagos, y luego con el 7, calificar la atención»*.
+
+**Flujo principal**
+1. Cuando la administración deja la PQRS **resuelta** o **cerrada**, al abrirla aparece «¿Cómo te
+   atendimos?» con 5 estrellas (Muy mala, Mala, Regular, Buena, Excelente) y un comentario opcional.
+2. «Enviar mi calificación» → «¡Gracias! Tu opinión nos ayuda a atenderte mejor». Después ve su
+   calificación.
+
+**Flujos alternativos:** abierta o en gestión → todavía no se califica. Ya calificada → no se
+cambia.
+
+**Reglas:** PN-15. **Estado:** ✅ — `/app/solicitudes/pqrs`.
+
+---
+
 ### CU-R-34
 ## CU-R-34 — Personalizar mi avatar en ALICE
 

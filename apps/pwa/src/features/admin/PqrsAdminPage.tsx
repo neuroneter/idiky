@@ -10,7 +10,8 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
 import { cambiarEstadoPqrs, responderPqrs } from '../../datos/repositorio'
-import { diasRestantesSla, etiquetaUnidad, pqrsAbierta, pqrsFueraDeSla } from '../../dominio/reglas'
+import { TEXTO_PUNTAJE, diasRestantesSla, etiquetaUnidad, pqrsAbierta, pqrsFueraDeSla, resumenCalificaciones } from '../../dominio/reglas'
+import { Estrellas } from '../residente/CalificarAtencion'
 import { capitalizar, formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import type { EstadoPqrs } from '../../dominio/tipos'
 import { Modal } from '../../componentes/Modal'
@@ -56,8 +57,28 @@ export function PqrsAdminPage() {
     if (resultado) setTexto('')
   }
 
+  // CU-A-38 · PN-15 — La satisfacción de la atención, para mostrársela al consejo.
+  const satisfaccion = resumenCalificaciones(todas)
+
   return (
     <>
+      <div className="rejilla-indicadores">
+        <div className="tarjeta indicador">
+          <span className="indicador__valor numerico">{satisfaccion.calificadas ? `${satisfaccion.promedio.toLocaleString('es-CO')} / 5` : '—'}</span>
+          <span className="indicador__etiqueta">Calificación de la atención</span>
+        </div>
+        <div className="tarjeta indicador">
+          <span className="indicador__valor numerico">{satisfaccion.calificadas ? `${satisfaccion.satisfechos} %` : '—'}</span>
+          <span className="indicador__etiqueta">Quedaron satisfechos (4 o 5)</span>
+        </div>
+        <div className="tarjeta indicador">
+          <span className="indicador__valor numerico">{satisfaccion.calificadas}</span>
+          <span className="indicador__etiqueta">
+            Calificadas{satisfaccion.porCalificar ? ` · ${satisfaccion.porCalificar} por calificar` : ''}
+          </span>
+        </div>
+      </div>
+
       <div className="filtros">
         {(
           [
@@ -156,6 +177,12 @@ export function PqrsAdminPage() {
                 </span>
                 <ChipPqrs estado={detalle.estado} />
               </div>
+              {detalle.calificacion && (
+                <p className="subtitulo" style={{ marginBottom: 'var(--e2)' }}>
+                  Calificación: <Estrellas puntaje={detalle.calificacion.puntaje} /> {TEXTO_PUNTAJE[detalle.calificacion.puntaje]}
+                  {detalle.calificacion.comentario ? ` · «${detalle.calificacion.comentario}»` : ''}
+                </p>
+              )}
               <FotoDano pqrs={detalle} />
               <p style={{ fontSize: 'var(--texto-sm)' }}>{detalle.descripcion}</p>
               <p className="ayuda-campo" style={{ marginTop: 'var(--e2)' }}>

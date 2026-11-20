@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 43
+export const VERSION_ESQUEMA = 45
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -784,6 +784,13 @@ function construirPqrs(): { pqrs: Pqrs[]; consecutivo: number } {
           fecha: `${sumarDias(hoy, -18)}T16:20:00.000Z`,
         },
       ],
+      // PN-15 — Calificada por quien la radicó.
+      calificacion: {
+        puntaje: 5,
+        comentario: 'Respondieron rápido y quedó bien.',
+        personaId: 'per-3',
+        fecha: `${sumarDias(hoy, -17)}T12:00:00.000Z`,
+      },
     },
     {
       id: 'pqr-4',
@@ -1515,6 +1522,8 @@ export function crearSemilla(): BaseDatos {
         quorumMinimo: 50,
         // PN-01 — Aprobado en la asamblea: 5 % de descuento pagando hasta el día 5.
         prontoPago: { activo: true, porcentaje: 5, diaLimite: 5 },
+        // Se define al crear el edificio: con ascensores, la parametrización de trasteos los pregunta.
+        tieneAscensores: true,
         // PN-10 — Lo parametriza la administración: horario y ascensores para trasteos.
         reglasTrasteo: {
           horaDesde: '08:00',

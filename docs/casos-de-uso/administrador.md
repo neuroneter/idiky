@@ -1359,6 +1359,11 @@ trastea los sábados, el depósito (opcional) y los **ascensores para trasteos**
 nombre y si está habilitado. Un ascensor se deshabilita, no se borra. Cada ascensor tiene su propia
 agenda. Lo ya aprobado no cambia. En BLOKY va en la parametrización del edificio (T-54).
 
+**Edificio sin ascensores** (Mary, 2026-11-20: *«si la propiedad por ejemplo no tiene ascensores no
+se debe habilitar esa pregunta para el administrador»*). Si el edificio tiene ascensores se define
+**al crearlo** (BLOKY, «Arma tu copropiedad»). Si no tiene, la parametrización de trasteos no
+pregunta por ascensores, el residente no elige ascensor y los trasteos van uno a la vez.
+
 **Depósito del trasteo** (Mary, 2026-11-20: *«el depósito también lo parametriza el
 administrador»* y *«sí, agrégalo»*). Si el edificio lo pide, cada trasteo lleva su depósito:
 1. «Depósito recibido»: lo marca la administración o portería cuando el residente lo entrega.
@@ -1372,3 +1377,21 @@ Los trasteos pasados con el depósito abierto siguen en la lista hasta cerrarlo.
 residente que el edificio guarda: la contable debe llevarla aparte (T-56).
 
 **Reglas:** PN-10, PN-11, PN-13. **Estado:** ✅ — `/admin/edificio`.
+
+---
+
+### CU-A-38
+## CU-A-38 — Ver cómo califican la atención
+
+- **Actor principal:** Administrador.
+- **Resultado esperado:** Sabe cómo se sienten atendidos los propietarios y se lo puede mostrar al
+  consejo.
+
+> Mary, 2026-11-20: *«de acuerdo contigo, sigamos con el punto 5, certificado de pagos, y luego con el 7, calificar la atención»*.
+
+**Flujo principal:** en la **bandeja de PQRS**, arriba: la calificación promedio (de 1 a 5), qué
+parte quedó satisfecha (4 o 5 estrellas) y cuántas se calificaron y cuántas faltan. Al abrir una
+PQRS calificada ve las estrellas y el comentario.
+
+**Reglas:** PN-15. **Estado:** ✅ — `/admin/pqrs`.
+
