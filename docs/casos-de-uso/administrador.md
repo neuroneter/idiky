@@ -1245,6 +1245,11 @@ consola del administrador (T-45).
 - **Actor principal:** Administrador. **Precondición:** lo aprobó la asamblea.
 - **Resultado esperado:** El edificio ofrece un descuento a quien paga la cuota ordinaria a tiempo.
 
+> Mary, 2026-11-20: *«el que define el % de descuento es el administrador cuando crea el
+> edificio»*. En BLOKY va en la parametrización del edificio, al crearlo («Arma tu copropiedad»,
+> CU-B-03), y se puede cambiar después. El demo no tiene creación de edificio: ahí se ve y se
+> cambia en Cartera.
+
 > Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
 
 **Flujo principal:** en **Cartera**, tarjeta «Descuento por pronto pago»: porcentaje (0,1 % a 30 %) y hasta qué día del mes (1 a 28); «Activar», «Guardar cambios» o «Apagar». Muestra cuánto se ha concedido.
