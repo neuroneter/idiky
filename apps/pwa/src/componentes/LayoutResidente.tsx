@@ -4,7 +4,7 @@
  */
 
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useDatos } from '../estado/DatosContext'
 import { useSesion } from '../estado/SesionContext'
 import * as sel from '../datos/selectores'
@@ -56,6 +56,7 @@ const TITULOS: Record<string, string> = {
   '/app/unidad': 'Mi unidad',
   '/app/unidad/vehiculos-mascotas': 'Vehículos y mascotas',
   '/app/unidad/permisos': 'Trasteos y obras',
+  '/app/avisos': 'Mis avisos',
   '/app/directorio': 'Teléfonos útiles',
   '/app/edificio': 'Tu edificio',
   '/app/edificio/cuentas': 'Cuentas claras',
@@ -83,6 +84,7 @@ export function LayoutResidente() {
   const { bd } = useDatos()
   const { sesion, cerrar, cambiarUnidadActiva } = useSesion()
   const { pathname } = useLocation()
+  const navegarA = useNavigate()
   const [eligiendoUnidad, setEligiendoUnidad] = useState(false)
   const [viendoPerfil, setViendoPerfil] = useState(false)
   /** `null` mientras se averigua si el aparato tiene lector (ADR-0002). */
@@ -200,6 +202,19 @@ export function LayoutResidente() {
               la letra y la huella. Van juntos porque son la misma clase de cosa —
               no viajan al backend de la fase 2 ni acompanan a la persona a otro
               aparato. */}
+          {/* CU-R-48 — Por dónde y de qué le avisamos. */}
+          <button
+            className="boton boton--bloque"
+            style={{ marginBottom: 'var(--e3)' }}
+            onClick={() => {
+              setViendoPerfil(false)
+              navegarA('/app/avisos')
+            }}
+          >
+            <Icono nombre="comunicados" tamano={16} />
+            Mis avisos: por dónde y de qué te avisamos
+          </button>
+
           <div className="columna" style={{ gap: 'var(--e1)', marginBottom: 'var(--e3)' }}>
             <strong>Tamaño de la letra</strong>
             <span className="subtitulo">Aplica a toda la app, en este teléfono.</span>

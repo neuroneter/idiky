@@ -151,7 +151,7 @@ test('pide ayuda, portería va en camino y la atiende (CU-R-43)', async ({ page 
   await entrarComo(page, /Jairo Alberto Pineda/)
   await expect(page.getByText(/Piden ayuda: Torre 1/)).toBeVisible()
   await page.getByRole('button', { name: 'Voy en camino' }).click()
-  await expect(page.getByText('En camino')).toBeVisible()
+  await expect(page.getByText('En camino', { exact: true })).toBeVisible()
   await page.getByRole('button', { name: 'Atendida' }).click()
   await expect(page.getByText(/Piden ayuda/)).toHaveCount(0)
 })

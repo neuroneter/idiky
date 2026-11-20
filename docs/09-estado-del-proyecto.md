@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Elegir por dónde y de qué me avisan (CU-R-48, PN-16)
+
+Mary: *«con el 6 por favor»*. Desde el perfil, **Mis avisos**: el canal (WhatsApp por defecto, SMS,
+correo o solo la app) y los temas que se pueden apagar (pagos, obras, zonas comunes). Lo que
+responde a algo que la persona pidió no se apaga. Si falta el dato del canal, sale por el otro.
+Cada mensaje guarda ahora a quién y por dónde salió, y la persona ve lo último que le enviamos.
+Archivos: `apps/pwa/src/features/residente/AvisosPage.tsx` y
+`apps/pwa/pruebas/navegador/avisos.spec.ts` (nuevos), `LayoutResidente`, `App.tsx`,
+`dominio/{tipos,reglas}.ts`, `datos/repositorio.ts`.
+
 ### 2026-11-20 · Mary + IA (Claude) · Certificado de pagos y calificar la atención (CU-R-46, CU-R-47, CU-A-38)
 
 Mary: *«sigamos con el punto 5, certificado de pagos, y luego con el 7, calificar la atención»*.

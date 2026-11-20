@@ -149,6 +149,8 @@ export interface Persona {
   documento: string
   email: string
   telefono: string
+  /** CU-R-48 · PN-16 — Por dónde y de qué quiere que le avisemos. Sin esto, por WhatsApp y de todo. */
+  preferenciasAvisos?: PreferenciasAvisos
 }
 
 /**
@@ -1063,6 +1065,9 @@ export interface Mensaje {
   cuotaId?: string
   /** RN-226 — El pago que se agradece. */
   pagoId?: string
+  /** PN-16 — A quién y por dónde salió. Los mensajes viejos no lo traen. */
+  personaId?: string
+  canal?: CanalAviso
   enviadoEn: FechaHoraISO
 }
 
@@ -2180,4 +2185,21 @@ export interface CertificadoPagosCongelado {
   total: Dinero
   descuentos: Dinero
   solicitadoPor: string
+}
+
+// ---------------------------------------------------------------------------
+// Por dónde me avisan — Mary, 2026-11-20 · CU-R-48 · PN-16
+// ---------------------------------------------------------------------------
+
+/** Por dónde le llegan los avisos a la persona. En la app le llegan siempre. */
+export type CanalAviso = 'whatsapp' | 'sms' | 'correo' | 'app'
+
+/** Los avisos que se pueden apagar. Lo que responde a algo que la persona pidió, no. */
+export type TemaAviso = 'pagos' | 'obras' | 'reservas'
+
+export interface PreferenciasAvisos {
+  canal: CanalAviso
+  /** `false` = no quiere ese tema. Lo que falta, se envía. */
+  temas: Partial<Record<TemaAviso, boolean>>
+  cambiadoEn?: FechaHoraISO
 }
