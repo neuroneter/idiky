@@ -113,6 +113,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Corte para el equipo y qué falta para salir
+
+Mary: *«hagamos una última validación de lo que está pendiente si quisiéramos sacar la app hoy para
+una propiedad»* y *«sí, por favor»* (incluirlo en el resumen). Nuevo corte
+[`22-entrega-de-mary-2026-11.md`](./22-entrega-de-mary-2026-11.md): lo construido, qué le toca a
+Daniel, Jeimy, Justo y al abogado, y la lista de lo que falta para salir a un edificio real (hoy no
+se puede: es la maqueta). **Qué sigue:** que Daniel asigne los rangos nuevos (T-55) y decidir el
+piloto de demostración con un administrador real.
+
 ### 2026-11-20 · Mary + IA (Claude) · Revisión entre perfiles (PN-20)
 
 Mary: *«revisar si falta algo en la app entre perfiles»*, *«sí, constrúyelo»* y *«lo que no aplique
