@@ -1894,6 +1894,8 @@ export interface BaseDatos {
   trasteos: Trasteo[]
   /** CU-R-45 — Permisos de obra en el apartamento. */
   permisosObra: PermisoObra[]
+  /** CU-R-49 — Objetos encontrados en el edificio. */
+  objetosEncontrados: ObjetoEncontrado[]
   accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
   asistencias: Asistencia[]
@@ -2202,4 +2204,34 @@ export interface PreferenciasAvisos {
   /** `false` = no quiere ese tema. Lo que falta, se envía. */
   temas: Partial<Record<TemaAviso, boolean>>
   cambiadoEn?: FechaHoraISO
+}
+
+// ---------------------------------------------------------------------------
+// Objetos perdidos — Mary, 2026-11-20 · CU-R-49 · PN-17
+// ---------------------------------------------------------------------------
+
+/** Quien dice que el objeto es suyo, con las señas para comprobarlo. */
+export interface ReclamoObjeto {
+  personaId: string
+  unidadId: string
+  senas: string
+  fecha: FechaHoraISO
+}
+
+/**
+ * PN-17 — Un objeto que alguien encontró en el edificio y quedó en portería.
+ * Se entrega a su dueño o, pasado el plazo, se da de baja con motivo. No se borra.
+ */
+export interface ObjetoEncontrado {
+  id: string
+  copropiedadId: string
+  descripcion: string
+  /** Dónde se encontró: «salón social», «parqueadero P-12». */
+  lugar: string
+  foto?: Soporte
+  encontradoEn: FechaHoraISO
+  registradoPor: string
+  reclamos: ReclamoObjeto[]
+  entrega?: { personaId: string; por: string; en: FechaHoraISO }
+  baja?: { motivo: string; por: string; en: FechaHoraISO }
 }

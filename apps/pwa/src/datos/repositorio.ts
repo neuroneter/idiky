@@ -219,6 +219,7 @@ import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajer
 import { finDePeriodo, formatearDinero, formatearFecha, formatearPeriodo } from '../utilidades/formato'
 import { guardar, leer, sembrar, ocupacion } from './almacen'
 import type {
+  ObjetoEncontrado,
   CanalAviso,
   TemaAviso,
   PermisoObra,
@@ -241,6 +242,9 @@ import type {
 } from '../dominio/tipos'
 import {
   reglasTrasteoDe,
+  motivoObjetoInvalido,
+  motivoBajaObjetoInvalida,
+  objetoPendiente,
   canalDelAviso,
   quiereElAviso,
   motivoCalificacionInvalida,
@@ -6364,4 +6368,90 @@ export async function configurarAvisos(
   }
   persona.preferenciasAvisos = { canal: parametros.canal, temas: { ...parametros.temas }, cambiadoEn: ahoraISO() }
   return persistir(bd, persona)
+}
+
+// ---------------------------------------------------------------------------
+// Objetos perdidos — Mary, 2026-11-20 · CU-R-49 · PN-17
+// ---------------------------------------------------------------------------
+
+/** CU-R-49 · PN-17 — Portería (o la administración) registra un objeto encontrado. */
+export async function registrarObjetoEncontrado(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; descripcion: string; lugar: string; foto?: string },
+): Promise<Resultado<ObjetoEncontrado>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!atiendePorteria(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('Los objetos encontrados los registra portería o la administración.')
+  }
+  const motivo = motivoObjetoInvalido(parametros)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const ahora = ahoraISO()
+  const objeto: ObjetoEncontrado = {
+    id: nuevoId('obj'),
+    copropiedadId: parametros.copropiedadId,
+    descripcion: parametros.descripcion.trim(),
+    lugar: parametros.lugar.trim(),
+    foto: parametros.foto ? { imagen: parametros.foto, adjuntadoEn: ahora } : undefined,
+    encontradoEn: ahora,
+    registradoPor: parametros.personaId,
+    reclamos: [],
+  }
+  bd.objetosEncontrados.unshift(objeto)
+  return persistir(bd, objeto)
+}
+
+/**
+ * CU-R-49 · PN-17 — Quien vive en el edificio dice «es mío» con las señas
+ * (cómo es, qué tiene adentro). Una vez por persona. Portería lo comprueba al
+ * entregarlo.
+ */
+export async function reclamarObjeto(
+  bdActual: BaseDatos,
+  parametros: { objetoId: string; personaId: string; unidadId: string; senas: string },
+): Promise<Resultado<ObjetoEncontrado>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const objeto = bd.objetosEncontrados.find((o) => o.id === parametros.objetoId)
+  if (!objeto) throw new ErrorDeNegocio('Ese objeto no existe.')
+  if (!esDeLaUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('Lo reclama quien vive o es dueño en el edificio.')
+  }
+  if (!objetoPendiente(objeto)) throw new ErrorDeNegocio('Ese objeto ya se entregó o se dio de baja.')
+  if (objeto.reclamos.some((r) => r.personaId === parametros.personaId)) throw new ErrorDeNegocio('Ya dijiste que es tuyo. Pasa por portería.')
+  if (parametros.senas.trim().length < 10) throw new ErrorDeNegocio('Cuéntanos alguna seña para que portería sepa que es tuyo.')
+  objeto.reclamos.push({ personaId: parametros.personaId, unidadId: parametros.unidadId, senas: parametros.senas.trim(), fecha: ahoraISO() })
+  return persistir(bd, objeto)
+}
+
+/** CU-R-49 · PN-17 — Portería entrega el objeto a quien lo reclamó (o a quien lo pida en persona). */
+export async function entregarObjeto(
+  bdActual: BaseDatos,
+  parametros: { objetoId: string; personaId: string; entregadoA: string },
+): Promise<Resultado<ObjetoEncontrado>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const objeto = bd.objetosEncontrados.find((o) => o.id === parametros.objetoId)
+  if (!objeto) throw new ErrorDeNegocio('Ese objeto no existe.')
+  if (!atiendePorteria(bd, parametros.personaId, objeto.copropiedadId)) throw new ErrorDeNegocio('Lo entrega portería o la administración.')
+  if (!objetoPendiente(objeto)) throw new ErrorDeNegocio('Ese objeto ya se cerró.')
+  if (!bd.personas.some((p) => p.id === parametros.entregadoA)) throw new ErrorDeNegocio('Elige a quién se entrega.')
+  objeto.entrega = { personaId: parametros.entregadoA, por: parametros.personaId, en: ahoraISO() }
+  return persistir(bd, objeto)
+}
+
+/** CU-R-49 · PN-17 — Pasado el plazo y sin reclamos, se da de baja con motivo. */
+export async function darDeBajaObjeto(
+  bdActual: BaseDatos,
+  parametros: { objetoId: string; personaId: string; motivo: string },
+): Promise<Resultado<ObjetoEncontrado>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const objeto = bd.objetosEncontrados.find((o) => o.id === parametros.objetoId)
+  if (!objeto) throw new ErrorDeNegocio('Ese objeto no existe.')
+  if (!atiendePorteria(bd, parametros.personaId, objeto.copropiedadId)) throw new ErrorDeNegocio('Lo da de baja portería o la administración.')
+  const motivo = motivoBajaObjetoInvalida(objeto, parametros.motivo, hoyISO())
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  objeto.baja = { motivo: parametros.motivo.trim(), por: parametros.personaId, en: ahoraISO() }
+  return persistir(bd, objeto)
 }

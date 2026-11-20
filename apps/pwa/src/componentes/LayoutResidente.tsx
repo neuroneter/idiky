@@ -64,6 +64,7 @@ const TITULOS: Record<string, string> = {
   '/app/edificio/encuestas': 'Encuestas',
   '/app/edificio/calendario': 'Calendario',
   '/app/edificio/clasificados': 'Clasificados',
+  '/app/edificio/objetos': 'Objetos perdidos',
 }
 
 /**

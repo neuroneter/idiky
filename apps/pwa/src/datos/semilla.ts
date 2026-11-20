@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 45
+export const VERSION_ESQUEMA = 46
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1890,6 +1890,27 @@ function construirParaCompetir() {
         estado: 'solicitado' as const,
         creadoEn: `${sumarDias(hoy, -1)}T14:00:00.000Z`,
         deposito: { valor: 200000 },
+      },
+    ],
+    // CU-R-49 — Dos objetos en portería: uno ya reclamado y uno viejo, que se puede dar de baja.
+    objetosEncontrados: [
+      {
+        id: 'obj-1',
+        copropiedadId: COPROPIEDAD_ID,
+        descripcion: 'Llaves con llavero de Totoro',
+        lugar: 'Parque infantil',
+        encontradoEn: `${sumarDias(hoy, -2)}T18:30:00.000Z`,
+        registradoPor: 'per-porteria',
+        reclamos: [],
+      },
+      {
+        id: 'obj-2',
+        copropiedadId: COPROPIEDAD_ID,
+        descripcion: 'Chaqueta azul de niño, talla 8',
+        lugar: 'Salón social',
+        encontradoEn: `${sumarDias(hoy, -70)}T20:00:00.000Z`,
+        registradoPor: 'per-porteria',
+        reclamos: [],
       },
     ],
     // CU-R-45 — Una obra en curso con sus trabajadores y una por aprobar.

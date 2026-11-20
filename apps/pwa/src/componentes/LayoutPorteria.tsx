@@ -51,6 +51,8 @@ const SECCIONES: Array<{
     icono: 'correspondencia',
     permiso: 'correspondencia',
   },
+  // CU-R-49 — Los objetos encontrados, con el mismo permiso que la correspondencia.
+  { ruta: '/porteria/objetos', texto: 'Objetos perdidos', icono: 'buscar', permiso: 'correspondencia' },
 ]
 
 const TITULOS: Record<string, string> = {
@@ -58,6 +60,7 @@ const TITULOS: Record<string, string> = {
   '/porteria/visitantes': 'Validar visitantes',
   '/porteria/residentes': 'Reconocer a quien vive aquí',
   '/porteria/correspondencia': 'Correspondencia',
+  '/porteria/objetos': 'Objetos perdidos',
 }
 
 export function LayoutPorteria() {

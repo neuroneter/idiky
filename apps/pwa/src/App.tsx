@@ -57,6 +57,8 @@ import { ResidentesPage } from './features/porteria/ResidentesPage'
 import { AvisoVersionNueva } from './componentes/AvisoVersionNueva'
 import { PermisosPage } from './features/residente/PermisosPage'
 import { AvisosPage } from './features/residente/AvisosPage'
+import { ObjetosPage } from './features/residente/edificio/ObjetosPage'
+import { GestionObjetos } from './componentes/GestionObjetos'
 import { EdificioPage } from './features/residente/edificio/EdificioPage'
 import { CuentasClarasPage } from './features/residente/edificio/CuentasClarasPage'
 import { DocumentosPage } from './features/residente/edificio/DocumentosPage'
@@ -143,6 +145,7 @@ export function App() {
         <Route path="edificio/encuestas" element={<EncuestasPage />} />
         <Route path="edificio/calendario" element={<CalendarioPage />} />
         <Route path="edificio/clasificados" element={<ClasificadosPage />} />
+        <Route path="edificio/objetos" element={<ObjetosPage />} />
       </Route>
 
       {/* Consola de administracion — CU-A-xx */}
@@ -195,6 +198,7 @@ export function App() {
         <Route path="visitantes" element={<ValidarVisitantePage />} />
         <Route path="residentes" element={<ResidentesPage />} />
         <Route path="correspondencia" element={<CorrespondenciaGestionPage />} />
+        <Route path="objetos" element={<GestionObjetos />} />
       </Route>
 
       <Route

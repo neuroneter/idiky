@@ -113,6 +113,18 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Objetos perdidos (CU-R-49, PN-17)
+
+Mary: *«sigamos con la 9»*. Portería o la administración registran lo encontrado; los residentes
+lo ven en **Tu edificio → Objetos perdidos** y dicen «es mío» con una seña; portería lo entrega a
+quien comprueba. A los 60 días sin reclamos se da de baja con motivo. La semilla sube a la versión
+46. **Con CU-R-49 se agotó el rango CU-R de Mary** (T-55: pedir rangos nuevos de RN y CU-R).
+Archivos: `apps/pwa/src/componentes/GestionObjetos.tsx`,
+`apps/pwa/src/features/residente/edificio/ObjetosPage.tsx` y
+`apps/pwa/pruebas/navegador/objetos.spec.ts` (nuevos), `EdificioPage`, `EdificioAdminPage`,
+`LayoutPorteria`, `LayoutResidente`, `App.tsx`, `dominio/{tipos,reglas}.ts`,
+`datos/{repositorio,semilla}.ts`.
+
 ### 2026-11-20 · Mary + IA (Claude) · Elegir por dónde y de qué me avisan (CU-R-48, PN-16)
 
 Mary: *«con el 6 por favor»*. Desde el perfil, **Mis avisos**: el canal (WhatsApp por defecto, SMS,
