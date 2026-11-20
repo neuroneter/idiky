@@ -8,7 +8,7 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { marcarTrasteoRealizado } from '../../datos/repositorio'
-import { etiquetaUnidad, hoyISO, obraTrabajaHoy } from '../../dominio/reglas'
+import { TEXTO_TIPO_EVENTO, etiquetaUnidad, hoyISO, obraTrabajaHoy } from '../../dominio/reglas'
 
 export function HoyEnElEdificio() {
   const { bd, ejecutar, cargando } = useDatos()
@@ -17,13 +17,22 @@ export function HoyEnElEdificio() {
   const hoy = hoyISO()
   const trasteos = (bd.trasteos ?? []).filter((t) => t.copropiedadId === sesion.copropiedadId && t.fecha === hoy && t.estado === 'aprobado')
   const obras = (bd.permisosObra ?? []).filter((o) => o.copropiedadId === sesion.copropiedadId && obraTrabajaHoy(o, hoy))
-  if (trasteos.length === 0 && obras.length === 0) return null
+  // PN-07 — Lo que la administración programó para hoy: portería es a quien le preguntan.
+  const eventos = (bd.eventosEdificio ?? []).filter((e) => e.copropiedadId === sesion.copropiedadId && e.fecha === hoy && !e.cancelacion)
+  if (trasteos.length === 0 && obras.length === 0 && eventos.length === 0) return null
   const ascensor = (id?: string) =>
     sel.copropiedad(bd, sesion.copropiedadId)?.reglasTrasteo?.ascensores?.find((a) => a.id === id)?.nombre
 
   return (
     <div className="tarjeta columna" style={{ gap: 'var(--e2)' }}>
       <strong>Hoy en el edificio</strong>
+      {eventos.map((e) => (
+        <span key={e.id}>
+          <strong>{TEXTO_TIPO_EVENTO[e.tipo]}</strong> · {e.titulo}
+          {e.horaInicio ? ` · ${e.horaInicio}${e.horaFin ? ` a ${e.horaFin}` : ''}` : ''}
+          {e.detalle ? <span className="subtitulo"> · {e.detalle}</span> : null}
+        </span>
+      ))}
       {trasteos.map((t) => {
         const unidad = sel.unidad(bd, t.unidadId)
         return (

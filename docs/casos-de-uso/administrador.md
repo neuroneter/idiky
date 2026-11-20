@@ -1280,6 +1280,13 @@ consola del administrador (T-45).
 
 **Reglas:** PN-03. **Estado:** ✅ — `/admin/edificio`. Con backend, desde la contable (T-52).
 
+> **Revisión entre perfiles (Mary, 2026-11-20).** El **tablero** de la administración (`/admin`)
+> abre con **«Te esperan»**: pedidos de ayuda sin atender, acuerdos de pago, trasteos y obras por
+> aprobar, preguntas sobre las obras sin responder, objetos perdidos reclamados y depósitos por
+> devolver, cada uno con su botón. En **Cartera → Certificados de pago** la administración genera
+> el certificado del año por el propietario que lo pide en persona (CU-R-46), y en **Cartera** ve
+> los **pagos programados** (CU-R-36) con lo que se espera recibir al mes.
+
 ---
 
 ### CU-A-33

@@ -3,6 +3,7 @@
  * Doc: docs/casos-de-uso/administrador.md#cu-a-01
  */
 
+import { TeEsperan } from './TeEsperan'
 import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
@@ -86,6 +87,9 @@ export function TableroPage() {
 
   return (
     <>
+      {/* Lo que residentes y portería dejaron esperando una respuesta. */}
+      <TeEsperan />
+
       {/* RN-102 — Las obras que deben un avance, arriba de todo: es lo único
           del tablero que el propietario está esperando y nadie más le va a
           reclamar al administrador. */}

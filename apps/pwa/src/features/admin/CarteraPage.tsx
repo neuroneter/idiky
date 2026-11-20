@@ -10,6 +10,7 @@
  * entra es el otro modulo (`PagosPage`), para no mezclar la consulta con la caja.
  */
 
+import { PagosProgramadosAdmin } from './PagosProgramadosAdmin'
 import { AcuerdosPagoAdmin } from './AcuerdosPagoAdmin'
 import { ProntoPagoTarjeta } from './ProntoPagoTarjeta'
 import { useMemo, useState } from 'react'
@@ -52,6 +53,9 @@ export function CarteraSeccionAdmin() {
         </NavLink>
         <NavLink to="/admin/cartera/paz-y-salvo" className="segmento">
           Paz y salvo
+        </NavLink>
+        <NavLink to="/admin/cartera/certificados" className="segmento">
+          Certificados de pago
         </NavLink>
       </nav>
       <Outlet />
@@ -155,6 +159,7 @@ export function CarteraPage() {
       <RecordatoriosPago />
       <ProntoPagoTarjeta />
       <AcuerdosPagoAdmin />
+      <PagosProgramadosAdmin />
 
       <div className="fila">
         <div className="filtros">

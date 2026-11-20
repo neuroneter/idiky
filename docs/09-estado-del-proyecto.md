@@ -113,6 +113,25 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Revisión entre perfiles (PN-20)
+
+Mary: *«revisar si falta algo en la app entre perfiles»*, *«sí, constrúyelo»* y *«lo que no aplique
+al perfil no se debe visualizar»*. Cinco arreglos:
+1. **Te esperan** en el tablero de la administración: todo lo que residentes y portería dejaron
+   esperando una respuesta.
+2. **Portería ve el calendario del día** en «Hoy en el edificio».
+3. **La minuta del turno** registra ayuda, trasteos y depósitos, y objetos perdidos.
+4. **La administración** genera el certificado de pagos por el propietario (Cartera → Certificados
+   de pago) y ve los pagos programados.
+5. **PN-20:** al familiar y al autorizado no se les muestra lo que decide el propietario o el
+   arrendatario (encuestas, obra, pago programado, acuerdo, certificado, preguntas de obra).
+   Perfil nuevo en el demo: **Tomás**, familiar de la 402. La semilla sube a la versión 49.
+Archivos nuevos: `apps/pwa/src/features/admin/{TeEsperan,PagosProgramadosAdmin,CertificadosAdminPage}.tsx`,
+`apps/pwa/pruebas/navegador/entre-perfiles.spec.ts`. Cambiados: `TableroPage`, `CarteraPage`,
+`HoyEnElEdificio`, `MinutaTurno`, `EncuestasPage`, `PermisosPage`, `PagoProgramado`, `AcuerdoPago`,
+`CertificadoPagos`, `PreguntasProyecto`, `LayoutAdmin`, `App.tsx`, `dominio/reglas.ts`,
+`datos/{selectores,semilla}.ts`.
+
 ### 2026-11-20 · Mary + IA (Claude) · Acuerdos de pago (CU-A-39, PN-19)
 
 Mary: *«sigamos con el acuerdo de pago, pero hay que crear en la parametrización si en el edificio

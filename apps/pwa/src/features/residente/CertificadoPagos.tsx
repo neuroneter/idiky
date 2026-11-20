@@ -11,7 +11,7 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { emitirCertificadoPagos } from '../../datos/repositorio'
-import { aniosConPagos } from '../../dominio/reglas'
+import { aniosConPagos, decideEnLaUnidad } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha } from '../../utilidades/formato'
 import { HojaCertificadoPagos } from '../../componentes/HojaCertificadoPagos'
 import { Icono } from '../../componentes/Icono'
@@ -23,7 +23,8 @@ export function CertificadoPagos({ viendo, alVer }: { viendo: string | null; alV
   const unidadId = sesion?.unidadActivaId ?? ''
   const anios = aniosConPagos(bd.pagos, unidadId)
   const [anio, setAnio] = useState<number | null>(anios[0] ?? null)
-  if (!sesion || anios.length === 0) return null
+  // PN-20 — El certificado lo pide el propietario o el arrendatario.
+  if (!sesion || anios.length === 0 || !decideEnLaUnidad(sel.rolEnUnidad(bd, sesion.personaId, unidadId))) return null
 
   const emitidos = sel.documentosDeUnidad(bd, unidadId).filter((d) => d.tipo === 'certificado_pagos')
   const documento = emitidos.find((d) => d.id === viendo)
