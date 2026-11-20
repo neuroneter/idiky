@@ -57,6 +57,7 @@ const TITULOS: Record<string, string> = {
   '/app/unidad/vehiculos-mascotas': 'Vehículos y mascotas',
   '/app/unidad/permisos': 'Trasteos y obras',
   '/app/avisos': 'Mis avisos',
+  '/app/propiedades': 'Mis propiedades',
   '/app/directorio': 'Teléfonos útiles',
   '/app/edificio': 'Tu edificio',
   '/app/edificio/cuentas': 'Cuentas claras',
@@ -276,6 +277,16 @@ export function LayoutResidente() {
           onCerrar={() => setEligiendoUnidad(false)}
         >
           <div className="lista">
+            {/* PN-18 — Todas, con lo que se debe en cada una. */}
+            <button
+              className="boton boton--bloque"
+              onClick={() => {
+                setEligiendoUnidad(false)
+                navegarA('/app/propiedades')
+              }}
+            >
+              Ver todas mis propiedades
+            </button>
             {misResidencias.map((residencia) => {
               const unidad = sel.unidad(bd, residencia.unidadId)
               if (!unidad) return null

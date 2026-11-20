@@ -68,6 +68,7 @@ export function InicioPage() {
     .visitantesDeUnidad(bd, unidadId)
     .filter((visitante) => estadoRealVisitante(visitante, hoyISO()) === 'activo')
 
+  const propiedades = sel.propiedadesDePersona(bd, sesion.personaId)
   const encuestasPorResponder = sel
     .encuestasDe(bd, sesion.copropiedadId)
     .filter((e) => encuestaAbierta(e, hoyISO()) && !respuestaDeUnidad(e, unidadId ?? '')).length
@@ -152,6 +153,21 @@ export function InicioPage() {
           <Icono nombre="chevron" tamano={16} className="tenue" />
         </div>
       </Link>
+
+      {/* PN-18 — Con varias propiedades, todas a un toque. */}
+      {propiedades.length > 1 && (
+        <Link to="/app/propiedades" className="tarjeta tarjeta--accion tarjeta--plana">
+          <div className="fila">
+            <div className="columna">
+              <strong>Tus {propiedades.length} propiedades</strong>
+              <span className="subtitulo">
+                Valor adeudado en todas: {formatearDinero(propiedades.reduce((s, p) => s + (p.saldo ?? 0), 0))}
+              </span>
+            </div>
+            <Icono nombre="chevron" tamano={16} className="tenue" />
+          </div>
+        </Link>
+      )}
 
       {/* Tu edificio: cuentas claras, calendario, encuestas, documentos y clasificados. */}
       <Link to="/app/edificio" className="tarjeta tarjeta--accion tarjeta--plana">

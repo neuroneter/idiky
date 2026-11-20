@@ -12,7 +12,7 @@ import type {
   FechaISO,
   PagoProgramado,
 } from '../dominio/tipos'
-import { TEXTO_TIPO_EVENTO, avisoVigente, encuestaAbierta, fechaLocalDe } from '../dominio/reglas'
+import { TEXTO_TIPO_EVENTO, avisoVigente, calcularSaldo, encuestaAbierta, fechaLocalDe, pendienteDesde, pqrsAbierta, veLaCuentaDe } from '../dominio/reglas'
 import { formatearFechaHora } from '../utilidades/formato'
 import type {
   Asamblea,
@@ -609,4 +609,50 @@ export function calendarioDelEdificio(bd: BaseDatos, copropiedadId: string, unid
     }
   }
   return filas.sort((a, b) => a.fecha.localeCompare(b.fecha) || (a.hora ?? '').localeCompare(b.hora ?? ''))
+}
+
+// ---------------------------------------------------------------------------
+// Todas mis propiedades — Mary, 2026-11-20 · CU-R-01 (A6) · PN-18
+// ---------------------------------------------------------------------------
+
+export interface ResumenPropiedad {
+  residencia: Residencia
+  unidad: Unidad
+  copropiedad?: string
+  /** `null` cuando su rol no ve la cuenta (PN-18). */
+  saldo: number | null
+  pendienteDesde?: FechaISO
+  proximoVencimiento?: FechaISO
+  pqrsAbiertas: number
+}
+
+/**
+ * PN-18 — **Todas las propiedades de una persona en una sola vista**: cada
+ * unidad con vínculo vigente, lo que se debe (si su rol la ve), desde cuándo hay
+ * algo pendiente, el próximo vencimiento y las solicitudes abiertas.
+ */
+export function propiedadesDePersona(bd: BaseDatos, personaId: string): ResumenPropiedad[] {
+  const hoy = hoyISO()
+  return residenciasDePersona(bd, personaId)
+    .filter((r) => !r.cierre)
+    .map((residencia): ResumenPropiedad | null => {
+      const u = unidad(bd, residencia.unidadId)
+      if (!u) return null
+      const cuotas = cuotasDeUnidad(bd, u.id)
+      const ve = veLaCuentaDe(residencia.rol)
+      const proximo = cuotas
+        .filter((c) => c.saldo > 0 && c.fechaVencimiento >= hoy)
+        .map((c) => c.fechaVencimiento)
+        .sort()[0]
+      return {
+        residencia,
+        unidad: u,
+        copropiedad: copropiedad(bd, u.copropiedadId)?.nombre,
+        saldo: ve ? calcularSaldo(cuotas) : null,
+        pendienteDesde: ve ? pendienteDesde(cuotas) : undefined,
+        proximoVencimiento: ve ? proximo : undefined,
+        pqrsAbiertas: pqrsDeUnidad(bd, u.id).filter(pqrsAbierta).length,
+      }
+    })
+    .filter((x): x is ResumenPropiedad => x !== null)
 }

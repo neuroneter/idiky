@@ -49,6 +49,15 @@ autenticado o con SMS, como funciona ahora la mayoría de ingresos»*)
   devuelve a elegir canal y pedir otro.
 - A5. **No es él** quien el teléfono recuerda → toca «No soy yo» y vuelve al campo.
 - A6. Cambia de unidad activa desde el selector del encabezado.
+  **Todas mis propiedades** (Mary, 2026-11-20: *«sigamos con el 8»*, PN-18): quien tiene varias
+  unidades ve en el inicio «Tus N propiedades» con el valor adeudado en todas, y en
+  **Mis propiedades** (`/app/propiedades`, también desde el selector) cada una con su edificio, su
+  rol, lo que debe, desde cuándo hay algo pendiente, el próximo vencimiento y las solicitudes en
+  curso; «Pagar esta» o «Entrar a esta unidad». La plata solo la ven el propietario y el
+  arrendatario; el familiar y el autorizado ven la unidad sin la cuenta. En el demo, Gustavo
+  (propietario no residente) tiene la 301 y, con Beatriz, la 502. Se amplió este caso de uso en vez
+  de abrir uno nuevo porque el rango CU-R de Mary se agotó (T-55). Unidades de **otros edificios**
+  llegan cuando el middleware sepa dónde vive cada cliente (ADR-0025).
 
 **Decisiones de interfaz**
 - **Un campo, no tres.** La persona escribe lo que se acuerde; el sistema reconoce si es correo
