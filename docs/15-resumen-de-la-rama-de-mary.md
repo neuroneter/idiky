@@ -2,6 +2,8 @@
 
 **Corte:** rama `claude/repository-review-c0p1wd`, commit `e315cbf`, 2026-09-10.
 
+> **Hay un corte más nuevo:** [`22-entrega-de-mary-2026-11.md`](./22-entrega-de-mary-2026-11.md) (2026-11-20).
+
 > **Para qué sirve este documento y para qué no.** La bitácora
 > ([`09-estado-del-proyecto.md`](./09-estado-del-proyecto.md)) cuenta el trabajo **en orden
 > cronológico**: sesión por sesión, qué se hizo y por qué. Esto es el **corte transversal**:
