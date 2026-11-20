@@ -1352,4 +1352,11 @@ trasteos próximos —unidad, llega o se va, fecha, horario, empresa y placa— 
 y trabajadores—. «Aprobar» o «No aprobar»; para no aprobar escribe por qué (mínimo 10 caracteres),
 con amabilidad, para que lo puedan pedir de nuevo. A quien lo pidió le llega un mensaje.
 
+**Parametrización de trasteos** (Mary, 2026-11-20: *«los horarios de trasteos y los ascensores
+habilitados para los trasteos los parametriza el administrador»*; *«también los días de
+anticipación»*). En la misma sección: horario (desde y hasta), días de anticipación (0 a 15), si se
+trastea los sábados, el depósito (opcional) y los **ascensores para trasteos**, cada uno con su
+nombre y si está habilitado. Un ascensor se deshabilita, no se borra. Cada ascensor tiene su propia
+agenda. Lo ya aprobado no cambia. En BLOKY va en la parametrización del edificio (T-54).
+
 **Reglas:** PN-10, PN-11. **Estado:** ✅ — `/admin/edificio`.

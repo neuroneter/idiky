@@ -16,6 +16,7 @@ import { cancelarPermiso, solicitarPermisoObra, solicitarTrasteo } from '../../d
 import {
   HORARIO_OBRAS,
   REGLAS_TRASTEO_POR_DEFECTO,
+  ascensoresHabilitados,
   TEXTO_ESTADO_PERMISO,
   hoyISO,
   motivoPermisoObraInvalido,
@@ -125,9 +126,11 @@ function PedirTrasteo({ unidadId, alCerrar }: { unidadId: string; alCerrar: () =
   const [horaFin, setHoraFin] = useState('11:00')
   const [empresa, setEmpresa] = useState('')
   const [placa, setPlaca] = useState('')
+  const habilitados = ascensoresHabilitados(reglas)
+  const [ascensorId, setAscensorId] = useState(habilitados[0]?.id ?? '')
   if (!sesion) return null
   const motivo = motivoTrasteoInvalido(
-    { fecha, horaInicio, horaFin },
+    { fecha, horaInicio, horaFin, ascensorId },
     reglas,
     (bd.trasteos ?? []).filter((t) => t.copropiedadId === sesion.copropiedadId),
     hoy,
@@ -161,6 +164,18 @@ function PedirTrasteo({ unidadId, alCerrar }: { unidadId: string; alCerrar: () =
           <input id="fin-trasteo" type="time" value={horaFin} onChange={(e) => setHoraFin(e.target.value)} />
         </div>
       </div>
+      {habilitados.length > 0 && (
+        <div className="campo">
+          <label htmlFor="ascensor-trasteo">Ascensor</label>
+          <select id="ascensor-trasteo" value={ascensorId} onChange={(e) => setAscensorId(e.target.value)}>
+            {habilitados.map((a) => (
+              <option key={a.id} value={a.id}>
+                {a.nombre}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="fila-campos">
         <div className="campo">
           <label htmlFor="empresa-trasteo">Empresa (opcional)</label>
@@ -180,7 +195,7 @@ function PedirTrasteo({ unidadId, alCerrar }: { unidadId: string; alCerrar: () =
         disabled={cargando || !!motivo}
         onClick={async () => {
           const hecho = await ejecutar(
-            (base) => solicitarTrasteo(base, { unidadId, personaId: sesion.personaId, sentido, fecha, horaInicio, horaFin, empresa, placa }),
+            (base) => solicitarTrasteo(base, { unidadId, personaId: sesion.personaId, sentido, fecha, horaInicio, horaFin, ascensorId, empresa, placa }),
             'Listo. Te avisamos cuando la administración lo apruebe.',
           )
           if (hecho) alCerrar()

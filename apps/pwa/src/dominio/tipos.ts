@@ -2063,6 +2063,20 @@ export interface ReglasTrasteo {
   sabados: boolean
   /** Depósito que pide el edificio para responder por daños, si lo pide. */
   deposito?: number
+  /**
+   * PN-10 — Los ascensores que se pueden usar para trasteos. Cada uno lleva su
+   * propia agenda: dos trasteos a la misma hora solo si van por ascensores
+   * distintos. Se deshabilitan, no se borran. Sin ninguno, una sola agenda.
+   */
+  ascensores?: AscensorTrasteo[]
+  cambiadoPor?: string
+  cambiadoEn?: FechaHoraISO
+}
+
+export interface AscensorTrasteo {
+  id: string
+  nombre: string
+  habilitado: boolean
 }
 
 export interface DecisionPermiso {
@@ -2081,6 +2095,8 @@ export interface Trasteo {
   fecha: FechaISO
   horaInicio: string
   horaFin: string
+  /** PN-10 — Por qué ascensor va, si el edificio tiene ascensores habilitados. */
+  ascensorId?: string
   empresa?: string
   placa?: string
   observaciones?: string

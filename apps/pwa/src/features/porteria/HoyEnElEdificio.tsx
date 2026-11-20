@@ -17,6 +17,8 @@ export function HoyEnElEdificio() {
   const trasteos = (bd.trasteos ?? []).filter((t) => t.copropiedadId === sesion.copropiedadId && t.fecha === hoy && t.estado === 'aprobado')
   const obras = (bd.permisosObra ?? []).filter((o) => o.copropiedadId === sesion.copropiedadId && obraTrabajaHoy(o, hoy))
   if (trasteos.length === 0 && obras.length === 0) return null
+  const ascensor = (id?: string) =>
+    sel.copropiedad(bd, sesion.copropiedadId)?.reglasTrasteo?.ascensores?.find((a) => a.id === id)?.nombre
 
   return (
     <div className="tarjeta columna" style={{ gap: 'var(--e2)' }}>
@@ -27,6 +29,7 @@ export function HoyEnElEdificio() {
           <div key={t.id} className="fila">
             <span>
               <strong>Trasteo</strong> · {unidad ? etiquetaUnidad(unidad) : ''} {t.sentido === 'llegada' ? 'llega' : 'se va'} de {t.horaInicio} a {t.horaFin}
+              {ascensor(t.ascensorId) ? ` · ${ascensor(t.ascensorId)}` : ''}
               {t.empresa ? ` · ${t.empresa}` : ''}
               {t.placa ? ` · ${t.placa}` : ''}
             </span>

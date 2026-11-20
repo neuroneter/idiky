@@ -13,25 +13,29 @@ test('trasteo: anticipación, domingos, horario y un solo trasteo a la vez (PN-1
     const intento = async (f: () => Promise<{ bd: typeof bd; datos: unknown }>) => {
       try { const res = await f(); bd = res.bd; return res.datos } catch (e) { return 'ERR: ' + (e as Error).message }
     }
-    const base = { unidadId: 'uni-torre1-402', personaId: 'per-1', sentido: 'llegada' as const }
+    const base = { unidadId: 'uni-torre1-402', personaId: 'per-1', sentido: 'llegada' as const, ascensorId: 'asc-t1' }
     const manana = await intento(() => repo.solicitarTrasteo(bd, { ...base, fecha: '2026-10-10', horaInicio: '09:00', horaFin: '11:00' }))
     const domingo = await intento(() => repo.solicitarTrasteo(bd, { ...base, fecha: '2026-10-18', horaInicio: '09:00', horaFin: '11:00' }))
     const festivo = await intento(() => repo.solicitarTrasteo(bd, { ...base, fecha: '2026-10-12', horaInicio: '09:00', horaFin: '11:00' }))
     const tarde = await intento(() => repo.solicitarTrasteo(bd, { ...base, fecha: '2026-10-14', horaInicio: '16:00', horaFin: '19:00' }))
     const bien = (await intento(() => repo.solicitarTrasteo(bd, { ...base, fecha: '2026-10-14', horaInicio: '09:00', horaFin: '11:00', placa: 'trk 123' }))) as { id: string; placa: string }
-    const cruce = await intento(() => repo.solicitarTrasteo(bd, { unidadId: 'uni-torre2-901', personaId: 'per-2', sentido: 'salida', fecha: '2026-10-14', horaInicio: '10:00', horaFin: '12:00' }))
+    const cruce = await intento(() => repo.solicitarTrasteo(bd, { unidadId: 'uni-torre2-901', personaId: 'per-2', sentido: 'salida', fecha: '2026-10-14', horaInicio: '10:00', horaFin: '12:00', ascensorId: 'asc-t1' }))
+    const otroAscensor = (await intento(() => repo.solicitarTrasteo(bd, { unidadId: 'uni-torre2-901', personaId: 'per-2', sentido: 'salida', fecha: '2026-10-14', horaInicio: '10:00', horaFin: '12:00', ascensorId: 'asc-t2' }))) as { estado: string }
+    const sinAscensor = await intento(() => repo.solicitarTrasteo(bd, { unidadId: 'uni-torre2-901', personaId: 'per-2', sentido: 'salida', fecha: '2026-10-15', horaInicio: '10:00', horaFin: '12:00' }))
     const sinMotivo = await intento(() => repo.decidirPermiso(bd, { tipo: 'trasteo', id: bien.id, personaId: 'per-admin', aprobar: false }))
     const propietariaAprueba = await intento(() => repo.decidirPermiso(bd, { tipo: 'trasteo', id: bien.id, personaId: 'per-1', aprobar: true }))
     await intento(() => repo.decidirPermiso(bd, { tipo: 'trasteo', id: bien.id, personaId: 'per-admin', aprobar: true }))
     const mensaje = bd.mensajes.find((m) => m.motivo === 'permiso_decidido')?.texto
-    return { manana, domingo, festivo, tarde, placa: bien.placa, cruce, sinMotivo, propietariaAprueba, mensaje }
+    return { manana, domingo, festivo, tarde, placa: bien.placa, cruce, otroAscensor: otroAscensor.estado, sinAscensor, sinMotivo, propietariaAprueba, mensaje }
   })
   expect(r.manana).toMatch(/anticipación/)
   expect(r.domingo).toMatch(/domingos y festivos/)
   expect(r.festivo).toMatch(/domingos y festivos/)
   expect(r.tarde).toMatch(/horario de trasteos/)
   expect(r.placa).toBe('TRK123')
-  expect(r.cruce).toMatch(/ya hay un trasteo/)
+  expect(r.cruce).toMatch(/ya hay un trasteo por ese ascensor/)
+  expect(r.otroAscensor).toBe('solicitado')
+  expect(r.sinAscensor).toMatch(/cuál ascensor/)
   expect(r.sinMotivo).toMatch(/por qué no se aprueba/)
   expect(r.propietariaAprueba).toMatch(/administración/)
   expect(r.mensaje).toMatch(/aprobó el trasteo/)
@@ -102,4 +106,32 @@ test('el código del visitante es un QR real con su patrón de posición (PN-12)
   await page.locator('.tarjeta--accion, .tarjeta button').first().click().catch(() => {})
   await expect(page.locator('svg[data-qr]')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Compartir el código' })).toBeVisible()
+})
+
+test('la administración parametriza horario, anticipación y ascensores de trasteo (PN-10)', async ({ page }) => {
+  await page.goto('/')
+  const r = await page.evaluate(async () => {
+    const repo = await import('/src/datos/repositorio.ts')
+    let bd = await repo.cargar()
+    const intento = async (f: () => Promise<{ bd: typeof bd; datos: unknown }>) => {
+      try { const res = await f(); bd = res.bd; return res.datos } catch (e) { return 'ERR: ' + (e as Error).message }
+    }
+    const reglas = { horaDesde: '09:00', horaHasta: '15:00', diasAnticipacion: 5, sabados: false, ascensores: [{ id: 'asc-t1', nombre: 'Ascensor de servicio Torre 1', habilitado: true }, { id: 'asc-t2', nombre: 'Ascensor de servicio Torre 2', habilitado: false }] }
+    const propietaria = await intento(() => repo.configurarReglasTrasteo(bd, { copropiedadId: 'cop-1', personaId: 'per-1', reglas }))
+    const alReves = await intento(() => repo.configurarReglasTrasteo(bd, { copropiedadId: 'cop-1', personaId: 'per-admin', reglas: { ...reglas, horaHasta: '08:00' } }))
+    await intento(() => repo.configurarReglasTrasteo(bd, { copropiedadId: 'cop-1', personaId: 'per-admin', reglas }))
+    const base = { unidadId: 'uni-torre1-402', personaId: 'per-1', sentido: 'llegada' as const, horaInicio: '09:00', horaFin: '11:00' }
+    return {
+      propietaria,
+      alReves,
+      anticipacion: await intento(() => repo.solicitarTrasteo(bd, { ...base, fecha: '2026-10-13', ascensorId: 'asc-t1' })),
+      sabado: await intento(() => repo.solicitarTrasteo(bd, { ...base, fecha: '2026-10-17', ascensorId: 'asc-t1' })),
+      deshabilitado: await intento(() => repo.solicitarTrasteo(bd, { ...base, fecha: '2026-10-15', ascensorId: 'asc-t2' })),
+    }
+  })
+  expect(r.propietaria).toMatch(/administración/)
+  expect(r.alReves).toMatch(/después de la de inicio/)
+  expect(r.anticipacion).toMatch(/5 días de anticipación/)
+  expect(r.sabado).toMatch(/no se trastea los sábados/)
+  expect(r.deshabilitado).toMatch(/cuál ascensor/)
 })
