@@ -12,12 +12,13 @@ import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import { preguntarSobreProyecto } from '../../datos/repositorio'
-import { LARGO_PREGUNTA_PROYECTO, motivoPreguntaInvalida, preguntasVisibles } from '../../dominio/reglas'
+import { LARGO_PREGUNTA_PROYECTO, decideEnLaUnidad, motivoPreguntaInvalida, preguntasVisibles } from '../../dominio/reglas'
+import * as sel from '../../datos/selectores'
 import type { Proyecto } from '../../dominio/tipos'
 import { formatearFechaCorta } from '../../utilidades/formato'
 
 export function PreguntasProyecto({ proyecto }: { proyecto: Proyecto }) {
-  const { ejecutar, cargando } = useDatos()
+  const { bd, ejecutar, cargando } = useDatos()
   const { sesion } = useSesion()
   const [escribiendo, setEscribiendo] = useState(false)
   const [texto, setTexto] = useState('')
@@ -25,12 +26,14 @@ export function PreguntasProyecto({ proyecto }: { proyecto: Proyecto }) {
   const unidadId = sesion.unidadActivaId
 
   const preguntas = preguntasVisibles(proyecto, sesion.personaId)
+  // PN-20 — Pregunta el propietario o el arrendatario; los demás leen las respuestas.
+  const pregunta = decideEnLaUnidad(sel.rolEnUnidad(bd, sesion.personaId, unidadId))
   const motivo = motivoPreguntaInvalida(texto)
 
   return (
     <div className="columna" style={{ gap: 'var(--e2)' }}>
       <span className="titulo-seccion">Preguntas sobre la obra ({preguntas.length})</span>
-      {preguntas.length === 0 && !escribiendo && (
+      {preguntas.length === 0 && !escribiendo && pregunta && (
         <p className="subtitulo">¿Tienes una duda? Pregúntale a la administración: te responde aquí.</p>
       )}
       {preguntas.map((pregunta) => {
@@ -96,7 +99,7 @@ export function PreguntasProyecto({ proyecto }: { proyecto: Proyecto }) {
           </div>
         </div>
       ) : (
-        unidadId && (
+        unidadId && pregunta && (
         <button className="boton" onClick={() => setEscribiendo(true)}>
           Hacer una pregunta
         </button>

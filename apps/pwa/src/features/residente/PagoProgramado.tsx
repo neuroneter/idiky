@@ -12,7 +12,7 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { cancelarPagoProgramado, programarPago } from '../../datos/repositorio'
-import { motivoPagoProgramadoInvalido } from '../../dominio/reglas'
+import { decideEnLaUnidad, motivoPagoProgramadoInvalido } from '../../dominio/reglas'
 import type { MedioProgramado } from '../../dominio/tipos'
 
 const MEDIOS: Record<MedioProgramado, string> = { pse: 'Débito PSE de mi cuenta', tarjeta: 'Tarjeta de crédito' }
@@ -27,6 +27,8 @@ export function PagoProgramado() {
   const [medio, setMedio] = useState<MedioProgramado>(actual?.medio ?? 'pse')
   if (!sesion?.unidadActivaId) return null
   const unidadId = sesion.unidadActivaId
+  // PN-20 — Solo para el propietario o el arrendatario.
+  if (!decideEnLaUnidad(sel.rolEnUnidad(bd, sesion.personaId, unidadId))) return null
   const motivo = motivoPagoProgramadoInvalido(Number(dia))
 
   return (

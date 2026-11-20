@@ -14,6 +14,9 @@ const MARCA: Record<string, string> = {
   paquete: 'Paquete',
   entrega: 'Entrega',
   novedad: 'Novedad',
+  ayuda: 'Ayuda',
+  trasteo: 'Trasteo',
+  objeto: 'Objeto perdido',
 }
 
 export function MinutaTurno({ turno }: { turno: TurnoPorteria }) {

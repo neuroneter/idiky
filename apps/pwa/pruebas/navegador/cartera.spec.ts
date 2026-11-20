@@ -66,7 +66,7 @@ test("paz y salvo desde la consola, con anulación con motivo (CU-A-13)", async 
   await p.goto(URL); await p.evaluate(() => localStorage.clear()); await p.goto(URL); await p.waitForTimeout(500)
   await entrar('Olga Lucia Henao')
   await p.goto(URL + '#/admin/cartera'); await p.waitForTimeout(300)
-  check((await p.locator('nav.segmentos a').count()) === 2, 'Cartera tiene dos pestañas')
+  check((await p.locator('nav.segmentos a').count()) === 3, 'Cartera tiene tres pestañas: cartera, paz y salvo y certificados de pago')
   check((await p.locator('.lateral__enlace.activo', { hasText: 'Cartera' }).count()) === 1, 'el menú marca Cartera')
   await p.goto(URL + '#/admin/cartera/paz-y-salvo'); await p.waitForTimeout(300)
   check((await p.locator('.lateral__enlace.activo', { hasText: 'Cartera' }).count()) === 1, 'el menú sigue marcando Cartera en la pestaña')

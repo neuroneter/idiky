@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 48
+export const VERSION_ESQUEMA = 49
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -168,6 +168,8 @@ const DEFINICION_PERSONAS: Array<[nombres: string, apellidos: string, unidad: st
   // (RN-68). Aprueban las estadías largas de sus arrendatarias (RN-60).
   ['Gustavo Adolfo', 'Mejia Toro', 'uni-torre1-301', 'propietario', false],
   ['Beatriz Elena', 'Franco Rios', 'uni-torre2-502', 'propietario', false],
+  // PN-20 — El hijo de María Camila: familiar. Para ver qué no le aparece (Mary, 2026-11-20).
+  ['Tomas', 'Restrepo Ossa', 'uni-torre1-402', 'familiar'],
 ]
 
 const personas: Persona[] = DEFINICION_PERSONAS.map(([nombres, apellidos], i) => ({
@@ -1689,6 +1691,15 @@ export function crearSemilla(): BaseDatos {
         personaId: 'per-5',
         copropiedadId: COPROPIEDAD_ID,
         unidadId: 'uni-torre1-301',
+      },
+      {
+        id: 'perfil-familiar',
+        etiqueta: 'Tomas Restrepo Ossa',
+        descripcion: 'Familiar (hijo de María Camila) · Torre 1 · 402',
+        rol: 'residente',
+        personaId: 'per-15',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre1-402',
       },
       {
         id: 'perfil-propietario-no-residente',

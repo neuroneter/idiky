@@ -464,7 +464,7 @@ export function visitantesAdentro(bd: BaseDatos, copropiedadId: string) {
  * apertura y el cierre; nada se escribe dos veces.
  */
 export function minutaDeTurno(bd: BaseDatos, turno: { id: string; copropiedadId: string; abiertoEn: string; cerradoEn?: string }) {
-  const lineas: Array<{ en: string; tipo: 'entrada' | 'salida' | 'paquete' | 'entrega' | 'novedad'; texto: string }> = []
+  const lineas: Array<{ en: string; tipo: 'entrada' | 'salida' | 'paquete' | 'entrega' | 'novedad' | 'ayuda' | 'trasteo' | 'objeto'; texto: string }> = []
   const unidadTexto = (id: string) => {
     const u = unidad(bd, id)
     return u ? `${u.torre} · ${u.numero}` : 'unidad'
@@ -483,6 +483,31 @@ export function minutaDeTurno(bd: BaseDatos, turno: { id: string; copropiedadId:
   }
   for (const n of bd.novedades ?? []) {
     if (n.turnoId === turno.id) lineas.push({ en: n.registradaEn, tipo: 'novedad', texto: n.texto })
+  }
+  // PN-09 — Los pedidos de ayuda: cuándo llegaron y cómo se atendieron.
+  for (const a of bd.alertasAyuda ?? []) {
+    if (a.copropiedadId !== turno.copropiedadId) continue
+    if (enTurno(a.creadaEn, turno)) lineas.push({ en: a.creadaEn, tipo: 'ayuda', texto: `Pidieron ayuda desde ${unidadTexto(a.unidadId)}${a.detalle ? `: ${a.detalle}` : ''}` })
+    if (a.atendida && enTurno(a.atendida.en, turno)) lineas.push({ en: a.atendida.en, tipo: 'ayuda', texto: `Se atendió la ayuda de ${unidadTexto(a.unidadId)}${a.atendida.nota ? `: ${a.atendida.nota}` : ''}` })
+  }
+  // PN-10, PN-13 — Los trasteos hechos y su depósito.
+  for (const t of bd.trasteos ?? []) {
+    if (t.copropiedadId !== turno.copropiedadId) continue
+    if (t.realizado && enTurno(t.realizado.en, turno)) lineas.push({ en: t.realizado.en, tipo: 'trasteo', texto: `Se hizo el trasteo de ${unidadTexto(t.unidadId)}${t.empresa ? ` (${t.empresa})` : ''}` })
+    if (t.deposito?.recibido && enTurno(t.deposito.recibido.en, turno)) lineas.push({ en: t.deposito.recibido.en, tipo: 'trasteo', texto: `Se recibió el depósito del trasteo de ${unidadTexto(t.unidadId)}` })
+    if (t.deposito?.cierre && enTurno(t.deposito.cierre.en, turno)) {
+      lineas.push({ en: t.deposito.cierre.en, tipo: 'trasteo', texto: `Depósito del trasteo de ${unidadTexto(t.unidadId)}: ${t.deposito.cierre.resultado === 'devuelto' ? 'devuelto' : `retenido por ${t.deposito.cierre.motivo}`}` })
+    }
+  }
+  // PN-17 — Los objetos encontrados, entregados y dados de baja.
+  for (const o of bd.objetosEncontrados ?? []) {
+    if (o.copropiedadId !== turno.copropiedadId) continue
+    if (enTurno(o.encontradoEn, turno)) lineas.push({ en: o.encontradoEn, tipo: 'objeto', texto: `Se recibió: ${o.descripcion} (en ${o.lugar.toLowerCase()})` })
+    if (o.entrega && enTurno(o.entrega.en, turno)) {
+      const quien = persona(bd, o.entrega.personaId)
+      lineas.push({ en: o.entrega.en, tipo: 'objeto', texto: `Se entregó ${o.descripcion} a ${quien ? nombreCompleto(quien) : 'su dueño'}` })
+    }
+    if (o.baja && enTurno(o.baja.en, turno)) lineas.push({ en: o.baja.en, tipo: 'objeto', texto: `Se dio de baja ${o.descripcion}: ${o.baja.motivo}` })
   }
   return lineas.sort((a, b) => a.en.localeCompare(b.en))
 }
@@ -655,4 +680,10 @@ export function propiedadesDePersona(bd: BaseDatos, personaId: string): ResumenP
       }
     })
     .filter((x): x is ResumenPropiedad => x !== null)
+}
+
+/** PN-20 — El rol de la persona en esa unidad, si tiene vínculo vigente. */
+export function rolEnUnidad(bd: BaseDatos, personaId: string, unidadId?: string): Residencia['rol'] | undefined {
+  if (!unidadId) return undefined
+  return residenciasDePersona(bd, personaId).find((r) => r.unidadId === unidadId && !r.cierre)?.rol
 }

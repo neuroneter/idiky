@@ -11,7 +11,7 @@ import { useDatos } from '../../../estado/DatosContext'
 import { useSesion } from '../../../estado/SesionContext'
 import * as sel from '../../../datos/selectores'
 import { responderEncuesta } from '../../../datos/repositorio'
-import { encuestaAbierta, hoyISO, respuestaDeUnidad } from '../../../dominio/reglas'
+import { decideEnLaUnidad, encuestaAbierta, hoyISO, respuestaDeUnidad } from '../../../dominio/reglas'
 import { formatearFecha } from '../../../utilidades/formato'
 import { BotonVolver } from '../../../componentes/BotonVolver'
 import { EstadoVacio } from '../../../componentes/EstadoVacio'
@@ -25,6 +25,8 @@ export function EncuestasPage() {
   const unidadId = sesion.unidadActivaId ?? ''
   const hoy = hoyISO()
   const encuestas = sel.encuestasDe(bd, sesion.copropiedadId)
+  // PN-20 — Responde el propietario o el arrendatario; los demás ven los resultados.
+  const responde = decideEnLaUnidad(sel.rolEnUnidad(bd, sesion.personaId, unidadId))
 
   return (
     <div className="pila">
@@ -46,7 +48,7 @@ export function EncuestasPage() {
             <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
               {abierta ? `Responde hasta el ${formatearFecha(encuesta.cierraEl)}` : `Cerró el ${formatearFecha(encuesta.cierraEl)}`}
             </span>
-            {abierta && !mia ? (
+            {abierta && !mia && responde ? (
               <>
                 {encuesta.opciones.map((o) => (
                   <label key={o.id} className="opcion-huella" style={{ margin: 0 }}>

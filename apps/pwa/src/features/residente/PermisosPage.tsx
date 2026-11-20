@@ -18,6 +18,7 @@ import {
   HORARIO_OBRAS,
   reglasTrasteoDe,
   ascensoresHabilitados,
+  decideEnLaUnidad,
   TEXTO_ESTADO_PERMISO,
   hoyISO,
   motivoPermisoObraInvalido,
@@ -46,6 +47,8 @@ export function PermisosPage() {
   const trasteos = (bd.trasteos ?? []).filter((t) => t.unidadId === unidadId).sort((a, b) => b.fecha.localeCompare(a.fecha))
   const obras = (bd.permisosObra ?? []).filter((p) => p.unidadId === unidadId).sort((a, b) => b.desde.localeCompare(a.desde))
 
+  // PN-20 — El permiso de obra lo pide el propietario o el arrendatario.
+  const pideObras = decideEnLaUnidad(sel.rolEnUnidad(bd, sesion.personaId, unidadId))
   const cancelar = (tipo: 'trasteo' | 'obra', id: string) =>
     void ejecutar((base) => cancelarPermiso(base, { tipo, id, personaId: sesion.personaId }), 'Solicitud cancelada.')
 
@@ -88,6 +91,8 @@ export function PermisosPage() {
         </div>
       ))}
 
+      {pideObras && (
+        <>
       <div className="encabezado-seccion" style={{ marginTop: 'var(--e3)' }}>
         <h2>Obras en el apartamento</h2>
       </div>
@@ -95,7 +100,9 @@ export function PermisosPage() {
         <Icono nombre="mas" tamano={16} />
         Pedir permiso de obra
       </button>
-      {obras.map((o) => (
+        </>
+      )}
+      {pideObras && obras.map((o) => (
         <div key={o.id} className="tarjeta tarjeta--plana columna" style={{ gap: 'var(--e1)' }}>
           <div className="fila fila-inicio">
             <strong>{o.descripcion}</strong>

@@ -58,6 +58,7 @@ import { AvisoVersionNueva } from './componentes/AvisoVersionNueva'
 import { PermisosPage } from './features/residente/PermisosPage'
 import { AvisosPage } from './features/residente/AvisosPage'
 import { PropiedadesPage } from './features/residente/PropiedadesPage'
+import { CertificadosAdminPage } from './features/admin/CertificadosAdminPage'
 import { ObjetosPage } from './features/residente/edificio/ObjetosPage'
 import { GestionObjetos } from './componentes/GestionObjetos'
 import { EdificioPage } from './features/residente/edificio/EdificioPage'
@@ -165,6 +166,7 @@ export function App() {
         <Route path="cartera" element={<CarteraSeccionAdmin />}>
           <Route index element={<CarteraPage />} />
           <Route path="paz-y-salvo" element={<PazYSalvoAdminPage />} />
+          <Route path="certificados" element={<CertificadosAdminPage />} />
         </Route>
         <Route path="multas" element={<CatalogoMultasPage />} />
         <Route path="sanciones" element={<SancionesPage />} />

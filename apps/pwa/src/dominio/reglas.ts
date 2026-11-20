@@ -4778,3 +4778,14 @@ export function avanceAcuerdo(acuerdo: AcuerdoPago, pagos: Pago[], hoy: FechaISO
 export function acuerdoEnCurso(acuerdo: AcuerdoPago): boolean {
   return acuerdo.estado === 'propuesto' || acuerdo.estado === 'aprobado'
 }
+
+/**
+ * PN-20 — **Lo que decide sobre la unidad lo hacen el propietario y el
+ * arrendatario**: responder encuestas, pedir permisos de obra, programar el
+ * pago, proponer acuerdos, pedir el certificado de pagos, preguntar sobre las
+ * obras. Al familiar y al autorizado **no se les muestra** (Mary, 2026-11-20:
+ * «lo que no aplique al perfil no se debe visualizar»).
+ */
+export function decideEnLaUnidad(rol: Residencia['rol'] | undefined): boolean {
+  return rol === 'propietario' || rol === 'arrendatario'
+}

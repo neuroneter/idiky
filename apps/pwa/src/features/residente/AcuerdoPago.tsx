@@ -18,6 +18,7 @@ import {
   avanceAcuerdo,
   calcularSaldoVencido,
   calendarioAcuerdo,
+  decideEnLaUnidad,
   hoyISO,
   motivoAcuerdoInvalido,
   sumarDias,
@@ -34,6 +35,8 @@ export function AcuerdoPago() {
   const [nota, setNota] = useState('')
   if (!sesion?.unidadActivaId) return null
   const unidadId = sesion.unidadActivaId
+  // PN-20 — Solo para el propietario o el arrendatario.
+  if (!decideEnLaUnidad(sel.rolEnUnidad(bd, sesion.personaId, unidadId))) return null
   const config = sel.copropiedad(bd, sesion.copropiedadId)?.acuerdosPago
   const enCurso = (bd.acuerdosPago ?? []).find((a) => a.unidadId === unidadId && acuerdoEnCurso(a))
   const ultimoRechazado = (bd.acuerdosPago ?? []).filter((a) => a.unidadId === unidadId && a.estado === 'rechazado').slice(-1)[0]
