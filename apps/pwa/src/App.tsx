@@ -57,6 +57,7 @@ import { ResidentesPage } from './features/porteria/ResidentesPage'
 import { AvisoVersionNueva } from './componentes/AvisoVersionNueva'
 import { PermisosPage } from './features/residente/PermisosPage'
 import { AvisosPage } from './features/residente/AvisosPage'
+import { PropiedadesPage } from './features/residente/PropiedadesPage'
 import { ObjetosPage } from './features/residente/edificio/ObjetosPage'
 import { GestionObjetos } from './componentes/GestionObjetos'
 import { EdificioPage } from './features/residente/edificio/EdificioPage'
@@ -137,6 +138,7 @@ export function App() {
         <Route path="unidad/vehiculos-mascotas" element={<VehiculosMascotasPage />} />
         <Route path="unidad/permisos" element={<PermisosPage />} />
         <Route path="avisos" element={<AvisosPage />} />
+        <Route path="propiedades" element={<PropiedadesPage />} />
         <Route path="directorio" element={<DirectorioPage />} />
         {/* Para competir — Mary, 2026-11-20 (CU-R-37 … CU-R-42). */}
         <Route path="edificio" element={<EdificioPage />} />

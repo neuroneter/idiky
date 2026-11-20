@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 46
+export const VERSION_ESQUEMA = 47
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -179,16 +179,29 @@ const personas: Persona[] = DEFINICION_PERSONAS.map(([nombres, apellidos], i) =>
   telefono: `+57 31${i % 10} ${200 + i} ${4000 + i * 7}`,
 }))
 
-const residencias: Residencia[] = DEFINICION_PERSONAS.map(([, , unidadId, rol, reside], i) => ({
-  id: `res-${i + 1}`,
-  personaId: `per-${i + 1}`,
-  unidadId,
-  rol,
-  desde: `${new Date().getFullYear() - 2}-03-01`,
-  principal: true,
-  // Casi todos viven en su unidad; los dueños de las arrendadas, no.
-  reside: reside ?? true,
-}))
+const residencias: Residencia[] = [
+  ...DEFINICION_PERSONAS.map(([, , unidadId, rol, reside], i) => ({
+    id: `res-${i + 1}`,
+    personaId: `per-${i + 1}`,
+    unidadId,
+    rol,
+    desde: `${new Date().getFullYear() - 2}-03-01`,
+    principal: true,
+    // Casi todos viven en su unidad; los dueños de las arrendadas, no.
+    reside: reside ?? true,
+  })),
+  // PN-18 — Gustavo tiene dos: la 301 y, con Beatriz, la 502. Así se ve
+  // «Mis propiedades» en el demo (Mary, 2026-11-20).
+  {
+    id: 'res-gustavo-502',
+    personaId: 'per-13',
+    unidadId: 'uni-torre2-502',
+    rol: 'propietario' as const,
+    desde: `${new Date().getFullYear() - 1}-06-01`,
+    principal: false,
+    reside: false,
+  },
+]
 
 /**
  * El portero del turno de la manana.

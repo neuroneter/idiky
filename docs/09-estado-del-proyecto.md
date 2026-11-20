@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Todas mis propiedades (CU-R-01 A6, PN-18)
+
+Mary: *«sigamos con el 8»*. Quien tiene varias unidades ve en el inicio «Tus N propiedades» y en
+**Mis propiedades** cada una con lo que debe, desde cuándo, el próximo vencimiento y las
+solicitudes en curso, con «Pagar esta» y «Entrar a esta unidad». La plata solo la ven propietario
+y arrendatario. Como el rango CU-R de Mary se agotó, se amplió CU-R-01 (A6) en lugar de abrir un
+caso de uso nuevo. En el demo, Gustavo tiene la 301 y la 502. La semilla sube a la versión 47.
+Archivos: `apps/pwa/src/features/residente/PropiedadesPage.tsx` y
+`apps/pwa/pruebas/navegador/propiedades.spec.ts` (nuevos), `InicioPage`, `LayoutResidente`,
+`App.tsx`, `dominio/reglas.ts`, `datos/{selectores,semilla}.ts`.
+
 ### 2026-11-20 · Mary + IA (Claude) · Objetos perdidos (CU-R-49, PN-17)
 
 Mary: *«sigamos con la 9»*. Portería o la administración registran lo encontrado; los residentes

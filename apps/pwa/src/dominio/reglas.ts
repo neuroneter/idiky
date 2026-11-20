@@ -4697,3 +4697,16 @@ export function motivoBajaObjetoInvalida(objeto: ObjetoEncontrado, motivo: strin
   if (motivo.trim().length < 5) return 'Di qué se hizo con el objeto: donado, desechado…'
   return null
 }
+
+// ---------------------------------------------------------------------------
+// Todas mis propiedades — PN-18 · CU-R-01 (A6)
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-18 — **Quién ve la plata de cada propiedad** en la vista de todas: el
+ * propietario y el arrendatario. El familiar y el autorizado ven la unidad, no
+ * lo que se debe (no es suyo ni les toca pagarlo).
+ */
+export function veLaCuentaDe(rol: Residencia['rol']): boolean {
+  return rol === 'propietario' || rol === 'arrendatario'
+}
