@@ -64,6 +64,11 @@ import { formatearFecha } from '../utilidades/formato'
 import type {
   AlertaAyuda,
   AvisoClasificado,
+  EstadoPermiso,
+  PermisoObra,
+  ReglasTrasteo,
+  TrabajadorObra,
+  Trasteo,
   CategoriaDocumentoEdificio,
   Encuesta,
   InformeMensual,
@@ -4327,4 +4332,91 @@ export function alertasPendientes(alertas: AlertaAyuda[], copropiedadId: string)
   return alertas
     .filter((a) => a.copropiedadId === copropiedadId && !a.atendida)
     .sort((a, b) => a.creadaEn.localeCompare(b.creadaEn))
+}
+
+// ---------------------------------------------------------------------------
+// Trasteos y obras en el apartamento — PN-10, PN-11 · CU-R-44, CU-R-45, CU-A-37
+// ---------------------------------------------------------------------------
+
+/** PN-10 — Las reglas de trasteo cuando el edificio no ha fijado las suyas. */
+export const REGLAS_TRASTEO_POR_DEFECTO: ReglasTrasteo = {
+  horaDesde: '08:00',
+  horaHasta: '17:00',
+  diasAnticipacion: 2,
+  sabados: true,
+}
+
+/** Domingos y festivos no se trastea ni se hace obra (Ley 51 de 1983 para los festivos). */
+export function esDiaDeDescanso(fecha: FechaISO): boolean {
+  return diaDeLaSemana(fecha) === 0 || esFestivo(fecha)
+}
+
+/**
+ * PN-10 — **Por qué no se puede pedir este trasteo**, o `null`. Con la
+ * anticipación del edificio, nunca domingo ni festivo (sábado solo si el
+ * edificio lo permite), dentro del horario y sin cruzarse con otro trasteo
+ * pedido o aprobado ese día: hay un solo ascensor de carga.
+ */
+export function motivoTrasteoInvalido(
+  trasteo: { fecha: FechaISO; horaInicio: string; horaFin: string },
+  reglas: ReglasTrasteo,
+  otros: Trasteo[],
+  hoy: FechaISO,
+): string | null {
+  if (!trasteo.fecha) return 'Elige la fecha del trasteo.'
+  const minima = sumarDias(hoy, reglas.diasAnticipacion)
+  if (trasteo.fecha < minima) return `Pídelo con ${reglas.diasAnticipacion} días de anticipación: desde el ${formatearFecha(minima)}.`
+  if (esDiaDeDescanso(trasteo.fecha)) return 'Los domingos y festivos no se trastea.'
+  if (diaDeLaSemana(trasteo.fecha) === 6 && !reglas.sabados) return 'En este edificio no se trastea los sábados.'
+  if (!trasteo.horaInicio || !trasteo.horaFin || trasteo.horaFin <= trasteo.horaInicio) return 'La hora de fin debe ser después de la de inicio.'
+  if (trasteo.horaInicio < reglas.horaDesde || trasteo.horaFin > reglas.horaHasta) {
+    return `El horario de trasteos es de ${reglas.horaDesde} a ${reglas.horaHasta}.`
+  }
+  const cruce = otros.find(
+    (o) =>
+      o.fecha === trasteo.fecha &&
+      (o.estado === 'solicitado' || o.estado === 'aprobado') &&
+      o.horaInicio < trasteo.horaFin &&
+      trasteo.horaInicio < o.horaFin,
+  )
+  if (cruce) return `Ese día ya hay un trasteo de ${cruce.horaInicio} a ${cruce.horaFin}. Elige otro horario.`
+  return null
+}
+
+/** PN-11 — El horario de obras que se le recuerda a quien pide el permiso. */
+export const HORARIO_OBRAS = 'Lunes a viernes de 8:00 a. m. a 5:00 p. m. y sábados de 9:00 a. m. a 1:00 p. m. Domingos y festivos no.'
+
+/** PN-11 — Una obra dura como mucho 90 días por permiso. */
+export const DIAS_MAXIMOS_OBRA = 90
+
+/** PN-11 — Por qué no se puede pedir este permiso de obra, o `null`. */
+export function motivoPermisoObraInvalido(
+  permiso: { descripcion: string; desde: FechaISO; hasta: FechaISO; trabajadores: TrabajadorObra[] },
+  hoy: FechaISO,
+): string | null {
+  if (permiso.descripcion.trim().length < 10) return 'Cuenta qué obra se va a hacer.'
+  if (!permiso.desde || permiso.desde <= hoy) return 'La obra empieza desde mañana: la administración debe aprobarla antes.'
+  if (!permiso.hasta || permiso.hasta < permiso.desde) return 'La fecha de fin debe ser igual o después del inicio.'
+  if (permiso.hasta > sumarDias(permiso.desde, DIAS_MAXIMOS_OBRA)) return `Un permiso dura como mucho ${DIAS_MAXIMOS_OBRA} días. Si la obra sigue, se pide otro.`
+  const trabajadores = permiso.trabajadores.filter((t) => t.nombre.trim() || t.documento.trim())
+  if (trabajadores.length === 0) return 'Agrega al menos un trabajador: portería necesita saber quién entra.'
+  if (trabajadores.length > 10) return 'Máximo 10 trabajadores por permiso.'
+  if (trabajadores.some((t) => t.nombre.trim().length < 3 || t.documento.replace(/\D/g, '').length < 5)) {
+    return 'Cada trabajador lleva su nombre y su número de documento.'
+  }
+  const documentos = trabajadores.map((t) => t.documento.replace(/\D/g, ''))
+  if (new Set(documentos).size !== documentos.length) return 'Hay un documento repetido.'
+  return null
+}
+
+/** PN-11 — La obra puede trabajar hoy: aprobada, dentro de sus fechas y no es día de descanso. */
+export function obraTrabajaHoy(permiso: PermisoObra, hoy: FechaISO): boolean {
+  return permiso.estado === 'aprobado' && permiso.desde <= hoy && hoy <= permiso.hasta && !esDiaDeDescanso(hoy)
+}
+
+export const TEXTO_ESTADO_PERMISO: Record<EstadoPermiso, string> = {
+  solicitado: 'Por aprobar',
+  aprobado: 'Aprobado',
+  rechazado: 'No aprobado',
+  cancelado: 'Cancelado',
 }

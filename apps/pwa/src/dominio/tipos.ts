@@ -88,6 +88,8 @@ export interface Copropiedad {
    * días antes de vencer, y las gracias al pagar. Ausente = apagados.
    */
   recordatorioPago?: { activo: boolean; diasAntes: number }
+  /** CU-R-44 · PN-10 — Horario y anticipación de los trasteos. Sin esto, los valores por defecto. */
+  reglasTrasteo?: ReglasTrasteo
   /** CU-A-31 · PN-01 — Descuento por pronto pago de la cuota ordinaria. */
   prontoPago?: ProntoPago
   /**
@@ -1024,6 +1026,7 @@ export type MotivoMensaje =
   | 'agradecimiento_pago'
   | 'respuesta_proyecto'
   | 'pago_programado'
+  | 'permiso_decidido'
 
 export interface Mensaje {
   id: string
@@ -1864,6 +1867,10 @@ export interface BaseDatos {
   clasificados: AvisoClasificado[]
   /** CU-R-43 — Pedidos de ayuda a portería. */
   alertasAyuda: AlertaAyuda[]
+  /** CU-R-44 — Permisos de trasteo. */
+  trasteos: Trasteo[]
+  /** CU-R-45 — Permisos de obra en el apartamento. */
+  permisosObra: PermisoObra[]
   accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
   asistencias: Asistencia[]
@@ -2038,4 +2045,71 @@ export interface AlertaAyuda {
   /** Portería la vio y va en camino. */
   vista?: { por: string; en: FechaHoraISO }
   atendida?: { por: string; en: FechaHoraISO; nota?: string }
+}
+
+// ---------------------------------------------------------------------------
+// Trasteos y obras en el apartamento — Mary, 2026-11-20 · CU-R-44, CU-R-45, CU-A-37
+// ---------------------------------------------------------------------------
+
+export type EstadoPermiso = 'solicitado' | 'aprobado' | 'rechazado' | 'cancelado'
+
+/** PN-10 — Cómo se trastea en este edificio (lo fija el reglamento o el manual). */
+export interface ReglasTrasteo {
+  horaDesde: string
+  horaHasta: string
+  /** Días de anticipación para pedirlo. */
+  diasAnticipacion: number
+  /** Si se puede trastear los sábados (domingos y festivos, nunca). */
+  sabados: boolean
+  /** Depósito que pide el edificio para responder por daños, si lo pide. */
+  deposito?: number
+}
+
+export interface DecisionPermiso {
+  por: string
+  en: FechaHoraISO
+  motivo?: string
+}
+
+/** PN-10 — Un permiso de trasteo: llega o se va un trasteo, en un horario, con el ascensor. */
+export interface Trasteo {
+  id: string
+  copropiedadId: string
+  unidadId: string
+  personaId: string
+  sentido: 'llegada' | 'salida'
+  fecha: FechaISO
+  horaInicio: string
+  horaFin: string
+  empresa?: string
+  placa?: string
+  observaciones?: string
+  estado: EstadoPermiso
+  creadoEn: FechaHoraISO
+  decision?: DecisionPermiso
+  cancelacion?: { por: string; en: FechaHoraISO }
+  /** Portería lo marca el día del trasteo. */
+  realizado?: { por: string; en: FechaHoraISO }
+}
+
+export interface TrabajadorObra {
+  nombre: string
+  documento: string
+}
+
+/** PN-11 — Un permiso de obra en el apartamento, con los trabajadores que entran. */
+export interface PermisoObra {
+  id: string
+  copropiedadId: string
+  unidadId: string
+  personaId: string
+  descripcion: string
+  desde: FechaISO
+  hasta: FechaISO
+  contratista?: string
+  trabajadores: TrabajadorObra[]
+  estado: EstadoPermiso
+  creadoEn: FechaHoraISO
+  decision?: DecisionPermiso
+  cancelacion?: { por: string; en: FechaHoraISO }
 }

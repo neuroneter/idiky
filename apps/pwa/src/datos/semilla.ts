@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 40
+export const VERSION_ESQUEMA = 41
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1837,5 +1837,67 @@ function construirParaCompetir() {
       },
     ],
     alertasAyuda: [],
+    // CU-R-44 — Un trasteo aprobado para hoy (portería lo ve) y uno por aprobar.
+    trasteos: [
+      {
+        id: 'tra-1',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre1-202',
+        personaId: 'per-4',
+        sentido: 'llegada' as const,
+        fecha: hoy,
+        horaInicio: '09:00',
+        horaFin: '12:00',
+        empresa: 'Mudanzas El Roble',
+        placa: 'TRK512',
+        estado: 'aprobado' as const,
+        creadoEn: `${sumarDias(hoy, -5)}T14:00:00.000Z`,
+        decision: { por: 'per-admin', en: `${sumarDias(hoy, -4)}T14:00:00.000Z` },
+      },
+      {
+        id: 'tra-2',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre2-901',
+        personaId: 'per-2',
+        sentido: 'salida' as const,
+        fecha: sumarDias(hoy, 4),
+        horaInicio: '08:00',
+        horaFin: '11:00',
+        estado: 'solicitado' as const,
+        creadoEn: `${sumarDias(hoy, -1)}T14:00:00.000Z`,
+      },
+    ],
+    // CU-R-45 — Una obra en curso con sus trabajadores y una por aprobar.
+    permisosObra: [
+      {
+        id: 'obr-1',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre1-201',
+        personaId: 'per-3',
+        descripcion: 'Cambio del enchape de la cocina y los baños.',
+        desde: sumarDias(hoy, -3),
+        hasta: sumarDias(hoy, 12),
+        contratista: 'Remodelaciones Bogotá',
+        trabajadores: [
+          { nombre: 'Wilson Andrés Cárdenas', documento: '80123456' },
+          { nombre: 'Jhon Fredy Ortiz', documento: '1012345678' },
+        ],
+        estado: 'aprobado' as const,
+        creadoEn: `${sumarDias(hoy, -8)}T14:00:00.000Z`,
+        decision: { por: 'per-admin', en: `${sumarDias(hoy, -7)}T14:00:00.000Z` },
+      },
+      {
+        id: 'obr-2',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre2-901',
+        personaId: 'per-2',
+        descripcion: 'Pintura del apartamento y arreglo de humedad en una pared.',
+        desde: sumarDias(hoy, 6),
+        hasta: sumarDias(hoy, 10),
+        trabajadores: [{ nombre: 'Luis Carlos Peña', documento: '79888777' }],
+        estado: 'solicitado' as const,
+        creadoEn: `${sumarDias(hoy, -1)}T15:00:00.000Z`,
+      },
+    ],
   }
 }

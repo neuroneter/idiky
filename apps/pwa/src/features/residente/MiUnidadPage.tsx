@@ -160,6 +160,22 @@ export function MiUnidadPage() {
         </div>
       </Link>
 
+      {/* CU-R-44, CU-R-45 — Los permisos de trasteo y de obra. */}
+      <Link to="/app/unidad/permisos" className="tarjeta tarjeta--accion">
+        <div className="fila">
+          <div className="tarjeta__cuerpo">
+            <span className="marca-tarjeta">
+              <Icono nombre="reservas" tamano={20} />
+            </span>
+            <div className="columna">
+              <strong>Trasteos y obras</strong>
+              <span className="subtitulo">Pide permiso para trastear o para hacer una obra en tu apartamento</span>
+            </div>
+          </div>
+          <Icono nombre="chevron" tamano={16} className="tenue" />
+        </div>
+      </Link>
+
       {/* CU-R-15 — Los vehículos y las mascotas de la unidad. */}
       <Link to="/app/unidad/vehiculos-mascotas" className="tarjeta tarjeta--accion">
         <div className="fila">

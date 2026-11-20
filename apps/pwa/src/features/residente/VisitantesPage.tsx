@@ -2,9 +2,10 @@
  * CU-R-10 — Autorizar un visitante y generar su codigo.
  * Doc: docs/casos-de-uso/residente.md#cu-r-10
  *
- * El patron visual del codigo NO es un QR real (ADR-0005).
+ * El codigo se muestra como QR real y escaneable (ADR-0005, actualizado el 2026-11-20).
  */
 
+import { CompartirCodigo } from './CompartirCodigo'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
@@ -210,8 +211,9 @@ export function VisitantesPage() {
                 ? `, solo los ${visitanteEnDetalle.dias.map((d) => NOMBRES_DIAS[d]).join(', ')}`
                 : ''}
             </p>
-            <p className="ayuda-campo" style={{ marginTop: 'var(--e3)' }}>
-              Demo: el patron es ilustrativo, porteria valida el codigo alfanumerico.
+            <CompartirCodigo visitante={visitanteEnDetalle} edificio={sel.copropiedad(bd, sesion.copropiedadId)?.nombre ?? 'el edificio'} />
+            <p className="ayuda-campo" style={{ marginTop: 'var(--e2)' }}>
+              Portería escanea el QR o escribe el código.
             </p>
             {estadoRealVisitante(visitanteEnDetalle) === 'activo' &&
               puedeInhabilitar({

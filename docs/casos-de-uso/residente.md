@@ -342,8 +342,14 @@ a la reserva al crearla, así que si la zona cambia después, la reserva conserv
   como `programado`, después de `vigenciaHasta` como `vencido` (CU-S-04).
 - RN-17: el código es de un solo uso salvo que se marque como recurrente.
 
-**Estado en el demo:** ✅ — `src/features/residente/VisitantesPage.tsx`. El QR se dibuja
-localmente sin librerías externas (ver [ADR-0005](../adr/0005-codigo-qr-sin-dependencias.md)).
+- **PN-12 (2026-11-20):** el código se muestra como **QR real y escaneable** (ISO/IEC 18004,
+  nivel M), generado sin librerías; lleva el mismo código alfanumérico. «Compartir el código»
+  manda la imagen del QR con un texto amable (hoja de compartir del teléfono) o, si el aparato
+  no comparte imágenes, el texto por WhatsApp. Portería lo escanea con la cámara (CU-P-02) o lo
+  escribe.
+
+**Estado en el demo:** ✅ — `src/features/residente/VisitantesPage.tsx`. El QR se genera
+localmente sin librerías externas (`src/utilidades/qr.ts`; ver [ADR-0005](../adr/0005-codigo-qr-sin-dependencias.md), actualizado el 2026-11-20).
 Desde el 2026-08-28 el código **ya se puede validar** en la entrada (CU-P-02): hasta ese día
 este caso de uso figuraba terminado con la mitad en el aire.
 
@@ -1617,6 +1623,55 @@ borran, RN-61), y marca quiénes son del **consejo de administración**.
 **Flujos alternativos:** ya hay un pedido abierto de la unidad → no se duplica; se le dice que portería ya lo tiene.
 
 **Reglas:** PN-09. **Estado:** ✅ — inicio de `/app` y `/porteria`.
+
+---
+
+### CU-R-44
+## CU-R-44 — Pedir permiso para un trasteo
+
+- **Actor principal:** Quien vive o es dueño de la unidad. **Secundarios:** administración, portería.
+- **Resultado esperado:** El trasteo queda aprobado, con su horario, y portería lo ve el día que toca.
+
+> Mary, 2026-11-20: *«1, 2 y 3 por favor»* (trasteos, obras en el apartamento y QR para visitantes), sobre lo que más puede requerir el propietario en la app.
+
+**Flujo principal**
+1. En **Mi unidad → Trasteos y obras**, «Pedir permiso de trasteo»: llego o me voy, fecha, desde y
+   hasta, empresa y placa del camión (opcionales). Se le dice el horario del edificio, la
+   anticipación y, si lo pide, el depósito.
+2. Queda **por aprobar**. La administración lo aprueba (CU-A-37) y le llega un mensaje.
+3. El día del trasteo, portería lo ve en **Hoy en el edificio** y marca «Se hizo».
+
+**Flujos alternativos**
+- A1. Sin la anticipación, en domingo o festivo, en sábado si el edificio no lo permite, fuera del
+  horario o cruzado con otro trasteo de ese día → no se puede pedir, y se dice por qué.
+- A2. No se aprueba → la administración dice por qué, con amabilidad, y se puede pedir de nuevo.
+- A3. Quien lo pidió lo cancela; queda guardado.
+
+**Reglas:** PN-10. **Estado:** ✅ — `/app/unidad/permisos`. Horario por defecto: 8:00 a 17:00,
+2 días de anticipación, sábados sí (cada edificio puede fijar el suyo, `reglasTrasteo`).
+
+---
+
+### CU-R-45
+## CU-R-45 — Pedir permiso para una obra en el apartamento
+
+- **Actor principal:** Propietario o arrendatario. **Secundarios:** administración, portería.
+- **Resultado esperado:** La obra queda aprobada y portería sabe qué trabajadores pueden entrar y cuándo.
+
+> Mary, 2026-11-20: *«1, 2 y 3 por favor»* (trasteos, obras en el apartamento y QR para visitantes), sobre lo que más puede requerir el propietario en la app.
+
+**Flujo principal**
+1. En **Mi unidad → Trasteos y obras**, «Pedir permiso de obra»: qué se va a hacer, desde y hasta,
+   contratista y los **trabajadores con su documento**. Se le recuerda el horario de obras.
+2. Queda **por aprobar**; la administración lo aprueba (CU-A-37) y le llega un mensaje.
+3. Cada día hábil de la obra, portería ve en **Hoy en el edificio** la obra y quiénes pueden entrar.
+
+**Flujos alternativos**
+- A1. Empieza hoy o antes, dura más de 90 días, no tiene trabajadores o un documento se repite →
+  no se puede pedir, y se dice por qué. Si la obra sigue, se pide otro permiso.
+- A2. Domingos y festivos no se trabaja: portería no la ve esos días.
+
+**Reglas:** PN-11. **Estado:** ✅ — `/app/unidad/permisos`.
 
 ---
 

@@ -55,6 +55,7 @@ const TITULOS: Record<string, string> = {
   '/app/procesos': 'Procesos sancionatorios',
   '/app/unidad': 'Mi unidad',
   '/app/unidad/vehiculos-mascotas': 'Vehículos y mascotas',
+  '/app/unidad/permisos': 'Trasteos y obras',
   '/app/directorio': 'Teléfonos útiles',
   '/app/edificio': 'Tu edificio',
   '/app/edificio/cuentas': 'Cuentas claras',

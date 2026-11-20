@@ -54,6 +54,8 @@ consola, de respaldo (CU-A-09). Lo recibido y lo entregado queda en **la minuta 
 - **Actor principal:** Portería
 - **Precondiciones:** El residente generó el código (CU-R-10).
 - **Disparador:** El visitante llega a la entrada.
+
+> **2026-11-20 (PN-12):** «Escanear el QR» abre la cámara y lee el código del visitante (lector del propio navegador, en Chrome y Android). Donde no hay lector, se escribe como siempre. En la misma pantalla de turno, **Hoy en el edificio** muestra los trasteos aprobados de hoy (se marcan «Se hizo») y las obras que trabajan, con los trabajadores autorizados (PN-10, PN-11).
 - **Resultado esperado:** La portería sabe si el código sirve **ahora**, y a qué unidad va.
 
 **Flujo principal**

@@ -219,6 +219,9 @@ import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajer
 import { finDePeriodo, formatearDinero, formatearFecha, formatearPeriodo } from '../utilidades/formato'
 import { guardar, leer, sembrar, ocupacion } from './almacen'
 import type {
+  PermisoObra,
+  TrabajadorObra,
+  Trasteo,
   AlertaAyuda,
   AvisoClasificado,
   CategoriaDocumentoEdificio,
@@ -234,6 +237,9 @@ import type {
   TipoEventoEdificio,
 } from '../dominio/tipos'
 import {
+  REGLAS_TRASTEO_POR_DEFECTO,
+  motivoPermisoObraInvalido,
+  motivoTrasteoInvalido,
   DIAS_VIGENCIA_AVISO,
   MAXIMO_ARCHIVO_DOCUMENTO_KB,
   cuotaQuePagaElProgramado,
@@ -5969,4 +5975,176 @@ export async function atenderAyuda(
     alerta.atendida = { por: parametros.personaId, en: ahora, nota: parametros.nota?.trim() || undefined }
   }
   return persistir(bd, alerta)
+}
+
+// ---------------------------------------------------------------------------
+// Trasteos y obras en el apartamento — Mary, 2026-11-20 · CU-R-44, CU-R-45, CU-A-37 · PN-10, PN-11
+// ---------------------------------------------------------------------------
+
+function avisarDecisionPermiso(bd: BaseDatos, permiso: Trasteo | PermisoObra, que: string): void {
+  const unidad = bd.unidades.find((u) => u.id === permiso.unidadId)
+  const aprobado = permiso.estado === 'aprobado'
+  avisarAPersona(bd, {
+    copropiedadId: permiso.copropiedadId,
+    personaId: permiso.personaId,
+    motivo: 'permiso_decidido',
+    texto: aprobado
+      ? `Idiky: la administración aprobó ${que} de ${unidad ? etiquetaUnidad(unidad) : 'tu unidad'}. Portería ya lo tiene.`
+      : `Idiky: la administración no pudo aprobar ${que}${permiso.decision?.motivo ? `: ${permiso.decision.motivo}` : ''}. Puedes pedirlo de nuevo en la app.`,
+  })
+}
+
+/** CU-R-44 · PN-10 — Pedir permiso para un trasteo. */
+export async function solicitarTrasteo(
+  bdActual: BaseDatos,
+  parametros: {
+    unidadId: string
+    personaId: string
+    sentido: 'llegada' | 'salida'
+    fecha: FechaISO
+    horaInicio: string
+    horaFin: string
+    empresa?: string
+    placa?: string
+    observaciones?: string
+  },
+): Promise<Resultado<Trasteo>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const copropiedadId = copropiedadDeUnidad(bd, parametros.unidadId)
+  if (!esDeLaUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('El trasteo lo pide quien vive o es dueño de la unidad.')
+  }
+  const reglas = bd.copropiedades.find((c) => c.id === copropiedadId)?.reglasTrasteo ?? REGLAS_TRASTEO_POR_DEFECTO
+  const motivo = motivoTrasteoInvalido(
+    parametros,
+    reglas,
+    bd.trasteos.filter((t) => t.copropiedadId === copropiedadId),
+    hoyISO(),
+  )
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const trasteo: Trasteo = {
+    id: nuevoId('tra'),
+    copropiedadId,
+    unidadId: parametros.unidadId,
+    personaId: parametros.personaId,
+    sentido: parametros.sentido,
+    fecha: parametros.fecha,
+    horaInicio: parametros.horaInicio,
+    horaFin: parametros.horaFin,
+    empresa: parametros.empresa?.trim() || undefined,
+    placa: parametros.placa ? normalizarPlaca(parametros.placa) || undefined : undefined,
+    observaciones: parametros.observaciones?.trim() || undefined,
+    estado: 'solicitado',
+    creadoEn: ahoraISO(),
+  }
+  bd.trasteos.push(trasteo)
+  return persistir(bd, trasteo)
+}
+
+/** CU-R-45 · PN-11 — Pedir permiso para una obra en el apartamento. */
+export async function solicitarPermisoObra(
+  bdActual: BaseDatos,
+  parametros: {
+    unidadId: string
+    personaId: string
+    descripcion: string
+    desde: FechaISO
+    hasta: FechaISO
+    contratista?: string
+    trabajadores: TrabajadorObra[]
+  },
+): Promise<Resultado<PermisoObra>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const copropiedadId = copropiedadDeUnidad(bd, parametros.unidadId)
+  if (!puedeManejarUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('El permiso de obra lo pide el propietario o el arrendatario.')
+  }
+  const motivo = motivoPermisoObraInvalido(parametros, hoyISO())
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const permiso: PermisoObra = {
+    id: nuevoId('obr'),
+    copropiedadId,
+    unidadId: parametros.unidadId,
+    personaId: parametros.personaId,
+    descripcion: parametros.descripcion.trim(),
+    desde: parametros.desde,
+    hasta: parametros.hasta,
+    contratista: parametros.contratista?.trim() || undefined,
+    trabajadores: parametros.trabajadores
+      .filter((t) => t.nombre.trim() || t.documento.trim())
+      .map((t) => ({ nombre: t.nombre.trim(), documento: t.documento.replace(/\D/g, '') })),
+    estado: 'solicitado',
+    creadoEn: ahoraISO(),
+  }
+  bd.permisosObra.push(permiso)
+  return persistir(bd, permiso)
+}
+
+/**
+ * CU-A-37 — La administración aprueba o no un trasteo o una obra. Si no, dice
+ * por qué. A quien lo pidió le llega un mensaje.
+ */
+export async function decidirPermiso(
+  bdActual: BaseDatos,
+  parametros: { tipo: 'trasteo' | 'obra'; id: string; personaId: string; aprobar: boolean; motivo?: string },
+): Promise<Resultado<Trasteo | PermisoObra>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const permiso =
+    parametros.tipo === 'trasteo'
+      ? bd.trasteos.find((t) => t.id === parametros.id)
+      : bd.permisosObra.find((p) => p.id === parametros.id)
+  if (!permiso) throw new ErrorDeNegocio('Esa solicitud no existe.')
+  exigirAdministracion(bd, parametros.personaId, permiso.copropiedadId, 'Aprobar trasteos y obras')
+  if (permiso.estado !== 'solicitado') throw new ErrorDeNegocio('Esa solicitud ya fue decidida.')
+  if (!parametros.aprobar && (parametros.motivo ?? '').trim().length < 10) {
+    throw new ErrorDeNegocio('Explica con amabilidad por qué no se aprueba, para que lo pueda pedir de nuevo.')
+  }
+  permiso.estado = parametros.aprobar ? 'aprobado' : 'rechazado'
+  permiso.decision = { por: parametros.personaId, en: ahoraISO(), motivo: parametros.motivo?.trim() || undefined }
+  avisarDecisionPermiso(
+    bd,
+    permiso,
+    parametros.tipo === 'trasteo' ? `el trasteo del ${fechaCorta((permiso as Trasteo).fecha)}` : 'el permiso de obra',
+  )
+  return persistir(bd, permiso)
+}
+
+/** CU-R-44, CU-R-45 — Quien lo pidió (o la administración) lo cancela; queda guardado. */
+export async function cancelarPermiso(
+  bdActual: BaseDatos,
+  parametros: { tipo: 'trasteo' | 'obra'; id: string; personaId: string },
+): Promise<Resultado<Trasteo | PermisoObra>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const permiso =
+    parametros.tipo === 'trasteo'
+      ? bd.trasteos.find((t) => t.id === parametros.id)
+      : bd.permisosObra.find((p) => p.id === parametros.id)
+  if (!permiso) throw new ErrorDeNegocio('Esa solicitud no existe.')
+  if (permiso.personaId !== parametros.personaId && !esAdministracion(bd, parametros.personaId, permiso.copropiedadId)) {
+    throw new ErrorDeNegocio('La cancela quien la pidió o la administración.')
+  }
+  if (permiso.estado === 'cancelado' || permiso.estado === 'rechazado') throw new ErrorDeNegocio('Esa solicitud ya está cerrada.')
+  permiso.estado = 'cancelado'
+  permiso.cancelacion = { por: parametros.personaId, en: ahoraISO() }
+  return persistir(bd, permiso)
+}
+
+/** CU-P-01 · PN-10 — Portería marca que el trasteo de hoy se hizo. */
+export async function marcarTrasteoRealizado(
+  bdActual: BaseDatos,
+  parametros: { trasteoId: string; personaId: string },
+): Promise<Resultado<Trasteo>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const trasteo = bd.trasteos.find((t) => t.id === parametros.trasteoId)
+  if (!trasteo) throw new ErrorDeNegocio('Ese trasteo no existe.')
+  if (!atiendePorteria(bd, parametros.personaId, trasteo.copropiedadId)) throw new ErrorDeNegocio('Lo marca portería.')
+  if (trasteo.estado !== 'aprobado') throw new ErrorDeNegocio('Solo se marcan los trasteos aprobados.')
+  if (trasteo.realizado) throw new ErrorDeNegocio('Ese trasteo ya está marcado.')
+  trasteo.realizado = { por: parametros.personaId, en: ahoraISO() }
+  return persistir(bd, trasteo)
 }

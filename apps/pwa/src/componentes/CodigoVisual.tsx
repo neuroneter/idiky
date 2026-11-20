@@ -1,83 +1,49 @@
 /**
- * CU-R-10 — Representacion visual del codigo de visitante.
+ * CU-R-10 — El código del visitante como **QR real y escaneable** (PN-12).
  *
- * ATENCION (ADR-0005): esto NO es un codigo QR valido. Es un patron
- * determinista generado a partir del codigo, con apariencia de QR, para las
- * demostraciones. Cuando exista el lector de porteria (fase 3) este componente
- * se reemplaza por un generador de QR real sin tocar el caso de uso.
+ * Desde el 2026-11-20 (ADR-0005, actualizado) es un QR de verdad, generado sin
+ * librerías (`utilidades/qr.ts`): lleva el código alfanumérico, el mismo que
+ * portería puede escribir a mano si no tiene cámara.
  */
 
-import type { ReactElement } from 'react'
+import { useMemo } from 'react'
+import { generarQr } from '../utilidades/qr'
 
-const MODULOS = 21
-
-/** Hash estable de una cadena, para que un mismo codigo genere siempre el mismo patron. */
-function hash(texto: string, semilla: number): number {
-  let valor = semilla
-  for (let i = 0; i < texto.length; i += 1) {
-    valor = (valor * 31 + texto.charCodeAt(i)) >>> 0
-  }
-  return valor
+/** El QR como SVG, con su margen blanco de cuatro módulos (lo exige la norma). */
+export function svgDelQr(texto: string, escala = 8): string {
+  const m = generarQr(texto)
+  const n = m.length + 8
+  let ruta = ''
+  m.forEach((fila, y) =>
+    fila.forEach((oscuro, x) => {
+      if (oscuro) ruta += `M${x + 4} ${y + 4}h1v1h-1z`
+    }),
+  )
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${n * escala}" height="${n * escala}" viewBox="0 0 ${n} ${n}" shape-rendering="crispEdges"><rect width="${n}" height="${n}" fill="#fff"/><path d="${ruta}" fill="#000"/></svg>`
 }
 
-function esModuloActivo(codigo: string, fila: number, columna: number): boolean {
-  return hash(`${codigo}:${fila}:${columna}`, 2166136261) % 100 < 47
-}
-
-/**
- * Los tres cuadros de referencia de las esquinas.
- * Devuelve `true` si el modulo se pinta, `false` si esta dentro del ojo pero
- * vacio, y `null` si la celda no pertenece a ningun ojo.
- */
-function enOjo(fila: number, columna: number): boolean | null {
-  const esquinas = [
-    [0, 0],
-    [0, MODULOS - 7],
-    [MODULOS - 7, 0],
-  ]
-  for (const [f, c] of esquinas) {
-    const df = fila - f
-    const dc = columna - c
-    if (df < 0 || dc < 0 || df > 6 || dc > 6) continue
-    const borde = df === 0 || df === 6 || dc === 0 || dc === 6
-    const centro = df >= 2 && df <= 4 && dc >= 2 && dc <= 4
-    return borde || centro
-  }
-  return null
-}
-
-export function CodigoVisual({ codigo, tamano = 168 }: { codigo: string; tamano?: number }) {
-  const celdas: ReactElement[] = []
-
-  for (let fila = 0; fila < MODULOS; fila += 1) {
-    for (let columna = 0; columna < MODULOS; columna += 1) {
-      const ojo = enOjo(fila, columna)
-      const activo = ojo === null ? esModuloActivo(codigo, fila, columna) : ojo
-      if (!activo) continue
-      celdas.push(
-        <rect
-          key={`${fila}-${columna}`}
-          x={columna}
-          y={fila}
-          width={1}
-          height={1}
-          rx={0.18}
-          fill="currentColor"
-        />,
-      )
-    }
-  }
-
+export function CodigoVisual({ codigo, tamano = 200 }: { codigo: string; tamano?: number }) {
+  const matriz = useMemo(() => generarQr(codigo), [codigo])
+  const n = matriz.length + 8
+  let ruta = ''
+  matriz.forEach((fila, y) =>
+    fila.forEach((oscuro, x) => {
+      if (oscuro) ruta += `M${x + 4} ${y + 4}h1v1h-1z`
+    }),
+  )
   return (
     <svg
       width={tamano}
       height={tamano}
-      viewBox={`-1 -1 ${MODULOS + 2} ${MODULOS + 2}`}
+      viewBox={`0 0 ${n} ${n}`}
+      shapeRendering="crispEdges"
       role="img"
-      aria-label={`Codigo visual del visitante ${codigo}`}
-      style={{ color: 'var(--color-texto)', background: '#fff', borderRadius: 'var(--radio-sm)' }}
+      aria-label={`Código QR del visitante ${codigo}`}
+      data-qr={codigo}
+      style={{ background: '#fff', borderRadius: 'var(--radio-sm)' }}
     >
-      {celdas}
+      <rect width={n} height={n} fill="#fff" />
+      <path d={ruta} fill="#000" />
     </svg>
   )
 }
