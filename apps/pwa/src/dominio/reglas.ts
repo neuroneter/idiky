@@ -65,6 +65,7 @@ import type {
   AlertaAyuda,
   AvisoClasificado,
   AscensorTrasteo,
+  DepositoTrasteo,
   EstadoPermiso,
   PermisoObra,
   ReglasTrasteo,
@@ -4450,4 +4451,47 @@ export const TEXTO_ESTADO_PERMISO: Record<EstadoPermiso, string> = {
   aprobado: 'Aprobado',
   rechazado: 'No aprobado',
   cancelado: 'Cancelado',
+}
+
+// ---------------------------------------------------------------------------
+// Depósito de trasteo — PN-13 · CU-R-44, CU-A-37
+// ---------------------------------------------------------------------------
+
+export type EstadoDeposito = 'por_recibir' | 'recibido' | 'devuelto' | 'retenido'
+
+/** PN-13 — En qué va el depósito. */
+export function estadoDeposito(deposito: DepositoTrasteo): EstadoDeposito {
+  if (deposito.cierre) return deposito.cierre.resultado
+  return deposito.recibido ? 'recibido' : 'por_recibir'
+}
+
+export const TEXTO_ESTADO_DEPOSITO: Record<EstadoDeposito, string> = {
+  por_recibir: 'Depósito por entregar',
+  recibido: 'Depósito recibido',
+  devuelto: 'Depósito devuelto',
+  retenido: 'Depósito retenido',
+}
+
+/**
+ * PN-13 — Por qué no se puede cerrar el depósito así, o `null`. Se cierra solo
+ * si se recibió y el trasteo ya se hizo. Retener exige el valor (hasta el total)
+ * y el motivo: el residente tiene que poder entender qué se le cobró.
+ */
+export function motivoCierreDepositoInvalido(
+  trasteo: Trasteo,
+  cierre: { resultado: 'devuelto' | 'retenido'; valorRetenido?: number; motivo?: string },
+): string | null {
+  const deposito = trasteo.deposito
+  if (!deposito) return 'Este trasteo no tiene depósito.'
+  if (!deposito.recibido) return 'El depósito todavía no se ha recibido.'
+  if (deposito.cierre) return 'Ese depósito ya se cerró.'
+  if (!trasteo.realizado) return 'Primero se marca el trasteo como hecho.'
+  if (cierre.resultado === 'retenido') {
+    const valor = cierre.valorRetenido ?? 0
+    if (!Number.isFinite(valor) || valor <= 0 || valor > deposito.valor) {
+      return 'Lo retenido va desde $1 hasta el depósito completo.'
+    }
+    if ((cierre.motivo ?? '').trim().length < 10) return 'Explica qué daño se cubre con lo retenido.'
+  }
+  return null
 }

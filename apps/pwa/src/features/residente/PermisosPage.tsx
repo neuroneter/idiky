@@ -8,6 +8,7 @@
  * día que toca.
  */
 
+import { TextoDeposito } from '../../componentes/DepositoTrasteo'
 import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
@@ -75,6 +76,10 @@ export function PermisosPage() {
             {t.empresa ? ` · ${t.empresa}` : ''}
           </span>
           {t.decision?.motivo && <span className="subtitulo">Administración: {t.decision.motivo}</span>}
+          {t.deposito && !t.deposito.recibido && (t.estado === 'solicitado' || t.estado === 'aprobado') && (
+            <span className="subtitulo">Entrega el depósito en la administración o en portería antes del trasteo.</span>
+          )}
+          <TextoDeposito trasteo={t} />
           {(t.estado === 'solicitado' || t.estado === 'aprobado') && !t.realizado && t.personaId === sesion.personaId && (
             <button className="boton boton--pequeno" style={{ alignSelf: 'flex-start' }} disabled={cargando} onClick={() => cancelar('trasteo', t.id)}>
               Cancelar

@@ -2106,6 +2106,26 @@ export interface Trasteo {
   cancelacion?: { por: string; en: FechaHoraISO }
   /** Portería lo marca el día del trasteo. */
   realizado?: { por: string; en: FechaHoraISO }
+  /** PN-13 — El depósito, si el edificio lo pide: cuánto, cuándo se recibió y cómo terminó. */
+  deposito?: DepositoTrasteo
+}
+
+/**
+ * PN-13 — El depósito de un trasteo. Es **plata del residente** que el edificio
+ * guarda mientras tanto: se recibe antes y se devuelve después, completo o con
+ * lo que se retuvo por daños, siempre con el motivo.
+ */
+export interface DepositoTrasteo {
+  valor: Dinero
+  recibido?: { por: string; en: FechaHoraISO }
+  cierre?: {
+    resultado: 'devuelto' | 'retenido'
+    /** Lo que se retuvo por daños (todo o una parte). */
+    valorRetenido?: Dinero
+    motivo?: string
+    por: string
+    en: FechaHoraISO
+  }
 }
 
 export interface TrabajadorObra {

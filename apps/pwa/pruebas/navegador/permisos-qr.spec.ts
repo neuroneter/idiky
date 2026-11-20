@@ -135,3 +135,40 @@ test('la administración parametriza horario, anticipación y ascensores de tras
   expect(r.sabado).toMatch(/no se trastea los sábados/)
   expect(r.deshabilitado).toMatch(/cuál ascensor/)
 })
+
+test('depósito del trasteo: se recibe, se devuelve o se retiene con motivo (PN-13)', async ({ page }) => {
+  await page.goto('/')
+  const r = await page.evaluate(async () => {
+    const repo = await import('/src/datos/repositorio.ts')
+    let bd = await repo.cargar()
+    const intento = async (f: () => Promise<{ bd: typeof bd; datos: unknown }>) => {
+      try { const res = await f(); bd = res.bd; return res.datos } catch (e) { return 'ERR: ' + (e as Error).message }
+    }
+    const nuevo = (await intento(() => repo.solicitarTrasteo(bd, { unidadId: 'uni-torre1-402', personaId: 'per-1', sentido: 'llegada', fecha: '2026-10-14', horaInicio: '09:00', horaFin: '11:00', ascensorId: 'asc-t1' }))) as { deposito?: { valor: number } }
+    const antesDeHacerse = await intento(() => repo.cerrarDepositoTrasteo(bd, { trasteoId: 'tra-1', personaId: 'per-admin', resultado: 'devuelto' }))
+    await intento(() => repo.marcarTrasteoRealizado(bd, { trasteoId: 'tra-1', personaId: 'per-admin' }))
+    const porteriaRetiene = await intento(() => repo.cerrarDepositoTrasteo(bd, { trasteoId: 'tra-1', personaId: 'per-porteria', resultado: 'retenido', valorRetenido: 50000, motivo: 'Rayón en la puerta del ascensor' }))
+    const demasiado = await intento(() => repo.cerrarDepositoTrasteo(bd, { trasteoId: 'tra-1', personaId: 'per-admin', resultado: 'retenido', valorRetenido: 300000, motivo: 'Rayón en la puerta del ascensor' }))
+    const sinMotivo = await intento(() => repo.cerrarDepositoTrasteo(bd, { trasteoId: 'tra-1', personaId: 'per-admin', resultado: 'retenido', valorRetenido: 50000 }))
+    await intento(() => repo.cerrarDepositoTrasteo(bd, { trasteoId: 'tra-1', personaId: 'per-admin', resultado: 'retenido', valorRetenido: 50000, motivo: 'Rayón en la puerta del ascensor' }))
+    const mensaje = bd.mensajes.find((m) => m.texto.includes('se retuvieron'))?.texto
+    const otraVez = await intento(() => repo.cerrarDepositoTrasteo(bd, { trasteoId: 'tra-1', personaId: 'per-admin', resultado: 'devuelto' }))
+    return { valorNuevo: nuevo.deposito?.valor, antesDeHacerse, porteriaRetiene, demasiado, sinMotivo, mensaje, otraVez }
+  })
+  expect(r.valorNuevo).toBe(200000)
+  expect(r.antesDeHacerse).toMatch(/Primero se marca el trasteo/)
+  expect(r.porteriaRetiene).toMatch(/administración/)
+  expect(r.demasiado).toMatch(/depósito completo/)
+  expect(r.sinMotivo).toMatch(/qué daño/)
+  expect(r.mensaje).toMatch(/Te devolvemos \$\s?150\.000/)
+  expect(r.otraVez).toMatch(/ya se cerró/)
+})
+
+test('portería recibe y devuelve el depósito del trasteo de hoy (PN-13)', async ({ page }) => {
+  await entrarComo(page, /Jairo Alberto Pineda/)
+  await expect(page.getByText('Depósito recibido').first()).toBeVisible()
+  await page.getByRole('button', { name: 'Se hizo' }).click()
+  await page.getByRole('button', { name: 'Devolver el depósito' }).click()
+  await expect(page.getByText('Depósito devuelto', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Retener por daños' })).toHaveCount(0)
+})

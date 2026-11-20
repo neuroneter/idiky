@@ -1359,4 +1359,16 @@ trastea los sábados, el depósito (opcional) y los **ascensores para trasteos**
 nombre y si está habilitado. Un ascensor se deshabilita, no se borra. Cada ascensor tiene su propia
 agenda. Lo ya aprobado no cambia. En BLOKY va en la parametrización del edificio (T-54).
 
-**Reglas:** PN-10, PN-11. **Estado:** ✅ — `/admin/edificio`.
+**Depósito del trasteo** (Mary, 2026-11-20: *«el depósito también lo parametriza el
+administrador»* y *«sí, agrégalo»*). Si el edificio lo pide, cada trasteo lleva su depósito:
+1. «Depósito recibido»: lo marca la administración o portería cuando el residente lo entrega.
+2. Después de que el trasteo se hizo, «Devolver el depósito» (administración o portería) o
+   «Retener por daños» (**solo la administración**, con el valor —hasta el depósito completo— y
+   qué daño cubre).
+3. Al residente le llega un mensaje: devuelto con las gracias, o lo retenido, el motivo y lo que
+   se le devuelve.
+
+Los trasteos pasados con el depósito abierto siguen en la lista hasta cerrarlo. Es plata del
+residente que el edificio guarda: la contable debe llevarla aparte (T-56).
+
+**Reglas:** PN-10, PN-11, PN-13. **Estado:** ✅ — `/admin/edificio`.

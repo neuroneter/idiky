@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Depósito del trasteo (CU-A-37, CU-R-44, PN-13)
+
+Mary: *«el depósito también lo parametriza el administrador»* (ya estaba en la parametrización) y
+*«sí, agrégalo»* (registrarlo). Cada trasteo trae su depósito fijo. La administración o portería
+marcan **recibido**; después del trasteo, **devuelto** (administración o portería) o **retenido
+por daños** (solo la administración, con el valor y el motivo). El residente ve en qué va y recibe
+un mensaje. T-56 para Jeimy: llevarlo aparte en la contable. La semilla sube a la versión 43
+(depósito de $200.000). Archivos: `apps/pwa/src/componentes/DepositoTrasteo.tsx` (nuevo),
+`PermisosAdmin`, `HoyEnElEdificio`, `PermisosPage`, `dominio/{tipos,reglas}.ts`,
+`datos/{repositorio,semilla}.ts`, `pruebas/navegador/permisos-qr.spec.ts`.
+
 ### 2026-11-20 · Mary + IA (Claude) · Parametrización de trasteos (CU-A-37, PN-10)
 
 Mary: *«los horarios de trasteos y los ascensores habilitados para los trasteos los parametriza el

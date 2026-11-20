@@ -3,6 +3,7 @@
  * aprobados y las obras que trabajan, con los trabajadores autorizados.
  */
 
+import { AccionesDeposito, TextoDeposito } from '../../componentes/DepositoTrasteo'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
@@ -26,7 +27,8 @@ export function HoyEnElEdificio() {
       {trasteos.map((t) => {
         const unidad = sel.unidad(bd, t.unidadId)
         return (
-          <div key={t.id} className="fila">
+          <div key={t.id} className="columna" style={{ gap: 'var(--e1)' }}>
+          <div className="fila">
             <span>
               <strong>Trasteo</strong> · {unidad ? etiquetaUnidad(unidad) : ''} {t.sentido === 'llegada' ? 'llega' : 'se va'} de {t.horaInicio} a {t.horaFin}
               {ascensor(t.ascensorId) ? ` · ${ascensor(t.ascensorId)}` : ''}
@@ -44,6 +46,9 @@ export function HoyEnElEdificio() {
                 Se hizo
               </button>
             )}
+          </div>
+          <TextoDeposito trasteo={t} />
+          <AccionesDeposito trasteo={t} puedeRetener={false} />
           </div>
         )
       })}

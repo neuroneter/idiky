@@ -240,6 +240,7 @@ import type {
 import {
   REGLAS_TRASTEO_POR_DEFECTO,
   motivoReglasTrasteoInvalidas,
+  motivoCierreDepositoInvalido,
   motivoPermisoObraInvalido,
   motivoTrasteoInvalido,
   DIAS_VIGENCIA_AVISO,
@@ -6041,6 +6042,8 @@ export async function solicitarTrasteo(
     observaciones: parametros.observaciones?.trim() || undefined,
     estado: 'solicitado',
     creadoEn: ahoraISO(),
+    // PN-13 — El depósito que pide hoy el edificio queda fijo en el trasteo.
+    deposito: reglas.deposito ? { valor: reglas.deposito } : undefined,
   }
   bd.trasteos.push(trasteo)
   return persistir(bd, trasteo)
@@ -6184,4 +6187,65 @@ export async function configurarReglasTrasteo(
     cambiadoEn: ahoraISO(),
   }
   return persistir(bd, copropiedad)
+}
+
+/** CU-A-37 · PN-13 — La administración o portería registra que recibió el depósito. */
+export async function recibirDepositoTrasteo(
+  bdActual: BaseDatos,
+  parametros: { trasteoId: string; personaId: string },
+): Promise<Resultado<Trasteo>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const trasteo = bd.trasteos.find((t) => t.id === parametros.trasteoId)
+  if (!trasteo?.deposito) throw new ErrorDeNegocio('Este trasteo no tiene depósito.')
+  if (!atiendePorteria(bd, parametros.personaId, trasteo.copropiedadId)) {
+    throw new ErrorDeNegocio('El depósito lo recibe la administración o portería.')
+  }
+  if (trasteo.estado === 'rechazado' || trasteo.estado === 'cancelado') throw new ErrorDeNegocio('Ese trasteo no sigue en pie.')
+  if (trasteo.deposito.recibido) throw new ErrorDeNegocio('Ese depósito ya se recibió.')
+  trasteo.deposito.recibido = { por: parametros.personaId, en: ahoraISO() }
+  return persistir(bd, trasteo)
+}
+
+/**
+ * CU-A-37 · PN-13 — Cerrar el depósito después del trasteo: devolverlo completo
+ * (administración o portería) o retener una parte o todo por daños (solo la
+ * administración, con el valor y el motivo). A quien lo pidió le llega un mensaje.
+ */
+export async function cerrarDepositoTrasteo(
+  bdActual: BaseDatos,
+  parametros: { trasteoId: string; personaId: string; resultado: 'devuelto' | 'retenido'; valorRetenido?: number; motivo?: string },
+): Promise<Resultado<Trasteo>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const trasteo = bd.trasteos.find((t) => t.id === parametros.trasteoId)
+  if (!trasteo) throw new ErrorDeNegocio('Ese trasteo no existe.')
+  if (parametros.resultado === 'retenido') {
+    exigirAdministracion(bd, parametros.personaId, trasteo.copropiedadId, 'Retener un depósito')
+  } else if (!atiendePorteria(bd, parametros.personaId, trasteo.copropiedadId)) {
+    throw new ErrorDeNegocio('El depósito lo devuelve la administración o portería.')
+  }
+  const motivo = motivoCierreDepositoInvalido(trasteo, parametros)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const deposito = trasteo.deposito!
+  deposito.cierre = {
+    resultado: parametros.resultado,
+    valorRetenido: parametros.resultado === 'retenido' ? parametros.valorRetenido : undefined,
+    motivo: parametros.motivo?.trim() || undefined,
+    por: parametros.personaId,
+    en: ahoraISO(),
+  }
+  const unidad = bd.unidades.find((u) => u.id === trasteo.unidadId)
+  const devuelto = deposito.valor - (deposito.cierre.valorRetenido ?? 0)
+  avisarAPersona(bd, {
+    copropiedadId: trasteo.copropiedadId,
+    personaId: trasteo.personaId,
+    motivo: 'permiso_decidido',
+    texto:
+      parametros.resultado === 'devuelto'
+        ? `Idiky: te devolvimos el depósito del trasteo de ${unidad ? etiquetaUnidad(unidad) : 'tu unidad'} (${formatearDinero(deposito.valor)}). ¡Gracias por cuidar el edificio!`
+        : `Idiky: del depósito del trasteo se retuvieron ${formatearDinero(deposito.cierre.valorRetenido ?? 0)} por ${deposito.cierre.motivo}. ` +
+          `${devuelto > 0 ? `Te devolvemos ${formatearDinero(devuelto)}. ` : ''}Si tienes dudas, escríbenos por la app.`,
+  })
+  return persistir(bd, trasteo)
 }
