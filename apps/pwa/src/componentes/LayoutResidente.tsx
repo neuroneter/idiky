@@ -56,6 +56,12 @@ const TITULOS: Record<string, string> = {
   '/app/unidad': 'Mi unidad',
   '/app/unidad/vehiculos-mascotas': 'Vehículos y mascotas',
   '/app/directorio': 'Teléfonos útiles',
+  '/app/edificio': 'Tu edificio',
+  '/app/edificio/cuentas': 'Cuentas claras',
+  '/app/edificio/documentos': 'Documentos',
+  '/app/edificio/encuestas': 'Encuestas',
+  '/app/edificio/calendario': 'Calendario',
+  '/app/edificio/clasificados': 'Clasificados',
 }
 
 /**

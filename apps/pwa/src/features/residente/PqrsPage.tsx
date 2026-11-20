@@ -17,6 +17,8 @@ import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipPqrs, ChipTipoPqrs } from '../../componentes/Etiquetas'
+import { FotoDano } from '../../componentes/FotoDano'
+import { ReportarDano } from './ReportarDano'
 
 const TIPOS: Array<{ id: TipoPqrs; texto: string; ayuda: string }> = [
   { id: 'peticion', texto: 'Petición', ayuda: 'Solicitas algo a la administración' },
@@ -37,6 +39,7 @@ export function PqrsPage() {
   const { bd, ejecutar, cargando, mostrarAviso } = useDatos()
   const { sesion } = useSesion()
   const [creando, setCreando] = useState(false)
+  const [reportando, setReportando] = useState(false)
   const [abierta, setAbierta] = useState<string | null>(null)
   const [tipo, setTipo] = useState<TipoPqrs>('peticion')
   const [categoria, setCategoria] = useState<CategoriaPqrs>('mantenimiento')
@@ -100,6 +103,19 @@ export function PqrsPage() {
         <Icono nombre="mas" tamano={16} />
         Nueva solicitud
       </button>
+      <button className="boton boton--bloque" onClick={() => setReportando(true)}>
+        <Icono nombre="camara" tamano={16} />
+        Reportar un daño con foto
+      </button>
+      {reportando && (
+        <ReportarDano
+          alCerrar={() => setReportando(false)}
+          alCrear={(id) => {
+            setReportando(false)
+            setAbierta(id)
+          }}
+        />
+      )}
 
       {misPqrs.length === 0 ? (
         <EstadoVacio
@@ -137,6 +153,7 @@ export function PqrsPage() {
                 {desplegada && (
                   <>
                     <div className="separador" />
+                    <FotoDano pqrs={pqrs} />
                     <p style={{ fontSize: 'var(--texto-sm)' }}>{pqrs.descripcion}</p>
 
                     {pqrsAbierta(pqrs) && (

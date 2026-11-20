@@ -3,6 +3,8 @@
  * Doc: docs/casos-de-uso/residente.md#cu-r-02
  */
 
+import { PedirAyuda } from './PedirAyuda'
+import { encuestaAbierta, respuestaDeUnidad } from '../../dominio/reglas'
 import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
@@ -65,6 +67,10 @@ export function InicioPage() {
   const visitantesVigentes = sel
     .visitantesDeUnidad(bd, unidadId)
     .filter((visitante) => estadoRealVisitante(visitante, hoyISO()) === 'activo')
+
+  const encuestasPorResponder = sel
+    .encuestasDe(bd, sesion.copropiedadId)
+    .filter((e) => encuestaAbierta(e, hoyISO()) && !respuestaDeUnidad(e, unidadId ?? '')).length
 
   return (
     <>
@@ -133,6 +139,9 @@ export function InicioPage() {
         </Link>
       </div>
 
+      {/* CU-R-43 — Pedir ayuda a portería, a la vista: en una emergencia nadie busca. */}
+      <PedirAyuda />
+
       {/* CU-R-17 — Los teléfonos útiles, a un toque: en una emergencia nadie busca. */}
       <Link to="/app/directorio" className="tarjeta tarjeta--accion tarjeta--plana">
         <div className="fila">
@@ -140,6 +149,22 @@ export function InicioPage() {
             <strong>Teléfonos útiles y emergencias</strong>
             <span className="subtitulo">Administración, portería, emergencias y servicios</span>
           </div>
+          <Icono nombre="chevron" tamano={16} className="tenue" />
+        </div>
+      </Link>
+
+      {/* Tu edificio: cuentas claras, calendario, encuestas, documentos y clasificados. */}
+      <Link to="/app/edificio" className="tarjeta tarjeta--accion tarjeta--plana">
+        <div className="fila">
+          <div className="columna">
+            <strong>Tu edificio</strong>
+            <span className="subtitulo">Cuentas claras, calendario, encuestas, documentos y clasificados</span>
+          </div>
+          {encuestasPorResponder > 0 && (
+            <span className="chip chip--marca">
+              {encuestasPorResponder === 1 ? '1 encuesta' : `${encuestasPorResponder} encuestas`}
+            </span>
+          )}
           <Icono nombre="chevron" tamano={16} className="tenue" />
         </div>
       </Link>

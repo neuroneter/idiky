@@ -55,6 +55,15 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-31 | **Enviar el poder firmado en foto** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-31) |
 | CU-R-32 | **Seguir el avance de los proyectos de la copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-32) |
 | CU-R-33 | **Mi apartamento lo maneja una inmobiliaria** | 1 | ✅ Demo (2026-11-10: el propietario la registra con soporte y escoge si asiste a asambleas y paga la administración; la administración la revisa; RN-228, RN-229) | [ver](./casos-de-uso/residente.md#cu-r-33) |
+| CU-R-35 | **Pagar con descuento por pronto pago** | 1 | ✅ Demo (2026-11-20, PN-01) | [ver](./casos-de-uso/residente.md#cu-r-35) |
+| CU-R-36 | **Programar el pago de mi cuota** | 1 | ✅ Demo, simulado (2026-11-20, PN-02) | [ver](./casos-de-uso/residente.md#cu-r-36) |
+| CU-R-37 | **Ver las cuentas claras del edificio** | 1 | ✅ Demo (2026-11-20, PN-03) | [ver](./casos-de-uso/residente.md#cu-r-37) |
+| CU-R-38 | **Consultar los documentos del edificio** | 1 | ✅ Demo (2026-11-20, PN-04) | [ver](./casos-de-uso/residente.md#cu-r-38) |
+| CU-R-39 | **Responder las encuestas del edificio** | 1 | ✅ Demo (2026-11-20, PN-05) | [ver](./casos-de-uso/residente.md#cu-r-39) |
+| CU-R-40 | **Reportar un daño con foto** | 1 | ✅ Demo (2026-11-20, PN-06) | [ver](./casos-de-uso/residente.md#cu-r-40) |
+| CU-R-41 | **Ver el calendario del edificio** | 1 | ✅ Demo (2026-11-20, PN-07) | [ver](./casos-de-uso/residente.md#cu-r-41) |
+| CU-R-42 | **Clasificados entre vecinos** | 1 | ✅ Demo (2026-11-20, PN-08) | [ver](./casos-de-uso/residente.md#cu-r-42) |
+| CU-R-43 | **Pedir ayuda a portería desde la app** | 1 | ✅ Demo (2026-11-20, PN-09) | [ver](./casos-de-uso/residente.md#cu-r-43) |
 | CU-R-34 | **Personalizar mi avatar en ALICE** (crear si no hay; editar el por defecto o el de BLOKY) | 1 | 🟡 Código en `develop` (2026-11-16; falta probar en teléfono) | [ver](./casos-de-uso/residente.md#cu-r-34) |
 
 ## 2. Administrador — consola web
@@ -91,6 +100,12 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-28 | **Registrar un proyecto y sus avances, y contárselos a los propietarios** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-28) |
 | CU-A-29 | **Ver la ocupación de las zonas comunes en un calendario** | 2 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-29) |
 | CU-A-30 | **Ver y descargar el informe de uso de las zonas comunes** | 2 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-30) |
+| CU-A-31 | **Configurar el descuento por pronto pago** | 1 | ✅ Demo (2026-11-20, PN-01) | [ver](./casos-de-uso/administrador.md#cu-a-31) |
+| CU-A-32 | **Publicar las cuentas claras del mes** | 1 | ✅ Demo (2026-11-20, PN-03) | [ver](./casos-de-uso/administrador.md#cu-a-32) |
+| CU-A-33 | **Publicar los documentos del edificio** | 1 | ✅ Demo (2026-11-20, PN-04) | [ver](./casos-de-uso/administrador.md#cu-a-33) |
+| CU-A-34 | **Crear encuestas rápidas** | 1 | ✅ Demo (2026-11-20, PN-05) | [ver](./casos-de-uso/administrador.md#cu-a-34) |
+| CU-A-35 | **Programar el calendario del edificio** | 1 | ✅ Demo (2026-11-20, PN-07) | [ver](./casos-de-uso/administrador.md#cu-a-35) |
+| CU-A-36 | **Cuidar los clasificados** | 1 | ✅ Demo (2026-11-20, PN-08) | [ver](./casos-de-uso/administrador.md#cu-a-36) |
 
 
 ## 3. Portería — consola de la entrada

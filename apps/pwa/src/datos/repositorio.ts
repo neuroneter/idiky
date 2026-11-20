@@ -83,6 +83,8 @@ import {
   estadoRealCuota,
   hoyISO,
   imputarPago,
+  fechaLocalDe,
+  descuentoProntoPago,
   numeroRecibo,
   prorratearPorCoeficiente,
   exigeSoportes,
@@ -216,6 +218,34 @@ import {
 import { redactar, textoAutorizacion, textoRechazo } from '../servicios/mensajeria'
 import { finDePeriodo, formatearDinero, formatearFecha, formatearPeriodo } from '../utilidades/formato'
 import { guardar, leer, sembrar, ocupacion } from './almacen'
+import type {
+  AlertaAyuda,
+  AvisoClasificado,
+  CategoriaDocumentoEdificio,
+  DocumentoEdificio,
+  Encuesta,
+  EventoEdificio,
+  InformeMensual,
+  MedioProgramado,
+  PagoProgramado,
+  RubroInforme,
+  TipoAviso,
+  TipoAyuda,
+  TipoEventoEdificio,
+} from '../dominio/tipos'
+import {
+  DIAS_VIGENCIA_AVISO,
+  MAXIMO_ARCHIVO_DOCUMENTO_KB,
+  cuotaQuePagaElProgramado,
+  encuestaAbierta,
+  motivoAvisoInvalido,
+  motivoEncuestaInvalida,
+  motivoEventoInvalido,
+  motivoInformeInvalido,
+  motivoPagoProgramadoInvalido,
+  motivoProntoPagoInvalido,
+  respuestaDeUnidad,
+} from '../dominio/reglas'
 import { responsablesDeRegistro, responsablesDeVisita, responsablesDelVinculo, unidadTienePropietario } from './selectores'
 
 /** Resultado de una operacion: base de datos actualizada + lo que se creo. */
@@ -314,6 +344,8 @@ function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boo
   if (enviarRecordatoriosDePago(bd, momento)) cambio = true
   // RN-227 — El poder de cada asamblea para quien tiene apoderado permanente.
   if (aplicarApoderadosPermanentes(bd)) cambio = true
+  // PN-02 — Los pagos programados, después de generar la cuota del mes.
+  if (cobrarPagosProgramados(bd, momento)) cambio = true
   return cambio
 }
 
@@ -371,7 +403,9 @@ function moverSaldos(bd: BaseDatos, imputaciones: Imputacion[], signo: 1 | -1): 
   for (const linea of imputaciones) {
     const cuota = bd.cuotas.find((c) => c.id === linea.cuotaId)
     if (!cuota) continue
-    cuota.saldo = Math.min(cuota.valor, Math.max(0, cuota.saldo - linea.valor * signo))
+    // PN-01 — El descuento por pronto pago baja el saldo igual que lo pagado.
+    const cubre = linea.valor + (linea.descuento ?? 0)
+    cuota.saldo = Math.min(cuota.valor, Math.max(0, cuota.saldo - cubre * signo))
     cuota.estado = estadoRealCuota(cuota)
   }
 }
@@ -464,11 +498,34 @@ export async function registrarPago(
 ): Promise<Resultado<Pago>> {
   await esperar()
   const bd = clonar(bdActual)
-  const cuotas = cuotasDe(bd, parametros.unidadId)
+  const pago = registrarPagoEn(bd, parametros)
+  return persistir(bd, pago)
+}
 
-  const imputaciones = parametros.imputaciones ?? imputarPago(cuotas, parametros.valor)
-  const validacion = validarImputacion({ valor: parametros.valor, imputaciones, cuotas })
+/**
+ * PN-01 — Marca el descuento por pronto pago en las líneas que lo ganan: la
+ * ordinaria pagada completa, a tiempo, por el valor menos el descuento.
+ */
+function aplicarProntoPago(bd: BaseDatos, unidadId: string, imputaciones: Imputacion[], fecha: FechaISO): Imputacion[] {
+  const unidad = bd.unidades.find((u) => u.id === unidadId)
+  const config = bd.copropiedades.find((c) => c.id === unidad?.copropiedadId)?.prontoPago
+  if (!config?.activo) return imputaciones
+  return imputaciones.map((linea) => {
+    const cuota = bd.cuotas.find((c) => c.id === linea.cuotaId)
+    if (!cuota) return linea
+    const descuento = descuentoProntoPago(cuota, config, fecha)
+    return descuento > 0 && linea.valor === cuota.saldo - descuento ? { ...linea, descuento } : linea
+  })
+}
+
+/** El cuerpo de `registrarPago`, sin esperar ni clonar: lo usa también el pago programado. */
+function registrarPagoEn(bd: BaseDatos, parametros: ParametrosPago, opciones: { agradecer?: boolean } = {}): Pago {
+  const cuotas = cuotasDe(bd, parametros.unidadId)
+  const ahora = ahoraISO()
+  const propuestas = parametros.imputaciones ?? imputarPago(cuotas, parametros.valor)
+  const validacion = validarImputacion({ valor: parametros.valor, imputaciones: propuestas, cuotas })
   if (!validacion.valido) throw new ErrorDeNegocio(validacion.motivo!)
+  const imputaciones = aplicarProntoPago(bd, parametros.unidadId, propuestas, fechaLocalDe(ahora))
 
   const pago: Pago = {
     id: nuevoId('pag'),
@@ -476,21 +533,21 @@ export async function registrarPago(
     valor: parametros.valor,
     medio: parametros.medio,
     referencia: parametros.referencia?.trim() || `REF${Date.now().toString().slice(-8)}`,
-    fecha: ahoraISO(),
+    fecha: ahora,
     estado: 'aplicado',
     origen: parametros.origen ?? 'administracion',
     conceptoInformado: parametros.conceptoInformado,
     recibo: emitirRecibo(bd),
     imputaciones: imputaciones.filter((linea) => linea.valor > 0),
     saldoAFavor: saldoAFavorDelPago(parametros.valor, imputaciones),
-    fechaAplicacion: ahoraISO(),
+    fechaAplicacion: ahora,
     registradoPor: parametros.registradoPor,
   }
 
   moverSaldos(bd, pago.imputaciones, 1)
   bd.pagos.unshift(pago)
-  agradecerPago(bd, pago)
-  return persistir(bd, pago)
+  if (opciones.agradecer !== false) agradecerPago(bd, pago)
+  return pago
 }
 
 /**
@@ -521,7 +578,10 @@ export async function aplicarPago(
   const validacion = validarImputacion({ valor: pago.valor, imputaciones, cuotas })
   if (!validacion.valido) throw new ErrorDeNegocio(validacion.motivo!)
 
-  pago.imputaciones = imputaciones.filter((linea) => linea.valor > 0)
+  // PN-01 — Cuenta la fecha en que el propietario pagó, no la de la conciliación.
+  pago.imputaciones = aplicarProntoPago(bd, pago.unidadId, imputaciones, fechaLocalDe(pago.fecha)).filter(
+    (linea) => linea.valor > 0,
+  )
   pago.saldoAFavor = saldoAFavorDelPago(pago.valor, imputaciones)
   pago.estado = 'aplicado'
   pago.recibo = emitirRecibo(bd)
@@ -759,13 +819,15 @@ function agradecerPago(bd: BaseDatos, pago: Pago): void {
   const copropiedad = bd.copropiedades.find((c) => c.id === unidad?.copropiedadId)
   if (!unidad || !copropiedad?.recordatorioPago?.activo) return
   const alDia = !estaEnMora(cuotasDe(bd, unidad.id))
+  const ahorro = pago.imputaciones.reduce((suma, l) => suma + (l.descuento ?? 0), 0)
   for (const persona of quienPagaLaUnidad(bd, unidad.id)) {
     avisarAPersona(bd, {
       copropiedadId: unidad.copropiedadId,
       personaId: persona.id,
       texto:
         `Idiky: ¡gracias, ${persona.nombres.split(' ')[0]}! Recibimos tu pago de ${formatearDinero(pago.valor)} ` +
-        `para ${etiquetaUnidad(unidad)}.${alDia ? ' Tu unidad está al día.' : ''} Tu recibo de caja ${pago.recibo} ya está en la app.`,
+        `para ${etiquetaUnidad(unidad)}.${ahorro > 0 ? ` Por pagar a tiempo te ahorraste ${formatearDinero(ahorro)}.` : ''}` +
+        `${alDia ? ' Tu unidad está al día.' : ''} Tu recibo de caja ${pago.recibo} ya está en la app.`,
       motivo: 'agradecimiento_pago',
       pagoId: pago.id,
     })
@@ -1132,6 +1194,9 @@ export async function crearPqrs(
     categoria: CategoriaPqrs
     asunto: string
     descripcion: string
+    /** CU-R-40 — Reportar un daño: la foto y dónde está. */
+    foto?: string
+    ubicacion?: string
   },
 ): Promise<Resultado<Pqrs>> {
   await esperar()
@@ -1155,6 +1220,8 @@ export async function crearPqrs(
     // RN-13: SLA de 15 dias calendario.
     fechaLimite: calcularFechaLimite(hoy),
     mensajes: [],
+    foto: parametros.foto ? { imagen: parametros.foto, adjuntadoEn: ahoraISO() } : undefined,
+    ubicacion: parametros.ubicacion?.trim() || undefined,
   }
 
   bd.pqrs.unshift(pqrs)
@@ -5419,4 +5486,487 @@ export async function anularDocumento(
   documento.anuladoPor = parametros.anuladoPor
   documento.motivoAnulacion = motivo
   return persistir(bd, documento)
+}
+
+// ---------------------------------------------------------------------------
+// Para competir — Mary, 2026-11-20 · CU-R-35…43, CU-A-31…36 · PN-01…PN-09
+// ---------------------------------------------------------------------------
+
+/** Quien vive o es dueño de la unidad, con vínculo vigente (cualquier rol). */
+function esDeLaUnidad(bd: BaseDatos, unidadId: string, personaId: string): boolean {
+  return bd.residencias.some((r) => r.unidadId === unidadId && r.personaId === personaId && !r.cierre && residenciaVigente(r))
+}
+
+function copropiedadDeUnidad(bd: BaseDatos, unidadId: string): string {
+  const unidad = bd.unidades.find((u) => u.id === unidadId)
+  if (!unidad) throw new ErrorDeNegocio('Esa unidad no existe.')
+  return unidad.copropiedadId
+}
+
+function exigirAdministracion(bd: BaseDatos, personaId: string, copropiedadId: string, que: string): void {
+  if (!esAdministracion(bd, personaId, copropiedadId)) throw new ErrorDeNegocio(`${que} lo hace la administración.`)
+}
+
+/** CU-A-31 · PN-01 — La administración configura el descuento por pronto pago. */
+export async function configurarProntoPago(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; activo: boolean; porcentaje: number; diaLimite: number },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Configurar el pronto pago')
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  if (parametros.activo) {
+    const motivo = motivoProntoPagoInvalido(parametros.porcentaje, parametros.diaLimite)
+    if (motivo) throw new ErrorDeNegocio(motivo)
+  }
+  copropiedad.prontoPago = {
+    activo: parametros.activo,
+    porcentaje: parametros.porcentaje,
+    diaLimite: parametros.diaLimite,
+    cambiadoPor: parametros.personaId,
+    cambiadoEn: ahoraISO(),
+  }
+  return persistir(bd, copropiedad)
+}
+
+/**
+ * CU-R-36 · PN-02 — El propietario programa el pago de la ordinaria de cada mes.
+ * Uno por unidad: el nuevo reemplaza al anterior. Si el día de este mes ya
+ * pasó (o es hoy), empieza el mes siguiente: nadie quiere un cobro sorpresa.
+ */
+export async function programarPago(
+  bdActual: BaseDatos,
+  parametros: { unidadId: string; personaId: string; medio: MedioProgramado; dia: number },
+): Promise<Resultado<PagoProgramado>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!puedeManejarUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('El pago programado lo deja el propietario o el arrendatario.')
+  }
+  const motivo = motivoPagoProgramadoInvalido(parametros.dia)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const ahora = ahoraISO()
+  for (const anterior of bd.pagosProgramados) {
+    if (anterior.unidadId === parametros.unidadId && anterior.activo) {
+      anterior.activo = false
+      anterior.desactivadoEn = ahora
+    }
+  }
+  const hoy = hoyISO()
+  const programado: PagoProgramado = {
+    id: nuevoId('ppr'),
+    unidadId: parametros.unidadId,
+    personaId: parametros.personaId,
+    medio: parametros.medio,
+    dia: parametros.dia,
+    activo: true,
+    creadoEn: ahora,
+    ultimoPeriodo: Number(hoy.slice(8, 10)) >= parametros.dia ? hoy.slice(0, 7) : undefined,
+  }
+  bd.pagosProgramados.push(programado)
+  return persistir(bd, programado)
+}
+
+/** CU-R-36 — Se apaga, no se borra. */
+export async function cancelarPagoProgramado(
+  bdActual: BaseDatos,
+  parametros: { programadoId: string; personaId: string },
+): Promise<Resultado<PagoProgramado>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const programado = bd.pagosProgramados.find((p) => p.id === parametros.programadoId)
+  if (!programado) throw new ErrorDeNegocio('Ese pago programado no existe.')
+  if (!puedeManejarUnidad(bd, programado.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('El pago programado lo cambia el propietario o el arrendatario.')
+  }
+  programado.activo = false
+  programado.desactivadoEn = ahoraISO()
+  return persistir(bd, programado)
+}
+
+const TEXTO_MEDIO_PROGRAMADO: Record<MedioProgramado, string> = { pse: 'débito PSE', tarjeta: 'tarjeta' }
+
+/**
+ * PN-02 — El proceso del sistema: el día programado se paga la ordinaria del
+ * mes (con el pronto pago si aplica) y se le cuenta al propietario. Simulado:
+ * no hay pasarela (fase 4); con backend lo hace el servidor (T-53).
+ */
+function cobrarPagosProgramados(bd: BaseDatos, momento: string): boolean {
+  let cambio = false
+  const hoy = fechaLocalDe(momento)
+  for (const programado of bd.pagosProgramados ?? []) {
+    const cuota = cuotaQuePagaElProgramado(programado, bd.cuotas, hoy)
+    if (!cuota) continue
+    const unidad = bd.unidades.find((u) => u.id === programado.unidadId)
+    const copropiedad = bd.copropiedades.find((c) => c.id === unidad?.copropiedadId)
+    if (!unidad || !copropiedad) continue
+    const descuento = descuentoProntoPago(cuota, copropiedad.prontoPago, hoy)
+    const valor = cuota.saldo - descuento
+    const pago = registrarPagoEn(
+      bd,
+      {
+        unidadId: unidad.id,
+        valor,
+        medio: programado.medio,
+        origen: 'residente',
+        imputaciones: [{ cuotaId: cuota.id, valor }],
+        registradoPor: 'Pago programado',
+        conceptoInformado: `Pago programado de ${formatearPeriodo(cuota.periodo)}`,
+      },
+      { agradecer: false },
+    )
+    programado.ultimoPeriodo = cuota.periodo
+    cambio = true
+    const persona = bd.personas.find((p) => p.id === programado.personaId)
+    avisarAPersona(bd, {
+      copropiedadId: copropiedad.id,
+      personaId: programado.personaId,
+      motivo: 'pago_programado',
+      pagoId: pago.id,
+      cuotaId: cuota.id,
+      ahora: momento,
+      texto:
+        `Idiky: ¡listo, ${persona?.nombres.split(' ')[0] ?? 'gracias'}! Pagamos la cuota de ${formatearPeriodo(cuota.periodo)} de ` +
+        `${etiquetaUnidad(unidad)} con tu ${TEXTO_MEDIO_PROGRAMADO[programado.medio]} programado: ${formatearDinero(valor)}.` +
+        `${descuento > 0 ? ` Te ahorraste ${formatearDinero(descuento)} por pronto pago.` : ''} Tu recibo ${pago.recibo} está en la app.`,
+    })
+  }
+  return cambio
+}
+
+/**
+ * CU-A-32 · PN-03 — La administración publica las cuentas claras del mes. Si ya
+ * había un informe del periodo, el nuevo lo reemplaza y el viejo queda
+ * guardado. Sale un comunicado en la cartelera.
+ */
+export async function publicarInformeMensual(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    personaId: string
+    periodo: Periodo
+    ingresos: number
+    gastos: RubroInforme[]
+    saldoFondo: number
+    nota?: string
+  },
+): Promise<Resultado<InformeMensual>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Publicar las cuentas del mes')
+  const motivo = motivoInformeInvalido(parametros)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  if (!/^\d{4}-\d{2}$/.test(parametros.periodo)) throw new ErrorDeNegocio('Elige el mes del informe.')
+  const ahora = ahoraISO()
+  const informe: InformeMensual = {
+    id: nuevoId('inf'),
+    copropiedadId: parametros.copropiedadId,
+    periodo: parametros.periodo,
+    ingresos: parametros.ingresos,
+    gastos: parametros.gastos.map((g) => ({ rubro: g.rubro.trim(), valor: g.valor })),
+    saldoFondo: parametros.saldoFondo,
+    nota: parametros.nota?.trim() || undefined,
+    publicadoPor: parametros.personaId,
+    publicadoEn: ahora,
+  }
+  const anterior = bd.informesMensuales.find(
+    (i) => i.copropiedadId === parametros.copropiedadId && i.periodo === parametros.periodo && !i.reemplazadoPor,
+  )
+  if (anterior) anterior.reemplazadoPor = informe.id
+  bd.informesMensuales.push(informe)
+  bd.comunicados.unshift({
+    id: nuevoId('com'),
+    copropiedadId: parametros.copropiedadId,
+    titulo: `Cuentas claras de ${formatearPeriodo(parametros.periodo)}${anterior ? ' (corregidas)' : ''}`,
+    cuerpo: `Ya puedes ver en la app cuánto entró, en qué se gastó y cuánto hay en el fondo en ${formatearPeriodo(parametros.periodo)}.`,
+    categoria: 'general',
+    fijado: false,
+    fechaPublicacion: ahora,
+    autor: 'Administración',
+    leidoPor: [],
+  })
+  return persistir(bd, informe)
+}
+
+/** CU-A-33 · PN-04 — Publicar un documento del edificio. */
+export async function publicarDocumentoEdificio(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    personaId: string
+    titulo: string
+    categoria: CategoriaDocumentoEdificio
+    descripcion?: string
+    fecha: FechaISO
+    archivo?: { nombre: string; tipo: string; datos: string }
+  },
+): Promise<Resultado<DocumentoEdificio>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Publicar documentos')
+  if (parametros.titulo.trim().length < 4) throw new ErrorDeNegocio('Ponle un título al documento.')
+  if (!parametros.fecha) throw new ErrorDeNegocio('Escribe la fecha del documento.')
+  if (parametros.archivo && parametros.archivo.datos.length * 0.75 > MAXIMO_ARCHIVO_DOCUMENTO_KB * 1024) {
+    throw new ErrorDeNegocio(`En el demo el archivo puede pesar hasta ${MAXIMO_ARCHIVO_DOCUMENTO_KB} KB.`)
+  }
+  const documento: DocumentoEdificio = {
+    id: nuevoId('ded'),
+    copropiedadId: parametros.copropiedadId,
+    titulo: parametros.titulo.trim(),
+    categoria: parametros.categoria,
+    descripcion: parametros.descripcion?.trim() || undefined,
+    fecha: parametros.fecha,
+    archivo: parametros.archivo,
+    publicadoPor: parametros.personaId,
+    publicadoEn: ahoraISO(),
+  }
+  bd.documentosEdificio.unshift(documento)
+  return persistir(bd, documento)
+}
+
+/** CU-A-33 · PN-04 — Se retira con motivo (por ejemplo, lo reemplazó uno nuevo); no se borra. */
+export async function retirarDocumentoEdificio(
+  bdActual: BaseDatos,
+  parametros: { documentoId: string; personaId: string; motivo: string },
+): Promise<Resultado<DocumentoEdificio>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const documento = bd.documentosEdificio.find((d) => d.id === parametros.documentoId)
+  if (!documento) throw new ErrorDeNegocio('Ese documento no existe.')
+  exigirAdministracion(bd, parametros.personaId, documento.copropiedadId, 'Retirar documentos')
+  if (documento.retiro) throw new ErrorDeNegocio('Ese documento ya está retirado.')
+  if (parametros.motivo.trim().length < 5) throw new ErrorDeNegocio('Escribe por qué se retira.')
+  documento.retiro = { por: parametros.personaId, en: ahoraISO(), motivo: parametros.motivo.trim() }
+  return persistir(bd, documento)
+}
+
+/** CU-A-34 · PN-05 — Crear una encuesta rápida. */
+export async function crearEncuesta(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; pregunta: string; descripcion?: string; opciones: string[]; cierraEl: FechaISO },
+): Promise<Resultado<Encuesta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Crear encuestas')
+  const motivo = motivoEncuestaInvalida(parametros, hoyISO())
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const encuesta: Encuesta = {
+    id: nuevoId('enc'),
+    copropiedadId: parametros.copropiedadId,
+    pregunta: parametros.pregunta.trim(),
+    descripcion: parametros.descripcion?.trim() || undefined,
+    opciones: parametros.opciones
+      .map((o) => o.trim())
+      .filter(Boolean)
+      .map((texto, i) => ({ id: `op-${i + 1}`, texto })),
+    cierraEl: parametros.cierraEl,
+    creadaPor: parametros.personaId,
+    creadaEn: ahoraISO(),
+    respuestas: [],
+  }
+  bd.encuestas.unshift(encuesta)
+  return persistir(bd, encuesta)
+}
+
+/** CU-R-39 · PN-05 — Responder: una vez por unidad, mientras esté abierta. */
+export async function responderEncuesta(
+  bdActual: BaseDatos,
+  parametros: { encuestaId: string; unidadId: string; personaId: string; opcionId: string },
+): Promise<Resultado<Encuesta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const encuesta = bd.encuestas.find((e) => e.id === parametros.encuestaId)
+  if (!encuesta) throw new ErrorDeNegocio('Esa encuesta no existe.')
+  if (!puedeManejarUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('Responde el propietario o el arrendatario de la unidad.')
+  }
+  if (!encuestaAbierta(encuesta, hoyISO())) throw new ErrorDeNegocio('Esta encuesta ya cerró.')
+  if (respuestaDeUnidad(encuesta, parametros.unidadId)) throw new ErrorDeNegocio('Tu unidad ya respondió esta encuesta.')
+  if (!encuesta.opciones.some((o) => o.id === parametros.opcionId)) throw new ErrorDeNegocio('Elige una de las opciones.')
+  encuesta.respuestas.push({
+    unidadId: parametros.unidadId,
+    personaId: parametros.personaId,
+    opcionId: parametros.opcionId,
+    fecha: ahoraISO(),
+  })
+  return persistir(bd, encuesta)
+}
+
+/** CU-A-34 — Cerrarla antes de su fecha. */
+export async function cerrarEncuesta(
+  bdActual: BaseDatos,
+  parametros: { encuestaId: string; personaId: string },
+): Promise<Resultado<Encuesta>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const encuesta = bd.encuestas.find((e) => e.id === parametros.encuestaId)
+  if (!encuesta) throw new ErrorDeNegocio('Esa encuesta no existe.')
+  exigirAdministracion(bd, parametros.personaId, encuesta.copropiedadId, 'Cerrar encuestas')
+  if (!encuestaAbierta(encuesta, hoyISO())) throw new ErrorDeNegocio('Esa encuesta ya está cerrada.')
+  encuesta.cerradaAntes = { por: parametros.personaId, en: ahoraISO() }
+  return persistir(bd, encuesta)
+}
+
+/** CU-A-35 · PN-07 — Programar algo en el calendario del edificio. */
+export async function programarEventoEdificio(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    personaId: string
+    titulo: string
+    tipo: TipoEventoEdificio
+    fecha: FechaISO
+    horaInicio?: string
+    horaFin?: string
+    detalle?: string
+  },
+): Promise<Resultado<EventoEdificio>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Programar el calendario')
+  const motivo = motivoEventoInvalido(parametros, hoyISO())
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const evento: EventoEdificio = {
+    id: nuevoId('evt'),
+    copropiedadId: parametros.copropiedadId,
+    titulo: parametros.titulo.trim(),
+    tipo: parametros.tipo,
+    fecha: parametros.fecha,
+    horaInicio: parametros.horaInicio || undefined,
+    horaFin: parametros.horaFin || undefined,
+    detalle: parametros.detalle?.trim() || undefined,
+    creadoPor: parametros.personaId,
+    creadoEn: ahoraISO(),
+  }
+  bd.eventosEdificio.push(evento)
+  return persistir(bd, evento)
+}
+
+/** CU-A-35 — Se cancela con motivo, y sigue viéndose tachado. */
+export async function cancelarEventoEdificio(
+  bdActual: BaseDatos,
+  parametros: { eventoId: string; personaId: string; motivo: string },
+): Promise<Resultado<EventoEdificio>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const evento = bd.eventosEdificio.find((e) => e.id === parametros.eventoId)
+  if (!evento) throw new ErrorDeNegocio('Ese evento no existe.')
+  exigirAdministracion(bd, parametros.personaId, evento.copropiedadId, 'Cancelar eventos')
+  if (evento.cancelacion) throw new ErrorDeNegocio('Ese evento ya está cancelado.')
+  if (parametros.motivo.trim().length < 5) throw new ErrorDeNegocio('Cuenta por qué se cancela.')
+  evento.cancelacion = { por: parametros.personaId, en: ahoraISO(), motivo: parametros.motivo.trim() }
+  return persistir(bd, evento)
+}
+
+/** CU-R-42 · PN-08 — Publicar un aviso de clasificados. */
+export async function publicarAviso(
+  bdActual: BaseDatos,
+  parametros: {
+    unidadId: string
+    personaId: string
+    tipo: TipoAviso
+    titulo: string
+    descripcion: string
+    precio?: number
+    foto?: string
+    mostrarCelular: boolean
+  },
+): Promise<Resultado<AvisoClasificado>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const copropiedadId = copropiedadDeUnidad(bd, parametros.unidadId)
+  if (!esDeLaUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('Los avisos los publican quienes viven o son dueños en el edificio.')
+  }
+  const motivo = motivoAvisoInvalido(parametros)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const ahora = ahoraISO()
+  const aviso: AvisoClasificado = {
+    id: nuevoId('avi'),
+    copropiedadId,
+    unidadId: parametros.unidadId,
+    personaId: parametros.personaId,
+    tipo: parametros.tipo,
+    titulo: parametros.titulo.trim(),
+    descripcion: parametros.descripcion.trim(),
+    precio: parametros.precio || undefined,
+    foto: parametros.foto ? { imagen: parametros.foto, adjuntadoEn: ahora } : undefined,
+    mostrarCelular: parametros.mostrarCelular,
+    publicadoEn: ahora,
+    venceEl: sumarDias(hoyISO(), DIAS_VIGENCIA_AVISO),
+  }
+  bd.clasificados.unshift(aviso)
+  return persistir(bd, aviso)
+}
+
+/**
+ * CU-R-42 — Cerrar un aviso: quien lo publicó («ya lo vendí» o «lo retiro») o
+ * la administración, con motivo, si no cumple el manual de convivencia.
+ */
+export async function cerrarAviso(
+  bdActual: BaseDatos,
+  parametros: { avisoId: string; personaId: string; motivo: 'resuelto' | 'retirado' | 'retirado_admin'; detalle?: string },
+): Promise<Resultado<AvisoClasificado>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const aviso = bd.clasificados.find((a) => a.id === parametros.avisoId)
+  if (!aviso) throw new ErrorDeNegocio('Ese aviso no existe.')
+  if (aviso.cierre) throw new ErrorDeNegocio('Ese aviso ya está cerrado.')
+  if (parametros.motivo === 'retirado_admin') {
+    exigirAdministracion(bd, parametros.personaId, aviso.copropiedadId, 'Retirar avisos de otros')
+    if ((parametros.detalle ?? '').trim().length < 10) throw new ErrorDeNegocio('Explica con respeto por qué se retira.')
+  } else if (aviso.personaId !== parametros.personaId) {
+    throw new ErrorDeNegocio('Solo quien publicó el aviso lo puede cerrar.')
+  }
+  aviso.cierre = { motivo: parametros.motivo, por: parametros.personaId, en: ahoraISO(), detalle: parametros.detalle?.trim() || undefined }
+  return persistir(bd, aviso)
+}
+
+/** CU-R-43 · PN-09 — Pedir ayuda a portería. */
+export async function pedirAyuda(
+  bdActual: BaseDatos,
+  parametros: { unidadId: string; personaId: string; tipo: TipoAyuda; detalle?: string },
+): Promise<Resultado<AlertaAyuda>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const copropiedadId = copropiedadDeUnidad(bd, parametros.unidadId)
+  if (!esDeLaUnidad(bd, parametros.unidadId, parametros.personaId)) {
+    throw new ErrorDeNegocio('La ayuda la pide quien vive o es dueño de la unidad.')
+  }
+  const abierta = bd.alertasAyuda.find((a) => a.unidadId === parametros.unidadId && !a.atendida)
+  if (abierta) throw new ErrorDeNegocio('Portería ya tiene tu pedido de ayuda. Si es grave, llama al 123.')
+  const alerta: AlertaAyuda = {
+    id: nuevoId('ayu'),
+    copropiedadId,
+    unidadId: parametros.unidadId,
+    personaId: parametros.personaId,
+    tipo: parametros.tipo,
+    detalle: parametros.detalle?.trim() || undefined,
+    creadaEn: ahoraISO(),
+  }
+  bd.alertasAyuda.unshift(alerta)
+  return persistir(bd, alerta)
+}
+
+/** CU-R-43 — Portería la ve («voy en camino») o la da por atendida, con una nota. */
+export async function atenderAyuda(
+  bdActual: BaseDatos,
+  parametros: { alertaId: string; personaId: string; paso: 'vista' | 'atendida'; nota?: string },
+): Promise<Resultado<AlertaAyuda>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const alerta = bd.alertasAyuda.find((a) => a.id === parametros.alertaId)
+  if (!alerta) throw new ErrorDeNegocio('Esa alerta no existe.')
+  if (!atiendePorteria(bd, parametros.personaId, alerta.copropiedadId)) {
+    throw new ErrorDeNegocio('Las alertas las atiende portería o la administración.')
+  }
+  if (alerta.atendida) throw new ErrorDeNegocio('Esa alerta ya fue atendida.')
+  const ahora = ahoraISO()
+  if (!alerta.vista) alerta.vista = { por: parametros.personaId, en: ahora }
+  if (parametros.paso === 'atendida') {
+    alerta.atendida = { por: parametros.personaId, en: ahora, nota: parametros.nota?.trim() || undefined }
+  }
+  return persistir(bd, alerta)
 }

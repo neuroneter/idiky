@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 39
+export const VERSION_ESQUEMA = 40
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1513,6 +1513,8 @@ export function crearSemilla(): BaseDatos {
         // RN-233 — Andrés es del consejo: ve a los proveedores en el directorio.
         consejo: ['per-2'],
         quorumMinimo: 50,
+        // PN-01 — Aprobado en la asamblea: 5 % de descuento pagando hasta el día 5.
+        prontoPago: { activo: true, porcentaje: 5, diaLimite: 5 },
       },
     ],
     unidades,
@@ -1527,6 +1529,7 @@ export function crearSemilla(): BaseDatos {
     pqrs,
     comunicados: construirComunicados(),
     proyectos: construirProyectos(),
+    ...construirParaCompetir(),
     correspondencia: construirCorrespondencia(),
     visitantes: construirVisitantes(),
     // Sin registros de ejemplo: llevan fotos, y una foto en la semilla es peso
@@ -1688,5 +1691,151 @@ export function crearSemilla(): BaseDatos {
       recibo: consecutivoRecibo,
       estadoCuenta: 1,
     },
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Para competir — Mary, 2026-11-20 · CU-R-35…43, CU-A-31…36
+// ---------------------------------------------------------------------------
+
+/** Un archivo de texto liviano para que los documentos del demo se puedan abrir. */
+function archivoDeTexto(nombre: string, texto: string) {
+  return { nombre, tipo: 'text/plain', datos: `data:text/plain;charset=utf-8,${encodeURIComponent(texto)}` }
+}
+
+function construirParaCompetir() {
+  const hoy = hoyISO()
+  const mesPasado = sumarDias(`${hoy.slice(0, 7)}-01`, -1).slice(0, 7)
+  return {
+    pagosProgramados: [],
+    informesMensuales: [
+      {
+        id: 'inf-1',
+        copropiedadId: COPROPIEDAD_ID,
+        periodo: mesPasado,
+        ingresos: 21450000,
+        gastos: [
+          { rubro: 'Vigilancia y portería', valor: 9800000 },
+          { rubro: 'Aseo y jardinería', valor: 3200000 },
+          { rubro: 'Servicios públicos de zonas comunes', valor: 2650000 },
+          { rubro: 'Mantenimiento de ascensores', valor: 1450000 },
+          { rubro: 'Administración y contabilidad', valor: 2900000 },
+        ],
+        saldoFondo: 38500000,
+        nota: 'El ahorro en servicios públicos viene del cambio a bombillos LED en los parqueaderos.',
+        publicadoPor: 'per-admin',
+        publicadoEn: `${hoy.slice(0, 7)}-03T15:00:00.000Z`,
+      },
+    ],
+    documentosEdificio: [
+      {
+        id: 'ded-1',
+        copropiedadId: COPROPIEDAD_ID,
+        titulo: 'Reglamento de propiedad horizontal',
+        categoria: 'reglamento' as const,
+        descripcion: 'Escritura pública 2345 de 2015, Notaría 21 de Bogotá.',
+        fecha: '2015-06-12',
+        archivo: archivoDeTexto('reglamento.txt', 'Reglamento de propiedad horizontal del Conjunto Residencial Altos del Bosque (resumen del demo).'),
+        publicadoPor: 'per-admin',
+        publicadoEn: `${sumarDias(hoy, -60)}T14:00:00.000Z`,
+      },
+      {
+        id: 'ded-2',
+        copropiedadId: COPROPIEDAD_ID,
+        titulo: 'Manual de convivencia',
+        categoria: 'manual' as const,
+        descripcion: 'Horarios de ruido, mascotas, zonas comunes y trasteos.',
+        fecha: '2024-03-20',
+        archivo: archivoDeTexto('manual-de-convivencia.txt', 'Manual de convivencia (resumen del demo): silencio de 10 p. m. a 7 a. m.; mascotas con traílla en zonas comunes; trasteos de lunes a sábado.'),
+        publicadoPor: 'per-admin',
+        publicadoEn: `${sumarDias(hoy, -60)}T14:05:00.000Z`,
+      },
+      {
+        id: 'ded-3',
+        copropiedadId: COPROPIEDAD_ID,
+        titulo: 'Póliza de áreas comunes',
+        categoria: 'poliza' as const,
+        descripcion: 'Incendio, terremoto y responsabilidad civil. Vigente hasta el 31 de marzo.',
+        fecha: sumarDias(hoy, -200),
+        archivo: archivoDeTexto('poliza.txt', 'Póliza de áreas comunes (resumen del demo).'),
+        publicadoPor: 'per-admin',
+        publicadoEn: `${sumarDias(hoy, -40)}T14:10:00.000Z`,
+      },
+    ],
+    encuestas: [
+      {
+        id: 'enc-1',
+        copropiedadId: COPROPIEDAD_ID,
+        pregunta: '¿En qué horario prefieres que abra el gimnasio los domingos?',
+        descripcion: 'No es una votación de asamblea: nos ayuda a decidir el horario de diciembre.',
+        opciones: [
+          { id: 'op-1', texto: '6:00 a. m. a 12:00 m.' },
+          { id: 'op-2', texto: '8:00 a. m. a 2:00 p. m.' },
+          { id: 'op-3', texto: 'Todo el día' },
+        ],
+        cierraEl: sumarDias(hoy, 7),
+        creadaPor: 'per-admin',
+        creadaEn: `${sumarDias(hoy, -2)}T14:00:00.000Z`,
+        respuestas: [
+          { unidadId: 'uni-torre2-901', personaId: 'per-2', opcionId: 'op-3', fecha: `${sumarDias(hoy, -1)}T13:00:00.000Z` },
+          { unidadId: 'uni-torre1-201', personaId: 'per-3', opcionId: 'op-2', fecha: `${sumarDias(hoy, -1)}T15:00:00.000Z` },
+          { unidadId: 'uni-torre1-202', personaId: 'per-4', opcionId: 'op-3', fecha: `${sumarDias(hoy, -1)}T16:00:00.000Z` },
+        ],
+      },
+    ],
+    eventosEdificio: [
+      {
+        id: 'evt-1',
+        copropiedadId: COPROPIEDAD_ID,
+        titulo: 'Fumigación de zonas comunes y sótanos',
+        tipo: 'fumigacion' as const,
+        fecha: sumarDias(hoy, 5),
+        horaInicio: '08:00',
+        horaFin: '12:00',
+        detalle: 'Mantén a tus mascotas dentro del apartamento durante la mañana.',
+        creadoPor: 'per-admin',
+        creadoEn: `${sumarDias(hoy, -3)}T14:00:00.000Z`,
+      },
+      {
+        id: 'evt-2',
+        copropiedadId: COPROPIEDAD_ID,
+        titulo: 'Mantenimiento del ascensor de la Torre 2',
+        tipo: 'mantenimiento' as const,
+        fecha: sumarDias(hoy, 12),
+        horaInicio: '09:00',
+        horaFin: '13:00',
+        detalle: 'El ascensor de la Torre 2 no funcionará en ese horario.',
+        creadoPor: 'per-admin',
+        creadoEn: `${sumarDias(hoy, -3)}T14:10:00.000Z`,
+      },
+    ],
+    clasificados: [
+      {
+        id: 'avi-1',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre2-901',
+        personaId: 'per-2',
+        tipo: 'vendo' as const,
+        titulo: 'Bicicleta de niño, rin 16',
+        descripcion: 'En muy buen estado, con rueditas de apoyo. Se puede ver en la portería de la Torre 2.',
+        precio: 180000,
+        mostrarCelular: true,
+        publicadoEn: `${sumarDias(hoy, -4)}T18:00:00.000Z`,
+        venceEl: sumarDias(hoy, 26),
+      },
+      {
+        id: 'avi-2',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre1-201',
+        personaId: 'per-3',
+        tipo: 'servicio' as const,
+        titulo: 'Clases de inglés para niños',
+        descripcion: 'Soy docente certificada. Clases en el salón social o en tu apartamento, entre semana en la tarde.',
+        mostrarCelular: true,
+        publicadoEn: `${sumarDias(hoy, -2)}T18:00:00.000Z`,
+        venceEl: sumarDias(hoy, 28),
+      },
+    ],
+    alertasAyuda: [],
   }
 }

@@ -113,6 +113,35 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Para competir: nueve funciones nuevas (CU-R-35 … CU-R-43, CU-A-31 … CU-A-36)
+
+Mary: *«la idea es salir siendo competitivos»* y *«por favor implementar los puntos propuestos
+del 1 al 9»*. Quedan en el demo:
+1. **Descuento por pronto pago** (la administración lo configura en Cartera; el propietario ve
+   cuánto se ahorra; el recibo lo muestra aparte).
+2. **Pago programado** de la cuota de administración (simulado).
+3. **Cuentas claras** del mes.
+4. **Documentos del edificio**.
+5. **Encuestas rápidas**.
+6. **Reportar un daño con foto**, como PQRS de mantenimiento.
+7. **Calendario del edificio**.
+8. **Clasificados entre vecinos**.
+9. **Pedir ayuda a portería**: portería la ve arriba de su pantalla.
+
+Para el propietario: la entrada **«Tu edificio»** en el inicio. Para la administración: **Edificio** en la consola.
+El rango RN de Mary se agotó: las reglas van como **PN-01 … PN-09** en `docs/05` hasta que el
+integrador asigne otro (T-55). Tareas para otros: T-51 (Jeimy, descuento en la contable), T-52
+(cuentas claras desde la contable), T-53 (pago programado real), T-54 (llevarlo a BLOKY y
+ALICE). La semilla sube a la versión 40.
+Archivos nuevos: `apps/pwa/src/features/residente/edificio/` (6 pantallas),
+`apps/pwa/src/features/admin/edificio/` (6), `apps/pwa/src/features/residente/{PagoProgramado,PedirAyuda,ReportarDano}.tsx`,
+`apps/pwa/src/features/admin/ProntoPagoTarjeta.tsx`,
+`apps/pwa/src/componentes/{AvisoProntoPago,ResultadosEncuesta,AlertasAyuda,FotoDano}.tsx`,
+`apps/pwa/pruebas/navegador/competir.spec.ts`. Cambiados: `dominio/{tipos,reglas}.ts`,
+`datos/{repositorio,selectores,semilla}.ts`, `utilidades/descarga.ts`, `App.tsx`, los layouts,
+`InicioPage`, `CuentaPage`, `PagoPage`, `PqrsPage`, `PqrsAdminPage`, `CarteraPage`,
+`TurnoPage` y `HojaReciboCaja`.
+
 ### 2026-11-20 · Mary + IA (Claude) · Proyectos: lo pagado, con qué se paga y preguntas (CU-R-32, CU-A-28, RN-238, RN-239)
 
 Mary: *«me gustó la propuesta de los 3 primeros numerales, por favor aplicar»*. En el tablero de

@@ -3,6 +3,7 @@
  * Doc: docs/casos-de-uso/administrador.md#cu-a-07
  */
 
+import { FotoDano } from '../../componentes/FotoDano'
 import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
@@ -155,6 +156,7 @@ export function PqrsAdminPage() {
                 </span>
                 <ChipPqrs estado={detalle.estado} />
               </div>
+              <FotoDano pqrs={detalle} />
               <p style={{ fontSize: 'var(--texto-sm)' }}>{detalle.descripcion}</p>
               <p className="ayuda-campo" style={{ marginTop: 'var(--e2)' }}>
                 Radicada el {formatearFecha(detalle.fechaRadicacion)} · plazo hasta el{' '}

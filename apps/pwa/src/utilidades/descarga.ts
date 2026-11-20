@@ -48,3 +48,32 @@ export async function descargarCsv(nombreArchivo: string, filas: Celda[][]): Pro
   URL.revokeObjectURL(url)
   return 'descargado'
 }
+
+/**
+ * CU-R-38 — Descargar un archivo guardado como data URL (los documentos del
+ * edificio en el demo). Dentro del visor de Claude se entrega por su canal de
+ * descargas cuando es texto; fuera, con un enlace.
+ */
+export async function descargarArchivo(nombreArchivo: string, dataUrl: string): Promise<ResultadoDescarga> {
+  const visor = (window as unknown as { claude?: VisorClaude }).claude
+  if (visor?.use) {
+    const [cabecera, cuerpo = ''] = dataUrl.split(',')
+    if (!cabecera.startsWith('data:text/')) return 'no_disponible'
+    const texto = cabecera.includes(';base64') ? atob(cuerpo) : decodeURIComponent(cuerpo)
+    const descargas = await visor.use('downloads').catch(() => null)
+    if (!descargas) return 'no_disponible'
+    try {
+      await descargas.save({ filename: nombreArchivo, data: texto })
+      return 'descargado'
+    } catch (error) {
+      return (error as { code?: string }).code === 'declined' ? 'cancelado' : 'no_disponible'
+    }
+  }
+  const enlace = document.createElement('a')
+  enlace.href = dataUrl
+  enlace.download = nombreArchivo
+  document.body.appendChild(enlace)
+  enlace.click()
+  enlace.remove()
+  return 'descargado'
+}

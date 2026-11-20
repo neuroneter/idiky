@@ -13,7 +13,8 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
 import { registrarPago } from '../../datos/repositorio'
-import { cuotasPorAntiguedad, estadoRealCuota } from '../../dominio/reglas'
+import { cuotasPorAntiguedad, descuentoProntoPago, estadoRealCuota, hoyISO } from '../../dominio/reglas'
+import { AvisoProntoPago } from '../../componentes/AvisoProntoPago'
 import { formatearDinero, formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import type { MedioPago, Pago } from '../../dominio/tipos'
 import { BotonVolver } from '../../componentes/BotonVolver'
@@ -56,8 +57,13 @@ export function PagoPage() {
   // Por defecto se paga todo; al tocar una cuota se paga hasta ella (y las anteriores).
   const corte = hasta ?? pendientes.length - 1
   const seleccionadas = pendientes.slice(0, corte + 1)
+  // PN-01 — El pronto pago se descuenta de la ordinaria que lo gana.
+  const prontoPago = sel.copropiedad(bd, sesion.copropiedadId)?.prontoPago
+  const hoy = hoyISO()
+  const descuentoDe = (cuota: (typeof pendientes)[number]) => descuentoProntoPago(cuota, prontoPago, hoy)
   // Se paga el saldo, no el valor facturado: la cuota puede venir abonada.
-  const total = seleccionadas.reduce((suma, cuota) => suma + cuota.saldo, 0)
+  const total = seleccionadas.reduce((suma, cuota) => suma + cuota.saldo - descuentoDe(cuota), 0)
+  const ahorro = seleccionadas.reduce((suma, cuota) => suma + descuentoDe(cuota), 0)
 
   async function pagar() {
     const pago = await ejecutar(
@@ -67,7 +73,7 @@ export function PagoPage() {
           valor: total,
           medio,
           origen: 'residente',
-          imputaciones: seleccionadas.map((cuota) => ({ cuotaId: cuota.id, valor: cuota.saldo })),
+          imputaciones: seleccionadas.map((cuota) => ({ cuotaId: cuota.id, valor: cuota.saldo - descuentoDe(cuota) })),
           registradoPor: nombreCompleto(persona),
         }),
       'Pago registrado correctamente.',
@@ -150,6 +156,8 @@ export function PagoPage() {
         <BotonVolver a="/app/cuenta" texto="Mi cuenta" />
       </div>
 
+      <AvisoProntoPago cuotas={pendientes} config={prontoPago} />
+
       <div className="pila">
         <span className="titulo-seccion">Qué vas a pagar</span>
         <p className="subtitulo">
@@ -174,7 +182,12 @@ export function PagoPage() {
                     </span>
                   </div>
                   <div className="columna" style={{ alignItems: 'flex-end' }}>
-                    <strong className="numerico">{formatearDinero(cuota.saldo)}</strong>
+                    <strong className="numerico">{formatearDinero(cuota.saldo - descuentoDe(cuota))}</strong>
+                    {descuentoDe(cuota) > 0 && (
+                      <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                        Ahorras {formatearDinero(descuentoDe(cuota))}
+                      </span>
+                    )}
                     {incluida ? (
                       <span className="chip chip--marca">Incluida</span>
                     ) : (
@@ -215,6 +228,11 @@ export function PagoPage() {
           <span className="subtitulo">Total a pagar</span>
           <strong className="dato-grande numerico">{formatearDinero(total)}</strong>
         </div>
+        {ahorro > 0 && (
+          <p className="subtitulo" style={{ color: 'var(--color-exito)' }}>
+            Con el descuento por pronto pago te ahorras {formatearDinero(ahorro)}.
+          </p>
+        )}
         <button
           className="boton boton--primario boton--bloque"
           style={{ marginTop: 'var(--e3)' }}

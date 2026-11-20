@@ -1236,3 +1236,91 @@ consola del administrador (T-45).
 
 **Estado en el demo:** ✅ — `src/features/admin/InformeZonasPage.tsx`, ruta
 `/admin/reservas/informe`; la descarga en `src/utilidades/descarga.ts`.
+
+---
+
+### CU-A-31
+## CU-A-31 — Configurar el descuento por pronto pago
+
+- **Actor principal:** Administrador. **Precondición:** lo aprobó la asamblea.
+- **Resultado esperado:** El edificio ofrece un descuento a quien paga la cuota ordinaria a tiempo.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal:** en **Cartera**, tarjeta «Descuento por pronto pago»: porcentaje (0,1 % a 30 %) y hasta qué día del mes (1 a 28); «Activar», «Guardar cambios» o «Apagar». Muestra cuánto se ha concedido.
+
+**Decisión:** el descuento **no es ingreso**: el recibo lo muestra aparte y la contable debe registrarlo como descuento (T-51).
+
+**Reglas:** PN-01. **Estado:** ✅ — `/admin/cartera`.
+
+---
+
+### CU-A-32
+## CU-A-32 — Publicar las cuentas claras del mes
+
+- **Actor principal:** Administrador.
+- **Resultado esperado:** Los propietarios ven cuánto entró, en qué se gastó y el fondo; sale un comunicado.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal:** en **Edificio → Cuentas claras**: mes, lo que entró, los gastos por rubro, el saldo del fondo y una nota; «Publicar las cuentas». Sale un comunicado «Cuentas claras de …».
+
+**Flujos alternativos:** ya había cuentas de ese mes → las nuevas las **reemplazan** y las anteriores quedan guardadas; el comunicado dice «(corregidas)».
+
+**Reglas:** PN-03. **Estado:** ✅ — `/admin/edificio`. Con backend, desde la contable (T-52).
+
+---
+
+### CU-A-33
+## CU-A-33 — Publicar los documentos del edificio
+
+- **Actor principal:** Administrador.
+- **Resultado esperado:** El reglamento, el manual, las actas, las pólizas y el presupuesto quedan a la mano de los propietarios.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal:** en **Edificio → Documentos**: título, tipo, fecha, descripción y archivo (PDF, imagen o texto; en el demo hasta 400 KB, ADR-0009). «Retirar» pide el motivo; el documento queda guardado.
+
+**Reglas:** PN-04. **Estado:** ✅ — `/admin/edificio`.
+
+---
+
+### CU-A-34
+## CU-A-34 — Crear encuestas rápidas
+
+- **Actor principal:** Administrador.
+- **Resultado esperado:** Conoce la opinión de los propietarios sin convocar una asamblea.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal:** en **Edificio → Encuestas**: pregunta, para qué es, de 2 a 6 opciones (sin repetir) y fecha de cierre. Ve los resultados en vivo y puede «Cerrar ahora».
+
+**Reglas:** PN-05. **Estado:** ✅ — `/admin/edificio`.
+
+---
+
+### CU-A-35
+## CU-A-35 — Programar el calendario del edificio
+
+- **Actor principal:** Administrador.
+- **Resultado esperado:** Los propietarios saben con tiempo de mantenimientos, cortes, fumigaciones y reuniones.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal:** en **Edificio → Calendario**: qué va a pasar, tipo, fecha (hoy o después), horas opcionales y qué debe saber el propietario. «Cancelar» pide el motivo; se sigue viendo tachado.
+
+**Reglas:** PN-07. **Estado:** ✅ — `/admin/edificio`.
+
+---
+
+### CU-A-36
+## CU-A-36 — Cuidar los clasificados
+
+- **Actor principal:** Administrador.
+- **Resultado esperado:** Los clasificados se mantienen dentro del manual de convivencia sin que la administración apruebe cada aviso.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal:** en **Edificio → Clasificados** ve los avisos vigentes con quién los publicó; «Retirar» exige un motivo respetuoso (mínimo 10 caracteres). Nada se borra.
+
+**Reglas:** PN-08. **Estado:** ✅ — `/admin/edificio`.

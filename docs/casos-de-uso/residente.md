@@ -1461,6 +1461,165 @@ borran, RN-61), y marca quiénes son del **consejo de administración**.
 
 ---
 
+### CU-R-35
+## CU-R-35 — Pagar con descuento por pronto pago
+
+- **Actor principal:** Propietario o arrendatario.
+- **Precondiciones:** La administración activó el descuento (CU-A-31).
+- **Resultado esperado:** Paga la cuota de administración del mes con el descuento, y el recibo lo dice.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal**
+1. En **Cuenta** y en **Pagar** ve en verde: «Si pagas la cuota de noviembre hasta el 5 de noviembre, pagas $X y te ahorras $Y». Si ninguna cuota lo gana hoy, se recuerda en positivo que el edificio lo ofrece.
+2. Al pagar, la cuota que lo gana se cobra con el descuento; el total dice cuánto se ahorra.
+3. El recibo de caja muestra lo pagado y, aparte, el descuento (no es plata recibida). El mensaje de gracias dice cuánto se ahorró.
+
+**Flujos alternativos**
+- A1. La cuota ya tenía un abono, no es la ordinaria o pasó el día límite → se paga completa, sin descuento.
+- A2. Se anula el recibo → la cuota vuelve a su saldo completo (descuento incluido).
+- A3. Abono informado y conciliado después (CU-A-27) → cuenta la fecha en que el propietario pagó.
+
+**Reglas:** PN-01. **Estado en el demo:** ✅ — `/app/cuenta`, `/app/cuenta/pagar`. La semilla trae 5 % hasta el día 5.
+
+---
+
+### CU-R-36
+## CU-R-36 — Programar el pago de mi cuota
+
+- **Actor principal:** Propietario o arrendatario.
+- **Resultado esperado:** La cuota de administración de cada mes se paga sola el día elegido.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal**
+1. En **Cuenta**, «Programar el pago»: día del mes (1 a 28) y medio (débito PSE o tarjeta). Si el día gana el pronto pago, se le dice.
+2. Ese día, el sistema paga la ordinaria del mes —con el pronto pago si aplica—, emite el recibo y le manda un mensaje: «¡Listo! Pagamos la cuota de noviembre… Tu recibo está en la app».
+3. Puede cambiarlo o desactivarlo cuando quiera (se apaga, no se borra).
+
+**Flujos alternativos**
+- A1. El día de este mes ya pasó (o es hoy) → empieza el mes siguiente: nadie quiere un cobro sorpresa.
+- A2. Solo paga la ordinaria del mes; extraordinarias y sanciones las decide el propietario. Una vez por mes.
+
+**Reglas:** PN-02. **Estado:** ✅ simulado (sin pasarela, fase 4; T-53).
+
+---
+
+### CU-R-37
+## CU-R-37 — Ver las cuentas claras del edificio
+
+- **Actor principal:** Propietario o residente.
+- **Resultado esperado:** Sabe cuánto entró en el mes, en qué se gastó y cuánto hay en el fondo de imprevistos.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal:** en **Tu edificio → Cuentas claras**, el mes más reciente: entró, se gastó, cada rubro con su barra, el fondo de imprevistos y la nota de la administración. Puede ver los meses anteriores.
+
+**Reglas:** PN-03. **Estado:** ✅ — `/app/edificio/cuentas`. Hoy las escribe la administración (CU-A-32); con backend, de la contable (T-52).
+
+---
+
+### CU-R-38
+## CU-R-38 — Consultar los documentos del edificio
+
+- **Actor principal:** Propietario o residente.
+- **Resultado esperado:** Encuentra y descarga el reglamento, el manual de convivencia, las actas, las pólizas y el presupuesto.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal:** en **Tu edificio → Documentos**, agrupados por tipo, con su fecha; «Descargar». Los retirados no se ven (siguen guardados).
+
+**Reglas:** PN-04. **Estado:** ✅ — `/app/edificio/documentos`.
+
+---
+
+### CU-R-39
+## CU-R-39 — Responder las encuestas del edificio
+
+- **Actor principal:** Propietario o arrendatario.
+- **Resultado esperado:** Opina sobre algo que se decide en el edificio, sin asamblea.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal**
+1. El inicio avisa «1 encuesta» en **Tu edificio**. En **Encuestas** elige una opción y «Enviar mi respuesta».
+2. Ve los resultados por opción, en % y número, sin nombres.
+
+**Flujos alternativos:** la unidad ya respondió o la encuesta cerró → solo ve los resultados.
+
+**Decisión:** **no es una votación de asamblea** y no obliga; por eso no pesa por coeficiente: una respuesta por unidad.
+
+**Reglas:** PN-05. **Estado:** ✅ — `/app/edificio/encuestas`.
+
+---
+
+### CU-R-40
+## CU-R-40 — Reportar un daño con foto
+
+- **Actor principal:** Propietario o residente.
+- **Resultado esperado:** El daño llega a la administración con foto y ubicación, y se sigue como una PQRS.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal:** en **Solicitudes → Peticiones y quejas**, «Reportar un daño con foto»: foto, dónde está y qué pasa. Entra como **petición de mantenimiento** con radicado y plazo (RN-12, RN-13). La foto y el lugar se ven en la PQRS, para el propietario y la administración.
+
+**Reglas:** PN-06 (la foto y la ubicación quedan en la PQRS y no se cambian), RN-12, RN-13. **Estado:** ✅ — `/app/solicitudes/pqrs`.
+
+---
+
+### CU-R-41
+## CU-R-41 — Ver el calendario del edificio
+
+- **Actor principal:** Propietario o residente.
+- **Resultado esperado:** Ve en un solo lugar lo que viene: mantenimientos, cortes, fumigaciones, asambleas, el vencimiento de su cuota y sus reservas confirmadas.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal:** en **Tu edificio → Calendario**, desde hoy y en orden. Lo cancelado se ve tachado con su motivo. Las asambleas, la cuota y la reserva llevan a su pantalla.
+
+**Reglas:** PN-07. **Estado:** ✅ — `/app/edificio/calendario`.
+
+---
+
+### CU-R-42
+## CU-R-42 — Clasificados entre vecinos
+
+- **Actor principal:** Quien vive o es dueño en el edificio.
+- **Resultado esperado:** Publica o encuentra «vendo, regalo, busco, servicio» entre vecinos.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal**
+1. En **Tu edificio → Clasificados**, filtra por tipo y ve los avisos vigentes: título, foto, precio, nombre y unidad de quien publica.
+2. «Escribirle por WhatsApp» si quien publicó dejó ver su celular; si no, «pregunta en portería».
+3. «Publicar un aviso»: tipo, título, descripción, precio (no en un regalo), foto y si muestra su celular. Dura **30 días**.
+4. Quien lo publicó lo cierra: «Ya lo resolví» o «Retirarlo».
+
+**Flujos alternativos:** la administración retira un aviso que no cumple el manual, con motivo (CU-A-36). Nada se borra.
+
+**Reglas:** PN-08. **Estado:** ✅ — `/app/edificio/clasificados`.
+
+---
+
+### CU-R-43
+## CU-R-43 — Pedir ayuda a portería desde la app
+
+- **Actor principal:** Quien vive o es dueño de la unidad. **Secundario:** portería.
+- **Resultado esperado:** Portería ve el pedido de inmediato y el residente sabe que alguien va en camino.
+
+> Mary, 2026-11-20: *«la idea es salir siendo competitivos»*; *«por favor implementar los puntos propuestos del 1 al 9»*. Lo que traen las apps de propiedad horizontal del mercado, con el trato de IDIKY (docs/08 §6 bis).
+
+**Flujo principal**
+1. En el **inicio**, «Pedir ayuda a portería»: una emergencia de salud, un problema de seguridad u otra cosa urgente, y un detalle opcional. Siempre se recuerda el **123**.
+2. Portería lo ve **arriba de su pantalla** con la unidad, el nombre y el celular: «Voy en camino» (el residente ve «Portería ya vio tu pedido y va en camino») y «Atendida», con una nota de qué se hizo.
+3. La administración los ve en **Edificio → Pedidos de ayuda**.
+
+**Flujos alternativos:** ya hay un pedido abierto de la unidad → no se duplica; se le dice que portería ya lo tiene.
+
+**Reglas:** PN-09. **Estado:** ✅ — inicio de `/app` y `/porteria`.
+
+---
+
 ### CU-R-34
 ## CU-R-34 — Personalizar mi avatar en ALICE
 

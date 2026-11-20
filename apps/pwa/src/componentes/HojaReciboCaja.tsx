@@ -86,6 +86,8 @@ export function HojaReciboCaja({
             <li key={linea.cuotaId}>
               {cuota ? `${cuota.concepto} · ${formatearPeriodo(cuota.periodo)}` : 'Cuota'}:{' '}
               {formatearDinero(linea.valor)}
+              {/* PN-01 — El descuento no es plata recibida: se dice aparte. */}
+              {linea.descuento ? ` (más ${formatearDinero(linea.descuento)} de descuento por pronto pago)` : ''}
             </li>
           )
         })}
