@@ -1647,8 +1647,11 @@ borran, RN-61), y marca quiénes son del **consejo de administración**.
   dice por qué. Por ascensores distintos sí puede haber dos a la misma hora.
 - A2. No se aprueba → la administración dice por qué, con amabilidad, y se puede pedir de nuevo.
 - A3. Quien lo pidió lo cancela; queda guardado.
+- A4. **El edificio pide depósito** → el trasteo lo trae fijo desde que se pide, y el residente ve
+  en qué va: *por entregar*, *recibido*, *devuelto* o *retenido* (con lo retenido y el motivo).
+  Cuando se cierra le llega un mensaje (PN-13).
 
-**Reglas:** PN-10. **Estado:** ✅ — `/app/unidad/permisos`. El horario, los días de anticipación,
+**Reglas:** PN-10, PN-13. **Estado:** ✅ — `/app/unidad/permisos`. El horario, los días de anticipación,
 los sábados, el depósito y los ascensores los **parametriza el administrador** (CU-A-37). En el
 demo: 8:00 a 17:00, 2 días, sábados sí y los ascensores de servicio de las dos torres.
 

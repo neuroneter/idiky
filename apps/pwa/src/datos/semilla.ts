@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 42
+export const VERSION_ESQUEMA = 43
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1521,6 +1521,7 @@ export function crearSemilla(): BaseDatos {
           horaHasta: '17:00',
           diasAnticipacion: 2,
           sabados: true,
+          deposito: 200000,
           ascensores: [
             { id: 'asc-t1', nombre: 'Ascensor de servicio Torre 1', habilitado: true },
             { id: 'asc-t2', nombre: 'Ascensor de servicio Torre 2', habilitado: true },
@@ -1865,6 +1866,7 @@ function construirParaCompetir() {
         estado: 'aprobado' as const,
         creadoEn: `${sumarDias(hoy, -5)}T14:00:00.000Z`,
         decision: { por: 'per-admin', en: `${sumarDias(hoy, -4)}T14:00:00.000Z` },
+        deposito: { valor: 200000, recibido: { por: 'per-admin', en: `${sumarDias(hoy, -2)}T15:00:00.000Z` } },
       },
       {
         id: 'tra-2',
@@ -1878,6 +1880,7 @@ function construirParaCompetir() {
         ascensorId: 'asc-t2',
         estado: 'solicitado' as const,
         creadoEn: `${sumarDias(hoy, -1)}T14:00:00.000Z`,
+        deposito: { valor: 200000 },
       },
     ],
     // CU-R-45 — Una obra en curso con sus trabajadores y una por aprobar.

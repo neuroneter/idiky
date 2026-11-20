@@ -5,6 +5,7 @@
  * Si no se aprueba, se explica con amabilidad para que lo puedan pedir de nuevo.
  */
 
+import { AccionesDeposito, TextoDeposito } from '../../../componentes/DepositoTrasteo'
 import { ReglasTrasteoAdmin } from './ReglasTrasteoAdmin'
 import { useState } from 'react'
 import { useDatos } from '../../../estado/DatosContext'
@@ -21,7 +22,10 @@ export function PermisosAdmin() {
   const [motivo, setMotivo] = useState('')
   if (!sesion) return null
   const hoy = hoyISO()
-  const trasteos = (bd.trasteos ?? []).filter((t) => t.copropiedadId === sesion.copropiedadId && t.fecha >= hoy).sort((a, b) => a.fecha.localeCompare(b.fecha))
+  // También los pasados con el depósito abierto: falta devolverlo (PN-13).
+  const trasteos = (bd.trasteos ?? []).filter(
+    (t) => t.copropiedadId === sesion.copropiedadId && (t.fecha >= hoy || (t.deposito?.recibido && !t.deposito.cierre)),
+  ).sort((a, b) => a.fecha.localeCompare(b.fecha))
   const obras = (bd.permisosObra ?? []).filter((o) => o.copropiedadId === sesion.copropiedadId && o.hasta >= hoy).sort((a, b) => a.desde.localeCompare(b.desde))
 
   const decidir = (tipo: 'trasteo' | 'obra', id: string, aprobar: boolean) =>
@@ -82,6 +86,8 @@ export function PermisosAdmin() {
                   {t.empresa ? ` · ${t.empresa}` : ''}
                   {t.placa ? ` · placa ${t.placa}` : ''}
                 </span>
+                <TextoDeposito trasteo={t} />
+                <AccionesDeposito trasteo={t} puedeRetener />
                 {t.estado === 'solicitado' && acciones('trasteo', t.id)}
               </div>
             )
