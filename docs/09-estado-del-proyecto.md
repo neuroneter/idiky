@@ -113,6 +113,12 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-20 · Mary + IA (Claude) · Quién define el pronto pago (CU-A-31, PN-01)
+
+Mary: *«el que define el % de descuento es el administrador cuando crea el edificio»*. Queda en
+CU-A-31, PN-01 (`docs/05`) y T-54: en BLOKY va en la creación del edificio («Arma tu
+copropiedad», CU-B-03). Sin cambios de código: en el demo el administrador ya lo define en Cartera.
+
 ### 2026-11-20 · Mary + IA (Claude) · Para competir: nueve funciones nuevas (CU-R-35 … CU-R-43, CU-A-31 … CU-A-36)
 
 Mary: *«la idea es salir siendo competitivos»* y *«por favor implementar los puntos propuestos
