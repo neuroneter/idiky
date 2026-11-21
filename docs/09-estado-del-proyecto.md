@@ -130,8 +130,11 @@ coeficiente y un acta que resista revisión.
   `…/:rol/:aplicacion/:modulo` (acciones) y `…/cambios`, con el token de administración y `x-bloky-quien`.
 - **Verificado:** `npm run probar` (seis pruebas nuevas) y builds; en el servidor, la matriz sembrada (13 roles, 22
   módulos), 401 sin token, y `/api/app/yo` de la persona de prueba con sus permisos (sesión de prueba abierta y revocada).
-- **Sin probar con datos reales:** «Mi unidad», porque en BLOKY Dev no hay residencias cargadas. Roles del Consejo: pendientes
-  de T-126.
+- **«Mi unidad» con datos reales:** se cargó a la persona de prueba (Olga Lucía Henao, celular de Daniel) como
+  **administradora de la unidad U-0133** de Altos del Bosque, por BLOKY (CU-B-07). En ALICE: `/yo` trae la unidad con
+  `roles: [administrador_unidad, administrador]` y `mi_unidad` completo; ver → 200, crear una mascota → 201, finalizarla →
+  200 (queda finalizada, «Prueba T-135»), y otra unidad (U-0134) → 403 `sin_permiso`. Sesiones de prueba revocadas.
+  Roles del Consejo: pendientes de T-126.
 
 ### 2026-11-21 · Daniel + IA (Claude) · ALICE · El contrato de permisos de `/api/app/yo` (docs/20 §4b, T-135, T-137)
 
