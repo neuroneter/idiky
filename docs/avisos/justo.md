@@ -262,6 +262,12 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
   entra. Las siguientes veces, solo el código del celular. Después: huella y facial.
 - **Cambiar celular o correo (RN-357):** el celular nuevo se valida con su código **y** un código al correo validado; el correo
   nuevo, con su código **y** un código al celular. Mientras no exista en ALICE, lo hace soporte desde BOB.
+- **Nunca existe una persona sin documento:** desde ya, `POST /api/app/c/:id/unidades/:uid/residentes` e `…/invitados` exigen
+  **`nombre`, `celular`, `tipoDocumento` y `numeroDocumento`** (422 si falta). Si el documento ya está con otro celular, 409
+  `otro_celular` (con `celularRegistrado` oculto: `300•••567`) y se reenvía con `aceptarCelularRegistrado: true` si el
+  administrador de la unidad lo acepta; si el celular es de otra persona, 409 `celular_de_otra`. **Hay que pedir el documento en
+  esos formularios de ALICE.**
+- `POST /api/app/acceso/enviar-codigo` con un celular que tienen dos personas (datos viejos) responde 409 `celular_repetido`.
 - **Del middleware hará falta** (lo hacemos juntos): enviar el código al correo, guardar el correo validado y las rutas de
   cambio de celular y correo. Dime qué contrato prefieres para escribirlo en docs/20.
 
