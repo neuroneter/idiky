@@ -33,3 +33,6 @@ El primer ingreso a ALICE pide **validar un correo con un código** y cambiar el
 - Va por HTTPS: no le afecta que Lightsail bloquee el puerto 25.
 - Cuando haya buzón de IDIKY, se agrega MX y se sube DMARC a `p=quarantine` con reportes.
 - El flujo de ALICE (pedir el correo, enviar y verificar el código, cambiar celular o correo) es T-143, con Justo.
+- **Toda IDIKY estará en AWS** (Daniel, 2026-11-21). La llave de acceso existe solo porque las instancias de **Lightsail no
+  pueden usar roles de IAM**. Cuando el middleware pase a EC2 o ECS, se le asigna un **rol** con la misma política
+  (`enviar-correo-desde-idiky`), se **desactiva y luego se elimina** la llave, y el middleware toma las credenciales del rol.
