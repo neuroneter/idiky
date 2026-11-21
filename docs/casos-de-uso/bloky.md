@@ -921,7 +921,7 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 3. Si es administrador de la unidad, agrega **residentes** (administradores o no), **mascotas** (sin usuario) e **invitados**
    con fecha de inicio y de fin (RN-321).
 
-**Reglas de negocio:** RN-320 a RN-328, RN-163, RN-166; la composición de cada unidad, RN-348 y RN-349.
+**Reglas de negocio:** RN-320 a RN-328, RN-163, RN-166; la composición de cada unidad, RN-348 y RN-349; los colaboradores entran con su celular (RN-323) y su ficha (RN-350), desde Equipo (CU-B-14).
 
 **Lo que queda abierto:** quién vota en las asambleas, propietario o arrendatario (T-127, con Mary); vincular a los miembros
 del consejo y las comisiones (T-126); las billeteras desde ALICE (T-129).
