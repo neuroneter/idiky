@@ -909,6 +909,11 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
    residente de cada unidad y «⬆ Cargar CSV». El CSV es una **plantilla**: trae todas las unidades, también las que faltan por
    generar desde la estructura. BLOKY muestra qué hará con cada fila —crear, ya estaba, sin celular o error con su línea y
    motivo— y solo crea al confirmar (si hace falta, genera primero las unidades).
+5. **Ve cómo está conformada cada unidad** (RN-348, 2026-11-21): en la tabla, cuántas personas, mascotas e invitados vigentes
+   tiene; al tocarla, su **ficha** con las personas (rol, celular, si ya entró a ALICE, quién la agregó), las mascotas, los
+   invitados con su vigencia y el **historial** de quienes salieron. Filtros (*sin administrador*, *sin entrar aún*, *con
+   invitados vigentes*, *con bloqueados*) y un resumen arriba. Desde la ficha **bloquea, desbloquea o retira** a cualquiera, sin
+   editar sus datos personales (RN-349).
 
 **Flujo principal (ALICE, Justo)**
 1. La persona entra con su **celular** y el código; la primera vez completa su **documento** y su nombre (RN-322, RN-327).
@@ -916,7 +921,7 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 3. Si es administrador de la unidad, agrega **residentes** (administradores o no), **mascotas** (sin usuario) e **invitados**
    con fecha de inicio y de fin (RN-321).
 
-**Reglas de negocio:** RN-320 a RN-328, RN-163, RN-166.
+**Reglas de negocio:** RN-320 a RN-328, RN-163, RN-166; la composición de cada unidad, RN-348 y RN-349.
 
 **Lo que queda abierto:** quién vota en las asambleas, propietario o arrendatario (T-127, con Mary); vincular a los miembros
 del consejo y las comisiones (T-126); las billeteras desde ALICE (T-129).
