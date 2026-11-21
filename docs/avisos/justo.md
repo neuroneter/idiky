@@ -248,3 +248,75 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
   completa al entrar). `/api/app/yo` le da `administrador_unidad` con `mi_unidad` completo. La U-0133 ya no se usa
   (era de una estructura que no está en el terreno; su residencia quedó finalizada).
 
+---
+
+## 9. Una persona, un documento, un celular; primer ingreso con correo — ⏳ abierto (2026-11-21)
+
+**Qué decidió Daniel:** [RN-353 a RN-357](../05-modelo-de-datos.md) (T-142 en el middleware y BLOKY, **T-143 es tuya**).
+
+- **Un celular es de una sola persona** en todo IDIKY, y el **documento** identifica a la persona. La Administración ya crea
+  a los usuarios de las unidades y a los colaboradores **con tipo y número de documento** (obligatorio) y BLOKY revisa antes.
+- **Primer ingreso a ALICE (RN-356):** 1) código por el celular; 2) tipo y número de documento, que **deben coincidir** con los
+  que reportó la Administración (`POST /api/app/yo/documento` ya lo revisa: si no coinciden responde 409
+  `documento_no_coincide`); 3) **un correo, validado con un código**; 4) los datos básicos que ya tienes mapeados. Solo ahí
+  entra. Las siguientes veces, solo el código del celular. Después: huella y facial.
+- **Cambiar celular o correo (RN-357):** el celular nuevo se valida con su código **y** un código al correo validado; el correo
+  nuevo, con su código **y** un código al celular. Mientras no exista en ALICE, lo hace soporte desde BOB.
+- **Nunca existe una persona sin documento:** desde ya, `POST /api/app/c/:id/unidades/:uid/residentes` e `…/invitados` exigen
+  **`nombre`, `celular`, `tipoDocumento` y `numeroDocumento`** (422 si falta). Si el documento ya está con otro celular, 409
+  `otro_celular` (con `celularRegistrado` oculto: `300•••567`) y se reenvía con `aceptarCelularRegistrado: true` si el
+  administrador de la unidad lo acepta; si el celular es de otra persona, 409 `celular_de_otra`. **Hay que pedir el documento en
+  esos formularios de ALICE.**
+- `POST /api/app/acceso/enviar-codigo` con un celular que tienen dos personas (datos viejos) responde 409 `celular_repetido`.
+- **Del middleware hará falta** (lo hacemos juntos): enviar el código al correo, guardar el correo validado y las rutas de
+  cambio de celular y correo. Dime qué contrato prefieres para escribirlo en docs/20.
+
+**Mientras se habla:** no construyas en ALICE un cambio de celular que no pida el segundo factor, ni un primer ingreso que
+deje entrar sin documento cuando la Administración lo reportó.
+
+---
+
+## 10. Varios países: documentos y celulares por país — 🟡 listo en el middleware, falta ALICE (2026-11-21)
+
+**Qué decidió Daniel:** [ADR-0035](../adr/0035-paises-documentos-y-celulares.md), RN-358 a RN-364. **T-146 es tuya.** Daniel
+lo probó en BLOKY y pidió que el **login de ALICE** lo tenga en cuenta.
+
+**Lo que ya está en BLOKY Dev (middleware `570790b.bloky-ad37c4c`, BOB `570790b.gestion-ccb1b79`):**
+
+- **BOB define los países y sus documentos** (panel: *Países* y *Tipos de documento*). Hoy hay **11**: CO, VE, EC, PE, MX, AR,
+  CL, ES, US, PA, BR, cada uno con su indicativo, la regla de su celular, sus documentos con su regla y el pasaporte.
+- **`GET /api/app/catalogo-paises`** — **público, sin token**, para la pantalla de ingreso:
+  `{ paisPorDefecto: 'CO', paises: [{ codigo, nombre, indicativo, celularLongitudMinima, celularLongitudMaxima,
+  celularEmpiezaCon: string[], celularEjemplo, tipos: [{ codigo, nombre, soloNumeros, longitudMinima, longitudMaxima,
+  patron, ejemplo, esPasaporte, orden }] }] }`.
+- **`GET /api/app/c/:copropiedadId/catalogo-identidad`** — con token: `{ pais, paises }`, donde `pais` es el de la
+  copropiedad (por defecto en los formularios dentro de la app).
+
+**Qué tiene que hacer ALICE**
+
+1. **Login (antes de la sesión):**
+   - Un **selector de país del celular**, con 🇨🇴 **+57 por defecto** y la lista del catálogo.
+   - Validar con la regla del país (longitud y con qué empieza) y mostrar el ejemplo.
+   - Mandar a `POST /api/app/acceso/enviar-codigo` y `…/verificar-codigo` el celular **completo con su indicativo**
+     (`+525512345678`). Sin el `+`, el middleware lo toma como de Colombia.
+2. **Primer ingreso (RN-356), después del código:**
+   - Pedir **país del documento** (por defecto el de la copropiedad), **tipo** (los del país) y **número**, y validarlo con la
+     regla del tipo.
+   - `POST /api/app/yo/documento`: si la Administración ya lo registró, **tiene que coincidir** (si no, 409
+     `documento_no_coincide`).
+   - Después, el **correo validado con su código** y los datos básicos. Para el correo falta la ruta del middleware: la
+     hacemos juntos (T-143).
+3. **Al agregar residentes e invitados:** pedir **nombre, celular y documento**. El país del celular y el del documento van
+   por defecto en el de la copropiedad y se pueden cambiar con «Otro país».
+   - Se mandan `paisCelular` y `paisDocumento`.
+   - 422 trae el mensaje de la regla.
+   - 409 `otro_celular` trae `celularRegistrado` (`300•••567`) y se reenvía con `aceptarCelularRegistrado: true` si se acepta.
+   - 409 `celular_de_otra` si el celular es de otra persona.
+4. **`celular_repetido` (409)** en el login: el celular lo tienen dos personas (datos viejos); se resuelve en BOB.
+
+**Hay que hablar el hash de identidad (RN-363):** la propuesta es que **no cambie para Colombia** («TIPO:NUMERO», así nadie
+pierde sus billeteras) y que para otros países sea «PAÍS:TIPO:NUMERO». Mientras no se decida, el middleware deja el hash
+**vacío** para documentos de otros países. ¿Te sirve así con lo que ya tienes en la cadena?
+
+**Mientras se habla:** no fijes en ALICE listas de tipos de documento ni reglas de celular solo para Colombia: léelas del
+catálogo.

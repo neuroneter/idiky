@@ -113,6 +113,69 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · País del celular y del documento; corregir antes del primer ingreso (T-145, RN-359 a RN-364)
+
+- Daniel: en Unidades no había **país del teléfono**, y no se podía **editar** a alguien que todavía no ha entrado a la app.
+- **Construido (T-145):** el middleware lee el catálogo de países de BOB (con **Colombia de respaldo** hasta desplegar BOB con
+  T-144) y valida celular y documento con la regla de su país en Unidades, CSV (columna opcional `pais_documento`), «Dar
+  acceso», ALICE y la corrección; `GET /api/c/:id/catalogo-identidad` (y su par de ALICE). El formulario de BLOKY trae
+  **🇨🇴 +57 por defecto**, los tipos del país y **«🌎 Otro país»** (celular y documento pueden ser de países distintos). El
+  directorio guarda `pais_documento` y es único por país + tipo + número (migración común 012); el hash no cambia para Colombia
+  y queda nulo para otros países hasta hablarlo con Justo.
+- **RN-364:** se guarda el **primer ingreso a ALICE**; mientras no exista, la Administración **corrige nombre, celular y
+  documento** («Editar» en Unidades y en la ficha, «Corregir datos» en Equipo), con las mismas revisiones. «Ya entró» dejó de
+  deducirse del documento. Para los de antes se tomó de sus sesiones de ALICE (migración 013): **Justo, Olga y Juan Luis** ya
+  entraron.
+- **BOB desplegado** (aprobado por Daniel, desde `develop` con la excepción y respaldo previo): `570790b.gestion-ccb1b79`. Daniel vio
+  que solo salía Colombia: la semilla se amplió a **11 países** (CO, VE, EC, PE, MX, AR, CL, ES, US, PA, BR) y se agregó
+  `GET /api/catalogo-paises`, porque la lectura pública de Strapi quitaba los tipos de documento de cada país. BLOKY lo lee
+  desde `570790b.bloky-fac544c`.
+- Para el **login de ALICE** (que no tiene sesión ni copropiedad): `GET /api/app/catalogo-paises`, público, desplegado en
+  `570790b.bloky-ad37c4c`. **Aviso a Justo §10** reescrito con el contrato del login, del primer ingreso y del alta de
+  residentes e invitados (Daniel pidió informarle).
+- `develop` `ebf94c1`, desplegado `570790b.bloky-ebf94c1`. 5 pruebas nuevas; probado en la app con la API simulada (Otro país
+  con celular de México, Editar con los datos cargados).
+
+### 2026-11-21 · Daniel + IA (Claude) · Varios países · Documentos y celulares por país (ADR-0035, RN-358 a RN-363)
+
+- Daniel: IDIKY es para **muchos países**: los tipos de documento y sus reglas de validación se gestionan **en BOB, por país**,
+  y la copropiedad, con su país, trae los suyos. Hoy todo asumía Colombia (tipos fijos, una sola validación, celular `+57`,
+  identidad sin país).
+- **Decidido (ADR-0035):** BOB define países (indicativo, regla del celular) y tipos de documento por país (regla de
+  validación); el middleware valida con ese catálogo; **por defecto el país de la copropiedad** (el 99 %), «Otro país» solo en
+  los pocos casos; documento y celular de países **independientes** (extranjero con celular de su país); **pasaporte siempre**;
+  persona única por **país + tipo + número**; el hash de identidad **no cambia para Colombia** (por confirmar con Justo).
+- **Tareas:** T-144 (BOB), T-145 (middleware y BLOKY), T-146 (ALICE, Justo). Aviso a Justo §10.
+- **T-144 construido en BOB** (`develop` `0cf70aa`, sin desplegar): colecciones «Países» y «Tipos de documento» con sus reglas
+  revisadas en el servidor, semilla de Colombia (CC, CE, PPT, TI, PA) y lectura pública de solo lectura
+  (`/api/paises?populate=tiposDocumento`). `scripts/probar-bob.mjs` (Strapi real sobre SQLite): las 11 comprobaciones nuevas
+  pasan; **5 fallas viejas** de «persona» (BOB ya no guarda personas, ADR-0025) quedan como estaban.
+- En Dev quedó resuelto el celular de Daniel (`3004051582` solo suyo; Olga y Andrés con números de prueba); siguen repetidos
+  los de Mary ×2 y Carlos ×2.
+
+### 2026-11-21 · Daniel + IA (Claude) · Identidad · Una persona, un documento, un celular (T-142, T-143, RN-353 a RN-357)
+
+- **Hallazgo:** el directorio solo exigía celular único entre personas **sin** documento; crear o corregir desde IDIKY/BOB no lo
+  revisaba y el ingreso escogía a una en silencio. En Dev: **3 celulares repetidos** (Olga / Andrés / Daniel con `300•••582`;
+  Mary ×2 con `310•••669`; Carlos ×2 con `300•••567`) y **1 persona sin documento** (Juan Luis Almonacid, EC-201).
+- **Decisiones de Daniel:** un celular es de una sola persona y el **documento** la identifica; **nunca existe una persona sin
+  documento**. Al dar de alta (Unidades, CSV, «Dar acceso» del colaborador y, en ALICE, los residentes e invitados) se piden
+  **nombre, celular, tipo y número de documento** y BLOKY revisa antes: si el documento ya tiene **otro celular**, avisa
+  «ya tiene registro en IDIKY con el celular 300•••567» y la Administración **acepta ese celular** o **no continúa** (la
+  persona cambia su celular en la app y se vuelve a registrar); si el celular es de otra persona, se rechaza. El primer ingreso
+  a ALICE debe **coincidir con el documento reportado**, luego **valida un correo**; cambiar celular o correo usa el otro como
+  segundo factor; después, huella y facial (RN-356, RN-357 → **T-143, Justo**, aviso §9).
+- **Construido (T-142):** `develop` `754f49c`, desplegado `570790b.bloky-754f49c`. Directorio con `altaConDocumento`,
+  `revisarAlta`, `celularesRepetidos`, `sinDocumento`; **se quitó `personaDeLugar`** (creaba personas solo con celular);
+  `crearPersona`/`corregirPersona` rechazan el celular de otra; `porCelular` no escoge entre dos (409 `celular_repetido`);
+  `POST /api/app/yo/documento` exige que coincida; CSV con `tipo_documento` y `numero_documento`. BLOKY: formulario
+  `AltaConDocumento` con el aviso y «Aceptar el celular registrado». 4 pruebas nuevas, 4 actualizadas; probado en la app con la
+  API simulada; el informe se consultó contra la base real.
+- **Ojo:** mientras sigan repetidos, **entrar a ALICE con `300•••582` responde «celular repetido»** (Olga, Andrés, Daniel), y
+  ALICE recibe 422 si agrega residentes o invitados sin documento hasta que Justo actualice sus formularios. **Falta:**
+  resolver los repetidos (corregir el celular de quien no corresponde, desde BOB) y después poner en la base el índice único y
+  la restricción de documento.
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · El consejo se elige de los residentes, con sus avatares (T-126, RN-351, RN-352)
 
 - Daniel: armar la Junta (consejo) eligiendo de las unidades quién tiene cada rol, identificar al **Presidente** y al
