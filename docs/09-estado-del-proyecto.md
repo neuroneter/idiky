@@ -113,6 +113,22 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Los perfiles internos (CU-B-18, RN-333 a RN-339)
+
+**Qué:** se definió el caso de uso que faltaba para el manejo de usuarios de BLOKY. Hasta hoy solo entran el Administrador
+y el Delegado (RN-161); docs/13 §3 ya decía que ellos crearían los perfiles internos, pero no había CU.
+
+- **Decidido con Daniel:** perfiles **libres con plantillas** (asistente administrativa, contador, revisor fiscal,
+  consejero) y que se den a **cualquier persona**, reutilizando el directorio. Los permisos **Sin acceso · Ver · Editar** por
+  módulo son la propuesta por defecto (Daniel no tuvo preferencia).
+- **Reglas nuevas:** RN-333 (perfiles), RN-334 (niveles por módulo, 403 en el middleware), RN-335 (lo que solo hacen
+  Administrador y Delegado), RN-336 (dar el perfil; los datos de contacto de alguien que ya existe no se cambian desde aquí),
+  RN-337 (amplía RN-161), RN-338 (efecto inmediato), RN-339 (registro de cambios).
+- **Abierto:** avisarle a la persona que ya tiene acceso; los módulos que vienen nacen sin acceso; actos reservados al
+  Administrador cuando existan cuotas y multas; ADR-0034 al implementar.
+
+**Sigue:** que Daniel revise el borrador de CU-B-18; luego T-134 en Bloky-Idiky.
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Código del ingreso por WhatsApp (T-133, RN-332, CU-B-01)
 
 **Qué:** en el paso 2 del ingreso a BLOKY aparece **«Código por WhatsApp»** junto a «Código por SMS» y

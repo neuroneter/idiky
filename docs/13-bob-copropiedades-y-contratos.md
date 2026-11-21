@@ -67,6 +67,7 @@
    persona existe una vez y tiene asignaciones por copropiedad, con su periodo y su soporte.
 4. **En una misma copropiedad, el Administrador y el Delegado no son la misma persona.**
 5. **Los dos entran a BLOKY y crean ahí los perfiles internos** de la copropiedad. **BOB no los crea.**
+   Definido en [CU-B-18](./casos-de-uso/bloky.md#cu-b-18) (2026-11-21).
 6. **El Delegado tiene lo mismo que el Administrador**, más una facultad propia: **solicitar desde
    BLOKY el bloqueo o el cambio del Administrador**. La solicitud debe cumplir la ley: al
    administrador lo remueve la asamblea, o el consejo si existe (art. 50), así que va con el acta.
