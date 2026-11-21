@@ -113,6 +113,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · El consejo se elige de los residentes, con sus avatares (T-126, RN-351, RN-352)
+
+- Daniel: armar la Junta (consejo) eligiendo de las unidades quién tiene cada rol, identificar al **Presidente** y al
+  **Delegado** (decidió que *Delegado* es un **cargo del consejo**) y verlos con su avatar, también en el espacio «Consejo de
+  administración» del Equipo. Los **permisos en la app por cargo quedan para después** (con Justo).
+- En Equipo → consejo (o comisión): **«Agregar miembro de los residentes»** con buscador por unidad o nombre; el miembro queda
+  vinculado a su persona y su unidad; los «por vincular» se vinculan con el mismo selector; sigue pudiéndose agregar a alguien
+  que aún no está en BLOKY. Cargo **Delegado** (uno por grupo, como el presidente). Lista por cargo con **👑 presidente** y
+  **🎖️ delegado** destacados; en el espacio del consejo del mundo aparecen con **el personaje que armaron en la app** y su
+  cargo. La ficha de la unidad muestra el cargo de cada persona en el consejo o las comisiones.
+- Middleware: `GET /api/c/:id/equipo/residentes`, `aparienciasMiembros` en el equipo, el PUT rechaza vincular a quien no es
+  residente. 2 pruebas nuevas. `develop` `4aac213`, desplegado `179927e.bloky-4aac213`; probado en la app con la API simulada.
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Los colaboradores entran a la app con su celular, y su ficha (T-123, RN-323, RN-350)
 
 - Daniel: en Equipo se creaban colaboradores pero no se les podía dar el celular para entrar a la app. Decidió que, **como los
