@@ -126,6 +126,10 @@ coeficiente y un acta que resista revisión.
   documento** («Editar» en Unidades y en la ficha, «Corregir datos» en Equipo), con las mismas revisiones. «Ya entró» dejó de
   deducirse del documento. Para los de antes se tomó de sus sesiones de ALICE (migración 013): **Justo, Olga y Juan Luis** ya
   entraron.
+- **BOB desplegado** (aprobado por Daniel, desde `develop` con la excepción y respaldo previo): `570790b.gestion-ccb1b79`. Daniel vio
+  que solo salía Colombia: la semilla se amplió a **11 países** (CO, VE, EC, PE, MX, AR, CL, ES, US, PA, BR) y se agregó
+  `GET /api/catalogo-paises`, porque la lectura pública de Strapi quitaba los tipos de documento de cada país. BLOKY lo lee
+  desde `570790b.bloky-fac544c`.
 - `develop` `ebf94c1`, desplegado `570790b.bloky-ebf94c1`. 5 pruebas nuevas; probado en la app con la API simulada (Otro país
   con celular de México, Editar con los datos cargados).
 
