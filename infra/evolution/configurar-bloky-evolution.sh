@@ -13,10 +13,10 @@ cp -p "$API" "$API.antes-evolution-t132"
 grep -v -E '^EVOLUTION_(URL|API_KEY|INSTANCE)=' "$API" | grep -v '^# ADR-0033 / T-132' > "$API.tmp" || true
 {
   cat "$API.tmp"
-  echo '# ADR-0033 / T-132 — WhatsApp (Evolution). Key copiada desde evolution.env'
+  echo '# ADR-0033 / T-132 — WhatsApp oficial Dev: Idiky_whatsapp (key desde evolution.env)'
   echo 'EVOLUTION_URL=http://10.0.2.2:8086'
   echo "EVOLUTION_API_KEY=$KEY"
-  echo 'EVOLUTION_INSTANCE=Justo Soto'
+  echo 'EVOLUTION_INSTANCE=Idiky_whatsapp'
 } > "$API"
 chmod 600 "$API"
 rm -f "$API.tmp"

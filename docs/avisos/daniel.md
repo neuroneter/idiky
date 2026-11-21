@@ -129,19 +129,20 @@ votación de unidad no). El ingreso ya no bloquea.
 
 ---
 
-## 8. Evolution API / WhatsApp en Dev (T-131, T-132, ADR-0033) — 🟡 desplegado; middleware en curso
+## 8. Evolution API / WhatsApp en Dev (T-131, T-132, ADR-0033) — ✅ instancia oficial `Idiky_whatsapp` (2026-11-21)
 
 **Cómo entrar y mandar mensajes:** [`infra/guia-de-evolution.md`](../../infra/guia-de-evolution.md)
 (Manager, API key en el servidor, `sendText`, y **§8** el endpoint del middleware).
 
-**Hecho:** firewall 8086; pod `v2.3.7`; mensaje de prueba ok (instancia «Justo Soto»).
+**Hecho:** firewall 8086; pod `v2.3.7`; mensaje de prueba ok.
 
 **T-132 (Justo, 2026-11-15):** OTP de ALICE por WhatsApp en `/api/app/acceso/*` (Evolution) +
-`POST /api/app/whatsapp/enviar` para texto libre. Middleware en BLOKY Dev; ALICE en
-`feature/T-106-preparar-reuniones-video` (también en `develop` de App-Idiky tras el merge de hoy).
-Secretos `EVOLUTION_*` ya en el servidor.
+`POST /api/app/whatsapp/enviar` para texto libre. Middleware en BLOKY Dev; ALICE en `develop`.
+Secretos `EVOLUTION_*` en el servidor.
 
-**Sigue:** número **dedicado de IDIKY** + documentarlo; opcional túnel `evolution-dev.idiky.com`.
+**2026-11-21 — línea oficial:** instancia Evolution **`Idiky_whatsapp`**. `EVOLUTION_INSTANCE` en
+`bloky-api.env` + BLOKY redesplegado (`ffcd6d8.bloky-96d7221`). Guía §6. Sigue opcional: túnel
+`evolution-dev.idiky.com`.
 
 ---
 
@@ -180,7 +181,7 @@ Secretos `EVOLUTION_*` ya en el servidor.
 
 - A1 / T-87 (plugin en el middleware), RP ID → dominio del middleware, redeploy Amoy (§1).
 - Probar avatar en teléfono y, si hace falta, pulir el dibujo.
-- Número WhatsApp dedicado de IDIKY (T-132).
+- ~~Número WhatsApp dedicado de IDIKY~~ → **`Idiky_whatsapp`** (2026-11-21).
 
 ## 9c. Avatar en ALICE (CU-R-34 / T-90) — 🟡 código en `develop` (2026-11-16)
 
@@ -248,7 +249,7 @@ middleware, redeploy Amoy (§1), movimientos día a día por middleware.
 - T-87: cómo firma ALICE Polygon sin JWT Strapi (§2).
 - Pantallas de quien entra a ALICE **solo** como Admin/Delegado (§8b).
 - Jitsi: sala espera anfitrión, permisos de cámara/mic, webhook asistencia (§7).
-- Número WhatsApp dedicado de IDIKY (§8).
+- ~~Número WhatsApp dedicado de IDIKY (§8)~~ → **`Idiky_whatsapp`** (2026-11-21).
 - Renovación automática del Bearer a los 30 días (`POST /api/app/sesion/renovar`).
 - Cerrar sesiones de ALICE desde BLOKY (T-128).
 
