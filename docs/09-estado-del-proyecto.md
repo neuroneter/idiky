@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Los colaboradores entran a la app con su celular, y su ficha (T-123, RN-323, RN-350)
+
+- Daniel: en Equipo se creaban colaboradores pero no se les podía dar el celular para entrar a la app. Decidió que, **como los
+  residentes, solo celular y nombre** (RN-323 ajustada: el documento lo completa en ALICE). Reservó **RN-350 … RN-399**.
+- En el panel de cada colaborador, **«📱 Acceso a la app»**: dar acceso con el celular (crea o encuentra a la persona en el
+  directorio con la asignación `colaborador`), ver si ya entró y quitar el acceso. Retirarlo del equipo también se lo quita.
+  **Se corrigió que guardar el equipo borraba el vínculo con la persona** (`personaId`): ahora lo conserva el servidor.
+- Daniel pidió además ver lo que el colaborador llena en la app: **«Ver ›»** junto a cada colaborador abre su **ficha** (RN-350):
+  nombre, **tipo y número de documento** (a diferencia de los residentes: presta un servicio a la copropiedad), celular, correo,
+  billeteras, acceso y su **personaje de la app**, que se puede usar en el equipo.
+- `develop` `2da0902` (merges `8c16c81` y `2da0902`), desplegado `3eab6ee.bloky-2da0902`. 3 pruebas nuevas; probado en la app
+  con la API simulada (dar acceso, guardar después sin choque, quitar acceso, ficha). Sin sesión las rutas responden 401.
+  **Falta:** que un colaborador real entre a ALICE (con Justo).
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Cómo está conformada cada unidad (T-141, RN-348, RN-349)
 
 - Daniel: lo que el administrador de la unidad crea desde ALICE (residentes, mascotas, invitados) no se veía en BLOKY: la tabla
