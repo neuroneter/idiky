@@ -113,6 +113,26 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Unidades huérfanas y copropiedad equivocada (T-140, RN-343 a RN-346)
+
+- **Causa** de las 656 unidades huérfanas de Altos del Bosque: el guardado del terreno retiraba las estructuras quitadas pero
+  **no tocaba sus unidades**, y la pantalla Unidades solo mostraba las de estructuras vivas. Cada vuelta de «quitar y armar
+  desde documentos» dejaba vivas las unidades de la vuelta anterior (y sus códigos ocupados).
+- **Reglas nuevas** (`docs/05`): **RN-343** quitar una estructura retira sus unidades, con aviso antes y sin dejar si hay
+  residentes · **RN-344** al confirmar desde documentos se ve en qué copropiedad (la de BOB) y se compara nombre/NIT/dirección
+  del documento; si no coincide hay que marcar «Sí, este documento es de…» · **RN-345** «Sin estructura» en Unidades ·
+  **RN-346** reparación con informe en la entrada de administración. Tarea **T-140**.
+- **Código** en `Bloky-Idiky`, rama `feature/T-140-unidades-huerfanas` (`8ab3d84`, sale de `develop` `e15e867`), **sin merge
+  ni despliegue**: `estructura/rutas.ts` (409 `retira_unidades` / `estructura_con_residentes`), `alta/rutas.ts` +
+  `ia/anthropic.ts` (la lectura pide también NIT y dirección; 409 `copropiedad_sin_confirmar`), `unidades/rutas.ts`
+  (`sinEstructura`, `informeHuerfanas`, `retirarHuerfanas`), `admin/rutas.ts` (`GET`/`POST
+  /api/admin/copropiedades/:id/unidades-huerfanas[/retirar]`), y en la app el terreno, «Armar desde documentos» y «Unidades».
+  `npm run build` en las dos y `npm run probar` pasan (8 pruebas nuevas). La advertencia y «Sin estructura» se miraron en la
+  app con la API simulada. **El SQL nuevo no se ha corrido contra PostgreSQL**: se prueba en BLOKY Dev al desplegar.
+- **Pendiente de Daniel:** aprobar el merge a `develop` y el despliegue; después, **ejecutar la reparación en Altos del Bosque**
+  (primero el informe; el plan está en las notas de la sesión). La EC-201 (Juan Luis Almonacid) es de Edificio Cocora, que
+  sigue en el terreno: la reparación no la toca; y una unidad huérfana con residentes no se retira.
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY Dev · La prueba de «Mi unidad» pasa a EC-201; unidades huérfanas en Altos del Bosque
 
 - La U-0133 que se usó en la prueba de T-135 **no se ve en BLOKY**: Altos del Bosque tiene **672 unidades** en el middleware,

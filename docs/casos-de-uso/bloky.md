@@ -193,9 +193,13 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
   (la ruta experta: ver el árbol antes de confirmar). El detalle de la importación se escribe con CU-B-06.
 - A2. Quita una torre o agrupación con cosas dentro → lo de dentro queda suelto (RN-171). Si ya
   tiene historia (unidades con propietarios, reservas), en el producto se **retira**, no se borra.
+- A2b. **Quita una estructura que tiene unidades** (RN-343, 2026-11-21) → al guardar, BLOKY avisa
+  «Al quitar ‹Torre 1› se retiran sus 64 unidades (quedan en el historial; no se borran). ¿Sigo?»
+  con *Sí, retirar las unidades* o *No, deshacer*. Si alguna unidad tiene residentes (vigentes o
+  bloqueados), no se deja: primero se retiran en «Unidades».
 - A3. Intenta meter una torre en otra, o algo dentro de sí mismo → no se deja (RN-170).
 
-**Reglas de negocio:** RN-169 a RN-173, RN-185, RN-186; la pila de pisos y las terrazas, RN-242 a RN-244; pisos mixtos y el piso de cada espacio, RN-245 y RN-246; la agrupación como capa de color, RN-247.
+**Reglas de negocio:** RN-169 a RN-173, RN-185, RN-186; quitar una estructura retira sus unidades, RN-343; la pila de pisos y las terrazas, RN-242 a RN-244; pisos mixtos y el piso de cada espacio, RN-245 y RN-246; la agrupación como capa de color, RN-247.
 
 **Lo que queda abierto**
 - ¿Las agrupaciones se anidan (etapa → sector → torres)? Hoy no (RN-170); docs/13 §6 lo permite.
@@ -370,11 +374,16 @@ sancionatorio. Mary debe conocerlo antes de seguir con reservas (T-84).
 **Flujos alternativos**
 - A1. La lectura no pasa la validación en ningún peldaño → la propuesta se ve con sus motivos y
   no se puede confirmar; puede subir otro documento o seguir a mano.
-- A2. El terreno ya tiene estructuras → la propuesta se puede revisar pero no confirmar (RN-187).
+- A2. El terreno ya tiene estructuras → la propuesta se puede revisar pero no confirmar (RN-187). Para
+  volver a armar, se quitan del terreno, y con ellas **se retiran sus unidades** (RN-343).
+- A2b. **El documento parece de otra copropiedad** (RN-344, 2026-11-21) → la propuesta muestra *«Se va a
+  armar en ‹copropiedad de BOB› · NIT …»*, lo que dice el documento y las diferencias (nombre, NIT,
+  dirección). Si no coincide o no se puede comprobar, el botón de confirmar solo se habilita al marcar
+  «Sí, este documento es de ‹copropiedad›»; el middleware rechaza la confirmación sin esa marca.
 - A3. Descarta la propuesta → queda registrada como descartada; no toca nada.
 - A4. Ya hay una lectura en curso en la copropiedad → espera a que termine (RN-189).
 
-**Reglas de negocio:** RN-187 a RN-189; el documento se guarda y se transcribe (RN-240, RN-241, CU-B-11).
+**Reglas de negocio:** RN-187 a RN-189; el documento se guarda y se transcribe (RN-240, RN-241, CU-B-11); la copropiedad se comprueba al confirmar (RN-344).
 
 **Lo que queda abierto**
 - Unir una propuesta con un terreno ya armado (emparejar torres por nombre).
@@ -388,7 +397,9 @@ sancionatorio. Mary debe conocerlo antes de seguir con reservas (T-84).
 propuesta con la página de cada unidad, confirmar en el terreno y la tabla `unidad`. Probado contra
 la API de Anthropic con el reglamento de Oasis (Haiku pasó al primer peldaño, 0,02 US$) y en la app
 con la API simulada. Falta la prueba de Daniel en Torres del Parque. Código: `apps/bloky-api/src/{ia,alta}/` y
-`apps/bloky/src/features/alta/`.
+`apps/bloky/src/features/alta/`. **2026-11-21 (T-140):** la comprobación de la copropiedad (RN-344) en
+`feature/T-140-unidades-huerfanas` de `Bloky-Idiky`, sin desplegar; probada en la app con la API simulada
+(el reglamento de Oasis en Altos del Bosque: no coincide, pide la marca).
 
 ---
 
@@ -859,10 +870,13 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 2. Si salieron del reglamento (CU-B-10), ya están. Si la estructura se armó a mano, pulsa **«Generar desde la estructura»**:
    BLOKY crea las que faltan con su identificador y su código (RN-319), sin tocar las que existen.
 3. Puede **editar el código** de una unidad (RN-318).
+4. **Ninguna unidad vigente queda escondida** (RN-345, 2026-11-21): las que quedaron sin estructura en el terreno se ven en
+   el grupo **«Sin estructura»**, con la estructura quitada y el aviso; el resumen las cuenta aparte. Las retira soporte de
+   IDIKY con el informe de RN-346 (solo las que no tienen residentes).
 
 **Lo que queda abierto:** el coeficiente a mano y el sugerido por área; la carga desde Excel; la matrícula inmobiliaria.
 
-**Estado:** 🟡 BLOKY Dev (2026-11-05): ficha «Unidades» con el código, «Generar desde la estructura» y editar el código (T-120).
+**Estado:** 🟡 BLOKY Dev (2026-11-05): ficha «Unidades» con el código, «Generar desde la estructura» y editar el código (T-120). **2026-11-21 (T-140):** el grupo «Sin estructura» en `feature/T-140-unidades-huerfanas`, sin desplegar.
 
 ---
 
