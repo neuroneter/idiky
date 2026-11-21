@@ -714,8 +714,8 @@ un texto por Evolution (`POST /api/app/whatsapp/enviar`). Cliente en ALICE:
 **Ramas:** `Bloky-Idiky` `feature/T-132-whatsapp-por-celular` · `App-Idiky` `feature/T-132-cliente-whatsapp` ·
 docs en `idiky` `Justo_dev`.
 
-**Sigue:** completar `EVOLUTION_*` en el servidor (copiar la key desde `evolution.env`), merge y
-desplegar BLOKY; mañana el número dedicado de IDIKY.
+**Sigue (histórico 2026-11-15):** completar `EVOLUTION_*` y el número dedicado.
+**Cerrado 2026-11-21:** instancia oficial **`Idiky_whatsapp`** (ver entrada de hoy arriba).
 
 ### 2026-11-14 · Justo · Infra · Guía Evolution para el equipo + prueba WhatsApp ok (T-131)
 
