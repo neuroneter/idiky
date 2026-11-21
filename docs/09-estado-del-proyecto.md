@@ -122,7 +122,7 @@ coeficiente y un acta que resista revisión.
   residentes · **RN-344** al confirmar desde documentos se ve en qué copropiedad (la de BOB) y se compara nombre/NIT/dirección
   del documento; si no coincide hay que marcar «Sí, este documento es de…» · **RN-345** «Sin estructura» en Unidades ·
   **RN-346** reparación con informe en la entrada de administración. Tarea **T-140**.
-- **Código** en `Bloky-Idiky`, rama `feature/T-140-unidades-huerfanas` (`8ab3d84`, sale de `develop` `e15e867`), **sin merge
+- **Código** en `Bloky-Idiky`, rama `feature/T-140-unidades-huerfanas` (`db25a5c`, sale de `develop` `e15e867`), **sin merge
   ni despliegue**: `estructura/rutas.ts` (409 `retira_unidades` / `estructura_con_residentes`), `alta/rutas.ts` +
   `ia/anthropic.ts` (la lectura pide también NIT y dirección; 409 `copropiedad_sin_confirmar`), `unidades/rutas.ts`
   (`sinEstructura`, `informeHuerfanas`, `retirarHuerfanas`), `admin/rutas.ts` (`GET`/`POST
