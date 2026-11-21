@@ -926,7 +926,7 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 **Lo que queda abierto:** quién vota en las asambleas, propietario o arrendatario (T-127, con Mary); vincular a los miembros
 del consejo y las comisiones (T-126); las billeteras desde ALICE (T-129).
 
-**Estado:** 🟡 BLOKY Dev (2026-11-05): en «Unidades», crear al administrador de cada unidad, bloquearlo y retirarlo (T-121, T-122); el ingreso de ALICE y la gestión de la unidad en el middleware (T-124, docs/20). Falta ALICE (T-125, Justo).
+**Estado:** 🟡 BLOKY Dev (2026-11-05): en «Unidades», crear al administrador de cada unidad, bloquearlo y retirarlo (T-121, T-122); **2026-11-21:** la composición de cada unidad, filtros, resumen y ficha con historial (RN-348, RN-349, T-141, `6634b5a.bloky-e5640b7`); el ingreso de ALICE y la gestión de la unidad en el middleware (T-124, docs/20). Falta ALICE (T-125, Justo).
 
 ---
 

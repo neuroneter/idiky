@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Cómo está conformada cada unidad (T-141, RN-348, RN-349)
+
+- Daniel: lo que el administrador de la unidad crea desde ALICE (residentes, mascotas, invitados) no se veía en BLOKY: la tabla
+  solo mostraba al administrador y un «+N». Aprobó las dos recomendaciones: la Administración ve **nombre, rol y celular, no el
+  número de documento** (solo si ya entró); y **bloquea o retira a cualquiera sin editar sus datos** (RN-349).
+- En «Unidades»: columna **«En la unidad»** (👤 personas · 🐾 mascotas · 🎫 invitados vigentes, *sin entrar* y *bloq.*), **filtros**
+  (sin administrador, sin entrar aún, con invitados vigentes, con bloqueados), **resumen** arriba y la **ficha** lateral de cada
+  unidad con personas, mascotas, invitados (vigencia), quién los agregó y el **historial** de quienes salieron, con quién y por qué.
+- Middleware: `GET /api/c/:id/composicion` y `GET /api/c/:id/unidades/:uid/ficha` (`composicionDeUnidad`, `resumenDeComposicion`),
+  2 pruebas nuevas. `develop` `e5640b7`, desplegado `6634b5a.bloky-e5640b7`; probado en la app con la API simulada (datos como
+  los de ALICE: bloquear desde la ficha actualiza el conteo y el resumen). Sin sesión la ruta responde 401.
+- **El rango RN-300 … RN-349 quedó agotado**: la siguiente regla de la integración necesita rango nuevo en `docs/11` §0.
+- En Altos del Bosque, Daniel ya retiró él mismo las 656 huérfanas con «Empezar de nuevo» (un lote; quedan 16 vigentes).
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · «Empezar de nuevo»: el Administrador retira lo anterior él mismo (T-140, RN-347)
 
 - Daniel: *quitar las unidades anteriores tiene que ser sencillo… el Administrador las debe poder retirar, pudo ser un error
