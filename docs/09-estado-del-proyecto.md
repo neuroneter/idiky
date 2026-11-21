@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY Dev · La prueba de «Mi unidad» pasa a EC-201; unidades huérfanas en Altos del Bosque
+
+- La U-0133 que se usó en la prueba de T-135 **no se ve en BLOKY**: Altos del Bosque tiene **672 unidades** en el middleware,
+  pero solo **16** son de una estructura que está en el terreno (Edificio Cocora); las otras **656 son de 11 estructuras que ya
+  no existen** y la pantalla Unidades no las muestra (dice «672 unidades en 1 estructuras»). Queda como hallazgo aparte.
+- Se finalizó la residencia de Olga en la U-0133 (con motivo) y **Daniel creó desde BLOKY** al administrador de la
+  **EC-201**: *Juan Luis Almonacid*, con otro celular, para no repetir el de Olga. En ALICE, `/api/app/yo` le da
+  `administrador_unidad` con `mi_unidad` completo y los demás permisos de la matriz (sesión de prueba revocada).
+- **Dos personas con el mismo celular** (Daniel y Olga): ALICE y BLOKY buscan por celular y siempre gana una. Conviene una
+  regla que lo impida o que obligue a elegir.
+
 ### 2026-11-21 · Daniel + IA (Claude) · Middleware · Roles y matriz de permisos construidos (T-135, RN-333 a RN-339)
 
 **Qué:** en Bloky-Idiky (`feature/T-135-matriz-de-permisos` → `develop` `e15e867`), desplegado en BLOKY Dev

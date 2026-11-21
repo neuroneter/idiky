@@ -243,7 +243,8 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
 - **2026-11-21 — T-135 en BLOKY Dev:** `GET /api/app/yo` ya trae `permisosVersion` y `roles`/`permisos` por lugar y por
   unidad (docs/20 §4b); también al validar el código. Las rutas de «Mi unidad» ya deciden con la matriz y responden
   `403 sin_permiso` con `modulo` y `accion`. Ojo: el **residente** ahora puede **ver** su unidad (`GET …/residencias`).
-- **2026-11-21 — Dato de prueba para T-137:** la persona de prueba **Olga Lucía Henao** (celular de Daniel) es ahora
-  **administradora de la unidad U-0133** de *Conjunto Residencial Altos del Bosque* en BLOKY Dev; sirve para probar
-  `permisos` por unidad y «Mi unidad» desde ALICE (el código le llega a Daniel).
+- **2026-11-21 — Dato de prueba para T-137 (corregido):** el administrador de la unidad **EC-201** de *Conjunto
+  Residencial Altos del Bosque* es **Juan Luis Almonacid** (celular de prueba de Daniel, sin documento todavía: lo
+  completa al entrar). `/api/app/yo` le da `administrador_unidad` con `mi_unidad` completo. La U-0133 ya no se usa
+  (era de una estructura que no está en el terreno; su residencia quedó finalizada).
 
