@@ -5,9 +5,10 @@
 > Código del servicio: [`evolution/`](./evolution/) · registro en el servidor:
 > [`servidor/levantar.sh`](./servidor/levantar.sh).
 
-**Estado (2026-11-14):** el pod `idiky-evolution` está **desplegado** en Dev (imagen
-`evoapicloud/evolution-api:v2.3.7`). Se probó enviar un texto por WhatsApp y **llegó**.
-Mañana se vincula un **número telefónico dedicado de IDIKY** y se documenta aquí.
+**Estado (2026-11-21):** el pod `idiky-evolution` está **desplegado** en Dev (imagen
+`evoapicloud/evolution-api:v2.3.7`). La instancia oficial de IDIKY es **`Idiky_whatsapp`**
+(mensaje de prueba llegó). El middleware de BLOKY Dev ya apunta a ella
+(`EVOLUTION_INSTANCE` en `bloky-api.env`).
 
 > **Las API keys no van en este documento ni en el chat.** Se leen en el servidor.
 
@@ -89,10 +90,11 @@ Documentación de la API: rutas Evolution v2 (`/message/sendText`, `/instance/�
 
 | Instancia | Uso | Notas |
 |---|---|---|
-| **Justo Soto** | Prueba personal de Justo (2026-11-14) | Vinculada; se envió mensaje de prueba con éxito |
-| *(mañana)* | **Número dedicado de IDIKY** | Se crea y se documenta aquí; la de prueba personal no es la de producto |
+| **`Idiky_whatsapp`** | **Oficial de IDIKY en Dev** (2026-11-21) | Línea exclusiva de la plataforma. OTP de ALICE y avisos del middleware salen por aquí. `EVOLUTION_INSTANCE=Idiky_whatsapp` |
+| **Justo Soto** | Prueba personal de Justo (2026-11-14) | Ya **no** la usa el middleware; se puede dejar o borrar en el Manager |
 
-No uses números de clientes reales en Dev.
+No uses números de clientes reales en Dev. La API key **no** va en git: vive en
+`evolution.env` / `bloky-api.env` (§3).
 
 ## 7. Si algo falla
 
@@ -135,17 +137,25 @@ Content-Type: application/json; charset=utf-8
 
 Variables en `~/.config/idiky/secretos/bloky-api.env` (no en git):
 
-| Variable | Valor típico en Dev |
+| Variable | Valor en Dev (2026-11-21) |
 |---|---|
 | `EVOLUTION_URL` | `http://10.0.2.2:8086` (host desde el pod de BLOKY) |
-| `EVOLUTION_API_KEY` | la misma `AUTHENTICATION_API_KEY` de `evolution.env` |
-| `EVOLUTION_INSTANCE` | hoy `Justo Soto` (prueba); mañana la de IDIKY |
+| `EVOLUTION_API_KEY` | la misma `AUTHENTICATION_API_KEY` de `evolution.env` (no en git) |
+| `EVOLUTION_INSTANCE` | **`Idiky_whatsapp`** (oficial) |
+
+Para reaplicar los secretos en el servidor (sin imprimir la key):
+
+```bash
+ssh idiky@<ip> 'sh -s' < infra/evolution/configurar-bloky-evolution.sh
+# luego redesplegar BLOKY para que el pod lea el .env
+IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/<llave> IDIKY_REF_BLOKY=origin/develop \
+  infra/desplegar.sh origin/main bloky
+```
 
 En ALICE: `lib/servicios/whatsapp/cliente.dart` (`App-Idiky`).
 
 ## 9. Pendiente (próximo paso)
 
-1. **Número telefónico especial de IDIKY** para WhatsApp (Justo + Daniel).
-2. Vincularlo en Evolution y anotar en esta guía el nombre de la instancia «oficial» de Dev;
-   actualizar `EVOLUTION_INSTANCE` en `bloky-api.env`.
-3. (Opcional) Túnel `evolution-dev.idiky.com` y actualizar `SERVER_URL` / `EVOLUTION_URL`.
+1. ~~Número / instancia oficial de IDIKY~~ → **`Idiky_whatsapp`** (hecho 2026-11-21).
+2. (Opcional) Túnel `evolution-dev.idiky.com` y actualizar `SERVER_URL` / `EVOLUTION_URL`.
+3. (Opcional) Retirar la instancia de prueba «Justo Soto» del Manager si ya no hace falta.

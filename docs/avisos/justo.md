@@ -210,7 +210,8 @@ Pod en Dev; guía [`infra/guia-de-evolution.md`](../../infra/guia-de-evolution.m
 Evolution. La app en `feature/T-106-preparar-reuniones-video` pide solo celular. Texto libre:
 `POST /api/app/whatsapp/enviar`.
 
-**Pendiente:** número **especial de IDIKY** (hoy instancia «Justo Soto»).
+**Hecho (2026-11-21):** instancia oficial **`Idiky_whatsapp`**. El middleware en Dev ya usa
+`EVOLUTION_INSTANCE=Idiky_whatsapp` (guía [`infra/guia-de-evolution.md`](../../infra/guia-de-evolution.md) §6).
 
 **Aparte, el SMS de BLOKY:** Twilio no entrega a Colombia y se pasará a **Amazon SNS cuando AWS apruebe la
 cuenta** (bitácora 2026-11-12, T-18). Mientras tanto Twilio sigue: no lo quites ni construyas sobre SNS.
