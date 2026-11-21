@@ -130,8 +130,10 @@ del SMS y no se puede mandar por WhatsApp).
 - **Ojo:** los códigos viven en la memoria del proceso: si el pod se reinicia, el código pendiente
   deja de servir (se pide otro). Vale para Dev; para producción conviene guardarlos en la base.
 
-**Sigue:** llevar la rama a `develop`, desplegar BLOKY Dev y probar el ingreso con un WhatsApp real
-(la instancia de Evolution debe estar conectada).
+**Desplegado y probado:** en `develop` de Bloky-Idiky (`8d4cddd`), BLOKY Dev en `b60ee1a.bloky-8d4cddd`;
+`/api/salud` anuncia `whatsapp: evolution`, la instancia está conectada y **Daniel entró con un código
+real por WhatsApp**. **Sigue:** número de WhatsApp propio de IDIKY (hoy la instancia es la de Justo) y,
+antes de producción, guardar los códigos en la base.
 
 ### 2026-11-21 · Daniel + IA (Claude) · Infra · IP nuevas de Daniel y Justo en el firewall (8086)
 
