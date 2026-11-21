@@ -289,5 +289,13 @@ deje entrar sin documento cuando la Administración lo reportó.
   **no cambie para Colombia** («TIPO:NUMERO», así nadie pierde sus billeteras) y que para otros países sea
   «PAÍS:TIPO:NUMERO». ¿Te sirve así con lo que ya tienes en la cadena?
 
+- **Ya está en el middleware (2026-11-21, T-145):** `GET /api/app/c/:id/catalogo-identidad` → `{ pais, paises: [{ codigo, nombre,
+  indicativo, celularLongitudMinima, celularLongitudMaxima, celularEmpiezaCon, celularEjemplo, tipos: [{ codigo, nombre,
+  soloNumeros, longitudMinima, longitudMaxima, patron, ejemplo, esPasaporte, orden }] }] }`. Al agregar residentes e invitados
+  se puede mandar `paisCelular` y `paisDocumento` (por defecto el de la copropiedad); el error 422 trae el mensaje de la regla.
+  Hoy el catálogo es solo Colombia hasta desplegar BOB con T-144.
+- **RN-364:** el middleware guarda el **primer ingreso a ALICE** al validar el código (`primer_ingreso_app`); hasta entonces la
+  Administración puede corregir los datos de la persona desde BLOKY.
+
 **Mientras se habla:** no fijes en ALICE nuevas listas de tipos de documento ni reglas de celular solo para Colombia.
 

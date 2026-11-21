@@ -113,6 +113,22 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · País del celular y del documento; corregir antes del primer ingreso (T-145, RN-359 a RN-364)
+
+- Daniel: en Unidades no había **país del teléfono**, y no se podía **editar** a alguien que todavía no ha entrado a la app.
+- **Construido (T-145):** el middleware lee el catálogo de países de BOB (con **Colombia de respaldo** hasta desplegar BOB con
+  T-144) y valida celular y documento con la regla de su país en Unidades, CSV (columna opcional `pais_documento`), «Dar
+  acceso», ALICE y la corrección; `GET /api/c/:id/catalogo-identidad` (y su par de ALICE). El formulario de BLOKY trae
+  **🇨🇴 +57 por defecto**, los tipos del país y **«🌎 Otro país»** (celular y documento pueden ser de países distintos). El
+  directorio guarda `pais_documento` y es único por país + tipo + número (migración común 012); el hash no cambia para Colombia
+  y queda nulo para otros países hasta hablarlo con Justo.
+- **RN-364:** se guarda el **primer ingreso a ALICE**; mientras no exista, la Administración **corrige nombre, celular y
+  documento** («Editar» en Unidades y en la ficha, «Corregir datos» en Equipo), con las mismas revisiones. «Ya entró» dejó de
+  deducirse del documento. Para los de antes se tomó de sus sesiones de ALICE (migración 013): **Justo, Olga y Juan Luis** ya
+  entraron.
+- `develop` `ebf94c1`, desplegado `570790b.bloky-ebf94c1`. 5 pruebas nuevas; probado en la app con la API simulada (Otro país
+  con celular de México, Editar con los datos cargados).
+
 ### 2026-11-21 · Daniel + IA (Claude) · Varios países · Documentos y celulares por país (ADR-0035, RN-358 a RN-363)
 
 - Daniel: IDIKY es para **muchos países**: los tipos de documento y sus reglas de validación se gestionan **en BOB, por país**,
