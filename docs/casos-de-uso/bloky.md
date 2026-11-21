@@ -27,11 +27,14 @@ creen. BLOKY no crea a nadie por su cuenta.
 2. BLOKY busca a la persona en BOB y comprueba que hoy tenga al menos una copropiedad a la que
    pueda entrar (RN-161, RN-162). Le muestra su nombre y **por dónde puede confirmar que es ella**:
    - **Código por SMS** al celular registrado, con la pista «••• 4567» (RN-163).
+   - **Código por WhatsApp** al **mismo** celular registrado, con la misma pista, cuando el entorno
+     tiene WhatsApp (Evolution, ADR-0033) (RN-332).
    - **Google** o **Microsoft**, con la cuenta registrada, pista «o•••@gmail.com» (RN-164). Se
      ofrece **solo el que corresponde al correo**: Gmail → Google; Hotmail, Outlook, Live o MSN →
-     Microsoft; Yahoo → Yahoo; otro dominio → solo SMS (RN-167).
+     Microsoft; Yahoo → Yahoo; otro dominio → solo SMS y WhatsApp (RN-167, RN-332).
    Un solo código por intento, por el canal que elija ([docs/13 §4](../13-bob-copropiedades-y-contratos.md)).
-3. **Por SMS:** recibe un código de seis números, válido diez minutos, y lo escribe.
+3. **Por SMS o por WhatsApp:** recibe un código de seis números, válido diez minutos, y lo escribe.
+   El código solo sirve por el canal por el que se pidió.
    **Por Google, Microsoft o Yahoo:** el navegador va al proveedor, la persona elige su cuenta y vuelve.
    BLOKY compara el correo que el proveedor verificó con el de BOB: tiene que ser el mismo.
 4. Queda dentro. Si tiene varias copropiedades, las ve todas con su rol en cada una.

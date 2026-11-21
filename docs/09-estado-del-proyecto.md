@@ -113,6 +113,26 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Código del ingreso por WhatsApp (T-133, RN-332, CU-B-01)
+
+**Qué:** en el paso 2 del ingreso a BLOKY aparece **«Código por WhatsApp»** junto a «Código por SMS» y
+al proveedor del correo. Reutiliza lo que hizo Justo en T-132 (Bloky-Idiky): el cliente de Evolution
+(`acceso/evolution.ts`) para enviar, y `acceso/codigos-whatsapp.ts`, que genera el código de seis
+números, lo guarda diez minutos en memoria y lo valida una sola vez (Twilio Verify es dueño del código
+del SMS y no se puede mandar por WhatsApp).
+
+- **Middleware:** `canalesDisponibles` ofrece `whatsapp` si hay celular y el entorno tiene WhatsApp;
+  `/api/acceso/enviar-codigo` y `/verificar-codigo` aceptan `canal: 'sms' | 'whatsapp'` (sin canal,
+  SMS: lo de antes sigue igual). Un código pedido por WhatsApp no sirve por SMS. Si el envío falla →
+  502 con un mensaje que sugiere el SMS.
+- **App:** el botón con el logo de WhatsApp y la pantalla del código dice por dónde se envió.
+- **Pruebas:** `npm run probar` (tres pruebas nuevas de RN-332) y el build de la app y del middleware pasan.
+- **Ojo:** los códigos viven en la memoria del proceso: si el pod se reinicia, el código pendiente
+  deja de servir (se pide otro). Vale para Dev; para producción conviene guardarlos en la base.
+
+**Sigue:** llevar la rama a `develop`, desplegar BLOKY Dev y probar el ingreso con un WhatsApp real
+(la instancia de Evolution debe estar conectada).
+
 ### 2026-11-21 · Daniel + IA (Claude) · Infra · IP nuevas de Daniel y Justo en el firewall (8086)
 
 - **Firewall de Lightsail:** la regla **TCP 8086** (Evolution) quedó con las IP nuevas de Daniel y de
