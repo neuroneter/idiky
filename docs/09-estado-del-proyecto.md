@@ -123,6 +123,11 @@ coeficiente y un acta que resista revisión.
   nombre de la copropiedad, **lotes** de retiro (migración `019-lotes-de-retiro.sql`) y «Unidades → Retiradas» con
   restaurar. Quitar una estructura y la reparación de soporte también dejan lote. 5 pruebas nuevas; builds y `probar` pasan;
   el flujo se miró en la app con la API simulada. **El SQL nuevo y la migración no se han corrido contra PostgreSQL.**
+- **Desplegado en BLOKY Dev** (Daniel lo aprobó): `develop` `467dbf9` (merge `--no-ff` de la rama), revisión
+  `6634b5a.bloky-467dbf9`. La migración `019-lotes-de-retiro.sql` quedó aplicada en Altos del Bosque. El informe de soporte
+  (RN-346, solo lectura) contra la base real da **656 huérfanas de 11 estructuras anteriores, ninguna con residentes** (las
+  cinco torres de Oasis, dos veces, con mayúsculas y sin ellas, y un «Edificio Cocora» viejo, distinto del vigente). **No se
+  retiró nada todavía**: 672 vigentes, 0 lotes.
 - Con esto, en Altos del Bosque **Daniel mismo** puede retirar las 656 huérfanas desde «Unidades → Sin estructura → Retirar
   estas unidades» después de desplegar; la ruta de soporte (RN-346) queda como respaldo.
 
