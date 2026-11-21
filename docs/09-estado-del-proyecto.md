@@ -113,6 +113,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · Cierre del día: repetidos, BOB limpio, entrega 0.2.0 y quién vota (T-127)
+
+- **Celulares repetidos en Dev:** «Carlos Sotom» (el duplicado, sin asignaciones ni sesiones) pasó a un número de prueba. Las dos
+  «Mary» **conservan su teléfono** (Daniel): mientras compartan `310•••669` siguen en el informe, el ingreso a ALICE con ese
+  número responde «celular repetido» y **no se puede poner todavía el índice único de celular en la base**.
+- **BOB:** se quitaron las pruebas de las reglas de persona que ya no viven en BOB (ADR-0025); `probar-bob.mjs` en **61/61**.
+- **Entrega 0.2.0** (Git Flow): `release/0.2.0` → `main` con la etiqueta **`v0.2.0`** → `develop`, en **Bloky-Idiky**
+  (`main` `aad9faf`, 227 commits nuevos) y **BOB-Idiky** (`main` `4a5a50e`, 17). `main` y `develop` quedan con el mismo
+  contenido; BOB ya se puede desplegar desde `main` sin la excepción.
+- **T-127 decidido (RN-365):** vota el propietario o el apoderado que él elija (el arrendatario u otro residente de la misma
+  copropiedad). Aviso a Mary §3 con lo que falta conciliar (apoderado externo o de otra copropiedad; coeficiente o unidad).
+- **Lo de Justo** (ALICE, T-143, T-146) lo desarrolla él; solo se toca con los dos conectados.
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · País del celular y del documento; corregir antes del primer ingreso (T-145, RN-359 a RN-364)
 
 - Daniel: en Unidades no había **país del teléfono**, y no se podía **editar** a alguien que todavía no ha entrado a la app.

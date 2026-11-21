@@ -78,6 +78,12 @@ Daniel decidió cómo se crean los residentes en BLOKY y ALICE
   definir con Daniel cómo se marca, en BLOKY, a un arrendatario que agrega el propietario, para que no
   vote (RN-51).
 
+  **Daniel, 2026-11-21 (RN-365):** *quien vota siempre es el propietario o el apoderado por el propietario, que puede ser
+  el arrendatario u otro residente del mismo edificio o conjunto, al que él le quiera dar el poder.* Así, los que el
+  propietario agrega desde ALICE no votan salvo que él les dé el poder. **Para ti:** tu RN-30 deja que el apoderado sea
+  **externo**, y tu RN-217 que sea de **otra copropiedad**; Daniel habla de *otro residente del mismo edificio*. ¿Se
+  restringe a residentes de la misma copropiedad, o se mantienen el externo y el de otra copropiedad?
+
 ## 4. Quién vota y con qué peso: lo que propone Daniel choca con reglas tuyas — ⏳ abierto (2026-11-21)
 
 Daniel (2026-11-21), al definir roles y permisos ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-impersonacion.md)):
