@@ -159,7 +159,8 @@ Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` + B
 ## 4b. Los permisos: qué módulos ve y qué puede hacer en cada uno (ADR-0034, RN-334, RN-339)
 
 > **Contrato acordado el 2026-11-21 (Daniel), antes de construir.** Lo implementa el middleware en **T-135** y ALICE lo
-> consume en **T-137** (Justo). Es **aditivo**: los campos de §4 no cambian.
+> consume en **T-137** (Justo). Es **aditivo**: los campos de §4 no cambian. **Ya responde en BLOKY Dev** (2026-11-21,
+> `7d7b111.bloky-e15e867`); `permisosVersion` también viene al validar el código y al completar el documento.
 
 `GET /api/app/yo` agrega a cada lugar y a cada unidad sus **roles** y sus **permisos**:
 
@@ -264,8 +265,10 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
 | `POST …/residencias/:rid/bloquear` · `…/desbloquear` · `…/finalizar` `{ motivo }` | Gestiona a uno de su unidad |
 
 - `403` si quien llama no es **administrador de esa unidad**. **Con T-135** esto lo decide la matriz (§4b): `GET` pide
-  `mi_unidad: ver`; agregar, `crear`; bloquear y desbloquear, `editar`; finalizar, `eliminar`. Con los valores iniciales queda
-  igual que hoy.
+  `mi_unidad: ver`; agregar, `crear`; bloquear y desbloquear, `editar`; finalizar, `eliminar`. Además, la persona tiene que
+  **estar en esa unidad** (los roles de la copropiedad solos no abren una unidad ajena). Con los valores iniciales, el
+  administrador de la unidad hace lo mismo que antes y **el residente ahora puede ver** quiénes están en su unidad (`ver`).
+  **Construido el 2026-11-21 (T-135).**
 - No se puede finalizar ni bloquear al **último administrador** de la unidad (RN-324); eso solo lo hace la Administración.
 - Nada se borra: se finaliza.
 

@@ -240,4 +240,7 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
   agrega `roles` y `permisos` (por unidad y por lugar) y `permisosVersion`; los 13 identificadores de módulo; el 403
   `sin_permiso`; y los valores iniciales de la matriz. Es aditivo: lo que ya usas no cambia. Puedes empezar con datos de
   prueba mientras Daniel construye T-135.
+- **2026-11-21 — T-135 en BLOKY Dev:** `GET /api/app/yo` ya trae `permisosVersion` y `roles`/`permisos` por lugar y por
+  unidad (docs/20 §4b); también al validar el código. Las rutas de «Mi unidad» ya deciden con la matriz y responden
+  `403 sin_permiso` con `modulo` y `accion`. Ojo: el **residente** ahora puede **ver** su unidad (`GET …/residencias`).
 

@@ -113,6 +113,26 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · Middleware · Roles y matriz de permisos construidos (T-135, RN-333 a RN-339)
+
+**Qué:** en Bloky-Idiky (`feature/T-135-matriz-de-permisos` → `develop` `e15e867`), desplegado en BLOKY Dev
+(`7d7b111.bloky-e15e867`).
+
+- **Datos:** migración común `011-permisos.sql` en el esquema `directorio`: `rol_catalogo`, `modulo`, `permiso`,
+  `permisos_version` y `cambio_permisos` (RN-342). Los valores iniciales de docs/20 §4b (`src/permisos/inicial.ts`) se
+  siembran una sola vez al arrancar; para BLOKY, Administrador y Delegado con todo (hasta T-134).
+- **Reglas puras** (`reglas.ts`): `normalizarAcciones`, `sumarPermisos` (suma de roles, retirados no cuentan), `permite`,
+  `rolDeResidencia`, `rolDeCargo`, `motivoRolInvalido`, `motivoPermisoInvalido`.
+- **ALICE:** `/api/app/yo` (y el ingreso y el documento) traen `permisosVersion`, `roles` y `permisos` por lugar y unidad.
+  «Mi unidad» decide con la matriz (`ver`/`crear`/`editar`/`eliminar`) y exige estar en la unidad; 403 `sin_permiso`.
+  Cambio visible: el residente puede ver su unidad.
+- **BOB:** `/api/admin/permisos` (leer), `…/roles/:id` (crear o renombrar), `…/roles/:id/retirar`,
+  `…/:rol/:aplicacion/:modulo` (acciones) y `…/cambios`, con el token de administración y `x-bloky-quien`.
+- **Verificado:** `npm run probar` (seis pruebas nuevas) y builds; en el servidor, la matriz sembrada (13 roles, 22
+  módulos), 401 sin token, y `/api/app/yo` de la persona de prueba con sus permisos (sesión de prueba abierta y revocada).
+- **Sin probar con datos reales:** «Mi unidad», porque en BLOKY Dev no hay residencias cargadas. Roles del Consejo: pendientes
+  de T-126.
+
 ### 2026-11-21 · Daniel + IA (Claude) · ALICE · El contrato de permisos de `/api/app/yo` (docs/20 §4b, T-135, T-137)
 
 **Qué:** se escribió, antes de construir, cómo el middleware le dice a ALICE qué módulos ve y qué puede hacer: `roles` y
