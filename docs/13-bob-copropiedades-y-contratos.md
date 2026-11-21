@@ -169,7 +169,7 @@ Decisiones de implementación que conviene conocer:
 BOB gana dos pantallas. Las dos **guardan en el middleware** por su entrada de administración (ADR-0025): Strapi no guarda
 ni los roles de las copropiedades, ni la matriz, ni las asignaciones.
 
-**Roles y permisos** (T-135)
+**Roles y permisos** (T-138; lo guarda el middleware, T-135)
 1. El **catálogo de roles** (RN-333), por categoría: Administración, Consejo de administración, Colaboradores y Residentes.
    Se crean, se renombran y se retiran; no se borran.
 2. La **matriz** (RN-334): una tabla con los roles en las filas y los módulos de BLOKY y de ALICE en las columnas, y en

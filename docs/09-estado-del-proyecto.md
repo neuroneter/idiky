@@ -113,6 +113,24 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · Prioridad · Qué va primero para que ALICE use el middleware; ruta de WhatsApp cerrada (T-135, T-138, T-139)
+
+**Hallazgo:** del middleware, ALICE usa hoy solo el ingreso, «Mi ficha», el documento, el avatar, la sesión, la cadena y
+**«Mi unidad»**; los demás módulos de ALICE corren con la semilla local de `App-Idiky`.
+
+**Orden aprobado por Daniel:**
+0. **T-139 · hecho hoy:** `POST /api/app/whatsapp/enviar` era una **puerta abierta** (sin sesión, texto libre desde el
+   WhatsApp de IDIKY a cualquier celular del directorio). Ahora, fuera de desarrollo, exige el token de administración
+   (`Bearer BLOKY_ADMIN_TOKEN`); sin él, 401. Prueba nueva en `npm run probar`; guía y script de Evolution ajustados.
+   En `develop` de Bloky-Idiky (`2dee977`). El cliente `ClienteWhatsApp` de ALICE no lo usa ninguna pantalla.
+1. **T-135 (middleware):** roles, módulos y matriz en el directorio con valores iniciales; los roles de hoy se traducen al
+   catálogo; `/api/app/yo` devuelve los permisos por unidad (contrato en docs/20 primero); «Mi unidad» aplica la matriz.
+2. **T-137 (Justo):** ALICE lee sus permisos, en paralelo desde que esté el contrato.
+3. **Módulos de ALICE con servicio**, en este orden propuesto: Visitantes + Portería, Correspondencia, Cartelera, PQRS,
+   Reservas; después Pagos y Asambleas.
+4. **Lo que no frena a ALICE:** T-138 (BOB «Roles y permisos», nueva al dividir T-135), T-134 (BLOKY «Usuarios»), T-136
+   (impersonación).
+
 ### 2026-11-21 · Daniel + IA (Claude) · Acceso · Roles desde BOB, matriz de permisos e impersonación (ADR-0034)
 
 **Qué:** revisando con Daniel el acceso de BOB, BLOKY y ALICE, se **reemplazó** el CU-B-18 de la mañana (perfiles libres por

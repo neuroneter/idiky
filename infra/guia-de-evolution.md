@@ -118,15 +118,20 @@ Con `EVOLUTION_*` en `bloky-api.env`, el middleware usa Evolution para el códig
 **T-132 · RN-331.** El middleware no habla con WhatsApp a mano: busca a la persona en el
 directorio y Evolution manda el texto a **su** celular registrado.
 
+**Desde el 2026-11-21 (T-139) exige el token de administración** (el de BOB, `BLOKY_ADMIN_TOKEN`) fuera de
+desarrollo: sin él responde `401`. Antes era una puerta abierta y cualquiera podía mandar texto libre desde
+el WhatsApp de IDIKY a cualquier celular del directorio.
+
 ```http
 POST https://bloky-dev.idiky.com/api/app/whatsapp/enviar
+Authorization: Bearer <BLOKY_ADMIN_TOKEN>
 Content-Type: application/json; charset=utf-8
 
 { "celular": "3001234567", "texto": "Hola desde IDIKY (prueba)" }
 ```
 
 - `200` → `{ ok, persona: { id, nombre }, pista }`
-- `404 no_existe` · `422 invalido` · `502 whatsapp_fallo` · `503 sin_whatsapp`
+- `401 no_autorizado` (sin el token) · `404 no_existe` · `422 invalido` · `502 whatsapp_fallo` · `503 sin_whatsapp`
 
 Variables en `~/.config/idiky/secretos/bloky-api.env` (no en git):
 

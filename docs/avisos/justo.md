@@ -230,4 +230,10 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
 - **Impersonación** (RN-340, RN-341): soporte de IDIKY entra a ALICE desde un módulo de BOB, también en el celular, con un
   **pase de un solo uso firmado por el middleware**, para una unidad y un rol. ALICE debe abrir con ese pase y mostrar la
   franja «Soporte IDIKY actuando como…», en solo lectura salvo con motivo (T-136, T-137).
+- **2026-11-21 — `POST /api/app/whatsapp/enviar` ya no es abierta (T-139):** fuera de desarrollo exige
+  `Authorization: Bearer <BLOKY_ADMIN_TOKEN>` (401 sin él). Era un riesgo con el número de IDIKY: cualquiera mandaba texto
+  libre. `ClienteWhatsApp` de ALICE no lo usa ninguna pantalla; si lo necesitas desde la app, habla con Daniel.
+- **Prioridad (2026-11-21):** primero T-135 (la matriz en el middleware y los permisos en `/api/app/yo`, con el contrato en
+  docs/20 antes de construir); tú puedes empezar T-137 con ese contrato. Luego los módulos de ALICE con servicio: Visitantes
+  + Portería, Correspondencia, Cartelera, PQRS, Reservas.
 
