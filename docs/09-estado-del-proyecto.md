@@ -122,7 +122,11 @@ coeficiente y un acta que resista revisión.
   validación); el middleware valida con ese catálogo; **por defecto el país de la copropiedad** (el 99 %), «Otro país» solo en
   los pocos casos; documento y celular de países **independientes** (extranjero con celular de su país); **pasaporte siempre**;
   persona única por **país + tipo + número**; el hash de identidad **no cambia para Colombia** (por confirmar con Justo).
-- **Tareas:** T-144 (BOB), T-145 (middleware y BLOKY), T-146 (ALICE, Justo). Aviso a Justo §10. **Nada construido todavía.**
+- **Tareas:** T-144 (BOB), T-145 (middleware y BLOKY), T-146 (ALICE, Justo). Aviso a Justo §10.
+- **T-144 construido en BOB** (`develop` `0cf70aa`, sin desplegar): colecciones «Países» y «Tipos de documento» con sus reglas
+  revisadas en el servidor, semilla de Colombia (CC, CE, PPT, TI, PA) y lectura pública de solo lectura
+  (`/api/paises?populate=tiposDocumento`). `scripts/probar-bob.mjs` (Strapi real sobre SQLite): las 11 comprobaciones nuevas
+  pasan; **5 fallas viejas** de «persona» (BOB ya no guarda personas, ADR-0025) quedan como estaban.
 - En Dev quedó resuelto el celular de Daniel (`3004051582` solo suyo; Olga y Andrés con números de prueba); siguen repetidos
   los de Mary ×2 y Carlos ×2.
 
