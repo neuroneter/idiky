@@ -214,3 +214,20 @@ Evolution. La app en `feature/T-106-preparar-reuniones-video` pide solo celular.
 
 **Aparte, el SMS de BLOKY:** Twilio no entrega a Colombia y se pasará a **Amazon SNS cuando AWS apruebe la
 cuenta** (bitácora 2026-11-12, T-18). Mientras tanto Twilio sigue: no lo quites ni construyas sobre SNS.
+
+## 8. Roles desde BOB, permisos por módulo en ALICE e impersonación con pase — ⏳ abierto (2026-11-21)
+
+Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-impersonacion.md)):
+
+- **Los roles los define BOB**, iguales para todas las copropiedades, y una **matriz rol × módulo** con **Ver · Crear ·
+  Editar · Eliminar** (eliminar = anular o retirar) para BLOKY y **ALICE** (RN-333 a RN-336). La aplica el **middleware**
+  en cada petición; ALICE debe pedir sus permisos y esconder lo que no tiene (T-137).
+- **Módulos de ALICE** para la matriz (sacados de `App-Idiky` develop y del demo, confirmados por Daniel): Mi unidad y sus
+  personas, Visitantes, Correspondencia, Reservas, Pagos y estado de cuenta, Paz y salvo, PQRS y solicitudes, Cartelera y
+  comunicados, Asambleas y poderes, Reuniones con video, Proyectos, Directorio y Portería. Inicio y Mi cuenta, siempre.
+  Si falta o sobra alguno, díselo a Daniel.
+- **Varios roles**: los permisos en ALICE son la suma de los roles de la persona **en la unidad que eligió** (RN-339).
+- **Impersonación** (RN-340, RN-341): soporte de IDIKY entra a ALICE desde un módulo de BOB, también en el celular, con un
+  **pase de un solo uso firmado por el middleware**, para una unidad y un rol. ALICE debe abrir con ese pase y mostrar la
+  franja «Soporte IDIKY actuando como…», en solo lectura salvo con motivo (T-136, T-137).
+

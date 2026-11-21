@@ -67,7 +67,7 @@
    persona existe una vez y tiene asignaciones por copropiedad, con su periodo y su soporte.
 4. **En una misma copropiedad, el Administrador y el Delegado no son la misma persona.**
 5. **Los dos entran a BLOKY y crean ahí los perfiles internos** de la copropiedad. **BOB no los crea.**
-   Definido en [CU-B-18](./casos-de-uso/bloky.md#cu-b-18) (2026-11-21).
+   **2026-11-21 (ADR-0034):** no crean perfiles propios: asignan los **roles que define BOB** (§9) ([CU-B-18](./casos-de-uso/bloky.md#cu-b-18)).
 6. **El Delegado tiene lo mismo que el Administrador**, más una facultad propia: **solicitar desde
    BLOKY el bloqueo o el cambio del Administrador**. La solicitud debe cumplir la ley: al
    administrador lo remueve la asamblea, o el consejo si existe (art. 50), así que va con el acta.
@@ -163,6 +163,24 @@ Decisiones de implementación que conviene conocer:
   unidades se hace hoy con una contratación nueva, mientras se decide cómo se amplía (§7).
 - **El lote quedó sin cobro** mientras se decide (§7).
 - **BOB no hace lo de BLOKY**: ni el árbol hasta la unidad ni los perfiles internos.
+
+## 9. Roles, permisos e impersonación (2026-11-21, ADR-0034)
+
+BOB gana dos pantallas. Las dos **guardan en el middleware** por su entrada de administración (ADR-0025): Strapi no guarda
+ni los roles de las copropiedades, ni la matriz, ni las asignaciones.
+
+**Roles y permisos** (T-135)
+1. El **catálogo de roles** (RN-333), por categoría: Administración, Consejo de administración, Colaboradores y Residentes.
+   Se crean, se renombran y se retiran; no se borran.
+2. La **matriz** (RN-334): una tabla con los roles en las filas y los módulos de BLOKY y de ALICE en las columnas, y en
+   cada cruce **Ver · Crear · Editar · Eliminar**. Es una sola para todas las copropiedades.
+3. Cada cambio queda registrado (RN-342) y rige desde la siguiente petición (RN-336).
+
+**Impersonar** (T-136), solo para usuarios de Strapi con el rol de soporte, también desde el celular
+1. Busca la copropiedad; para ALICE elige la **unidad**; elige el **rol** y la aplicación (BLOKY o ALICE).
+2. «Entrar»: BOB le pide al middleware un **pase** (RN-340), que firma el middleware y vence a los dos minutos.
+3. BLOKY o ALICE abren con la franja «Soporte IDIKY actuando como…», en solo lectura; para escribir, el motivo (RN-341).
+4. Todo lo que haga queda en la auditoría a su nombre de Strapi (RN-342), y el Administrador recibe el aviso.
 
 ## Fuentes
 

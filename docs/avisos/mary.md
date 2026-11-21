@@ -78,3 +78,25 @@ Daniel decidió cómo se crean los residentes en BLOKY y ALICE
   definir con Daniel cómo se marca, en BLOKY, a un arrendatario que agrega el propietario, para que no
   vote (RN-51).
 
+## 4. Quién vota y con qué peso: lo que propone Daniel choca con reglas tuyas — ⏳ abierto (2026-11-21)
+
+Daniel (2026-11-21), al definir roles y permisos ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-impersonacion.md)):
+*una copropiedad puede definir quién tendrá la capacidad de voto por el % de su copropiedad; no se puede dar a menores de
+edad, arrendatarios ni visitantes; solo a alguien creado en la APP en esa copropiedad como residente, con la marca de
+dueño; y se puede transferir a un residente de otra copropiedad que cumpla lo mismo.* También: una persona puede tener
+**varios inmuebles** en la misma copropiedad y **varios roles** a la vez (propietaria de una unidad y arrendataria de otra).
+
+Lo que hay que conciliar (lo de la ley va de memoria: **confirmarlo con un abogado**):
+
+1. **Por coeficiente o por unidad.** Daniel habla del % de copropiedad (Ley 675, art. 37: el voto de cada propietario
+   equivale a su coeficiente). Tu **RN-29** dice *un voto por unidad*. Son incompatibles.
+2. **«Solo un residente de la app».** La ley le da el voto al **propietario**, viva o no ahí (tu RN-51 y tu RN-68 ya lo
+   reconocen: propietario residente o no).
+3. **«No a arrendatarios».** La ley deja que el propietario se haga representar por poder y no prohíbe que el apoderado sea
+   el arrendatario. Si se restringe, sería por **reglamento** de cada copropiedad (como tu tope de RN-220). Que el poder
+   vaya a alguien de **otra copropiedad** ya está en tu RN-217.
+4. **Menores de edad.** No pueden ser apoderados; un menor propietario vota por su representante legal. Hoy **no se guarda
+   la fecha de nacimiento**.
+
+**Para ti:** revísalo con Daniel. Nada de esto entra a la matriz de permisos: lo legal queda fijo (RN-337).
+

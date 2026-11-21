@@ -113,6 +113,23 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · Acceso · Roles desde BOB, matriz de permisos e impersonación (ADR-0034)
+
+**Qué:** revisando con Daniel el acceso de BOB, BLOKY y ALICE, se **reemplazó** el CU-B-18 de la mañana (perfiles libres por
+copropiedad) por **roles fijos que define BOB** y una **matriz rol × módulo** única.
+
+- **ADR-0034** (reemplaza ADR-0022 §5): catálogo de roles por categoría —Administración, Consejo de administración,
+  Colaboradores (Secretaría, Seguridad, Aseo, Mantenimiento, Contador, Revisor fiscal…), Residentes—; matriz con **Ver ·
+  Crear · Editar · Eliminar** (eliminar = anular) para BLOKY y ALICE, editada en BOB, **guardada y aplicada por el
+  middleware**; la ley por encima. Delegado y Presidente del consejo son roles distintos. «Junta» pasa a Consejo de
+  administración (RN-305, RN-315).
+- **Impersonación**: módulo en BOB (también celular) para el rol de soporte de Strapi; copropiedad, unidad y rol; el
+  **middleware firma** un pase de un uso; se mantienen las protecciones del ADR-0022.
+- **Reglas:** RN-333 a RN-339 rehechas, RN-340 a RN-342 nuevas; RN-161, RN-327 y RN-261 ampliadas. docs/13 §9 (lo de BOB),
+  glosario, CU-B-18 reescrito. Tareas **T-134 a T-137**.
+- **Avisos:** a **Mary** (quién vota y con qué peso choca con RN-29, RN-51, RN-217; confirmar con abogado) y a **Justo**
+  (permisos y pase en ALICE, y la lista de módulos de ALICE).
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Los perfiles internos (CU-B-18, RN-333 a RN-339)
 
 **Qué:** se definió el caso de uso que faltaba para el manejo de usuarios de BLOKY. Hasta hoy solo entran el Administrador
@@ -127,7 +144,7 @@ y el Delegado (RN-161); docs/13 §3 ya decía que ellos crearían los perfiles i
 - **Abierto:** avisarle a la persona que ya tiene acceso; los módulos que vienen nacen sin acceso; actos reservados al
   Administrador cuando existan cuotas y multas; ADR-0034 al implementar.
 
-**Sigue:** que Daniel revise el borrador de CU-B-18; luego T-134 en Bloky-Idiky.
+**Reemplazado el mismo día** por ADR-0034 (entrada de arriba): los perfiles los define BOB.
 
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Código del ingreso por WhatsApp (T-133, RN-332, CU-B-01)
 

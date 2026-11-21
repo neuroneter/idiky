@@ -65,6 +65,10 @@ misma persona puede ser Administradora en una y solo de portería en otra.
 
 ### 5. La impersonación: soporte de IDIKY, con permiso de BOB
 
+> **Reemplazada el 2026-11-21 por [ADR-0034](./0034-roles-desde-bob-matriz-de-permisos-e-impersonacion.md) §3:** se entra desde
+> un módulo de BOB con un pase firmado por el middleware, a BLOKY o a ALICE, con la unidad y el rol. Las
+> protecciones de abajo se mantienen.
+
 - **El permiso se da en BOB** al empleado de IDIKY («Puede entrar como soporte»); BLOKY lo lee
   como las demás asignaciones.
 - El empleado **entra con su propio ingreso** (su documento y su código), busca la copropiedad y

@@ -903,62 +903,48 @@ del consejo y las comisiones (T-126); las billeteras desde ALICE (T-129).
 ---
 
 ### CU-B-18
-## CU-B-18 — Los perfiles internos y quién más entra a BLOKY
+## CU-B-18 — Quién entra y con qué rol: los roles de BOB asignados a personas
 
-> Daniel (2026-11-21): el manejo de usuarios de BLOKY. Hasta hoy solo entran el Administrador y el Delegado
-> ([docs/13 §3](../13-bob-copropiedades-y-contratos.md), RN-161); allí quedó dicho que *«los dos entran a BLOKY y crean
-> ahí los perfiles internos de la copropiedad»*. Decidido con Daniel: **perfiles libres con plantillas**, que se pueden dar
-> a **cualquier persona** (si ya está en el directorio, se reutiliza). Los tres niveles de permiso por módulo (sin acceso,
-> ver, editar) son la propuesta por defecto: Daniel no tuvo preferencia.
+> Daniel (2026-11-21): *el Administrador o Delegado usará los perfiles o roles que desde BOB se definan, para mantener
+> estandarizado todo el desarrollo.* Reemplaza el borrador de la mañana (perfiles libres por copropiedad).
+> Decisión: [ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-impersonacion.md). Lo de BOB: [docs/13 §9](../13-bob-copropiedades-y-contratos.md).
 
 - **Actor principal:** Administrador o Delegado.
-- **Actor secundario:** la persona que recibe el perfil (contadora, asistente, revisor fiscal, consejero…).
-- **Precondiciones:** CU-B-01; la copropiedad está activa o en implementación (RN-162).
-- **Disparador:** la ficha **«Usuarios»** del menú, que solo ven el Administrador y el Delegado (RN-335).
-- **Resultado esperado:** otras personas entran a BLOKY a la copropiedad, cada una con un perfil que dice qué módulos ve y
-  cuáles puede cambiar; la Administración las bloquea o las retira cuando quiera, con efecto inmediato.
+- **Actor secundario:** la persona que recibe el rol.
+- **Precondiciones:** CU-B-01; BOB ya definió los roles y su matriz de permisos (docs/13 §9).
+- **Disparador:** la ficha **«Usuarios»** del menú, que solo ven el Administrador y el Delegado (RN-338).
+- **Resultado esperado:** cada persona que trabaja o participa en la copropiedad entra a BLOKY o a ALICE con los roles que
+  le corresponden, y ve y hace solo lo que la matriz de BOB permite a esos roles.
 
-**Flujo principal — los perfiles**
-1. En **Usuarios › Perfiles** ve los perfiles de la copropiedad, cada uno con cuántas personas lo tienen.
-2. **Crea un perfil** desde cero o **desde una plantilla** (RN-333): *Asistente administrativa*, *Contador*,
-   *Revisor fiscal*, *Consejero*. La plantilla solo propone: se copia y queda como perfil propio de la copropiedad.
-3. Le pone **nombre** y, en una tabla de módulos, marca para cada uno **Sin acceso · Ver · Editar** (RN-334):
-   Estructura (o Planta), Unidades, Mundo, Equipo, Perfil, Reuniones, Documentos, Ubicación y Primeros pasos.
-4. Guarda. Cambiar un perfil cambia de inmediato lo que pueden hacer todas las personas que lo tienen (RN-338).
-
-**Flujo principal — las personas**
-1. En **Usuarios › Personas** ve a quienes entran a BLOKY en esta copropiedad: el Administrador y el Delegado (fijos, de
-   BOB) y las personas con perfil interno, con su perfil, su estado y desde cuándo.
-2. **Agrega a una persona:** escribe su **tipo y número de documento**. Si ya está en el directorio de IDIKY (es residente,
-   colaboradora o entra a otra copropiedad), BLOKY muestra su nombre y la pista de su celular y correo; si no, pide su
-   **nombre** y un **celular o un correo** (RN-267, RN-336).
-3. Elige su **perfil** y, si quiere, la fecha **hasta** la que tendrá acceso. Guarda.
-4. La persona entra a BLOKY como cualquiera (CU-B-01): documento y código por SMS o WhatsApp, o su correo (RN-337). Ve
-   solo los módulos de su perfil; los de «Ver» sin botones para cambiar.
-5. La Administración puede **cambiarle el perfil, bloquearla, desbloquearla o retirarla** (RN-336). Bloquear o retirar le
-   cierra la entrada en la siguiente petición (RN-338).
+**Flujo principal**
+1. En **Usuarios** ve a todas las personas con rol en la copropiedad, agrupadas por categoría (Administración, Consejo de
+   administración, Colaboradores, Residentes), con sus roles, su estado y desde cuándo. El Administrador y el Delegado
+   aparecen fijos: los asigna BOB.
+2. **Agrega a una persona:** escribe su tipo y número de documento. Si ya está en el directorio de IDIKY, BLOKY muestra su
+   nombre y la pista de su celular y correo; si no, pide su nombre y un celular o un correo (RN-267, RN-338).
+3. Elige uno o varios **roles de la categoría Colaboradores** del catálogo de BOB (Secretaría, Seguridad, Aseo,
+   Mantenimiento, Contador, Revisor fiscal…) y, si quiere, la fecha **hasta**. Guarda. BLOKY muestra qué podrá ver y hacer,
+   leído de la matriz.
+4. Los demás roles nacen donde ya se gestionan: los del **Consejo de administración** al ser miembro en CU-B-08 (el
+   presidente del consejo tiene el rol Presidente); los de **Residentes** en CU-B-07 y desde ALICE (RN-320, RN-321).
+5. La persona entra como cualquiera (CU-B-01 en BLOKY, docs/20 en ALICE). Ve solo los módulos en los que alguno de sus roles
+   tiene permiso (RN-339).
+6. La Administración puede **quitarle un rol, bloquearla, desbloquearla o retirarla**; el efecto es inmediato (RN-336).
 
 **Flujos alternativos**
-- A1. El documento es del Administrador o del Delegado de esta copropiedad → no se le da perfil: ya entra con su rol raíz.
-- A2. La persona ya tiene un perfil en esta copropiedad → se le cambia; una persona tiene **un solo perfil** por copropiedad.
-- A3. La persona existe pero sin celular ni correo utilizables → se avisa; no podría entrar. Sus datos de contacto **no se
-  cambian desde aquí** (RN-336): se corrigen donde nacieron (BOB, ALICE o su ficha).
-- A4. Se quiere borrar un perfil que alguien tiene → no se deja; primero se les cambia o se les retira. Un perfil sin nadie
-  se **retira** (no se borra).
-- A5. Alguien con perfil entra a un módulo sin acceso (por un enlace guardado) → «Tu perfil no incluye este módulo» y vuelve
-  al inicio; el middleware responde 403 (RN-334).
-- A6. Alguien con perfil intenta gestionar perfiles o personas → no ve «Usuarios»; el middleware responde 403 (RN-335).
+- A1. El documento es del Administrador o del Delegado de esta copropiedad → ya entra con su rol; no se le agregan
+  colaboradores desde aquí.
+- A2. La persona existe pero sin celular ni correo utilizables → se avisa: no podría entrar. Sus datos de contacto **no se
+  cambian desde aquí** (RN-338).
+- A3. Alguien entra a un módulo que su rol no permite (por un enlace guardado) → «Tu rol no incluye este módulo»; el
+  middleware responde 403 (RN-336).
+- A4. Alguien sin «Usuarios» intenta asignar roles → el middleware responde 403 (RN-338).
 
-**Reglas de negocio:** RN-333 a RN-339; RN-161 (ampliada por RN-337), RN-162, RN-163, RN-166, RN-267.
+**Reglas de negocio:** RN-333 a RN-342; RN-161 y RN-327 (ampliadas por RN-339), RN-163, RN-261, RN-267, RN-295.
 
 **Lo que queda abierto**
-- **Avisarle a la persona** que ya tiene acceso (WhatsApp o correo con el enlace a BLOKY), ¿sí?
-- **Módulos que vienen** (cuotas, pagos, multas, pendientes): entran a la tabla de permisos **sin acceso** para todos los
-  perfiles, y la Administración los abre (RN-334). Si hay actos que **solo** puede hacer el Administrador (parametrizar cuotas
-  y multas, sanciones), se marcarán cuando existan esos módulos (docs/13 §3, pendiente).
-- **El Delegado frente al Administrador:** este CU no cambia lo pendiente de docs/13 §3; los dos gestionan perfiles por igual.
-- **ALICE:** un perfil interno no da entrada a ALICE (RN-327 no cambia).
-- ¿Hace falta un ADR? Amplía quién entra a BLOKY (RN-161) y agrega el rol `interno` al directorio (ADR-0025); propuesta:
-  registrarlo como ADR-0034 al implementar.
+- **Avisarle a la persona** que ya tiene acceso (WhatsApp o correo con el enlace), ¿sí?
+- **El voto** en las asambleas (quién, cómo, poderes): aviso abierto a Mary, no se configura en la matriz (RN-337).
+- La marca de **propietario o arrendatario** en cada unidad (T-127).
 
-**Estado:** ⬜ Definido (2026-11-21, borrador para revisar con Daniel). Implementación: T-134.
+**Estado:** ⬜ Definido (2026-11-21). Implementación: T-134 (BLOKY), T-135 (BOB), T-136 (impersonación), T-137 (ALICE).
