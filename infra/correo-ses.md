@@ -8,8 +8,10 @@ Estado al 2026-11-21:
 | DNS en Cloudflare: 3 CNAME `…._domainkey` (solo DNS) y `_dmarc` TXT `v=DMARC1; p=none;` | ✅ Puestos y resolviendo |
 | Usuario de IAM `idiky-correo-ses`, sin consola, con la política `enviar-correo-desde-idiky` (solo `ses:SendEmail` y `ses:SendRawEmail`, solo desde `*@idiky.com`) | ✅ Creado |
 | Middleware: envío por la API de SES, simulado sin llaves; `POST /api/admin/correo/prueba` | ✅ En BLOKY Dev (`96d7221`) |
-| Llaves del usuario en el servidor | ⏳ **Daniel** (paso 1) |
-| Correos de prueba verificados (la cuenta está en *sandbox*) | ⏳ **Daniel** (paso 2) |
+| Llaves del usuario en el servidor | ✅ 2026-11-21 (BLOKY Dev las usa: `real: true`) |
+| Correos de prueba verificados (la cuenta está en *sandbox*) | ✅ el de Daniel (2026-11-21); cada persona más del equipo se verifica igual |
+| Primer correo real por SES | ✅ 2026-11-21, de `no-responder@idiky.com` a Daniel |
+| Acceso de producción (enviar a cualquier correo) | ⏳ antes de salir con personas reales |
 | Acceso de producción de SES | ⏳ Antes de salir con personas reales (paso 4) |
 
 ## Lo que hace Daniel

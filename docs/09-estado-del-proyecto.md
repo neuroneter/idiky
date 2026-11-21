@@ -126,6 +126,11 @@ coeficiente y un acta que resista revisión.
 - **Falta (Daniel, `infra/correo-ses.md`):** crear la clave de acceso del usuario y guardarla en el servidor con el comando
   de la guía (nadie más la ve), verificar los correos de prueba (AWS manda un enlace), y antes de salir con personas reales
   pedir el acceso de producción. Verificar el correo de prueba no lo hizo la IA: envía un correo a nombre de Daniel.
+- **Hecho después (Daniel + IA):** Daniel creó la clave de acceso y la guardó con el comando de la guía (la IA solo comprobó que
+  estuviera, por su largo); BLOKY Dev se volvió a desplegar (`bloky-bd4a324`) y Daniel verificó su correo en SES (us-east-1;
+  la identidad hay que crearla como *Dirección de correo electrónico*, no como dominio). **El primer correo real salió** por
+  `POST /api/admin/correo/prueba` (`real: true`). Para que otra persona del equipo reciba correos en *sandbox*, se crea su
+  identidad igual y ella abre el enlace. **Falta:** el acceso de producción y, con Justo, el código al correo en ALICE (T-143).
 
 ### 2026-11-21 · Daniel + IA (Claude) · Cierre del día: repetidos, BOB limpio, entrega 0.2.0 y quién vota (T-127)
 
