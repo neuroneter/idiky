@@ -236,4 +236,8 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
 - **Prioridad (2026-11-21):** primero T-135 (la matriz en el middleware y los permisos en `/api/app/yo`, con el contrato en
   docs/20 antes de construir); tú puedes empezar T-137 con ese contrato. Luego los módulos de ALICE con servicio: Visitantes
   + Portería, Correspondencia, Cartelera, PQRS, Reservas.
+- **2026-11-21 — Contrato de permisos listo para T-137:** [docs/20 §4b](../20-alta-e-ingreso-desde-alice.md). `GET /api/app/yo`
+  agrega `roles` y `permisos` (por unidad y por lugar) y `permisosVersion`; los 13 identificadores de módulo; el 403
+  `sin_permiso`; y los valores iniciales de la matriz. Es aditivo: lo que ya usas no cambia. Puedes empezar con datos de
+  prueba mientras Daniel construye T-135.
 

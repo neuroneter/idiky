@@ -113,6 +113,13 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · ALICE · El contrato de permisos de `/api/app/yo` (docs/20 §4b, T-135, T-137)
+
+**Qué:** se escribió, antes de construir, cómo el middleware le dice a ALICE qué módulos ve y qué puede hacer: `roles` y
+`permisos` por unidad (suma de los roles de la unidad y de la copropiedad) y por lugar (sin unidad), `permisosVersion`, los
+13 identificadores de módulo, el 403 `sin_permiso` con módulo y acción, los valores iniciales de la matriz para ALICE y cómo
+se traducen los cargos y las residencias de hoy a roles. Es aditivo: lo que ALICE ya usa no cambia. Justo puede empezar T-137.
+
 ### 2026-11-21 · Daniel + IA (Claude) · Prioridad · Qué va primero para que ALICE use el middleware; ruta de WhatsApp cerrada (T-135, T-138, T-139)
 
 **Hallazgo:** del middleware, ALICE usa hoy solo el ingreso, «Mi ficha», el documento, el avatar, la sesión, la cadena y

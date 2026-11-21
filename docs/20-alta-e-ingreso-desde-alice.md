@@ -156,6 +156,101 @@ Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` + B
 - ALICE muestra el listado; la persona elige **una unidad** (o su lugar de trabajo, si es colaborador, o la
   copropiedad por administración) y puede saltar a otra sin volver a pedir código.
 
+## 4b. Los permisos: qué módulos ve y qué puede hacer en cada uno (ADR-0034, RN-334, RN-339)
+
+> **Contrato acordado el 2026-11-21 (Daniel), antes de construir.** Lo implementa el middleware en **T-135** y ALICE lo
+> consume en **T-137** (Justo). Es **aditivo**: los campos de §4 no cambian.
+
+`GET /api/app/yo` agrega a cada lugar y a cada unidad sus **roles** y sus **permisos**:
+
+```json
+{
+  "persona": { "…": "…" },
+  "permisosVersion": 7,
+  "lugares": [
+    {
+      "copropiedadId": "cp-123", "nombre": "Conjunto La Pradera", "api": "https://bloky-dev.idiky.com",
+      "unidades": [
+        {
+          "unidadId": "…", "codigo": "T2-502", "rol": "administrador",
+          "roles": ["administrador_unidad"],
+          "permisos": {
+            "mi_unidad": ["ver", "crear", "editar", "eliminar"],
+            "visitantes": ["ver", "crear", "eliminar"],
+            "cartelera": ["ver"]
+          }
+        }
+      ],
+      "colaborador": { "cargo": "secretaria", "espacio": "Administración" },
+      "administracion": null,
+      "roles": ["secretaria"],
+      "permisos": {
+        "correspondencia": ["ver", "crear", "editar"],
+        "cartelera": ["ver", "crear", "editar"]
+      }
+    }
+  ]
+}
+```
+
+**Cómo se leen**
+- **`permisos` de una unidad**: lo que la persona puede hacer **entrando por esa unidad**. Es la **suma** de los roles de esa
+  unidad y de sus roles en la copropiedad (colaborador, Administración, Consejo de administración), sin repetir (RN-339).
+- **`permisos` del lugar**: lo que puede hacer **entrando sin unidad**, por su lugar de trabajo o por administración. Es la
+  suma de sus roles en la copropiedad. Si no tiene ninguno, viene `{}`.
+- **Un módulo que no aparece no existe para esa persona**: ALICE no lo muestra. Las acciones son `ver`, `crear`, `editar` y
+  `eliminar` (**eliminar = anular o retirar**, RN-335); si hay `crear`, `editar` o `eliminar`, siempre viene `ver`.
+- **Inicio y Mi cuenta** (con el avatar) no van en `permisos`: siempre están.
+- **`roles`**: los identificadores del catálogo de BOB (RN-333), para mostrar («Secretaría», «Administrador de la unidad»).
+  ALICE **no decide nada con los roles**, solo con `permisos`.
+- **`permisosVersion`**: cambia cuando BOB cambia la matriz. ALICE vuelve a pedir `GET /api/app/yo` al abrir, al volver a
+  primer plano y al renovar la sesión; si la versión cambió, rehace el menú.
+
+**Los módulos** (identificadores fijos; los nombres para mostrar los pone ALICE)
+
+| `modulo` | Módulo | `modulo` | Módulo |
+|---|---|---|---|
+| `mi_unidad` | Mi unidad y sus personas | `pqrs` | PQRS y solicitudes |
+| `visitantes` | Visitantes | `cartelera` | Cartelera y comunicados |
+| `correspondencia` | Correspondencia | `asambleas` | Asambleas y poderes |
+| `reservas` | Reservas | `reuniones` | Reuniones con video |
+| `pagos` | Pagos y estado de cuenta | `proyectos` | Proyectos |
+| `paz_y_salvo` | Paz y salvo | `directorio` | Directorio |
+| | | `porteria` | Portería (turno, hoy en el edificio, validar QR) |
+
+**El middleware manda, no la app** (RN-336): aunque ALICE esconda un botón, cada ruta del módulo revisa el permiso. Sin él:
+
+```json
+HTTP 403
+{ "error": "sin_permiso", "mensaje": "Tu rol no te permite hacer esto aquí.", "modulo": "visitantes", "accion": "crear" }
+```
+
+Si ALICE recibe `sin_permiso`, vuelve a pedir `GET /api/app/yo` (la matriz pudo cambiar) y rehace el menú.
+
+**Lo legal no está aquí** (RN-337): quién vota y con qué peso no sale de `permisos`; `asambleas: ["ver"]` deja entrar al
+módulo, y el voto lo decide la ley (T-127, aviso a Mary).
+
+**Valores iniciales de la matriz para ALICE** (propuesta para T-135; Daniel los ajusta, y luego BOB en T-138). V = ver,
+C = crear, E = editar, A = anular (eliminar); — = sin acceso.
+
+| Rol | mi_unidad | visitantes | correspondencia | reservas | pagos | paz_y_salvo | pqrs | cartelera | asambleas | reuniones | proyectos | directorio | porteria |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| Administrador de la unidad | VCEA | VCEA | V | VCEA | VC | VC | VCE | V | V | V | V | V | — |
+| Residente | V | VCA | V | VCA | V | V | VC | V | V | V | V | V | — |
+| Invitado | — | — | — | — | — | — | — | V | — | V | — | — | — |
+| Administrador · Delegado | — | V | V | VE | — | — | VE | VCEA | V | V | VCEA | V | V |
+| Presidente del consejo · Consejero | — | — | — | — | — | — | V | V | V | V | V | V | — |
+| Secretaría | — | V | VCE | VE | — | — | VE | VCE | — | V | — | V | — |
+| Seguridad | — | VE | VCE | — | — | — | — | V | — | — | — | V | VCE |
+| Aseo | — | — | — | — | — | — | — | V | — | — | — | — | — |
+| Mantenimiento | — | — | — | — | — | — | VE | V | — | — | — | — | — |
+| Contador | — | — | — | — | V | V | — | — | — | — | — | — | — |
+| Revisor fiscal | — | — | — | — | V | V | — | — | V | — | — | — | — |
+
+**Los cargos de hoy se traducen así** mientras BLOKY no asigne roles (T-134): vigilante y portería → Seguridad; aseo → Aseo;
+mantenimiento y jardinería → Mantenimiento; administración y secretaría → Secretaría; «otro» → sin rol. Las residencias:
+`administrador` → Administrador de la unidad; `residente` → Residente; `invitado` → Invitado.
+
 ## 5. La unidad: residentes, mascotas e invitados (RN-321, solo el administrador de la unidad)
 
 Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
@@ -168,7 +263,9 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
 | `POST …/mascotas` `{ nombre, especie, foto? }` | Agrega una mascota (perfil, sin ingreso) |
 | `POST …/residencias/:rid/bloquear` · `…/desbloquear` · `…/finalizar` `{ motivo }` | Gestiona a uno de su unidad |
 
-- `403` si quien llama no es **administrador de esa unidad**.
+- `403` si quien llama no es **administrador de esa unidad**. **Con T-135** esto lo decide la matriz (§4b): `GET` pide
+  `mi_unidad: ver`; agregar, `crear`; bloquear y desbloquear, `editar`; finalizar, `eliminar`. Con los valores iniciales queda
+  igual que hoy.
 - No se puede finalizar ni bloquear al **último administrador** de la unidad (RN-324); eso solo lo hace la Administración.
 - Nada se borra: se finaliza.
 
