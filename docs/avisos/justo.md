@@ -248,3 +248,23 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
   completa al entrar). `/api/app/yo` le da `administrador_unidad` con `mi_unidad` completo. La U-0133 ya no se usa
   (era de una estructura que no está en el terreno; su residencia quedó finalizada).
 
+---
+
+## 9. Una persona, un documento, un celular; primer ingreso con correo — ⏳ abierto (2026-11-21)
+
+**Qué decidió Daniel:** [RN-353 a RN-357](../05-modelo-de-datos.md) (T-142 en el middleware y BLOKY, **T-143 es tuya**).
+
+- **Un celular es de una sola persona** en todo IDIKY, y el **documento** identifica a la persona. La Administración ya crea
+  a los usuarios de las unidades y a los colaboradores **con tipo y número de documento** (obligatorio) y BLOKY revisa antes.
+- **Primer ingreso a ALICE (RN-356):** 1) código por el celular; 2) tipo y número de documento, que **deben coincidir** con los
+  que reportó la Administración (`POST /api/app/yo/documento` ya lo revisa: si no coinciden responde 409
+  `documento_no_coincide`); 3) **un correo, validado con un código**; 4) los datos básicos que ya tienes mapeados. Solo ahí
+  entra. Las siguientes veces, solo el código del celular. Después: huella y facial.
+- **Cambiar celular o correo (RN-357):** el celular nuevo se valida con su código **y** un código al correo validado; el correo
+  nuevo, con su código **y** un código al celular. Mientras no exista en ALICE, lo hace soporte desde BOB.
+- **Del middleware hará falta** (lo hacemos juntos): enviar el código al correo, guardar el correo validado y las rutas de
+  cambio de celular y correo. Dime qué contrato prefieres para escribirlo en docs/20.
+
+**Mientras se habla:** no construyas en ALICE un cambio de celular que no pida el segundo factor, ni un primer ingreso que
+deje entrar sin documento cuando la Administración lo reportó.
+
