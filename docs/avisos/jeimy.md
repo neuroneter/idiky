@@ -6,6 +6,20 @@
 
 ---
 
+## 2. El correo de IDIKY (Amazon SES) — ⏳ verificar tu correo (2026-11-21)
+
+El correo de IDIKY ya funciona: sale de **`IDIKY <no-responder@idiky.com>`** por Amazon SES
+([ADR-0036](../adr/0036-correo-con-amazon-ses.md)). Todo lo que hay que saber está en
+[`infra/correo-ses.md`](../../infra/correo-ses.md).
+
+- **Para recibir correos de prueba**, Daniel agrega tu correo personal en Amazon y a ti te llega un correo de *Amazon Web
+  Services* («Email Address Verification Request»; mira en Spam): **ábrelo y dale clic al enlace**. Sin eso, a tu correo
+  no le llega nada de IDIKY mientras la cuenta esté en modo de prueba.
+- **En tu demo** no se mandan correos reales (no hay backend): si una pantalla «envía un correo», se simula en el
+  repositorio de datos y se muestra el correo oculto (`m•••@gmail.com`). Nunca pongas llaves de AWS en el código.
+
+---
+
 ## 1. El entorno de desarrollo se mudó a AWS — ⏳ abierto (2026-11-03)
 
 Desde el 2026-11-01 el entorno vive en **AWS Lightsail**

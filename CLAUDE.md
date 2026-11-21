@@ -136,6 +136,10 @@ y no va en el repositorio. Lo que Mary y Jeimy despliegan hoy son
 **BOB** (Strapi, repo `BOB-Idiky`): **el modelo de datos se diseña en local con `npm run develop`
 y va a git**; en el servidor Strapi corre en modo producción y lo creado ahí se pierde.
 
+**Correo** (Amazon SES, `no-responder@idiky.com`): solo lo envía el middleware; cómo funciona, cómo mandar un correo desde
+el código y cómo agregar a alguien para recibir pruebas, en [`infra/correo-ses.md`](./infra/correo-ses.md) (ADR-0036).
+Las llaves de AWS **nunca** van en una app ni en el repositorio, y la IA no las ve.
+
 **Jitsi** (`https://jitsi-dev.idiky.com`): cómo entrar, crear cuentas y qué hacer si falla, en
 [`infra/guia-de-jitsi.md`](./infra/guia-de-jitsi.md). **Las cuentas con contraseña las crea la
 persona en su terminal**, nunca la IA ni con la clave escrita en el comando.

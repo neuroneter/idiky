@@ -268,7 +268,10 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
   administrador de la unidad lo acepta; si el celular es de otra persona, 409 `celular_de_otra`. **Hay que pedir el documento en
   esos formularios de ALICE.**
 - `POST /api/app/acceso/enviar-codigo` con un celular que tienen dos personas (datos viejos) responde 409 `celular_repetido`.
-- **Del middleware hará falta** (lo hacemos juntos): enviar el código al correo, guardar el correo validado y las rutas de
+- **El correo ya sale** (2026-11-21): Amazon SES desde `no-responder@idiky.com`, en el middleware (`src/correo/ses.ts`, la
+  dependencia `correo` de las rutas); tu Gmail ya está verificado para pruebas. Cómo funciona y cómo usarlo:
+  [`infra/correo-ses.md`](../../infra/correo-ses.md).
+- **Del middleware hará falta** (lo hacemos juntos): las rutas para enviar el código al correo, guardar el correo validado y las rutas de
   cambio de celular y correo. Dime qué contrato prefieres para escribirlo en docs/20.
 
 **Mientras se habla:** no construyas en ALICE un cambio de celular que no pida el segundo factor, ni un primer ingreso que
