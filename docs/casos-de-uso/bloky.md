@@ -197,6 +197,9 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
   «Al quitar ‹Torre 1› se retiran sus 64 unidades (quedan en el historial; no se borran). ¿Sigo?»
   con *Sí, retirar las unidades* o *No, deshacer*. Si alguna unidad tiene residentes (vigentes o
   bloqueados), no se deja: primero se retiran en «Unidades».
+- A2c. **Empezar de nuevo** (RN-347, propuesta por aprobar) → el Administrador ve qué se retira (estructuras, unidades,
+  cuáles tienen residentes), escribe el nombre de la copropiedad y BLOKY retira todo lo que no tiene residentes, en un
+  lote que queda consultable en Unidades. Es el camino para volver a armar desde documentos.
 - A3. Intenta meter una torre en otra, o algo dentro de sí mismo → no se deja (RN-170).
 
 **Reglas de negocio:** RN-169 a RN-173, RN-185, RN-186; quitar una estructura retira sus unidades, RN-343; la pila de pisos y las terrazas, RN-242 a RN-244; pisos mixtos y el piso de cada espacio, RN-245 y RN-246; la agrupación como capa de color, RN-247.
@@ -375,7 +378,8 @@ sancionatorio. Mary debe conocerlo antes de seguir con reservas (T-84).
 - A1. La lectura no pasa la validación en ningún peldaño → la propuesta se ve con sus motivos y
   no se puede confirmar; puede subir otro documento o seguir a mano.
 - A2. El terreno ya tiene estructuras → la propuesta se puede revisar pero no confirmar (RN-187). Para
-  volver a armar, se quitan del terreno, y con ellas **se retiran sus unidades** (RN-343).
+  volver a armar, se quitan del terreno, y con ellas **se retiran sus unidades** (RN-343); la pantalla ofrece
+  **«Empezar de nuevo»** (RN-347, CU-B-03 A2c).
 - A2b. **El documento parece de otra copropiedad** (RN-344, 2026-11-21) → la propuesta muestra *«Se va a
   armar en ‹copropiedad de BOB› · NIT …»*, lo que dice el documento y las diferencias (nombre, NIT,
   dirección). Si no coincide o no se puede comprobar, el botón de confirmar solo se habilita al marcar
