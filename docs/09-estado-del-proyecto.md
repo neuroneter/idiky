@@ -130,6 +130,9 @@ coeficiente y un acta que resista revisión.
   que solo salía Colombia: la semilla se amplió a **11 países** (CO, VE, EC, PE, MX, AR, CL, ES, US, PA, BR) y se agregó
   `GET /api/catalogo-paises`, porque la lectura pública de Strapi quitaba los tipos de documento de cada país. BLOKY lo lee
   desde `570790b.bloky-fac544c`.
+- Para el **login de ALICE** (que no tiene sesión ni copropiedad): `GET /api/app/catalogo-paises`, público, desplegado en
+  `570790b.bloky-ad37c4c`. **Aviso a Justo §10** reescrito con el contrato del login, del primer ingreso y del alta de
+  residentes e invitados (Daniel pidió informarle).
 - `develop` `ebf94c1`, desplegado `570790b.bloky-ebf94c1`. 5 pruebas nuevas; probado en la app con la API simulada (Otro país
   con celular de México, Editar con los datos cargados).
 
