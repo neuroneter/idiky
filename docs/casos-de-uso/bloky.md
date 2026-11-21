@@ -604,7 +604,12 @@ miembros y empresas que reservan; tarifas.
 - A1. Un turno se cruzaría con otro de la misma persona → no se acepta; vuelve y se avisa.
 - A2. Alguien deja de trabajar → se **retira** (no se borra) y se puede traer de vuelta.
 
-**Reglas de negocio:** RN-261, RN-262, RN-263, RN-264.
+**Acceso a la app** (RN-323, RN-350, RN-354; T-123, T-142, 2026-11-21): en la ficha del colaborador, «Dar acceso» con su
+**celular y documento** (el nombre ya lo tiene), con la misma revisión que en Unidades; «Quitar acceso» lo finaliza. «Ver ›»
+abre su **ficha con lo que llenó en ALICE** (documento, celular, correo, personaje, si ya entró). Mientras no haya entrado,
+«Corregir datos» (RN-364).
+
+**Reglas de negocio:** RN-261, RN-262, RN-263, RN-264; el acceso a la app, RN-323, RN-350, RN-353, RN-354, RN-364.
 
 **Lo que queda abierto:** novedades del día (incapacidades, reemplazos), marcar llegada y salida,
 avisos a los colaboradores, sus permisos en BLOKY (perfiles, CU-B-01) y que **cada colaborador
@@ -646,9 +651,10 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
 4. **Consejo y comisiones** son lugares del mundo, casitas del plano: la mesa con sus miembros sentados y,
    en un tablero, su próxima reunión (al tocarlo, su calendario). Crea el
    **consejo de administración** (uno) y las **comisiones** que necesite (convivencia, salud, seguridad…).
-5. En cada uno, **los miembros**: nombre, cargo en el grupo (presidente —uno—, vicepresidente, secretario, vocal, miembro,
-   suplente), su unidad escrita y su celular o correo. Son residentes: quedan **«por vincular»** hasta que existan los
-   propietarios y residentes (CU-B-07).
+5. En cada uno, **los miembros**: «Agregar miembro» los **elige de los residentes** de las unidades (RN-351, 2026-11-21), con
+   su cargo en el grupo (presidente —uno—, vicepresidente, secretario, vocal, **Delegado**, miembro, suplente). Aparecen con
+   **el avatar que armaron en la app** y ordenados por cargo, en la lista y en su espacio del mundo (RN-352). Los que se
+   escribieron antes a mano quedan «por vincular» hasta elegirlos de la lista.
 6. Y **su calendario**: no tienen turnos, se reúnen. Programa reuniones presenciales (con lugar) o virtuales; a una virtual le
    **crea su sala con video** (CU-B-15), invitando a los miembros que tienen correo o celular.
 
@@ -657,14 +663,14 @@ API simulada; falta desplegar. Código: `apps/bloky/src/features/equipo/` y `app
 - A2. Un miembro sale del grupo: queda retirado, no se borra. Una reunión cancelada queda en el calendario como cancelada (y su
   sala con video también se cancela).
 
-**Reglas de negocio:** RN-294, RN-295, RN-296, RN-297 (y las de CU-B-14).
+**Reglas de negocio:** RN-294, RN-295, RN-296, RN-297, RN-351, RN-352 (y las de CU-B-14).
 
-**Lo que queda abierto:** vincular cada miembro a su persona y su unidad cuando exista CU-B-07; que una reunión que se cambia de
+**Lo que queda abierto:** los permisos del consejo en ALICE (en la matriz de roles, con Justo, T-137); que una reunión que se cambia de
 fecha mueva también su sala con video; actas y decisiones del consejo; el calendario de cada colaborador (novedades).
 
 **Estado en BLOKY Dev:** 🟡 (2026-10-21) — desplegado (`c819b8a.bloky-3fb38ce`), probado en local con la API simulada (el
 mundo, un consejo con su presidenta, una reunión virtual con su sala). Código: `apps/bloky/src/features/equipo/` (`grupos.tsx`)
-y `apps/bloky-api/src/equipo/`.
+y `apps/bloky-api/src/equipo/`. **2026-11-21:** el consejo se elige de los residentes, cargo Delegado y avatares (T-126).
 
 ---
 
@@ -902,11 +908,18 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
 - **Resultado esperado:** cada unidad tiene su administrador, que entra a ALICE y gestiona a los de su unidad.
 
 **Flujo principal (BLOKY)**
-1. En **Residentes**, elige una unidad sin administrador y escribe el **celular** (y, si lo sabe, el nombre) del residente.
-2. BLOKY lo crea como **administrador de la unidad** (RN-320). La persona nace sin documento (RN-322).
+1. En **Unidades**, elige una unidad sin administrador y escribe **nombre, celular, tipo y número de documento** del residente
+   (todo obligatorio desde el 2026-11-21, RN-354). El celular y el documento traen el **país de la copropiedad** por defecto
+   (🇨🇴 +57); «🌎 Otro país» solo si hace falta, y pueden ser distintos (RN-360, RN-361). El documento y el celular se validan
+   con la regla de su país, que define BOB (RN-358, RN-359).
+2. **BLOKY revisa antes de crear** (RN-353, RN-354): si el documento ya está en IDIKY con otro celular, lo dice con el celular
+   oculto (`300•••567`) y la Administración **acepta ese celular** o no continúa; si el celular es de otra persona, no se deja
+   (un celular, una persona). Luego lo crea como **administrador de la unidad** (RN-320). **Nunca existe una persona sin
+   documento.**
 3. Puede **bloquear, desbloquear o finalizar** a cualquier residente, por unidad (RN-324).
-4. **Para muchas unidades a la vez** (RN-328): «⬇ Descargar CSV», llena en Excel el **celular** (y el nombre) del primer
-   residente de cada unidad y «⬆ Cargar CSV». El CSV es una **plantilla**: trae todas las unidades, también las que faltan por
+4. **Para muchas unidades a la vez** (RN-328, RN-355): «⬇ Descargar CSV», llena en Excel **nombre, celular,
+   `tipo_documento`, `numero_documento`** (y `pais_documento` si no es el de la copropiedad) del primer residente de cada
+   unidad y «⬆ Cargar CSV». Cada fila pasa por la misma revisión del paso 2. El CSV es una **plantilla**: trae todas las unidades, también las que faltan por
    generar desde la estructura. BLOKY muestra qué hará con cada fila —crear, ya estaba, sin celular o error con su línea y
    motivo— y solo crea al confirmar (si hace falta, genera primero las unidades).
 5. **Ve cómo está conformada cada unidad** (RN-348, 2026-11-21): en la tabla, cuántas personas, mascotas e invitados vigentes
@@ -914,19 +927,29 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
    invitados con su vigencia y el **historial** de quienes salieron. Filtros (*sin administrador*, *sin entrar aún*, *con
    invitados vigentes*, *con bloqueados*) y un resumen arriba. Desde la ficha **bloquea, desbloquea o retira** a cualquiera, sin
    editar sus datos personales (RN-349).
+6. **Corrige a alguien que todavía no ha entrado** (RN-364): mientras la persona nunca haya entrado a ALICE, «Editar» en su
+   ficha deja cambiar su nombre, celular y documento, con las mismas revisiones. Después de su primer ingreso, solo ella cambia
+   sus datos desde la app (RN-357).
 
 **Flujo principal (ALICE, Justo)**
-1. La persona entra con su **celular** y el código; la primera vez completa su **documento** y su nombre (RN-322, RN-327).
+1. La persona entra con su **celular** (con el país, 🇨🇴 +57 por defecto) y el código por WhatsApp. La primera vez escribe su
+   **documento**, que **debe coincidir** con el que reportó la Administración (RN-356); luego, un **correo validado con un
+   código** y sus datos básicos (el correo: por construir, T-143). Contrato: [docs/20](../20-alta-e-ingreso-desde-alice.md).
 2. Ve **dónde está** —sus copropiedades, sus unidades y su rol en cada una— y elige a qué unidad entrar (RN-326).
 3. Si es administrador de la unidad, agrega **residentes** (administradores o no), **mascotas** (sin usuario) e **invitados**
-   con fecha de inicio y de fin (RN-321).
+   con fecha de inicio y de fin (RN-321); a las personas, con su documento y la misma revisión de RN-354.
 
-**Reglas de negocio:** RN-320 a RN-328, RN-163, RN-166; la composición de cada unidad, RN-348 y RN-349; los colaboradores entran con su celular (RN-323) y su ficha (RN-350), desde Equipo (CU-B-14).
+**Reglas de negocio:** RN-320 a RN-328, RN-163, RN-166; la composición de cada unidad, RN-348 y RN-349; una persona, un
+documento, un celular, RN-353 a RN-357; varios países, RN-358 a RN-363; corregir antes del primer ingreso, RN-364; quién vota,
+RN-365; los colaboradores entran con su celular (RN-323) y su ficha (RN-350), desde Equipo (CU-B-14).
 
-**Lo que queda abierto:** quién vota en las asambleas, propietario o arrendatario (T-127, con Mary); vincular a los miembros
-del consejo y las comisiones (T-126); las billeteras desde ALICE (T-129).
+**Lo que queda abierto:** el correo con código y el cambio de celular o correo en ALICE (T-143, Justo); los países en ALICE
+(T-146); en Dev, las dos «Mary» que comparten celular (por eso aún no hay índice único de celular en la base); conciliar con
+Mary el apoderado externo y el peso del voto (RN-365, aviso a Mary §4). *Resueltos el 2026-11-21:* quién vota (T-127), el
+consejo vinculado a sus residentes (T-126).
 
-**Estado:** 🟡 BLOKY Dev (2026-11-05): en «Unidades», crear al administrador de cada unidad, bloquearlo y retirarlo (T-121, T-122); **2026-11-21:** la composición de cada unidad, filtros, resumen y ficha con historial (RN-348, RN-349, T-141, `6634b5a.bloky-e5640b7`); el ingreso de ALICE y la gestión de la unidad en el middleware (T-124, docs/20). Falta ALICE (T-125, Justo).
+**Estado:** 🟡 BLOKY Dev (2026-11-05): en «Unidades», crear al administrador de cada unidad, bloquearlo y retirarlo (T-121, T-122); **2026-11-21:** la composición de cada unidad, filtros, resumen y ficha con historial (RN-348, RN-349, T-141, `6634b5a.bloky-e5640b7`); el ingreso de ALICE y la gestión de la unidad en el middleware (T-124, docs/20). **2026-11-21 (tarde):** documento obligatorio con revisión previa y celular único (T-142), países y «Otro país», editar antes
+del primer ingreso (T-145, `bloky-bd4a324`). Falta ALICE (T-125, T-143, T-146, Justo).
 
 ---
 

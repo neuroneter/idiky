@@ -7,6 +7,27 @@
 
 ---
 
+## 6. Lo que cambió hoy en BLOKY y la maqueta debería reflejar — ⏳ para revisar (2026-11-21)
+
+Daniel construyó en BLOKY (el producto real) reglas nuevas que tocan pantallas de tu demo (consola del administrador y
+ALICE). No hay que cambiar nada hoy, pero **no construyas en la maqueta algo que las contradiga**:
+
+- **Una persona, un documento, un celular** (RN-353 a RN-356): al crear a alguien (residente, colaborador, registro de
+  propietarios) se piden **nombre, celular, tipo y número de documento**, todo obligatorio. Si el documento ya existe con
+  otro celular, se muestra el celular oculto (`300•••567`) y se acepta ese o no se sigue. Un celular nunca es de dos personas.
+- **Primer ingreso a ALICE** (RN-356): código al celular → documento que debe coincidir con el que puso la Administración →
+  **correo validado con un código** → datos básicos. Cambiar celular o correo pide el otro como segundo factor (RN-357).
+- **Varios países** (ADR-0035, RN-358 a RN-363): el celular y el documento llevan país, por defecto el de la copropiedad
+  (🇨🇴 +57) y «🌎 Otro país» para los pocos casos; el pasaporte siempre está.
+- **Corregir antes del primer ingreso** (RN-364): la Administración puede corregir nombre, celular y documento de alguien
+  solo mientras esa persona no haya entrado a la app.
+- **Quién vota** (RN-365): ver el §4.
+
+Las reglas completas están en [`05-modelo-de-datos.md`](../05-modelo-de-datos.md) y cómo se ve en BLOKY, en
+[`casos-de-uso/bloky.md`](../casos-de-uso/bloky.md) (CU-B-07, CU-B-08, CU-B-14).
+
+---
+
 ## 5. El correo de IDIKY (Amazon SES) — ⏳ verificar tu correo (2026-11-21)
 
 El correo de IDIKY ya funciona: sale de **`IDIKY <no-responder@idiky.com>`** por Amazon SES

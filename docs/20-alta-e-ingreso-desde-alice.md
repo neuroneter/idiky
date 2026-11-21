@@ -10,6 +10,17 @@
 > **Para probar en Dev (2026-11-15):** el código de ALICE va por **WhatsApp** (Evolution, T-132) cuando el
 > middleware tiene `EVOLUTION_*`. La persona debe existir (BLOKY → Unidades → «Crear administrador», con ese celular).
 > Twilio sigue para el ingreso de BLOKY; no se quita.
+>
+> **Al día el 2026-11-21 (lo que cambió para ALICE, todo en BLOKY Dev):**
+> - El WhatsApp sale por la instancia oficial **`Idiky_whatsapp`** (T-131, T-132).
+> - **Un celular es de una sola persona** y **nadie existe sin documento** (RN-353 a RN-356, T-142): agregar residentes e
+>   invitados exige el documento (§5) y el ingreso puede responder `celular_repetido` (§1.1).
+> - **Varios países** (ADR-0035, RN-358 a RN-363, T-146): catálogo público de países (§1.0); el celular va con su
+>   indicativo y el documento con su país.
+> - **Primer ingreso** (RN-356, T-143): el documento que escribe la persona debe coincidir con el que reportó la
+>   Administración (§2, `documento_no_coincide`); después, el correo con código (§2c, **por construir con Justo**: el envío
+>   de correo ya funciona, [`infra/correo-ses.md`](../infra/correo-ses.md)).
+> - **Quién vota** en las reuniones: RN-365 (§6).
 
 Todas las rutas son del **middleware de IDIKY** (BLOKY Dev: `https://bloky-dev.idiky.com`). ALICE no habla con BOB ni con
 ninguna base.
@@ -17,6 +28,25 @@ ninguna base.
 ---
 
 ## 1. Ingresar
+
+### 1.0 El catálogo de países (antes de ingresar)
+
+`GET /api/app/catalogo-paises` — **público, sin token** (no tiene datos de personas). Lo arma BOB (ADR-0035); el middleware
+lo guarda 10 minutos y, si BOB no responde, usa el último que tuvo (o Colombia).
+
+```json
+{ "paisPorDefecto": "CO",
+  "paises": [{ "codigo": "CO", "nombre": "Colombia", "indicativo": "+57",
+    "celularLongitudMinima": 10, "celularLongitudMaxima": 10, "celularEmpiezaCon": ["3"], "celularEjemplo": "3001234567",
+    "tipos": [{ "codigo": "CC", "nombre": "Cédula de ciudadanía", "soloNumeros": true, "longitudMinima": 5,
+      "longitudMaxima": 10, "patron": null, "ejemplo": "1020304050", "esPasaporte": false, "orden": 1 }, …] }, …] }
+```
+
+- Hoy hay **11 países**: CO, VE, EC, PE, MX, AR, CL, ES, US, PA, BR; cada uno con su pasaporte.
+- **En la pantalla de ingreso:** selector de país con 🇨🇴 **+57 por defecto**; valida con la regla del país (longitud, con
+  qué empieza) y muestra el ejemplo. El 99 % de las personas no cambia nada (RN-360).
+- Dentro de la app, `GET /api/app/c/:copropiedadId/catalogo-identidad` (con token) → `{ pais, paises }`: `pais` es el de la
+  copropiedad, el que va por defecto en los formularios de §5.
 
 ### 1.1 Pedir el código
 
@@ -30,11 +60,16 @@ o, cuando la persona ya completó su documento:
 { "tipoDocumento": "CC", "numeroDocumento": "52100200" }
 ```
 
+- El celular va **completo con su indicativo** (`"+525512345678"`). Por compatibilidad, un celular colombiano de 10 dígitos
+  que empieza por 3 se acepta sin `+57`.
 - Busca a la persona por su celular registrado o por su documento. El código va **siempre al celular registrado** (RN-163).
 - En Dev con Evolution, el canal es **WhatsApp** (`canal: "whatsapp"` en la respuesta); si no hay Evolution, SMS/simulado.
 - Responde `200 { "pista": "••• •• 4567", "canal": "whatsapp" }` (y `codigoSimulado` solo si el enviador lo expone fuera de producción).
 - `404 no_existe` si no hay nadie con ese dato; `403 sin_acceso` si existe pero no tiene nada vigente para ALICE (RN-327);
-  `429 bloqueado` tras cinco errores en 15 minutos (RN-166).
+  `429 bloqueado` tras cinco errores en 15 minutos (RN-166); `422 invalido` si el celular no es válido.
+- **`409 celular_repetido`** si ese celular lo tienen dos personas (datos viejos; RN-353): no se escoge una en silencio. ALICE
+  muestra el `mensaje` (que hable con la administración).
+- `409 sin_celular` si la persona (buscada por documento) no tiene celular; `502` si el WhatsApp o el SMS no salió.
 
 ### 1.2 Validar el código
 
@@ -59,7 +94,10 @@ Responde:
   con `POST /api/app/sesion/renovar` (§3). Es solo de ALICE: no abre BLOKY, y la cookie de BLOKY no abre ALICE.
 - `persona` trae también `hashIdentidad` y las dos billeteras (vacías hasta crearlas), para el alta en la cadena (T-129).
 - `documentoCompleto: false` → ALICE pide el documento antes de seguir (§2).
-- `lugares` es el listado de RN-326 (§4).
+- `lugares` es el listado de RN-326 (§4). `permisosVersion` dice qué versión de la matriz de permisos aplica (§4b).
+- `401 codigo_incorrecto` si el código no es o ya venció; `403 sin_acceso` si ya no tiene nada vigente.
+- Al validar el código por primera vez, el middleware marca el **primer ingreso** de la persona (RN-364): desde ahí la
+  Administración ya no puede corregir su nombre, celular ni documento desde BLOKY.
 
 ## 2. Completar el documento (primer ingreso)
 
@@ -72,6 +110,9 @@ Responde:
 - Si el documento **no existe** en el directorio: se le pone a esta persona y se calcula su `hash_identidad` (RN-298).
 - Si **ya existe** (la persona está en otra copropiedad): **se unen** (RN-322). La respuesta trae la persona resultante y
   un **token nuevo** (el anterior queda cerrado).
+- **RN-356 — Si la Administración ya reportó el documento** (hoy es obligatorio al crear a alguien), el que escribe la
+  persona **tiene que coincidir** (tipo y número): si no, **`409 documento_no_coincide`** y no entra. Así se sabe que es la
+  persona invitada. Si coincide, responde como `GET /api/app/yo`.
 - Responde `200 { persona, lugares, token? }`. `409 documento_de_otra_persona` si ese documento ya tiene otro celular y no
   se pudo confirmar que es la misma persona (en ese caso, la Administración lo resuelve).
 - Después, ALICE crea las billeteras con la passkey por las rutas de §2b (T-129, opción A2 de docs/19: el middleware
@@ -104,6 +145,21 @@ Con el Bearer de ALICE. Si `persona` ya trae las dos billeteras, se salta.
 `BOB_API_TOKEN` en el pod del middleware. `infra/servidor/levantar.sh` lo inyecta al crear BOB (lee
 `bloky-api.env`); también se puede fijar a mano con `infra/gestion/conectar-cadena-proxy.sh` (repo `BOB-Idiky`).
 Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` + Bearer de servicio).
+
+## 2c. El correo con código (primer ingreso y segundo factor) — por construir (T-143)
+
+**Decidido (RN-356, RN-357):** el primer ingreso es 1) código al celular → 2) documento que coincida (§2) → 3) **un correo,
+validado con un código** → 4) los datos básicos; solo ahí entra. Las veces siguientes, solo el código del celular. Cambiar el
+celular pide su código **y** uno al correo validado; cambiar el correo pide su código **y** uno al celular. Después: huella y
+facial.
+
+**Lo que ya está:** el middleware ya **envía correos reales** por Amazon SES desde `no-responder@idiky.com`
+([ADR-0036](./adr/0036-correo-con-amazon-ses.md), [`infra/correo-ses.md`](../infra/correo-ses.md)). En *sandbox* solo llegan
+a correos verificados (hoy Daniel y Justo).
+
+**Lo que falta, con Justo conectado:** las rutas (`…/yo/correo` para pedir y validar el código, guardar el correo validado, y
+las de cambio de celular y correo), escritas primero aquí. Mientras no existan, ALICE **no** construye un cambio de celular sin
+segundo factor.
 
 ## 3. La sesión
 
@@ -259,8 +315,8 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
 | Ruta | Qué hace |
 |---|---|
 | `GET …/residencias` | Quiénes están en la unidad: personas (con rol), mascotas e invitados |
-| `POST …/residentes` `{ celular, nombre?, rol: "administrador" \| "residente" }` | Agrega un residente |
-| `POST …/invitados` `{ celular, nombre?, desde, hasta }` | Agrega un invitado con sus fechas (obligatorias) |
+| `POST …/residentes` `{ nombre, celular, paisCelular?, tipoDocumento, numeroDocumento, paisDocumento?, rol: "administrador" \| "residente", aceptarCelularRegistrado? }` | Agrega un residente |
+| `POST …/invitados` `{ nombre, celular, paisCelular?, tipoDocumento, numeroDocumento, paisDocumento?, desde, hasta, aceptarCelularRegistrado? }` | Agrega un invitado con sus fechas (obligatorias) |
 | `POST …/mascotas` `{ nombre, especie, foto? }` | Agrega una mascota (perfil, sin ingreso) |
 | `POST …/residencias/:rid/bloquear` · `…/desbloquear` · `…/finalizar` `{ motivo }` | Gestiona a uno de su unidad |
 
@@ -269,6 +325,16 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
   **estar en esa unidad** (los roles de la copropiedad solos no abren una unidad ajena). Con los valores iniciales, el
   administrador de la unidad hace lo mismo que antes y **el residente ahora puede ver** quiénes están en su unidad (`ver`).
   **Construido el 2026-11-21 (T-135).**
+- **Nadie se crea sin documento (RN-354, desde 2026-11-21):** `nombre`, `celular`, `tipoDocumento` y `numeroDocumento` son
+  obligatorios (`422 invalido` con el `mensaje`). `paisCelular` y `paisDocumento` (código ISO) son opcionales: por defecto, el
+  país de la copropiedad (RN-360); pueden ser distintos (RN-361). El tipo y el número se validan con la regla del país del
+  catálogo (§1.0).
+- **Revisión previa (RN-354):**
+  - **`409 otro_celular`** — ese documento ya está en IDIKY con otro celular. Trae `celularRegistrado` oculto (`300•••567`)
+    y el `mensaje`. ALICE pregunta «¿Aceptar el celular registrado?»: si sí, reenvía igual con `aceptarCelularRegistrado:
+    true` y la persona queda con **su** celular de siempre; si no, no continúa.
+  - **`409 celular_de_otra`** — ese celular ya es de otra persona (un celular, una persona: RN-353).
+  - `409 ya_esta` — esa persona ya está en la unidad.
 - No se puede finalizar ni bloquear al **último administrador** de la unidad (RN-324); eso solo lo hace la Administración.
 - Nada se borra: se finaliza.
 
@@ -276,7 +342,9 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
 
 **Pendiente (T-124, segunda parte):** las rutas de [docs/18](./18-reuniones-con-video.md) aceptarán también el token de ALICE:
 `GET /api/c/:id/reuniones` y `POST /api/c/:id/reuniones/:rid/entrar` (con `Authorization: Bearer`). El rol en la reunión sale
-de la persona en esa copropiedad (ADR-0030). **Quién vota** (el propietario) está por definir con Mary (T-127).
+de la persona en esa copropiedad (ADR-0030). **Quién vota (RN-365, decidido el 2026-11-21):** el propietario —el
+administrador de la unidad que crea la Administración— o el **apoderado** que él elija (el arrendatario u otro residente de la
+misma copropiedad). Falta conciliar con Mary el apoderado externo y el peso del voto ([`avisos/mary.md`](./avisos/mary.md) §4).
 
 ## 7. Errores
 

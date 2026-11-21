@@ -174,7 +174,10 @@ Daniel decidió el 2026-11-05 cómo se crean los residentes y los colaboradores 
 - **Responde tus preguntas 2 y 3 de [docs/19](../19-diagnostico-alice-sesion-y-polygon.md):** ALICE recibe un **token Bearer**
   de 30 días que se renueva (no la cookie), y entran a ALICE los **residentes** (con su unidad y su rol) y los
   **colaboradores** (RN-327). Las preguntas 1, 4 y 5 siguen abiertas (T-129).
-- **Cambia lo que dejaste hoy:** el residente **nace sin documento** (la Administración solo pone unidad y celular), así que
+- ⚠️ **Actualizado el 2026-11-21 (§9 y §10):** ya **nadie nace sin documento**: la Administración crea al residente o al
+  colaborador con nombre, celular **y documento**, y en el primer ingreso el documento que escribe la persona **debe
+  coincidir**. Lo que sigue en este punto es lo de noviembre 5, para la historia.
+- **(2026-11-05) Cambia lo que dejaste hoy:** el residente **nace sin documento** (la Administración solo pone unidad y celular), así que
   **el primer ingreso es por celular**; la primera vez ALICE le pide el **documento** y el nombre (`POST /api/app/yo/documento`),
   y si ya existía en otra copropiedad se unen. Después puede entrar con documento o celular. El ingreso por documento que
   hiciste sigue sirviendo para el segundo caso.
@@ -285,7 +288,8 @@ deje entrar sin documento cuando la Administración lo reportó.
 **Qué decidió Daniel:** [ADR-0035](../adr/0035-paises-documentos-y-celulares.md), RN-358 a RN-364. **T-146 es tuya.** Daniel
 lo probó en BLOKY y pidió que el **login de ALICE** lo tenga en cuenta.
 
-**Lo que ya está en BLOKY Dev (middleware `570790b.bloky-ad37c4c`, BOB `570790b.gestion-ccb1b79`):**
+**Lo que ya está en BLOKY Dev (middleware `a5d8e43.bloky-bd4a324`, que incluye tu `Idiky_whatsapp`; BOB
+`570790b.gestion-ccb1b79`, ya desplegado con los 11 países):**
 
 - **BOB define los países y sus documentos** (panel: *Países* y *Tipos de documento*). Hoy hay **11**: CO, VE, EC, PE, MX, AR,
   CL, ES, US, PA, BR, cada uno con su indicativo, la regla de su celular, sus documentos con su regla y el pasaporte.
@@ -324,3 +328,7 @@ pierde sus billeteras) y que para otros países sea «PAÍS:TIPO:NUMERO». Mient
 
 **Mientras se habla:** no fijes en ALICE listas de tipos de documento ni reglas de celular solo para Colombia: léelas del
 catálogo.
+
+**El contrato completo, al día el 2026-11-21**, con los cuerpos, las respuestas y todos los códigos de error (§1.0 países,
+§1.1 `celular_repetido`, §2 `documento_no_coincide`, §2c el correo, §5 el alta con documento, §6 quién vota):
+[docs/20](../20-alta-e-ingreso-desde-alice.md).

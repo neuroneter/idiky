@@ -6,6 +6,18 @@
 
 ---
 
+## 3. Lo que cambió hoy en IDIKY y te puede tocar — ℹ️ para saber (2026-11-21)
+
+Nada de esto cambia la contable hoy, pero si construyes algo con personas (terceros, propietarios):
+
+- **Una persona, un documento, un celular** (RN-353, RN-354): las personas de IDIKY se identifican por **tipo y número de
+  documento** (y su país); un celular nunca es de dos personas.
+- **Varios países** (ADR-0035): los tipos de documento dependen del país; en Colombia, CC, CE, PPT, TI y pasaporte.
+- **El correo de IDIKY** ya existe (§2): si la contable algún día manda un recibo o un aviso por correo, saldrá por el
+  middleware desde `no-responder@idiky.com`; en la contable de hoy se simula.
+
+---
+
 ## 2. El correo de IDIKY (Amazon SES) — ⏳ verificar tu correo (2026-11-21)
 
 El correo de IDIKY ya funciona: sale de **`IDIKY <no-responder@idiky.com>`** por Amazon SES
