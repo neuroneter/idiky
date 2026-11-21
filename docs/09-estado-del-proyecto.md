@@ -113,6 +113,29 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · Identidad · Una persona, un documento, un celular (T-142, T-143, RN-353 a RN-357)
+
+- **Hallazgo:** el directorio solo exigía celular único entre personas **sin** documento; crear o corregir desde IDIKY/BOB no lo
+  revisaba y el ingreso escogía a una en silencio. En Dev: **3 celulares repetidos** (Olga / Andrés / Daniel con `300•••582`;
+  Mary ×2 con `310•••669`; Carlos ×2 con `300•••567`) y **1 persona sin documento** (Juan Luis Almonacid, EC-201).
+- **Decisiones de Daniel:** un celular es de una sola persona y el **documento** la identifica; **nunca existe una persona sin
+  documento**. Al dar de alta (Unidades, CSV, «Dar acceso» del colaborador y, en ALICE, los residentes e invitados) se piden
+  **nombre, celular, tipo y número de documento** y BLOKY revisa antes: si el documento ya tiene **otro celular**, avisa
+  «ya tiene registro en IDIKY con el celular 300•••567» y la Administración **acepta ese celular** o **no continúa** (la
+  persona cambia su celular en la app y se vuelve a registrar); si el celular es de otra persona, se rechaza. El primer ingreso
+  a ALICE debe **coincidir con el documento reportado**, luego **valida un correo**; cambiar celular o correo usa el otro como
+  segundo factor; después, huella y facial (RN-356, RN-357 → **T-143, Justo**, aviso §9).
+- **Construido (T-142):** `develop` `754f49c`, desplegado `570790b.bloky-754f49c`. Directorio con `altaConDocumento`,
+  `revisarAlta`, `celularesRepetidos`, `sinDocumento`; **se quitó `personaDeLugar`** (creaba personas solo con celular);
+  `crearPersona`/`corregirPersona` rechazan el celular de otra; `porCelular` no escoge entre dos (409 `celular_repetido`);
+  `POST /api/app/yo/documento` exige que coincida; CSV con `tipo_documento` y `numero_documento`. BLOKY: formulario
+  `AltaConDocumento` con el aviso y «Aceptar el celular registrado». 4 pruebas nuevas, 4 actualizadas; probado en la app con la
+  API simulada; el informe se consultó contra la base real.
+- **Ojo:** mientras sigan repetidos, **entrar a ALICE con `300•••582` responde «celular repetido»** (Olga, Andrés, Daniel), y
+  ALICE recibe 422 si agrega residentes o invitados sin documento hasta que Justo actualice sus formularios. **Falta:**
+  resolver los repetidos (corregir el celular de quien no corresponde, desde BOB) y después poner en la base el índice único y
+  la restricción de documento.
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · El consejo se elige de los residentes, con sus avatares (T-126, RN-351, RN-352)
 
 - Daniel: armar la Junta (consejo) eligiendo de las unidades quién tiene cada rol, identificar al **Presidente** y al
