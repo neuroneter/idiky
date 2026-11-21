@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · Correo · idiky.com en Amazon SES (ADR-0036, T-143)
+
+- Daniel: *configuremos lo que se requiera; idiky.com no tiene correo*. Con su sesión en el navegador:
+  - **SES (us-east-1):** identidad de dominio `idiky.com` con Easy DKIM → **verificada**. La cuenta está en *sandbox*
+    (200 correos al día, solo a direcciones verificadas): sirve para desarrollar.
+  - **Cloudflare:** 3 CNAME DKIM (solo DNS) y `_dmarc` TXT `v=DMARC1; p=none;`; resuelven en internet.
+  - **IAM:** usuario `idiky-correo-ses`, sin consola, con la política `enviar-correo-desde-idiky` (solo enviar, solo desde
+    `*@idiky.com`).
+- **Middleware** (`develop` `96d7221`, BLOKY Dev): envío por la API de SES con la firma AWS v4 del almacén (sin librería),
+  **simulado sin llaves**; `POST /api/admin/correo/prueba`. 2 pruebas nuevas.
+- **Falta (Daniel, `infra/correo-ses.md`):** crear la clave de acceso del usuario y guardarla en el servidor con el comando
+  de la guía (nadie más la ve), verificar los correos de prueba (AWS manda un enlace), y antes de salir con personas reales
+  pedir el acceso de producción. Verificar el correo de prueba no lo hizo la IA: envía un correo a nombre de Daniel.
+
 ### 2026-11-21 · Daniel + IA (Claude) · Cierre del día: repetidos, BOB limpio, entrega 0.2.0 y quién vota (T-127)
 
 - **Celulares repetidos en Dev:** «Carlos Sotom» (el duplicado, sin asignaciones ni sesiones) pasó a un número de prueba. Las dos
