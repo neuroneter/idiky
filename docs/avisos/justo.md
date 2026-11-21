@@ -274,3 +274,20 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
 **Mientras se habla:** no construyas en ALICE un cambio de celular que no pida el segundo factor, ni un primer ingreso que
 deje entrar sin documento cuando la Administración lo reportó.
 
+---
+
+## 10. Varios países: documentos y celulares por país — ⏳ abierto (2026-11-21)
+
+**Qué decidió Daniel:** [ADR-0035](../adr/0035-paises-documentos-y-celulares.md), RN-358 a RN-363 (T-146 es tuya).
+
+- Los **tipos de documento y sus reglas de validación** se definen **en BOB, por país**; también el **indicativo y la regla
+  del celular** de cada país. ALICE pedirá ese catálogo al middleware para la copropiedad y armará con él sus formularios.
+- **Por defecto, el país de la copropiedad** para el documento y para el celular; «Otro país» solo en los pocos casos. El
+  país del documento y el del celular son **independientes** (un extranjero con su celular de afuera). El **pasaporte**
+  siempre está disponible, con su país emisor.
+- **La persona es única por país + tipo + número.** **Hay que hablar el hash de identidad (RN-298):** la propuesta es que
+  **no cambie para Colombia** («TIPO:NUMERO», así nadie pierde sus billeteras) y que para otros países sea
+  «PAÍS:TIPO:NUMERO». ¿Te sirve así con lo que ya tienes en la cadena?
+
+**Mientras se habla:** no fijes en ALICE nuevas listas de tipos de documento ni reglas de celular solo para Colombia.
+

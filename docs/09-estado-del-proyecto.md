@@ -113,6 +113,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · Varios países · Documentos y celulares por país (ADR-0035, RN-358 a RN-363)
+
+- Daniel: IDIKY es para **muchos países**: los tipos de documento y sus reglas de validación se gestionan **en BOB, por país**,
+  y la copropiedad, con su país, trae los suyos. Hoy todo asumía Colombia (tipos fijos, una sola validación, celular `+57`,
+  identidad sin país).
+- **Decidido (ADR-0035):** BOB define países (indicativo, regla del celular) y tipos de documento por país (regla de
+  validación); el middleware valida con ese catálogo; **por defecto el país de la copropiedad** (el 99 %), «Otro país» solo en
+  los pocos casos; documento y celular de países **independientes** (extranjero con celular de su país); **pasaporte siempre**;
+  persona única por **país + tipo + número**; el hash de identidad **no cambia para Colombia** (por confirmar con Justo).
+- **Tareas:** T-144 (BOB), T-145 (middleware y BLOKY), T-146 (ALICE, Justo). Aviso a Justo §10. **Nada construido todavía.**
+- En Dev quedó resuelto el celular de Daniel (`3004051582` solo suyo; Olga y Andrés con números de prueba); siguen repetidos
+  los de Mary ×2 y Carlos ×2.
+
 ### 2026-11-21 · Daniel + IA (Claude) · Identidad · Una persona, un documento, un celular (T-142, T-143, RN-353 a RN-357)
 
 - **Hallazgo:** el directorio solo exigía celular único entre personas **sin** documento; crear o corregir desde IDIKY/BOB no lo

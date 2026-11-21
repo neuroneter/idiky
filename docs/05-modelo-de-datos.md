@@ -1275,6 +1275,17 @@ copropiedades (asignaciones): lo que no se repite es la persona.
 | RN-356 | **El primer ingreso a ALICE confirma a la persona invitada** (Daniel, 2026-11-21): 1) código por el celular; 2) la primera vez, **tipo y número de documento**, que deben **coincidir con los que reportó la Administración** (si la persona ya los tenía, solo los confirma); si no coinciden, no entra y se le dice que hable con la Administración; 3) un **correo**, que se valida con otro código; 4) sus datos básicos (nombre, correo, celular, lo que ALICE ya tiene). Solo entonces entra. Las siguientes veces basta el código del celular; después vendrán **huella y reconocimiento facial** en teléfonos que los tengan, para no mandar códigos | middleware `POST /api/app/yo/documento` (coincidencia, T-142); el resto en ALICE y el middleware (T-143, Justo) |
 | RN-357 | **Cambiar el celular o el correo, con el otro como segundo factor** (Daniel, 2026-11-21): en ALICE, la persona cambia su **celular** validando el número nuevo con un código **y** un código a su **correo** validado; cambia su **correo** validando el nuevo **y** un código a su **celular**. Mientras ALICE no lo tenga, el cambio lo hace soporte de IDIKY desde BOB (RN-353 lo revisa) | Por construir (T-143, Justo) |
 
+### Varios países (ADR-0035, T-144 a T-146, 2026-11-21)
+
+| # | Regla | Dónde vive |
+|---|---|---|
+| RN-358 | **Los países y sus tipos de documento los define BOB** (ADR-0035): cada **país** con su código ISO, nombre, indicativo y la regla de su celular; cada **tipo de documento** de un país con código, nombre, regla de validación (solo números o letras y números, longitud mínima y máxima, patrón opcional), ejemplo, orden y si está activo. Se editan en BOB sin desplegar | Por construir (T-144, BOB) |
+| RN-359 | **Todo documento y todo celular se validan con la regla de su país** (ADR-0035): el middleware usa el catálogo de BOB (guardado unos minutos; si BOB no responde, el último que tenía) en todos los caminos, y rechaza con un mensaje que dice la regla («La cédula de ciudadanía va con 6 a 10 números, sin puntos») | Por construir (T-145, middleware) |
+| RN-360 | **Por defecto, el país de la copropiedad** (Daniel, 2026-11-21: *el 99 % será del mismo país*): los formularios de BLOKY y ALICE traen ya el país de la copropiedad para el documento y para el celular; «Otro país» solo para los pocos casos | Por construir (T-145 BLOKY, T-146 ALICE) |
+| RN-361 | **El país del documento y el del celular son independientes**: un extranjero puede vivir en una propiedad de Colombia con un celular de su país | Por construir (T-145, T-146) |
+| RN-362 | **El pasaporte siempre está disponible**, con su país emisor, además de los tipos del país de la copropiedad | Por construir (T-144, T-145) |
+| RN-363 | **La persona es única por país + tipo + número de documento**, y el celular se guarda completo con su indicativo; las personas de antes quedan con país CO. El hash de identidad (RN-298) **no cambia para Colombia** («TIPO:NUMERO»); para otros países es «PAÍS:TIPO:NUMERO» (por confirmar con Justo) | Por construir (T-145, directorio) |
+
 ## Reglas del alta desde documentos (CU-B-10, ADR-0023) — rango de la integración
 
 Definidas el 2026-10-11 con Daniel, sobre el experimento de ADR-0023 §5 (Oasis: 320 unidades,
