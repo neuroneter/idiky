@@ -166,10 +166,12 @@ Secretos `EVOLUTION_*` en el servidor.
 
 | Repo | Rama / revisión | Notas |
 |---|---|---|
-| `Bloky-Idiky` | `develop` @ `180c909` (T-90) · antes T-129 en `d187292` | Middleware Dev: billeteras + apariencia |
-| `BOB-Idiky` | `develop` @ `561d905` | Rutas `/servicio/alta*` + script secreto; desplegado fuera de main (`IDIKY_GESTION_FUERA_DE_MAIN`) |
-| `App-Idiky` | `develop` @ `85d89c7` (T-90 avatar; incluye T-129 billeteras) | Probar avatar y passkey en teléfono físico |
-| `idiky` (arnés) | `main` | Bitácora, CU-R-34, RN-191, docs/20, este aviso, Mary §0 |
+| `Bloky-Idiky` | `develop` (plantilla `Idiky_whatsapp` en `secretos.sh`) | Middleware Dev: billeteras + apariencia + WhatsApp oficial |
+| `BOB-Idiky` | `develop` | Rutas `/servicio/alta*` + script secreto |
+| `App-Idiky` | `develop` | Avatar, billeteras T-129, menú cuenta (cerrar sesión) |
+| `idiky` (arnés) | `main` | Bitácora, CU-R-34, **`Idiky_whatsapp`**, este aviso |
+
+**Billeteras (recordatorio):** se crean con **`hashIdentidad`** (RN-298) = HMAC del documento `TIPO:NUMERO`, no del correo (§1).
 
 ### Notas útiles
 
