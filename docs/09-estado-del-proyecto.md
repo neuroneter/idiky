@@ -113,6 +113,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · «Empezar de nuevo»: el Administrador retira lo anterior él mismo (T-140, RN-347)
+
+- Daniel: *quitar las unidades anteriores tiene que ser sencillo… el Administrador las debe poder retirar, pudo ser un error
+  por cargar el documento equivocado*. Aprobó las dos decisiones: **(a)** la estructura con alguna unidad con residentes se
+  queda entera; **(b)** se restaura solo el último «Empezar de nuevo» y solo si no se armó nada encima.
+- Construido en `feature/T-140-unidades-huerfanas` (`0db0a3a`): flujo «Empezar de nuevo» (botón del terreno, aviso en
+  Armar desde documentos, «Retirar estas unidades» en «Sin estructura» solo para las huérfanas), confirmación escribiendo el
+  nombre de la copropiedad, **lotes** de retiro (migración `019-lotes-de-retiro.sql`) y «Unidades → Retiradas» con
+  restaurar. Quitar una estructura y la reparación de soporte también dejan lote. 5 pruebas nuevas; builds y `probar` pasan;
+  el flujo se miró en la app con la API simulada. **El SQL nuevo y la migración no se han corrido contra PostgreSQL.**
+- Con esto, en Altos del Bosque **Daniel mismo** puede retirar las 656 huérfanas desde «Unidades → Sin estructura → Retirar
+  estas unidades» después de desplegar; la ruta de soporte (RN-346) queda como respaldo.
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Unidades huérfanas y copropiedad equivocada (T-140, RN-343 a RN-346)
 
 - **Causa** de las 656 unidades huérfanas de Altos del Bosque: el guardado del terreno retiraba las estructuras quitadas pero
@@ -129,8 +142,8 @@ coeficiente y un acta que resista revisión.
   /api/admin/copropiedades/:id/unidades-huerfanas[/retirar]`), y en la app el terreno, «Armar desde documentos» y «Unidades».
   `npm run build` en las dos y `npm run probar` pasan (8 pruebas nuevas). La advertencia y «Sin estructura» se miraron en la
   app con la API simulada. **El SQL nuevo no se ha corrido contra PostgreSQL**: se prueba en BLOKY Dev al desplegar.
-- **Pendiente de Daniel:** aprobar el merge a `develop` y el despliegue; después, **ejecutar la reparación en Altos del Bosque**
-  (primero el informe, que no toca nada; luego retirar con el total del informe). La reparación **nunca retira una unidad con
+- **Pendiente de Daniel:** aprobar el merge a `develop` y el despliegue; después, retirar las huérfanas de Altos del Bosque
+  (desde BLOKY con RN-347, o con la ruta de soporte: primero el informe, luego retirar con su total). La reparación **nunca retira una unidad con
   residentes no finalizados**, así que la EC-201 (Juan Luis Almonacid) no se toca aunque fuera huérfana; las que deje, el
   informe las lista.
 

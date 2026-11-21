@@ -197,9 +197,11 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
   «Al quitar ‹Torre 1› se retiran sus 64 unidades (quedan en el historial; no se borran). ¿Sigo?»
   con *Sí, retirar las unidades* o *No, deshacer*. Si alguna unidad tiene residentes (vigentes o
   bloqueados), no se deja: primero se retiran en «Unidades».
-- A2c. **Empezar de nuevo** (RN-347, propuesta por aprobar) → el Administrador ve qué se retira (estructuras, unidades,
-  cuáles tienen residentes), escribe el nombre de la copropiedad y BLOKY retira todo lo que no tiene residentes, en un
-  lote que queda consultable en Unidades. Es el camino para volver a armar desde documentos.
+- A2c. **Empezar de nuevo** (RN-347, aprobado por Daniel el 2026-11-21) → botón en el terreno. El Administrador ve qué se
+  retira (estructuras con sus unidades, agrupaciones vacías, unidades sin estructura) y qué se queda (las estructuras con
+  unidades con residentes, enteras, y quiénes son esos residentes), escribe el nombre de la copropiedad y BLOKY retira, sin
+  borrar, en un lote. Lo lleva a Armar desde documentos. En «Unidades → Retiradas» ve el lote y puede **restaurarlo** si
+  no armó nada encima. Es el camino para corregir un documento equivocado sin pedirle a IDIKY.
 - A3. Intenta meter una torre en otra, o algo dentro de sí mismo → no se deja (RN-170).
 
 **Reglas de negocio:** RN-169 a RN-173, RN-185, RN-186; quitar una estructura retira sus unidades, RN-343; la pila de pisos y las terrazas, RN-242 a RN-244; pisos mixtos y el piso de cada espacio, RN-245 y RN-246; la agrupación como capa de color, RN-247.
@@ -875,8 +877,11 @@ votaciones en BLOKY (con Mary) → ALICE (Justo).
    BLOKY crea las que faltan con su identificador y su código (RN-319), sin tocar las que existen.
 3. Puede **editar el código** de una unidad (RN-318).
 4. **Ninguna unidad vigente queda escondida** (RN-345, 2026-11-21): las que quedaron sin estructura en el terreno se ven en
-   el grupo **«Sin estructura»**, con la estructura quitada y el aviso; el resumen las cuenta aparte. Las retira soporte de
-   IDIKY con el informe de RN-346 (solo las que no tienen residentes).
+   el grupo **«Sin estructura»**, con la estructura quitada y el aviso; el resumen las cuenta aparte. Las retira
+   la propia Administración con **«Retirar estas unidades»** (RN-347; solo las que no tienen residentes); el informe de RN-346 es el
+   respaldo de soporte.
+5. **«Retiradas»** (RN-347): lo retirado por lote —cuándo, quién, cómo, cuántas— con sus unidades; el último «Empezar de nuevo»
+   se puede **restaurar** si no se armó nada encima.
 
 **Lo que queda abierto:** el coeficiente a mano y el sugerido por área; la carga desde Excel; la matrícula inmobiliaria.
 
