@@ -130,8 +130,9 @@ coeficiente y un acta que resista revisión.
   `npm run build` en las dos y `npm run probar` pasan (8 pruebas nuevas). La advertencia y «Sin estructura» se miraron en la
   app con la API simulada. **El SQL nuevo no se ha corrido contra PostgreSQL**: se prueba en BLOKY Dev al desplegar.
 - **Pendiente de Daniel:** aprobar el merge a `develop` y el despliegue; después, **ejecutar la reparación en Altos del Bosque**
-  (primero el informe; el plan está en las notas de la sesión). La EC-201 (Juan Luis Almonacid) es de Edificio Cocora, que
-  sigue en el terreno: la reparación no la toca; y una unidad huérfana con residentes no se retira.
+  (primero el informe, que no toca nada; luego retirar con el total del informe). La reparación **nunca retira una unidad con
+  residentes no finalizados**, así que la EC-201 (Juan Luis Almonacid) no se toca aunque fuera huérfana; las que deje, el
+  informe las lista.
 
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY Dev · La prueba de «Mi unidad» pasa a EC-201; unidades huérfanas en Altos del Bosque
 
