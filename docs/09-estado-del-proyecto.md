@@ -113,6 +113,59 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Cómo está conformada cada unidad (T-141, RN-348, RN-349)
+
+- Daniel: lo que el administrador de la unidad crea desde ALICE (residentes, mascotas, invitados) no se veía en BLOKY: la tabla
+  solo mostraba al administrador y un «+N». Aprobó las dos recomendaciones: la Administración ve **nombre, rol y celular, no el
+  número de documento** (solo si ya entró); y **bloquea o retira a cualquiera sin editar sus datos** (RN-349).
+- En «Unidades»: columna **«En la unidad»** (👤 personas · 🐾 mascotas · 🎫 invitados vigentes, *sin entrar* y *bloq.*), **filtros**
+  (sin administrador, sin entrar aún, con invitados vigentes, con bloqueados), **resumen** arriba y la **ficha** lateral de cada
+  unidad con personas, mascotas, invitados (vigencia), quién los agregó y el **historial** de quienes salieron, con quién y por qué.
+- Middleware: `GET /api/c/:id/composicion` y `GET /api/c/:id/unidades/:uid/ficha` (`composicionDeUnidad`, `resumenDeComposicion`),
+  2 pruebas nuevas. `develop` `e5640b7`, desplegado `6634b5a.bloky-e5640b7`; probado en la app con la API simulada (datos como
+  los de ALICE: bloquear desde la ficha actualiza el conteo y el resumen). Sin sesión la ruta responde 401.
+- **El rango RN-300 … RN-349 quedó agotado**: la siguiente regla de la integración necesita rango nuevo en `docs/11` §0.
+- En Altos del Bosque, Daniel ya retiró él mismo las 656 huérfanas con «Empezar de nuevo» (un lote; quedan 16 vigentes).
+
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · «Empezar de nuevo»: el Administrador retira lo anterior él mismo (T-140, RN-347)
+
+- Daniel: *quitar las unidades anteriores tiene que ser sencillo… el Administrador las debe poder retirar, pudo ser un error
+  por cargar el documento equivocado*. Aprobó las dos decisiones: **(a)** la estructura con alguna unidad con residentes se
+  queda entera; **(b)** se restaura solo el último «Empezar de nuevo» y solo si no se armó nada encima.
+- Construido en `feature/T-140-unidades-huerfanas` (`0db0a3a`): flujo «Empezar de nuevo» (botón del terreno, aviso en
+  Armar desde documentos, «Retirar estas unidades» en «Sin estructura» solo para las huérfanas), confirmación escribiendo el
+  nombre de la copropiedad, **lotes** de retiro (migración `019-lotes-de-retiro.sql`) y «Unidades → Retiradas» con
+  restaurar. Quitar una estructura y la reparación de soporte también dejan lote. 5 pruebas nuevas; builds y `probar` pasan;
+  el flujo se miró en la app con la API simulada. **El SQL nuevo y la migración no se han corrido contra PostgreSQL.**
+- **Desplegado en BLOKY Dev** (Daniel lo aprobó): `develop` `467dbf9` (merge `--no-ff` de la rama), revisión
+  `6634b5a.bloky-467dbf9`. La migración `019-lotes-de-retiro.sql` quedó aplicada en Altos del Bosque. El informe de soporte
+  (RN-346, solo lectura) contra la base real da **656 huérfanas de 11 estructuras anteriores, ninguna con residentes** (las
+  cinco torres de Oasis, dos veces, con mayúsculas y sin ellas, y un «Edificio Cocora» viejo, distinto del vigente). **No se
+  retiró nada todavía**: 672 vigentes, 0 lotes.
+- Con esto, en Altos del Bosque **Daniel mismo** puede retirar las 656 huérfanas desde «Unidades → Sin estructura → Retirar
+  estas unidades» después de desplegar; la ruta de soporte (RN-346) queda como respaldo.
+
+### 2026-11-21 · Daniel + IA (Claude) · BLOKY · Unidades huérfanas y copropiedad equivocada (T-140, RN-343 a RN-346)
+
+- **Causa** de las 656 unidades huérfanas de Altos del Bosque: el guardado del terreno retiraba las estructuras quitadas pero
+  **no tocaba sus unidades**, y la pantalla Unidades solo mostraba las de estructuras vivas. Cada vuelta de «quitar y armar
+  desde documentos» dejaba vivas las unidades de la vuelta anterior (y sus códigos ocupados).
+- **Reglas nuevas** (`docs/05`): **RN-343** quitar una estructura retira sus unidades, con aviso antes y sin dejar si hay
+  residentes · **RN-344** al confirmar desde documentos se ve en qué copropiedad (la de BOB) y se compara nombre/NIT/dirección
+  del documento; si no coincide hay que marcar «Sí, este documento es de…» · **RN-345** «Sin estructura» en Unidades ·
+  **RN-346** reparación con informe en la entrada de administración. Tarea **T-140**.
+- **Código** en `Bloky-Idiky`, rama `feature/T-140-unidades-huerfanas` (`db25a5c`, sale de `develop` `e15e867`), **sin merge
+  ni despliegue**: `estructura/rutas.ts` (409 `retira_unidades` / `estructura_con_residentes`), `alta/rutas.ts` +
+  `ia/anthropic.ts` (la lectura pide también NIT y dirección; 409 `copropiedad_sin_confirmar`), `unidades/rutas.ts`
+  (`sinEstructura`, `informeHuerfanas`, `retirarHuerfanas`), `admin/rutas.ts` (`GET`/`POST
+  /api/admin/copropiedades/:id/unidades-huerfanas[/retirar]`), y en la app el terreno, «Armar desde documentos» y «Unidades».
+  `npm run build` en las dos y `npm run probar` pasan (8 pruebas nuevas). La advertencia y «Sin estructura» se miraron en la
+  app con la API simulada. **El SQL nuevo no se ha corrido contra PostgreSQL**: se prueba en BLOKY Dev al desplegar.
+- **Pendiente de Daniel:** aprobar el merge a `develop` y el despliegue; después, retirar las huérfanas de Altos del Bosque
+  (desde BLOKY con RN-347, o con la ruta de soporte: primero el informe, luego retirar con su total). La reparación **nunca retira una unidad con
+  residentes no finalizados**, así que la EC-201 (Juan Luis Almonacid) no se toca aunque fuera huérfana; las que deje, el
+  informe las lista.
+
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY Dev · La prueba de «Mi unidad» pasa a EC-201; unidades huérfanas en Altos del Bosque
 
 - La U-0133 que se usó en la prueba de T-135 **no se ve en BLOKY**: Altos del Bosque tiene **672 unidades** en el middleware,
