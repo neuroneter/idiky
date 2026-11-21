@@ -113,6 +113,13 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-21 · Daniel + IA (Claude) · Infra · IP nuevas de Daniel y Justo en el firewall (8086)
+
+- **Firewall de Lightsail:** la regla **TCP 8086** (Evolution) quedó con las IP nuevas de Daniel y de
+  Justo, que cambiaron con sus operadores; se quitó la IP vieja de Justo. Las IP no se escriben aquí
+  (el repositorio es público). 22, 8080–8085 y UDP 10000 siguen igual (abiertas a cualquier origen).
+- **Verificado:** el 8086 responde HTTP 200 desde la IP de Daniel. Falta que Justo lo pruebe desde la suya.
+
 ### 2026-11-20 · Mary + IA (Claude) · Corte para el equipo y qué falta para salir
 
 Mary: *«hagamos una última validación de lo que está pendiente si quisiéramos sacar la app hoy para
