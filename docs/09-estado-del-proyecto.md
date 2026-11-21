@@ -17,7 +17,7 @@ nueva o una sesión de IA distinta.
 | **Fase** | 1 de 5 ([roadmap](./07-roadmap.md)) |
 | **Productos** | `apps/pwa/` (Mary, la maqueta de ALICE y de la consola), `apps/contable/` (Jeimy), `apps/gestion/` (BOB) y, desde el 2026-09-21, **`apps/bloky/` + `apps/bloky-api/` (BLOKY Dev, el producto real, ADR-0013)** |
 | **BOB** (back office de IDIKY) | **Instalado en el entorno de desarrollo**: Strapi 5.53 + PostgreSQL 17 en un pod, puerto 8082 y **`https://bob-dev.idiky.com`** (ADR-0014) ([ADR-0012](./adr/0012-sistema-de-gestion-strapi.md), `apps/gestion/`). Abierto al equipo, con la marca de IDIKY en el panel. Con el modelo de datos y, desde el 2026-09-21, **tres copropiedades de prueba** con sus perfiles raíz; faltan el responsable y el disco de datos (T-37) **Desde el 2026-10-19:** con el plugin `cuentas-polygon` (alta de cuentas Polygon por QR) y las claves de **Polygon Amoy** (red de pruebas), publicado como `ad48f90.gestion-12e7c44`; el hash del `rpId` (`bob-dev.idiky.com`) completo desde el 2026-10-21; faltan los usuarios de la app (T-87) |
-| **Cadena / contratos / ALICE (Justo)** | Identidad = `hashIdentidad` (RN-298). **2026-11-16 (cierre):** T-129 billeteras vía middleware **en Dev**; T-90 avatar (CU-R-34 / RN-191) **middleware + app en `develop`** (falta probar en teléfono). Resumen: [`daniel.md`](./avisos/daniel.md) §10. También: WhatsApp, Asambleas/Jitsi, RN-190, sesión persistente, Admin/Delegado (RN-327). **T-87** A1 sigue abierto ([`19`](./19-diagnostico-alice-sesion-y-polygon.md)). |
+| **Cadena / contratos / ALICE (Justo)** | Identidad = `hashIdentidad` (RN-298). **2026-11-21:** WhatsApp oficial Dev = instancia Evolution **`Idiky_whatsapp`** (T-131/T-132). Antes (2026-11-16): T-129 billeteras; T-90 avatar en `develop`. Resumen: [`daniel.md`](./avisos/daniel.md) §10. **T-87** A1 sigue abierto ([`19`](./19-diagnostico-alice-sesion-y-polygon.md)). |
 | **Foco actual** | **La app del propietario.** Las de administrador y portería se trabajan después (Mary, 2026-08-28) |
 | **Contable** | Tres módulos: Cartera · Contabilidad (recaudos, pagos, ajustes, plan de cuentas) · Reportes. Partida doble sobre un PUC colombiano editable |
 | **Backend** | **BLOKY tiene API propia desde el 2026-09-21** (`apps/bloky-api`, ADR-0008): Node + Fastify + PostgreSQL, lee BOB. Publicada en **`https://bloky-dev.idiky.com`** (túnel de Cloudflare, ADR-0014). **Desplegada y probada en el servidor de desarrollo** (pod `idiky-bloky`, puerto 8083, CU-B-01 contra el BOB real). El demo y la contable siguen con datos simulados en el navegador. |
@@ -112,6 +112,19 @@ coeficiente y un acta que resista revisión.
 ## Bitácora
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
+
+### 2026-11-21 · Justo · Evolution · Instancia oficial `Idiky_whatsapp` (T-131, T-132)
+
+**Qué:** la línea exclusiva de WhatsApp de IDIKY en Dev es la instancia Evolution **`Idiky_whatsapp`**.
+Se probó el envío a un celular de prueba y llegó. En el servidor:
+`EVOLUTION_INSTANCE=Idiky_whatsapp` en `bloky-api.env` (key = `AUTHENTICATION_API_KEY` de
+`evolution.env`, sin publicar la key). BLOKY redesplegado
+(`ffcd6d8.bloky-96d7221`); el pod expone `EVOLUTION_INSTANCE=Idiky_whatsapp`.
+Guía [`infra/guia-de-evolution.md`](../infra/guia-de-evolution.md) §6; script
+`infra/evolution/configurar-bloky-evolution.sh` actualizado. La instancia «Justo Soto» ya no la usa
+el middleware.
+
+**Sigue:** túnel HTTPS opcional; retirar la instancia de prueba si no hace falta.
 
 ### 2026-11-21 · Daniel + IA (Claude) · BLOKY · País del celular y del documento; corregir antes del primer ingreso (T-145, RN-359 a RN-364)
 
