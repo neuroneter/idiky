@@ -341,3 +341,18 @@ catálogo.
 **El contrato completo, al día el 2026-11-21**, con los cuerpos, las respuestas y todos los códigos de error (§1.0 países,
 §1.1 `celular_repetido`, §2 `documento_no_coincide`, §2c el correo, §5 el alta con documento, §6 quién vota):
 [docs/20](../20-alta-e-ingreso-desde-alice.md).
+
+---
+
+## 11. Propietario, arrendatario y vínculos — 📝 borrador (2026-11-22)
+
+Justo dejó documentada la visión de producto (cadena CSV → propietario → arrendatario/familia/visitantes; listado
+`lugares`; tres “contratos” que no se mezclan; sin auto-reclamo de apartamento) en:
+
+**[`docs/23-propietario-arrendatario-y-vinculos.md`](../23-propietario-arrendatario-y-vinculos.md)**
+
+**Aún no es decisión cerrada con Daniel.** Justo lo irá ampliando. Mientras tanto: **no construir** el rol arrendatario
+ni facultades nuevas en API/ALICE en contra de ese borrador; sí se puede seguir con Mi unidad (residente/invitado) según
+docs/20 §5 y ADR-0032.
+
+**Para hablar con Daniel:** §12 del docs/23 (preguntas abiertas) y cuándo pasar el borrador a ADR + RN.

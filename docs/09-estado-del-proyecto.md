@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-22 · Justo · Producto · Propietario, arrendatario y vínculos con la vivienda (docs/23)
+
+- Justo cerró en conversación la visión: la Administración carga **propietarios** por CSV (no implica que vivan);
+  el propietario registra arrendatario (fechas + facultades), familia y visitantes; quien vive opera el día a día;
+  ALICE siempre muestra todos los `lugares`; no hay auto-reclamo de apartamento; el smart contract del edificio no es
+  el menú del login.
+- Quedó escrito en [`docs/23-propietario-arrendatario-y-vinculos.md`](./23-propietario-arrendatario-y-vinculos.md)
+  (borrador con diagramas Mermaid, índice en `docs/README.md`, aviso en [`avisos/justo.md`](./avisos/justo.md)).
+  **Aún no es ADR:** Justo lo irá mejorando; Daniel lo cierra cuando toque.
+
 ### 2026-11-22 · Justo · Middleware · Correo OTP + fecha nacimiento (T-143, M1–M8)
 
 **Qué:** en `Bloky-Idiky`, migración `014` (`fecha_nacimiento`, `correo_validado_en`), flags en `/yo`,
