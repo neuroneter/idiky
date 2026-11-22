@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-22 · Justo · ALICE · Flujo primer ingreso + contrato middleware (T-143)
+
+**Qué:** contrato en [`docs/20` §2c](./20-alta-e-ingreso-desde-alice.md) (correo OTP, datos básicos,
+flags `correoValidado`/`fechaNacimiento`, checklist **M1–M11**). En `App-Idiky`, pantallas del primer
+ingreso: documento → correo + código → nombre + fecha de nacimiento → billeteras; cliente HTTP listo
+para las rutas nuevas. Aviso Justo §9 y tablero T-143 al día.
+
+**Sigue:** middleware M1–M9 en `Bloky-Idiky` (migración fecha, rutas correo/datos, `/yo` con flags,
+humo, Dev); luego probar el flujo de punta a punta. M10 cambio 2FA y M11 SES prod después.
+
 ### 2026-11-22 · Justo · ALICE · País del celular en el ingreso (T-146, paso 1)
 
 **Qué:** en `App-Idiky`, el login pide país (bandera + indicativo) junto al celular. Catálogo
