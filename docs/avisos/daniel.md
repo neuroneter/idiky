@@ -146,28 +146,18 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
-## 11. Datos del usuario y unicidad (Justo, 2026-11-22) — ⏳ tu confirmación
+## 11. Datos del usuario, unicidad y fecha de nacimiento — ✅ aprobado (2026-11-22)
 
-Justo revisó RN-353…357 / docs/20 y dejó escrito en [docs/20 §0](../20-alta-e-ingreso-desde-alice.md):
+Justo documentó en [docs/20 §0](../20-alta-e-ingreso-desde-alice.md) y **RN-192**:
 
-**Ya alineado con lo tuyo**
-- Un **celular** y un **documento** = una sola persona cada uno; **no se repiten** entre usuarios (RN-353, RN-354).
-- Motivo de cadena/ALICE: la passkey del teléfono y las billeteras (`hashIdentidad` del documento) no pueden quedar
-  atadas a dos personas.
-- Para **crear billeteras** bastan tipo + número de documento (+ passkey). Correo y nombre son del perfil / 2FA.
+- Un **celular** y un **documento** = una sola persona cada uno; **no se repiten** (RN-353, RN-354). Motivo: passkey y
+  billeteras (`hashIdentidad`) no pueden quedar atadas a dos personas.
+- Para **crear billeteras** bastan tipo + número de documento (+ passkey).
+- Campos del primer ingreso: tipo/número de documento, nombre, celular, correo (con código) y **fecha de nacimiento**.
 
-**Campos que Justo quiere capturar en el primer ingreso**
-
-| Campo | ¿Ya está? |
-|---|---|
-| Tipo + número de documento | ✅ |
-| Nombre | ✅ |
-| Celular | ✅ (lo pone Administración) |
-| Correo (con código) | ✅ decidido; rutas T-143 |
-| **Fecha de nacimiento** | ❌ **No está** en el directorio ni en ninguna RN |
-
-**Te pide:** ¿aprobamos `fechaNacimiento` (o el nombre que digas) en `directorio.persona` y en el paso de «datos
-básicos» del primer ingreso (T-143)? Si sí, Justo lo mete en el contrato de docs/20 y en ALICE.
+**Fecha de nacimiento — ✅ aprobada** (acuerdo telefónico Justo ↔ Daniel, 2026-11-22): va en `directorio.persona`
+(`fecha_nacimiento`, `YYYY-MM-DD`), obligatoria en los datos básicos del primer ingreso (T-143). Falta construirla en el
+middleware (migración + ruta) y en ALICE.
 
 ---
 

@@ -49,11 +49,11 @@ identidad de la persona en IDIKY y en la cadena.
 | **Nombre** | Administración; la persona puede completar/ajustar en datos básicos | Obligatorio |
 | **Celular** | Administración al crear | Obligatorio; único (arriba). Ingreso con código |
 | **Correo electrónico** | La persona en el primer ingreso, **validado con código** (§2c) | Obligatorio para terminar el primer ingreso (RN-356) |
-| **Fecha de nacimiento** | La persona en datos básicos | **Propuesta Justo (2026-11-22):** aún **no** está en el directorio ni en RN; falta que Daniel la confirme y el middleware la guarde |
+| **Fecha de nacimiento** | La persona en datos básicos | **Aprobada** (Justo + Daniel, 2026-11-22, acuerdo telefónico; **RN-192**). Campo `fecha_nacimiento` (`YYYY-MM-DD`) en el directorio. Obligatoria al cerrar el primer ingreso (T-143) |
 
 Con **tipo + número de documento** (y el secreto de IDIKY) el middleware ya puede calcular `hashIdentidad` y ALICE puede
-**crear las billeteras** (§2b) tras la passkey. Nombre, correo y (si se aprueba) fecha de nacimiento son del perfil; el
-correo además es segundo factor (RN-357).
+**crear las billeteras** (§2b) tras la passkey. Nombre, correo y fecha de nacimiento son del perfil; el correo además es
+segundo factor (RN-357).
 
 ---
 
@@ -179,10 +179,10 @@ Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` + B
 ## 2c. El correo con código (primer ingreso y segundo factor) — por construir (T-143)
 
 **Decidido (RN-356, RN-357):** el primer ingreso es 1) código al celular → 2) documento que coincida (§2) → 3) **un correo,
-validado con un código** → 4) los **datos básicos** (§0: nombre; **fecha de nacimiento** si Daniel la aprueba); solo ahí
-entra. Tras el documento (y con `hashIdentidad`) puede crear las **billeteras** (§2b). Las veces siguientes, solo el código
-del celular. Cambiar el celular pide su código **y** uno al correo validado; cambiar el correo pide su código **y** uno al
-celular. Después: huella y facial.
+validado con un código** → 4) los **datos básicos** (§0: nombre y **fecha de nacimiento**, RN-192); solo ahí entra. Tras el
+documento (y con `hashIdentidad`) puede crear las **billeteras** (§2b). Las veces siguientes, solo el código del celular.
+Cambiar el celular pide su código **y** uno al correo validado; cambiar el correo pide su código **y** uno al celular.
+Después: huella y facial.
 
 **Lo que ya está:** el middleware ya **envía correos reales** por Amazon SES desde `no-responder@idiky.com`
 ([ADR-0036](./adr/0036-correo-con-amazon-ses.md), [`infra/correo-ses.md`](../infra/correo-ses.md)). En *sandbox* solo llegan
