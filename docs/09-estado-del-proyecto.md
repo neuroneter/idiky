@@ -119,6 +119,10 @@ coeficiente y un acta que resista revisión.
 `GET /api/app/catalogo-paises`; sugerencia por IP (`api.country.is`) → locale del teléfono → CO.
 El middleware recibe el celular completo (`+57300…`).
 
+**Verificado en Dev (2026-11-22):** `POST …/enviar-codigo` con `+573053996759` y con `3053996759`
+responde `{ canal: "whatsapp", pista: "••• 6759" }` (instancia `Idiky_whatsapp`). Evolution usa el
+número sin `+`. Catálogo de 11 países OK.
+
 **Sigue:** país del documento en el primer ingreso; residentes/invitados con país (resto de T-146).
 
 ### 2026-11-22 · Justo · Identidad · Datos a capturar, unicidad y fecha de nacimiento (RN-192)
