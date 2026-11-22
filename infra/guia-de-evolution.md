@@ -68,6 +68,8 @@ IDIKY_SERVIDOR=idiky@<ip> IDIKY_LLAVE=~/.ssh/idiky_despliegue \
 ## 5. Enviar un mensaje de texto (prueba)
 
 Número en formato internacional **sin** `+` ni espacios (Colombia: `57` + celular).
+El **middleware** normaliza el celular a E.164 (`+57300…`) y, al llamar a Evolution, le quita el `+`
+(`numeroParaEvolution` → `57300…`). ALICE manda el celular **con** indicativo (`docs/20` §1.1).
 
 ```bash
 # En el servidor, con la key ya cargada (no la pegues en el historial compartido):
