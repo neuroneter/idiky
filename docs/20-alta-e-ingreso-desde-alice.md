@@ -248,14 +248,14 @@ los campos, manda.
 
 | # | Tarea | Repo / zona | Estado |
 |---|---|---|---|
-| M1 | Migración: columna `fecha_nacimiento` (`date`, nullable) en `directorio.persona` | `Bloky-Idiky` | ⬜ |
-| M2 | Migración / campos: correo pendiente + `correo_validado_en` (o boolean + timestamp) | `Bloky-Idiky` | ⬜ |
-| M3 | Exponer en `/yo` (y en verificar-código / documento): `correo`, `correoValidado`, `fechaNacimiento` | `Bloky-Idiky` | ⬜ |
-| M4 | Reto de código por correo (generar, guardar hash/vencimiento, intentos) reutilizando el patrón del celular | `Bloky-Idiky` | ⬜ |
-| M5 | `POST /api/app/yo/correo/enviar-codigo` con SES (`deps.correo`) | `Bloky-Idiky` | ⬜ |
-| M6 | `POST /api/app/yo/correo/verificar-codigo` | `Bloky-Idiky` | ⬜ |
-| M7 | `PUT /api/app/yo/datos-basicos` (nombre + fecha) | `Bloky-Idiky` | ⬜ |
-| M8 | Pruebas de humo de las tres rutas + flags en `/yo` | `Bloky-Idiky` | ⬜ |
+| M1 | Migración: columna `fecha_nacimiento` (`date`, nullable) en `directorio.persona` | `Bloky-Idiky` | ✅ `014-fecha-nacimiento-y-correo-validado.sql` |
+| M2 | Migración / campos: `correo_validado_en` + índice único del correo validado | `Bloky-Idiky` | ✅ misma migración |
+| M3 | Exponer en `/yo` (y en verificar-código / documento): `correo`, `correoValidado`, `fechaNacimiento` | `Bloky-Idiky` | ✅ |
+| M4 | Reto de código por correo (generar, guardar ~10 min, intentos) | `Bloky-Idiky` | ✅ `acceso/codigos-correo.ts` |
+| M5 | `POST /api/app/yo/correo/enviar-codigo` con SES | `Bloky-Idiky` | ✅ |
+| M6 | `POST /api/app/yo/correo/verificar-codigo` | `Bloky-Idiky` | ✅ |
+| M7 | `PUT /api/app/yo/datos-basicos` (nombre + fecha) | `Bloky-Idiky` | ✅ |
+| M8 | Pruebas de humo de las tres rutas + flags en `/yo` | `Bloky-Idiky` | ✅ |
 | M9 | Desplegar middleware en BLOKY Dev y probar con correos verificados en SES (Justo / Daniel) | Dev | ⬜ |
 | M10 | (Después del primer ingreso) rutas de **cambio** de celular y de correo con 2FA (RN-357) | `Bloky-Idiky` | ⬜ |
 | M11 | Acceso SES fuera de *sandbox* (producción) cuando toque | AWS / Daniel | ⬜ |

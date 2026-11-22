@@ -283,10 +283,9 @@ Lista de campos y unicidad, al día: [docs/20 §0](../20-alta-e-ingreso-desde-al
 - **El correo ya sale** (2026-11-21): Amazon SES desde `no-responder@idiky.com`, en el middleware (`src/correo/ses.ts`, la
   dependencia `correo` de las rutas); tu Gmail ya está verificado para pruebas. Cómo funciona y cómo usarlo:
   [`infra/correo-ses.md`](../../infra/correo-ses.md).
-- **Contrato escrito (2026-11-22, Justo):** [`docs/20` §2c](../20-alta-e-ingreso-desde-alice.md) — `POST …/yo/correo/enviar-codigo`,
-  `POST …/yo/correo/verificar-codigo`, `PUT …/yo/datos-basicos`, flags `correoValidado` / `fechaNacimiento`, y checklist
-  **M1–M11** del middleware. ALICE ya arma el flujo de pantallas; faltan M1–M9 en `Bloky-Idiky` para que el formulario
-  guarde de verdad.
+- **Contrato + middleware M1–M8 (2026-11-22, Justo):** [`docs/20` §2c](../20-alta-e-ingreso-desde-alice.md). Rutas y
+  migración en `Bloky-Idiky` (`feature/T-143-correo-datos-primer-ingreso`). ALICE ya tiene el flujo. **Falta M9:**
+  desplegar en BLOKY Dev y probar con tu correo verificado en SES.
 
 **Mientras se habla:** no construyas en ALICE un cambio de celular que no pida el segundo factor, ni un primer ingreso que
 deje entrar sin documento cuando la Administración lo reportó.

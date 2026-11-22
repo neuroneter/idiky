@@ -113,6 +113,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-22 · Justo · Middleware · Correo OTP + fecha nacimiento (T-143, M1–M8)
+
+**Qué:** en `Bloky-Idiky`, migración `014` (`fecha_nacimiento`, `correo_validado_en`), flags en `/yo`,
+`POST …/yo/correo/enviar-codigo`, `POST …/yo/correo/verificar-codigo`, `PUT …/yo/datos-basicos`, códigos
+por SES (simulado sin llaves), humo en verde. Checklist M1–M8 ✅ en [`docs/20` §2c](./20-alta-e-ingreso-desde-alice.md).
+
+**Sigue:** **M9** desplegar middleware en BLOKY Dev y probar el formulario de ALICE de punta a punta
+(correo verificado en SES). M10 cambio 2FA; M11 SES prod.
+
 ### 2026-11-22 · Justo · ALICE · Flujo primer ingreso + contrato middleware (T-143)
 
 **Qué:** contrato en [`docs/20` §2c](./20-alta-e-ingreso-desde-alice.md) (correo OTP, datos básicos,
@@ -120,8 +129,7 @@ flags `correoValidado`/`fechaNacimiento`, checklist **M1–M11**). En `App-Idiky
 ingreso: documento → correo + código → nombre + fecha de nacimiento → billeteras; cliente HTTP listo
 para las rutas nuevas. Aviso Justo §9 y tablero T-143 al día.
 
-**Sigue:** middleware M1–M9 en `Bloky-Idiky` (migración fecha, rutas correo/datos, `/yo` con flags,
-humo, Dev); luego probar el flujo de punta a punta. M10 cambio 2FA y M11 SES prod después.
+**Sigue:** middleware M1–M8 hechos; falta M9 (Dev).
 
 ### 2026-11-22 · Justo · ALICE · País del celular en el ingreso (T-146, paso 1)
 
