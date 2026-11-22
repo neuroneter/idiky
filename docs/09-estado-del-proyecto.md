@@ -113,6 +113,14 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-22 · Justo · ALICE · País del celular en el ingreso (T-146, paso 1)
+
+**Qué:** en `App-Idiky`, el login pide país (bandera + indicativo) junto al celular. Catálogo
+`GET /api/app/catalogo-paises`; sugerencia por IP (`api.country.is`) → locale del teléfono → CO.
+El middleware recibe el celular completo (`+57300…`).
+
+**Sigue:** país del documento en el primer ingreso; residentes/invitados con país (resto de T-146).
+
 ### 2026-11-22 · Justo · Identidad · Datos a capturar, unicidad y fecha de nacimiento (RN-192)
 
 **Qué:** docs/20 §0 — unicidad celular/documento; datos del primer ingreso. **Fecha de nacimiento aprobada** (acuerdo
