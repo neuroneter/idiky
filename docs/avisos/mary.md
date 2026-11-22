@@ -137,7 +137,7 @@ Lo que hay que conciliar (lo de la ley va de memoria: **confirmarlo con un aboga
    el arrendatario. Si se restringe, sería por **reglamento** de cada copropiedad (como tu tope de RN-220). Que el poder
    vaya a alguien de **otra copropiedad** ya está en tu RN-217.
 4. **Menores de edad.** No pueden ser apoderados; un menor propietario vota por su representante legal. Hoy **no se guarda
-   la fecha de nacimiento**.
+   la fecha de nacimiento** — **2026-11-22:** ya se decidió capturarla (**RN-192**); falta construirla en el directorio y en ALICE (T-143).
 
 **Para ti:** revísalo con Daniel. Nada de esto entra a la matriz de permisos: lo legal queda fijo (RN-337).
 

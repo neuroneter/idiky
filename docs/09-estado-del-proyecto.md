@@ -113,13 +113,12 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
-### 2026-11-22 · Justo · Identidad · Datos a capturar y unicidad (docs/20 §0)
+### 2026-11-22 · Justo · Identidad · Datos a capturar, unicidad y fecha de nacimiento (RN-192)
 
-**Qué:** documentados los datos del usuario (tipo/número de documento, nombre, celular, correo; billeteras con
-`hashIdentidad`) y que **ni el celular ni el documento se repiten** entre personas (passkey / cadena). **Fecha de
-nacimiento** la pide Justo y **aún no está** en el modelo — aviso a Daniel §11.
+**Qué:** docs/20 §0 — unicidad celular/documento; datos del primer ingreso. **Fecha de nacimiento aprobada** (acuerdo
+telefónico con Daniel): **RN-192**, campo `fecha_nacimiento` en el directorio, obligatoria en datos básicos (T-143).
 
-**Sigue:** confirmación de Daniel sobre la fecha; T-143 rutas de correo.
+**Sigue:** migración + rutas en middleware; pedirla en ALICE junto al correo (T-143).
 
 ### 2026-11-21 · Daniel + IA (Claude) · Documentación al día: resumen del día y qué sigue
 

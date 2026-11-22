@@ -265,8 +265,8 @@ Lista de campos y unicidad, al día: [docs/20 §0](../20-alta-e-ingreso-desde-al
 - **Un celular es de una sola persona** en todo IDIKY, y el **documento** identifica a la persona. La Administración ya crea
   a los usuarios de las unidades y a los colaboradores **con tipo y número de documento** (obligatorio) y BLOKY revisa antes.
 - **Datos a capturar (primer ingreso):** tipo de documento, número, nombre, correo (validado), celular (ya lo trajo la
-  Administración). **Fecha de nacimiento:** la pediste tú; **aún no está** en el directorio — hay que confirmarla con Daniel
-  (aviso en [`daniel.md`](./daniel.md) §11).
+  Administración) y **fecha de nacimiento** (**RN-192**, aprobada con Daniel el 2026-11-22). Falta guardarla en el
+  middleware y pedirla en ALICE (T-143).
 - **Billeteras:** con tipo + número (→ `hashIdentidad`) + passkey bastan (§2b); no dependen del correo ni de la fecha.
 - **Primer ingreso a ALICE (RN-356):** 1) código por el celular; 2) tipo y número de documento, que **deben coincidir** con los
   que reportó la Administración (`POST /api/app/yo/documento` ya lo revisa: si no coinciden responde 409
