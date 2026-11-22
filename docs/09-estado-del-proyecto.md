@@ -113,6 +113,14 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-22 · Justo · Identidad · Datos a capturar y unicidad (docs/20 §0)
+
+**Qué:** documentados los datos del usuario (tipo/número de documento, nombre, celular, correo; billeteras con
+`hashIdentidad`) y que **ni el celular ni el documento se repiten** entre personas (passkey / cadena). **Fecha de
+nacimiento** la pide Justo y **aún no está** en el modelo — aviso a Daniel §11.
+
+**Sigue:** confirmación de Daniel sobre la fecha; T-143 rutas de correo.
+
 ### 2026-11-21 · Daniel + IA (Claude) · Documentación al día: resumen del día y qué sigue
 
 - Daniel: *documenta todo lo de hoy para que Justo, Mary y Jeimy trabajen sin problemas*. Se puso al día:

@@ -257,12 +257,20 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
 ## 9. Una persona, un documento, un celular; primer ingreso con correo — ⏳ abierto (2026-11-21)
 
 **Qué decidió Daniel:** [RN-353 a RN-357](../05-modelo-de-datos.md) (T-142 en el middleware y BLOKY, **T-143 es tuya**).
+Lista de campos y unicidad, al día: [docs/20 §0](../20-alta-e-ingreso-desde-alice.md).
 
+- **Identidad (no se repite):** un **celular** = una persona; un **documento** (país+tipo+número) = una persona. Ni el
+  celular ni la cédula (u otro documento) pueden pertenecer a otro usuario: con la passkey y las billeteras, repetirlos
+  mezclaría claves/cuentas (Justo, 2026-11-22; RN-353, RN-354, RN-298).
 - **Un celular es de una sola persona** en todo IDIKY, y el **documento** identifica a la persona. La Administración ya crea
   a los usuarios de las unidades y a los colaboradores **con tipo y número de documento** (obligatorio) y BLOKY revisa antes.
+- **Datos a capturar (primer ingreso):** tipo de documento, número, nombre, correo (validado), celular (ya lo trajo la
+  Administración). **Fecha de nacimiento:** la pediste tú; **aún no está** en el directorio — hay que confirmarla con Daniel
+  (aviso en [`daniel.md`](./daniel.md) §11).
+- **Billeteras:** con tipo + número (→ `hashIdentidad`) + passkey bastan (§2b); no dependen del correo ni de la fecha.
 - **Primer ingreso a ALICE (RN-356):** 1) código por el celular; 2) tipo y número de documento, que **deben coincidir** con los
   que reportó la Administración (`POST /api/app/yo/documento` ya lo revisa: si no coinciden responde 409
-  `documento_no_coincide`); 3) **un correo, validado con un código**; 4) los datos básicos que ya tienes mapeados. Solo ahí
+  `documento_no_coincide`); 3) **un correo, validado con un código**; 4) los datos básicos. Solo ahí
   entra. Las siguientes veces, solo el código del celular. Después: huella y facial.
 - **Cambiar celular o correo (RN-357):** el celular nuevo se valida con su código **y** un código al correo validado; el correo
   nuevo, con su código **y** un código al celular. Mientras no exista en ALICE, lo hace soporte desde BOB.

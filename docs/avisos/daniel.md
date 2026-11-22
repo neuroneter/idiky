@@ -146,6 +146,31 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
+## 11. Datos del usuario y unicidad (Justo, 2026-11-22) — ⏳ tu confirmación
+
+Justo revisó RN-353…357 / docs/20 y dejó escrito en [docs/20 §0](../20-alta-e-ingreso-desde-alice.md):
+
+**Ya alineado con lo tuyo**
+- Un **celular** y un **documento** = una sola persona cada uno; **no se repiten** entre usuarios (RN-353, RN-354).
+- Motivo de cadena/ALICE: la passkey del teléfono y las billeteras (`hashIdentidad` del documento) no pueden quedar
+  atadas a dos personas.
+- Para **crear billeteras** bastan tipo + número de documento (+ passkey). Correo y nombre son del perfil / 2FA.
+
+**Campos que Justo quiere capturar en el primer ingreso**
+
+| Campo | ¿Ya está? |
+|---|---|
+| Tipo + número de documento | ✅ |
+| Nombre | ✅ |
+| Celular | ✅ (lo pone Administración) |
+| Correo (con código) | ✅ decidido; rutas T-143 |
+| **Fecha de nacimiento** | ❌ **No está** en el directorio ni en ninguna RN |
+
+**Te pide:** ¿aprobamos `fechaNacimiento` (o el nombre que digas) en `directorio.persona` y en el paso de «datos
+básicos» del primer ingreso (T-143)? Si sí, Justo lo mete en el contrato de docs/20 y en ALICE.
+
+---
+
 ## 10. Resumen para Daniel — sesión Justo 2026-11-16 (cierre del día)
 
 > Léelo primero si retomas ALICE / cadena / avatar. Detalle en la bitácora
