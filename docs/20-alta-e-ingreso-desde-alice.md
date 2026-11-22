@@ -27,6 +27,36 @@ ninguna base.
 
 ---
 
+## 0. Identidad y datos que se capturan (Justo, 2026-11-22; alinea RN-353, RN-354, RN-356)
+
+### Identidad (no se repite)
+
+| Dato | Regla | Por qué |
+|---|---|---|
+| **Celular** | **Una sola persona** en todo IDIKY (RN-353) | Es el canal del código (WhatsApp) y ancla la sesión |
+| **Documento** (país + tipo + número) | **Una sola persona** (RN-354, ADR-0035) | Identifica a la persona; de aquí sale el `hashIdentidad` de las billeteras (RN-298) |
+
+**No** puede haber dos usuarios con el mismo celular, ni dos con el mismo documento. Si se reutilizaran, la passkey del
+teléfono y las billeteras en cadena quedarían atadas a la persona equivocada (claves / cuentas repetidas). Eso **es** la
+identidad de la persona en IDIKY y en la cadena.
+
+### Datos a capturar (primer ingreso / perfil)
+
+| Campo | Quién lo pone | Notas |
+|---|---|---|
+| **Tipo de documento** | Administración al crear; la persona **confirma** en el primer ingreso | Obligatorio; catálogo por país (§1.0) |
+| **Número de documento** | Igual | Obligatorio; debe **coincidir** con el reportado (`documento_no_coincide`, §2) |
+| **Nombre** | Administración; la persona puede completar/ajustar en datos básicos | Obligatorio |
+| **Celular** | Administración al crear | Obligatorio; único (arriba). Ingreso con código |
+| **Correo electrónico** | La persona en el primer ingreso, **validado con código** (§2c) | Obligatorio para terminar el primer ingreso (RN-356) |
+| **Fecha de nacimiento** | La persona en datos básicos | **Propuesta Justo (2026-11-22):** aún **no** está en el directorio ni en RN; falta que Daniel la confirme y el middleware la guarde |
+
+Con **tipo + número de documento** (y el secreto de IDIKY) el middleware ya puede calcular `hashIdentidad` y ALICE puede
+**crear las billeteras** (§2b) tras la passkey. Nombre, correo y (si se aprueba) fecha de nacimiento son del perfil; el
+correo además es segundo factor (RN-357).
+
+---
+
 ## 1. Ingresar
 
 ### 1.0 El catálogo de países (antes de ingresar)
@@ -149,9 +179,10 @@ Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` + B
 ## 2c. El correo con código (primer ingreso y segundo factor) — por construir (T-143)
 
 **Decidido (RN-356, RN-357):** el primer ingreso es 1) código al celular → 2) documento que coincida (§2) → 3) **un correo,
-validado con un código** → 4) los datos básicos; solo ahí entra. Las veces siguientes, solo el código del celular. Cambiar el
-celular pide su código **y** uno al correo validado; cambiar el correo pide su código **y** uno al celular. Después: huella y
-facial.
+validado con un código** → 4) los **datos básicos** (§0: nombre; **fecha de nacimiento** si Daniel la aprueba); solo ahí
+entra. Tras el documento (y con `hashIdentidad`) puede crear las **billeteras** (§2b). Las veces siguientes, solo el código
+del celular. Cambiar el celular pide su código **y** uno al correo validado; cambiar el correo pide su código **y** uno al
+celular. Después: huella y facial.
 
 **Lo que ya está:** el middleware ya **envía correos reales** por Amazon SES desde `no-responder@idiky.com`
 ([ADR-0036](./adr/0036-correo-con-amazon-ses.md), [`infra/correo-ses.md`](../infra/correo-ses.md)). En *sandbox* solo llegan
