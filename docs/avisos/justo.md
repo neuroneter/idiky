@@ -351,3 +351,11 @@ en **[`docs/23`](../23-propietario-arrendatario-y-vinculos.md)** · **ya en `mai
 
 **Mientras Daniel no autorice:** no construir rol arrendatario ni visitante nuevo en contra del docs/23; sí se puede
 seguir con Mi unidad (residente/invitado) según docs/20 §5.
+
+## 9. docs/23 (propietario, arrendatario, visitantes, Merkle) — 🟡 Daniel respondió con ajustes (2026-11-23)
+
+La respuesta, decisión por decisión, está en [`avisos/daniel.md`](./daniel.md) §12. En corto: **D1, D2, D6 aprobadas**;
+**D3** con facultades como **roles fijos de BOB** (no checkboxes por persona); **D4/D5**: el **visitante puntual usa un
+pase sin app** y las billeteras son para quien usa ALICE; **D7/D8** en un **ADR aparte**, fase posterior. Siguiente: redactar
+el ADR de D1–D6 y seguir con «Mi unidad» en ALICE.
+

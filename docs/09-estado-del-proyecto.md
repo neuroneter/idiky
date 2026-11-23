@@ -113,6 +113,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Daniel + IA (Claude) · Producto · Respuesta al docs/23 de Justo (propietario, arrendatario, visitantes)
+
+Revisado contra las RN, CU y ADR vigentes; respuesta en `avisos/daniel.md` §12. **Aprobadas:** D1 (cadena de altas sin
+auto-reclamo), D2 (el propietario puede no vivir ahí), D6 (escala el paquete). **Con ajustes:** D3 (las facultades del
+arrendatario son roles fijos de BOB, no permisos por persona, por ADR-0034), D4/D5 (el visitante puntual usa un pase sin
+app; billeteras para quien usa ALICE; Ley 1581). **En principio, ADR aparte:** D7/D8 (Merkle de altas y accesos). Nombres:
+propietario · arrendatario · conviviente · invitado; el visitante es un pase. Varios propietarios por unidad → definir el
+principal con Mary. Justo redacta el ADR.
+
 ### 2026-11-23 · Mary + IA (Claude) · Al citar, cada punto dice cómo se cuenta (RN-211, aviso 4)
 
 Mary respondió el punto 1 del aviso 4: la base del voto *«depende por lo que se vote»*, y la define el administrador

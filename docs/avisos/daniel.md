@@ -146,7 +146,7 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
-## 12. Propietario, arrendatario, visitantes y bitácora Merkle — ⏳ abierto (Justo, 2026-11-23)
+## 12. Propietario, arrendatario, visitantes y bitácora Merkle — 🟡 respondido con ajustes (Daniel, 2026-11-23)
 
 **Documento a revisar con tu IA (ya en `main` del arnés `idiky`):**  
 [`docs/23-propietario-arrendatario-y-vinculos.md`](../23-propietario-arrendatario-y-vinculos.md)  
@@ -171,6 +171,34 @@ Secretos `EVOLUTION_*` en el servidor.
 Mi unidad con residente/invitado (docs/20 §5).
 
 **Al cerrar:** marcar ✅ aquí, abrir ADR (o pedir a Justo que lo redacte) y actualizar docs/20 / ADR-0032 si hace falta.
+
+**Respuesta de Daniel (2026-11-23), revisada con su IA contra las RN, CU y ADR vigentes:**
+
+| # | Decisión | Respuesta |
+|---|---|---|
+| **D1** | Cadena de altas, sin auto-reclamo | ✅ **Aprobada.** Coincide con RN-320, RN-328, RN-354 y RN-365 |
+| **D2** | Propietario ≠ vive ahí | ✅ **Aprobada.** Ya lo dijo Mary (2026-11-10) y lo recoge RN-365 |
+| **D3** | Arrendatario con fechas + facultades | 🟡 **Aprobada con ajuste.** Las facultades **no** se marcan persona por persona: eso es dar permisos por persona, lo que se descartó el 2026-11-21 para mantener el estándar (ADR-0034, RN-333). Las facultades son **roles fijos definidos en BOB** (p. ej. «Arrendatario · solo vivir», «Arrendatario · operación completa»); el propietario elige uno al crear al arrendatario y la matriz sigue siendo una sola. Agregar al catálogo de BOB: **propietario** (hoy `administrador_unidad`), **arrendatario** y **conviviente** |
+| **D4** | Visitantes usan ALICE | 🟡 **Ajustada.** El **visitante puntual no necesita ALICE**: quien vive le manda un **pase/QR por WhatsApp** y portería lo valida (como CU-P-02 y CU-S-04). Pedirle app, documento, correo, fecha de nacimiento y billeteras por una visita de una hora es fricción y va contra la minimización de la Ley 1581. El **recurrente**, el **conviviente**, el **arrendatario** y el **propietario** sí usan ALICE. El embudo multi-conjunto se logra **invitando** a instalarla, no obligando |
+| **D5** | Doble cartera para todos | 🟡 **Ajustada:** para **todos los que usan ALICE** (D4), sí, en el primer ingreso. El visitante puntual con pase no tiene billeteras |
+| **D6** | Lo que escala es el paquete | ✅ **Aprobada.** Es la matriz de ADR-0034 |
+| **D7** | BD operativa + Merkle periódico; tokens solo roles estables | 🟡 **Aprobada en principio, como ADR aparte y fase posterior.** Encaja con RN-298 (sin PII) y ADR-0031 (sin mint por visita), pero falta decidir qué contrato la recibe, la frecuencia, el costo por copropiedad en Polygon y cómo se alinea con la minuta de portería de Mary (RN-236). No frena a ALICE |
+| **D8** | Bitácora de portería e ingresos auditable | 🟡 **Igual que D7**: en el mismo ADR |
+
+**Nombres (una sola lista):** roles en la unidad = **propietario · arrendatario · conviviente · invitado** (con fechas, el de
+RN-321). El **visitante** es un **pase**, no una residencia. Así no se cruzan «invitado», «familiar» y «visitante recurrente».
+
+**Preguntas de docs/23 §12:**
+- **Varios propietarios por unidad:** sí puede pasar (herencias, parejas), pero RN-365 dice que vota **uno** por unidad:
+  hay que definir el propietario **principal** (quien vota y crea al arrendatario). Se lleva a Mary.
+- **Al vencer el arriendo:** sí, se finalizan solos los convivientes e invitados que creó el arrendatario.
+- **Propietario no residente:** sí sigue viendo la cartera y puede bloquear al arrendatario en cualquier momento (RN-324).
+- Las demás (regla del recurrente, nombre en la UI, invitación por código, frecuencia del cierre Merkle) quedan para el ADR.
+
+**Siguiente paso:** Justo redacta el **ADR** con estos ajustes (D1–D6) y las reglas nuevas, del rango de Integración o
+pidiendo el suyo. El de Merkle (D7–D8) va aparte. Mientras tanto sigue con **«Mi unidad» en ALICE** con residente e
+invitado contra la API actual (docs/20 §5).
+
 
 ---
 
