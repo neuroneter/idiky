@@ -1,13 +1,14 @@
 # 23 — Propietario, arrendatario y vínculos con la vivienda
 
-> **Estado:** borrador de producto (Justo, 2026-11-22). Se puede ir mejorando; **aún no es ADR**.
-> Cuando Daniel lo cierre, se convierte en ADR + reglas (`RN-…`) y se actualizan [docs/20](./20-alta-e-ingreso-desde-alice.md)
-> y [ADR-0032](./adr/0032-residentes-colaboradores-e-ingreso-de-alice.md).
+> **Estado:** ⏳ **listo para revisión de Daniel** (Justo, 2026-11-23). Borrador de producto; **aún no es ADR**.
+> Cuando Daniel lo autorice (o lo ajuste), se convierte en ADR + reglas (`RN-…`) y se actualizan
+> [docs/20](./20-alta-e-ingreso-desde-alice.md) y [ADR-0032](./adr/0032-residentes-colaboradores-e-ingreso-de-alice.md).
 >
-> **Para qué sirve:** dejar escrita la visión de cómo una persona se asocia a una vivienda, quién crea a quién,
-> qué ve ALICE al entrar, y cómo encajan el arrendatario, la familia, los visitantes y la cadena.
+> **Para qué sirve:** visión de cómo una persona se asocia a una vivienda, quién crea a quién, qué ve ALICE,
+> arrendatario / familia / visitantes, billeteras, bitácora Merkle y tokens on-chain.
 >
-> **Relacionados:** ADR-0025 · ADR-0031 · ADR-0032 · ADR-0034 · docs/20 · RN-320, RN-321, RN-326, RN-328, RN-365 · T-127
+> **Relacionados:** ADR-0025 · ADR-0031 · ADR-0032 · ADR-0034 · docs/20 · RN-320, RN-321, RN-326, RN-328, RN-365 · T-127  
+> **Aviso a Daniel:** [`avisos/daniel.md`](./avisos/daniel.md) §12
 
 ---
 
@@ -15,7 +16,8 @@
 
 La Administración del conjunto carga a los **propietarios** de cada unidad (CSV). El propietario **no tiene que vivir ahí**:
 registra a quien vive (arrendatario, familia) y les pasa facultades. Quien vive opera el día a día (visitantes, convivientes).
-ALICE siempre muestra **todos los lugares** donde esa persona tiene vínculo. Las llaves (passkey / billeteras) solo viven en la app.
+ALICE siempre muestra **todos los lugares** donde esa persona tiene vínculo. **Todo usuario de ALICE** activa passkey y
+**dos billeteras** en el primer ingreso; lo que cambia por vínculo es el **paquete de permisos/servicios**, no las carteras.
 
 ---
 
@@ -128,11 +130,12 @@ Nombres que queremos usar en ALICE (hoy en API el dueño se llama `administrador
 | **Propietario** (admin. de la unidad) | Administración (CSV / alta) | Opcional | Crear arrendatario, familia, visitantes; decidir facultades; es quien vota salvo poder (RN-365) |
 | **Arrendatario** | Propietario | Sí (en el periodo del contrato) | Casi la operación del dueño **según facultades**; gestiona visitantes y convivientes |
 | **Residente / familiar** | Propietario o arrendatario (si tiene facultad) | Sí | Vivir; visitantes si se le permite; no es dueño ni asume el paquete completo del arrendatario |
-| **Invitado (app)** | Propietario o quien tenga `mi_unidad: crear` | Temporal (`desde`/`hasta` por **días**) | Entra a ALICE solo en la ventana; permisos mínimos |
-| **Visitante (portería / pase)** | Quien vive con permiso | Horas / un día / recurrente | Acceso; no implica billeteras completas si solo pasa portería |
+| **Visitante puntual** | Quien vive con facultad | Horas / un día | App + billeteras; solo pase/portería |
+| **Visitante recurrente** | Quien vive con facultad | Regla recurrente o días | App + billeteras; servicios si el paquete los incluye |
+| **Familiar** (hoy `residente` / antes “invitado” de días en API) | Propietario o arrendatario con facultad | Sí / o ventana de días | App + billeteras; zonas según paquete |
 
 > **Hueco actual:** en BLOKY/ALICE la residencia solo tiene `administrador | residente | invitado`.  
-> **Arrendatario** como rol propio (con fechas y facultades) **falta** — hay que cerrarlo con Daniel/Mary (T-127 / RN-365).
+> Faltan **arrendatario** (fechas + facultades) y el modelo fino de **visitante puntual/recurrente** — cerrar con Daniel (y Mary en voto, RN-365).
 
 ---
 
@@ -220,17 +223,82 @@ flowchart LR
 
 ---
 
-## 7. Visitantes vs invitado de app
+## 7. Escalones de identidad: visitante → recurrente → familiar → residente
 
-| | **Invitado (residencia)** | **Visitante (pase)** |
+Acuerdo de producto (Justo, 2026-11-23; afinado el mismo día): **todos los que usan ALICE activan las dos
+billeteras** en el primer ingreso (passkey / huella o factor del teléfono). El costo es el mismo chequeo que ya
+hacemos para firmar el alta; **no aporta mucho posponerlas** por tipo de vínculo. Aunque el visitante puntual
+casi no las use, quedan listas para el siguiente edificio o cuando suba de escalón.
+
+Lo que **sí** se escala por vínculo es el **paquete de permisos / servicios**, no la existencia de las carteras.
+
+| Escalón | App + doble cartera | Qué puede (visión) |
 |---|---|---|
-| Hoy en API | `POST …/invitados` con `desde`/`hasta` (días) | Demo CU-R-10 / módulo `visitantes` |
-| Entra a ALICE | Sí, solo en la ventana | No necesariamente |
-| Datos mínimos | Nombre, celular, documento, fechas | Celular + cédula (+ vigencia) |
-| Cadena | Opcional (billeteras si entra a la app) | Pase firmado o token de corta duración — **por diseñar** |
-| Quién lo crea | Propietario / quien tenga permiso en Mi unidad | Quien vive (arrendatario o familiar autorizado) |
+| **Visitante puntual** | Sí (primer ingreso completo) | Solo ingreso autorizado (horas / un día); QR/pase desde la app |
+| **Visitante recurrente** | Sí | Reglas de recurrencia; servicios (gimnasio, piscina…) si el paquete los incluye |
+| **Familiar / conviviente** | Sí | Vive; visitantes si tiene facultad; zonas/reservas según permisos |
+| **Arrendatario / propietario** | Sí | Operación completa según rol y facultades |
 
-**Opinión de diseño:** no forzar alta completa de billeteras a quien solo visita unas horas. Si necesita token en blockchain, que sea un **pase de visita** con vigencia, no el mismo flujo del propietario.
+```mermaid
+flowchart TB
+  Primero[Primer ingreso ALICE] --> Wal[Dos billeteras · passkey]
+  Wal --> V1[Visitante puntual · solo pase]
+  Wal --> V2[Recurrente · pase + paquete]
+  Wal --> Fam[Familiar · reservas / zonas…]
+  Wal --> Arr[Arrendatario / propietario]
+  V2 --> Serv[Servicios contratados en el vínculo]
+  Fam --> Serv
+```
+
+### 7.1 Cuadrar permisos y “contratar” servicios
+
+Al crear o editar el vínculo (familiar, recurrente, arrendatario), quien autoriza **configura el paquete**:
+
+- solo acceso / portería;
+- zonas comunes (gimnasio, piscina, …) → módulo `reservas` u otro;
+- gestionar visitantes;
+- reuniones / poder (solo con poder explícito, RN-365).
+
+Eso se traduce a **permisos de la matriz** (ADR-0034) + vigencia del vínculo. No es un mint distinto por servicio:
+es el mismo usuario (ya con billeteras) con más o menos módulos abiertos en ese edificio.
+
+### 7.2 Visitante puntual vs recurrente
+
+| | **Visitante puntual** | **Visitante recurrente / invitado** |
+|---|---|---|
+| Vigencia | Horas o un día | Días, semanas o regla recurrente |
+| Billeteras | Sí (mismo primer ingreso) | Sí |
+| Portería | Pase / QR desde ALICE | Igual + puede usar más módulos si el paquete lo dice |
+| Quién lo crea | Quien vive con facultad `visitantes: crear` | Igual; el paquete lo define quien crea |
+
+---
+
+## 7b. Bitácora auditable (portería e ingresos) + ancla Merkle
+
+**Operación en base de datos** (middleware): cada autorización y cada ingreso (portería / acceso a la unidad)
+guarda *quién entró, quién autorizó, unidad, vigencia, resultado*.
+
+**Cadena:** no un token por visita. Periódicamente (p. ej. **cierre diario** o por turno) se publica en el
+proxy `Copropiedad` (o contrato de bitácora) la **raíz Merkle** del lote — sin PII (RN-298). Sirve de
+notario: la bitácora off-chain se puede demostrar íntegra después.
+
+Árboles sugeridos en el mismo cierre (o dos raíces):
+
+1. **Vínculos / altas** — quién montó a quién ese día.
+2. **Accesos** — quién pasó portería (o ingreso registrado) y con qué autorización.
+
+```mermaid
+flowchart LR
+  BD[BD · visitas y vínculos] --> Lote[Lote del día]
+  Lote --> M1[Merkle altas]
+  Lote --> M2[Merkle accesos]
+  M1 --> Chain[Ancla on-chain]
+  M2 --> Chain
+```
+
+Los **tokens de rol** del ADR-0031 siguen para derechos **estables** (propietario, admin del conjunto…).
+La visita no hace mint por evento: vive en BD + pase firmado (patrón reuniones) + ancla Merkle del lote.
+La persona **sí** tiene billeteras (primer ingreso); eso no implica token ERC-1155 de visitante.
 
 ---
 
@@ -259,18 +327,36 @@ Un solo login → un listado → elige contexto. Bloquearlo en un apto **no** lo
 | Rol **arrendatario** + fechas de contrato | **Falta** |
 | Paquete de **facultades** al crear arrendatario | **Falta** (encaja con matriz + poder) |
 | Etiqueta “Propietario” en `lugares` | **Falta** (hoy `administrador`) |
-| Visitante por horas / recurrente + pase cadena | **Falta** |
+| Visitante en app (todos con billeteras; paquete de servicios por vínculo) | **Falta** |
+| Bitácora portería/ingresos + cierre Merkle diario | **Falta** (visión §7b) |
+| Paquete de servicios (gimnasio/piscina) al crear familiar/recurrente | **Falta** (matriz + reservas) |
 | Auto-registro “reclamo mi apto” | **Fuera de alcance** (salvo invitación o solicitud aprobada, futuro) |
 
 ---
 
-## 10. Orden sugerido de trabajo
+## 10. Orden sugerido de trabajo (después de autorizar)
 
-1. **Documentar y acordar** este archivo con Daniel (y Mary en voto/arrendatario).
-2. **ADR** que fije: propietario ≠ vive ahí; arrendatario con vigencia y facultades; sin auto-reclamo.
-3. **ALICE · Mi unidad** contra la API actual (residente / invitado) — valor inmediato.
-4. Middleware: rol `arrendatario` + campos de contrato + facultades → permisos.
-5. Visitantes de corta duración (pase); cadena cuando el modelo de token esté claro.
+1. **ADR** a partir de este docs/23 (Daniel + Justo; Mary en voto/arrendatario si hace falta).
+2. **ALICE · Mi unidad** contra la API actual (residente / invitado) — valor inmediato, no bloquea el ADR.
+3. Middleware: rol `arrendatario` + fechas + facultades → permisos.
+4. Visitantes en app (pase); paquetes de servicios; bitácora + cierre Merkle.
+
+---
+
+## 10b. Qué se pide autorizar a Daniel
+
+Marcar ✅ / ajustar / rechazar. Detalle en §12.
+
+| # | Decisión | Propuesta de Justo |
+|---|---|---|
+| D1 | Cadena de altas | CSV → propietario → arrendatario/familia/visitantes; sin auto-reclamo de apto |
+| D2 | Propietario ≠ vive ahí | El dueño puede no residir; opera o delega al arrendatario |
+| D3 | Arrendatario | Rol propio con fechas + paquete de facultades |
+| D4 | Visitantes usan ALICE | Identidad en app; embudo multi-conjunto |
+| D5 | Doble cartera | **Todos** la activan en el primer ingreso (passkey) |
+| D6 | Qué escala | El **paquete** (pase / zonas / operar), no las billeteras |
+| D7 | Cadena vs BD | Operación en BD; **Merkle periódico** de altas y accesos; tokens on-chain solo roles estables |
+| D8 | Bitácora | Portería e ingresos a unidad auditables + ancla on-chain sin PII |
 
 ---
 
@@ -285,6 +371,8 @@ Un solo login → un listado → elige contexto. Bloquearlo en un apto **no** lo
 | **Residencia** | Fila persona+unidad+rol en el esquema del edificio |
 | **Asignación** | Fila persona+copropiedad+rol en el directorio |
 | **Pase de visita** | Permiso temporal de acceso (horas/días/recurrente); distinto de residencia |
+| **Doble cartera** | Las dos billeteras (transaccional + financiera); **todos** las activan en el primer ingreso ALICE |
+| **Cierre Merkle** | Ancla periódica on-chain del lote de altas y/o accesos; bitácora auditable sin PII |
 
 ---
 
@@ -292,14 +380,17 @@ Un solo login → un listado → elige contexto. Bloquearlo en un apto **no** lo
 
 > Espacio para Justo / Daniel / Mary. Ir tachando o ampliando.
 
+- [x] ~~Visitante en app + BD/Merkle en vez de mint por visita~~ — acordado 2026-11-23 (§7, §7b)
+- [x] ~~Doble cartera para todos en el primer ingreso~~ — afinado 2026-11-23 (§7); el paquete de servicios es lo que escala
 - [ ] ¿Las facultades del arrendatario son checkboxes fijos o reutilizan solo la matriz ADR-0034?
 - [ ] ¿Un apto puede tener **varios propietarios** (copropiedad del inmueble)? ¿Quién “manda” al crear arrendatario?
 - [ ] Al vencer el arrendamiento: ¿auto-finaliza residencias de familia/visitantes que creó el arrendatario?
 - [ ] ¿El propietario no residente sigue viendo cartera y puede bloquear al arrendatario en cualquier momento?
-- [ ] Visitante recurrente: ¿regla en middleware, en cadena, o ambas?
+- [ ] Visitante recurrente: ¿la regla (lun–vie 8–18, etc.) vive solo en middleware?
 - [ ] Nombre en UI: ¿“Administrador de la unidad” o solo “Propietario”?
 - [ ] Invitación por código / solicitud de vínculo: ¿sí en v1 o después del CSV?
+- [ ] Cierre Merkle: ¿diario fijo, por turno de portería, o al cerrar el día en BLOKY?
 
 ---
 
-*Última actualización: 2026-11-22 · Justo (borrador). Mejorar este archivo; no construir en contra hasta que Daniel lo marque como decisión.*
+*Última actualización: 2026-11-23 · Justo · **listo para revisión de Daniel** (avisos/daniel.md §12). No construir roles nuevos en contra hasta que lo autorice.*

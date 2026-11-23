@@ -113,6 +113,13 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Justo · Producto · docs/23 listo para revisión de Daniel
+
+- Afinado docs/23: visitantes usan ALICE; **todos** activan doble cartera en el primer ingreso; escala el **paquete**
+  (pase / zonas / operar); operación en BD + **cierre Merkle** de altas y accesos; tokens on-chain solo roles estables.
+- Tabla **§10b** con decisiones D1–D8 para autorizar. Aviso en [`avisos/daniel.md`](./avisos/daniel.md) §12.
+  Archivo: [`docs/23-propietario-arrendatario-y-vinculos.md`](./23-propietario-arrendatario-y-vinculos.md).
+
 ### 2026-11-22 · Justo · Producto · Propietario, arrendatario y vínculos con la vivienda (docs/23)
 
 - Justo cerró en conversación la visión: la Administración carga **propietarios** por CSV (no implica que vivan);

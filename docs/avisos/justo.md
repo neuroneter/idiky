@@ -344,15 +344,10 @@ catálogo.
 
 ---
 
-## 11. Propietario, arrendatario y vínculos — 📝 borrador (2026-11-22)
+## 11. Propietario, arrendatario y vínculos — ⏳ listo para Daniel (2026-11-23)
 
-Justo dejó documentada la visión de producto (cadena CSV → propietario → arrendatario/familia/visitantes; listado
-`lugares`; tres “contratos” que no se mezclan; sin auto-reclamo de apartamento) en:
+Visión de producto completa (altas, arrendatario, visitantes en app, doble cartera para todos, bitácora + Merkle)
+en **[`docs/23`](../23-propietario-arrendatario-y-vinculos.md)** · aviso a Daniel §12.
 
-**[`docs/23-propietario-arrendatario-y-vinculos.md`](../23-propietario-arrendatario-y-vinculos.md)**
-
-**Aún no es decisión cerrada con Daniel.** Justo lo irá ampliando. Mientras tanto: **no construir** el rol arrendatario
-ni facultades nuevas en API/ALICE en contra de ese borrador; sí se puede seguir con Mi unidad (residente/invitado) según
-docs/20 §5 y ADR-0032.
-
-**Para hablar con Daniel:** §12 del docs/23 (preguntas abiertas) y cuándo pasar el borrador a ADR + RN.
+**Mientras Daniel no autorice:** no construir rol arrendatario ni visitante nuevo en contra del docs/23; sí se puede
+seguir con Mi unidad (residente/invitado) según docs/20 §5.
