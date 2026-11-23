@@ -286,7 +286,7 @@ celular/correo (M10) hasta que existan esas rutas.
   {
     "copropiedadId": "cp-123", "nombre": "Conjunto La Pradera", "api": "https://bloky-dev.idiky.com",
     "unidades": [
-      { "unidadId": "…", "codigo": "T2-502", "rol": "administrador" },
+      { "unidadId": "…", "codigo": "T2-502", "rol": "propietario" },
       { "unidadId": "…", "codigo": "T1-101", "rol": "invitado", "desde": "2026-11-10", "hasta": "2026-11-20" }
     ],
     "colaborador": null,
@@ -331,8 +331,8 @@ celular/correo (M10) hasta que existan esas rutas.
       "copropiedadId": "cp-123", "nombre": "Conjunto La Pradera", "api": "https://bloky-dev.idiky.com",
       "unidades": [
         {
-          "unidadId": "…", "codigo": "T2-502", "rol": "administrador",
-          "roles": ["administrador_unidad"],
+          "unidadId": "…", "codigo": "T2-502", "rol": "propietario",
+          "roles": ["propietario"],
           "permisos": {
             "mi_unidad": ["ver", "crear", "editar", "eliminar"],
             "visitantes": ["ver", "crear", "eliminar"],
@@ -394,8 +394,8 @@ C = crear, E = editar, A = anular (eliminar); — = sin acceso.
 
 | Rol | mi_unidad | visitantes | correspondencia | reservas | pagos | paz_y_salvo | pqrs | cartelera | asambleas | reuniones | proyectos | directorio | porteria |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| Administrador de la unidad | VCEA | VCEA | V | VCEA | VC | VC | VCE | V | V | V | V | V | — |
-| Residente | V | VCA | V | VCA | V | V | VC | V | V | V | V | V | — |
+| Propietario · Arrendatario · operación completa | VCEA | VCEA | V | VCEA | VC | VC | VCE | V | V | V | V | V | — |
+| Conviviente · Arrendatario · solo vivir | V | VCA | V | VCA | V | V | VC | V | V | V | V | V | — |
 | Invitado | — | — | — | — | — | — | — | V | — | V | — | — | — |
 | Administrador · Delegado | — | V | V | VE | — | — | VE | VCEA | V | V | VCEA | V | V |
 | Presidente del consejo · Consejero | — | — | — | — | — | — | V | V | V | V | V | V | — |
@@ -408,19 +408,26 @@ C = crear, E = editar, A = anular (eliminar); — = sin acceso.
 
 **Los cargos de hoy se traducen así** mientras BLOKY no asigne roles (T-134): vigilante y portería → Seguridad; aseo → Aseo;
 mantenimiento y jardinería → Mantenimiento; administración y secretaría → Secretaría; «otro» → sin rol. Las residencias:
-`administrador` → Administrador de la unidad; `residente` → Residente; `invitado` → Invitado.
+`propietario` → Propietario; `arrendatario` → **su paquete** (`arrendatario_operacion` o `arrendatario_solo_vivir`);
+`conviviente` → Conviviente; `invitado` → Invitado (RN-366, T-147, 2026-11-23).
 
-## 5. La unidad: residentes, mascotas e invitados (RN-321, solo el administrador de la unidad)
+## 5. La unidad: propietario, arrendatario, convivientes, invitados y mascotas (RN-321, RN-366 a RN-369)
+
+> **Cambio de contrato del 2026-11-23 (T-147, en BLOKY Dev `bloky-31e8af6`).** Los roles en la unidad ahora son
+> **`propietario` · `arrendatario` · `conviviente` · `invitado`** (RN-366). En las respuestas ya **no** sale `administrador`
+> ni `residente`: las filas que existían se renombraron. Al **crear**, la API todavía acepta `rol: "administrador"` y
+> `"residente"` como nombres viejos (se guardan como `propietario` y `conviviente`), mientras ALICE cambia.
 
 Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
 
 | Ruta | Qué hace |
 |---|---|
 | `GET …/residencias` | Quiénes están en la unidad: personas (con rol), mascotas e invitados |
-| `POST …/residentes` `{ nombre, celular, paisCelular?, tipoDocumento, numeroDocumento, paisDocumento?, rol: "administrador" \| "residente", aceptarCelularRegistrado? }` | Agrega un residente |
+| `POST …/residentes` `{ nombre, celular, paisCelular?, tipoDocumento, numeroDocumento, paisDocumento?, rol: "propietario" \| "conviviente", aceptarCelularRegistrado? }` | Agrega un conviviente (por defecto) o un copropietario. **Propietario: solo lo crea otro propietario** |
+| `POST …/arrendatarios` `{ …lo mismo, desde, hasta, paquete }` | **Solo el propietario** (RN-366, RN-369). `paquete` es un rol fijo de BOB: `GET /api/app/paquetes-de-arrendatario` da la lista (`[{ id, nombre }]`, hoy «Arrendatario · operación completa» y «· solo vivir»). Fechas obligatorias, hasta 5 años |
 | `POST …/invitados` `{ nombre, celular, paisCelular?, tipoDocumento, numeroDocumento, paisDocumento?, desde, hasta, aceptarCelularRegistrado? }` | Agrega un invitado con sus fechas (obligatorias) |
 | `POST …/mascotas` `{ nombre, especie, foto? }` | Agrega una mascota (perfil, sin ingreso) |
-| `POST …/residencias/:rid/bloquear` · `…/desbloquear` · `…/finalizar` `{ motivo }` | Gestiona a uno de su unidad |
+| `POST …/residencias/:rid/bloquear` · `…/desbloquear` · `…/finalizar` `{ motivo }` | Gestiona a uno de su unidad. **Finalizar es en cadena** (RN-368): también se finalizan los convivientes, invitados y mascotas que esa persona creó |
 
 - `403` si quien llama no es **administrador de esa unidad**. **Con T-135** esto lo decide la matriz (§4b): `GET` pide
   `mi_unidad: ver`; agregar, `crear`; bloquear y desbloquear, `editar`; finalizar, `eliminar`. Además, la persona tiene que
@@ -437,7 +444,13 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
     true` y la persona queda con **su** celular de siempre; si no, no continúa.
   - **`409 celular_de_otra`** — ese celular ya es de otra persona (un celular, una persona: RN-353).
   - `409 ya_esta` — esa persona ya está en la unidad.
-- No se puede finalizar ni bloquear al **último administrador** de la unidad (RN-324); eso solo lo hace la Administración.
+- No se puede finalizar ni bloquear al **último propietario** de la unidad (`409 sin_propietario`, RN-324); eso solo lo hace la
+  Administración.
+- **`403 solo_propietario`** — crear, bloquear o finalizar a un **propietario** o a un **arrendatario** es solo del propietario
+  (RN-369), aunque el arrendatario con operación completa tenga `mi_unidad` completo.
+- **Al vencer el arriendo** (RN-368) el arrendatario y lo que creó se finalizan solos, la próxima vez que alguien entra o lee
+  la unidad; ALICE solo ve que ya no está.
+- En `GET …/residencias` y en `lugares`, el arrendatario trae `desde`, `hasta` y `paquete`.
 - Nada se borra: se finaliza.
 
 ## 6. Reuniones con video

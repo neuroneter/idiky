@@ -392,3 +392,11 @@ escrita de Daniel; si la tarea lo pide, detente y pídele a Justo que lo consult
 **Sí puedes seguir:** «Mi unidad» en ALICE contra la API de hoy (docs/20 §5, residente e invitado), y redactar el **ADR** de
 D1–D6 con las reglas RN-366 a RN-369. El cambio de nombre en la API (`administrador` → `propietario`) y los roles nuevos los
 hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
+
+- **2026-11-23 — T-147 en BLOKY Dev: cambia el contrato de «Mi unidad»** ([docs/20 §5](../20-alta-e-ingreso-desde-alice.md)).
+  Los roles de la unidad que devuelve la API son ahora **`propietario` · `arrendatario` · `conviviente` · `invitado`**: ya no sale
+  `administrador` ni `residente` (al crear, la API todavía los acepta como nombres viejos). Nuevo: `POST …/arrendatarios`
+  (solo el propietario; con `desde`, `hasta` y `paquete`), `GET /api/app/paquetes-de-arrendatario`, `403 solo_propietario`, y
+  finalizar en cadena. En `permisos`, los roles son `propietario`, `arrendatario_operacion`, `arrendatario_solo_vivir` y
+  `conviviente`. **Ajusta los textos y los tipos de ALICE antes de seguir con «Mi unidad».**
+

@@ -131,6 +131,26 @@ registro con el correo, 401 sin sesión; `npm run build` pasa. **No se probó co
 máquina). **Sigue:** merge a `develop`, release a `main` y desplegar `gestion` (Daniel o Justo); asignar el permiso
 «Gestionar» al rol de administración de IDIKY en BOB Dev.
 
+### 2026-11-23 · Daniel + IA (Claude) · Middleware · Roles de la unidad construidos (T-147, RN-366, RN-368, RN-369)
+
+**Qué:** en Bloky-Idiky (`feature/T-147-roles-de-la-unidad` → `develop` `31e8af6`), desplegado en BLOKY Dev
+(`e9c22a5.bloky-31e8af6`).
+
+- **Datos:** migración de copropiedad `020-roles-de-la-unidad.sql` (renombra `administrador` → `propietario` y `residente` →
+  `conviviente`; agrega `arrendatario` con fechas y `paquete`) y común `015-roles-de-la-unidad.sql` (catálogo con
+  `propietario`, `arrendatario_operacion`, `arrendatario_solo_vivir` y `conviviente`, con los permisos de los roles viejos, que
+  quedan retirados; matriz versión 2, con su registro).
+- **Reglas** (`reglas.ts`): `rolUnidadDe` (acepta los nombres viejos al crear), `conFechas`, `esPaqueteDeArrendatario`,
+  `soloDelPropietario`, `motivoArrendatarioInvalido`, `cascadaDeRetiro`, `arriendosVencidos`, `motivoUnidadSinPropietario`.
+- **Rutas:** ALICE `POST …/arrendatarios`, `GET /api/app/paquetes-de-arrendatario`, `403 solo_propietario`, finalizar en
+  cadena; BLOKY `POST …/unidades/:uid/propietario` (`…/administrador` queda como nombre viejo), finalizar en cadena; los
+  arriendos vencidos se cierran solos al leer (`residencias/cascada.ts`). BLOKY dice «propietario» en Unidades y Equipo.
+- **Verificado:** `npm run probar` (seis pruebas nuevas, cuatro ajustadas) y builds; en el servidor, las migraciones aplicadas,
+  las residencias renombradas, la matriz con los roles nuevos y `GET /api/app/paquetes-de-arrendatario` respondiendo. **No se
+  pudo probar con un propietario real:** la residencia de Juan Luis Almonacid en la EC-201 la finalizó la Administración el
+  2026-11-21 («se crea nuevamente»).
+- **Falta:** la pantalla de BOB «Roles y permisos» (T-138) y que ALICE ajuste el contrato (aviso a Justo).
+
 ### 2026-11-23 · Daniel + IA (Claude) · Producto · Decisiones finales sobre el docs/23: RN-366 a RN-369 (T-147, T-148)
 
 Daniel ajustó la respuesta: **D4 y D5 aprobadas como las propuso Justo** (el invitado siempre con ALICE y cuenta verificada que
