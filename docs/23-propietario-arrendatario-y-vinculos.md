@@ -1,7 +1,7 @@
 # 23 — Propietario, arrendatario y vínculos con la vivienda
 
-> **Estado:** 🟡 **respondido por Daniel con ajustes** (2026-11-23): D1, D2 y D6 aprobadas; D3, D4 y D5 con ajustes; D7 y D8
-> en principio, como ADR aparte. Ver la respuesta en [`avisos/daniel.md`](./avisos/daniel.md) §12. Borrador de producto; **aún no es ADR**.
+> **Estado:** 🟡 **respondido por Daniel** (2026-11-23): D1, D2, D4, D5 y D6 aprobadas; D3 con ajuste (paquetes como roles fijos
+> de BOB, RN-366); D7 y D8 en principio, como ADR aparte. Reglas: **RN-366 a RN-369**. Ver la respuesta en [`avisos/daniel.md`](./avisos/daniel.md) §12. Borrador de producto; **aún no es ADR**.
 > Cuando Daniel lo autorice (o lo ajuste), se convierte en ADR + reglas (`RN-…`) y se actualizan
 > [docs/20](./20-alta-e-ingreso-desde-alice.md) y [ADR-0032](./adr/0032-residentes-colaboradores-e-ingreso-de-alice.md).
 >

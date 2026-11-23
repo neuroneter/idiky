@@ -113,6 +113,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Daniel + IA (Claude) · Producto · Decisiones finales sobre el docs/23: RN-366 a RN-369 (T-147, T-148)
+
+Daniel ajustó la respuesta: **D4 y D5 aprobadas como las propuso Justo** (el invitado siempre con ALICE y cuenta verificada que
+se registra una vez, RN-367); los roles de la unidad son **propietario · arrendatario · conviviente · invitado** y nada dentro
+de la copropiedad se llama «administrador» (RN-366); los paquetes del arrendatario son **roles fijos de BOB**, que **se
+construyen ya** (T-147); retiro en cascada (RN-368); el propietario no residente sigue gestionando (RN-369). Avisos: a
+**Justo** (§9, con la explicación de los roles estándar y los límites para su IA) y a **Mary** (§5: visitante con app cambia
+CU-R-10 y CU-P-02; propietario principal cuando hay varios).
+
 ### 2026-11-23 · Daniel + IA (Claude) · Producto · Respuesta al docs/23 de Justo (propietario, arrendatario, visitantes)
 
 Revisado contra las RN, CU y ADR vigentes; respuesta en `avisos/daniel.md` §12. **Aprobadas:** D1 (cadena de altas sin

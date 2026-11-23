@@ -147,3 +147,26 @@ Lo que hay que conciliar (lo de la ley va de memoria: **confirmarlo con un aboga
 
 **Para ti:** revísalo con Daniel. Nada de esto entra a la matriz de permisos: lo legal queda fijo (RN-337).
 
+## 5. Roles estándar de BOB, visitantes con app y varios propietarios — ⏳ abierto (2026-11-23)
+
+Daniel decidió (2026-11-23, sobre el docs/23 de Justo) cosas que tocan tu maqueta y tus casos de uso. En palabras sencillas:
+
+- **Los roles son estándar y los define BOB** (ADR-0034). Ni la copropiedad ni el propietario inventan permisos: eligen entre
+  roles fijos (por ejemplo «Arrendatario · solo vivir» o «Arrendatario · operación completa»), y lo que cada rol puede hacer
+  lo dice una sola tabla, igual en todos los edificios. Así todo se comporta igual y se puede auditar.
+- **Los roles en la unidad son cuatro** (RN-366): **propietario · arrendatario · conviviente · invitado**. Lo que en la
+  maqueta y en BLOKY se llamaba «administrador de la unidad» ahora es **propietario**, para no confundirlo con el
+  Administrador del conjunto.
+- **El visitante entra siempre con la app** (RN-367): se registra **una sola vez** en IDIKY (con su documento y sus datos) y
+  después cada edificio solo le manda una **invitación** cada vez que va. Daniel: *es molesto la primera vez pero garantiza
+  muchas cosas las siguientes*. Esto **cambia el código de visitante sin app** de tu maqueta (CU-R-10 y CU-P-02): la
+  portería validará la invitación de la persona en ALICE.
+- **Retirar a alguien retira lo que creó** (RN-368) y **el propietario puede no vivir ahí y seguir gestionando** (RN-369).
+
+**Para decidir contigo:** un apartamento **puede tener varios propietarios** (herencias, parejas), pero vota **uno** por
+unidad (RN-365). ¿Cómo se define el **propietario principal** (quien vota y crea al arrendatario): lo marca la
+Administración al cargarlo, o lo eligen los propietarios entre ellos?
+
+**Para ti:** revisa con Daniel cómo ajustar CU-R-10 y CU-P-02 en la maqueta, y el nombre «propietario» donde hoy dice
+administrador de la unidad.
+

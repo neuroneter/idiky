@@ -172,32 +172,35 @@ Mi unidad con residente/invitado (docs/20 §5).
 
 **Al cerrar:** marcar ✅ aquí, abrir ADR (o pedir a Justo que lo redacte) y actualizar docs/20 / ADR-0032 si hace falta.
 
-**Respuesta de Daniel (2026-11-23), revisada con su IA contra las RN, CU y ADR vigentes:**
+**Respuesta de Daniel (2026-11-23), revisada con su IA contra las RN, CU y ADR vigentes, y ajustada por él mismo:**
 
-| # | Decisión | Respuesta |
+| # | Decisión | Respuesta final |
 |---|---|---|
-| **D1** | Cadena de altas, sin auto-reclamo | ✅ **Aprobada.** Coincide con RN-320, RN-328, RN-354 y RN-365 |
-| **D2** | Propietario ≠ vive ahí | ✅ **Aprobada.** Ya lo dijo Mary (2026-11-10) y lo recoge RN-365 |
-| **D3** | Arrendatario con fechas + facultades | 🟡 **Aprobada con ajuste.** Las facultades **no** se marcan persona por persona: eso es dar permisos por persona, lo que se descartó el 2026-11-21 para mantener el estándar (ADR-0034, RN-333). Las facultades son **roles fijos definidos en BOB** (p. ej. «Arrendatario · solo vivir», «Arrendatario · operación completa»); el propietario elige uno al crear al arrendatario y la matriz sigue siendo una sola. Agregar al catálogo de BOB: **propietario** (hoy `administrador_unidad`), **arrendatario** y **conviviente** |
-| **D4** | Visitantes usan ALICE | 🟡 **Ajustada.** El **visitante puntual no necesita ALICE**: quien vive le manda un **pase/QR por WhatsApp** y portería lo valida (como CU-P-02 y CU-S-04). Pedirle app, documento, correo, fecha de nacimiento y billeteras por una visita de una hora es fricción y va contra la minimización de la Ley 1581. El **recurrente**, el **conviviente**, el **arrendatario** y el **propietario** sí usan ALICE. El embudo multi-conjunto se logra **invitando** a instalarla, no obligando |
-| **D5** | Doble cartera para todos | 🟡 **Ajustada:** para **todos los que usan ALICE** (D4), sí, en el primer ingreso. El visitante puntual con pase no tiene billeteras |
-| **D6** | Lo que escala es el paquete | ✅ **Aprobada.** Es la matriz de ADR-0034 |
-| **D7** | BD operativa + Merkle periódico; tokens solo roles estables | 🟡 **Aprobada en principio, como ADR aparte y fase posterior.** Encaja con RN-298 (sin PII) y ADR-0031 (sin mint por visita), pero falta decidir qué contrato la recibe, la frecuencia, el costo por copropiedad en Polygon y cómo se alinea con la minuta de portería de Mary (RN-236). No frena a ALICE |
-| **D8** | Bitácora de portería e ingresos auditable | 🟡 **Igual que D7**: en el mismo ADR |
+| **D1** | Cadena de altas, sin auto-reclamo | ✅ **Aprobada** (RN-320, RN-328, RN-354, RN-365) |
+| **D2** | Propietario ≠ vive ahí | ✅ **Aprobada** → **RN-369**: no lo obliga a vivir ahí, pero sigue gestionando la unidad |
+| **D3** | Arrendatario con fechas + facultades | 🟡 **Aprobada con ajuste** → **RN-366**: las facultades **no se marcan persona por persona**. Los roles son **estandarizados y los define BOB** (ADR-0034, RN-333): BOB tiene **paquetes como roles fijos** («Arrendatario · solo vivir», «Arrendatario · operación completa»…) y el propietario elige uno. **Se construye ya en BOB** (T-147) |
+| **D4** | Visitantes usan ALICE | ✅ **Aprobada como la propuso Justo** → **RN-367**: el invitado **siempre** usa ALICE. *El plomero ya tiene su cuenta en IDIKY: se registra una única vez y cada edificio solo le extiende la invitación; es molesto la primera vez pero garantiza muchas cosas las siguientes* (Daniel). No hay pase sin app |
+| **D5** | Doble cartera para todos | ✅ **Aprobada**: todos los que entran usan ALICE (D4), y todos activan las dos billeteras en el primer ingreso |
+| **D6** | Lo que escala es el paquete | ✅ **Aprobada** (matriz de ADR-0034) |
+| **D7** | BD + Merkle periódico; tokens solo roles estables | 🟡 **En principio, ADR aparte y fase posterior** (contrato, frecuencia, costo en Polygon, minuta de portería RN-236). No frena a ALICE |
+| **D8** | Bitácora de portería e ingresos | 🟡 **En el mismo ADR que D7**. Todas las entradas quedan registradas desde ya en la base (RN-367) |
 
-**Nombres (una sola lista):** roles en la unidad = **propietario · arrendatario · conviviente · invitado** (con fechas, el de
-RN-321). El **visitante** es un **pase**, no una residencia. Así no se cruzan «invitado», «familiar» y «visitante recurrente».
+**Nombres (RN-366):** roles en la unidad = **propietario · arrendatario · conviviente · invitado** (con fechas). **Ningún rol
+dentro de la copropiedad se llama «administrador»**: el «administrador de la unidad» pasa a ser **propietario**, para no
+confundirlo con el Administrador de la copropiedad. El visitante **es** el invitado: se le extiende una invitación y entra con
+ALICE.
 
 **Preguntas de docs/23 §12:**
-- **Varios propietarios por unidad:** sí puede pasar (herencias, parejas), pero RN-365 dice que vota **uno** por unidad:
-  hay que definir el propietario **principal** (quien vota y crea al arrendatario). Se lleva a Mary.
-- **Al vencer el arriendo:** sí, se finalizan solos los convivientes e invitados que creó el arrendatario.
-- **Propietario no residente:** sí sigue viendo la cartera y puede bloquear al arrendatario en cualquier momento (RN-324).
-- Las demás (regla del recurrente, nombre en la UI, invitación por código, frecuencia del cierre Merkle) quedan para el ADR.
+- **Varios propietarios por unidad:** sí pasa (herencias, parejas), pero vota uno por unidad (RN-365): hay que definir el
+  **propietario principal**. → Mary (aviso §5 de Mary).
+- **Retiros en cascada (RN-368):** cuando el propietario retira a un arrendatario o conviviente, se retira todo lo que ese
+  usuario creó (personas y permisos); al vencer el arriendo, pasa solo.
+- **Propietario no residente (RN-369):** sigue viendo la cartera y puede bloquear o finalizar al arrendatario.
+- Lo demás (regla del recurrente, invitación por código, frecuencia del Merkle) queda para los ADR.
 
-**Siguiente paso:** Justo redacta el **ADR** con estos ajustes (D1–D6) y las reglas nuevas, del rango de Integración o
-pidiendo el suyo. El de Merkle (D7–D8) va aparte. Mientras tanto sigue con **«Mi unidad» en ALICE** con residente e
-invitado contra la API actual (docs/20 §5).
+**Siguiente paso:** Justo redacta el **ADR** con D1–D6 tal como quedaron arriba (las reglas ya están: RN-366 a RN-369); el
+de Merkle (D7–D8) va aparte. **Mientras tanto** sigue con «Mi unidad» en ALICE contra la API de hoy (docs/20 §5),
+**sin construir nada que contradiga RN-366 a RN-369 ni ADR-0034** sin autorización de Daniel (aviso §9 de Justo).
 
 
 ---

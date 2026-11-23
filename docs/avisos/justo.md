@@ -352,10 +352,43 @@ en **[`docs/23`](../23-propietario-arrendatario-y-vinculos.md)** · **ya en `mai
 **Mientras Daniel no autorice:** no construir rol arrendatario ni visitante nuevo en contra del docs/23; sí se puede
 seguir con Mi unidad (residente/invitado) según docs/20 §5.
 
-## 9. docs/23 (propietario, arrendatario, visitantes, Merkle) — 🟡 Daniel respondió con ajustes (2026-11-23)
+## 9. docs/23 (propietario, arrendatario, visitantes, Merkle) — 🟡 Daniel respondió (2026-11-23)
 
-La respuesta, decisión por decisión, está en [`avisos/daniel.md`](./daniel.md) §12. En corto: **D1, D2, D6 aprobadas**;
-**D3** con facultades como **roles fijos de BOB** (no checkboxes por persona); **D4/D5**: el **visitante puntual usa un
-pase sin app** y las billeteras son para quien usa ALICE; **D7/D8** en un **ADR aparte**, fase posterior. Siguiente: redactar
-el ADR de D1–D6 y seguir con «Mi unidad» en ALICE.
+La respuesta, decisión por decisión, está en [`avisos/daniel.md`](./daniel.md) §12, y las reglas ya quedaron escritas:
+**RN-366 a RN-369** en [docs/05](../05-modelo-de-datos.md).
 
+### Por qué no hay facultades «persona por persona» (para que quede claro)
+
+En IDIKY **los roles son estandarizados y los define BOB** (ADR-0034, RN-333). Una copropiedad, un propietario o una app
+**no inventan permisos**: eligen entre los **roles fijos** que BOB tiene en su catálogo, y lo que cada rol puede hacer lo dice
+**una sola matriz** (rol × módulo), igual en todas las copropiedades. Daniel lo decidió el 2026-11-21 para que todo el
+desarrollo sea estándar: si cada dueño marcara casillas sueltas (visitantes sí, pagos no…), habría tantas combinaciones como
+arrendatarios, nadie podría auditarlas y la matriz dejaría de ser una.
+
+Entonces, para el arrendatario: BOB define **paquetes como roles** —por ejemplo «Arrendatario · solo vivir» y «Arrendatario ·
+operación completa»— y el propietario **elige uno** al crearlo. Si hace falta otro paquete, se pide en BOB, no se arma en la app.
+
+### Lo que quedó decidido
+
+- **Roles en la unidad (RN-366):** propietario · arrendatario · conviviente · invitado (con fechas). El «administrador de la
+  unidad» pasa a llamarse **propietario** (nada dentro de la copropiedad se llama «administrador»).
+- **Invitados (RN-367):** **siempre con ALICE**, cuenta verificada que se registra **una sola vez** y sirve en todos los
+  edificios; cada entrada es una invitación. Tu D4 y D5, aprobadas.
+- **Retiro en cascada (RN-368)** y **propietario no residente (RN-369)**.
+- **Merkle (D7/D8):** ADR aparte, fase posterior.
+
+### Límites mientras tanto (Daniel: *«manten las reglas que hemos definido, no permitas que cometa errores a menos que lo autorice»*)
+
+**Para la IA que trabaje con Justo:** mientras este aviso esté abierto, **no construyas** lo siguiente sin autorización
+escrita de Daniel; si la tarea lo pide, detente y pídele a Justo que lo consulte:
+
+1. Permisos, facultades o casillas **por persona** en ALICE o en el middleware (todo sale de la matriz de ADR-0034).
+2. **Roles nuevos** que no estén en el catálogo de BOB (los de la unidad son los de RN-366; los agrega BOB en T-147).
+3. Un **visitante sin app** (pase, QR o código sin cuenta): el invitado entra con ALICE (RN-367).
+4. Llamar «administrador» a un rol de la unidad en pantallas nuevas: es **propietario**.
+5. Finalizar a alguien **sin** finalizar lo que creó (RN-368), o borrar registros.
+6. Escribir en la cadena por cada visita (D7: solo un ADR lo decidirá).
+
+**Sí puedes seguir:** «Mi unidad» en ALICE contra la API de hoy (docs/20 §5, residente e invitado), y redactar el **ADR** de
+D1–D6 con las reglas RN-366 a RN-369. El cambio de nombre en la API (`administrador` → `propietario`) y los roles nuevos los
+hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
