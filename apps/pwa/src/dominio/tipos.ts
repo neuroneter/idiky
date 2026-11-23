@@ -1220,6 +1220,14 @@ export interface PuntoOrdenDelDia {
    * Si falta, se asume `simple`, que es la regla general de la ley.
    */
   mayoria?: MayoriaExigida
+  /**
+   * RN-211 — Si el punto es una decisión **de contenido económico**, definido
+   * **al citar** (Mary, 2026-11-23: «depende de lo que se vote, y eso lo define
+   * el administrador en la parametrización: cuando cite la asamblea o desde la
+   * creación del edificio»). De eso depende si se cuenta por coeficiente o por
+   * unidad; la votación lo trae ya marcado. Sin marcar, se escoge al abrirla.
+   */
+  contenidoEconomico?: boolean
 }
 
 export interface Asamblea {

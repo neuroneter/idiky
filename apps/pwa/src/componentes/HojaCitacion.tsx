@@ -103,7 +103,10 @@ export function HojaCitacion({
         {asamblea.ordenDelDia.map((punto) => (
           <li key={punto.id}>
             {punto.titulo}
-            {punto.seVota ? ' (se somete a votación)' : ''}
+            {punto.seVota ? ' (se somete a votación' : ''}
+            {/* RN-211 — Si se definió al citar, el propietario sabe desde ya cómo se cuenta. */}
+            {punto.seVota && punto.contenidoEconomico === true ? '; decisión económica, se cuenta por coeficiente' : ''}
+            {punto.seVota ? ')' : ''}
           </li>
         ))}
       </ol>

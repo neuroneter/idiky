@@ -1016,7 +1016,7 @@ interface DatosConvocatoria {
   lugar?: string
   enlaceTransmision?: string
   citacion: string
-  ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida }>
+  ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida; contenidoEconomico?: boolean }>
 }
 
 function FormularioConvocatoria({
@@ -1035,7 +1035,7 @@ function FormularioConvocatoria({
   const [enlace, setEnlace] = useState('')
   const [citacion, setCitacion] = useState('')
   const [puntos, setPuntos] = useState<
-    Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida }>
+    Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida; contenidoEconomico?: boolean }>
   >([{ titulo: '', descripcion: '', seVota: false }])
   const [error, setError] = useState<string | null>(null)
 
@@ -1261,6 +1261,27 @@ function FormularioConvocatoria({
                     {m.nombre} ({m.cifra}) · {m.fuente}
                   </option>
                 ))}
+              </select>
+            )}
+            {/* RN-211 — Al citar, si la decisión es económica: define si se cuenta por coeficiente o por unidad. */}
+            {punto.seVota && (
+              <select
+                aria-label={`Tipo de decisión del punto ${i + 1}`}
+                value={punto.contenidoEconomico === undefined ? '' : punto.contenidoEconomico ? 'si' : 'no'}
+                onChange={(evento) =>
+                  setPuntos(
+                    puntos.map((p, j) =>
+                      i === j
+                        ? { ...p, contenidoEconomico: evento.target.value === '' ? undefined : evento.target.value === 'si' }
+                        : p,
+                    ),
+                  )
+                }
+                style={{ marginTop: 'var(--e2)' }}
+              >
+                <option value="">Tipo de decisión: la escojo al abrir la votación</option>
+                <option value="si">Económica (presupuesto, cuotas, obras): se cuenta por coeficiente</option>
+                <option value="no">No económica (elecciones, reglamento, convivencia): según el edificio</option>
               </select>
             )}
           </div>

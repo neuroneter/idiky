@@ -2689,6 +2689,8 @@ export async function convocarAsamblea(
       descripcion: string
       seVota: boolean
       mayoria?: MayoriaExigida
+      /** RN-211 — Si es decisión económica, definido al citar. */
+      contenidoEconomico?: boolean
     }>
     /** Quien convoca: firma la citacion (RN-219). */
     convocadaPor?: string
@@ -2731,6 +2733,7 @@ export async function convocarAsamblea(
       descripcion: punto.descripcion.trim(),
       seVota: punto.seVota,
       ...(punto.mayoria ? { mayoria: punto.mayoria } : {}),
+      ...(punto.seVota && punto.contenidoEconomico !== undefined ? { contenidoEconomico: punto.contenidoEconomico } : {}),
     })),
     estado: 'convocada',
   }
