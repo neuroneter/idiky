@@ -102,7 +102,7 @@ test('la administradora emite la citación y la propietaria la ve en su app (CU-
   // RN-33 — Una ordinaria a cinco días no se deja convocar.
   await page.getByRole('button', { name: /Convocar/ }).first().click()
   await page.getByLabel('Fecha y hora').fill('2026-10-14T18:00')
-  await expect(page.getByText(/al menos 15 días calendario/)).toBeVisible()
+  await expect(page.getByRole('dialog', { name: 'Convocar una asamblea' }).getByText(/al menos 15 días calendario/)).toBeVisible()
   await page.getByRole('dialog', { name: 'Convocar una asamblea' }).getByRole('button', { name: 'Cerrar' }).click()
 
   await page.locator('tr', { hasText: 'Asamblea ordinaria anual' }).getByRole('button', { name: 'Abrir' }).click()
@@ -110,7 +110,7 @@ test('la administradora emite la citación y la propietaria la ve en su app (CU-
   await expect(page.getByText(/Citación CIT-/)).toBeVisible()
   await page.getByRole('button', { name: 'Ver la citación' }).click()
   await expect(page.getByText(/CONVOCATORIA A ASAMBLEA GENERAL ORDINARIA/)).toBeVisible()
-  await expect(page.getByText(/8:00 p\. m\./)).toBeVisible()
+  await expect(page.locator('.hoja-documento').getByText(/8:00 p\. m\./)).toBeVisible()
 
   await entrarComo(page, /Maria Camila Restrepo/)
   await page.goto('/#/app/asambleas/asa-ordinaria-anual')

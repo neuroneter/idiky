@@ -67,6 +67,9 @@ import { HojaPoder } from '../../componentes/HojaPoder'
 import { CapturaFoto } from '../../componentes/CapturaFoto'
 import { HojaActa } from '../../componentes/HojaActa'
 import type { FormaAsistencia, PuntoOrdenDelDia, Votacion } from '../../dominio/tipos'
+import { Postulaciones } from '../../componentes/Postulaciones'
+import { AntesDeLaAsamblea } from '../../componentes/AntesDeLaAsamblea'
+import { MiCodigoDeEntrada } from '../../componentes/EntradaConQr'
 
 function formatearCoeficiente(coeficiente: number): string {
   return `${coeficiente.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
@@ -855,6 +858,12 @@ export function AsambleaDetallePage() {
         </div>
       )}
 
+      {/* PN-25 — El código para entrar al salón. */}
+      <MiCodigoDeEntrada asamblea={asamblea} esPropietario={puedo} />
+
+      {/* PN-24 — Lo que se lee y se pregunta antes de ir. */}
+      <AntesDeLaAsamblea asamblea={asamblea} modo="residente" rol={miRol} />
+
       <div className="pila">
         <span className="titulo-seccion">Orden del día</span>
         {asamblea.ordenDelDia.map((punto) => (
@@ -871,6 +880,8 @@ export function AsambleaDetallePage() {
               <strong>{punto.titulo}</strong>
               <span className="subtitulo">{punto.descripcion}</span>
             </div>
+            {/* PN-23 — Si es una elección: quién se postula, y postularse. */}
+            <Postulaciones asamblea={asamblea} punto={punto} modo="residente" rol={miRol} />
             {punto.seVota && (
               <>
                 <div className="separador" />

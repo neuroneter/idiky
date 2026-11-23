@@ -23,6 +23,9 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { abrirVotacion, anularVotacion, cerrarVotacion, prepararVotacion } from '../../datos/repositorio'
 import {
+  CARGOS_ELECCION,
+  opcionesDeEleccion,
+  postulacionesVigentes,
   baseDeVoto,
   contarVotacion,
   mayoriaDelPunto,
@@ -46,8 +49,15 @@ export function VotacionPunto({ asamblea, punto }: { asamblea: Asamblea; punto: 
   const { bd, ejecutar, cargando } = useDatos()
   const { sesion } = useSesion()
   const [preparando, setPreparando] = useState(false)
-  const [pregunta, setPregunta] = useState(`¿Aprueba ${punto.titulo.charAt(0).toLowerCase()}${punto.titulo.slice(1)}?`)
-  const [opciones, setOpciones] = useState<string[]>(OPCIONES_POR_DEFECTO)
+  // PN-23 — Una elección trae a los candidatos y el voto en blanco.
+  const [pregunta, setPregunta] = useState(
+    punto.eleccion
+      ? `¿A quién elige para ${CARGOS_ELECCION[punto.eleccion].nombre.toLowerCase()}?`
+      : `¿Aprueba ${punto.titulo.charAt(0).toLowerCase()}${punto.titulo.slice(1)}?`,
+  )
+  const [opciones, setOpciones] = useState<string[]>(
+    OPCIONES_POR_DEFECTO,
+  )
   // RN-211 — Si se definió al citar, la votación lo trae marcado.
   const [economica, setEconomica] = useState<boolean | undefined>(punto.contenidoEconomico)
   const [anulando, setAnulando] = useState(false)
@@ -79,7 +89,14 @@ export function VotacionPunto({ asamblea, punto }: { asamblea: Asamblea; punto: 
     if (!preparando) {
       return (
         <div style={{ marginTop: 'var(--e2)' }}>
-          <button className="boton boton--pequeno" onClick={() => setPreparando(true)}>
+          <button
+            className="boton boton--pequeno"
+            onClick={() => {
+              // PN-23 — Al prepararla, se toman las postulaciones vigentes en ese momento.
+              if (punto.eleccion) setOpciones(opcionesDeEleccion(postulacionesVigentes(bd.postulaciones, punto.id)))
+              setPreparando(true)
+            }}
+          >
             Preparar la votación
           </button>
           {historial}

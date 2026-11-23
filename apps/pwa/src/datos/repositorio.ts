@@ -274,6 +274,8 @@ import {
   motivoProntoPagoInvalido,
   respuestaDeUnidad,
 } from '../dominio/reglas'
+import { leerCodigoAsistencia, motivoPostulacionInvalida, poderVigente, motivoPreguntaAsambleaInvalida, postulacionesVigentes, textoRespuestaAsamblea } from '../dominio/reglas'
+import type { CargoEleccion, Postulacion, PreguntaAsamblea } from '../dominio/tipos'
 import { responsablesDeRegistro, responsablesDeVisita, responsablesDelVinculo, unidadTienePropietario } from './selectores'
 
 /** Resultado de una operacion: base de datos actualizada + lo que se creo. */
@@ -2691,6 +2693,8 @@ export async function convocarAsamblea(
       mayoria?: MayoriaExigida
       /** RN-211 — Si es decisión económica, definido al citar. */
       contenidoEconomico?: boolean
+      /** PN-23 — Si el punto es una elección y de qué cargo. */
+      eleccion?: CargoEleccion
     }>
     /** Quien convoca: firma la citacion (RN-219). */
     convocadaPor?: string
@@ -2734,6 +2738,8 @@ export async function convocarAsamblea(
       seVota: punto.seVota,
       ...(punto.mayoria ? { mayoria: punto.mayoria } : {}),
       ...(punto.seVota && punto.contenidoEconomico !== undefined ? { contenidoEconomico: punto.contenidoEconomico } : {}),
+      // PN-23 — Una elección no es económica: se cuenta según el edificio.
+      ...(punto.seVota && punto.eleccion ? { eleccion: punto.eleccion, contenidoEconomico: false } : {}),
     })),
     estado: 'convocada',
   }
@@ -5751,6 +5757,8 @@ export async function publicarDocumentoEdificio(
     descripcion?: string
     fecha: FechaISO
     archivo?: { nombre: string; tipo: string; datos: string }
+    /** PN-24 — Si es un documento para una asamblea. */
+    asambleaId?: string
   },
 ): Promise<Resultado<DocumentoEdificio>> {
   await esperar()
@@ -5758,6 +5766,11 @@ export async function publicarDocumentoEdificio(
   exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Publicar documentos')
   if (parametros.titulo.trim().length < 4) throw new ErrorDeNegocio('Ponle un título al documento.')
   if (!parametros.fecha) throw new ErrorDeNegocio('Escribe la fecha del documento.')
+  if (parametros.asambleaId) {
+    const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId && a.copropiedadId === parametros.copropiedadId)
+    if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+    if (asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') throw new ErrorDeNegocio('La asamblea ya terminó.')
+  }
   if (parametros.archivo && parametros.archivo.datos.length * 0.75 > MAXIMO_ARCHIVO_DOCUMENTO_KB * 1024) {
     throw new ErrorDeNegocio(`En el demo el archivo puede pesar hasta ${MAXIMO_ARCHIVO_DOCUMENTO_KB} KB.`)
   }
@@ -5769,6 +5782,7 @@ export async function publicarDocumentoEdificio(
     descripcion: parametros.descripcion?.trim() || undefined,
     fecha: parametros.fecha,
     archivo: parametros.archivo,
+    ...(parametros.asambleaId ? { asambleaId: parametros.asambleaId } : {}),
     publicadoPor: parametros.personaId,
     publicadoEn: ahoraISO(),
   }
@@ -6604,4 +6618,192 @@ export async function configurarDiaVencimiento(
   if (motivo) throw new ErrorDeNegocio(motivo)
   copropiedad.diaVencimiento = parametros.dia
   return persistir(bd, copropiedad)
+}
+
+// ---------------------------------------------------------------------------
+// Elecciones en la asamblea — PN-23 · CU-A-12, CU-R-21 (Mary, 2026-11-23)
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-23 — Postularse (el propietario, desde la app) o registrar una postulación
+ * (la administración: el revisor fiscal, o quien se postule en la sala).
+ */
+export async function postularACargo(
+  bdActual: BaseDatos,
+  parametros: {
+    asambleaId: string
+    puntoId: string
+    /** Quien hace la postulación: el candidato mismo, o la administración. */
+    personaId: string
+    /** La unidad desde la que se postula, si es el propietario. */
+    unidadId?: string
+    /** Solo la administración: el nombre de un candidato que no es ella. */
+    nombre?: string
+    presentacion: string
+    integrantes?: string[]
+    matricula?: string
+  },
+): Promise<Resultado<Postulacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  bd.postulaciones ??= []
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  const punto = asamblea.ordenDelDia.find((p) => p.id === parametros.puntoId)
+  const admin = esAdministracion(bd, parametros.personaId, asamblea.copropiedadId)
+  const rol = parametros.unidadId
+    ? bd.residencias.find((r) => r.personaId === parametros.personaId && r.unidadId === parametros.unidadId && residenciaVigente(r))?.rol
+    : undefined
+  const persona = bd.personas.find((p) => p.id === parametros.personaId)
+  const nombre = admin ? (parametros.nombre ?? '') : persona ? `${persona.nombres} ${persona.apellidos}` : ''
+  const motivo = motivoPostulacionInvalida({
+    asamblea,
+    punto,
+    hayVotacion: !!votacionVigente(bd.votaciones, parametros.puntoId),
+    esAdministracion: admin,
+    rol,
+    yaPostulado: postulacionesVigentes(bd.postulaciones, parametros.puntoId).some((p) => p.personaId === parametros.personaId),
+    nombre,
+    presentacion: parametros.presentacion,
+    matricula: parametros.matricula,
+  })
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const integrantes = (parametros.integrantes ?? []).map((n) => n.trim()).filter(Boolean)
+  const postulacion: Postulacion = {
+    id: nuevoId('pos'),
+    asambleaId: asamblea.id,
+    puntoId: punto!.id,
+    cargo: punto!.eleccion!,
+    nombre: integrantes.length > 0 ? `Plancha de ${nombre.trim()}` : nombre.trim(),
+    ...(admin ? {} : { personaId: parametros.personaId, unidadId: parametros.unidadId }),
+    presentacion: parametros.presentacion.trim(),
+    ...(integrantes.length > 0 ? { integrantes: [nombre.trim(), ...integrantes] } : {}),
+    ...(parametros.matricula?.trim() ? { matricula: parametros.matricula.trim() } : {}),
+    postuladaPor: parametros.personaId,
+    postuladaEn: ahoraISO(),
+  }
+  bd.postulaciones.push(postulacion)
+  return persistir(bd, postulacion)
+}
+
+/** PN-23 — Retirar una postulación: el candidato o la administración, antes de preparar la votación. No se borra. */
+export async function retirarPostulacion(
+  bdActual: BaseDatos,
+  parametros: { postulacionId: string; personaId: string },
+): Promise<Resultado<Postulacion>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const postulacion = (bd.postulaciones ?? []).find((p) => p.id === parametros.postulacionId)
+  if (!postulacion || postulacion.retiro) throw new ErrorDeNegocio('Esa postulación ya no está vigente.')
+  const asamblea = bd.asambleas.find((a) => a.id === postulacion.asambleaId)!
+  const admin = esAdministracion(bd, parametros.personaId, asamblea.copropiedadId)
+  if (!admin && postulacion.postuladaPor !== parametros.personaId) {
+    throw new ErrorDeNegocio('Una postulación la retira quien la hizo o la administración.')
+  }
+  if (votacionVigente(bd.votaciones, postulacion.puntoId)) {
+    throw new ErrorDeNegocio('La votación ya está preparada: la postulación ya está en la tarjeta.')
+  }
+  postulacion.retiro = { por: parametros.personaId, en: ahoraISO() }
+  return persistir(bd, postulacion)
+}
+
+// ---------------------------------------------------------------------------
+// Antes de la asamblea — PN-24 · CU-A-12, CU-R-20 (Mary, 2026-11-23)
+// ---------------------------------------------------------------------------
+
+/** PN-24 — El propietario pregunta antes de la asamblea, en general o sobre un punto. */
+export async function preguntarAntesDeAsamblea(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; personaId: string; unidadId: string; texto: string; puntoId?: string },
+): Promise<Resultado<PreguntaAsamblea>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  const rol = bd.residencias.find(
+    (r) => r.personaId === parametros.personaId && r.unidadId === parametros.unidadId && residenciaVigente(r),
+  )?.rol
+  const motivo = motivoPreguntaAsambleaInvalida(asamblea, rol, parametros.texto)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  if (parametros.puntoId && !asamblea.ordenDelDia.some((p) => p.id === parametros.puntoId)) {
+    throw new ErrorDeNegocio('Ese punto no está en el orden del día.')
+  }
+  const pregunta: PreguntaAsamblea = {
+    id: nuevoId('pra'),
+    personaId: parametros.personaId,
+    unidadId: parametros.unidadId,
+    texto: parametros.texto.trim(),
+    fecha: ahoraISO(),
+    ...(parametros.puntoId ? { puntoId: parametros.puntoId } : {}),
+  }
+  asamblea.preguntas = [...(asamblea.preguntas ?? []), pregunta]
+  return persistir(bd, pregunta)
+}
+
+/** PN-24 — La administración responde; la ven todos y a quien preguntó le llega el aviso. */
+export async function responderPreguntaAsamblea(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; preguntaId: string; personaId: string; texto: string },
+): Promise<Resultado<PreguntaAsamblea>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  const pregunta = asamblea?.preguntas?.find((p) => p.id === parametros.preguntaId)
+  if (!asamblea || !pregunta) throw new ErrorDeNegocio('Esa pregunta no existe.')
+  exigirAdministracion(bd, parametros.personaId, asamblea.copropiedadId, 'Responder las preguntas de la asamblea')
+  if (pregunta.respuesta) throw new ErrorDeNegocio('Esa pregunta ya tiene respuesta.')
+  const motivo = motivoPreguntaInvalida(parametros.texto, 'respuesta')
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const ahora = ahoraISO()
+  pregunta.respuesta = { texto: parametros.texto.trim(), respondidoPor: parametros.personaId, fecha: ahora }
+  const copropiedad = bd.copropiedades.find((c) => c.id === asamblea.copropiedadId)
+  avisarAPersona(bd, {
+    copropiedadId: asamblea.copropiedadId,
+    personaId: pregunta.personaId,
+    texto: textoRespuestaAsamblea(asamblea, copropiedad?.nombre ?? 'La copropiedad'),
+    motivo: 'respuesta_asamblea',
+    ahora,
+  })
+  return persistir(bd, pregunta)
+}
+
+// ---------------------------------------------------------------------------
+// Entrada con QR a la asamblea presencial — PN-25 (Mary, 2026-11-23)
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-25 — La administración lee el QR en la entrada y la llegada queda
+ * registrada como presencial. Vale si quien llega es **propietario de la
+ * unidad** o su **apoderado con poder vigente** (RN-30); si no, no entra a
+ * contar y se le dice por qué.
+ */
+export async function registrarLlegadaConCodigo(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; codigo: string; personaId: string },
+): Promise<Resultado<Asistencia>> {
+  const bd0 = clonar(bdActual)
+  const asamblea = bd0.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  exigirAdministracion(bd0, parametros.personaId, asamblea.copropiedadId, 'Registrar la llegada')
+  const leido = leerCodigoAsistencia(parametros.codigo)
+  if (!leido) throw new ErrorDeNegocio('Ese código no es de entrada a una asamblea.')
+  if (leido.asambleaId !== asamblea.id) throw new ErrorDeNegocio('Ese código es de otra asamblea.')
+  const propietario = bd0.residencias.some(
+    (r) => r.personaId === leido.personaId && r.unidadId === leido.unidadId && r.rol === 'propietario' && residenciaVigente(r),
+  )
+  const poder = propietario
+    ? undefined
+    : bd0.poderes.find(
+        (p) => p.asambleaId === asamblea.id && p.unidadId === leido.unidadId && p.apoderadoId === leido.personaId && poderVigente(p),
+      )
+  if (!propietario && !poder) {
+    throw new ErrorDeNegocio('Quien llega no es propietario de la unidad ni tiene un poder vigente para ella.')
+  }
+  return marcarAsistencia(bdActual, {
+    asambleaId: asamblea.id,
+    unidadId: leido.unidadId,
+    personaId: leido.personaId,
+    forma: 'presencial',
+    ...(poder ? { poderId: poder.id } : {}),
+  })
 }

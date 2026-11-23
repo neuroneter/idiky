@@ -113,6 +113,27 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Mary + IA (Claude) · Asambleas ordinarias: elecciones, antes de la reunión, QR y calendario (PN-23 a PN-26)
+
+Para llegar fuertes a las ordinarias (Mary: *«nuestro producto solo tiene tres semanas para
+posicionarse»*), se construyeron en la maqueta los puntos 1, 2, 3 y 5 de la propuesta. El 4,
+la pantalla para proyectar en el salón, queda **a decisión de Mary**.
+- **Elecciones** (PN-23): al citar, un punto puede ser elección de consejo, comité de convivencia o
+  revisor fiscal; postulaciones desde ALICE (y en plancha), el revisor fiscal lo registra la
+  administración con matrícula; la votación trae a los candidatos y el voto en blanco
+  (`componentes/Postulaciones.tsx`).
+- **Antes de la asamblea** (PN-24): documentos para la asamblea y preguntas de los propietarios,
+  respondidas sin nombre; lo sin responder va a «Te esperan» (`componentes/AntesDeLaAsamblea.tsx`).
+- **Entrada con QR** (PN-25): el propietario y el apoderado muestran su código; la administración lo
+  lee y la asistencia queda presencial (`componentes/EntradaConQr.tsx`).
+- **Calendario legal de la ordinaria** (PN-26): fechas de los arts. 39, 41, 47 y 49 y en qué va cada
+  una (`features/admin/CalendarioOrdinaria.tsx`).
+
+Semilla en la versión 52 (una postulación de Gustavo y una pregunta respondida en la ordinaria).
+Pruebas nuevas: `elecciones`, `antes-asamblea`, `entrada-qr` y `calendario-ordinaria`; **127 pasan**.
+**Para el abogado:** reparto de puestos del consejo y período presupuestal distinto del año
+calendario. **Sigue:** que Daniel lleve PN-23 a PN-26 a BLOKY y el middleware (T-55: números).
+
 ### 2026-11-23 · Mary + IA (Claude) · Al citar, cada punto dice cómo se cuenta (RN-211, aviso 4)
 
 Mary respondió el punto 1 del aviso 4: la base del voto *«depende por lo que se vote»*, y la define el administrador

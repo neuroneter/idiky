@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 51
+export const VERSION_ESQUEMA = 52
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1174,6 +1174,22 @@ const asambleas: Asamblea[] = [
     lugar: 'Salón social, Torre 1',
     estado: 'convocada',
     citacion: 'Convocatoria 001 de la administración',
+    // PN-24 — Una pregunta ya respondida antes de la reunión.
+    preguntas: [
+      {
+        id: 'pra-1',
+        personaId: 'per-13',
+        unidadId: 'uni-torre1-301',
+        puntoId: 'pun-or-3',
+        texto: '¿El presupuesto incluye el cambio de las bombas del agua?',
+        fecha: `${sumarDias(hoyISO(), -2)}T14:00:00.000Z`,
+        respuesta: {
+          texto: 'Sí: está en el rubro de mantenimiento, por 18 millones. El detalle está en el documento del presupuesto.',
+          respondidoPor: 'per-admin',
+          fecha: `${sumarDias(hoyISO(), -1)}T16:00:00.000Z`,
+        },
+      },
+    ],
     ordenDelDia: [
       {
         id: 'pun-or-1',
@@ -1188,6 +1204,7 @@ const asambleas: Asamblea[] = [
         titulo: 'Aprobacion de los estados financieros',
         descripcion: 'Estados financieros del último periodo, con el informe del revisor fiscal.',
         seVota: true,
+        contenidoEconomico: true,
       },
       {
         id: 'pun-or-3',
@@ -1195,6 +1212,7 @@ const asambleas: Asamblea[] = [
         titulo: 'Presupuesto del próximo año',
         descripcion: 'Presupuesto de ingresos y gastos, y el valor de la cuota de administración.',
         seVota: true,
+        contenidoEconomico: true,
       },
       {
         id: 'pun-or-4',
@@ -1202,6 +1220,8 @@ const asambleas: Asamblea[] = [
         titulo: 'Elección del consejo de administración',
         descripcion: 'Postulaciones recibidas hasta ocho días antes de la asamblea.',
         seVota: true,
+        contenidoEconomico: false,
+        eleccion: 'consejo',
       },
     ],
   },
@@ -1974,6 +1994,21 @@ function construirParaCompetir() {
       },
     ],
     acuerdosPago: [],
+    // PN-23 — Una postulación al consejo ya recibida: así se ve la elección en el demo.
+    postulaciones: [
+      {
+        id: 'pos-1',
+        asambleaId: ASAMBLEA_CONVOCADA,
+        puntoId: 'pun-or-4',
+        cargo: 'consejo' as const,
+        nombre: 'Gustavo Adolfo Mejia Toro',
+        personaId: 'per-13',
+        unidadId: 'uni-torre1-301',
+        presentacion: 'Propietario hace seis años. Quiero que el consejo publique cada mes en qué se gasta la cuota.',
+        postuladaPor: 'per-13',
+        postuladaEn: `${sumarDias(hoy, -3)}T15:00:00.000Z`,
+      },
+    ],
     // CU-R-49 — Dos objetos en portería: uno ya reclamado y uno viejo, que se puede dar de baja.
     objetosEncontrados: [
       {

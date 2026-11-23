@@ -570,6 +570,8 @@ espera a ADR-0006.
 ### CU-R-20
 ## CU-R-20 — Recibir la citación a asamblea
 
+> **Ampliación 2026-11-23 (PN-24):** en la asamblea convocada, el propietario **lee los documentos** que la administración publicó para ella y **pregunta antes**, en general o sobre un punto; ve las respuestas de todos, sin nombres. Pantalla: `componentes/AntesDeLaAsamblea.tsx`; prueba: `antes-asamblea.spec.ts`.
+
 - **Actor principal:** Copropietario
 - **Precondiciones:** El administrador convocó la asamblea (CU-A-12).
 - **Disparador:** Se emite la convocatoria.
@@ -606,6 +608,8 @@ entrega** la convocatoria en PDF (ADR-0006).
 
 ### CU-R-21
 ## CU-R-21 — Entrar a la asamblea y marcar mi asistencia
+
+> **Ampliación 2026-11-23:** en la presencial o mixta, el propietario —y el apoderado, por cada unidad que representa— ve **su código QR para entrar** (PN-25, `componentes/EntradaConQr.tsx`). Si un punto es una **elección**, ve a los candidatos con su presentación y, si el cargo se lo permite, **se postula** (PN-23, `componentes/Postulaciones.tsx`). Pruebas: `entrada-qr.spec.ts`, `elecciones.spec.ts`.
 
 - **Actor principal:** Copropietario
 - **Precondiciones:** La asamblea está instalada (CU-A-17).
