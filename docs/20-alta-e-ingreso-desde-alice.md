@@ -17,9 +17,9 @@
 >   invitados exige el documento (§5) y el ingreso puede responder `celular_repetido` (§1.1).
 > - **Varios países** (ADR-0035, RN-358 a RN-363, T-146): catálogo público de países (§1.0); el celular va con su
 >   indicativo y el documento con su país.
-> - **Primer ingreso** (RN-356, T-143): el documento que escribe la persona debe coincidir con el que reportó la
->   Administración (§2, `documento_no_coincide`); después, el correo con código (§2c, **por construir con Justo**: el envío
->   de correo ya funciona, [`infra/correo-ses.md`](../infra/correo-ses.md)).
+> - **Primer ingreso** (RN-356, T-143, **RN-192**): documento que coincida (§2) → correo con código (§2c) → datos básicos
+>   (nombre + fecha de nacimiento) → billeteras (§2b). El envío de correo por SES ya funciona
+>   ([`infra/correo-ses.md`](../infra/correo-ses.md)); faltan las rutas de §2c en el middleware (lista abajo).
 > - **Quién vota** en las reuniones: RN-365 (§6).
 
 Todas las rutas son del **middleware de IDIKY** (BLOKY Dev: `https://bloky-dev.idiky.com`). ALICE no habla con BOB ni con
@@ -176,21 +176,92 @@ Con el Bearer de ALICE. Si `persona` ya trae las dos billeteras, se salta.
 `bloky-api.env`); también se puede fijar a mano con `infra/gestion/conectar-cadena-proxy.sh` (repo `BOB-Idiky`).
 Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` + Bearer de servicio).
 
-## 2c. El correo con código (primer ingreso y segundo factor) — por construir (T-143)
+## 2c. Correo con código y datos básicos (primer ingreso) — T-143 · contrato (2026-11-22)
 
-**Decidido (RN-356, RN-357):** el primer ingreso es 1) código al celular → 2) documento que coincida (§2) → 3) **un correo,
-validado con un código** → 4) los **datos básicos** (§0: nombre y **fecha de nacimiento**, RN-192); solo ahí entra. Tras el
-documento (y con `hashIdentidad`) puede crear las **billeteras** (§2b). Las veces siguientes, solo el código del celular.
-Cambiar el celular pide su código **y** uno al correo validado; cambiar el correo pide su código **y** uno al celular.
-Después: huella y facial.
+**Decidido (RN-356, RN-357, RN-192):** el primer ingreso es:
 
-**Lo que ya está:** el middleware ya **envía correos reales** por Amazon SES desde `no-responder@idiky.com`
-([ADR-0036](./adr/0036-correo-con-amazon-ses.md), [`infra/correo-ses.md`](../infra/correo-ses.md)). En *sandbox* solo llegan
-a correos verificados (hoy Daniel y Justo).
+1. Código al **celular** (§1)
+2. **Documento** que coincida (§2) → queda `hashIdentidad`
+3. **Correo**, validado con un código a ese correo (esta sección)
+4. **Datos básicos**: nombre (ajustable) + **fecha de nacimiento** (RN-192)
+5. **Billeteras** con passkey (§2b)
 
-**Lo que falta, con Justo conectado:** las rutas (`…/yo/correo` para pedir y validar el código, guardar el correo validado, y
-las de cambio de celular y correo), escritas primero aquí. Mientras no existan, ALICE **no** construye un cambio de celular sin
-segundo factor.
+Solo entonces entra a la app. Las veces siguientes, solo el código del celular. Cambiar celular o correo: RN-357 (segundo
+factor; rutas de cambio **después** del primer ingreso). Después: huella y facial.
+
+**Lo que ya está:** Amazon SES desde `no-responder@idiky.com` ([ADR-0036](./adr/0036-correo-con-amazon-ses.md),
+[`infra/correo-ses.md`](../infra/correo-ses.md)). En *sandbox* solo llegan a correos verificados (hoy Daniel y Justo).
+
+### Campos en `persona` (respuestas de `/yo`, verificar-código, documento, etc.)
+
+| Campo JSON | Tipo | Notas |
+|---|---|---|
+| `documentoCompleto` | boolean | Ya existe (§2) |
+| `correo` | string \| null | Correo guardado; si aún no está validado puede ir la pista o null |
+| `correoValidado` | boolean | `true` solo tras verificar el código del correo |
+| `fechaNacimiento` | string \| null | `YYYY-MM-DD`; null si aún no la dio |
+
+ALICE no deja pasar del paso correspondiente mientras el flag falle. Si el middleware **aún no publica**
+`correoValidado` / `fechaNacimiento`, ALICE no bloquea a quien ya tiene billeteras (compatibilidad); en cuanto existan
+los campos, manda.
+
+### `POST /api/app/yo/correo/enviar-codigo` (Bearer)
+
+```json
+{ "correo": "justo@ejemplo.com" }
+```
+
+- Valida formato. Normaliza a minúsculas.
+- Si ese correo ya está **validado en otra persona** → `409 correo_de_otra`.
+- Guarda el correo como *pendiente de validar* en esta persona (o solo en el reto, a criterio de implementación) y **envía
+  el código por SES** (mismo estilo que el código de celular: pocos dígitos, vencimiento corto, límite de intentos).
+- Responde `200 { "pista": "jus•••@ejemplo.com", "canal": "correo", "codigoSimulado"?: "…" }` (`codigoSimulado` solo en Dev).
+- Errores: `422 correo_invalido` · `429 bloqueado` · `502 correo_fallo` si SES no pudo enviar.
+
+### `POST /api/app/yo/correo/verificar-codigo` (Bearer)
+
+```json
+{ "correo": "justo@ejemplo.com", "codigo": "123456" }
+```
+
+- Si el código es correcto: marca `correoValidado: true`, guarda `correo`, limpia el reto.
+- Responde `200` con la misma forma que `/yo` (`persona`, `lugares`, `token?` si se rota).
+- Errores: `401 codigo_incorrecto` / `bloqueado` · `422` si el correo no coincide con el pendiente.
+
+### `PUT /api/app/yo/datos-basicos` (Bearer)
+
+```json
+{ "nombre": "Justo Soto", "fechaNacimiento": "1985-03-14" }
+```
+
+- Exige `correoValidado: true` (si no → `409 correo_pendiente`).
+- `nombre` no vacío; `fechaNacimiento` día calendario válido `YYYY-MM-DD` (no futura; edad razonable a criterio, p. ej. no
+  menor de 0 ni mayor de 120 años) → si no, `422 fecha_invalida` / `nombre_invalido`.
+- Guarda `nombre` y `fecha_nacimiento` en el directorio.
+- Responde `200` forma `/yo`.
+
+### Orden que ALICE aplica tras cada respuesta
+
+`documentoCompleto` → `correoValidado` → `fechaNacimiento` presente → billeteras (§2b) → entrar.
+
+### Tareas del middleware (checklist T-143 — Justo + Daniel)
+
+| # | Tarea | Repo / zona | Estado |
+|---|---|---|---|
+| M1 | Migración: columna `fecha_nacimiento` (`date`, nullable) en `directorio.persona` | `Bloky-Idiky` | ✅ `014-fecha-nacimiento-y-correo-validado.sql` |
+| M2 | Migración / campos: `correo_validado_en` + índice único del correo validado | `Bloky-Idiky` | ✅ misma migración |
+| M3 | Exponer en `/yo` (y en verificar-código / documento): `correo`, `correoValidado`, `fechaNacimiento` | `Bloky-Idiky` | ✅ |
+| M4 | Reto de código por correo (generar, guardar ~10 min, intentos) | `Bloky-Idiky` | ✅ `acceso/codigos-correo.ts` |
+| M5 | `POST /api/app/yo/correo/enviar-codigo` con SES | `Bloky-Idiky` | ✅ |
+| M6 | `POST /api/app/yo/correo/verificar-codigo` | `Bloky-Idiky` | ✅ |
+| M7 | `PUT /api/app/yo/datos-basicos` (nombre + fecha) | `Bloky-Idiky` | ✅ |
+| M8 | Pruebas de humo de las tres rutas + flags en `/yo` | `Bloky-Idiky` | ✅ |
+| M9 | Desplegar middleware en BLOKY Dev y probar con correos verificados en SES (Justo / Daniel) | Dev | ⬜ |
+| M10 | (Después del primer ingreso) rutas de **cambio** de celular y de correo con 2FA (RN-357) | `Bloky-Idiky` | ⬜ |
+| M11 | Acceso SES fuera de *sandbox* (producción) cuando toque | AWS / Daniel | ⬜ |
+
+**ALICE (esta app):** flujo de pantallas del primer ingreso (pasos 3→6) y cliente HTTP de M5–M7. No construir cambio de
+celular/correo (M10) hasta que existan esas rutas.
 
 ## 3. La sesión
 

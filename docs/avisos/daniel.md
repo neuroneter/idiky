@@ -146,6 +146,34 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
+## 12. Propietario, arrendatario, visitantes y bitácora Merkle — ⏳ abierto (Justo, 2026-11-23)
+
+**Documento a revisar con tu IA:**  
+[`docs/23-propietario-arrendatario-y-vinculos.md`](../23-propietario-arrendatario-y-vinculos.md)  
+(§0 idea central · §3 cadena · §7 billeteras y paquetes · §7b Merkle · **§10b decisiones D1–D8** · §12 preguntas)
+
+**Qué pide Justo:** que autorices (o ajustes) el borrador para convertirlo en ADR + RN y poder seguir en ALICE
+(Mi unidad, arrendatario, visitantes).
+
+**Resumen de la propuesta**
+
+| | |
+|---|---|
+| Altas | Admin/Delegado suben **propietarios** por CSV (no implica que vivan) |
+| Cadena | Propietario → arrendatario (fechas + facultades) / familia / visitantes |
+| Login | `lugares` con todos los vínculos; **sin** auto-reclamo de apartamento |
+| Visitantes | Usan **ALICE** (identidad multi-conjunto) |
+| Billeteras | **Todos** activan la doble cartera en el primer ingreso (passkey) |
+| Escala | El **paquete** (pase / gimnasio-piscina / operar), no las carteras |
+| Cadena | BD operativa; **Merkle periódico** de altas y accesos; tokens on-chain = roles **estables** (ADR-0031) |
+
+**Mientras está abierto:** Justo no construye rol arrendatario ni visitante nuevo en contra del docs/23; puede seguir
+Mi unidad con residente/invitado (docs/20 §5).
+
+**Al cerrar:** marcar ✅ aquí, abrir ADR (o pedir a Justo que lo redacte) y actualizar docs/20 / ADR-0032 si hace falta.
+
+---
+
 ## 11. Datos del usuario, unicidad y fecha de nacimiento — ✅ aprobado (2026-11-22)
 
 Justo documentó en [docs/20 §0](../20-alta-e-ingreso-desde-alice.md) y **RN-192**:

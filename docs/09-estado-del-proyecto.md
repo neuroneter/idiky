@@ -113,6 +113,41 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Justo · Producto · docs/23 listo para revisión de Daniel
+
+- Afinado docs/23: visitantes usan ALICE; **todos** activan doble cartera en el primer ingreso; escala el **paquete**
+  (pase / zonas / operar); operación en BD + **cierre Merkle** de altas y accesos; tokens on-chain solo roles estables.
+- Tabla **§10b** con decisiones D1–D8 para autorizar. Aviso en [`avisos/daniel.md`](./avisos/daniel.md) §12.
+  Archivo: [`docs/23-propietario-arrendatario-y-vinculos.md`](./23-propietario-arrendatario-y-vinculos.md).
+
+### 2026-11-22 · Justo · Producto · Propietario, arrendatario y vínculos con la vivienda (docs/23)
+
+- Justo cerró en conversación la visión: la Administración carga **propietarios** por CSV (no implica que vivan);
+  el propietario registra arrendatario (fechas + facultades), familia y visitantes; quien vive opera el día a día;
+  ALICE siempre muestra todos los `lugares`; no hay auto-reclamo de apartamento; el smart contract del edificio no es
+  el menú del login.
+- Quedó escrito en [`docs/23-propietario-arrendatario-y-vinculos.md`](./23-propietario-arrendatario-y-vinculos.md)
+  (borrador con diagramas Mermaid, índice en `docs/README.md`, aviso en [`avisos/justo.md`](./avisos/justo.md)).
+  **Aún no es ADR:** Justo lo irá mejorando; Daniel lo cierra cuando toque.
+
+### 2026-11-22 · Justo · Middleware · Correo OTP + fecha nacimiento (T-143, M1–M8)
+
+**Qué:** en `Bloky-Idiky`, migración `014` (`fecha_nacimiento`, `correo_validado_en`), flags en `/yo`,
+`POST …/yo/correo/enviar-codigo`, `POST …/yo/correo/verificar-codigo`, `PUT …/yo/datos-basicos`, códigos
+por SES (simulado sin llaves), humo en verde. Checklist M1–M8 ✅ en [`docs/20` §2c](./20-alta-e-ingreso-desde-alice.md).
+
+**Sigue:** **M9** desplegar middleware en BLOKY Dev y probar el formulario de ALICE de punta a punta
+(correo verificado en SES). M10 cambio 2FA; M11 SES prod.
+
+### 2026-11-22 · Justo · ALICE · Flujo primer ingreso + contrato middleware (T-143)
+
+**Qué:** contrato en [`docs/20` §2c](./20-alta-e-ingreso-desde-alice.md) (correo OTP, datos básicos,
+flags `correoValidado`/`fechaNacimiento`, checklist **M1–M11**). En `App-Idiky`, pantallas del primer
+ingreso: documento → correo + código → nombre + fecha de nacimiento → billeteras; cliente HTTP listo
+para las rutas nuevas. Aviso Justo §9 y tablero T-143 al día.
+
+**Sigue:** middleware M1–M8 hechos; falta M9 (Dev).
+
 ### 2026-11-22 · Justo · ALICE · País del celular en el ingreso (T-146, paso 1)
 
 **Qué:** en `App-Idiky`, el login pide país (bandera + indicativo) junto al celular. Catálogo

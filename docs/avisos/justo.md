@@ -283,8 +283,9 @@ Lista de campos y unicidad, al día: [docs/20 §0](../20-alta-e-ingreso-desde-al
 - **El correo ya sale** (2026-11-21): Amazon SES desde `no-responder@idiky.com`, en el middleware (`src/correo/ses.ts`, la
   dependencia `correo` de las rutas); tu Gmail ya está verificado para pruebas. Cómo funciona y cómo usarlo:
   [`infra/correo-ses.md`](../../infra/correo-ses.md).
-- **Del middleware hará falta** (lo hacemos juntos): las rutas para enviar el código al correo, guardar el correo validado y las rutas de
-  cambio de celular y correo. Dime qué contrato prefieres para escribirlo en docs/20.
+- **Contrato + middleware M1–M8 (2026-11-22, Justo):** [`docs/20` §2c](../20-alta-e-ingreso-desde-alice.md). Rutas y
+  migración en `Bloky-Idiky` (`feature/T-143-correo-datos-primer-ingreso`). ALICE ya tiene el flujo. **Falta M9:**
+  desplegar en BLOKY Dev y probar con tu correo verificado en SES.
 
 **Mientras se habla:** no construyas en ALICE un cambio de celular que no pida el segundo factor, ni un primer ingreso que
 deje entrar sin documento cuando la Administración lo reportó.
@@ -340,3 +341,13 @@ catálogo.
 **El contrato completo, al día el 2026-11-21**, con los cuerpos, las respuestas y todos los códigos de error (§1.0 países,
 §1.1 `celular_repetido`, §2 `documento_no_coincide`, §2c el correo, §5 el alta con documento, §6 quién vota):
 [docs/20](../20-alta-e-ingreso-desde-alice.md).
+
+---
+
+## 11. Propietario, arrendatario y vínculos — ⏳ listo para Daniel (2026-11-23)
+
+Visión de producto completa (altas, arrendatario, visitantes en app, doble cartera para todos, bitácora + Merkle)
+en **[`docs/23`](../23-propietario-arrendatario-y-vinculos.md)** · aviso a Daniel §12.
+
+**Mientras Daniel no autorice:** no construir rol arrendatario ni visitante nuevo en contra del docs/23; sí se puede
+seguir con Mi unidad (residente/invitado) según docs/20 §5.
