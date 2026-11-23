@@ -347,7 +347,7 @@ catálogo.
 ## 11. Propietario, arrendatario y vínculos — ⏳ listo para Daniel (2026-11-23)
 
 Visión de producto completa (altas, arrendatario, visitantes en app, doble cartera para todos, bitácora + Merkle)
-en **[`docs/23`](../23-propietario-arrendatario-y-vinculos.md)** · aviso a Daniel §12.
+en **[`docs/23`](../23-propietario-arrendatario-y-vinculos.md)** · **ya en `main`** · aviso a Daniel §12.
 
 **Mientras Daniel no autorice:** no construir rol arrendatario ni visitante nuevo en contra del docs/23; sí se puede
 seguir con Mi unidad (residente/invitado) según docs/20 §5.
