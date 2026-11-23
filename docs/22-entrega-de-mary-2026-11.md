@@ -71,6 +71,14 @@ equivalente nativo; el contrato de la API del middleware está en [`20`](./20-al
 5. Si se **suspenden los intereses** durante un acuerdo de pago.
 6. La parte legal de §5: datos personales, contrato y términos de uso.
 
+## 3 bis. Decisiones de negocio (**Mary, 2026-11-23**)
+
+- **Se le vende a la copropiedad**; los administradores son usuarios (ADR-0031).
+- **Un administrador maneja varios edificios** desde la misma cuenta: CU-A-15 entra en la primera versión.
+- **El vencimiento de la cuota lo fija cada edificio** (el 10, el 15…): T-59.
+- **Entran también en la primera versión:** reserva de **parqueaderos de visitantes**, **chat entre
+  residentes** (espera rango de casos de uso, T-55) y **facturación electrónica** (T-58).
+
 ## 4. Lo que es solo de la maqueta (y lo dice)
 
 Datos en el navegador · el código de ingreso se ve en pantalla · los mensajes se escriben pero no

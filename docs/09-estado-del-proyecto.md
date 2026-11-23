@@ -113,6 +113,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Mary + IA (Claude) · Decisiones de negocio para dejar la app lista para desarrollo
+
+Mary: *«quiero dejarla lista para su desarrollo»* y *«no tenemos tiempo para perder»*. Respondió las
+preguntas abiertas desde agosto (`docs/12`): **se le vende a la copropiedad** (los administradores son
+usuarios); **un administrador maneja varios edificios** (CU-A-15 sube a la primera versión); **el
+vencimiento de la cuota lo fija cada edificio** (T-59); y entran también **parqueaderos de visitantes**,
+**chat entre residentes** (espera rango, T-55) y **facturación electrónica** (T-58). Antes se trajeron
+72 cambios de `main` sin conflictos y se le mostraron sus avisos nuevos (4, 5 y 6 de `avisos/mary.md`).
+
 ### 2026-11-23 · Justo · Producto · docs/23 listo para revisión de Daniel
 
 - Afinado docs/23: visitantes usan ALICE; **todos** activan doble cartera en el primer ingreso; escala el **paquete**
