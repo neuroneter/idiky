@@ -8,7 +8,7 @@
 > arrendatario / familia / visitantes, billeteras, bitácora Merkle y tokens on-chain.
 >
 > **Relacionados:** ADR-0025 · ADR-0031 · ADR-0032 · ADR-0034 · docs/20 · RN-320, RN-321, RN-326, RN-328, RN-365 · T-127  
-> **Aviso a Daniel:** [`avisos/daniel.md`](./avisos/daniel.md) §12
+> **Aviso a Daniel:** [`avisos/daniel.md`](./avisos/daniel.md) §12 · **Este documento ya está en `main`.**
 
 ---
 

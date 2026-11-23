@@ -148,7 +148,7 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ## 12. Propietario, arrendatario, visitantes y bitácora Merkle — ⏳ abierto (Justo, 2026-11-23)
 
-**Documento a revisar con tu IA:**  
+**Documento a revisar con tu IA (ya en `main` del arnés `idiky`):**  
 [`docs/23-propietario-arrendatario-y-vinculos.md`](../23-propietario-arrendatario-y-vinculos.md)  
 (§0 idea central · §3 cadena · §7 billeteras y paquetes · §7b Merkle · **§10b decisiones D1–D8** · §12 preguntas)
 
