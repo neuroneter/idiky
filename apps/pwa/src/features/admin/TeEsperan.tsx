@@ -8,7 +8,7 @@
 import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
-import { alertasPendientes, objetoPendiente, preguntasPorResponder } from '../../dominio/reglas'
+import { alertasPendientes, objetoPendiente, pqrsPorVencer, preguntasPorResponder } from '../../dominio/reglas'
 
 export function TeEsperan() {
   const { bd } = useDatos()
@@ -19,6 +19,8 @@ export function TeEsperan() {
 
   const filas: Array<{ cuantos: number; uno: string; varios: string; a: string; urgente?: boolean }> = [
     { cuantos: alertasPendientes(bd.alertasAyuda ?? [], c).length, uno: 'pedido de ayuda sin atender', varios: 'pedidos de ayuda sin atender', a: '/admin/edificio', urgente: true },
+    // PN-22 — Las PQRS que vencen en pocos días: se responden antes del plazo.
+    { cuantos: delEdificio(bd.pqrs).filter((p) => pqrsPorVencer(p)).length, uno: 'PQRS vence en 3 días o menos', varios: 'PQRS vencen en 3 días o menos', a: '/admin/pqrs', urgente: true },
     { cuantos: delEdificio(bd.acuerdosPago).filter((a) => a.estado === 'propuesto').length, uno: 'acuerdo de pago por aprobar', varios: 'acuerdos de pago por aprobar', a: '/admin/cartera' },
     { cuantos: delEdificio(bd.trasteos).filter((t) => t.estado === 'solicitado').length, uno: 'trasteo por aprobar', varios: 'trasteos por aprobar', a: '/admin/edificio' },
     { cuantos: delEdificio(bd.permisosObra).filter((o) => o.estado === 'solicitado').length, uno: 'obra en apartamento por aprobar', varios: 'obras en apartamentos por aprobar', a: '/admin/edificio' },

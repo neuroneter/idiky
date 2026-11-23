@@ -26,7 +26,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-02 | Ver resumen de mi copropiedad (inicio) | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-02) |
 | CU-R-03 | Consultar estado de cuenta | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-03) |
 | CU-R-04 | Pagar una cuota | 1 | ✅ Demo (simulado) | [ver](./casos-de-uso/residente.md#cu-r-04) |
-| CU-R-05 | Reservar una zona común | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-05) |
+| CU-R-05 | Reservar una zona común (incluye el **parqueadero de visitantes**, con la placa, PN-21) | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-05) |
 | CU-R-06 | Cancelar una reserva | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-06) |
 | CU-R-07 | Radicar una PQRS | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-07) |
 | CU-R-08 | Seguir una PQRS radicada | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-08) |
@@ -35,7 +35,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-11 | Ver correspondencia pendiente | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-11) |
 | CU-R-12 | **Descargar el paz y salvo** | 1 | ✅ Demo (se emite e imprime a PDF desde el teléfono) | [ver](./casos-de-uso/residente.md#cu-r-12) |
 | CU-R-13 | **Votar en una asamblea** | 1 | ✅ Demo (mayoría y quórum citando la ley; RN-74, RN-94; vota también el apoderado por la unidad que representa) | [ver](./casos-de-uso/residente.md#cu-r-13) |
-| CU-R-14 | Reportar una novedad con foto (daño, ruido) | 3 | ⬜ Pendiente | — |
+| CU-R-14 | Reportar una novedad con foto (daño, ruido) | 3 | 🟡 Parcial (2026-11-23: el **daño con foto** lo cubre CU-R-40; falta el ruido y la convivencia) | — |
 | CU-R-15 | **Registrar mis vehículos y mascotas** | 3 | ✅ Demo (2026-11-10: placa válida y única en el edificio, mascota sin usuario, se dan de baja; RN-230, RN-231) | [ver](./casos-de-uso/residente.md#cu-r-15) |
 | CU-R-16 | Recibir notificaciones push | 3 | ⬜ Pendiente | — |
 | CU-R-17 | **Directorio de contactos útiles y emergencias** | 3 | ✅ Demo (2026-11-12: por grupos con «Llamar», las emergencias primero; los proveedores solo para administración y consejo; RN-232, RN-233) | [ver](./casos-de-uso/residente.md#cu-r-17) |
@@ -89,9 +89,9 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-11 | Cargar presupuesto anual | 3 | ⬜ Pendiente | — |
 | CU-A-12 | **Convocar la asamblea y emitir las citaciones** | 1 | ✅ Demo (2026-10-12: citación con número y código, enviada a cada propietario con constancia, antelación de 15 días para la ordinaria; RN-33, RN-219) | [ver](./casos-de-uso/administrador.md#cu-a-12) |
 | CU-A-13 | **Emitir el paz y salvo** | 1 | ✅ Demo (desde Cartera → Paz y salvo: busca la unidad, ve el saldo, emite, imprime y anula con motivo — RN-26, RN-36) | [ver](./casos-de-uso/administrador.md#cu-a-13) |
-| CU-A-14 | Gestionar proveedores y mantenimientos | 3 | ⬜ Pendiente | — |
-| CU-A-15 | Administrar varias copropiedades | 3 | ⬜ Pendiente | — |
-| CU-A-16 | Exportar informes (cartera, PQRS) | 2 | ⬜ Pendiente | — |
+| CU-A-14 | Gestionar proveedores y mantenimientos | 3 | 🟡 Parcial (2026-11-23: proveedores en el directorio, CU-R-17; mantenimientos programados en el calendario, CU-A-35; falta la hoja de vida de equipos con vencimientos y certificados) | — |
+| CU-A-15 | **Administrar varias copropiedades** | 1 | ✅ Demo (2026-11-23: Mary, 2026-11-23, «sí, varios»; selector de edificio en la consola) | — |
+| CU-A-16 | Exportar informes (cartera, PQRS) | 2 | ✅ Demo (2026-11-23: «Descargar a Excel» en Cartera y en la bandeja de PQRS) | — |
 | CU-A-17 | **Instalar la asamblea y llevar la asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-17) |
 | CU-A-18 | **Habilitar, abrir y cerrar una votación** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-18) |
 | CU-A-19 | **Registrar un poder en papel y dar de alta a quien lo ejerce** | 1 | ✅ Demo (registra, valida el que llega en foto, muestra el acumulado y **aplica el tope de poderes por persona si el edificio lo configuró**, RN-220) | [ver](./casos-de-uso/administrador.md#cu-a-19) |
@@ -162,7 +162,7 @@ con datos reales.
 | CU-S-02 | Marcar cuotas vencidas y calcular interés de mora | 1 | 🟡 Parcial (el vencimiento se marca; el interés no se calcula — **solo si la copropiedad lo activó**, RN-42) |
 | CU-S-03 | **Liberar reservas no confirmadas** | 2 | ✅ Demo (vence la solicitud sin respuesta al llegar su turno y avisa al residente; el tablero alerta las que vencen en menos de 48 h — RN-122) |
 | CU-S-04 | Vencer códigos de visitante | 1 | ✅ Demo (por fecha de vigencia) |
-| CU-S-05 | Alertar PQRS próximas a vencer SLA | 2 | 🟡 Parcial (se muestra el indicador de vencida) |
+| CU-S-05 | Alertar PQRS próximas a vencer SLA | 2 | ✅ Demo (2026-11-23, PN-22: «Te esperan» y el filtro «Por vencer», 3 días antes) |
 | CU-S-06 | **Enviar recordatorios de pago** | 3 | ✅ Demo (2026-11-10: un recordatorio amable un par de días antes de vencer y las gracias al pagar; sin mensaje de cuota vencida; RN-226) |
 | CU-S-07 | **Calcular el quórum en vivo por coeficientes (presentes + representados)** | 1 | ✅ Demo (en la asamblea instalada, la consola muestra unidades, coeficiente reunido —presentes y representadas por poder— y cuánto falta, según la convocatoria: `hayQuorum`, `faltaParaQuorum`, RN-28, RN-92) |
 | CU-S-08 | **Consolidar el resultado de una votación ponderado por coeficiente** | 1 | ✅ Demo (se calcula por coeficiente **o por unidad** —RN-211, C-522 de 2002— con la mayoría y la base que exige la ley —`contarVotacion`, `resultadoVotacion`, RN-74— y se ve en la app del residente, en el acta y, mientras se vota, en la consola —CU-A-18, `VotacionPunto.tsx`—)

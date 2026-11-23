@@ -243,6 +243,8 @@ import type {
 } from '../dominio/tipos'
 import {
   reglasTrasteoDe,
+  motivoParqueaderoInvalido,
+  motivoDiaVencimientoInvalido,
   acuerdoEnCurso,
   calcularSaldoVencido,
   calendarioAcuerdo,
@@ -729,8 +731,11 @@ function construirCuotas(bd: BaseDatos, parametros: ParametrosGeneracion): Cuota
     valor: linea.valor,
     // RN-75: nace debiendo todo su valor.
     saldo: linea.valor,
-    // RN-23: vencimiento por defecto el dia 10 del periodo.
-    fechaVencimiento: vencimientoDelPeriodo(parametros.periodo),
+    // RN-23 (T-59): el día que fija el edificio; sin él, el 10.
+    fechaVencimiento: vencimientoDelPeriodo(
+      parametros.periodo,
+      bd.copropiedades.find((c) => c.id === parametros.copropiedadId)?.diaVencimiento,
+    ),
     estado: 'pendiente',
     // El respaldo viaja en **cada** cuota, no en un encabezado aparte: quien
     // reclama lo hace desde su estado de cuenta, mirando su linea (RN-47).
@@ -942,6 +947,9 @@ export async function crearReserva(
     aceptaCondiciones?: boolean
     /** RN-126 — Los nombres de sus invitados. */
     invitados?: string[]
+    /** PN-21 — En un parqueadero de visitantes: la placa y a quién se espera. */
+    placaVisitante?: string
+    visitanteEsperado?: string
   },
 ): Promise<Resultado<Reserva>> {
   await esperar()
@@ -973,6 +981,8 @@ export async function crearReserva(
   const invitados = parametros.invitados ?? []
   const motivoInvitados = motivoInvitadosInvalido(invitados, parametros.personas ?? 1)
   if (motivoInvitados) throw new ErrorDeNegocio(motivoInvitados)
+  const motivoParqueadero = motivoParqueaderoInvalido(zona, parametros.placaVisitante)
+  if (motivoParqueadero) throw new ErrorDeNegocio(motivoParqueadero)
 
   const reserva: Reserva = {
     id: nuevoId('rsv'),
@@ -991,6 +1001,12 @@ export async function crearReserva(
     ...valoresDeLaReserva(zona),
     ...(condiciones ? { condicionesAceptadas: { aceptadasEn: ahoraISO(), texto: condiciones } } : {}),
     ...(invitados.length ? { invitados } : {}),
+    ...(zona.parqueaderoVisitantes
+      ? {
+          placaVisitante: normalizarPlaca(parametros.placaVisitante ?? ''),
+          visitanteEsperado: parametros.visitanteEsperado?.trim() || undefined,
+        }
+      : {}),
   }
 
   bd.reservas.push(reserva)
@@ -6565,4 +6581,24 @@ export async function cancelarAcuerdoPago(
   acuerdo.estado = 'cancelado'
   acuerdo.cancelacion = { por: parametros.personaId, en: ahoraISO() }
   return persistir(bd, acuerdo)
+}
+
+/**
+ * RN-23 (T-59) — La administración fija el día de vencimiento de la cuota,
+ * según el reglamento. Aplica a las cuotas que se generen desde ahora: las ya
+ * generadas no cambian.
+ */
+export async function configurarDiaVencimiento(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; dia: number },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Fijar el día de vencimiento')
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  const motivo = motivoDiaVencimientoInvalido(parametros.dia)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  copropiedad.diaVencimiento = parametros.dia
+  return persistir(bd, copropiedad)
 }

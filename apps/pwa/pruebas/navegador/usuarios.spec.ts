@@ -153,7 +153,7 @@ test("cambio de propietario desde Unidades lleva a registrar al nuevo (CU-A-02, 
   await p.locator('#detalle-cierre').fill('Escritura 1234 Notaría 5')
   await p.getByRole('button', { name: 'Inhabilitar y registrar al nuevo' }).click(); await p.waitForTimeout(900)
   check(p.url().includes('#/admin/registros?unidad='), 'lleva a Registros con la unidad: ' + p.url())
-  const sel = p.locator('select').first()
+  const sel = p.locator('.consola__principal select').first()
   const texto = await sel.locator('option:checked').textContent().catch(()=>'')
   check(/402/.test(texto ?? ''), 'el formulario abre con la 402 escogida: ' + texto)
   check(await p.locator('#rol').count() === 0, 'no se escoge título: es propietario')

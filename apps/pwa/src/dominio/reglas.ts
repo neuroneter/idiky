@@ -551,9 +551,18 @@ export function porcentajeRecaudo(cuotas: Cuota[], periodo: Periodo): number {
   return Math.round((recaudado / facturado) * 100)
 }
 
-/** RN-23 — Fecha de vencimiento por defecto de un periodo. */
-export function vencimientoDelPeriodo(periodo: Periodo): FechaISO {
-  return `${periodo}-${String(DIA_VENCIMIENTO_CUOTA).padStart(2, '0')}`
+/**
+ * RN-23 — Fecha de vencimiento de un periodo: el día que fija el edificio
+ * (T-59, Mary 2026-11-23: «hay estándares que dicen el 10 y otros el día 15»);
+ * sin día, el 10.
+ */
+export function vencimientoDelPeriodo(periodo: Periodo, dia: number = DIA_VENCIMIENTO_CUOTA): FechaISO {
+  return `${periodo}-${String(dia).padStart(2, '0')}`
+}
+
+/** RN-23 (T-59) — El día de vencimiento va del 1 al 28, para que exista en todos los meses. */
+export function motivoDiaVencimientoInvalido(dia: number): string | null {
+  return Number.isInteger(dia) && dia >= 1 && dia <= 28 ? null : 'El día de vencimiento va del 1 al 28.'
 }
 
 // ---------------------------------------------------------------------------
@@ -4788,4 +4797,34 @@ export function acuerdoEnCurso(acuerdo: AcuerdoPago): boolean {
  */
 export function decideEnLaUnidad(rol: Residencia['rol'] | undefined): boolean {
   return rol === 'propietario' || rol === 'arrendatario'
+}
+
+// ---------------------------------------------------------------------------
+// Parqueaderos de visitantes — PN-21 · CU-R-05 (Mary, 2026-11-23)
+// ---------------------------------------------------------------------------
+
+/** PN-21 — En un parqueadero de visitantes la placa es obligatoria y válida. */
+export function motivoParqueaderoInvalido(zona: { parqueaderoVisitantes?: boolean }, placa?: string): string | null {
+  if (!zona.parqueaderoVisitantes) return null
+  if (!placa?.trim()) return 'Escribe la placa del carro de tu visitante: portería la necesita.'
+  // Carro o moto: vale cualquiera de los dos formatos.
+  if (!motivoPlacaInvalida('carro', placa) || !motivoPlacaInvalida('moto', placa)) return null
+  return 'La placa son tres letras y tres números (carro) o tres letras, dos números y una letra (moto).'
+}
+
+// ---------------------------------------------------------------------------
+// PQRS por vencer — PN-22 · CU-S-05 (Mary, 2026-11-23)
+// ---------------------------------------------------------------------------
+
+/** PN-22 — Con cuántos días de anticipación se avisa que una PQRS va a vencer. */
+export const DIAS_AVISO_PQRS = 3
+
+/**
+ * PN-22 — **Una PQRS por vencer**: abierta, todavía dentro del plazo (RN-13) y
+ * con `DIAS_AVISO_PQRS` días o menos. Se avisa **antes**, no cuando ya venció.
+ */
+export function pqrsPorVencer(pqrs: Pqrs, hoy: FechaISO = hoyISO()): boolean {
+  if (!pqrsAbierta(pqrs)) return false
+  const dias = diasRestantesSla(pqrs, hoy)
+  return dias >= 0 && dias <= DIAS_AVISO_PQRS
 }

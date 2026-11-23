@@ -119,7 +119,9 @@ export function GestionTurno({ parte }: { parte: 'arriba' | 'abajo' }) {
               ? `Es de un residente: ${etiquetaUnidad(sel.unidad(bd, placaEncontrada.unidadId)!)}${placaEncontrada.vehiculo.parqueadero ? `, parqueadero ${placaEncontrada.vehiculo.parqueadero}` : ''}.`
               : placaEncontrada.tipo === 'visitante'
                 ? `Es de un visitante autorizado hoy: ${placaEncontrada.visitante.nombre}, para ${etiquetaUnidad(sel.unidad(bd, placaEncontrada.unidadId)!)}.`
-                : `La placa ${placaEncontrada.placa} no está registrada. Llama a la unidad antes de dejarla entrar.`}
+                : placaEncontrada.tipo === 'parqueadero'
+                  ? `Tiene parqueadero de visitantes hoy, de ${placaEncontrada.reserva.horaInicio} a ${placaEncontrada.reserva.horaFin}, para ${etiquetaUnidad(sel.unidad(bd, placaEncontrada.unidadId)!)}${placaEncontrada.reserva.visitanteEsperado ? ` (${placaEncontrada.reserva.visitanteEsperado})` : ''}.`
+                  : `La placa ${placaEncontrada.placa} no está registrada. Llama a la unidad antes de dejarla entrar.`}
           </p>
         )}
       </div>

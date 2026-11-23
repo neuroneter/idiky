@@ -432,7 +432,7 @@ function AtajoDemo({ alSeleccionar }: { alSeleccionar: (personaId: string) => vo
         Entra directo con uno de estos perfiles, sin código.
       </p>
       <div className="lista">
-        {bd.perfilesDemo.map((perfil) => (
+        {bd.perfilesDemo.filter((perfil) => !perfil.oculto).map((perfil) => (
           <button
             key={perfil.id}
             className="tarjeta tarjeta--plana tarjeta--accion"

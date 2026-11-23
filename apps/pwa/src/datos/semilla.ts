@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 49
+export const VERSION_ESQUEMA = 51
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -115,16 +115,29 @@ function idUnidad(torre: string, numero: string): string {
   return `uni-${torre.toLowerCase().replace(/\s+/g, '')}-${numero}`
 }
 
-const unidades: Unidad[] = DEFINICION_UNIDADES.map(([torre, numero, area, coeficiente], i) => ({
-  id: idUnidad(torre, numero),
-  copropiedadId: COPROPIEDAD_ID,
-  torre,
-  numero,
-  tipo: 'apartamento',
-  area,
-  coeficiente,
-  parqueaderos: [`P-${String(i + 1).padStart(2, '0')}`],
-}))
+const unidades: Unidad[] = [
+  ...DEFINICION_UNIDADES.map(([torre, numero, area, coeficiente], i) => ({
+    id: idUnidad(torre, numero),
+    copropiedadId: COPROPIEDAD_ID,
+    torre,
+    numero,
+    tipo: 'apartamento' as const,
+    area,
+    coeficiente,
+    parqueaderos: [`P-${String(i + 1).padStart(2, '0')}`],
+  })),
+  // CU-A-15 — El segundo edificio que administra Olga (Mary, 2026-11-23).
+  ...[['101', 25], ['102', 25], ['201', 25], ['202', 25]].map(([numero, coeficiente]) => ({
+    id: `uni-mirador-${numero}`,
+    copropiedadId: 'cop-2',
+    torre: 'Mirador',
+    numero: String(numero),
+    tipo: 'apartamento' as const,
+    area: 60,
+    coeficiente: Number(coeficiente),
+    parqueaderos: [],
+  })),
+]
 
 /**
  * Perfil de cartera por unidad: cuantos periodos recientes tiene sin pagar.
@@ -355,6 +368,24 @@ const zonasComunes: ZonaComun[] = [
     duracionBloqueHoras: 2,
     anticipacionMinimaHoras: 4,
     cupoMensualPorUnidad: 8,
+  },
+  // PN-21 — Parqueaderos de visitantes (Mary, 2026-11-23): se reservan por turnos y piden la placa.
+  {
+    id: 'zon-parq-visitantes',
+    copropiedadId: COPROPIEDAD_ID,
+    nombre: 'Parqueadero de visitantes',
+    descripcion: 'Cuatro cupos en el sótano para los carros de tus visitantes.',
+    icono: 'parqueadero',
+    especificaciones: 'Un cupo por unidad a la vez\nEl visitante deja el documento en portería\nNo se deja el carro de un día para otro',
+    aforo: 4,
+    requiereAprobacion: false,
+    horaInicio: '07:00',
+    horaFin: '22:00',
+    duracionBloqueHoras: 3,
+    anticipacionMinimaHoras: 1,
+    cupoMensualPorUnidad: 8,
+    modoUso: 'compartido',
+    parqueaderoVisitantes: true,
   },
 ]
 
@@ -1554,6 +1585,20 @@ export function crearSemilla(): BaseDatos {
           ],
         },
       },
+      // CU-A-15 — Un segundo edificio, pequeño, para ver el cambio de edificio en la consola.
+      {
+        id: 'cop-2',
+        nombre: 'Edificio Mirador del Parque',
+        nit: '901.876.543-2',
+        direccion: 'Carrera 7 # 120-15',
+        ciudad: 'Bogotá',
+        tipo: 'residencial',
+        diasDescargos: 10,
+        diasImpugnacion: 5,
+        mesesReincidencia: 12,
+        quorumMinimo: 50,
+        diaVencimiento: 15,
+      },
     ],
     unidades,
     personas: [...personas, administrador, portero],
@@ -1727,6 +1772,16 @@ export function crearSemilla(): BaseDatos {
         rol: 'admin',
         personaId: 'per-admin',
         copropiedadId: COPROPIEDAD_ID,
+      },
+      // CU-A-15 — Olga también administra el Mirador: no sale en la lista de entrada.
+      {
+        id: 'perfil-admin-mirador',
+        etiqueta: 'Olga Lucia Henao',
+        descripcion: 'Administradora del Edificio Mirador del Parque',
+        rol: 'admin',
+        personaId: 'per-admin',
+        copropiedadId: 'cop-2',
+        oculto: true,
       },
     ],
     consecutivos: {

@@ -94,6 +94,11 @@ export interface Copropiedad {
    * de trasteos no pregunta por ellos (Mary, 2026-11-20). Si falta, se asume que sí.
    */
   tieneAscensores?: boolean
+  /**
+   * RN-23 (T-59) — Qué día del mes vence la cuota en este edificio: lo fija su
+   * reglamento (el 10, el 15…). Sin esto, el 10 (Mary, 2026-11-23).
+   */
+  diaVencimiento?: number
   /** CU-R-44 · PN-10 — Horario y anticipación de los trasteos. Sin esto, los valores por defecto. */
   reglasTrasteo?: ReglasTrasteo
   /**
@@ -550,6 +555,11 @@ export interface ZonaComun {
   anticipacionMinimaHoras: number
   cupoMensualPorUnidad: number
   /**
+   * PN-21 — Es un parqueadero de visitantes (Mary, 2026-11-23): se reserva como
+   * cualquier zona, pero pide la placa del visitante y portería la ve ese día.
+   */
+  parqueaderoVisitantes?: boolean
+  /**
    * Fotos de la zona, para reservar viendo como es (RN-104, Mary 2026-10-01).
    * Configuracion, no registro: se agregan y se quitan desde la consola. Hasta
    * cinco, reducidas (ADR-0009).
@@ -668,6 +678,9 @@ export interface Reserva {
    */
   motivoCancelacion?: string
   canceladaEn?: FechaHoraISO
+  /** PN-21 — En un parqueadero de visitantes: la placa y a quién se espera. */
+  placaVisitante?: string
+  visitanteEsperado?: string
   /**
    * Cuantas personas van, contando a quien reserva (RN-113). En una zona
    * compartida es lo que llena el turno (RN-111). Ausente cuenta como una.
@@ -1749,6 +1762,11 @@ export interface PerfilDemo {
   copropiedadId: string
   /** Unidad preseleccionada; los admin no tienen. */
   unidadId?: string
+  /**
+   * CU-A-15 — Una asignación más de la misma persona (otro edificio que
+   * administra): no se muestra en la lista de entrada del demo.
+   */
+  oculto?: boolean
 }
 
 export interface Sesion {

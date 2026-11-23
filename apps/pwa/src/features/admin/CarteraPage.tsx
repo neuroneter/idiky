@@ -10,6 +10,8 @@
  * entra es el otro modulo (`PagosPage`), para no mezclar la consulta con la caja.
  */
 
+import { descargarCsv } from '../../utilidades/descarga'
+import { DiaVencimientoTarjeta } from './DiaVencimientoTarjeta'
 import { PagosProgramadosAdmin } from './PagosProgramadosAdmin'
 import { AcuerdosPagoAdmin } from './AcuerdosPagoAdmin'
 import { ProntoPagoTarjeta } from './ProntoPagoTarjeta'
@@ -156,6 +158,7 @@ export function CarteraPage() {
       <CuotaAutomaticaTarjeta />
 
       {/* RN-226, CU-S-06 — Recordatorios de pago a los propietarios. */}
+      <DiaVencimientoTarjeta />
       <RecordatoriosPago />
       <ProntoPagoTarjeta />
       <AcuerdosPagoAdmin />
@@ -180,10 +183,24 @@ export function CarteraPage() {
             </button>
           ))}
         </div>
-        <button className="boton boton--primario" onClick={() => setGenerando(true)}>
-          <Icono nombre="mas" tamano={15} />
-          Generar cuotas
-        </button>
+        <div className="grupo-botones">
+          {/* CU-A-16 — La cartera, para Excel: lo que se ve con el filtro elegido. */}
+          <button
+            className="boton"
+            onClick={() =>
+              void descargarCsv(`cartera-${new Date().toISOString().slice(0, 10)}.csv`, [
+                ['Unidad', 'Propietario', 'Saldo', 'Vencido', 'Días de mora'],
+                ...filas.map((f) => [etiquetaUnidad(f.unidad), f.propietario, f.saldo, f.vencido, f.mora]),
+              ])
+            }
+          >
+            Descargar a Excel
+          </button>
+          <button className="boton boton--primario" onClick={() => setGenerando(true)}>
+            <Icono nombre="mas" tamano={15} />
+            Generar cuotas
+          </button>
+        </div>
       </div>
 
       <div className="rejilla-indicadores">
