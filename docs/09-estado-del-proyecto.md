@@ -113,6 +113,24 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Daniel + IA (Claude) · BOB · Pantalla «Roles y permisos» (T-138; RN-333, RN-334, RN-342; ADR-0034)
+
+En `BOB-Idiky`, rama **`feature/T-138-roles-y-permisos`** (commit `0f10351`, desde `develop`): plugin nuevo
+`apps/gestion/src/plugins/roles-y-permisos/`, **sin content-types** (BOB no guarda la matriz). Página «Roles y permisos» en
+el menú: roles en filas por categoría, módulos en columnas agrupados por BLOKY y ALICE (filtro por aplicación), casillas
+V · C · E · A (marcar C/E/A marca V; quitar V lo quita todo, RN-334), crear, renombrar, retirar y volver a usar roles, la
+`version` de la matriz y el registro de cambios (RN-342). Habla con `/api/admin/permisos*` del middleware con
+`BLOKY_ADMIN_TOKEN` (nunca en el navegador) y `x-bloky-quien` = el correo del usuario del panel. **Pinta lo que venga del
+catálogo**: los roles de la unidad de T-147 (propietario, arrendatario, conviviente, invitado) aparecen solos. Dos
+permisos de BOB por rol: «Ver roles y permisos de IDIKY» y «Gestionar…» (solo la administración de IDIKY; el Super Admin
+los tiene).
+
+**Probado en local** con BOB en `npm run develop` (SQLite temporal) y el middleware de `develop` en memoria: leer la
+matriz, marcar una casilla desde la página, crear y retirar un rol, rechazos (rol retirado 422, acción inválida 400),
+registro con el correo, 401 sin sesión; `npm run build` pasa. **No se probó contra BLOKY Dev** (el token no está en esta
+máquina). **Sigue:** merge a `develop`, release a `main` y desplegar `gestion` (Daniel o Justo); asignar el permiso
+«Gestionar» al rol de administración de IDIKY en BOB Dev.
+
 ### 2026-11-23 · Daniel + IA (Claude) · Producto · Decisiones finales sobre el docs/23: RN-366 a RN-369 (T-147, T-148)
 
 Daniel ajustó la respuesta: **D4 y D5 aprobadas como las propuso Justo** (el invitado siempre con ALICE y cuenta verificada que
