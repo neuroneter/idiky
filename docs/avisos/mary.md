@@ -119,7 +119,13 @@ Daniel decidió cómo se crean los residentes en BLOKY y ALICE
   **externo**, y tu RN-217 que sea de **otra copropiedad**; Daniel habla de *otro residente del mismo edificio*. ¿Se
   restringe a residentes de la misma copropiedad, o se mantienen el externo y el de otra copropiedad?
 
-## 4. Quién vota y con qué peso: lo que propone Daniel choca con reglas tuyas — ⏳ abierto (2026-11-21)
+## 4. Quién vota y con qué peso: lo que propone Daniel choca con reglas tuyas — 🟡 en parte respondido (2026-11-23)
+
+**Tu respuesta (2026-11-23), sobre el punto 1:** *«depende por lo que se vote y eso lo define el administrador en la
+parametrización: puede ser de cuando cite a la asamblea o desde la creación del edificio».* Quedó así en la maqueta
+(RN-211): **desde la creación del edificio**, la base del mixto (`votoNoEconomicoMixto`); **al citar**, cada punto que
+se vota dice si es **decisión económica** (coeficiente) o **no económica** (según el edificio), y la votación lo trae
+marcado. Sin marcar al citar, se escoge al abrir la votación. Siguen abiertos los puntos 2, 3 y 4 con Daniel.
 
 Daniel (2026-11-21), al definir roles y permisos ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-impersonacion.md)):
 *una copropiedad puede definir quién tendrá la capacidad de voto por el % de su copropiedad; no se puede dar a menores de

@@ -113,6 +113,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Mary + IA (Claude) · Al citar, cada punto dice cómo se cuenta (RN-211, aviso 4)
+
+Mary respondió el punto 1 del aviso 4: la base del voto *«depende por lo que se vote»*, y la define el administrador
+**al citar** o **desde la creación del edificio**. Al convocar (CU-A-12), cada punto que se vota tiene ahora
+«Tipo de decisión»: **económica** (coeficiente) o **no económica** (según el edificio: unidad en residencial,
+coeficiente en comercial, lo parametrizado en el mixto). Se guarda en `PuntoOrdenDelDia.contenidoEconomico`, pasa a la
+segunda convocatoria, la votación lo trae marcado (`VotacionPunto.tsx`) y la citación se lo dice al propietario
+(`HojaCitacion.tsx`). Pruebas en `pruebas/navegador/unanimidad.spec.ts`. **Sigue:** las mejoras de asamblea 1, 2, 3 y 5.
+
 ### 2026-11-23 · Mary + IA (Claude) · Lista para desarrollo: lo que faltaba y el mapa para el desarrollador
 
 Con las decisiones de negocio del día se construyó en la maqueta, sin números nuevos:

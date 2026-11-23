@@ -48,7 +48,8 @@ export function VotacionPunto({ asamblea, punto }: { asamblea: Asamblea; punto: 
   const [preparando, setPreparando] = useState(false)
   const [pregunta, setPregunta] = useState(`¿Aprueba ${punto.titulo.charAt(0).toLowerCase()}${punto.titulo.slice(1)}?`)
   const [opciones, setOpciones] = useState<string[]>(OPCIONES_POR_DEFECTO)
-  const [economica, setEconomica] = useState<boolean | undefined>(undefined)
+  // RN-211 — Si se definió al citar, la votación lo trae marcado.
+  const [economica, setEconomica] = useState<boolean | undefined>(punto.contenidoEconomico)
   const [anulando, setAnulando] = useState(false)
   const [motivo, setMotivo] = useState('')
   if (!sesion || !punto.seVota) return null
