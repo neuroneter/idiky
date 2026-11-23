@@ -10,7 +10,8 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
 import { cambiarEstadoPqrs, responderPqrs } from '../../datos/repositorio'
-import { TEXTO_PUNTAJE, diasRestantesSla, etiquetaUnidad, pqrsAbierta, pqrsFueraDeSla, resumenCalificaciones } from '../../dominio/reglas'
+import { TEXTO_PUNTAJE, diasRestantesSla, etiquetaUnidad, pqrsAbierta, pqrsFueraDeSla, pqrsPorVencer, resumenCalificaciones } from '../../dominio/reglas'
+import { descargarCsv } from '../../utilidades/descarga'
 import { Estrellas } from '../residente/CalificarAtencion'
 import { capitalizar, formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import type { EstadoPqrs } from '../../dominio/tipos'
@@ -18,7 +19,7 @@ import { Modal } from '../../componentes/Modal'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipPqrs, ChipTipoPqrs } from '../../componentes/Etiquetas'
 
-type Filtro = 'abiertas' | 'vencidas' | 'todas'
+type Filtro = 'abiertas' | 'por_vencer' | 'vencidas' | 'todas'
 
 export function PqrsAdminPage() {
   const { bd, ejecutar, cargando, mostrarAviso } = useDatos()
@@ -34,6 +35,7 @@ export function PqrsAdminPage() {
   const listado = todas.filter((solicitud) => {
     if (filtro === 'abiertas') return pqrsAbierta(solicitud)
     if (filtro === 'vencidas') return pqrsFueraDeSla(solicitud)
+    if (filtro === 'por_vencer') return pqrsPorVencer(solicitud)
     return true
   })
   const detalle = todas.find((solicitud) => solicitud.id === abierta)
@@ -79,10 +81,33 @@ export function PqrsAdminPage() {
         </div>
       </div>
 
+      {/* CU-A-16 — La bandeja, para Excel. */}
+      <button
+        className="boton boton--pequeno"
+        style={{ alignSelf: 'flex-start' }}
+        onClick={async () => {
+          const filas = todas.map((p) => {
+            const u = sel.unidad(bd, p.unidadId)
+            return [
+              p.radicado, p.fechaRadicacion.slice(0, 10), u ? etiquetaUnidad(u) : '', p.tipo, p.categoria, p.asunto, p.estado,
+              p.fechaLimite, p.calificacion ? String(p.calificacion.puntaje) : '',
+            ]
+          })
+          const r = await descargarCsv(`pqrs-${new Date().toISOString().slice(0, 10)}.csv`, [
+            ['Radicado', 'Fecha', 'Unidad', 'Tipo', 'Categoría', 'Asunto', 'Estado', 'Fecha límite', 'Calificación'],
+            ...filas,
+          ])
+          if (r === 'no_disponible') mostrarAviso('No se pudo descargar desde aquí.', 'error')
+        }}
+      >
+        Descargar a Excel
+      </button>
+
       <div className="filtros">
         {(
           [
             ['abiertas', 'Abiertas'],
+            ['por_vencer', 'Por vencer'],
             ['vencidas', 'Fuera de plazo'],
             ['todas', 'Todas'],
           ] as Array<[Filtro, string]>

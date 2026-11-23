@@ -528,6 +528,11 @@ export function quienEsLaPlaca(bd: BaseDatos, copropiedadId: string, placaEscrit
     (v) => (v.placa ?? '').toUpperCase().replace(/[^A-Z0-9]/g, '') === placa && estadoRealVisitante(v, hoy) === 'activo',
   )
   if (visitante) return { tipo: 'visitante' as const, placa, unidadId: visitante.unidadId, visitante }
+  // PN-21 — La placa de un parqueadero de visitantes reservado para hoy.
+  const reserva = bd.reservas.find(
+    (r) => r.placaVisitante === placa && r.fecha === hoy && r.estado === 'confirmada' && unidad(bd, r.unidadId)?.copropiedadId === copropiedadId,
+  )
+  if (reserva) return { tipo: 'parqueadero' as const, placa, unidadId: reserva.unidadId, reserva }
   return { tipo: 'desconocida' as const, placa }
 }
 
@@ -686,4 +691,14 @@ export function propiedadesDePersona(bd: BaseDatos, personaId: string): ResumenP
 export function rolEnUnidad(bd: BaseDatos, personaId: string, unidadId?: string): Residencia['rol'] | undefined {
   if (!unidadId) return undefined
   return residenciasDePersona(bd, personaId).find((r) => r.unidadId === unidadId && !r.cierre)?.rol
+}
+
+/**
+ * CU-A-15 — Los edificios que administra una persona (Mary, 2026-11-23: «sí,
+ * varios» desde la misma cuenta). En el demo salen de sus perfiles de
+ * administración; en BLOKY, de las asignaciones que hace BOB (RN-161).
+ */
+export function edificiosQueAdministra(bd: BaseDatos, personaId: string) {
+  const ids = new Set(bd.perfilesDemo.filter((p) => p.rol === 'admin' && p.personaId === personaId).map((p) => p.copropiedadId))
+  return bd.copropiedades.filter((c) => ids.has(c.id))
 }

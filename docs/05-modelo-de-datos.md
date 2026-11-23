@@ -684,6 +684,35 @@ convocatoria, poder y acta.
 | `archivo` | string | Referencia al PDF en el almacenamiento de objetos. Vacío mientras no exista backend |
 | `estadoCuenta` | `{desde, hasta, saldoInicial, movimientos[], totalCargos, totalAbonos, saldoFinal, solicitadoPor}`? | Solo en el estado de cuenta (CU-R-18): **lo que afirmó, congelado al emitirlo** (RN-127). Cada movimiento es `{fecha, tipo: 'cargo' \| 'abono', concepto, valor, saldo}`. Reimprimirlo da el mismo papel. Consecutivo propio `EC-AAAA-NNNN` (`consecutivos.estadoCuenta`) |
 
+### Entidades nuevas de noviembre (Mary, 2026-11-10 a 2026-11-23)
+
+> **Para el desarrollador.** La definición exacta —campos, tipos y comentarios— está en
+> `apps/pwa/src/dominio/tipos.ts`, buscando el nombre de la entidad; aquí va qué es, lo que no
+> puede faltar y la regla que la gobierna. **Ninguna se borra**: se cierran, se cancelan o se
+> anulan con quién y cuándo.
+
+| Entidad | Qué es | Campos clave | Regla |
+|---|---|---|---|
+| `Copropiedad` (parámetros nuevos) | La parametrización del edificio | `diaVencimiento`, `prontoPago` {activo, porcentaje, diaLimite}, `acuerdosPago` {activo, cuotasMaximas}, `reglasTrasteo` {horaDesde, horaHasta, diasAnticipacion, sabados, deposito, ascensores[]}, `tieneAscensores`, `cobraInteresMora`, `cuotaAutomatica`, `recordatorioPago`, `topePoderes`, `morososNoVotan`, `consejo[]` | RN-23, PN-01, PN-10, PN-19 |
+| `Imputacion.descuento` | El descuento por pronto pago dentro del recibo | `descuento` (no es plata recibida) | PN-01 |
+| `PagoProgramado` | El pago automático de la cuota mensual | `unidadId`, `personaId`, `medio`, `dia`, `activo`, `ultimoPeriodo` | PN-02 |
+| `InformeMensual` | Las cuentas claras de un mes | `periodo`, `ingresos`, `gastos[]` {rubro, valor}, `saldoFondo`, `reemplazadoPor` | PN-03 |
+| `DocumentoEdificio` | Reglamento, manual, actas, pólizas | `categoria`, `fecha`, `archivo`, `retiro` | PN-04 (en BLOKY: CU-B-11) |
+| `Encuesta` | Una encuesta rápida | `pregunta`, `opciones[]`, `cierraEl`, `respuestas[]` {unidadId, opcionId} | PN-05 |
+| `Pqrs.foto`, `Pqrs.ubicacion`, `Pqrs.calificacion` | El daño con foto y la calificación de la atención | `foto`, `ubicacion`, `calificacion` {puntaje 1–5, comentario} | PN-06, PN-15 |
+| `EventoEdificio` | Lo que se programa en el edificio | `tipo`, `fecha`, `horaInicio`, `horaFin`, `cancelacion` | PN-07 |
+| `AvisoClasificado` | Un aviso entre vecinos | `tipo`, `precio`, `mostrarCelular`, `venceEl`, `cierre` | PN-08 |
+| `AlertaAyuda` | Un pedido de ayuda a portería | `tipo`, `vista`, `atendida` {nota} | PN-09 |
+| `Trasteo` | Un permiso de trasteo | `sentido`, `fecha`, `horaInicio`, `horaFin`, `ascensorId`, `estado`, `decision`, `realizado`, `deposito` {valor, recibido, cierre} | PN-10, PN-13 |
+| `PermisoObra` | Una obra en el apartamento | `descripcion`, `desde`, `hasta`, `trabajadores[]` {nombre, documento}, `estado` | PN-11 |
+| `ObjetoEncontrado` | Un objeto perdido en portería | `descripcion`, `lugar`, `reclamos[]` {senas}, `entrega`, `baja` | PN-17 |
+| `AcuerdoPago` | Un acuerdo para ponerse al día | `deudaAcordada`, `cuotas[]` {fecha, valor}, `estado`, `decision` | PN-19 |
+| `Documento` tipo `certificado_pagos` | El certificado de pagos del año | `certificadoPagos` {anio, pagos[], total, descuentos}, congelado | PN-14, RN-36 |
+| `Persona.preferenciasAvisos`, `Mensaje.canal` | Por dónde y de qué se avisa | `canal`, `temas`; en el mensaje, `personaId` y `canal` | PN-16 |
+| `Proyecto.financiacion`, `AvanceProyecto.pagado`, `Proyecto.preguntas` | Transparencia de las obras | fuente, lo pagado acumulado, preguntas y respuestas | RN-238, RN-239 |
+| `ZonaComun.parqueaderoVisitantes`, `Reserva.placaVisitante` | El parqueadero de visitantes | la marca en la zona; la placa en la reserva | PN-21 |
+
+
 ## 3. Reglas de negocio
 
 Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este listado.**
@@ -712,7 +741,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-20 | Toda unidad tiene al menos un propietario. | *pendiente* |
 | RN-21 | Los días de mora se cuentan desde la cuota vencida más antigua. | `dominio/reglas.ts` |
 | RN-22 | No se generan dos veces las cuotas ordinarias del mismo periodo. | `datos/repositorio.ts` |
-| RN-23 | Vencimiento por defecto: día 10 del periodo. | `datos/repositorio.ts` |
+| RN-23 | Vencimiento: el **día que fija cada edificio** en su parametrización (del 1 al 28); sin día, el 10. Aplica a las cuotas que se generen desde que se cambia (Mary, 2026-11-23, T-59: cambiarlo también en la contable) | `dominio/reglas.ts` (`vencimientoDelPeriodo`), `datos/repositorio.ts` (`configurarDiaVencimiento`) |
 | RN-24 | La primera respuesta de la administración pasa la PQRS a `en_gestion`. | `datos/repositorio.ts` |
 | RN-25 | La correspondencia entregada no se edita. | `features/admin/CorrespondenciaAdminPage.tsx` |
 | RN-26 | El paz y salvo solo se emite si el saldo de la unidad es cero, **incluida la cuota ya facturada del periodo aunque todavía no haya vencido**. Estar sin mora no basta. | `datos/repositorio.ts` (`emitirPazYSalvo`) |
@@ -791,7 +820,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-239 | **Preguntas sobre la obra**: las hace el propietario o el arrendatario (10 a 500 caracteres) y no se borran ni se editan. Pendientes, solo las ve quien preguntó; respondidas, las ven todos los propietarios **sin el nombre de quien preguntó**. Una sola respuesta, que avisa por mensaje a quien preguntó (CU-R-32, CU-A-28) | `dominio/reglas.ts` (`motivoPreguntaInvalida`, `preguntasVisibles`, `preguntasPorResponder`) |
 
 **Reglas pendientes de número (PN) — Mary, 2026-11-20.** El rango RN de Mary se agotó en RN-239.
-Estas reglas van como **PN-01 … PN-20** hasta que el integrador le asigne un rango nuevo
+Estas reglas van como **PN-01 … PN-22** hasta que el integrador le asigne un rango nuevo
 (T-55); entonces se renumeran aquí, en el código (`apps/pwa/src/dominio/reglas.ts`, sección «Para
 competir») y en los casos de uso.
 
@@ -814,6 +843,8 @@ competir») y en los casos de uso.
 | PN-18 | **Todas mis propiedades**: la persona ve juntas todas las unidades con vínculo vigente, con lo que se debe en cada una y el total; la cuenta (saldo, pendiente, vencimiento) solo la ven el propietario y el arrendatario (CU-R-01 A6) | `dominio/reglas.ts` (`veLaCuentaDe`), `datos/selectores.ts` (`propiedadesDePersona`) |
 | PN-19 | **Acuerdos de pago**: solo si la parametrización del edificio los permite (Sí/No, por defecto No; máximo de 2 a 24 cuotas). Los propone el propietario o el arrendatario con cuotas vencidas, uno a la vez, con la primera cuota dentro de 30 días; el calendario reparte lo vencido en cuotas mensuales iguales (la última absorbe el redondeo). La administración lo aprueba o no, con motivo. No cambia la deuda: se mide lo pagado desde la aprobación contra lo que vencía según el calendario (CU-A-39) | `dominio/reglas.ts` (`calendarioAcuerdo`, `motivoAcuerdoInvalido`, `avanceAcuerdo`), `datos/repositorio.ts` (`configurarAcuerdosPago`, `proponerAcuerdoPago`, `decidirAcuerdoPago`) |
 | PN-20 | **Lo que decide sobre la unidad lo hacen el propietario y el arrendatario** (responder encuestas, pedir permiso de obra, programar el pago, proponer acuerdos, pedir el certificado de pagos, preguntar sobre las obras). Al familiar y al autorizado **no se les muestra** (Mary, 2026-11-20: *«lo que no aplique al perfil no se debe visualizar»*). Siguen viendo y usando lo que es de quien vive: trasteos, pedir ayuda, clasificados, objetos perdidos, resultados de encuestas | `dominio/reglas.ts` (`decideEnLaUnidad`), `datos/selectores.ts` (`rolEnUnidad`) |
+| PN-21 | **Parqueadero de visitantes**: es una zona común reservable marcada como tal; al reservarla se pide la **placa** (carro o moto, válida) y, si se quiere, a quién se espera. Portería la ve en «Hoy en el edificio» y «¿De quién es esta placa?» la reconoce ese día (CU-R-05) | `dominio/reglas.ts` (`motivoParqueaderoInvalido`), `datos/selectores.ts` (`quienEsLaPlaca`) |
+| PN-22 | **PQRS por vencer**: abierta, dentro del plazo (RN-13) y con 3 días o menos; se avisa en «Te esperan» y en el filtro «Por vencer» de la bandeja, **antes** de que venza (CU-S-05) | `dominio/reglas.ts` (`pqrsPorVencer`, `DIAS_AVISO_PQRS`) |
 | PN-11 | **Obras en el apartamento**: las pide el propietario o el arrendatario; empiezan desde mañana, duran como mucho 90 días, llevan de 1 a 10 trabajadores con nombre y documento sin repetir. La obra trabaja los días hábiles de su permiso aprobado; portería ve quiénes pueden entrar (CU-R-45, CU-A-37) | `dominio/reglas.ts` (`motivoPermisoObraInvalido`, `obraTrabajaHoy`) |
 | PN-12 | **QR del visitante**: es un QR real (ISO/IEC 18004, nivel M, versiones 1 a 5) con el código alfanumérico; se genera sin librerías; portería lo escanea o escribe el código (CU-R-10, CU-P-02) | `utilidades/qr.ts`, `componentes/CodigoVisual.tsx`, `features/porteria/EscanearQr.tsx` |
 | PN-09 | **Pedir ayuda**: un pedido abierto por unidad; lo atiende portería o la administración en dos pasos («Voy en camino» y «Atendida», con nota); siempre se recuerda el 123 (CU-R-43) | `datos/repositorio.ts` (`pedirAyuda`, `atenderAyuda`), `dominio/reglas.ts` (`alertasPendientes`) |

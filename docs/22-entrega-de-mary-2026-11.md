@@ -1,6 +1,6 @@
 # 22 — Entrega de Mary: lo construido en noviembre y qué falta para salir
 
-**Corte:** 2026-11-20, `main` en `d331b2e`. **Para:** Daniel (BLOKY, integración), Jeimy
+**Corte:** 2026-11-20, actualizado el 2026-11-23 (decisiones de negocio y mapa para el desarrollador). **Para:** Daniel (BLOKY, integración), Jeimy
 (contable) y Justo (ALICE).
 
 > **Qué es este documento.** El **corte transversal** de lo que Mary definió y dejó en la maqueta
@@ -71,6 +71,14 @@ equivalente nativo; el contrato de la API del middleware está en [`20`](./20-al
 5. Si se **suspenden los intereses** durante un acuerdo de pago.
 6. La parte legal de §5: datos personales, contrato y términos de uso.
 
+## 3 bis. Decisiones de negocio (**Mary, 2026-11-23**)
+
+- **Se le vende a la copropiedad**; los administradores son usuarios (ADR-0031).
+- **Un administrador maneja varios edificios** desde la misma cuenta: CU-A-15 entra en la primera versión.
+- **El vencimiento de la cuota lo fija cada edificio** (el 10, el 15…): T-59.
+- **Entran también en la primera versión:** reserva de **parqueaderos de visitantes**, **chat entre
+  residentes** (espera rango de casos de uso, T-55) y **facturación electrónica** (T-58).
+
 ## 4. Lo que es solo de la maqueta (y lo dice)
 
 Datos en el navegador · el código de ingreso se ve en pantalla · los mensajes se escriben pero no
@@ -108,3 +116,45 @@ middleware**, en construcción en sus repositorios.
 3. **Después, por etapas:** lo demás de §2, la pasarela de pagos y la contable.
 
 Las fechas las ponen Daniel y Justo según su avance.
+
+## 6. Mapa para el desarrollador: caso de uso → pantalla de la maqueta → prueba
+
+> Cada caso de uso tiene **una pantalla que lo muestra** (el ejemplo) y **una prueba que lo
+> comprueba** (el criterio de terminado). Las pruebas están en `apps/pwa/pruebas/navegador/` y se
+> corren con `npm run probar:navegador`. La maqueta se abre con `npm run dev`.
+
+| Caso de uso | Ruta en la maqueta | Pantalla (`apps/pwa/src/`) | Prueba |
+|---|---|---|---|
+| CU-R-35, CU-A-31 Pronto pago | `/app/cuenta`, `/admin/cartera` | `componentes/AvisoProntoPago.tsx`, `features/admin/ProntoPagoTarjeta.tsx` | `competir.spec.ts` |
+| CU-R-36 Pago programado | `/app/cuenta` | `features/residente/PagoProgramado.tsx`, `features/admin/PagosProgramadosAdmin.tsx` | `competir.spec.ts`, `entre-perfiles.spec.ts` |
+| CU-R-37, CU-A-32 Cuentas claras | `/app/edificio/cuentas`, `/admin/edificio` | `features/residente/edificio/CuentasClarasPage.tsx`, `features/admin/edificio/CuentasClarasAdmin.tsx` | `competir.spec.ts` |
+| CU-R-38, CU-A-33 Documentos | `/app/edificio/documentos`, `/admin/edificio` | `features/residente/edificio/DocumentosPage.tsx`, `features/admin/edificio/DocumentosAdmin.tsx` | `competir.spec.ts` |
+| CU-R-39, CU-A-34 Encuestas | `/app/edificio/encuestas`, `/admin/edificio` | `features/residente/edificio/EncuestasPage.tsx`, `features/admin/edificio/EncuestasAdmin.tsx` | `competir.spec.ts` |
+| CU-R-40 Daño con foto | `/app/solicitudes/pqrs` | `features/residente/ReportarDano.tsx` | `competir.spec.ts` |
+| CU-R-41, CU-A-35 Calendario | `/app/edificio/calendario`, `/admin/edificio` | `features/residente/edificio/CalendarioPage.tsx`, `features/admin/edificio/CalendarioAdmin.tsx` | `competir.spec.ts` |
+| CU-R-42, CU-A-36 Clasificados | `/app/edificio/clasificados`, `/admin/edificio` | `features/residente/edificio/ClasificadosPage.tsx`, `features/admin/edificio/ClasificadosAdmin.tsx` | `competir.spec.ts` |
+| CU-R-43 Pedir ayuda | `/app`, `/porteria` | `features/residente/PedirAyuda.tsx`, `componentes/AlertasAyuda.tsx` | `competir.spec.ts` |
+| CU-R-44, CU-R-45, CU-A-37 Trasteos, obras y depósito | `/app/unidad/permisos`, `/admin/edificio`, `/porteria` | `features/residente/PermisosPage.tsx`, `features/admin/edificio/{PermisosAdmin,ReglasTrasteoAdmin}.tsx`, `componentes/DepositoTrasteo.tsx`, `features/porteria/HoyEnElEdificio.tsx` | `permisos-qr.spec.ts` |
+| CU-R-10, CU-P-02 QR de visitantes | `/app/visitantes`, `/porteria/visitantes` | `utilidades/qr.ts`, `componentes/CodigoVisual.tsx`, `features/porteria/EscanearQr.tsx` | `permisos-qr.spec.ts` |
+| CU-R-46 Certificado de pagos | `/app/cuenta/pagos`, `/admin/cartera/certificados` | `features/residente/CertificadoPagos.tsx`, `features/admin/CertificadosAdminPage.tsx`, `componentes/HojaCertificadoPagos.tsx` | `certificado-calificacion.spec.ts` |
+| CU-R-47, CU-A-38 Calificar la atención | `/app/solicitudes/pqrs`, `/admin/pqrs` | `features/residente/CalificarAtencion.tsx` | `certificado-calificacion.spec.ts` |
+| CU-R-48 Mis avisos | `/app/avisos` | `features/residente/AvisosPage.tsx` | `avisos.spec.ts` |
+| CU-R-49 Objetos perdidos | `/app/edificio/objetos`, `/porteria/objetos` | `features/residente/edificio/ObjetosPage.tsx`, `componentes/GestionObjetos.tsx` | `objetos.spec.ts` |
+| CU-R-01 (A6) Mis propiedades | `/app/propiedades` | `features/residente/PropiedadesPage.tsx` | `propiedades.spec.ts` |
+| CU-A-39 Acuerdos de pago | `/app/cuenta`, `/admin/cartera` | `features/residente/AcuerdoPago.tsx`, `features/admin/AcuerdosPagoAdmin.tsx` | `acuerdos.spec.ts` |
+| CU-R-32, CU-A-28 Obras: pagado y preguntas | `/app/proyectos`, `/admin/proyectos` | `componentes/TableroProyecto.tsx`, `features/residente/PreguntasProyecto.tsx`, `features/admin/PreguntasPorResponder.tsx` | `proyectos.spec.ts` |
+| CU-R-05 Parqueadero de visitantes | `/app/solicitudes/reservas` | `features/residente/ReservasPage.tsx` | `listo-desarrollo.spec.ts` |
+| CU-A-15 Varios edificios | `/admin` (selector «Edificio») | `componentes/LayoutAdmin.tsx` | `listo-desarrollo.spec.ts` |
+| CU-A-16 Exportar a Excel | `/admin/cartera`, `/admin/pqrs` | `features/admin/{CarteraPage,PqrsAdminPage}.tsx` | `listo-desarrollo.spec.ts` |
+| CU-S-05 PQRS por vencer · «Te esperan» | `/admin`, `/admin/pqrs` | `features/admin/TeEsperan.tsx` | `entre-perfiles.spec.ts`, `listo-desarrollo.spec.ts` |
+| RN-23 Día de vencimiento | `/admin/cartera` | `features/admin/DiaVencimientoTarjeta.tsx` | `listo-desarrollo.spec.ts` |
+| PN-20 Lo que no aplica al perfil | entrar como **Tomás** | `dominio/reglas.ts` (`decideEnLaUnidad`) | `entre-perfiles.spec.ts` |
+
+**Las reglas** (RN y PN) viven en `apps/pwa/src/dominio/reglas.ts` como funciones puras: son la
+especificación ejecutable que hay que llevar al middleware. **Los datos** pasan siempre por
+`apps/pwa/src/datos/repositorio.ts`: cada función exportada es, en la práctica, un servicio del
+middleware por construir (quién puede, qué valida, qué guarda y a quién avisa).
+
+**Lo que todavía no está en la maqueta y entra en la primera versión:** el **chat entre residentes**
+(espera rango de casos de uso, T-55) y la **facturación electrónica** (T-58). Quedan en la
+contable: el **cálculo del interés de mora** (CU-S-02, CU-A-25) y el **presupuesto** (CU-A-11).

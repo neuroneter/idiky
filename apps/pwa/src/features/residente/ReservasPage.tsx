@@ -70,6 +70,9 @@ export function ReservasPage() {
   const [acepta, setAcepta] = useState(false)
   /** RN-126 — Los invitados, un nombre por renglón. */
   const [invitadosTexto, setInvitadosTexto] = useState('')
+  // PN-21 — Parqueadero de visitantes: la placa y a quién se espera.
+  const [placaVisitante, setPlacaVisitante] = useState('')
+  const [visitanteEsperado, setVisitanteEsperado] = useState('')
   /** RN-126 — La reserva cuya lista de invitados se está editando. */
   const [editandoInvitados, setEditandoInvitados] = useState<Reserva | null>(null)
   const [invitadosEdicion, setInvitadosEdicion] = useState('')
@@ -150,6 +153,8 @@ export function ReservasPage() {
           personas,
           aceptaCondiciones: acepta,
           invitados: limpiarInvitados(invitadosTexto),
+          placaVisitante,
+          visitanteEsperado,
         }),
       zonaElegida.requiereAprobacion
         ? 'Solicitud enviada. La administración la revisará.'
@@ -409,8 +414,22 @@ export function ReservasPage() {
             </span>
           </div>
 
+          {/* PN-21 — En el parqueadero de visitantes, la placa que portería espera. */}
+          {zonaElegida.parqueaderoVisitantes && (
+            <div className="fila-campos">
+              <div className="campo">
+                <label htmlFor="placa-visitante">Placa del visitante</label>
+                <input id="placa-visitante" value={placaVisitante} onChange={(e) => setPlacaVisitante(e.target.value)} style={{ textTransform: 'uppercase' }} placeholder="ABC123" />
+              </div>
+              <div className="campo">
+                <label htmlFor="nombre-visitante-parq">A quién esperas (opcional)</label>
+                <input id="nombre-visitante-parq" value={visitanteEsperado} onChange={(e) => setVisitanteEsperado(e.target.value)} />
+              </div>
+            </div>
+          )}
+
           {/* RN-126 — Los invitados, para que portería los deje entrar. */}
-          {personas > 1 && (
+          {personas > 1 && !zonaElegida.parqueaderoVisitantes && (
             <div className="campo">
               <label htmlFor="invitados-reserva">Tus invitados (opcional)</label>
               <textarea

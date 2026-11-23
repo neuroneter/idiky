@@ -18,6 +18,8 @@ interface ContextoSesion {
   iniciar: (perfil: PerfilDemo) => void
   cerrar: () => void
   cambiarUnidadActiva: (unidadId: string) => void
+  /** CU-A-15 — La administración cambia de edificio sin salir. */
+  cambiarCopropiedad: (copropiedadId: string) => void
 }
 
 const Contexto = createContext<ContextoSesion | null>(null)
@@ -69,9 +71,18 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
     })
   }, [])
 
+  const cambiarCopropiedad = useCallback((copropiedadId: string) => {
+    setSesion((actual) => {
+      if (!actual) return actual
+      const nueva = { ...actual, copropiedadId }
+      guardarSesion(nueva)
+      return nueva
+    })
+  }, [])
+
   const valor = useMemo(
-    () => ({ sesion, iniciar, cerrar, cambiarUnidadActiva }),
-    [sesion, iniciar, cerrar, cambiarUnidadActiva],
+    () => ({ sesion, iniciar, cerrar, cambiarUnidadActiva, cambiarCopropiedad }),
+    [sesion, iniciar, cerrar, cambiarUnidadActiva, cambiarCopropiedad],
   )
 
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>

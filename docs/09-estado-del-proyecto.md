@@ -113,6 +113,34 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Mary + IA (Claude) · Lista para desarrollo: lo que faltaba y el mapa para el desarrollador
+
+Con las decisiones de negocio del día se construyó en la maqueta, sin números nuevos:
+- **día de vencimiento por edificio** (RN-23, T-59);
+- **parqueadero de visitantes**, con la placa que portería reconoce (CU-R-05, PN-21);
+- **varios edificios por administrador**, con un selector en la consola (CU-A-15); el demo trae un
+  segundo edificio, el *Mirador del Parque*;
+- **exportar cartera y PQRS a Excel** (CU-A-16);
+- **PQRS por vencer**, avisadas 3 días antes (CU-S-05, PN-22).
+
+Documentación para el desarrollador:
+- estados del catálogo al día;
+- las entidades nuevas en `docs/05`;
+- la tabla de módulos de `docs/12` sin «sin confirmar»;
+- en `docs/22` §6, el **mapa caso de uso → pantalla → prueba**.
+
+Dos pruebas viejas se ajustaron por estos cambios: el selector de edificio y el orden de las zonas.
+La semilla sube a la versión 51. **Qué sigue:** Daniel (T-55, rangos) y el chat entre residentes.
+
+### 2026-11-23 · Mary + IA (Claude) · Decisiones de negocio para dejar la app lista para desarrollo
+
+Mary: *«quiero dejarla lista para su desarrollo»* y *«no tenemos tiempo para perder»*. Respondió las
+preguntas abiertas desde agosto (`docs/12`): **se le vende a la copropiedad** (los administradores son
+usuarios); **un administrador maneja varios edificios** (CU-A-15 sube a la primera versión); **el
+vencimiento de la cuota lo fija cada edificio** (T-59); y entran también **parqueaderos de visitantes**,
+**chat entre residentes** (espera rango, T-55) y **facturación electrónica** (T-58). Antes se trajeron
+72 cambios de `main` sin conflictos y se le mostraron sus avisos nuevos (4, 5 y 6 de `avisos/mary.md`).
+
 ### 2026-11-23 · Justo · Producto · docs/23 listo para revisión de Daniel
 
 - Afinado docs/23: visitantes usan ALICE; **todos** activan doble cartera en el primer ingreso; escala el **paquete**

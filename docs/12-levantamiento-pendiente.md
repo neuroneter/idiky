@@ -73,11 +73,14 @@ borraron, pero tampoco se pueden dar por vigentes.
 ## 1. Producto y negocio
 
 - ¿A quién le vendemos: **al administrador**, a la **copropiedad**, o a una **empresa
-  administradora** con varios conjuntos? → *(respuesta)*
+  administradora** con varios conjuntos? → ✅ **Mary, 2026-11-23**: *«el contrato se realiza con la copropiedad, no
+  con los administradores; ellos son usuarios»* (coincide con ADR-0031).
 - ¿Un administrador manejará **una** copropiedad o **varias** desde la misma cuenta?
-  (Hoy está previsto como fase 3, CU-A-15.) → *(respuesta)*
+  (Hoy está previsto como fase 3, CU-A-15.) → ✅ **Mary, 2026-11-23**: **sí, varias**, desde la misma cuenta.
+  CU-A-15 sube a la primera versión.
 - ¿El producto es para un solo país o desde el inicio debe soportar varios? Esto afecta
-  moneda, formato de fechas, impuestos y normativa. → *(respuesta)*
+  moneda, formato de fechas, impuestos y normativa. → ✅ Daniel, 2026-11-21: **varios países**,
+  Colombia por defecto ([ADR-0035](./adr/0035-paises-documentos-y-celulares.md), RN-358 a RN-363).
 - ¿Hay un producto competidor de referencia con el que nos vamos a comparar? → *(respuesta)*
 
 ## 2. Alcance funcional
@@ -98,22 +101,26 @@ hay que responderlo explícitamente, no asumirlo.
 | Paz y salvo | ✅ v1 | Debe poder **descargarse**, no solo consultarse |
 | Reservas de zonas comunes | ✅ v1 | Ya funciona en el demo |
 | PQRS | ✅ v1 | «Crear solicitudes hacia el administrador» |
-| Pagos en línea (pasarela) | ❓ Sin confirmar | Se pidió el **comprobante**; no se dijo si el pago se hace dentro de la app |
-| Comunicados / cartelera | ❓ Sin confirmar | No mencionado. Hoy implementado |
-| Correspondencia | ❓ Sin confirmar | No mencionado. Hoy implementado |
-| Visitantes con código | ❓ Sin confirmar | No mencionado. Hoy implementado |
-| Portería: minuta y validación de ingreso | ❓ Sin confirmar | No mencionado |
-| Presupuesto y contabilidad | ❓ Sin confirmar | No mencionado |
-| Proveedores y mantenimientos | ❓ Sin confirmar | No mencionado |
-| Encuestas a residentes | ❓ Sin confirmar | No mencionado. Se solapa con «votaciones» |
-| Chat entre residentes | ❓ Sin confirmar | No mencionado |
-| Reserva de parqueaderos de visitantes | ❓ Sin confirmar | No mencionado |
-| Control de mascotas | ❓ Sin confirmar | No mencionado |
+| Pagos en línea (pasarela) | ⬜ Después (fase 4) | Mary, 2026-11-23: la primera versión sale con pagos **informados** y registrados por la administración (`docs/22` §5) |
+| Comunicados / cartelera | ✅ v1 | Mary, 2026-11-23: en la maqueta |
+| Correspondencia | ✅ v1 | Mary, 2026-11-23: en la maqueta |
+| Visitantes con código | ✅ v1 | Mary, 2026-11-23: con QR real (PN-12) |
+| Portería: minuta y validación de ingreso | ✅ v1 | Mary, 2026-11-23: turno, entradas y salidas, minuta completa |
+| Presupuesto y contabilidad | ⬜ Con la contable | Mary, 2026-11-23: la contabilidad es de Jeimy; el presupuesto (CU-A-11) se define con ella |
+| Proveedores y mantenimientos | 🟡 v1 parcial | Mary, 2026-11-23: proveedores en el directorio y mantenimientos en el calendario (CU-A-14) |
+| Encuestas a residentes | ✅ v1 | Mary, 2026-11-23: no son votaciones de asamblea (PN-05) |
+| Chat entre residentes | ✅ v1 | **Mary, 2026-11-23**. Necesita caso de uso nuevo: espera el rango de Mary (T-55). Reglas de convivencia y moderación por definir |
+| Reserva de parqueaderos de visitantes | ✅ v1 | **Mary, 2026-11-23**. Se construye como una zona común reservable más (CU-R-05), sin caso de uso nuevo |
+| Control de mascotas | ✅ v1 | Mary, 2026-11-23: vehículos y mascotas de la unidad (CU-R-15) |
 | **Multas y sanciones por convivencia** | ✅ v1 | Pedido el 2026-08-27. **CU-A-23 desbloqueado el 2026-09-09**: el debido proceso lo fija el reglamento y la app lo parametriza (§3 quater, RN-69) |
 | ~~Cobros adicionales por unidad~~ | ⛔ | **Retirado el 2026-09-09**: son la cuota extraordinaria, no una figura aparte (RN-73). CU-A-24 retirado |
-| Facturación electrónica | ❓ Sin confirmar | No mencionado |
+| Facturación electrónica | ✅ v1 | **Mary, 2026-11-23**. Con la contable (Jeimy) y un proveedor autorizado por la DIAN: T-58 |
 
 ## 3. Funcionamiento de la copropiedad real
+
+> **Vencimiento de la cuota** — **Mary, 2026-11-23**: *«esto depende de las reglas de cada edificio: hay estándares
+> que dicen el 10 y otros el día 15»*. Se **parametriza por edificio** (por defecto el 10); RN-23 se
+> amplía en la maqueta y en la contable el mismo día (T-59).
 
 - ¿Las cuotas se facturan **por anticipado o vencidas**? ¿Qué día vencen?
   *(Supuesto actual: vencen el día 10 del periodo — RN-23.)* → *(respuesta)*

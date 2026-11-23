@@ -62,20 +62,38 @@ const TITULOS: Record<string, string> = {
 
 export function LayoutAdmin() {
   const { bd, reiniciarDemo } = useDatos()
-  const { sesion, cerrar } = useSesion()
+  const { sesion, cerrar, cambiarCopropiedad } = useSesion()
   const { pathname } = useLocation()
 
   if (!sesion) return null
 
   const copropiedad = sel.copropiedad(bd, sesion.copropiedadId)
   const persona = sel.persona(bd, sesion.personaId)
+  // CU-A-15 — Un administrador con varios edificios cambia de uno a otro sin salir.
+  const edificios = sel.edificiosQueAdministra(bd, sesion.personaId)
 
   return (
     <div className="consola">
       <aside className="lateral">
         <div className="lateral__marca">
           <Logotipo inverso />
-          <span className="lateral__marca-sub">{copropiedad?.nombre}</span>
+          {edificios.length > 1 ? (
+            <select
+              aria-label="Edificio"
+              className="lateral__edificio"
+              value={sesion.copropiedadId}
+              onChange={(e) => cambiarCopropiedad(e.target.value)}
+              style={{ marginTop: 'var(--e2)', width: '100%', borderRadius: 'var(--radio-sm)', padding: '0.35rem 0.5rem' }}
+            >
+              {edificios.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.nombre}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <span className="lateral__marca-sub">{copropiedad?.nombre}</span>
+          )}
         </div>
 
         <nav className="lateral__nav">
