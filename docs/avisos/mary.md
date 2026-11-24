@@ -188,3 +188,9 @@ primero, luego urgentes (tu RN-15), «vigente hasta», y leído por persona. Agr
 reglas nuevas del rango de integración: **anular con motivo** en vez de borrar (RN-376), **corregir guarda la versión
 anterior** (RN-377) y quien publica ve **cuántos lo leyeron**. Si algo de eso no te cuadra, dímelo.
 
+**2026-11-24 — PQRS, también en el producto (T-153):** tus CU-R-07, CU-R-08, CU-A-07 y CU-R-47 funcionan en el middleware:
+radicado consecutivo, plazo de 15 días, semáforo con «por vencer» a 3 días (PN-22), calificación una vez (PN-15), y **RN-14
+ya no está pendiente**: la resuelta se cierra sola a los 5 días. Para eso decidí una cosa que tu regla deja abierta: **si el
+residente escribe en una resuelta, se reabre** a «en gestión» (RN-379), porque es su forma de decir que no quedó resuelta.
+Y la cerrada es final (RN-378). Si prefieres otra cosa, dímelo.
+

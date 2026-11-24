@@ -733,9 +733,9 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-09 | En una zona **de uso exclusivo**, no puede haber dos reservas activas en la misma franja. *(Corregida el 2026-10-02: desde RN-111, la zona compartida admite varias reservas por turno hasta el aforo.)* | `dominio/reglas.ts` (`franjaOcupada`, `motivoFranjaNoDisponible`) |
 | RN-10 | La reserva exige la anticipación mínima de la zona. | `dominio/reglas.ts` |
 | ~~RN-11~~ | ⛔ **Retirada el 2026-10-02** (auditoría de reglas). Decía «cancelar con menos de 24 h puede acarrear sanción». La superaron **RN-110** (la multa sale del catálogo y cada zona fija su plazo), **RN-112** (se advierte antes de cancelar tarde) y **RN-128** (hasta cuándo se cancela). El número no se vuelve a usar. | — |
-| RN-12 | Radicado PQRS: `PQRS-<AAAA>-<NNNN>`, consecutivo por copropiedad. | `datos/repositorio.ts` |
-| RN-13 | SLA de PQRS: 15 días calendario. | `dominio/reglas.ts` |
-| RN-14 | Una PQRS resuelta se cierra sola a los 5 días. | *pendiente* |
+| RN-12 | Radicado PQRS: `PQRS-<AAAA>-<NNNN>`, consecutivo por copropiedad. | `datos/repositorio.ts` · **Producto:** middleware, BLOKY Dev (T-153, 2026-11-24) |
+| RN-13 | SLA de PQRS: 15 días calendario. | `dominio/reglas.ts` · **Producto:** middleware (T-153) |
+| RN-14 | Una PQRS resuelta se cierra sola a los 5 días. | *pendiente* en el demo · **Producto:** middleware (T-153, 2026-11-24): al leer, con el cambio «Cierre automático (RN-14)»; si el residente escribe antes, se reabre (RN-379) |
 | RN-15 | Los comunicados `urgente` se destacan y no se ocultan. | `features/residente/InicioPage.tsx` · **Producto:** middleware, BLOKY Dev (T-152, 2026-11-24): `destacado` y el orden de RN-375 |
 | RN-16 | El código de visitante solo vale **dentro** de su vigencia: antes de `vigenciaDesde` está `programado`, después de `vigenciaHasta` está `vencido`. | `dominio/reglas.ts` |
 | RN-17 | El código es de un solo uso salvo que sea recurrente. | *parcial* |
@@ -1343,6 +1343,9 @@ copropiedades (asignaciones): lo que no se repite es la persona.
 | RN-375 | **Qué está en la cartelera** (CU-R-09): lo no anulado cuya fecha «vigente hasta», si la tiene, no ha pasado (vale todo ese día). Orden: fijados, luego urgentes (RN-15), y en cada grupo del más reciente al más viejo. Cada persona ve cuáles leyó y cuántos le faltan; quien edita ve cuántos lo leyeron | Middleware (T-152): `comunicadoVigente`, `ordenDeCartelera` |
 | RN-376 | **Un comunicado no se borra: se anula, con motivo** (el «eliminar» de la matriz, ADR-0034). Sale de la cartelera; quien edita lo sigue viendo con quién lo anuló y por qué. Lo anulado ya no se edita | Middleware (T-152): `motivoAnulacionInvalida` |
 | RN-377 | **Corregir un comunicado guarda la versión anterior** (qué decía, quién lo cambió y cuándo) y lo marca «editado»: lo que se publicó a toda la copropiedad no se reescribe sin rastro | Middleware (T-152): tabla `comunicado_cambio` |
+| RN-378 | **Los estados de una PQRS** (CU-A-07, T-153): la radicación la deja `abierta`; la administración la pasa a `en_gestion`, `resuelta` o `cerrada`. **La cerrada es final** y nadie la devuelve a `abierta`. Cada cambio queda guardado con quién y cuándo (también el automático de RN-14) | Middleware en BLOKY Dev (T-153): `motivoCambioEstadoPqrs`, tabla `pqrs_estado` |
+| RN-379 | **Si el residente escribe en una resuelta, se reabre** a `en_gestion`: es la forma de decir «no quedó resuelta», y por eso RN-14 cierra solo la que nadie volvió a tocar en 5 días. En una cerrada ya no se escribe: se radica otra | Middleware (T-153): `estadoTrasMensaje` |
+| RN-380 | **Quién hace qué en PQRS**: radica y escribe quien vive en la unidad (`pqrs: crear`); la ven todos los de la unidad; la califica quien la radicó o quien maneja la unidad (`pqrs: editar`: propietario, arrendatario de operación completa). La bandeja de toda la copropiedad es de la Administración, Secretaría y Mantenimiento (`pqrs: ver/editar` por su rol en la copropiedad) | Middleware (T-153) |
 
 ## Reglas del alta desde documentos (CU-B-10, ADR-0023) — rango de la integración
 

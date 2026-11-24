@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-24 · Daniel + IA (Claude) · Middleware · PQRS y solicitudes (T-153)
+
+Los casos de Mary (CU-R-07, CU-R-08, CU-R-40, CU-R-47, CU-A-07, CU-A-38), en el producto. Bloky-Idiky `feature/T-153-pqrs` →
+`develop` `c226d0f`, BLOKY Dev `74ac221.bloky-c226d0f`. Migración de copropiedad `025-pqrs.sql` (`pqrs`, `pqrs_mensaje`,
+`pqrs_estado`); reglas `motivoPqrsInvalida`, `radicadoPqrs`, `fechaLimitePqrs`, `semaforoPqrs`, `estadoTrasMensaje`,
+`motivoCambioEstadoPqrs`, `pqrsSeCierraSola`, `motivoCalificacionPqrsInvalida`, `resumenCalificacionesPqrs`; rutas de la unidad
+y de la bandeja (docs/20 §5e). Reglas nuevas RN-378 (estados, la cerrada es final), RN-379 (escribir en la resuelta la
+reabre) y RN-380 (quién hace qué). RN-14 deja de estar pendiente: el cierre a los 5 días se hace al leer.
+
+**Verificado:** `npm run probar` (siete pruebas nuevas) y build; en «Pruebas IDIKY» con Juan Luis y Daniel: radicados
+consecutivos, 403 a Olga y a Juan en la bandeja, responder y resolver, reabrir escribiendo, calificar una vez, cierre
+automático (se atrasó la fecha de resolución de la PQRS de prueba), 409 en la cerrada, conteos y calificaciones.
+**Sigue:** Reservas (módulo 5).
+
 ### 2026-11-24 · Daniel + IA (Claude) · Middleware · Cartelera y comunicados (T-152, CU-A-08, CU-R-09)
 
 Los casos de Mary, en el producto. Bloky-Idiky `feature/T-152-cartelera` → `develop` `1205930`, BLOKY Dev

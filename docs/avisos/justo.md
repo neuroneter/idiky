@@ -417,4 +417,8 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
   cartelera es de la copropiedad (no de la unidad): todos ven; Administración y Secretaría publican y corrigen; anular es de
   la Administración. ALICE marca leído al abrir (`POST …/:id/leido`) y muestra `destacado` (urgente) en el inicio sin dejarlo
   ocultar (RN-15). En «Pruebas IDIKY» quedan dos de prueba: uno fijado y uno urgente que vence hoy.
+- **2026-11-24 — PQRS (T-153) en BLOKY Dev:** [docs/20 §5e](../20-alta-e-ingreso-desde-alice.md). Desde la unidad: radicar,
+  ver la conversación, escribir y calificar; la bandeja (Administración, Secretaría, Mantenimiento) responde y cambia el
+  estado. Usa `semaforo` para el color y `calificacion` para mostrar «¿Cómo te atendimos?» solo cuando está resuelta o
+  cerrada. La foto del daño todavía no: manda solo `ubicacion`. En la I1-101 de «Pruebas IDIKY» quedan dos de prueba.
 

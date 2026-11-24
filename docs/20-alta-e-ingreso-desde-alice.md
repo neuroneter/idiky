@@ -541,6 +541,36 @@ Cada comunicado trae: `id, titulo, cuerpo, categoria, fijado, destacado` (urgent
 deja ocultarlo), `vigenteHasta, vigente, publicadoEn, autor, editadoEn, leido, leidoEn`. **Todavía no:** la notificación al
 publicar (CU-A-08 A2) y los comunicados que publican otros módulos solos (asambleas RN-216/219, proyectos RN-101, cierres RN-117).
 
+## 5e. PQRS y solicitudes (CU-R-07, CU-R-08, CU-R-40, CU-R-47, CU-A-07, CU-A-38; RN-12, RN-13, RN-14, RN-24, PN-15, PN-22, RN-378 a RN-380; T-153)
+
+> **En BLOKY Dev desde el 2026-11-24** (`bloky-c226d0f`). Módulo `pqrs` de la matriz: el propietario y el arrendatario de
+> operación completa radican, escriben y califican (`VCE`); el conviviente y el arrendatario «solo vivir» radican y escriben
+> (`VC`); la Administración, Secretaría y Mantenimiento atienden la bandeja (`VE`).
+
+**Desde la unidad** (residencia vigente). Prefijo `/api/app/c/:copropiedadId/unidades/:unidadId/pqrs`:
+
+| Ruta | Permiso | Qué hace |
+|---|---|---|
+| `POST …` `{ tipo: "peticion" \| "queja" \| "reclamo" \| "sugerencia", categoria: "convivencia" \| "mantenimiento" \| "seguridad" \| "administracion" \| "otro", asunto, descripcion, ubicacion? }` | `crear` | Radica: `PQRS-AAAA-NNNN` consecutivo (RN-12), límite a 15 días (RN-13). `ubicacion` es el «dónde» de un daño (CU-R-40) |
+| `GET …` · `GET …/:id` | `ver` | Las de la unidad; una con su conversación (`mensajes`) y sus `cambiosDeEstado` |
+| `POST …/:id/mensajes` `{ texto }` | `crear` | Escribe mientras no esté cerrada (`409 cerrada`). En una **resuelta**, la reabre a «en gestión» (RN-379) |
+| `POST …/:id/calificar` `{ puntaje: 1..5, comentario? }` | `ver` si la radicó; si no, `editar` | Resuelta o cerrada, **una vez** (`409 ya_calificada`, PN-15) |
+
+**La bandeja** (por los roles en la copropiedad). Prefijo `/api/app/c/:copropiedadId/pqrs`:
+
+| Ruta | Permiso | Qué hace |
+|---|---|---|
+| `GET …?estado=&semaforo=por_vencer \| vencida \| en_plazo` | `ver` | La lista, con `conteos` (abiertas, en gestión, resueltas, cerradas, por vencer, vencidas) y `calificaciones` (promedio, % satisfechos, cuántas faltan; CU-A-38) |
+| `GET …/:id` | `ver` | Una, con la conversación y los cambios de estado |
+| `POST …/:id/responder` `{ texto, estado? }` | `editar` | Responde; la primera respuesta la pasa a «en gestión» (RN-24). Con `estado` responde y cambia en un paso |
+| `POST …/:id/estado` `{ estado: "en_gestion" \| "resuelta" \| "cerrada" }` | `editar` | Cambia sin escribir. La cerrada es final (RN-378) |
+
+Cada PQRS trae `id, radicado, unidadId, unidad, radicadaPor, tipo, categoria, asunto, descripcion, ubicacion, estado,
+radicadaEn, fechaLimite, semaforo` (`vencida` · `por_vencer` con 3 días o menos · `en_plazo` · `null` si está resuelta o
+cerrada), `resueltaEn, cerradaEn, calificacion`. **La resuelta se cierra sola a los 5 días** (RN-14) si nadie vuelve a
+escribir; el cambio queda con «Cierre automático (RN-14)». **Todavía no:** la foto del daño (CU-R-40, va con los archivos
+de ADR-0019), reasignar a un responsable (CU-A-07 A2) y los avisos al radicar o responder.
+
 ## 6. Reuniones con video
 
 **Pendiente (T-124, segunda parte):** las rutas de [docs/18](./18-reuniones-con-video.md) aceptarán también el token de ALICE:
