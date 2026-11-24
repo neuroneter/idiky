@@ -421,4 +421,9 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
   ver la conversación, escribir y calificar; la bandeja (Administración, Secretaría, Mantenimiento) responde y cambia el
   estado. Usa `semaforo` para el color y `calificacion` para mostrar «¿Cómo te atendimos?» solo cuando está resuelta o
   cerrada. La foto del daño todavía no: manda solo `ubicacion`. En la I1-101 de «Pruebas IDIKY» quedan dos de prueba.
+- **2026-11-24 — Reservas (T-154) en BLOKY Dev, sin la plata:** [docs/20 §5f](../20-alta-e-ingreso-desde-alice.md). En ALICE:
+  zonas, turnos de un día (`libres`, `disponible`), reservar, mis reservas (con `cancelableHasta`), invitados y cancelar; la
+  lista de la administración con aprobar, rechazar y cancelar; y «Reservas de hoy» en Portería. Las horas van en hora de
+  Colombia y como texto `"10:00"`. En «Pruebas IDIKY» ya tienen reglas la **Piscina** (compartida, aforo 6, de 8 a 20 y el
+  domingo de 8 a 12) y **Garajes** (parqueadero de visitantes: pide placa y aprobación). Nada cobra todavía.
 

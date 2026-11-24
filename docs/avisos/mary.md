@@ -194,3 +194,10 @@ ya no está pendiente**: la resuelta se cierra sola a los 5 días. Para eso deci
 residente escribe en una resuelta, se reabre** a «en gestión» (RN-379), porque es su forma de decir que no quedó resuelta.
 Y la cerrada es final (RN-378). Si prefieres otra cosa, dímelo.
 
+**2026-11-24 — Reservas, también en el producto, sin la plata (T-154):** tus reglas de zonas y reservas funcionan en el
+middleware: turnos exactos y horario por día, exclusiva o compartida con aforo, anticipación, cupo mensual, aprobación,
+plazo para cancelar copiado a la reserva, cierre por mantenimiento, desactivar con motivo, invitados, placa del parqueadero
+de visitantes, «Reservas de hoy» para portería, y lo automático (vence la solicitud, se cierra la usada). **Lo que no entró
+todavía:** cobro, depósito y multas (esperan la cartera del producto), la mora, las fotos y los mensajes. Las reglas de cada
+zona las escribe la Administración desde BLOKY, porque las zonas son las que se dibujan en su Estructura.
+

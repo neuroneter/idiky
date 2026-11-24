@@ -571,6 +571,46 @@ cerrada), `resueltaEn, cerradaEn, calificacion`. **La resuelta se cierra sola a 
 escribir; el cambio queda con «Cierre automático (RN-14)». **Todavía no:** la foto del daño (CU-R-40, va con los archivos
 de ADR-0019), reasignar a un responsable (CU-A-07 A2) y los avisos al radicar o responder.
 
+## 5f. Reservas, sin la plata (CU-R-05, CU-R-06, CU-A-06, CU-A-10; RN-09, RN-10, RN-105 a RN-108, RN-111, RN-113 a RN-116, RN-122, RN-126, RN-128, RN-129, PN-21, RN-381 a RN-383; T-154)
+
+> **En BLOKY Dev desde el 2026-11-24** (`bloky-ab6b2fb`). **Sin la plata:** cobro por uso, depósito, multa por no cancelar y
+> la constancia de condiciones (RN-109, RN-110, RN-112, RN-118 a RN-121, RN-124) esperan a que la cartera esté en el producto;
+> tampoco se revisa la mora (RN-08). Módulo `reservas` de la matriz: el propietario y el arrendatario de operación completa
+> reservan, cambian y cancelan (`VCEA`); el conviviente y el arrendatario «solo vivir», también (`VCA`); la Administración y
+> Secretaría atienden (`VE`). **Las horas son de Colombia** (RN-382).
+
+**Las zonas y sus reglas, desde BLOKY** (cookie de BLOKY; `bloky:estructura`: `ver` para leer, `editar` para cambiar; RN-381).
+Las zonas son los elementos de la Estructura de tipo salón, piscina, gimnasio, parque, espacio o parqueadero. Prefijo `/api/c/:copropiedadId/zonas`:
+
+| Ruta | Qué hace |
+|---|---|
+| `GET …` | Las zonas con `reglas` (o `null` si aún no tienen), `activa`, `motivoDesactivacion` y los `cierres` que no han terminado |
+| `PUT …/:zonaId/reglas` `{ descripcion?, horaInicio, horaFin, duracion: 1\|2\|3\|4\|6\|12, horarioSemanal?: [{ dia: 0..6, horaInicio, horaFin }], modo: "exclusivo"\|"compartido", aforo, cupoMensual, anticipacionHoras?, limiteCancelacionHoras?, requiereAprobacion?, parqueaderoVisitantes? }` | Escribe las reglas (horas enteras de 0 a 24). El horario se divide en turnos exactos (RN-105, RN-114). La versión anterior queda guardada; **no toca las reservas hechas** (RN-106) |
+| `POST …/:zonaId/desactivar` `{ motivo }` · `POST …/:zonaId/reactivar` | Desactivar cancela las reservas que no han empezado, con el motivo (RN-107). Las canceladas no reviven |
+| `POST …/:zonaId/cierres` `{ desde, hasta, motivo }` · `POST …/:zonaId/cierres/:cierreId/levantar` | Cierre por mantenimiento: cancela lo que cae dentro y vuelve solo al pasar la fecha final (RN-108) |
+
+**Para reservar, desde ALICE.** Prefijo `/api/app/c/:copropiedadId`:
+
+| Ruta | Permiso | Qué hace |
+|---|---|---|
+| `GET …/zonas` | `ver` | Las zonas activas con sus reglas y cierres (la desactivada no aparece) |
+| `GET …/zonas/:zonaId/turnos?fecha=` | `ver` | Los turnos de ese día con `libres` y `disponible`; si no abre o está cerrada, `motivo` |
+| `POST …/unidades/:unidadId/reservas` `{ zonaId, fecha, horaInicio: "10:00", personas, invitados?, placa?, aQuienEspera? }` | `crear` | Reserva: `confirmada`, o `solicitada` si la zona pide aprobación. Valida turno, ocupación (RN-09) o cupos (RN-111), aforo (RN-113), anticipación (RN-10), cierre, cupo mensual y la placa del parqueadero de visitantes (PN-21) |
+| `GET …/unidades/:unidadId/reservas` | `ver` | Las de la unidad, con `cancelableHasta` (RN-128) y el `motivo` si la cancelaron |
+| `PUT …/unidades/:unidadId/reservas/:id/invitados` `{ invitados }` | `crear` | Hasta que empiece el turno; caben las personas menos quien reserva (RN-126) |
+| `POST …/unidades/:unidadId/reservas/:id/cancelar` | `eliminar` | Antes del límite que se copió al reservar (RN-128) |
+| `GET …/reservas?estado=&desde=&hasta=` | `ver` (copropiedad) | La lista de la administración, desde hoy por defecto, con `porAprobar` |
+| `POST …/reservas/:id/aprobar` · `POST …/reservas/:id/rechazar` `{ motivo }` | `editar` | Solo la solicitada; el rechazo con motivo |
+| `POST …/reservas/:id/cancelar` `{ motivo }` | `editar` | Una confirmada, antes de que empiece, con motivo (RN-115) |
+| `GET …/porteria/reservas-de-hoy` | `porteria: ver` | Las confirmadas de hoy por hora: zona, horario, unidad, quién, personas, invitados y placa (RN-116). Nada de plata |
+
+Estados: `solicitada · confirmada · rechazada · cancelada · vencida · cerrada`. **Lo que pasa solo** (al leer o escribir): la
+solicitada que nadie contestó **vence** al empezar su turno (RN-122) y la confirmada **se cierra sola** al terminar (RN-129;
+sin plata, ninguna se cierra a mano); las dos quedan con `automatica: true`. `canceladaPor`: `residente`, `administracion`,
+`cierre` o `desactivacion`. **Todavía no:** la plata, la mora, las fotos y especificaciones de la zona (RN-104, con ADR-0019),
+los mensajes a quien reservó (RN-107, RN-115, RN-123, RN-125), la pantalla de BLOKY para las reglas (CU-B-04) y el calendario
+e informe de uso (CU-A-29, CU-A-30).
+
 ## 6. Reuniones con video
 
 **Pendiente (T-124, segunda parte):** las rutas de [docs/18](./18-reuniones-con-video.md) aceptarán también el token de ALICE:

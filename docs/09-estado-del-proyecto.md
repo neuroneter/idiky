@@ -113,6 +113,21 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-24 · Daniel + IA (Claude) · Middleware · Reservas, sin la plata (T-154)
+
+Daniel escogió el alcance: **el núcleo sin la plata**, y **las reglas de cada zona guardadas en el middleware**, escritas desde
+BLOKY (las zonas son los elementos de la Estructura, RN-381). Bloky-Idiky `feature/T-154-reservas` → `develop` `ab6b2fb`,
+BLOKY Dev `11ed44e.bloky-ab6b2fb`. Migración de copropiedad `026-reservas.sql` (`zona_reglas`, `zona_reglas_cambio`,
+`zona_cierre`, `reserva`); reglas `motivoReglasZonaInvalidas`, `horarioDelDia`, `turnosDelDia`, `motivoReservaInvalida`,
+`motivoInvitadosInvalido`, `motivoNoCancelaResidente`, `motivoNoCancelaAdministracion`, `estadoAutomaticoReserva`,
+`motivoCierreZonaInvalido`; rutas de BLOKY (`reservas/zonas.ts`) y de ALICE (docs/20 §5f). Reglas nuevas RN-381 a RN-383.
+
+**Verificado:** `npm run probar` (diez pruebas nuevas) y build; en «Pruebas IDIKY» con la Piscina y Garajes configurados desde
+BLOKY: el recorrido completo de reservar, aprobar, cancelar, cerrar y desactivar, «Reservas de hoy» en portería y los 403
+(lista en docs/11, T-154). Las reglas de prueba quedan para Justo; las reservas de prueba quedaron canceladas.
+**Sigue:** con los cinco módulos de ALICE en el middleware, lo pendiente es de Justo (pantallas) y lo que se dejó para después
+(la plata con la cartera, avisos, fotos, CU-B-04 en BLOKY).
+
 ### 2026-11-24 · Daniel + IA (Claude) · Middleware · PQRS y solicitudes (T-153)
 
 Los casos de Mary (CU-R-07, CU-R-08, CU-R-40, CU-R-47, CU-A-07, CU-A-38), en el producto. Bloky-Idiky `feature/T-153-pqrs` →
