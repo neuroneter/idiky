@@ -736,7 +736,7 @@ Referenciadas desde los casos de uso. **Si cambias una regla, actualiza este lis
 | RN-12 | Radicado PQRS: `PQRS-<AAAA>-<NNNN>`, consecutivo por copropiedad. | `datos/repositorio.ts` |
 | RN-13 | SLA de PQRS: 15 días calendario. | `dominio/reglas.ts` |
 | RN-14 | Una PQRS resuelta se cierra sola a los 5 días. | *pendiente* |
-| RN-15 | Los comunicados `urgente` se destacan y no se ocultan. | `features/residente/InicioPage.tsx` |
+| RN-15 | Los comunicados `urgente` se destacan y no se ocultan. | `features/residente/InicioPage.tsx` · **Producto:** middleware, BLOKY Dev (T-152, 2026-11-24): `destacado` y el orden de RN-375 |
 | RN-16 | El código de visitante solo vale **dentro** de su vigencia: antes de `vigenciaDesde` está `programado`, después de `vigenciaHasta` está `vencido`. | `dominio/reglas.ts` |
 | RN-17 | El código es de un solo uso salvo que sea recurrente. | *parcial* |
 | RN-18 | El % de recaudo se calcula sobre las cuotas del periodo actual. | `dominio/reglas.ts` |
@@ -1339,6 +1339,10 @@ copropiedades (asignaciones): lo que no se repite es la persona.
 | RN-371 | **El pase de entrada es un QR que cambia** (Daniel, 2026-11-23): quien vive o está invitado lo pide en su ALICE y el middleware lo firma con su secreto, para esa residencia, persona, unidad y copropiedad; **vence a los 2 minutos** y no abre ninguna otra cosa. No se puede reenviar ni guardar una foto para después | Middleware en BLOKY Dev (T-149): `porteria/pase.ts` |
 | RN-372 | **La portería valida y ve el porqué** (CU-P-02, en la línea de RN-16): con el QR o, de respaldo, con el documento; responde **vigente · programado · vencido · bloqueado · finalizado**, quién es (documento oculto), a qué unidad va, con qué rol, la placa, **quién lo autorizó** y si ya está adentro. Valida quien tenga `porteria: ver` | Middleware en BLOKY Dev (T-149) |
 | RN-373 | **Toda entrada queda registrada** (RN-367; D8 de docs/23): «Entró» (a pie o en vehículo con placa, hora y quién lo registró) solo si la invitación sirve **hoy** y la persona no está ya adentro; «Salió» la cierra; «Adentro ahora» lista a quienes no han salido. Registrar es de `porteria: crear` (salida, `editar`), es decir, de **Seguridad**. Nunca se borra. El turno del portero (RN-234) viene después | Middleware en BLOKY Dev (T-149): tabla `ingreso` |
+| RN-374 | **Un comunicado** (CU-A-08, T-152): título de 3 a 120 letras, texto de 3 a 5000, categoría `general` · `urgente` · `mantenimiento` · `asamblea` · `proyecto`, «fijado» opcional y «vigente hasta» opcional, que no puede ser una fecha pasada. Lo publica quien tenga `cartelera: crear` (Administrador, Delegado, Secretaría) | Middleware en BLOKY Dev (T-152): `motivoComunicadoInvalido` |
+| RN-375 | **Qué está en la cartelera** (CU-R-09): lo no anulado cuya fecha «vigente hasta», si la tiene, no ha pasado (vale todo ese día). Orden: fijados, luego urgentes (RN-15), y en cada grupo del más reciente al más viejo. Cada persona ve cuáles leyó y cuántos le faltan; quien edita ve cuántos lo leyeron | Middleware (T-152): `comunicadoVigente`, `ordenDeCartelera` |
+| RN-376 | **Un comunicado no se borra: se anula, con motivo** (el «eliminar» de la matriz, ADR-0034). Sale de la cartelera; quien edita lo sigue viendo con quién lo anuló y por qué. Lo anulado ya no se edita | Middleware (T-152): `motivoAnulacionInvalida` |
+| RN-377 | **Corregir un comunicado guarda la versión anterior** (qué decía, quién lo cambió y cuándo) y lo marca «editado»: lo que se publicó a toda la copropiedad no se reescribe sin rastro | Middleware (T-152): tabla `comunicado_cambio` |
 
 ## Reglas del alta desde documentos (CU-B-10, ADR-0023) — rango de la integración
 

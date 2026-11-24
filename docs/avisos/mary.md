@@ -183,3 +183,8 @@ reúne entradas, salidas y novedades en orden de hora. Los paquetes entran a la 
 maqueta: portería registra quién recibió, entrega a quién, el residente confirma «Recibido» (y si portería no lo entregó, su
 confirmación vale como entrega), y todo queda en la minuta del turno.
 
+**2026-11-24 — La cartelera, también en el producto (T-152):** tus CU-A-08 y CU-R-09 funcionan en el middleware: fijados
+primero, luego urgentes (tu RN-15), «vigente hasta», y leído por persona. Agregué tres cosas que tu maqueta no tenía, con
+reglas nuevas del rango de integración: **anular con motivo** en vez de borrar (RN-376), **corregir guarda la versión
+anterior** (RN-377) y quien publica ve **cuántos lo leyeron**. Si algo de eso no te cuadra, dímelo.
+

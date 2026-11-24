@@ -519,6 +519,28 @@ Cada registro trae: `id, unidadId, unidad, tipo, remitente, observaciones, estad
 entregadaA, entregadaPor, confirmadaEn, confirmadaPor`. En la minuta del turno aparecen como `paquete_recibido` y
 `paquete_entregado` (§5b). **Todavía no:** el aviso al residente cuando llega algo (notificación).
 
+## 5d. Cartelera y comunicados (CU-A-08, CU-R-09; RN-15, RN-374 a RN-377; T-152)
+
+> **En BLOKY Dev desde el 2026-11-24** (`bloky-1205930`). Módulo `cartelera` de la matriz: Administrador y Delegado
+> publican, editan y anulan (`VCEA`); Secretaría publica y edita (`VCE`); todos los demás roles, también el invitado, **ven**.
+> La cartelera es **de la copropiedad**, no de una unidad: los permisos suman los roles de cada unidad donde vive la persona
+> y los de la copropiedad (Administración, Equipo).
+
+Prefijo `/api/app/c/:copropiedadId/comunicados`:
+
+| Ruta | Permiso | Qué hace |
+|---|---|---|
+| `POST …` `{ titulo, cuerpo, categoria: "general" \| "urgente" \| "mantenimiento" \| "asamblea" \| "proyecto", fijado?, vigenteHasta? }` | `crear` | Publica; aparece de inmediato. `vigenteHasta` (AAAA-MM-DD) no puede ser pasada (RN-374) |
+| `GET …` | `ver` | La cartelera: los vigentes (RN-375), **fijados primero, luego urgentes, y por fecha**; cada uno con `leido`, y `noLeidos` en total. Con `editar`, `?todos=1` trae también vencidos y anulados, y cada uno trae `lecturas`, `anuladoEn`, `anuladoPor`, `motivoAnulacion` |
+| `POST …/:id/leido` | `ver` | Abrirlo lo marca leído para esa persona (una vez; repetir no cambia la hora) |
+| `PUT …/:id` (el mismo cuerpo) | `editar` | Corrige; **la versión anterior queda guardada** (RN-377). `409 anulado` si ya se anuló |
+| `POST …/:id/anular` `{ motivo }` | `eliminar` | Sale de la cartelera, con motivo; **no se borra** (RN-376). `409 ya_anulado` |
+| `GET …/:id/cambios` | `editar` | Las versiones anteriores: qué decía, quién lo cambió y cuándo |
+
+Cada comunicado trae: `id, titulo, cuerpo, categoria, fijado, destacado` (urgente, RN-15: ALICE lo muestra en el inicio y no
+deja ocultarlo), `vigenteHasta, vigente, publicadoEn, autor, editadoEn, leido, leidoEn`. **Todavía no:** la notificación al
+publicar (CU-A-08 A2) y los comunicados que publican otros módulos solos (asambleas RN-216/219, proyectos RN-101, cierres RN-117).
+
 ## 6. Reuniones con video
 
 **Pendiente (T-124, segunda parte):** las rutas de [docs/18](./18-reuniones-con-video.md) aceptarán también el token de ALICE:

@@ -113,6 +113,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-24 · Daniel + IA (Claude) · Middleware · Cartelera y comunicados (T-152, CU-A-08, CU-R-09)
+
+Los casos de Mary, en el producto. Bloky-Idiky `feature/T-152-cartelera` → `develop` `1205930`, BLOKY Dev
+`2d34a12.bloky-1205930`. Migración de copropiedad `024-cartelera.sql` (`comunicado`, `comunicado_cambio`,
+`comunicado_lectura`); reglas `motivoComunicadoInvalido`, `comunicadoVigente`, `ordenDeCartelera`, `motivoAnulacionInvalida`
+(RN-374 a RN-377); rutas de publicar, listar, leído, corregir, anular y versiones (docs/20 §5d). Los permisos de la cartelera
+suman los roles de todas las unidades de la persona y los de la copropiedad.
+
+**Verificado:** `npm run probar` (cuatro pruebas nuevas) y build; en «Pruebas IDIKY»: publicar (la fecha pasada da 422), el
+orden y los no leídos de Juan Luis, leído una vez, Juan no publica y Olga no ve (403), la corrección guarda la versión
+anterior, anular (una vez; lo anulado no se edita) y Juan ya no lo ve. Quedan dos comunicados de prueba para Justo.
+**Sigue:** PQRS y solicitudes (módulo 4).
+
 ### 2026-11-23 · Daniel + IA (Claude) · Middleware · Correspondencia (T-151, CU-P-01, CU-R-11)
 
 Las reglas de Mary (RN-25, RN-52, RN-103), en el producto. Bloky-Idiky `feature/T-151-correspondencia` → `develop`

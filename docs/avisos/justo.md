@@ -413,4 +413,8 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
 - **2026-11-23 — Correspondencia (T-151) en BLOKY Dev:** [docs/20 §5c](../20-alta-e-ingreso-desde-alice.md). Portería (Seguridad,
   Secretaría) registra y entrega; quien vive en la unidad ve lo suyo y toca «Recibido». Hay un paquete y una carta de prueba
   en la I1-101 de «Pruebas IDIKY», ya entregados y confirmados.
+- **2026-11-24 — Cartelera y comunicados (T-152) en BLOKY Dev:** [docs/20 §5d](../20-alta-e-ingreso-desde-alice.md). La
+  cartelera es de la copropiedad (no de la unidad): todos ven; Administración y Secretaría publican y corrigen; anular es de
+  la Administración. ALICE marca leído al abrir (`POST …/:id/leido`) y muestra `destacado` (urgente) en el inicio sin dejarlo
+  ocultar (RN-15). En «Pruebas IDIKY» quedan dos de prueba: uno fijado y uno urgente que vence hoy.
 
