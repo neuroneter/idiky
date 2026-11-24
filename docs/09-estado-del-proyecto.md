@@ -113,6 +113,14 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Daniel + IA (Claude) · BLOKY Dev · Ajuste único: el documento de una persona de prueba creada sin él
+
+Una persona de prueba (Juan Luis Almonacid) se creó **sin documento** antes de RN-354 y ya había entrado a ALICE, así que ni
+la Administración (RN-364) ni ella (sin unidades vigentes, ALICE no la deja entrar) podían completarlo, y BLOKY rechazaba
+asignarla porque su celular «era de otra persona». **Autorizado por Daniel una sola vez:** se le agregó su documento al
+registro que ya existía (con su hash de identidad), sin crear a nadie ni cambiar su celular, y quedó en `bloky.auditoria`
+(`completar_documento_ajuste_unico`). El número no va en el repositorio. RN-354 no cambia: hoy nadie se crea sin documento.
+
 ### 2026-11-23 · Daniel + IA (Claude) · BOB · Pantalla «Roles y permisos» (T-138; RN-333, RN-334, RN-342; ADR-0034)
 
 En `BOB-Idiky`, rama **`feature/T-138-roles-y-permisos`** (commit `0f10351`, desde `develop`): plugin nuevo
