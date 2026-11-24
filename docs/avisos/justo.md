@@ -399,4 +399,7 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
   (solo el propietario; con `desde`, `hasta` y `paquete`), `GET /api/app/paquetes-de-arrendatario`, `403 solo_propietario`, y
   finalizar en cadena. En `permisos`, los roles son `propietario`, `arrendatario_operacion`, `arrendatario_solo_vivir` y
   `conviviente`. **Ajusta los textos y los tipos de ALICE antes de seguir con «Mi unidad».**
+- **2026-11-23 — Dato de prueba vigente para ALICE:** **Juan Luis Almonacid** es **propietario de la I1-101** de «Pruebas IDIKY»
+  (celular de prueba de Daniel terminado en 1613). Úsalo para probar «Mi unidad» con los roles nuevos y crear un arrendatario
+  con su paquete. La EC-201 de Altos del Bosque ya no sirve.
 
