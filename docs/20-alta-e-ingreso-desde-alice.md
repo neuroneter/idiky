@@ -493,7 +493,31 @@ residencia **vigente hoy** en esa unidad (invitado o quien vive). ALICE pinta `p
 
 - **Sin turno abierto** no se registra nada: «Entró», «Salió» y las novedades responden `409 sin_turno` («Primero abre el turno»).
 - Hay **un turno abierto a la vez** por copropiedad; salir de la app no lo cierra. La Administración lee la minuta (tiene `porteria: ver`).
-- **Todavía no:** paquetes en la minuta (con Correspondencia), visitante recurrente y el cierre Merkle (D7/D8).
+- Los paquetes recibidos y entregados en el turno entran a la minuta (§5c). **Todavía no:** visitante recurrente y el cierre Merkle (D7/D8).
+
+## 5c. Correspondencia (CU-P-01, CU-R-11; RN-25, RN-52, RN-103; T-151)
+
+> **En BLOKY Dev desde el 2026-11-23** (`bloky-a0dffb4`). Módulo `correspondencia` de la matriz: Seguridad y Secretaría
+> registran y entregan (`crear`, `editar`); la Administración ve; quien vive en la unidad ve lo suyo y confirma.
+
+**La portería** (permisos por sus roles en la copropiedad). Prefijo `/api/app/c/:copropiedadId/correspondencia`:
+
+| Ruta | Permiso | Qué hace |
+|---|---|---|
+| `POST …` `{ unidadId, tipo: "paquete" \| "carta" \| "domicilio" \| "otro", remitente?, observaciones? }` | `crear` | Registra lo que llegó; guarda **quién lo recibió** y la hora. Si hay turno abierto, entra a su minuta |
+| `GET …?estado=en_porteria \| entregada \| todas&unidadId=` | `ver` | La lista (por defecto, lo que espera) |
+| `POST …/:id/entregar` `{ entregadaA }` | `editar` | La entrega: a quién se lo llevó. `409 ya_entregada` (la entregada no se edita, RN-25) |
+
+**Quien vive en la unidad** (residencia vigente). Prefijo `/api/app/c/:copropiedadId/unidades/:unidadId/correspondencia`:
+
+| Ruta | Qué hace |
+|---|---|
+| `GET …` | Lo de la unidad: lo que espera en portería y lo entregado («Entregado a X, según portería») |
+| `POST …/:id/recibido` | **«Recibido»** (RN-103): una sola vez (`409 ya_confirmada`), cualquiera de la unidad. Si portería no lo había entregado, la confirmación vale como entrega (CU-R-11 A1) |
+
+Cada registro trae: `id, unidadId, unidad, tipo, remitente, observaciones, estado, recibidaEn, recibidaPor, entregadaEn,
+entregadaA, entregadaPor, confirmadaEn, confirmadaPor`. En la minuta del turno aparecen como `paquete_recibido` y
+`paquete_entregado` (§5b). **Todavía no:** el aviso al residente cuando llega algo (notificación).
 
 ## 6. Reuniones con video
 

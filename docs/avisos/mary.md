@@ -179,3 +179,7 @@ la minuta de tu maqueta (RN-234, RN-236) vienen en el siguiente paso. Revisa con
 middleware: un turno a la vez, sin turno no se registra nada, la entrega al cerrar la ve el siguiente portero, y la minuta
 reúne entradas, salidas y novedades en orden de hora. Los paquetes entran a la minuta cuando se construya Correspondencia.
 
+**2026-11-23 — Correspondencia, también en el producto (T-151):** tu CU-P-01 y CU-R-11 funcionan en el middleware como en tu
+maqueta: portería registra quién recibió, entrega a quién, el residente confirma «Recibido» (y si portería no lo entregó, su
+confirmación vale como entrega), y todo queda en la minuta del turno.
+

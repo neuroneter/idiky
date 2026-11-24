@@ -410,4 +410,7 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
   **sin turno abierto no se registra** entrada, salida ni novedad (`409 sin_turno`): el portero abre el turno al empezar, ve
   la entrega del anterior, y al cerrar deja la suya. La minuta reúne todo en orden de hora. Para probar: Daniel es vigilante
   en «Pruebas IDIKY» y Juan Luis puede invitar.
+- **2026-11-23 — Correspondencia (T-151) en BLOKY Dev:** [docs/20 §5c](../20-alta-e-ingreso-desde-alice.md). Portería (Seguridad,
+  Secretaría) registra y entrega; quien vive en la unidad ve lo suyo y toca «Recibido». Hay un paquete y una carta de prueba
+  en la I1-101 de «Pruebas IDIKY», ya entregados y confirmados.
 

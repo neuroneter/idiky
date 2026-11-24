@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Daniel + IA (Claude) · Middleware · Correspondencia (T-151, CU-P-01, CU-R-11)
+
+Las reglas de Mary (RN-25, RN-52, RN-103), en el producto. Bloky-Idiky `feature/T-151-correspondencia` → `develop`
+`a0dffb4`, BLOKY Dev `cf8a688.bloky-a0dffb4`. Migración de copropiedad `023-correspondencia.sql`; reglas
+`motivoCorrespondenciaInvalida`, `motivoEntregaCorrespondenciaInvalida`; rutas de portería (registrar, listar, entregar) y de
+la unidad (ver, «Recibido»), docs/20 §5c. Registrar no exige turno, pero si hay uno abierto el paquete entra a su minuta.
+
+**Verificado** en «Pruebas IDIKY» (Daniel como vigilante, Juan Luis propietario de la I1-101): paquete y carta registrados con
+turno, la lista de portería, Juan ve lo suyo, entregar y «Recibido» (los dos solo una vez), la carta no entregada confirmada
+por Juan quedó entregada, Olga (no vive ahí) recibe 403, y la minuta muestra los paquetes. Turno cerrado al terminar.
+
 ### 2026-11-23 · Daniel + IA (Claude) · Middleware · El turno de portería y su minuta (T-150, RN-234 a RN-236)
 
 Las reglas de Mary, ahora en el producto. Bloky-Idiky `feature/T-150-turno-y-minuta` → `develop` `1168c09`, BLOKY Dev
