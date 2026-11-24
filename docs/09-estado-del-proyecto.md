@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Daniel + IA (Claude) · BLOKY Dev · La portería probada de punta a punta (T-149)
+
+Pedido por Daniel. En «Pruebas IDIKY», **Daniel quedó en el Equipo como vigilante** con sus propios datos (no se inventó a nadie):
+ahora tiene los roles `administrador` y `seguridad` y el módulo `porteria` con ver, crear y editar. Juan Luis (propietario de la
+I1-101) invitó a Olga por hoy con placa; con el pase QR, la portería validó (vigente), registró **«Entró»** en vehículo, la vio en
+**«Adentro ahora»**, rechazó una segunda entrada (409 `ya_adentro`), registró **«Salió»** (200) y rechazó repetirla (409
+`no_adentro`). La invitación de prueba quedó finalizada y las sesiones de prueba revocadas.
+
+**Hallazgo:** una petición con `content-type: application/json` y cuerpo vacío respondía **500**; el manejador de errores ahora
+devuelve los rechazos de la petición como **4xx** (`peticion_invalida`). En `develop` `ad4c121`, BLOKY Dev `4a414d0.bloky-ad4c121`.
+
 ### 2026-11-23 · Daniel + IA (Claude) · Middleware · Visitantes y portería (T-149, RN-370 a RN-373)
 
 **Decidido con Daniel:** la invitación es el **invitado de la unidad** con fechas (y placa); la portería identifica con un
