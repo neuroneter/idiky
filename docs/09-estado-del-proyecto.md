@@ -113,6 +113,18 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Daniel + IA (Claude) · Middleware · El turno de portería y su minuta (T-150, RN-234 a RN-236)
+
+Las reglas de Mary, ahora en el producto. Bloky-Idiky `feature/T-150-turno-y-minuta` → `develop` `1168c09`, BLOKY Dev
+`b19a2b3.bloky-1168c09`. Migración de copropiedad `022-turno-y-minuta.sql` (`turno_porteria` con un solo abierto,
+`novedad_porteria`, y el turno de cada entrada y salida); reglas `motivoNovedadInvalida`, `motivoEntregaInvalida`,
+`minutaDeTurno`; rutas de turno, novedades, turnos y minuta (docs/20 §5b). «Entró», «Salió» y las novedades exigen turno abierto.
+
+**Verificado:** `npm run probar` (dos pruebas nuevas) y build; en «Pruebas IDIKY», con Daniel como vigilante y la visita de
+prueba de Olga: 409 `sin_turno` antes de abrir, abrir (y no dos veces), entrada, novedad, salida, cerrar con entrega, el
+siguiente ve la entrega, y la minuta en orden (abrió · entró · novedad · salió · cerró). El turno quedó cerrado y la
+invitación finalizada.
+
 ### 2026-11-23 · Daniel + IA (Claude) · BLOKY Dev · La portería probada de punta a punta (T-149)
 
 Pedido por Daniel. En «Pruebas IDIKY», **Daniel quedó en el Equipo como vigilante** con sus propios datos (no se inventó a nadie):

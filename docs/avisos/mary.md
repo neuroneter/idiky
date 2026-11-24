@@ -175,3 +175,7 @@ viene en carro); en vez del código fijo, muestra un **QR que cambia cada 2 minu
 viendo si sirve hoy, «todavía no» o «ya no», a qué unidad va y quién lo autorizó; luego marca «Entró» y «Salió». El turno y
 la minuta de tu maqueta (RN-234, RN-236) vienen en el siguiente paso. Revisa con Daniel cómo queda CU-R-10 y CU-P-02.
 
+**2026-11-23 — También en el producto (T-150):** tu **turno de portería** y tu **minuta** (RN-234 a RN-236) ya funcionan en el
+middleware: un turno a la vez, sin turno no se registra nada, la entrega al cerrar la ve el siguiente portero, y la minuta
+reúne entradas, salidas y novedades en orden de hora. Los paquetes entran a la minuta cuando se construya Correspondencia.
+

@@ -480,7 +480,20 @@ residencia **vigente hoy** en esa unidad (invitado o quien vive). ALICE pinta `p
   no» que «ya no» (CU-P-02).
 - QR alterado, vencido o de otra copropiedad: `422 pase_invalido` («pídele que lo abra de nuevo»).
 - Sin el permiso de portería: `403 sin_permiso` con `modulo: "porteria"`.
-- **Todavía no:** el turno del portero y la minuta (RN-234, RN-236), visitante recurrente, y el cierre Merkle (D7/D8).
+**El turno y la minuta** (RN-234 a RN-236, T-150, BLOKY Dev `bloky-1168c09`):
+
+| Ruta | Permiso | Qué hace |
+|---|---|---|
+| `GET …/turno` | `porteria: ver` | `{ abierto, anterior }`: el turno abierto y **lo que dejó el anterior** (`entrega`), para leerlo antes de abrir |
+| `POST …/turno/abrir` | `porteria: crear` | Abre el turno. `409 turno_abierto` (con quién lo tiene) si ya hay uno |
+| `POST …/turno/cerrar` `{ entrega? }` | `porteria: editar` | Lo cierra con la entrega para el siguiente (hasta 2000 letras). Responde cuántos quedaron `adentro` |
+| `POST …/novedades` `{ texto }` | `porteria: crear` | Una novedad del portero (3 a 1000 letras) |
+| `GET …/turnos?limite=` | `porteria: ver` | Los turnos, del más reciente al más viejo |
+| `GET …/minuta?turno=` | `porteria: ver` | `{ turno, minuta: [{ tipo: abrio · entro · salio · novedad · cerro, hora, quien, persona?, unidad?, forma?, placa?, texto?, entrega? }] }` en orden de hora; sin `turno`, la del abierto o la del último |
+
+- **Sin turno abierto** no se registra nada: «Entró», «Salió» y las novedades responden `409 sin_turno` («Primero abre el turno»).
+- Hay **un turno abierto a la vez** por copropiedad; salir de la app no lo cierra. La Administración lee la minuta (tiene `porteria: ver`).
+- **Todavía no:** paquetes en la minuta (con Correspondencia), visitante recurrente y el cierre Merkle (D7/D8).
 
 ## 6. Reuniones con video
 

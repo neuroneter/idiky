@@ -406,4 +406,8 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
   pide `visitantes: crear` y acepta `placa`; el invitado pide su **pase QR** (`GET …/unidades/:id/pase`, vence en 2 min) y la
   portería (rol Seguridad) valida, registra «Entró»/«Salió» y ve «Adentro ahora». En ALICE: la pantalla del pase para quien vive
   o está invitado, y el módulo Portería con el escáner para Seguridad.
+- **2026-11-23 — Turno y minuta de portería (T-150) en BLOKY Dev:** [docs/20 §5b](../20-alta-e-ingreso-desde-alice.md). Ahora
+  **sin turno abierto no se registra** entrada, salida ni novedad (`409 sin_turno`): el portero abre el turno al empezar, ve
+  la entrega del anterior, y al cerrar deja la suya. La minuta reúne todo en orden de hora. Para probar: Daniel es vigilante
+  en «Pruebas IDIKY» y Juan Luis puede invitar.
 
