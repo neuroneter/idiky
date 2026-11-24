@@ -453,6 +453,35 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
 - En `GET …/residencias` y en `lugares`, el arrendatario trae `desde`, `hasta` y `paquete`.
 - Nada se borra: se finaliza.
 
+## 5b. Visitantes y portería (RN-370 a RN-373, T-149)
+
+> **En BLOKY Dev desde el 2026-11-23** (`bloky-04bee12`). El invitado entra **siempre con ALICE** (RN-367): no hay código de
+> visitante sin app.
+
+**Invitar** — `POST /api/app/c/:copropiedadId/unidades/:unidadId/invitados` `{ nombre, celular, tipoDocumento, numeroDocumento, …, desde, hasta, placa? }`.
+Ahora pide **`visitantes: crear`** (antes `mi_unidad: crear`): el conviviente también puede invitar. `placa` es opcional
+(`ABC123`); va en `datos.placa` de la residencia.
+
+**El pase QR** — `GET /api/app/c/:copropiedadId/unidades/:unidadId/pase` → `{ pase, venceEn }`. Lo pide quien tiene una
+residencia **vigente hoy** en esa unidad (invitado o quien vive). ALICE pinta `pase` como QR y pide otro antes de `venceEn`
+(**2 minutos**). Sin invitación vigente: `403 sin_invitacion`.
+
+**La portería** (quien tenga el módulo `porteria`: hoy, **Seguridad**; Administración solo ve). Prefijo
+`/api/app/c/:copropiedadId/porteria`:
+
+| Ruta | Permiso | Qué hace |
+|---|---|---|
+| `POST …/validar` `{ pase }` o `{ tipoDocumento, numeroDocumento }` | `porteria: ver` | `{ ingreso: { residenciaId, veredicto, persona: { nombre, documento: "••• 123" }, unidad: { id, codigo }, rol, desde, hasta, placa, autorizadoPor, adentro } }`; por documento, además `otras` |
+| `POST …/entradas` `{ residenciaId, forma: "pie" \| "vehiculo", placa? }` | `porteria: crear` | «Entró». `409 no_vigente` (con `veredicto`) o `409 ya_adentro` |
+| `POST …/entradas/:ingresoId/salida` | `porteria: editar` | «Salió». `409 no_adentro` |
+| `GET …/adentro` | `porteria: ver` | «Adentro ahora»: `[{ ingresoId, nombre, unidad, rol, forma, placa, entroEn }]` |
+
+- `veredicto`: `vigente` · `programado` (todavía no) · `vencido` (ya no) · `bloqueado` · `finalizado`. No es lo mismo «todavía
+  no» que «ya no» (CU-P-02).
+- QR alterado, vencido o de otra copropiedad: `422 pase_invalido` («pídele que lo abra de nuevo»).
+- Sin el permiso de portería: `403 sin_permiso` con `modulo: "porteria"`.
+- **Todavía no:** el turno del portero y la minuta (RN-234, RN-236), visitante recurrente, y el cierre Merkle (D7/D8).
+
 ## 6. Reuniones con video
 
 **Pendiente (T-124, segunda parte):** las rutas de [docs/18](./18-reuniones-con-video.md) aceptarán también el token de ALICE:

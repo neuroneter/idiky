@@ -170,3 +170,8 @@ Administración al cargarlo, o lo eligen los propietarios entre ellos?
 **Para ti:** revisa con Daniel cómo ajustar CU-R-10 y CU-P-02 en la maqueta, y el nombre «propietario» donde hoy dice
 administrador de la unidad.
 
+**2026-11-23 — Ya construido en el producto (T-149):** el visitante es el **invitado de la unidad** con sus fechas (y placa si
+viene en carro); en vez del código fijo, muestra un **QR que cambia cada 2 minutos** desde su app, y la portería lo valida
+viendo si sirve hoy, «todavía no» o «ya no», a qué unidad va y quién lo autorizó; luego marca «Entró» y «Salió». El turno y
+la minuta de tu maqueta (RN-234, RN-236) vienen en el siguiente paso. Revisa con Daniel cómo queda CU-R-10 y CU-P-02.
+

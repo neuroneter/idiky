@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-23 · Daniel + IA (Claude) · Middleware · Visitantes y portería (T-149, RN-370 a RN-373)
+
+**Decidido con Daniel:** la invitación es el **invitado de la unidad** con fechas (y placa); la portería identifica con un
+**QR que cambia en el ALICE** del invitado (vence en 2 min), con el documento de respaldo; el turno del portero, después.
+
+**Qué:** Bloky-Idiky `feature/T-149-visitantes-y-porteria` → `develop` `04bee12`, BLOKY Dev `234bbc4.bloky-04bee12`. Migración
+de copropiedad `021-ingresos.sql` (tabla `ingreso`, una persona adentro a la vez); reglas `veredictoDeIngreso`,
+`placaNormalizada`, `motivoEntradaInvalida`; `porteria/pase.ts` (QR firmado, audiencia `porteria`); rutas de pase, validar,
+entrada, salida y adentro (docs/20 §5b). Invitar pasó al módulo `visitantes`.
+
+**Verificado:** `npm run probar` (tres pruebas nuevas) y builds; en BLOKY Dev, con datos de prueba (Juan Luis invitó a Olga
+por hoy, sin crear a nadie; la invitación quedó finalizada al terminar): pase, validación, QR alterado, y los 403 de quien
+no es de portería. **Falta** probar «Entró»/«Salió» con alguien de Seguridad, el turno y la minuta, y ALICE (Justo).
+
 ### 2026-11-23 · Daniel + IA (Claude) · BLOKY Dev · Ajuste único: el documento de una persona de prueba creada sin él
 
 Una persona de prueba (Juan Luis Almonacid) se creó **sin documento** antes de RN-354 y ya había entrado a ALICE, así que ni

@@ -402,4 +402,8 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
 - **2026-11-23 — Dato de prueba vigente para ALICE:** **Juan Luis Almonacid** es **propietario de la I1-101** de «Pruebas IDIKY»
   (celular de prueba de Daniel terminado en 1613). Úsalo para probar «Mi unidad» con los roles nuevos y crear un arrendatario
   con su paquete. La EC-201 de Altos del Bosque ya no sirve.
+- **2026-11-23 — Visitantes y portería (T-149) en BLOKY Dev:** [docs/20 §5b](../20-alta-e-ingreso-desde-alice.md). Invitar ahora
+  pide `visitantes: crear` y acepta `placa`; el invitado pide su **pase QR** (`GET …/unidades/:id/pase`, vence en 2 min) y la
+  portería (rol Seguridad) valida, registra «Entró»/«Salió» y ve «Adentro ahora». En ALICE: la pantalla del pase para quien vive
+  o está invitado, y el módulo Portería con el escáner para Seguridad.
 
