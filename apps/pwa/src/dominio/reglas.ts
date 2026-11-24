@@ -7,6 +7,9 @@
  */
 
 import type {
+  PreguntaAsamblea,
+  CargoEleccion,
+  Postulacion,
   CanalCitacion,
   FechaHoraISO,
   EnvioCitacion,
@@ -20,6 +23,7 @@ import type {
   Proyecto,
   VerificacionActa,
   Asamblea,
+  PuntoOrdenDelDia,
   Asistencia,
   FormaAsistencia,
   MayoriaExigida,
@@ -4827,4 +4831,253 @@ export function pqrsPorVencer(pqrs: Pqrs, hoy: FechaISO = hoyISO()): boolean {
   if (!pqrsAbierta(pqrs)) return false
   const dias = diasRestantesSla(pqrs, hoy)
   return dias >= 0 && dias <= DIAS_AVISO_PQRS
+}
+
+// ---------------------------------------------------------------------------
+// Elecciones en la asamblea — PN-23 · CU-A-12, CU-R-21 (Mary, 2026-11-23)
+// ---------------------------------------------------------------------------
+
+/** PN-23 — Cada cargo, quién puede aspirar y de dónde sale la regla. */
+export const CARGOS_ELECCION: Record<
+  CargoEleccion,
+  { nombre: string; quienes: string; fuente: string }
+> = {
+  consejo: {
+    nombre: 'Consejo de administración',
+    quienes: 'Se postulan los propietarios del edificio.',
+    fuente: 'Ley 675 de 2001, art. 53',
+  },
+  comite_convivencia: {
+    nombre: 'Comité de convivencia',
+    quienes: 'Se postulan propietarios y arrendatarios.',
+    fuente: 'Ley 675 de 2001, art. 58',
+  },
+  revisor_fiscal: {
+    nombre: 'Revisor fiscal',
+    quienes: 'Contador público con matrícula vigente que no viva ni tenga bienes en el edificio. Lo registra la administración.',
+    fuente: 'Ley 675 de 2001, art. 56',
+  },
+}
+
+/** PN-23 — Las postulaciones que siguen en pie para un punto. */
+export function postulacionesVigentes(postulaciones: Postulacion[] | undefined, puntoId: string): Postulacion[] {
+  return (postulaciones ?? []).filter((p) => p.puntoId === puntoId && !p.retiro)
+}
+
+/**
+ * PN-23 — Si se puede recibir una postulación.
+ *
+ * - El punto es una elección y la asamblea no ha terminado.
+ * - **Mientras no se prepare la votación**: después, las opciones ya están fijas.
+ * - Consejo: propietario (art. 53). Comité: propietario o arrendatario (art. 58).
+ * - Revisor fiscal: solo lo registra la administración, con matrícula (art. 56).
+ * - Una persona, una postulación vigente por punto.
+ */
+export function motivoPostulacionInvalida(p: {
+  asamblea: Pick<Asamblea, 'estado'>
+  punto?: Pick<PuntoOrdenDelDia, 'eleccion'>
+  hayVotacion: boolean
+  esAdministracion: boolean
+  rol?: RolResidencia
+  yaPostulado: boolean
+  nombre: string
+  presentacion: string
+  matricula?: string
+}): string | null {
+  if (!p.punto?.eleccion) return 'Ese punto no es una elección.'
+  if (p.asamblea.estado === 'cerrada' || p.asamblea.estado === 'cancelada') return 'La asamblea ya terminó.'
+  if (p.hayVotacion) return 'La votación de ese punto ya está preparada: las postulaciones se cerraron.'
+  const cargo = p.punto.eleccion
+  if (!p.esAdministracion) {
+    if (cargo === 'revisor_fiscal') return 'Al revisor fiscal lo registra la administración: es un contador que no vive en el edificio.'
+    if (cargo === 'consejo' && p.rol !== 'propietario') return 'Al consejo de administración se postulan los propietarios (Ley 675, art. 53).'
+    if (cargo === 'comite_convivencia' && p.rol !== 'propietario' && p.rol !== 'arrendatario') {
+      return 'Al comité de convivencia se postulan propietarios y arrendatarios.'
+    }
+    if (p.yaPostulado) return 'Ya tienes una postulación a este cargo.'
+  }
+  if (!p.nombre.trim()) return 'Escribe el nombre del candidato.'
+  if (p.presentacion.trim().length < 10) return 'Cuéntales a los propietarios en una o dos frases por qué votar por esta postulación.'
+  if (cargo === 'revisor_fiscal' && !(p.matricula ?? '').trim()) return 'Escribe la matrícula profesional del contador (art. 56).'
+  return null
+}
+
+/** PN-23 — Las opciones de la votación de una elección: cada postulación y el voto en blanco. */
+export function opcionesDeEleccion(postulaciones: Postulacion[]): string[] {
+  return [...postulaciones.map((p) => p.nombre), 'Voto en blanco']
+}
+
+// ---------------------------------------------------------------------------
+// Antes de la asamblea — PN-24 · CU-A-12, CU-R-20 (Mary, 2026-11-23)
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-24 — Las preguntas antes de la asamblea se reciben **mientras está
+ * convocada**: una vez instalada, se pregunta en la reunión. Las hace el
+ * propietario (la asamblea es de propietarios, RN-30).
+ */
+export function motivoPreguntaAsambleaInvalida(
+  asamblea: Pick<Asamblea, 'estado'>,
+  rol: RolResidencia | undefined,
+  texto: string,
+): string | null {
+  if (asamblea.estado !== 'convocada') return 'La asamblea ya empezó: haz tu pregunta en la reunión.'
+  if (rol !== 'propietario') return 'Las preguntas antes de la asamblea las hacen los propietarios.'
+  return motivoPreguntaInvalida(texto)
+}
+
+/** PN-24 — Las que la administración todavía no responde. */
+export function preguntasAsambleaSinResponder(asamblea: Pick<Asamblea, 'estado' | 'preguntas'>): PreguntaAsamblea[] {
+  if (asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') return []
+  return (asamblea.preguntas ?? []).filter((p) => !p.respuesta)
+}
+
+/** PN-24 — El mensaje a quien preguntó, cuando le responden. */
+export function textoRespuestaAsamblea(asamblea: Pick<Asamblea, 'titulo'>, copropiedad: string): string {
+  return `${copropiedad}: la administración respondió tu pregunta para la «${asamblea.titulo}». Gracias por preguntar. Míralo en Idiky.`
+}
+
+// ---------------------------------------------------------------------------
+// Entrada con QR a la asamblea presencial — PN-25 · CU-A-17, CU-R-21 (Mary, 2026-11-23)
+// ---------------------------------------------------------------------------
+
+const PREFIJO_ASISTENCIA = 'IDIKY|ASIS'
+
+/**
+ * PN-25 — El código que el propietario (o su apoderado) muestra en la entrada.
+ * Lleva la asamblea, la unidad y la persona: **no da el voto**, solo dice quién
+ * llega; el que vale lo verifica la administración al leerlo.
+ */
+export function codigoAsistencia(p: { asambleaId: string; unidadId: string; personaId: string }): string {
+  return `${PREFIJO_ASISTENCIA}|${p.asambleaId}|${p.unidadId}|${p.personaId}`
+}
+
+/** PN-25 — Lee el código; si no es de asistencia, `null`. */
+export function leerCodigoAsistencia(texto: string): { asambleaId: string; unidadId: string; personaId: string } | null {
+  const partes = texto.trim().split('|')
+  if (partes.length !== 5 || `${partes[0]}|${partes[1]}` !== PREFIJO_ASISTENCIA) return null
+  const [, , asambleaId, unidadId, personaId] = partes
+  if (!asambleaId || !unidadId || !personaId) return null
+  return { asambleaId, unidadId, personaId }
+}
+
+// ---------------------------------------------------------------------------
+// Calendario legal de la asamblea ordinaria — PN-26 · CU-A-12 (Mary, 2026-11-23)
+// ---------------------------------------------------------------------------
+
+export type EstadoPasoCalendario = 'hecho' | 'pendiente' | 'vencido' | 'informativo'
+
+export interface PasoCalendarioOrdinaria {
+  id: 'cierre' | 'documentos' | 'citacion' | 'reunion' | 'derecho_propio' | 'acta' | 'impugnacion'
+  fecha: FechaISO
+  titulo: string
+  detalle: string
+  fuente: string
+  estado: EstadoPasoCalendario
+}
+
+function sumarMeses(fecha: FechaISO, meses: number): FechaISO {
+  const d = new Date(`${fecha}T12:00:00`)
+  d.setMonth(d.getMonth() + meses)
+  return fechaLocalDe(d.toISOString())
+}
+
+/**
+ * PN-26 — **El calendario de la asamblea ordinaria** y en qué va cada paso.
+ *
+ * La ordinaria se reúne dentro de los **tres meses siguientes** al cierre del
+ * período presupuestal —con el año calendario, hasta el 31 de marzo— y se cita
+ * con **15 días calendario** de antelación (Ley 675, art. 39). Si nadie la
+ * convoca, se reúne **por derecho propio** el primer día hábil del cuarto mes,
+ * a las 8:00 p. m. (art. 41). El acta queda a disposición en **20 días
+ * hábiles** (art. 47) y las decisiones se impugnan dentro de **dos meses**
+ * (art. 49). Se muestra la ordinaria que viene: pasado el 31 de marzo, la del
+ * año siguiente. **Para el abogado:** el período presupuestal que no sea el año
+ * calendario.
+ */
+export function calendarioOrdinaria(p: {
+  hoy: FechaISO
+  asambleas: Array<Pick<Asamblea, 'id' | 'tipo' | 'fechaHora' | 'estado'>>
+  actas: Acta[]
+  documentosEdificio: Array<{ asambleaId?: string; retiro?: unknown }>
+}): { anio: number; asambleaId?: string; pasos: PasoCalendarioOrdinaria[] } {
+  const anioHoy = Number(p.hoy.slice(0, 4))
+  const anio = p.hoy <= `${anioHoy}-03-31` ? anioHoy : anioHoy + 1
+  const limite = `${anio}-03-31`
+  const ordinaria = p.asambleas.find(
+    (a) => a.tipo === 'ordinaria' && a.estado !== 'cancelada' && a.fechaHora.slice(0, 10) >= `${anio}-01-01` && a.fechaHora.slice(0, 10) <= limite,
+  )
+  const fechaReunion = ordinaria?.fechaHora.slice(0, 10)
+  const ultimaCitacion = sumarDias(limite, -15)
+  const conDocumentos = !!ordinaria && p.documentosEdificio.some((d) => d.asambleaId === ordinaria.id && !d.retiro)
+  const acta = ordinaria ? actaDeAsamblea(p.actas, ordinaria.id) : undefined
+  const reunida = ordinaria?.estado === 'cerrada' || ordinaria?.estado === 'instalada'
+  const estado = (hecho: boolean, fecha: FechaISO): EstadoPasoCalendario => (hecho ? 'hecho' : p.hoy > fecha ? 'vencido' : 'pendiente')
+  // Primer día hábil de abril: el 1 si es hábil; si no, el siguiente hábil.
+  const marzo31 = `${anio}-03-31`
+  const derechoPropio = sumarDiasHabiles(marzo31, 1)
+  const baseActa = fechaReunion ?? limite
+
+  return {
+    anio,
+    asambleaId: ordinaria?.id,
+    pasos: [
+      {
+        id: 'cierre',
+        fecha: `${anio - 1}-12-31`,
+        titulo: 'Cierra el período presupuestal',
+        detalle: 'Desde aquí corren los tres meses para reunir la asamblea ordinaria.',
+        fuente: 'Ley 675 de 2001, art. 39',
+        estado: p.hoy > `${anio - 1}-12-31` ? 'hecho' : 'pendiente',
+      },
+      {
+        id: 'documentos',
+        fecha: ultimaCitacion,
+        titulo: 'Estados financieros y presupuesto, para los propietarios',
+        detalle: 'Publícalos en la asamblea, con la citación: los propietarios llegan habiéndolos leído.',
+        fuente: 'Ley 675 de 2001, art. 38 (la asamblea los aprueba)',
+        estado: estado(conDocumentos, ultimaCitacion),
+      },
+      {
+        id: 'citacion',
+        fecha: ultimaCitacion,
+        titulo: 'Último día para citar',
+        detalle: 'La ordinaria se cita con al menos 15 días calendario de antelación (RN-33).',
+        fuente: 'Ley 675 de 2001, art. 39',
+        estado: estado(!!ordinaria, ultimaCitacion),
+      },
+      {
+        id: 'reunion',
+        fecha: fechaReunion ?? limite,
+        titulo: fechaReunion ? 'La asamblea ordinaria' : 'Último día para reunirse',
+        detalle: 'Dentro de los tres meses siguientes al cierre del período presupuestal.',
+        fuente: 'Ley 675 de 2001, art. 39',
+        estado: estado(reunida, limite),
+      },
+      {
+        id: 'derecho_propio',
+        fecha: derechoPropio,
+        titulo: 'Si nadie la convoca: reunión por derecho propio',
+        detalle: 'A las 8:00 p. m., en el edificio, sin citación. Mejor no llegar a esto.',
+        fuente: 'Ley 675 de 2001, art. 41',
+        estado: ordinaria ? 'hecho' : 'informativo',
+      },
+      {
+        id: 'acta',
+        fecha: sumarDiasHabiles(baseActa, 20),
+        titulo: 'El acta, a disposición de los propietarios',
+        detalle: 'Veinte días hábiles después de la reunión (CU-A-20).',
+        fuente: 'Ley 675 de 2001, art. 47',
+        estado: estado(!!acta && actaCongelada(acta), sumarDiasHabiles(baseActa, 20)),
+      },
+      {
+        id: 'impugnacion',
+        fecha: sumarMeses(baseActa, 2),
+        titulo: 'Vence el plazo para impugnar las decisiones',
+        detalle: 'Dos meses después de la reunión. Hasta entonces, guarda los soportes.',
+        fuente: 'Ley 675 de 2001, art. 49',
+        estado: 'informativo',
+      },
+    ],
+  }
 }

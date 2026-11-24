@@ -8,7 +8,7 @@
 import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
-import { alertasPendientes, objetoPendiente, pqrsPorVencer, preguntasPorResponder } from '../../dominio/reglas'
+import { alertasPendientes, objetoPendiente, pqrsPorVencer, preguntasAsambleaSinResponder, preguntasPorResponder } from '../../dominio/reglas'
 
 export function TeEsperan() {
   const { bd } = useDatos()
@@ -25,6 +25,8 @@ export function TeEsperan() {
     { cuantos: delEdificio(bd.trasteos).filter((t) => t.estado === 'solicitado').length, uno: 'trasteo por aprobar', varios: 'trasteos por aprobar', a: '/admin/edificio' },
     { cuantos: delEdificio(bd.permisosObra).filter((o) => o.estado === 'solicitado').length, uno: 'obra en apartamento por aprobar', varios: 'obras en apartamentos por aprobar', a: '/admin/edificio' },
     { cuantos: delEdificio(bd.proyectos).reduce((s, p) => s + preguntasPorResponder(p).length, 0), uno: 'pregunta sobre las obras sin responder', varios: 'preguntas sobre las obras sin responder', a: '/admin/proyectos' },
+    // PN-24 — Lo que preguntan antes de la asamblea se responde antes de la reunión.
+    { cuantos: delEdificio(bd.asambleas).reduce((s, a) => s + preguntasAsambleaSinResponder(a).length, 0), uno: 'pregunta para la asamblea sin responder', varios: 'preguntas para la asamblea sin responder', a: '/admin/asambleas' },
     { cuantos: delEdificio(bd.objetosEncontrados).filter((o) => objetoPendiente(o) && o.reclamos.length > 0).length, uno: 'objeto perdido que alguien reclamó', varios: 'objetos perdidos que alguien reclamó', a: '/admin/edificio' },
     { cuantos: delEdificio(bd.trasteos).filter((t) => t.deposito?.recibido && !t.deposito.cierre && t.realizado).length, uno: 'depósito de trasteo por devolver', varios: 'depósitos de trasteo por devolver', a: '/admin/edificio' },
   ].filter((f) => f.cuantos > 0)

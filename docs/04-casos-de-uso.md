@@ -41,8 +41,8 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-17 | **Directorio de contactos útiles y emergencias** | 3 | ✅ Demo (2026-11-12: por grupos con «Llamar», las emergencias primero; los proveedores solo para administración y consejo; RN-232, RN-233) | [ver](./casos-de-uso/residente.md#cu-r-17) |
 | CU-R-18 | **Descargar el informe de estado de cuenta** | 1 | ✅ Demo (se emite con consecutivo y código, y se imprime o guarda en PDF desde la app — RN-127) | [ver](./casos-de-uso/residente.md#cu-r-18) |
 | CU-R-19 | **Consultar y descargar mis comprobantes de pago** | 1 | ✅ Demo (2026-11-10: lista de recibos de caja, hoja del recibo y descarga en PDF; también desde la consola) | [ver](./casos-de-uso/residente.md#cu-r-19) |
-| CU-R-20 | **Recibir la citación a asamblea** | 1 | ✅ Demo (ve e imprime la citación que le llegó, CU-A-12). Confirmar asistencia **no se pide** (Mary, 2026-10-12) | [ver](./casos-de-uso/residente.md#cu-r-20) |
-| CU-R-21 | **Entrar a la asamblea y marcar mi asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-21) |
+| CU-R-20 | **Recibir la citación a asamblea** | 1 | ✅ Demo (ve e imprime la citación que le llegó, CU-A-12; 2026-11-23: lee los documentos y pregunta antes de la reunión, PN-24). Confirmar asistencia **no se pide** (Mary, 2026-10-12) | [ver](./casos-de-uso/residente.md#cu-r-20) |
+| CU-R-21 | **Entrar a la asamblea y marcar mi asistencia** | 1 | ✅ Demo (2026-11-23: código QR para entrar al salón, PN-25; postularse a una elección, PN-23) | [ver](./casos-de-uso/residente.md#cu-r-21) |
 | CU-R-22 | ~~Otorgar poder a otro copropietario~~ | — | ⛔ Retirado (2026-10-02, puesta al día del catálogo): lo cubren CU-R-23 —dar poder desde la app—, CU-R-31 —enviar el papel en foto— y CU-A-19 —registrarlo en papel—. Lo que dejaba abierto (tope y firma) son preguntas jurídicas de §3 bis | [ver](./casos-de-uso/residente.md#cu-r-22) |
 | CU-R-23 | **Dar poder para que otro vote por mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-23) |
 | CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-24) |
@@ -87,12 +87,12 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-09 | Registrar correspondencia recibida | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-09) |
 | CU-A-10 | **Configurar zonas comunes y sus reglas** | 2 | ✅ Demo (crear, editar, cerrar por mantenimiento y desactivar con aviso; costos, depósito y multa por no cancelar; uso exclusivo o compartido; días y horario; aviso masivo del cierre; fotos y especificaciones — RN-104 a RN-117) | [ver](./casos-de-uso/administrador.md#cu-a-10) |
 | CU-A-11 | Cargar presupuesto anual | 3 | ⬜ Pendiente | — |
-| CU-A-12 | **Convocar la asamblea y emitir las citaciones** | 1 | ✅ Demo (2026-10-12: citación con número y código, enviada a cada propietario con constancia, antelación de 15 días para la ordinaria; RN-33, RN-219; 2026-11-23: cada punto que se vota dice al citar si es decisión económica, RN-211) | [ver](./casos-de-uso/administrador.md#cu-a-12) |
+| CU-A-12 | **Convocar la asamblea y emitir las citaciones** | 1 | ✅ Demo (2026-10-12: citación con número y código, enviada a cada propietario con constancia, antelación de 15 días para la ordinaria; RN-33, RN-219; 2026-11-23: cada punto que se vota dice al citar si es decisión económica, RN-211; elecciones con postulaciones, PN-23; documentos y preguntas antes de la reunión, PN-24; calendario legal de la ordinaria, PN-26) | [ver](./casos-de-uso/administrador.md#cu-a-12) |
 | CU-A-13 | **Emitir el paz y salvo** | 1 | ✅ Demo (desde Cartera → Paz y salvo: busca la unidad, ve el saldo, emite, imprime y anula con motivo — RN-26, RN-36) | [ver](./casos-de-uso/administrador.md#cu-a-13) |
 | CU-A-14 | Gestionar proveedores y mantenimientos | 3 | 🟡 Parcial (2026-11-23: proveedores en el directorio, CU-R-17; mantenimientos programados en el calendario, CU-A-35; falta la hoja de vida de equipos con vencimientos y certificados) | — |
 | CU-A-15 | **Administrar varias copropiedades** | 1 | ✅ Demo (2026-11-23: Mary, 2026-11-23, «sí, varios»; selector de edificio en la consola) | — |
 | CU-A-16 | Exportar informes (cartera, PQRS) | 2 | ✅ Demo (2026-11-23: «Descargar a Excel» en Cartera y en la bandeja de PQRS) | — |
-| CU-A-17 | **Instalar la asamblea y llevar la asistencia** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-17) |
+| CU-A-17 | **Instalar la asamblea y llevar la asistencia** | 1 | ✅ Demo (2026-11-23: registrar la llegada con el QR, PN-25) | [ver](./casos-de-uso/administrador.md#cu-a-17) |
 | CU-A-18 | **Habilitar, abrir y cerrar una votación** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-18) |
 | CU-A-19 | **Registrar un poder en papel y dar de alta a quien lo ejerce** | 1 | ✅ Demo (registra, valida el que llega en foto, muestra el acumulado y **aplica el tope de poderes por persona si el edificio lo configuró**, RN-220) | [ver](./casos-de-uso/administrador.md#cu-a-19) |
 | CU-A-20 | **Levantar el acta de la asamblea** | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-20) |

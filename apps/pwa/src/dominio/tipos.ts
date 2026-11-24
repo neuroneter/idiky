@@ -1061,6 +1061,7 @@ export type MotivoMensaje =
   | 'recordatorio_pago'
   | 'agradecimiento_pago'
   | 'respuesta_proyecto'
+  | 'respuesta_asamblea'
   | 'pago_programado'
   | 'permiso_decidido'
   | 'acuerdo_pago'
@@ -1151,6 +1152,11 @@ export interface PreguntaProyecto {
   respuesta?: { texto: string; respondidoPor: string; fecha: FechaHoraISO }
 }
 
+/** PN-24 — Una pregunta antes de la asamblea; puede ser sobre un punto. */
+export interface PreguntaAsamblea extends PreguntaProyecto {
+  puntoId?: string
+}
+
 export interface Proyecto {
   id: string
   copropiedadId: string
@@ -1228,6 +1234,42 @@ export interface PuntoOrdenDelDia {
    * unidad; la votación lo trae ya marcado. Sin marcar, se escoge al abrirla.
    */
   contenidoEconomico?: boolean
+  /**
+   * PN-23 — Si el punto es **una elección** y de qué cargo (Mary, 2026-11-23).
+   * Una elección es una decisión no económica: se cuenta según el edificio.
+   */
+  eleccion?: CargoEleccion
+}
+
+/** PN-23 — Los cargos que elige la asamblea (Ley 675 de 2001, arts. 53, 56 y 58). */
+export type CargoEleccion = 'consejo' | 'comite_convivencia' | 'revisor_fiscal'
+
+/**
+ * PN-23 — Una postulación a un cargo que se elige en la asamblea (CU-A-12, CU-R-21).
+ *
+ * El propietario se postula desde la app; la administración registra al revisor
+ * fiscal (es un contador de afuera) y a quien se postule en la sala. **No se
+ * borra**: se retira, y queda quién y cuándo.
+ */
+export interface Postulacion {
+  id: string
+  asambleaId: string
+  puntoId: string
+  cargo: CargoEleccion
+  /** Cómo aparece en la votación: el nombre del candidato o de la plancha. */
+  nombre: string
+  /** Si es alguien del edificio. El revisor fiscal no lo es (art. 56). */
+  personaId?: string
+  unidadId?: string
+  /** Por qué votar por él: lo lee el propietario antes de la asamblea. */
+  presentacion: string
+  /** Una plancha: los demás nombres que van con el candidato. */
+  integrantes?: string[]
+  /** Revisor fiscal: matrícula profesional de contador público (art. 56). */
+  matricula?: string
+  postuladaPor: string
+  postuladaEn: FechaHoraISO
+  retiro?: { por: string; en: FechaHoraISO }
 }
 
 export interface Asamblea {
@@ -1265,6 +1307,12 @@ export interface Asamblea {
   enlaceGrabacion?: string
   ordenDelDia: PuntoOrdenDelDia[]
   estado: EstadoAsamblea
+  /**
+   * PN-24 — Lo que los propietarios preguntan **antes** de la asamblea
+   * (Mary, 2026-11-23). Se responde antes de la reunión y la respuesta la ven
+   * todos, sin el nombre de quien preguntó.
+   */
+  preguntas?: PreguntaAsamblea[]
   /**
    * RN-215 — El quórum con que se instaló: la asistencia de ese momento (Mary,
    * 2026-10-11: «la asistencia es el quórum y se verifica al inicio de la
@@ -1930,6 +1978,8 @@ export interface BaseDatos {
   objetosEncontrados: ObjetoEncontrado[]
   /** CU-A-39 — Acuerdos de pago. */
   acuerdosPago: AcuerdoPago[]
+  /** PN-23 — Postulaciones a los cargos que elige la asamblea. */
+  postulaciones: Postulacion[]
   accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
   asistencias: Asistencia[]
@@ -2028,6 +2078,8 @@ export interface DocumentoEdificio {
   fecha: FechaISO
   /** El archivo, como data URL en el demo (ADR-0009). */
   archivo?: { nombre: string; tipo: string; datos: string }
+  /** PN-24 — Si se publicó para una asamblea: el propietario lo lee antes de ir. */
+  asambleaId?: string
   publicadoPor: string
   publicadoEn: FechaHoraISO
   retiro?: { por: string; en: FechaHoraISO; motivo: string }

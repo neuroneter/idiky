@@ -309,6 +309,12 @@ marca las que el residente canceló fuera de plazo (RN-112).
    cada uno, **qué mayoría exige**: simple (art. 45), calificada del 70 % (art. 46) o
    **unanimidad** si el reglamento la pide (RN-224); y si es **decisión económica** (se cuenta por
    coeficiente) o **no económica** (según el edificio), o lo deja para cuando abra la votación (RN-211).
+   Un punto puede ser una **elección** (consejo, comité de convivencia o revisor fiscal, PN-23):
+   antes de preparar la votación se reciben las postulaciones —la administración registra al
+   revisor fiscal y a quien se postule en la sala— y la votación trae a los candidatos y el voto
+   en blanco. Con la asamblea convocada, la administración publica los **documentos para la
+   asamblea** y responde las **preguntas** de los propietarios (PN-24). Arriba de Asambleas, el
+   **calendario legal de la ordinaria** dice las fechas de la ley y en qué va cada una (PN-26).
 3. El sistema valida la antelación (RN-33; Ley 675, art. 39): la **ordinaria** se cita con al
    menos **15 días calendario** y, si no, no deja convocar; la **extraordinaria** solo avisa,
    porque su plazo lo fija el reglamento. La segunda convocatoria no se mide (art. 41).
@@ -397,6 +403,8 @@ necesita autorización previa— no cambia: hoy pueden emitirlo los dos.
 
 ### CU-A-17
 ## CU-A-17 — Instalar la asamblea y llevar la asistencia
+
+> **Ampliación 2026-11-23 (PN-25):** en la presencial o mixta, la llegada se registra **leyendo el QR** que el propietario o su apoderado trae en la app (o escribiendo el código). Solo cuenta si es propietario de la unidad o tiene poder vigente. Pantalla: `componentes/EntradaConQr.tsx` (`RegistrarLlegadaQr`); prueba: `entrada-qr.spec.ts`.
 
 - **Actor principal:** Administrador
 - **Precondiciones:** La asamblea está convocada y llegó su fecha.

@@ -92,6 +92,12 @@ import { ChipAsamblea } from '../../componentes/Etiquetas'
 import { CapturaFoto } from '../../componentes/CapturaFoto'
 import { HojaPoder } from '../../componentes/HojaPoder'
 import { HojaActa } from '../../componentes/HojaActa'
+import { Postulaciones } from '../../componentes/Postulaciones'
+import { AntesDeLaAsamblea } from '../../componentes/AntesDeLaAsamblea'
+import { RegistrarLlegadaQr } from '../../componentes/EntradaConQr'
+import { CARGOS_ELECCION } from '../../dominio/reglas'
+import type { CargoEleccion } from '../../dominio/tipos'
+import { CalendarioOrdinaria } from './CalendarioOrdinaria'
 import { VotacionPunto } from './VotacionPunto'
 import { SegundaConvocatoria } from './SegundaConvocatoria'
 import { CitacionAsamblea } from './CitacionAsamblea'
@@ -138,6 +144,9 @@ export function AsambleasAdminPage() {
           Convocar
         </button>
       </div>
+
+      {/* PN-26 — Las fechas de la ley para la ordinaria que viene. */}
+      <CalendarioOrdinaria />
 
       {/* RN-211 — Cómo se cuentan los votos en este edificio. Va arriba porque
           decide el resultado de cada votación, y el administrador tiene que
@@ -607,6 +616,8 @@ function DetalleAsamblea({
           </span>
         </div>
       )}
+      {/* PN-25 — En la entrada del salón: leer el QR y la llegada queda registrada. */}
+      <RegistrarLlegadaQr asamblea={asamblea} />
       <div className="separador" />
       <span className="titulo-seccion">Orden del día</span>
       <ol className="lista lista--compacta" style={{ paddingLeft: 'var(--e4)' }}>
@@ -627,12 +638,18 @@ function DetalleAsamblea({
                   {admisible.motivo}
                 </p>
               )}
+              {/* PN-23 — Si es una elección: las postulaciones, antes de preparar la votación. */}
+              <Postulaciones asamblea={asamblea} punto={punto} modo="admin" />
               {/* CU-A-18 — La votación del punto, donde se discute. */}
               <VotacionPunto asamblea={asamblea} punto={punto} />
             </li>
           )
         })}
       </ol>
+
+      {/* PN-24 — Documentos para leer y preguntas de los propietarios, antes de la reunión. */}
+      <div className="separador" />
+      <AntesDeLaAsamblea asamblea={asamblea} modo="admin" />
 
       {asamblea.estado !== 'cerrada' && asamblea.estado !== 'cancelada' && (
         <>
@@ -1016,7 +1033,7 @@ interface DatosConvocatoria {
   lugar?: string
   enlaceTransmision?: string
   citacion: string
-  ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida; contenidoEconomico?: boolean }>
+  ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida; contenidoEconomico?: boolean; eleccion?: CargoEleccion }>
 }
 
 function FormularioConvocatoria({
@@ -1035,7 +1052,7 @@ function FormularioConvocatoria({
   const [enlace, setEnlace] = useState('')
   const [citacion, setCitacion] = useState('')
   const [puntos, setPuntos] = useState<
-    Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida; contenidoEconomico?: boolean }>
+    Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida; contenidoEconomico?: boolean; eleccion?: CargoEleccion }>
   >([{ titulo: '', descripcion: '', seVota: false }])
   const [error, setError] = useState<string | null>(null)
 
@@ -1263,8 +1280,32 @@ function FormularioConvocatoria({
                 ))}
               </select>
             )}
-            {/* RN-211 — Al citar, si la decisión es económica: define si se cuenta por coeficiente o por unidad. */}
+            {/* PN-23 — Si el punto es una elección, y de qué cargo. */}
             {punto.seVota && (
+              <select
+                aria-label={`Elección del punto ${i + 1}`}
+                value={punto.eleccion ?? ''}
+                onChange={(evento) =>
+                  setPuntos(
+                    puntos.map((p, j) => {
+                      if (i !== j) return p
+                      const eleccion = (evento.target.value || undefined) as CargoEleccion | undefined
+                      return { ...p, eleccion, ...(eleccion ? { contenidoEconomico: false } : {}) }
+                    }),
+                  )
+                }
+                style={{ marginTop: 'var(--e2)' }}
+              >
+                <option value="">No es una elección</option>
+                {(Object.keys(CARGOS_ELECCION) as CargoEleccion[]).map((c) => (
+                  <option key={c} value={c}>
+                    Elección: {CARGOS_ELECCION[c].nombre}
+                  </option>
+                ))}
+              </select>
+            )}
+            {/* RN-211 — Al citar, si la decisión es económica: define si se cuenta por coeficiente o por unidad. */}
+            {punto.seVota && !punto.eleccion && (
               <select
                 aria-label={`Tipo de decisión del punto ${i + 1}`}
                 value={punto.contenidoEconomico === undefined ? '' : punto.contenidoEconomico ? 'si' : 'no'}
