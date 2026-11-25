@@ -113,6 +113,21 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · Filtros y páginas, empezando por PQRS (T-161, RN-390)
+
+El segundo paso de lo que Daniel pidió al ver Convivencia: que **el servidor filtre y pagine**. Regla nueva **RN-390** y sus
+funciones (`paginaPedida`, `resumenDePaginas`, `diaDeFiltro`, `textoDeFiltro`). La bandeja de PQRS ya no trae hasta mil filas:
+recibe estado, semáforo, tipo, categoría, rango de fechas, texto y página, y devuelve 20 con el total; los conteos de las
+pestañas salen de una sola consulta. En BLOKY, `componentes/Filtros.tsx` con la barra de filtros, el buscador, el rango de
+fechas y el paginador, comunes a todas las listas; y **PQRS en la plantilla ancha**, con la bandeja y la conversación lado a
+lado. Bloky-Idiky `feature/T-161-filtros-y-paginas-pqrs` → `develop` `4d2f73f`, desplegado en BLOKY Dev.
+
+**Verificado:** `npm run probar` (una prueba nueva), los dos build, los filtros y las páginas por la API en «Pruebas IDIKY»
+(solo lectura) y la pantalla en el navegador, en escritorio y en celular (docs/11, T-161). La vista entró con un pase de
+soporte (`prueba-t161@idiky.com`): otro correo de aviso.
+**No cambia para ALICE:** sus listas de PQRS siguen igual (son otras rutas).
+**Sigue:** lo mismo en Reservas, Comunicados y Portería.
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY · La plantilla ancha y Reuniones como calendario (T-160)
 
 Daniel, al ver Convivencia en BLOKY Dev: (1) con mucha información las listas no van a servir: hacen falta **filtros por rango
