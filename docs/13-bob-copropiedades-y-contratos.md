@@ -182,6 +182,12 @@ ni los roles de las copropiedades, ni la matriz, ni las asignaciones.
 3. BLOKY o ALICE abren con la franja «Soporte IDIKY actuando como…», en solo lectura; para escribir, el motivo (RN-341).
 4. Todo lo que haga queda en la auditoría a su nombre de Strapi (RN-342), y el Administrador recibe el aviso.
 
+**Como quedó construido (T-136, 2026-11-24; RN-387 a RN-389).** Plugin `impersonar` de BOB, sin content-types: lo ve quien
+tiene el permiso «Impersonar en BLOKY y ALICE (soporte)» (*Configuración → Roles → Plugins → Impersonar*; dáselo al rol de
+soporte). La copropiedad se busca entre las de BOB; el rol, entre los que tienen permisos en BLOKY; el motivo es
+obligatorio y le llega por correo al Administrador y al Delegado. «Entrar a BLOKY» abre otra pestaña con el pase en el
+fragmento de la dirección. Abajo, lo último que se ha hecho impersonando. **Solo BLOKY por ahora**: ALICE espera a T-137.
+
 ## Fuentes
 
 - [Ley 675 de 2001 — Régimen de Propiedad Horizontal (Alcaldía de Bogotá, Sisjur)](https://www.alcaldiabogota.gov.co/sisjur/normas/Norma1.jsp?i=4162)

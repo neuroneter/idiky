@@ -230,6 +230,10 @@ Daniel decidió ([ADR-0034](../adr/0034-roles-desde-bob-matriz-de-permisos-e-imp
   personas, Visitantes, Correspondencia, Reservas, Pagos y estado de cuenta, Paz y salvo, PQRS y solicitudes, Cartelera y
   comunicados, Asambleas y poderes, Reuniones con video, Proyectos, Directorio y Portería. Inicio y Mi cuenta, siempre.
   Si falta o sobra alguno, díselo a Daniel.
+- **Nuevo (2026-11-24, T-136): impersonar ya funciona en BLOKY**, no en ALICE. El middleware firma un pase de un uso (dos
+  minutos) y abre una sesión de soporte con un rol, en solo lectura, de dos horas, con franja, aviso y auditoría (RN-387 a
+  RN-389). Para ALICE falta acordar contigo: cómo llega el pase a la app (enlace), que ALICE lo canjee, y la franja. Mientras
+  tanto el middleware responde 409 si alguien pide un pase para ALICE. No lo construyas sin hablarlo con Daniel.
 - **Nuevo (2026-11-24, T-134):** BLOKY ya tiene **«Usuarios»**: la Administración le da a una persona roles de
   Colaboradores (Secretaría, Contador, Revisor fiscal…). Para ALICE cambia una cosa: **puede llegar un lugar sin unidades,
   sin cargo y sin administración**, solo con `roles` y `permisos` (docs/20 §4b, RN-386). Muéstralo con lo que esos permisos

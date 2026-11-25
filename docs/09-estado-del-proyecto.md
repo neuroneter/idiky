@@ -113,6 +113,25 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-24 · Daniel + IA (Claude) · Middleware, BLOKY y BOB · Impersonar con pase firmado (T-136)
+
+Soporte de IDIKY ya puede entrar a **BLOKY** con un rol, sin ser una persona del directorio (ADR-0034 §3). BOB pide el pase
+por la entrada de administración; **el middleware lo firma**, lo guarda y lo deja usar una vez en dos minutos (RN-387). La
+sesión es de un rol en una copropiedad, dura dos horas y nace en **solo lectura**; para cambiar algo hay que escribir el
+motivo (RN-388). Al entrar se le avisa por correo al Administrador y al Delegado, y cada paso queda en la auditoría con el
+correo del usuario de BOB (RN-389). BLOKY muestra la **franja** en toda la pantalla.
+Bloky-Idiky `feature/T-136-impersonar` → `develop` `0c93a39`, BLOKY Dev `6247a11.bloky-0c93a39` (migración común `017`,
+`soporte/rutas.ts`, la guardia en `acceso/contexto.ts`, `features/soporte/Soporte.tsx`). BOB-Idiky `feature/T-136-impersonar`
+→ `develop` `65eb0ac`: plugin `impersonar` (página, permiso y cuatro rutas), sin content-types.
+
+**Verificado:** `npm run probar` (tres pruebas nuevas) y los build de los tres; en «Pruebas IDIKY», el recorrido completo por
+la API con los rechazos (docs/11, T-136); y en el navegador, la franja en solo lectura y en modo de cambio, y la pantalla
+«Usuarios» de T-134 (BLOKY en local contra la API de Dev, entrando con un pase). Las pruebas mandaron **dos correos de aviso**
+a la Administración de «Pruebas IDIKY» y dejaron en la auditoría los pasos de `prueba-t136@idiky.com`.
+**No verificado:** la página de BOB en un Strapi corriendo (compila; no se desplegó: `gestion` sale solo de `main`).
+**Sigue:** sacar la versión de BOB y desplegar `gestion` cuando Daniel lo diga; darle el permiso al rol de soporte; ALICE con
+Justo (T-137).
+
 ### 2026-11-24 · Daniel + IA (Claude) · BLOKY y middleware · «Usuarios» y la matriz aplicada en BLOKY (T-134, CU-B-18)
 
 Hasta hoy a BLOKY solo entraban el Administrador y el Delegado, con todo. Ahora **la matriz de BOB se aplica en cada petición
