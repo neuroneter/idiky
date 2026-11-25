@@ -142,6 +142,13 @@ soporte: un correo de aviso más a la Administración de «Pruebas IDIKY» y sus
 como botón pequeño al pie del riel, porque hoy solo se sabe si el paso 1 está hecho y no se puede esconder «al terminar».
 **Sigue:** que Daniel lo vea; al construir cada módulo de BLOKY, su ficha entra en su grupo.
 
+### 2026-11-25 · Justo · ALICE · Vigencia del invitado con selector de fecha y hora (T-148)
+
+- En Mi unidad, invitado: **Desde/Hasta** pasan de texto `AAAA-MM-DD` a selector de **fecha y hora**, por defecto el **día
+  de hoy** (hasta 23:59). Arrendatario: selector de fecha (desde hoy, hasta +1 año).
+- El middleware sigue guardando solo el **día** (`YYYY-MM-DD`, RN-321); la hora es de la UI. Si hace falta persistir hora,
+  hay que abrirlo con Daniel. `App-Idiky` `develop`.
+
 ### 2026-11-25 · Justo · Producto · ¿Agregar a la unidad solo con celular? (RN-354)
 
 - Justo preguntó si en Mi unidad basta el celular (sin nombre ni cédula), porque la otra persona confirma datos al entrar.
