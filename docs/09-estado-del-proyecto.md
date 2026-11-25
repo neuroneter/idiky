@@ -113,6 +113,22 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · BLOKY · Las pantallas viejas, a la plantilla ancha (T-163)
+
+El último paso de lo que Daniel pidió sobre el diseño de escritorio: Unidades, Usuarios, Documentos, Perfil y Ubicación pasan
+de `.consola__contenido` (columna centrada con ancho máximo) a `.pagina`. Usuarios y Perfil se reparten en dos columnas en
+escritorio. Bloky-Idiky `feature/T-163-pantallas-a-lo-ancho` → `develop` `6d790e6`, desplegado en BLOKY Dev. Solo estilos y
+contenedores.
+
+**Criterio que queda:** las listas, las tablas, los mapas y los tableros usan todo el ancho; lo que es de leer o de seguir
+pasos (Primeros pasos, Armar desde documentos, Empezar de nuevo) se queda en una columna cómoda. En celular todo es una
+columna.
+
+**Verificado:** build y las cinco pantallas en el navegador a 1680 px; Unidades y Usuarios también en celular (docs/11,
+T-163). La vista entró con un pase de soporte (`prueba-t163@idiky.com`): otro correo de aviso.
+**Sigue:** lo que Daniel escoja. Quedan anotados: la vista de semana del calendario, filtros y páginas en Unidades y Documentos
+cuando crezcan, y paginar las listas de ALICE (con aviso a Justo).
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · Filtros y páginas en Reservas, Comunicados y Portería (T-162, RN-390)
 
 RN-390 aplicada a las otras tres pantallas de Convivencia. En el servidor: `GET /reservas` (estado, zona, fechas, texto; de
