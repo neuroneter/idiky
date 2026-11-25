@@ -423,6 +423,12 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
 - **2026-11-25 — ¿Solo celular al agregar a la unidad?** Propuses no pedir nombre ni cédula (la persona los confirma
   después). **Hoy no se puede:** **RN-354** exige nombre + celular + documento. Quedó para Daniel en
   [`avisos/daniel.md`](./daniel.md) §16. Mientras, Mi unidad sigue con los cuatro campos.
+- **2026-11-25 — Hora en la vigencia del invitado:** el arnés solo guarda el **día** (`date`, RN-321). La hora de la UI
+  no se persiste ni la mira portería. Pediste franjas horarias → [`avisos/daniel.md`](./daniel.md) §17.
+- **2026-11-25 — Si el invitado ya está en IDIKY:** no se crea otra persona (RN-354). Misma cédula + mismo celular → se
+  **reutiliza** y se le agrega la invitación en tu unidad. Misma cédula + otro celular → `409 otro_celular` (aceptar el
+  registrado o que lo cambie en la app). Celular de otra persona → `409 celular_de_otra`. Ya está en **esa** unidad →
+  `409 ya_esta`.
 - **2026-11-23 — Visitantes y portería (T-149) en BLOKY Dev:** [docs/20 §5b](../20-alta-e-ingreso-desde-alice.md). Invitar ahora
   pide `visitantes: crear` y acepta `placa`; el invitado pide su **pase QR** (`GET …/unidades/:id/pase`, vence en 2 min) y la
   portería (rol Seguridad) valida, registra «Entró»/«Salió» y ve «Adentro ahora». En ALICE: la pantalla del pase para quien vive

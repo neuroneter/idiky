@@ -146,6 +146,35 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
+## 17. Vigencia del invitado: ¿solo día o también hora (franja)? — ⏳ abierto (Justo, 2026-11-25)
+
+**Contexto:** en ALICE (Mi unidad) el invitado ya elige **fecha y hora** en Desde/Hasta (por defecto hoy). Justo
+quiere poder autorizar **franjas** (p. ej. «solo de 14:00 a 18:00») para visitas y para dar objetivo a otras personas
+(portería, pase).
+
+**Qué dice el arnés hoy (no se puede persistir la hora sin cambiarlo):**
+
+| Pieza | Hoy |
+|---|---|
+| **RN-321 / RN-370** | Invitado con **fecha** de inicio y de fin (día calendario) |
+| **BD** `residencia.desde` / `hasta` | Tipo **`date`**, no `timestamptz` (migración `016-residencias.sql`) |
+| **Validación** `motivoInvitadoInvalido` | Solo `YYYY-MM-DD` |
+| **Portería / vigencia** `residenciaVigente` · `veredictoDeIngreso` | Comparan con **`hoy`** (día), no con la hora |
+
+ALICE muestra hora en la UI, pero al guardar manda solo el día. La hora **no llega** al middleware ni a portería.
+
+**Propuesta de Justo:** que la vigencia del invitado pueda ser **día + hora** (franja), para que portería y el pase
+respeten «todavía no» / «ya no» también por reloj.
+
+| Opción | Efecto |
+|---|---|
+| **A. Mantener solo día** | Como hoy; la hora en ALICE sobra o es solo referencia |
+| **B. Franja con hora** | Cambiar RN + columnas (`timestamptz` o `date`+`time`) + validación + portería/pase |
+
+**Justo no tocó el middleware.** Mientras está abierto, ALICE sigue con selectores de hora pero el backend guarda el día.
+
+---
+
 ## 16. ¿Al agregar a la unidad basta el celular (sin nombre ni cédula)? — ⏳ abierto (Justo, 2026-11-25)
 
 **Contexto:** en ALICE → **Mi unidad → Agregar**, hoy se piden **nombre, celular y documento** (conviviente /
