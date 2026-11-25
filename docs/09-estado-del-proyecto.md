@@ -129,7 +129,10 @@ Lo que faltaba de la decisión de Daniel sobre el documento: después del primer
 
 **Verificado:** `npm run probar` (prueba de punta a punta nueva), build del middleware y del panel de BOB, y en Dev las
 validaciones y la lista de IDIKY sin enviar códigos ni cambiar datos de nadie.
-**No verificado:** una solicitud real con código en un celular, ni la pantalla de BOB en el navegador.
+**En el navegador, con la sesión de Daniel:** «Cambios de documento» de BOB con una solicitud de prueba sobre su perfil (dos
+fotos, bloqueos de aprobar y rechazar, rechazo firmado; su documento no cambió) y «Avisos» de BLOKY con un aviso de prueba
+en «Pruebas IDIKY» (contador, «Entendido», «Ya vistos»). Los dos registros de prueba quedan guardados.
+**No verificado:** aprobar desde BOB (cambiaría un documento real) ni una solicitud real desde ALICE con código en un celular.
 **Sigue:** dar el permiso «Revisar cambios de documento» al rol que revise (Daniel, en BOB); T-166 (Justo, ALICE).
 
 ### 2026-11-25 · Daniel + IA (Claude) · Middleware y BLOKY · El documento se corrige una vez; el invitado, por días y horas (T-164, RN-391 a RN-395)
