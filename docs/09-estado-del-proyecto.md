@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · «Reservas» en BLOKY (T-156, CU-A-06, CU-A-10, CU-B-04)
+
+Daniel aprobó construir en BLOKY las pantallas de Convivencia, en este orden: Reservas y zonas · Comunicados · PQRS · Portería.
+La primera: la ficha **Reservas**, con la bandeja de la Administración y las reglas de cada zona, que hasta hoy solo se
+escribían por la ruta del middleware. El middleware gana la bandeja para BLOKY (`GET /api/c/:id/reservas` y aprobar, rechazar,
+cancelar) y la matriz gana cuatro módulos de BLOKY (migración común `018`; RN-384). Bloky-Idiky `feature/T-156-reservas-en-bloky`
+→ `develop` `70bd70a`, BLOKY Dev `bd4f4df.bloky-70bd70a`. Nuevo: `features/reservas/Reservas.tsx`; cambian `reservas/zonas.ts`,
+`reglas.ts` (las zonas pasan al módulo Reservas) y el menú.
+
+**Verificado:** `npm run probar`, los dos build, el recorrido completo en «Pruebas IDIKY» por la API y la pantalla en el
+navegador (docs/11, T-156). La vista en el navegador entró con un pase de soporte (`prueba-t156@idiky.com`): otro correo de
+aviso a la Administración de «Pruebas IDIKY». Quedan de muestra dos reservas en Garajes.
+**Sigue:** Comunicados (T-157), PQRS y Portería en BLOKY.
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY · El menú por grupos (T-155, CU-B-02)
 
 Daniel: *se está saturando el menú… ya no caben más funcionalidades… ordenar por grupos… sin perder la estética*. Aprobó la

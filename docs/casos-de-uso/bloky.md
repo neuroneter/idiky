@@ -323,6 +323,14 @@ sancionatorio. Mary debe conocerlo antes de seguir con reservas (T-84).
 - Enviar alertas pide un programador de tareas y proveedores de correo, SMS y llamada; con costo,
   posiblemente como servicio adicional del plan (docs/13 §2).
 
+**La parte de reservas ya está (T-156, 2026-11-25).** En BLOKY → Convivencia → **Reservas** → «Zonas y reglas», cada zona
+común de la Estructura (salón, piscina, gimnasio, parque, espacio, parqueadero) muestra sus reglas y deja ponerlas o
+cambiarlas: horario (uno para todos los días, o cada día el suyo y días que no abre), duración del turno, uso exclusivo o
+compartido con su aforo, reservas al mes por unidad, anticipación, hasta cuándo se cancela, si la Administración aprueba y,
+en un parqueadero, si es el de visitantes. También **desactivarla**, **reactivarla** y **cerrarla por mantenimiento** entre
+dos fechas (con motivo; cancela las reservas que caen dentro). La pestaña «Reservas» es la bandeja de CU-A-06. Pagos y
+alertas de cada espacio siguen pendientes.
+
 **Estado en BLOKY Dev:** ⬜
 
 ---
