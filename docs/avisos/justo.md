@@ -420,6 +420,9 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
   verificado en SES** (Daniel, §15 ✅). Úsalo en «Tu correo» del primer ingreso de Juan Luis.
 - **2026-11-24 — Mi unidad (T-148) en `App-Idiky` `develop`:** pantalla + cliente HTTP (conviviente, arrendatario con
   paquete, invitado); saludo/unidad desde middleware. Sigue pendiente probarlo con Juan Luis cuando el correo de §15 esté.
+- **2026-11-25 — ¿Solo celular al agregar a la unidad?** Propuses no pedir nombre ni cédula (la persona los confirma
+  después). **Hoy no se puede:** **RN-354** exige nombre + celular + documento. Quedó para Daniel en
+  [`avisos/daniel.md`](./daniel.md) §16. Mientras, Mi unidad sigue con los cuatro campos.
 - **2026-11-23 — Visitantes y portería (T-149) en BLOKY Dev:** [docs/20 §5b](../20-alta-e-ingreso-desde-alice.md). Invitar ahora
   pide `visitantes: crear` y acepta `placa`; el invitado pide su **pase QR** (`GET …/unidades/:id/pase`, vence en 2 min) y la
   portería (rol Seguridad) valida, registra «Entró»/«Salió» y ve «Adentro ahora». En ALICE: la pantalla del pase para quien vive

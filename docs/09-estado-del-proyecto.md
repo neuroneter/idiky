@@ -142,6 +142,11 @@ soporte: un correo de aviso más a la Administración de «Pruebas IDIKY» y sus
 como botón pequeño al pie del riel, porque hoy solo se sabe si el paso 1 está hecho y no se puede esconder «al terminar».
 **Sigue:** que Daniel lo vea; al construir cada módulo de BLOKY, su ficha entra en su grupo.
 
+### 2026-11-25 · Justo · Producto · ¿Agregar a la unidad solo con celular? (RN-354)
+
+- Justo preguntó si en Mi unidad basta el celular (sin nombre ni cédula), porque la otra persona confirma datos al entrar.
+- **No se cambió nada:** RN-354 exige nombre + celular + documento. Quedó abierto en [`avisos/daniel.md`](./avisos/daniel.md) §16.
+
 ### 2026-11-25 · Justo · ALICE · Datos básicos: solo fecha de nacimiento (T-143)
 
 - En el primer ingreso, «Tus datos» pedía otra vez el nombre (ya estaba en el paso del documento). Quedó **solo la fecha de
