@@ -406,7 +406,13 @@ C = crear, E = editar, A = anular (eliminar); — = sin acceso.
 | Contador | — | — | — | — | V | V | — | — | — | — | — | — | — |
 | Revisor fiscal | — | — | — | — | V | V | — | — | V | — | — | — | — |
 
-**Los cargos de hoy se traducen así** mientras BLOKY no asigne roles (T-134): vigilante y portería → Seguridad; aseo → Aseo;
+**Desde T-134 (2026-11-24, RN-386) la Administración asigna roles de Colaboradores en BLOKY → «Usuarios».** Quien solo
+tiene uno de esos roles (por ejemplo el Contador, sin unidad ni cargo en Equipo) **también entra a ALICE**: su copropiedad
+viene en `lugares` con `unidades: []`, `colaborador: null`, `administracion: null` y sus `roles` y `permisos` (por ejemplo
+`{"pagos":["ver"],"paz_y_salvo":["ver"]}`). ALICE debe mostrar ese lugar con lo que esos permisos dejan, igual que hace con
+el Administrador sin unidad. Los roles asignados se suman a los del cargo y a los de cada unidad.
+
+**Los cargos del equipo se traducen así** (siguen valiendo junto a los roles asignados en «Usuarios»): vigilante y portería → Seguridad; aseo → Aseo;
 mantenimiento y jardinería → Mantenimiento; administración y secretaría → Secretaría; «otro» → sin rol. Las residencias:
 `propietario` → Propietario; `arrendatario` → **su paquete** (`arrendatario_operacion` o `arrendatario_solo_vivir`);
 `conviviente` → Conviviente; `invitado` → Invitado (RN-366, T-147, 2026-11-23).

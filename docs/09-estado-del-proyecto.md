@@ -113,6 +113,25 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-24 · Daniel + IA (Claude) · BLOKY y middleware · «Usuarios» y la matriz aplicada en BLOKY (T-134, CU-B-18)
+
+Hasta hoy a BLOKY solo entraban el Administrador y el Delegado, con todo. Ahora **la matriz de BOB se aplica en cada petición
+de BLOKY** (RN-384): cada ruta pertenece a un módulo y pide ver, crear, editar o eliminar; sin el permiso, 403. Y la
+Administración tiene la ficha **«Usuarios»**: busca a una persona por su documento y le da uno o varios roles de la categoría
+Colaboradores (RN-385); los roles se guardan en el directorio (`directorio.rol_asignado`, migración común `016`), con su
+registro de cambios. Los roles de una persona son los de Administración, los asignados y el de su cargo en Equipo (RN-386);
+entra a BLOKY quien tenga algún módulo, y a ALICE también quien solo tiene un rol asignado.
+Bloky-Idiky `feature/T-134-usuarios` → `develop` `ee56f09`, BLOKY Dev `faabaef.bloky-ee56f09`. Nuevo: `permisos/roles.ts`,
+`usuarios/rutas.ts`, `features/usuarios/Usuarios.tsx`; cambian `acceso/contexto.ts` (la guardia), el ingreso, `alice/rutas.ts`
+y el menú (solo las fichas que el rol deja ver; «Usuarios» solo para Administración).
+
+**Verificado:** `npm run probar` (cinco pruebas nuevas) y los dos build; en «Pruebas IDIKY» por la API, con Daniel y Olga
+(detalle en docs/11, T-134). Para probar que un rol entra a BLOKY se le dio a Contador «ver Documentos» en la matriz de Dev y
+se devolvió al terminar (quedan los dos renglones en el registro de la matriz, firmados «prueba T-134»).
+**No verificado:** la pantalla en el navegador de BLOKY Dev (entrar pide el código de Daniel).
+**Sigue:** que Daniel la vea; decidir si se le avisa a la persona que ya tiene acceso; T-136 (impersonación); en ALICE,
+mostrar un lugar sin unidades (aviso a Justo, §8).
+
 ### 2026-11-24 · Daniel + IA (Claude) · Middleware · Reservas, sin la plata (T-154)
 
 Daniel escogió el alcance: **el núcleo sin la plata**, y **las reglas de cada zona guardadas en el middleware**, escritas desde
@@ -607,7 +626,7 @@ el middleware.
 
 - **Datos:** migración común `011-permisos.sql` en el esquema `directorio`: `rol_catalogo`, `modulo`, `permiso`,
   `permisos_version` y `cambio_permisos` (RN-342). Los valores iniciales de docs/20 §4b (`src/permisos/inicial.ts`) se
-  siembran una sola vez al arrancar; para BLOKY, Administrador y Delegado con todo (hasta T-134).
+  siembran una sola vez al arrancar; para BLOKY, Administrador y Delegado con todo (desde T-134, 2026-11-24, la matriz se aplica también en BLOKY: RN-384).
 - **Reglas puras** (`reglas.ts`): `normalizarAcciones`, `sumarPermisos` (suma de roles, retirados no cuentan), `permite`,
   `rolDeResidencia`, `rolDeCargo`, `motivoRolInvalido`, `motivoPermisoInvalido`.
 - **ALICE:** `/api/app/yo` (y el ingreso y el documento) traen `permisosVersion`, `roles` y `permisos` por lugar y unidad.

@@ -998,4 +998,11 @@ del primer ingreso (T-145, `bloky-bd4a324`). Falta ALICE (T-125, T-143, T-146, J
 - **El voto** en las asambleas (quién, cómo, poderes): aviso abierto a Mary, no se configura en la matriz (RN-337).
 - La marca de **propietario o arrendatario** en cada unidad (T-127).
 
-**Estado:** ⬜ Definido (2026-11-21). Implementación: T-134 (BLOKY), T-135 (BOB), T-136 (impersonación), T-137 (ALICE).
+**Como quedó construido (T-134, 2026-11-24)**
+- La persona nueva nace con su **nombre y su celular** (el correo es opcional): el código para entrar va al celular.
+- El Consejo y los Residentes se muestran **contados**, con el enlace a Equipo y a Unidades, donde se manejan; los roles del
+  Consejo todavía no dan permisos (T-126).
+- Quien tiene un cargo en Equipo aparece con el rol que le da su cargo; ese se cambia en Equipo.
+- Qué pide cada pantalla de BLOKY en la matriz: RN-384. Qué es un rol asignado: RN-385. Con qué roles entra cada quien: RN-386.
+
+**Estado:** 🟡 En BLOKY Dev (2026-11-24, T-134), probado por la API. Sigue: T-136 (impersonación), T-137 (ALICE).
