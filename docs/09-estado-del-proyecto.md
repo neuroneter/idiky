@@ -113,6 +113,23 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · «Portería» en BLOKY (T-159)
+
+La cuarta y última pantalla de Convivencia: la ficha **Portería**, de **solo consulta**. La Administración ve desde BLOKY el
+turno abierto, quién está adentro, los paquetes en espera, las reservas confirmadas de hoy y la minuta de cada turno; lo
+registra el portero en ALICE (T-149 a T-151). Middleware: `porteria/rutas.ts` (`GET /api/c/:id/porteria` y `…/minuta`, módulo
+`bloky:porteria`, RN-384); BLOKY: `features/porteria/Porteria.tsx`. Bloky-Idiky `feature/T-159-porteria-en-bloky` → `develop`
+`27f96c7`, BLOKY Dev `56f31ab.bloky-27f96c7`. Sin reglas nuevas.
+
+**Con esto el grupo Convivencia del menú queda completo** (Reuniones, Reservas, Comunicados, PQRS, Portería), y los cinco
+módulos de ALICE que están en el middleware ya tienen su pantalla de Administración en BLOKY.
+
+**Verificado:** `npm run probar`, los dos build, el recorrido en «Pruebas IDIKY» por la API y la pantalla en el navegador
+(docs/11, T-159). La vista entró con un pase de soporte (`prueba-t159@idiky.com`): otro correo de aviso. Queda de muestra un
+paquete en espera.
+**Ojo:** el rango de tareas T-120 … T-159 quedó **agotado**; la siguiente necesita uno nuevo en docs/11 §0.
+**Sigue:** que Daniel vea las cuatro pantallas; después, lo que él escoja (roles del Consejo, avisos, Dinero, ALICE con Justo).
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · «PQRS» en BLOKY (T-158, CU-A-07, CU-A-38)
 
 La tercera pantalla de Convivencia: la ficha **PQRS**, la bandeja de la Administración sobre las mismas PQRS que ALICE radica
