@@ -142,6 +142,11 @@ soporte: un correo de aviso más a la Administración de «Pruebas IDIKY» y sus
 como botón pequeño al pie del riel, porque hoy solo se sabe si el paso 1 está hecho y no se puede esconder «al terminar».
 **Sigue:** que Daniel lo vea; al construir cada módulo de BLOKY, su ficha entra en su grupo.
 
+### 2026-11-25 · Justo · ALICE · Datos básicos: solo fecha de nacimiento (T-143)
+
+- En el primer ingreso, «Tus datos» pedía otra vez el nombre (ya estaba en el paso del documento). Quedó **solo la fecha de
+  nacimiento**; el nombre se reutiliza al llamar `PUT …/datos-basicos`. `App-Idiky` `develop` · docs/20 §2c.
+
 ### 2026-11-24 · Justo · ALICE · Mi unidad en `develop` (T-148) + correo SES para Juan Luis
 
 - En **`App-Idiky` `develop`**: pantalla **Mi unidad** (lista + agregar conviviente / arrendatario con paquete / invitado),
