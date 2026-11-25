@@ -146,7 +146,11 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
-## 15. Verificar en SES el correo `sotomadev@gmail.com` (prueba Juan Luis) — ⏳ abierto (Justo, 2026-11-24)
+## 15. Verificar en SES el correo `sotomadev@gmail.com` (prueba Juan Luis) — 🟡 identidad creada; falta que Justo abra el enlace (2026-11-25)
+
+**Hecho por Daniel (2026-11-25):** la identidad `sotomadev@gmail.com` está creada en SES, región us-east-1, en estado
+**«Verificación pendiente»**. **Justo:** abre el correo de *Amazon Web Services* («Email Address Verification Request»; mira en
+Spam o Promociones) y haz clic en el enlace. Si no llegó, avísale a Daniel para usar «Reenviar».
 
 **Favor:** en Amazon SES (región **us-east-1**), crear la identidad de correo **`sotomadev@gmail.com`** y dejarla
 **Verificada** ([`infra/correo-ses.md`](../../infra/correo-ses.md) §4).
