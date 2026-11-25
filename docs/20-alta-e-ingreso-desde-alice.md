@@ -140,9 +140,14 @@ Responde:
 - Si el documento **no existe** en el directorio: se le pone a esta persona y se calcula su `hash_identidad` (RN-298).
 - Si **ya existe** (la persona está en otra copropiedad): **se unen** (RN-322). La respuesta trae la persona resultante y
   un **token nuevo** (el anterior queda cerrado).
-- **RN-356 — Si la Administración ya reportó el documento** (hoy es obligatorio al crear a alguien), el que escribe la
-  persona **tiene que coincidir** (tipo y número): si no, **`409 documento_no_coincide`** y no entra. Así se sabe que es la
-  persona invitada. Si coincide, responde como `GET /api/app/yo`.
+- **RN-356 y RN-391 — Si la Administración ya reportó el documento** (hoy es obligatorio al crear a alguien) y el que
+  escribe la persona **no coincide**, responde **`409 documento_no_coincide`** con **`puedeCorregir: true`** y un mensaje
+  para mostrarle. ALICE le pregunta si está segura y, si dice que sí, repite la llamada con **`corregir: true`**: queda el
+  documento que ella escribió, la respuesta es como `GET /api/app/yo` más `documentoCorregido: true`, y a la
+  Administración le queda un aviso. **Es una sola vez** (Daniel, 2026-11-25): al coincidir o al corregir, el documento
+  queda confirmado (`persona.documentoConfirmado: true`) y desde ahí cualquier intento de cambiarlo responde
+  **`409 documento_fijo`** (`puedeCorregir: false`): ALICE **no** debe ofrecer cambiar el documento en el perfil. El cambio
+  se le pide a IDIKY con foto por ambas caras y un código nuevo (RN-395, por construir).
 - Responde `200 { persona, lugares, token? }`. `409 documento_de_otra_persona` si ese documento ya tiene otro celular y no
   se pudo confirmar que es la misma persona (en ese caso, la Administración lo resuelve).
 - Después, ALICE crea las billeteras con la passkey por las rutas de §2b (T-129, opción A2 de docs/19: el middleware
@@ -465,7 +470,15 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
 > **En BLOKY Dev desde el 2026-11-23** (`bloky-04bee12`). El invitado entra **siempre con ALICE** (RN-367): no hay código de
 > visitante sin app.
 
-**Invitar** — `POST /api/app/c/:copropiedadId/unidades/:unidadId/invitados` `{ nombre, celular, tipoDocumento, numeroDocumento, …, desde, hasta, placa? }`.
+**Invitar** — `POST /api/app/c/:copropiedadId/unidades/:unidadId/invitados` `{ nombre, celular, tipoDocumento, numeroDocumento, …, desde, hasta, horaDesde?, horaHasta?, placa? }`.
+**RN-392 (Daniel, 2026-11-25) — días y, si se quiere, horas.** `desde` y `hasta` son días (`AAAA-MM-DD`); `horaDesde` y
+`horaHasta` (`"14:00"`, 24 horas, hora de Colombia) son una franja que vale para **cada día** del rango. Sin ellas es todo
+el día. Van las dos o ninguna, y la salida después de la llegada (`422` con el mensaje si no). Una visita de un rato: el
+mismo día en `desde` y `hasta`, con su franja. Cada residencia de la unidad trae `horaDesde` y `horaHasta` (o `null`).
+La respuesta trae `yaExistia: true` cuando la persona ya estaba en IDIKY: solo se creó su relación con la unidad y se
+conserva el nombre que ya tenía (RN-394). El pase responde `403 fuera_de_horario` (con `horaDesde`, `horaHasta` y un
+mensaje) si se pide fuera de la franja. **En ALICE tiene que ser muy fácil**: por defecto «todo el día», y un interruptor
+«solo unas horas» que muestra las dos horas.
 Ahora pide **`visitantes: crear`** (antes `mi_unidad: crear`): el conviviente también puede invitar. `placa` es opcional
 (`ABC123`); va en `datos.placa` de la residencia.
 
@@ -483,8 +496,9 @@ residencia **vigente hoy** en esa unidad (invitado o quien vive). ALICE pinta `p
 | `POST …/entradas/:ingresoId/salida` | `porteria: editar` | «Salió». `409 no_adentro` |
 | `GET …/adentro` | `porteria: ver` | «Adentro ahora»: `[{ ingresoId, nombre, unidad, rol, forma, placa, entroEn }]` |
 
-- `veredicto`: `vigente` · `programado` (todavía no) · `vencido` (ya no) · `bloqueado` · `finalizado`. No es lo mismo «todavía
-  no» que «ya no» (CU-P-02).
+- `veredicto`: `vigente` · `programado` (todavía no) · `vencido` (ya no) · **`fuera_de_horario`** (hoy sí le toca, pero no a
+  esta hora; RN-392) · `bloqueado` · `finalizado`. No es lo mismo «todavía no» que «ya no» (CU-P-02). La ficha trae
+  `horaDesde`, `horaHasta` y `horario` («de 14:00 a 18:00» o «todo el día») para decírselo.
 - QR alterado, vencido o de otra copropiedad: `422 pase_invalido` («pídele que lo abra de nuevo»).
 - Sin el permiso de portería: `403 sin_permiso` con `modulo: "porteria"`.
 **El turno y la minuta** (RN-234 a RN-236, T-150, BLOKY Dev `bloky-1168c09`):

@@ -113,6 +113,28 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · Middleware y BLOKY · El documento se corrige una vez; el invitado, por días y horas (T-164, RN-391 a RN-395)
+
+Daniel respondió las cuatro preguntas abiertas de Justo (avisos §14, §16, §17 y §18) y confirmó el rango T-160 … T-199.
+
+- **Documento (RN-391):** si no coincide con el de la Administración, la persona lo corrige ella misma **una sola vez**, al
+  validarse en ALICE. Desde ahí queda fijo (`documento_confirmado_en`, migración común 019): ni ella lo cambia. Un cambio
+  posterior se pide a IDIKY con foto por ambas caras y un código nuevo (**RN-395, por construir: T-165**).
+- **Avisos a la Administración (RN-393):** tabla `aviso_administracion` en cada copropiedad, rutas `/api/c/:id/avisos` y
+  pantalla «Avisos» en BLOKY, con el número de pendientes en la barra. Primer tipo: documento corregido.
+- **Invitado (RN-392):** un solo rol, por días y con una franja de horas opcional (`hora_desde`, `hora_hasta`, migración de
+  copropiedad 027). La portería ve `fuera_de_horario` y el pase no sale fuera de la franja.
+- **Alta (RN-394):** siempre nombre y documento; si la persona ya existe, solo nace la relación y se conserva su nombre.
+- **De paso:** `hoyISO()` devolvía el día de UTC; después de las 7 de la noche en Colombia ya era «mañana». Ahora «hoy» y
+  la hora salen de la zona de Colombia (`BLOKY_ZONA_HORARIA`, por defecto `America/Bogota`).
+
+Bloky-Idiky `develop` `86ec8fd`, BLOKY Dev `ec66faf.bloky-86ec8fd`. La primera prueba en Dev encontró que las rutas de
+avisos no pasaban por el guardián (usaban `:id` y no `:copropiedadId`; quedaban cerradas, no abiertas): corregido.
+
+**Verificado:** `npm run probar` (cinco pruebas nuevas), los dos build y la API en «Pruebas IDIKY» (docs/11, T-164).
+**No verificado:** la corrección con una persona real ni la pantalla «Avisos» en el navegador.
+**Sigue:** T-165 (la solicitud de cambio de documento a IDIKY) y T-166 (Justo, ALICE). Aviso a Justo: `avisos/justo.md` §12.
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY · Las pantallas viejas, a la plantilla ancha (T-163)
 
 El último paso de lo que Daniel pidió sobre el diseño de escritorio: Unidades, Usuarios, Documentos, Perfil y Ubicación pasan

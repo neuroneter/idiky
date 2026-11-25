@@ -146,7 +146,11 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
-## 18. Dos modos de invitado: visita de un rato vs varios días — ⏳ abierto (Justo, 2026-11-25)
+## 18. Dos modos de invitado: visita de un rato vs varios días — ✅ respondido (Daniel, 2026-11-25)
+
+> **Decisión (RN-392):** es **un solo rol** `invitado`. Se autoriza para uno o varios días y, si se quiere, solo unas horas
+> de cada uno de esos días; sin horas, todo el día. La visita de un rato es un día con su franja. Ya está en el middleware
+> (T-164, BLOKY Dev); en ALICE tiene que ser muy fácil de configurar (T-166).
 
 **Hoy (RN-366 / RN-370):** un solo rol **`invitado`**, con `desde`/`hasta` en **días**. Misma pantalla y mismas reglas
 para «viene un amigo esta tarde» y «la tía se queda una semana».
@@ -172,7 +176,10 @@ sirve bien a portería ni al pase.
 
 ---
 
-## 17. Vigencia del invitado: ¿solo día o también hora (franja)? — ⏳ abierto (Justo, 2026-11-25)
+## 17. Vigencia del invitado: ¿solo día o también hora (franja)? — ✅ respondido: opción B (Daniel, 2026-11-25)
+
+> **Decisión (RN-392):** días **y** franja de horas opcional (`horaDesde`, `horaHasta`), que la portería y el pase respetan
+> (`fuera_de_horario`). Hecho en el middleware (T-164); contrato en docs/20 §5b.
 
 **Contexto:** en ALICE (Mi unidad) el invitado ya elige **fecha y hora** en Desde/Hasta (por defecto hoy). Justo
 quiere poder autorizar **franjas** (p. ej. «solo de 14:00 a 18:00») para visitas y para dar objetivo a otras personas
@@ -201,7 +208,10 @@ respeten «todavía no» / «ya no» también por reloj.
 
 ---
 
-## 16. ¿Al agregar a la unidad basta el celular (sin nombre ni cédula)? — ⏳ abierto (Justo, 2026-11-25)
+## 16. ¿Al agregar a la unidad basta el celular (sin nombre ni cédula)? — ✅ respondido: opción A (Daniel, 2026-11-25)
+
+> **Decisión (RN-394):** **siempre** se piden nombre y documento. Si el documento ya existe no se crea otra persona: solo
+> su relación con la unidad, y se conserva el nombre que ya tenía (la respuesta trae `yaExistia: true`).
 
 **Contexto:** en ALICE → **Mi unidad → Agregar**, hoy se piden **nombre, celular y documento** (conviviente /
 arrendatario / invitado). Justo, al probar con Juan Luis, siente que es mucho: la otra persona **igual va a
@@ -239,7 +249,12 @@ Amazon (o ya quedó verificada).
 
 ---
 
-## 14. ¿La app puede corregir el documento si no coincide con el de la Administración? — ⏳ abierto (Justo, 2026-11-24)
+## 14. ¿La app puede corregir el documento si no coincide con el de la Administración? — ✅ respondido: sí, una sola vez (Daniel, 2026-11-25)
+
+> **Decisión (RN-391, RN-393, RN-395):** sí, la persona lo corrige ella misma **una sola vez**, en el momento en que se
+> valida al entrar a ALICE (ya probó el celular con el código), y a la Administración le queda un aviso en BLOKY. **Después
+> ALICE no puede permitir que la misma persona cambie su documento**: se le pide a IDIKY con foto por ambas caras y un
+> código nuevo, e IDIKY lo evalúa (T-165, por construir). Hecho en el middleware (T-164); contrato en docs/20 §2.
 
 **Contexto:** en el primer ingreso (pantalla «Confirmar documento»), si el tipo/número no coinciden con
 `directorio.persona`, el middleware responde `409 documento_no_coincide` y ALICE no deja seguir (RN-356).

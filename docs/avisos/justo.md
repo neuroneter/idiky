@@ -352,6 +352,21 @@ catálogo.
 
 ---
 
+## 12. Daniel respondió tus cuatro preguntas del documento y del invitado — 🟡 listo en el middleware, falta ALICE (2026-11-25)
+
+Tus avisos §14, §16, §17 y §18 ([`daniel.md`](./daniel.md)) ya tienen decisión, y el middleware de BLOKY Dev ya la aplica
+(T-164). Lo tuyo es **T-166**. El contrato está en [`docs/20`](../20-alta-e-ingreso-desde-alice.md) §2 y §5b.
+
+| Tu pregunta | Decisión de Daniel | Qué cambia en ALICE |
+|---|---|---|
+| §14 corregir el documento | **Sí, una sola vez**, al validarse en el primer ingreso (RN-391) | Con `409 documento_no_coincide` y `puedeCorregir: true`, muestra el diálogo y repite con `corregir: true`. Con `409 documento_fijo` no hay nada que ofrecer |
+| | **Después, nunca desde el perfil** | Si `persona.documentoConfirmado` es `true`, **no ofrezcas cambiar el documento**. El cambio será una solicitud a IDIKY con foto por ambas caras y un código nuevo (RN-395, T-165: todavía no existe la ruta) |
+| §16 solo celular | **No**: siempre nombre y documento (RN-394) | Nada. Si la respuesta trae `yaExistia: true`, la persona ya estaba en IDIKY y se conserva su nombre, no el que se escribió |
+| §17 y §18 horas y dos modos | **Un solo rol**: días y, si se quiere, una franja de horas para cada día (RN-392) | Manda `horaDesde` y `horaHasta` (`"14:00"`) o ninguna. Daniel pide que sea **muy fácil**: por defecto «todo el día», y un interruptor «solo unas horas». En portería llega el veredicto nuevo `fuera_de_horario` con `horario`; el pase puede responder `403 fuera_de_horario` |
+
+**Ojo:** «hoy» y la hora ahora son los de Colombia en todo el middleware (antes «hoy» era el de UTC, y después de las 7 de
+la noche ya contaba el día siguiente).
+
 ## 11. Propietario, arrendatario y vínculos — ⏳ listo para Daniel (2026-11-23)
 
 Visión de producto completa (altas, arrendatario, visitantes en app, doble cartera para todos, bitácora + Merkle)
