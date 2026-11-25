@@ -128,11 +128,14 @@ soporte: un correo de aviso más a la Administración de «Pruebas IDIKY» y sus
 como botón pequeño al pie del riel, porque hoy solo se sabe si el paso 1 está hecho y no se puede esconder «al terminar».
 **Sigue:** que Daniel lo vea; al construir cada módulo de BLOKY, su ficha entra en su grupo.
 
-### 2026-11-24 · Justo · Dev · Pedir a Daniel verificar `sotomadev@gmail.com` en SES
+### 2026-11-24 · Justo · ALICE · Mi unidad en `develop` (T-148) + correo SES para Juan Luis
 
-- Justo no puede usar su Gmail en el primer ingreso de **Juan Luis Almonacid** (`correo_de_otra`). Pidió a Daniel
-  verificar en Amazon SES **`sotomadev@gmail.com`** para esa prueba.
-- Aviso: [`avisos/daniel.md`](./avisos/daniel.md) §15 · [`avisos/justo.md`](./avisos/justo.md). Guía: [`infra/correo-ses.md`](../infra/correo-ses.md) §4.
+- En **`App-Idiky` `develop`**: pantalla **Mi unidad** (lista + agregar conviviente / arrendatario con paquete / invitado),
+  entrada en la rejilla, saludo y unidad desde el middleware (ya no el perfil semilla de María tras el login).
+- Para probar con **Juan Luis Almonacid** (I1-101): celular temporal `+573104045015` (§13); documento **CC · 19325950**.
+  El correo de Justo no sirve (`correo_de_otra`) → pedido a Daniel verificar en SES **`sotomadev@gmail.com`**
+  ([`avisos/daniel.md`](./avisos/daniel.md) §15). Guía: [`infra/correo-ses.md`](../infra/correo-ses.md) §4.
+- Tablero T-148 → 🔨. **Falta:** completar el primer ingreso de Juan Luis y probar Mi unidad punta a punta.
 
 ### 2026-11-24 · Justo · Producto · ¿Corregir documento desde ALICE si no coincide? (RN-356)
 
