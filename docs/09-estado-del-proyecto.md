@@ -128,6 +128,12 @@ soporte: un correo de aviso más a la Administración de «Pruebas IDIKY» y sus
 como botón pequeño al pie del riel, porque hoy solo se sabe si el paso 1 está hecho y no se puede esconder «al terminar».
 **Sigue:** que Daniel lo vea; al construir cada módulo de BLOKY, su ficha entra en su grupo.
 
+### 2026-11-24 · Justo · Dev · Pedir a Daniel verificar `sotomadev@gmail.com` en SES
+
+- Justo no puede usar su Gmail en el primer ingreso de **Juan Luis Almonacid** (`correo_de_otra`). Pidió a Daniel
+  verificar en Amazon SES **`sotomadev@gmail.com`** para esa prueba.
+- Aviso: [`avisos/daniel.md`](./avisos/daniel.md) §15 · [`avisos/justo.md`](./avisos/justo.md). Guía: [`infra/correo-ses.md`](../infra/correo-ses.md) §4.
+
 ### 2026-11-24 · Justo · Producto · ¿Corregir documento desde ALICE si no coincide? (RN-356)
 
 - Justo propuso que, si el documento del primer ingreso no coincide con el de la Administración, la app pregunte y permita

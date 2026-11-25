@@ -146,6 +146,20 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
+## 15. Verificar en SES el correo `sotomadev@gmail.com` (prueba Juan Luis) — ⏳ abierto (Justo, 2026-11-24)
+
+**Favor:** en Amazon SES (región **us-east-1**), crear la identidad de correo **`sotomadev@gmail.com`** y dejarla
+**Verificada** ([`infra/correo-ses.md`](../../infra/correo-ses.md) §4).
+
+**Para qué:** Justo está en el primer ingreso de **Juan Luis Almonacid** (I1-101 · «Pruebas IDIKY», T-148 / T-143). El
+correo personal que ya tiene verificado está atado a **Justo Soto**; no puede reutilizarlo (`409 correo_de_otra`).
+Necesita este segundo correo, verificado en el *sandbox*, para completar el código al correo de Juan Luis.
+
+**Cuando esté:** Justo abre el enlace de Amazon en `sotomadev@gmail.com` (Spam/Promociones si no llega) y sigue el
+primer ingreso en ALICE.
+
+---
+
 ## 14. ¿La app puede corregir el documento si no coincide con el de la Administración? — ⏳ abierto (Justo, 2026-11-24)
 
 **Contexto:** en el primer ingreso (pantalla «Confirmar documento»), si el tipo/número no coinciden con
