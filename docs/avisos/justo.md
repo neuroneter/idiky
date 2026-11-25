@@ -416,6 +416,9 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
 - **2026-11-24 — Documento que no coincide:** propusiste que la app pueda corregir el de la Administración con un «¿estás
   seguro?». **No se implementó:** choca con **RN-356** (debe coincidir o hablar con la Administración). Quedó para Daniel
   en [`avisos/daniel.md`](./daniel.md) §14. Para seguir ahora con Juan Luis usa **CC · 19325950**.
+- **2026-11-24 — Correo para Juan Luis:** el tuyo ya está en Justo Soto (`correo_de_otra`). Pediste a Daniel verificar en
+  SES **`sotomadev@gmail.com`**: [`avisos/daniel.md`](./daniel.md) §15. Cuando te llegue el mail de Amazon, abre el enlace
+  y úsalo en la pantalla «Tu correo» del primer ingreso.
 - **2026-11-23 — Visitantes y portería (T-149) en BLOKY Dev:** [docs/20 §5b](../20-alta-e-ingreso-desde-alice.md). Invitar ahora
   pide `visitantes: crear` y acepta `placa`; el invitado pide su **pase QR** (`GET …/unidades/:id/pase`, vence en 2 min) y la
   portería (rol Seguridad) valida, registra «Entró»/«Salió» y ve «Adentro ahora». En ALICE: la pantalla del pase para quien vive
