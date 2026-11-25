@@ -581,6 +581,9 @@ cerrada), `resueltaEn, cerradaEn, calificacion`. **La resuelta se cierra sola a 
 escribir; el cambio queda con «Cierre automático (RN-14)». **Todavía no:** la foto del daño (CU-R-40, va con los archivos
 de ADR-0019), reasignar a un responsable (CU-A-07 A2) y los avisos al radicar o responder.
 
+> **2026-11-25 (T-158):** la Administración también responde y cambia el estado desde **BLOKY** («PQRS»). Para ALICE no cambia
+> nada: es la misma conversación. Los mensajes escritos desde BLOKY llegan con `autor: "administracion"` igual que los demás.
+
 ## 5f. Reservas, sin la plata (CU-R-05, CU-R-06, CU-A-06, CU-A-10; RN-09, RN-10, RN-105 a RN-108, RN-111, RN-113 a RN-116, RN-122, RN-126, RN-128, RN-129, PN-21, RN-381 a RN-383; T-154)
 
 > **En BLOKY Dev desde el 2026-11-24** (`bloky-ab6b2fb`). **Sin la plata:** cobro por uso, depósito, multa por no cancelar y

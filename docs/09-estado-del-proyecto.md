@@ -113,6 +113,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · «PQRS» en BLOKY (T-158, CU-A-07, CU-A-38)
+
+La tercera pantalla de Convivencia: la ficha **PQRS**, la bandeja de la Administración sobre las mismas PQRS que ALICE radica
+(T-153). Middleware: `pqrs/rutas.ts` (`/api/c/:id/pqrs`, módulo `bloky:pqrs`, RN-384; responder y cambiar el estado son
+*editar*); cada PQRS dice a qué estados puede pasar, para que la pantalla no ofrezca lo que se va a rechazar. BLOKY:
+`features/pqrs/Pqrs.tsx`. Bloky-Idiky `feature/T-158-pqrs-en-bloky` → `develop` `3fb7fde`, BLOKY Dev `80527b2.bloky-3fb7fde`.
+Sin reglas nuevas.
+
+**Verificado:** `npm run probar`, los dos build, el recorrido en «Pruebas IDIKY» por la API (ALICE radica, BLOKY responde) y la
+pantalla en el navegador (docs/11, T-158). La vista entró con un pase de soporte (`prueba-t158@idiky.com`): otro correo de
+aviso a la Administración de «Pruebas IDIKY». Queda de muestra una PQRS abierta.
+**Sigue:** Portería en BLOKY, la última del orden aprobado.
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · «Comunicados» en BLOKY (T-157, CU-A-08)
 
 La segunda pantalla de Convivencia: la ficha **Comunicados**. La Administración publica, corrige y anula la cartelera desde
