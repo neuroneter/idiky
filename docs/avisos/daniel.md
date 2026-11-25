@@ -254,7 +254,9 @@ Amazon (o ya quedó verificada).
 > **Decisión (RN-391, RN-393, RN-395):** sí, la persona lo corrige ella misma **una sola vez**, en el momento en que se
 > valida al entrar a ALICE (ya probó el celular con el código), y a la Administración le queda un aviso en BLOKY. **Después
 > ALICE no puede permitir que la misma persona cambie su documento**: se le pide a IDIKY con foto por ambas caras y un
-> código nuevo, e IDIKY lo evalúa (T-165, por construir). Hecho en el middleware (T-164); contrato en docs/20 §2.
+> código nuevo, e IDIKY lo evalúa. Hecho en el middleware (T-164 y T-165); la pantalla de BOB «Cambios de documento» está
+> en `develop` de BOB-Idiky y **falta desplegarla** (y darle el permiso «Revisar cambios de documento» a quien revise).
+> Contrato en docs/20 §2.
 
 **Contexto:** en el primer ingreso (pantalla «Confirmar documento»), si el tipo/número no coinciden con
 `directorio.persona`, el middleware responde `409 documento_no_coincide` y ALICE no deja seguir (RN-356).

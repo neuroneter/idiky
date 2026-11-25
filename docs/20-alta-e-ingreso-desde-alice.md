@@ -147,7 +147,26 @@ Responde:
   Administración le queda un aviso. **Es una sola vez** (Daniel, 2026-11-25): al coincidir o al corregir, el documento
   queda confirmado (`persona.documentoConfirmado: true`) y desde ahí cualquier intento de cambiarlo responde
   **`409 documento_fijo`** (`puedeCorregir: false`): ALICE **no** debe ofrecer cambiar el documento en el perfil. El cambio
-  se le pide a IDIKY con foto por ambas caras y un código nuevo (RN-395, por construir).
+  se le pide a IDIKY con foto por ambas caras y un código nuevo (RN-395, abajo).
+
+### Pedirle a IDIKY el cambio de documento (RN-395, T-165) — con Bearer
+
+Solo para quien ya confirmó su documento (`persona.documentoConfirmado`). Tres rutas:
+
+| Ruta | Qué hace |
+|---|---|
+| `GET /api/app/yo/documento/solicitud` | `{ solicitud }`: la última, o `null`. `estado`: `pendiente` · `aprobada` · `rechazada`; con `respuesta` (el motivo de IDIKY) cuando ya se resolvió. Nunca trae las fotos |
+| `POST /api/app/yo/documento/solicitud/enviar-codigo` | Manda un **código nuevo** al celular de la persona (mismo canal del ingreso). `{ pista, canal }`. `409 ya_hay_una` si ya tiene una pendiente; `429 bloqueado` |
+| `POST /api/app/yo/documento/solicitud` `{ tipoDocumento, numeroDocumento, paisDocumento?, motivo, frente, reverso, codigo }` | Envía la solicitud. `201 { solicitud }` |
+
+- `frente` y `reverso`: la foto en **base64** (con o sin `data:image/…;base64,`), JPG, PNG o WebP, hasta **5 MB** cada una.
+  El cuerpo completo admite hasta 16 MB: conviene reducir la foto en el teléfono antes de mandarla.
+- `motivo`: entre 10 y 500 letras.
+- Errores: `422 invalido` (documento que no cumple la regla de su país, el mismo que ya tiene, sin motivo, o todavía no ha
+  confirmado su documento) · `422 foto_invalida` · `409 ya_hay_una` · `401 codigo_incorrecto` · `429 bloqueado`. **El
+  código se revisa de último**: una foto mala no lo gasta.
+- Mientras está `pendiente` no se puede enviar otra. Al resolverse, `GET /api/app/yo` ya trae el documento nuevo si fue
+  aprobada (la persona no ve su número ahí, pero el ingreso por documento usa el nuevo).
 - Responde `200 { persona, lugares, token? }`. `409 documento_de_otra_persona` si ese documento ya tiene otro celular y no
   se pudo confirmar que es la misma persona (en ese caso, la Administración lo resuelve).
 - Después, ALICE crea las billeteras con la passkey por las rutas de §2b (T-129, opción A2 de docs/19: el middleware

@@ -113,6 +113,24 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · Middleware y BOB · La solicitud de cambio de documento a IDIKY (T-165, RN-395)
+
+Lo que faltaba de la decisión de Daniel sobre el documento: después del primer ingreso, el cambio se le pide a IDIKY.
+
+- **Middleware** (Bloky-Idiky `develop` `c920df9`, BLOKY Dev `3c1c12d.bloky-c920df9`): `directorio.solicitud_documento` y
+  `…_foto` (migración común 020). ALICE pide un código nuevo y envía el documento nuevo, el motivo y las dos fotos; IDIKY
+  lista, ve las fotos y aprueba o rechaza por la entrada de administración. Al aprobar cambia el documento y deja el aviso
+  a la Administración (RN-393, tipo `documento_cambiado`).
+- **BOB** (BOB-Idiky `develop` `b8dcb43`): plugin `cambios-de-documento`, sin content-types; permiso «Revisar cambios de
+  documento». **No está desplegado**: falta sacarlo a `main` y que Daniel pida desplegar `gestion`.
+- **Decidido por defecto:** las fotos viven en la base del directorio y se conservan; con billeteras cambia el documento
+  pero no la identidad en cadena (BOB lo advierte).
+
+**Verificado:** `npm run probar` (prueba de punta a punta nueva), build del middleware y del panel de BOB, y en Dev las
+validaciones y la lista de IDIKY sin enviar códigos ni cambiar datos de nadie.
+**No verificado:** una solicitud real con código en un celular, ni la pantalla de BOB en el navegador.
+**Sigue:** desplegar BOB cuando Daniel lo pida; T-166 (Justo, ALICE).
+
 ### 2026-11-25 · Daniel + IA (Claude) · Middleware y BLOKY · El documento se corrige una vez; el invitado, por días y horas (T-164, RN-391 a RN-395)
 
 Daniel respondió las cuatro preguntas abiertas de Justo (avisos §14, §16, §17 y §18) y confirmó el rango T-160 … T-199.
