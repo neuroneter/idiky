@@ -128,6 +128,12 @@ soporte: un correo de aviso más a la Administración de «Pruebas IDIKY» y sus
 como botón pequeño al pie del riel, porque hoy solo se sabe si el paso 1 está hecho y no se puede esconder «al terminar».
 **Sigue:** que Daniel lo vea; al construir cada módulo de BLOKY, su ficha entra en su grupo.
 
+### 2026-11-24 · Justo · Producto · ¿Corregir documento desde ALICE si no coincide? (RN-356)
+
+- Justo propuso que, si el documento del primer ingreso no coincide con el de la Administración, la app pregunte y permita
+  actualizar con lo que escribió la persona. **No se construyó:** RN-356 exige coincidencia o hablar con la Administración.
+- Quedó abierto en [`avisos/daniel.md`](./avisos/daniel.md) §14 para que Daniel decida (mantener A o permitir corrección B).
+
 ### 2026-11-24 · Justo · Dev · Celular temporal de Juan Luis Almonacid (T-148)
 
 - Para probar **Mi unidad** en ALICE, Justo no recibe el OTP del celular de prueba …1613. En BLOKY Dev se cambió

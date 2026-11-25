@@ -413,6 +413,9 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
 - **2026-11-24 — Celular temporal de Juan Luis (solo Dev):** para recibir el OTP, el celular en `directorio.persona` pasó de
   `+573004051613` (…1613) a **`+573104045015`**. Detalle y SQL para revertir: [`avisos/daniel.md`](./daniel.md) §13. Cuando
   termines de probar Mi unidad, pídele a Daniel (o a la IA) que lo restaure.
+- **2026-11-24 — Documento que no coincide:** propusiste que la app pueda corregir el de la Administración con un «¿estás
+  seguro?». **No se implementó:** choca con **RN-356** (debe coincidir o hablar con la Administración). Quedó para Daniel
+  en [`avisos/daniel.md`](./daniel.md) §14. Para seguir ahora con Juan Luis usa **CC · 19325950**.
 - **2026-11-23 — Visitantes y portería (T-149) en BLOKY Dev:** [docs/20 §5b](../20-alta-e-ingreso-desde-alice.md). Invitar ahora
   pide `visitantes: crear` y acepta `placa`; el invitado pide su **pase QR** (`GET …/unidades/:id/pase`, vence en 2 min) y la
   portería (rol Seguridad) valida, registra «Entró»/«Salió» y ve «Adentro ahora». En ALICE: la pantalla del pase para quien vive

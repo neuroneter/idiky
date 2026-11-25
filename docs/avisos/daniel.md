@@ -146,6 +146,29 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
+## 14. ¿La app puede corregir el documento si no coincide con el de la Administración? — ⏳ abierto (Justo, 2026-11-24)
+
+**Contexto:** en el primer ingreso (pantalla «Confirmar documento»), si el tipo/número no coinciden con
+`directorio.persona`, el middleware responde `409 documento_no_coincide` y ALICE no deja seguir (RN-356).
+
+**Propuesta de Justo:** que **prime lo que escribe la persona en la app** (ella conoce sus datos). Si difiere de lo que
+puso la Administración, mostrar un diálogo: *«Estos datos no coinciden con los de la administración. ¿Estás seguro de
+que son correctos y quieres actualizarlos?»* → si acepta, guardar lo de la app y continuar.
+
+**Hoy (RN-356, Daniel 2026-11-21):** *deben coincidir con los que reportó la Administración; si no, no entra y se le dice
+que hable con la Administración.* Motivo: no atar passkey/`hashIdentidad`/billeteras a una identidad equivocada.
+
+**Justo no lo implementó** (respeta RN-356). Pide decisión:
+
+| Opción | Efecto |
+|---|---|
+| **A. Mantener RN-356** | Sigue el rechazo duro; la Administración corrige el documento en BLOKY |
+| **B. Aceptar corrección con confirmación** | Nueva regla / ajuste a RN-356: diálogo + actualizar documento (y ¿recalcular `hashIdentidad` si aún no hay billeteras?) |
+
+**Mientras está abierto:** ALICE y el middleware **no** cambian el comportamiento de `documento_no_coincide`.
+
+---
+
 ## 13. Celular temporal de Juan Luis Almonacid (Dev) — 🟡 temporal (Justo, 2026-11-24)
 
 **Qué pasó:** Justo está construyendo **Mi unidad** en ALICE (T-148). Con su usuario (Justo Soto) entra a «Pruebas IDIKY»
