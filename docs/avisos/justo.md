@@ -425,6 +425,8 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
   [`avisos/daniel.md`](./daniel.md) §16. Mientras, Mi unidad sigue con los cuatro campos.
 - **2026-11-25 — Hora en la vigencia del invitado:** el arnés solo guarda el **día** (`date`, RN-321). La hora de la UI
   no se persiste ni la mira portería. Pediste franjas horarias → [`avisos/daniel.md`](./daniel.md) §17.
+- **2026-11-25 — Dos modos de invitado:** visita de un rato (hoy + hora / hasta que se vaya) vs estancia de varios días.
+  **Hoy no está:** un solo `invitado` con fechas. Propuesta en [`avisos/daniel.md`](./daniel.md) §18; no se construyó.
 - **2026-11-25 — Si el invitado ya está en IDIKY:** no se crea otra persona (RN-354). Misma cédula + mismo celular → se
   **reutiliza** y se le agrega la invitación en tu unidad. Misma cédula + otro celular → `409 otro_celular` (aceptar el
   registrado o que lo cambie en la app). Celular de otra persona → `409 celular_de_otra`. Ya está en **esa** unidad →

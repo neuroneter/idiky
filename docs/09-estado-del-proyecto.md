@@ -149,6 +149,12 @@ como botón pequeño al pie del riel, porque hoy solo se sabe si el paso 1 está
 - El middleware sigue guardando solo el **día** (`YYYY-MM-DD`, RN-321; columna `date`). Pedido de **franja horaria**
   abierto en [`avisos/daniel.md`](./avisos/daniel.md) §17. `App-Idiky` `develop`.
 
+### 2026-11-25 · Justo · Producto · Dos modos de invitado (visita corta vs varios días)
+
+- Justo propone en Mi unidad, tras elegir Invitado: **visita/diario** (hoy, franja horaria o hasta que se vaya) vs
+  **estancia/temporal** (desde–hasta en días). Hoy el arnés solo tiene un `invitado` con fechas (RN-366/370).
+- Abierto en [`avisos/daniel.md`](./avisos/daniel.md) §18 (ligado a §17 hora). **No se implementó.**
+
 ### 2026-11-25 · Justo · Producto · ¿Agregar a la unidad solo con celular? (RN-354)
 
 - Justo preguntó si en Mi unidad basta el celular (sin nombre ni cédula), porque la otra persona confirma datos al entrar.
