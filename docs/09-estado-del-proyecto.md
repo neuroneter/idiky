@@ -113,6 +113,22 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · BLOKY · La plantilla ancha y Reuniones como calendario (T-160)
+
+Daniel, al ver Convivencia en BLOKY Dev: (1) con mucha información las listas no van a servir: hacen falta **filtros por rango
+de fechas y paginación**, y que el servidor traiga solo una fracción; (2) las reuniones deben verse **como un calendario**; (3)
+BLOKY organiza todo **en una columna centrada** y en computador desperdicia la pantalla: necesita una vista de escritorio y otra
+de celular. Se acordó no hacer dos juegos de pantallas sino **dos plantillas sobre el mismo contenido**.
+Primer paso, hecho: la plantilla `.pagina` (`base.css`) y **Reuniones** como calendario del mes con el detalle al lado
+(`Reuniones.tsx`, `reuniones.css`). Bloky-Idiky `feature/T-160-plantilla-ancha-y-calendario` → `develop` `bb413c0`, BLOKY Dev
+`4b702b5.bloky-bb413c0`. Las pantallas ya tenían un ancho máximo fijo (720 px de base; hasta 1100 las más nuevas).
+
+**Verificado:** build y la pantalla en el navegador, a 1680 px y en celular (docs/11, T-160). La vista entró con un pase de
+soporte (`prueba-t160@idiky.com`): otro correo de aviso.
+**Ojo:** el rango T-160 … T-199 se tomó en la sesión al agotarse el anterior; falta que Daniel lo confirme.
+**Sigue:** filtros y paginación en el servidor (PQRS, Reservas, Comunicados, Portería) con barra y paginador comunes; después,
+pasar las demás pantallas a la plantilla ancha.
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · «Portería» en BLOKY (T-159)
 
 La cuarta y última pantalla de Convivencia: la ficha **Portería**, de **solo consulta**. La Administración ve desde BLOKY el
