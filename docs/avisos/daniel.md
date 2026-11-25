@@ -146,6 +146,31 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
+## 16. ¿Al agregar a la unidad basta el celular (sin nombre ni cédula)? — ⏳ abierto (Justo, 2026-11-25)
+
+**Contexto:** en ALICE → **Mi unidad → Agregar**, hoy se piden **nombre, celular y documento** (conviviente /
+arrendatario / invitado). Justo, al probar con Juan Luis, siente que es mucho: la otra persona **igual va a
+comprobar/completar** sus datos en el primer ingreso.
+
+**Propuesta de Justo:** al crear desde la unidad, **solo el celular** (o como mucho celular + algo mínimo). **No
+obligar nombre ni número de cédula** ahí; eso lo confirma la persona cuando entre a la app.
+
+**Hoy (RN-354, Daniel 2026-11-21; docs/20 §5):** *nadie se crea sin documento*. Al agregar residente/invitado hacen falta
+**`nombre`, `celular`, `tipoDocumento` y `numeroDocumento`**. Motivo: el documento identifica a la persona antes de
+crearla (revisión `otro_celular` / `celular_de_otra`); en el primer ingreso debe **coincidir** con lo reportado
+(RN-356). RN-322 (nacer solo con celular) **quedó reemplazada** para lo nuevo.
+
+**Justo no cambió ALICE ni el middleware** (respeta RN-354). Pide decisión:
+
+| Opción | Efecto |
+|---|---|
+| **A. Mantener RN-354** | Sigue pidiendo nombre + celular + documento al agregar |
+| **B. Alta mínima por celular** | Nueva regla / ajuste: crear con solo celular (¿y nombre opcional?); documento y nombre los completa la persona en el primer ingreso (vuelve algo como RN-322) |
+
+**Mientras está abierto:** Mi unidad **sigue** pidiendo los cuatro campos.
+
+---
+
 ## 15. Verificar en SES el correo `sotomadev@gmail.com` (prueba Juan Luis) — ✅ hecho (2026-11-25)
 
 **Hecho por Daniel (2026-11-25):** creó la identidad `sotomadev@gmail.com` en SES (us-east-1). Justo abrió el enlace de
