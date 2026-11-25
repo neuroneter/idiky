@@ -548,6 +548,9 @@ Cada comunicado trae: `id, titulo, cuerpo, categoria, fijado, destacado` (urgent
 deja ocultarlo), `vigenteHasta, vigente, publicadoEn, autor, editadoEn, leido, leidoEn`. **Todavía no:** la notificación al
 publicar (CU-A-08 A2) y los comunicados que publican otros módulos solos (asambleas RN-216/219, proyectos RN-101, cierres RN-117).
 
+> **2026-11-25 (T-157):** la Administración también publica, corrige y anula desde **BLOKY** («Comunicados»). Para ALICE no
+> cambia nada: es la misma cartelera. Un comunicado publicado desde BLOKY llega con su `autor` igual que los demás.
+
 ## 5e. PQRS y solicitudes (CU-R-07, CU-R-08, CU-R-40, CU-R-47, CU-A-07, CU-A-38; RN-12, RN-13, RN-14, RN-24, PN-15, PN-22, RN-378 a RN-380; T-153)
 
 > **En BLOKY Dev desde el 2026-11-24** (`bloky-c226d0f`). Módulo `pqrs` de la matriz: el propietario y el arrendatario de

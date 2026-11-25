@@ -113,6 +113,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · «Comunicados» en BLOKY (T-157, CU-A-08)
+
+La segunda pantalla de Convivencia: la ficha **Comunicados**. La Administración publica, corrige y anula la cartelera desde
+BLOKY, sobre la misma tabla que ALICE lee (T-152): no hay dos carteleras. Middleware: `cartelera/rutas.ts`
+(`/api/c/:id/comunicados`, módulo `bloky:cartelera`, RN-384); BLOKY: `features/comunicados/Comunicados.tsx` y su ficha en el
+menú. Bloky-Idiky `feature/T-157-comunicados-en-bloky` → `develop` `493a515`, BLOKY Dev `904e9eb.bloky-493a515`. Sin reglas
+nuevas: usa RN-374 a RN-377.
+
+**Verificado:** `npm run probar`, los dos build, el recorrido en «Pruebas IDIKY» por la API (BLOKY publica, ALICE lee) y la
+pantalla en el navegador (docs/11, T-157). La vista entró con un pase de soporte (`prueba-t157@idiky.com`): otro correo de
+aviso a la Administración de «Pruebas IDIKY».
+**Sigue:** PQRS y Portería en BLOKY.
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · «Reservas» en BLOKY (T-156, CU-A-06, CU-A-10, CU-B-04)
 
 Daniel aprobó construir en BLOKY las pantallas de Convivencia, en este orden: Reservas y zonas · Comunicados · PQRS · Portería.
