@@ -113,6 +113,23 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · Middleware y BOB · La ficha para verificar antes de aprobar un cambio de documento (T-167, RN-396)
+
+Daniel vio la pantalla de BOB y pidió que quien aprueba tenga con qué verificar: todos los datos de la persona, sus
+copropiedades y roles, y los registros contables hechos con el documento, porque antes de aprobar hay que llamar a la
+persona o a las copropiedades.
+
+- **Middleware** (Bloky-Idiky `develop` `2705073`, BLOKY Dev `a61c92c.bloky-2705073`): ruta de verificación dentro de la
+  entrada de administración; firmada y con registro en la auditoría porque entrega contactos completos.
+- **BOB** (BOB-Idiky `develop` `6b9617e`): botón «Verificar a la persona» y la ficha; aprobar exige ficha y fotos. **Sin
+  desplegar.**
+- **Registros contables:** BLOKY no los tiene todavía (módulo Dinero); la ficha lo dice. Todo lo demás se guarda por
+  persona, no por número de documento.
+
+**Verificado:** `npm run probar`, build del middleware y del panel de BOB, y la ruta en Dev contra la solicitud de prueba.
+**No verificado:** la ficha en el navegador (BOB sin desplegar).
+**Sigue:** desplegar BOB cuando Daniel lo pida.
+
 ### 2026-11-25 · Daniel + IA (Claude) · Middleware y BOB · La solicitud de cambio de documento a IDIKY (T-165, RN-395)
 
 Lo que faltaba de la decisión de Daniel sobre el documento: después del primer ingreso, el cambio se le pide a IDIKY.
