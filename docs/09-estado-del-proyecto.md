@@ -113,6 +113,21 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · BLOKY · El menú por grupos (T-155, CU-B-02)
+
+Daniel: *se está saturando el menú… ya no caben más funcionalidades… ordenar por grupos… sin perder la estética*. Aprobó la
+propuesta (una maqueta en la conversación): el riel pasa de una ficha por pantalla a **una por grupo**, y cada grupo abre un
+panel con sus fichas y lo que viene, con candado. Grupos de la copropiedad: Mi copropiedad · Personas · Convivencia · Dinero ·
+Gobierno. Desaparece la ficha «Pronto». Bloky-Idiky `feature/T-155-menu-por-grupos` → `develop` `3ff7995`, BLOKY Dev
+`34a7839.bloky-3ff7995`. Solo cambian `MenuJuego.tsx` (con tres dibujos nuevos: Convivencia, Dinero, Gobierno) y `base.css`;
+ninguna ruta ni regla. El panel se ancla al cuerpo de la consola, debajo de la barra y de la franja de soporte.
+
+**Verificado:** build; y en el navegador, en escritorio y en celular (detalle en docs/11, T-155). La prueba entró con un pase de
+soporte: un correo de aviso más a la Administración de «Pruebas IDIKY» y sus renglones en la auditoría (`prueba-t155@idiky.com`).
+**Decidido al construir:** tocar un grupo siempre abre su panel (no entra directo a la última ficha); «Primeros pasos» queda
+como botón pequeño al pie del riel, porque hoy solo se sabe si el paso 1 está hecho y no se puede esconder «al terminar».
+**Sigue:** que Daniel lo vea; al construir cada módulo de BLOKY, su ficha entra en su grupo.
+
 ### 2026-11-24 · Daniel + IA (Claude) · Middleware, BLOKY y BOB · Impersonar con pase firmado (T-136)
 
 Soporte de IDIKY ya puede entrar a **BLOKY** con un rol, sin ser una persona del directorio (ADR-0034 §3). BOB pide el pase

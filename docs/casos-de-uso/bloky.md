@@ -144,6 +144,14 @@ camino con anillo de avance; cada paso dice qué falta y lleva a donde se hace:
 
 **Reglas de negocio:** RN-168, RN-184.
 
+**El menú por grupos (T-155, Daniel, 2026-11-25:** *se está saturando el menú… ordenar por grupos de funcionalidades… sin
+perder la estética***).** El riel tiene un botón por **grupo**, con su dibujo: **Mi copropiedad** (Estructura, Unidades, Mundo,
+Ubicación, Perfil, Documentos) · **Personas** (Equipo, Usuarios) · **Convivencia** (Reuniones) · **Dinero** · **Gobierno**. Al
+tocar un grupo se abre a su lado un panel con sus fichas; elegir una entra y cierra el panel. Lo que todavía no existe se ve
+dentro de su grupo, con candado (ya no hay ficha «Pronto»). Una ficha se ve solo si el rol la deja ver (RN-384) y un grupo
+solo si tiene alguna; a quien administra se le muestran todos. «Primeros pasos» es un botón pequeño al pie del riel. En el
+celular el riel va arriba, con los grupos en una fila. Una pantalla nueva entra como ficha de su grupo: el riel no crece.
+
 **Estado en BLOKY Dev:** ⬜ — hoy el interior es vacío a propósito (`features/inicio/InicioPage.tsx`).
 
 ---
