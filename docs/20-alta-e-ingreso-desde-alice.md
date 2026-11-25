@@ -183,7 +183,8 @@ Rutas BOB: `/api/cuentas-polygon/servicio/alta` y `…/firma` (`auth: false` + B
 1. Código al **celular** (§1)
 2. **Documento** que coincida (§2) → queda `hashIdentidad`
 3. **Correo**, validado con un código a ese correo (esta sección)
-4. **Datos básicos**: nombre (ajustable) + **fecha de nacimiento** (RN-192)
+4. **Datos básicos**: **fecha de nacimiento** (RN-192). El nombre ya se pidió al confirmar el documento; ALICE no lo vuelve
+   a pedir (sí lo reenvía en `PUT …/datos-basicos`, que sigue exigiendo `nombre` + `fechaNacimiento`)
 5. **Billeteras** con passkey (§2b)
 
 Solo entonces entra a la app. Las veces siguientes, solo el código del celular. Cambiar celular o correo: RN-357 (segundo
