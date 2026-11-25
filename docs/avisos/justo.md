@@ -419,6 +419,8 @@ hace Daniel en el middleware y en BOB (T-147); se te avisa cuando estén.
 - **2026-11-24 — Correo para Juan Luis:** el tuyo ya está en Justo Soto (`correo_de_otra`). Pediste a Daniel verificar en
   SES **`sotomadev@gmail.com`**: [`avisos/daniel.md`](./daniel.md) §15. Cuando te llegue el mail de Amazon, abre el enlace
   y úsalo en la pantalla «Tu correo» del primer ingreso.
+- **2026-11-24 — Mi unidad (T-148) en `App-Idiky` `develop`:** pantalla + cliente HTTP (conviviente, arrendatario con
+  paquete, invitado); saludo/unidad desde middleware. Sigue pendiente probarlo con Juan Luis cuando el correo de §15 esté.
 - **2026-11-23 — Visitantes y portería (T-149) en BLOKY Dev:** [docs/20 §5b](../20-alta-e-ingreso-desde-alice.md). Invitar ahora
   pide `visitantes: crear` y acepta `placa`; el invitado pide su **pase QR** (`GET …/unidades/:id/pase`, vence en 2 min) y la
   portería (rol Seguridad) valida, registra «Entró»/«Salió» y ve «Adentro ahora». En ALICE: la pantalla del pase para quien vive
