@@ -113,6 +113,21 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · Filtros y páginas en Reservas, Comunicados y Portería (T-162, RN-390)
+
+RN-390 aplicada a las otras tres pantallas de Convivencia. En el servidor: `GET /reservas` (estado, zona, fechas, texto; de
+hoy en adelante si no se pide otra cosa), `GET /comunicados` (en la cartelera o fuera, categoría, fechas, texto; con conteos y
+en el orden de la cartelera), y en Portería dos rutas nuevas, `…/porteria/turnos` y `…/porteria/correspondencia`, esta última
+con **el historial de lo ya entregado**, que antes no se podía consultar. En BLOKY las tres usan la plantilla ancha, la barra
+de filtros y el paginador comunes. Bloky-Idiky `feature/T-162-filtros-en-convivencia` → `develop` `6bd5fe6`, BLOKY Dev
+`f0dce00.bloky-6bd5fe6`. **Con esto las cinco pantallas de Convivencia usan todo el ancho y ninguna trae todo de una vez.**
+
+**Verificado:** `npm run probar`, los dos build, los filtros y las páginas por la API en «Pruebas IDIKY» (solo lectura) y las
+tres pantallas en el navegador (docs/11, T-162). La vista entró con un pase de soporte (`prueba-t162@idiky.com`): otro correo
+de aviso.
+**Sigue:** las pantallas viejas (Unidades, Equipo, Usuarios, Documentos, Perfil) a la plantilla ancha; avisarle a Justo cuando
+se paginen las listas de ALICE.
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY y middleware · Filtros y páginas, empezando por PQRS (T-161, RN-390)
 
 El segundo paso de lo que Daniel pidió al ver Convivencia: que **el servidor filtre y pagine**. Regla nueva **RN-390** y sus
