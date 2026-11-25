@@ -146,6 +146,32 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
+## 18. Dos modos de invitado: visita de un rato vs varios días — ⏳ abierto (Justo, 2026-11-25)
+
+**Hoy (RN-366 / RN-370):** un solo rol **`invitado`**, con `desde`/`hasta` en **días**. Misma pantalla y mismas reglas
+para «viene un amigo esta tarde» y «la tía se queda una semana».
+
+**Propuesta de Justo (ALICE → Mi unidad → Invitado):** un selector de **dos formas**:
+
+| Modo | Caso de uso | Vigencia que pediría |
+|---|---|---|
+| **Visita / diario** | Estoy en casa; hoy viene un amigo. Lo registro como invitado y **de una** tiene acceso a la unidad (pase / confirmación). Puede ser franja horaria (desde–hasta hoy) o «hasta que se vaya» | Día de hoy + **hora** (relacionado con §17); o abierta hasta que portería/él cierre la visita |
+| **Estancia / temporal** | Familiar o amigo que **vive unos días** en la unidad | Desde qué **día** hasta qué **día** (como hoy, sin obligar hora) |
+
+**Por qué:** el flujo mental y los controles no son los mismos; meter ambos en un solo par de fechas confunde y no
+sirve bien a portería ni al pase.
+
+**Qué habría que decidir contigo:**
+
+1. ¿Son **dos modos del mismo rol** `invitado` (un campo `modo` / UX) o dos roles/paquetes en BOB?
+2. Visita corta: ¿franja con hora (§17 B), «hasta que salga» (cierre en portería), o basta el día completo?
+3. Estancia: ¿sigue solo con días, como ahora?
+4. ¿El pase QR y «Adentro ahora» (T-149) cambian según el modo?
+
+**Justo no implementó el selector.** Queda la pantalla actual (un invitado, fechas). Ver también §16 (datos al crear) y §17 (hora).
+
+---
+
 ## 17. Vigencia del invitado: ¿solo día o también hora (franja)? — ⏳ abierto (Justo, 2026-11-25)
 
 **Contexto:** en ALICE (Mi unidad) el invitado ya elige **fecha y hora** en Desde/Hasta (por defecto hoy). Justo
