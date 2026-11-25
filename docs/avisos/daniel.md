@@ -146,21 +146,16 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
-## 15. Verificar en SES el correo `sotomadev@gmail.com` (prueba Juan Luis) — 🟡 identidad creada; falta que Justo abra el enlace (2026-11-25)
+## 15. Verificar en SES el correo `sotomadev@gmail.com` (prueba Juan Luis) — ✅ hecho (2026-11-25)
 
-**Hecho por Daniel (2026-11-25):** la identidad `sotomadev@gmail.com` está creada en SES, región us-east-1, en estado
-**«Verificación pendiente»**. **Justo:** abre el correo de *Amazon Web Services* («Email Address Verification Request»; mira en
-Spam o Promociones) y haz clic en el enlace. Si no llegó, avísale a Daniel para usar «Reenviar».
+**Hecho por Daniel (2026-11-25):** creó la identidad `sotomadev@gmail.com` en SES (us-east-1). Justo abrió el enlace de
+Amazon (o ya quedó verificada).
 
-**Favor:** en Amazon SES (región **us-east-1**), crear la identidad de correo **`sotomadev@gmail.com`** y dejarla
-**Verificada** ([`infra/correo-ses.md`](../../infra/correo-ses.md) §4).
+**Comprobado (Justo, 2026-11-25):** prueba real desde BLOKY Dev (`POST /api/admin/correo/prueba`) → `enviado: true`,
+`real: true`. SES acepta el destinatario.
 
-**Para qué:** Justo está en el primer ingreso de **Juan Luis Almonacid** (I1-101 · «Pruebas IDIKY», T-148 / T-143). El
-correo personal que ya tiene verificado está atado a **Justo Soto**; no puede reutilizarlo (`409 correo_de_otra`).
-Necesita este segundo correo, verificado en el *sandbox*, para completar el código al correo de Juan Luis.
-
-**Cuando esté:** Justo abre el enlace de Amazon en `sotomadev@gmail.com` (Spam/Promociones si no llega) y sigue el
-primer ingreso en ALICE.
+**Uso:** **`sotomadev@gmail.com`** en «Tu correo» del primer ingreso de **Juan Luis Almonacid** (I1-101). Guía:
+[`infra/correo-ses.md`](../../infra/correo-ses.md) §4.
 
 ---
 
