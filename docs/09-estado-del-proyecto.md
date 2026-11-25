@@ -128,9 +128,11 @@ Bloky-Idiky `feature/T-136-impersonar` → `develop` `0c93a39`, BLOKY Dev `6247a
 la API con los rechazos (docs/11, T-136); y en el navegador, la franja en solo lectura y en modo de cambio, y la pantalla
 «Usuarios» de T-134 (BLOKY en local contra la API de Dev, entrando con un pase). Las pruebas mandaron **dos correos de aviso**
 a la Administración de «Pruebas IDIKY» y dejaron en la auditoría los pasos de `prueba-t136@idiky.com`.
-**No verificado:** la página de BOB en un Strapi corriendo (compila; no se desplegó: `gestion` sale solo de `main`).
-**Sigue:** sacar la versión de BOB y desplegar `gestion` cuando Daniel lo diga; darle el permiso al rol de soporte; ALICE con
-Justo (T-137).
+**No verificado:** la página de BOB en un Strapi corriendo (compila).
+**BOB desplegado el mismo día** (Daniel lo pidió): versión 0.4.0 (`main` `7baa2d9`, etiqueta `v0.4.0`), `gestion`
+`52cf2ed.gestion-7baa2d9`, con respaldo previo. El plugin cargó, el permiso quedó registrado y BOB conserva sus datos. La página
+sigue sin verse en Strapi (entrar pide la clave de Daniel).
+**Sigue:** que Daniel entre desde BOB → Impersonar; darle el permiso al rol de soporte; ALICE con Justo (T-137).
 
 ### 2026-11-24 · Daniel + IA (Claude) · BLOKY y middleware · «Usuarios» y la matriz aplicada en BLOKY (T-134, CU-B-18)
 
