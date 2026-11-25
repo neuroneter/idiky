@@ -122,14 +122,15 @@ Lo que faltaba de la decisión de Daniel sobre el documento: después del primer
   lista, ve las fotos y aprueba o rechaza por la entrada de administración. Al aprobar cambia el documento y deja el aviso
   a la Administración (RN-393, tipo `documento_cambiado`).
 - **BOB** (BOB-Idiky `develop` `b8dcb43`): plugin `cambios-de-documento`, sin content-types; permiso «Revisar cambios de
-  documento». **No está desplegado**: falta sacarlo a `main` y que Daniel pida desplegar `gestion`.
+  documento». Daniel pidió desplegarlo el mismo día: versión **0.5.0** (`main` `472a558`, `v0.5.0`), BOB Dev
+  `9c68789.gestion-472a558`. Arrancó sin errores y la base quedó con las mismas 58 tablas del respaldo previo.
 - **Decidido por defecto:** las fotos viven en la base del directorio y se conservan; con billeteras cambia el documento
   pero no la identidad en cadena (BOB lo advierte).
 
 **Verificado:** `npm run probar` (prueba de punta a punta nueva), build del middleware y del panel de BOB, y en Dev las
 validaciones y la lista de IDIKY sin enviar códigos ni cambiar datos de nadie.
 **No verificado:** una solicitud real con código en un celular, ni la pantalla de BOB en el navegador.
-**Sigue:** desplegar BOB cuando Daniel lo pida; T-166 (Justo, ALICE).
+**Sigue:** dar el permiso «Revisar cambios de documento» al rol que revise (Daniel, en BOB); T-166 (Justo, ALICE).
 
 ### 2026-11-25 · Daniel + IA (Claude) · Middleware y BLOKY · El documento se corrige una vez; el invitado, por días y horas (T-164, RN-391 a RN-395)
 
