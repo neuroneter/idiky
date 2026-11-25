@@ -146,6 +146,35 @@ Secretos `EVOLUTION_*` en el servidor.
 
 ---
 
+## 13. Celular temporal de Juan Luis Almonacid (Dev) — 🟡 temporal (Justo, 2026-11-24)
+
+**Qué pasó:** Justo está construyendo **Mi unidad** en ALICE (T-148). Con su usuario (Justo Soto) entra a «Pruebas IDIKY»
+pero **sin unidad** (es administración/delegado). El propietario de prueba **Juan Luis Almonacid · I1-101** tenía el celular
+de prueba que terminaba en **1613**, al que Justo no recibe el OTP de WhatsApp.
+
+**Cambio en BLOKY Dev** (`directorio.persona`, id `7e4e6cd6-0306-4c1b-b54b-10bf288ff87c`):
+
+| | Celular |
+|---|---|
+| **Antes** | `+573004051613` |
+| **Ahora (temporal)** | `+573104045015` |
+
+**Por qué:** para que el OTP de Juan Luis llegue a un número que Justo controla y pueda probar Mi unidad.  
+**No** se usó el celular de Justo Soto (`+573053996759`): un celular = una persona (RN-353).
+
+**Para restaurar** (cuando termine la prueba o si el …1613 “no le funciona” a quien lo usaba):
+
+```sql
+UPDATE directorio.persona
+SET celular = '+573004051613'
+WHERE id = '7e4e6cd6-0306-4c1b-b54b-10bf288ff87c'
+  AND nombre = 'Juan Luis Almonacid';
+```
+
+**Al cerrar:** devolver el celular al …1613 (o al que Daniel decida) y marcar ✅ aquí.
+
+---
+
 ## 12. Propietario, arrendatario, visitantes y bitácora Merkle — 🟡 respondido con ajustes (Daniel, 2026-11-23)
 
 **Documento a revisar con tu IA (ya en `main` del arnés `idiky`):**  

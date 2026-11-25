@@ -113,6 +113,14 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-24 · Justo · Dev · Celular temporal de Juan Luis Almonacid (T-148)
+
+- Para probar **Mi unidad** en ALICE, Justo no recibe el OTP del celular de prueba …1613. En BLOKY Dev se cambió
+  **temporalmente** el celular de Juan Luis Almonacid (`7e4e6cd6-0306-4c1b-b54b-10bf288ff87c`) de `+573004051613` a
+  **`+573104045015`**.
+- Constancia y SQL para revertir: [`avisos/daniel.md`](./avisos/daniel.md) §13 · aviso en [`avisos/justo.md`](./avisos/justo.md).
+- **Sigue:** restaurar el …1613 cuando termine la prueba.
+
 ### 2026-11-24 · Daniel + IA (Claude) · Middleware, BLOKY y BOB · Impersonar con pase firmado (T-136)
 
 Soporte de IDIKY ya puede entrar a **BLOKY** con un rol, sin ser una persona del directorio (ADR-0034 §3). BOB pide el pase
