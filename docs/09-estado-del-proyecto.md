@@ -121,14 +121,14 @@ persona o a las copropiedades.
 
 - **Middleware** (Bloky-Idiky `develop` `2705073`, BLOKY Dev `a61c92c.bloky-2705073`): ruta de verificación dentro de la
   entrada de administración; firmada y con registro en la auditoría porque entrega contactos completos.
-- **BOB** (BOB-Idiky `develop` `6b9617e`): botón «Verificar a la persona» y la ficha; aprobar exige ficha y fotos. **Sin
-  desplegar.**
+- **BOB** (versión 0.6.0, `main` `a4fbc11`, BOB Dev `cb386a8.gestion-a4fbc11`): botón «Verificar a la persona» y la ficha;
+  aprobar exige ficha y fotos. Desplegado a pedido de Daniel.
 - **Registros contables:** BLOKY no los tiene todavía (módulo Dinero); la ficha lo dice. Todo lo demás se guarda por
   persona, no por número de documento.
 
 **Verificado:** `npm run probar`, build del middleware y del panel de BOB, y la ruta en Dev contra la solicitud de prueba.
-**No verificado:** la ficha en el navegador (BOB sin desplegar).
-**Sigue:** desplegar BOB cuando Daniel lo pida.
+La ficha se vio en el navegador con la sesión de Daniel, sobre la solicitud de prueba.
+**No verificado:** unidades y roles del catálogo con datos reales, ni el bloqueo de aprobar sobre una solicitud pendiente.
 
 ### 2026-11-25 · Daniel + IA (Claude) · Middleware y BOB · La solicitud de cambio de documento a IDIKY (T-165, RN-395)
 
