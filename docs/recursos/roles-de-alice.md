@@ -14,7 +14,7 @@
 
 | Usuario | Marca de residencia | Quién lo crea | Quién lo inactiva |
 |---|---|---|---|
-| **Administrador Idiky** | No aplica | *(vacío en la tabla)* | *(vacío en la tabla)* |
+| **Administrador Idiky** | No aplica | El **primero** se crea al instalar el sistema (es el dueño); los demás, **otro Administrador Idiky** | **Otro Administrador Idiky**, nunca él mismo; **siempre queda al menos uno activo** |
 | **Administrador Copropiedad** | No aplica | Administrador Idiky | Administrador Idiky |
 | **Delegado** | No aplica | Administrador Idiky | Administrador Idiky, **solo por solicitud directa** a `operaciones@idiky.com`, con el soporte |
 | **Portería** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
@@ -51,12 +51,11 @@
 | 2 | 2026-11-26 | **«Conviviente» no existe** en la legislación ni en la terminología colombiana de propiedad horizontal: *«Conviviente no existe en la legislación o en la terminología colombiana»*. **No se usa** en pantallas, mensajes, documentos ni en el código nuevo. Quien vive en la unidad sin ser propietario ni arrendatario es **Familiar o acompañante** (o Visitante), con su **marca de residencia**. |
 | 3 | 2026-11-26 | **Al familiar o acompañante lo inactiva quien lo creó o el perfil superior a ese** (*«lo inactiva el que lo creó o el perfil superior a este»*). Por ejemplo, si lo creó el arrendatario, lo inactiva el arrendatario o el propietario. **Esta lectura la confirmó Mary** (*«sí, está bien»*). |
 | 4 | 2026-11-26 | **Al familiar o acompañante lo crean el propietario o el arrendatario** (*«lo pueden crear el propietario o arrendatario»*). |
+| 5 | 2026-11-26 | **Administrador Idiky**, el rol más alto (el dueño, el equipo de IDIKY): el primero se crea al instalar el sistema; los demás los crea otro Administrador Idiky. Lo inactiva **otro** Administrador Idiky, nunca él mismo, y **siempre queda al menos uno activo**: así IDIKY nunca queda sin dueño y quien se va o pierde su clave se bloquea el mismo día. Propuesta aceptada por Mary (*«sí, déjalo así»*). |
 
 ## 3. Lo que la tabla todavía no dice — preguntar a Mary
 
-1. **Administrador Idiky:** quién lo crea y quién lo inactiva (es el equipo de IDIKY; las celdas
-   están vacías).
-2. **Qué puede hacer cada usuario** (la matriz de permisos por usuario): la tabla dice quién crea a
+1. **Qué puede hacer cada usuario** (la matriz de permisos por usuario): la tabla dice quién crea a
    quién, no qué ve cada uno.
 
 ## 4. Lo que hoy choca con la tabla — para que Mary y Daniel lo concilien
@@ -80,3 +79,4 @@ contradiga la tabla.
 | 2026-11-26 | Se agrega el **Delegado** (en el Excel y aquí), con lo que dice `docs/13` §3 | Mary |
 | 2026-11-26 | Quién inactiva al **familiar o acompañante** (en el Excel y aquí) | Mary |
 | 2026-11-26 | Quién crea al **familiar o acompañante** (en el Excel y aquí) | Mary |
+| 2026-11-26 | Quién crea e inactiva al **Administrador Idiky** (en el Excel y aquí) | Mary |
