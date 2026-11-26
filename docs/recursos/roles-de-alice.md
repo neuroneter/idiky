@@ -28,7 +28,8 @@
 | **Mantenimiento** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Propietario** | Residente · Residente Temporal · No Residente | El Administrador Copropiedad crea **un** propietario; si hay más propietarios, **los crea ese primer propietario** | Igual: el Administrador Copropiedad al primero; los demás, el propietario que creó el Administrador |
 | **Arrendatario** | Residente · Residente Temporal · No Residente | Propietario | Propietario |
-| **Inmobiliaria y operador** | No aplica (no vive en la unidad) | Propietario | Propietario |
+| **Inmobiliaria** | No aplica (no vive en la unidad); **solo ve las unidades que le asignan** | Propietario | Propietario |
+| **Operador** | No aplica (no vive en la unidad); **solo ve las unidades que le asignan** | Propietario | Propietario |
 | **Visitante** | Residente · Residente Temporal · No Residente | Propietario y arrendatario. **Solo el propietario** puede crear un visitante con marca de **Residente Temporal** | Propietario y arrendatario |
 | **Familiar o acompañante** | Residente · Residente Temporal · No Residente · **Residente Recurrente** | **Propietario o arrendatario** | **Quien lo creó, o el perfil superior a quien lo creó** |
 
@@ -57,6 +58,7 @@
 | 3 | 2026-11-26 | **Al familiar o acompañante lo inactiva quien lo creó o el perfil superior a ese** (*«lo inactiva el que lo creó o el perfil superior a este»*). Por ejemplo, si lo creó el arrendatario, lo inactiva el arrendatario o el propietario. **Esta lectura la confirmó Mary** (*«sí, está bien»*). |
 | 6 | 2026-11-26 | **Consolidación con el catálogo de BOB y BLOKY** (§4 ter): queda **Portería** (no «Seguridad»); queda **Auxiliar Administrativo** (no «Secretaría»); se **crea Piscinero**; se **agregan Aseo, Mantenimiento, Presidente del consejo y Consejero**; queda **Arrendatario**, que es el de BLOKY «Arrendatario · solo vivir»; se incluye **Inmobiliaria y operador**, que **reemplaza** a «Arrendatario · operación completa»; queda **Familiar o acompañante** y se **elimina «conviviente»**; queda **Visitante** (no «Invitado»); se **agrega la marca de residencia** como dato. |
 | 7 | 2026-11-26 | **Quién crea e inactiva a los cinco nuevos**: Presidente del consejo, lo elige el consejo y lo registra el Administrador Copropiedad con el acta; Consejero, lo elige la asamblea (queda al cerrar la votación); Aseo y Mantenimiento, el Administrador Copropiedad; Inmobiliaria y operador, el Propietario (no vive en la unidad). Propuesta aceptada por Mary (*«sí, déjalo así»*). |
+| 8 | 2026-11-26 | **Inmobiliaria y Operador son dos roles distintos**, y cada uno **solo ve lo de las unidades que le asignan** (*«son dos roles diferentes y solo ven lo de las unidades asignadas»*). Los dos los crea e inactiva el Propietario (decisión 7). |
 | 4 | 2026-11-26 | **Al familiar o acompañante lo crean el propietario o el arrendatario** (*«lo pueden crear el propietario o arrendatario»*). |
 | 5 | 2026-11-26 | **Administrador Idiky**, el rol más alto (el dueño, el equipo de IDIKY): el primero se crea al instalar el sistema; los demás los crea otro Administrador Idiky. Lo inactiva **otro** Administrador Idiky, nunca él mismo, y **siempre queda al menos uno activo**: así IDIKY nunca queda sin dueño y quien se va o pierde su clave se bloquea el mismo día. Propuesta aceptada por Mary (*«sí, déjalo así»*). |
 
@@ -95,7 +97,7 @@ el catálogo con el que arranca el middleware y que se edita en BOB (RN-333, ADR
 | *(no estaba)* | `aseo`, Aseo · `mantenimiento`, Mantenimiento | ✅ **Se agregan** a la tabla |
 | *(no estaba)* | `presidente_consejo`, Presidente del consejo · `consejero`, Consejero | ✅ **Se agregan** a la tabla |
 | Propietario | `propietario`, Propietario | Coinciden |
-| Arrendatario | **Dos**: `arrendatario_operacion` (operación completa) y `arrendatario_solo_vivir` (solo vivir) | ✅ **Arrendatario** = «solo vivir»; «operación completa» lo **reemplaza Inmobiliaria y operador** |
+| Arrendatario | **Dos**: `arrendatario_operacion` (operación completa) y `arrendatario_solo_vivir` (solo vivir) | ✅ **Arrendatario** = «solo vivir»; «operación completa» lo **reemplazan la Inmobiliaria y el Operador**, dos roles distintos (decisión 8) |
 | Familiar o acompañante | `conviviente`, se muestra «Residente» | ✅ Queda **Familiar o acompañante**; **se elimina `conviviente`** |
 | Visitante | `invitado`, Invitado | ✅ Queda **Visitante** |
 | Marca de residencia | **No existe** como dato | ✅ **Se agrega** |
@@ -166,34 +168,40 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas. ⁹ El Au
 ### Los usuarios nuevos (decisión 6) — ⏳ PROPUESTA, por confirmar con Mary
 
 Mismas letras y mismos módulos de arriba. **Pres** Presidente del consejo · **Cons** Consejero ·
-**Aseo** · **Mant** Mantenimiento · **Inmo** Inmobiliaria y operador. El Presidente y el Consejero
+**Aseo** · **Mant** Mantenimiento · **Inmo** Inmobiliaria · **Oper** Operador. La Inmobiliaria y el
+Operador **solo ven las unidades que les asignan** (decisión 8). El Presidente y el Consejero
 **conservan además lo que tienen como propietarios**.
 
-| Módulo | Pres | Cons | Aseo | Mant | Inmo |
-|---|---|---|---|---|---|
-| 1. Contrato y alta de la copropiedad (BOB) | — | — | — | — | — |
-| 2. Estructura, unidades y parametrización | V | V | — | — | — |
-| 3. Usuarios: crear e inactivar | — | — | — | — | — |
-| 4. Cartera: cuotas, estado de cuenta, pagos y acuerdos | V | V | — | — | S |
-| 5. Paz y salvo y certificados | V | V | — | — | S |
-| 6. Contabilidad (la contable) | V | V | — | — | — |
-| 7. Cuentas claras e informes | V | V | — | — | V |
-| 8. Asambleas: citación, documentos, asistencia y actas | V | V | — | — | Con poder ¹ |
-| 9. Votar y dar poder | Ley | Ley | — | — | Con poder ¹ |
-| 10. Reservas de zonas comunes | V | V | V ¹⁰ | V ¹⁰ | S |
-| 11. PQRS | V | V | — | V E ¹¹ | S |
-| 12. Comunicados, encuestas y calendario | V | V | V | V | V |
-| 13. Visitantes y accesos | — | — | — | — | S |
-| 14. Correspondencia y objetos perdidos | — | — | — | — | s |
-| 15. Minuta y novedades | V | V | S ¹² | S ¹² | — |
-| 16. Trasteos y obras en apartamentos | V | V | — | V | S |
-| 17. Documentos y proyectos del edificio | V | V | — | V | V |
-| 18. Pedir ayuda | — | — | — | — | — |
-| 19. Clasificados entre vecinos | — | — | — | — | — |
-| 20. Vehículos y mascotas | — | — | — | — | — |
+| Módulo | Pres | Cons | Aseo | Mant | Inmo | Oper |
+|---|---|---|---|---|---|---|
+| 1. Contrato y alta de la copropiedad (BOB) | — | — | — | — | — | — |
+| 2. Estructura, unidades y parametrización | V | V | — | — | — | — |
+| 3. Usuarios: crear e inactivar | — | — | — | — | S ¹³ | S ¹³ |
+| 4. Cartera: cuotas, estado de cuenta, pagos y acuerdos | V | V | — | — | S | — |
+| 5. Paz y salvo y certificados | V | V | — | — | S | — |
+| 6. Contabilidad (la contable) | V | V | — | — | — | — |
+| 7. Cuentas claras e informes | V | V | — | — | V | — |
+| 8. Asambleas: citación, documentos, asistencia y actas | V | V | — | — | Con poder ¹ | — |
+| 9. Votar y dar poder | Ley | Ley | — | — | Con poder ¹ | — |
+| 10. Reservas de zonas comunes | V | V | V ¹⁰ | V ¹⁰ | S | S |
+| 11. PQRS | V | V | — | V E ¹¹ | S | S |
+| 12. Comunicados, encuestas y calendario | V | V | V | V | V | V |
+| 13. Visitantes y accesos | — | — | — | — | S | S |
+| 14. Correspondencia y objetos perdidos | — | — | — | — | s | s |
+| 15. Minuta y novedades | V | V | S ¹² | S ¹² | — | — |
+| 16. Trasteos y obras en apartamentos | V | V | — | V | S | — |
+| 17. Documentos y proyectos del edificio | V | V | — | V | V | V |
+| 18. Pedir ayuda | — | — | — | — | — | S |
+| 19. Clasificados entre vecinos | — | — | — | — | — | — |
+| 20. Vehículos y mascotas | — | — | — | — | — | s |
 
 ¹⁰ Para alistar o cerrar la zona. ¹¹ Las de daños: las ve y las atiende (registra lo que hizo).
-¹² Registra las novedades de su trabajo.
+¹² Registra las novedades de su trabajo. ¹³ Crea y retira a los **visitantes** de las unidades que le asignan (por confirmar con Mary).
+
+**Para que Mary decida:** ¿qué hace distinto el **Operador** de la **Inmobiliaria**? La propuesta supone
+que la **Inmobiliaria** maneja el arriendo (paga la administración, pide paz y salvo, trasteos) y el
+**Operador** maneja la estadía de la gente en la unidad (visitantes y huéspedes, reservas, PQRS), sin
+la plata.
 
 ## 5. Historia
 
