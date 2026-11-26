@@ -165,9 +165,11 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas. ⁹ El Au
    certificados pero lo debe aprobar el administrador»*).
 5. ✅ **Respondida (Mary, 2026-11-26):** el **Piscinero no necesita nada más** (*«el piscinero no necesita nada más»*): su columna queda como está.
 
-### Los usuarios nuevos (decisión 6) — ⏳ PROPUESTA, por confirmar con Mary
+### Los usuarios nuevos (decisión 6) — ✅ Pres, Cons, Aseo y Mant CONFIRMADOS · ⏳ Inmo y Oper por confirmar
 
-Mismas letras y mismos módulos de arriba. **Pres** Presidente del consejo · **Cons** Consejero ·
+**Mary, 2026-11-26:** *«confirmo los permisos de Presidente del consejo, Consejero, Aseo y
+Mantenimiento»*: esas cuatro columnas son **obligatorias**. Las de la Inmobiliaria y el Operador
+siguen como propuesta. Mismas letras y mismos módulos de arriba. **Pres** Presidente del consejo · **Cons** Consejero ·
 **Aseo** · **Mant** Mantenimiento · **Inmo** Inmobiliaria · **Oper** Operador. La Inmobiliaria y el
 Operador **solo ven las unidades que les asignan** (decisión 8). El Presidente y el Consejero
 **conservan además lo que tienen como propietarios**.
@@ -216,3 +218,4 @@ la plata.
 | 2026-11-26 | Mary responde las seis dudas y **confirma la tabla de permisos** (§4 bis) | Mary |
 | 2026-11-26 | **Consolida** la tabla con el catálogo de BOB y BLOKY: cinco usuarios nuevos y los nombres que quedan (decisión 6; en el Excel y aquí) | Mary |
 | 2026-11-26 | Quién crea e inactiva a los cinco usuarios nuevos (decisión 7; en el Excel y aquí) | Mary |
+| 2026-11-26 | Inmobiliaria y Operador, dos roles (decisión 8). **Confirma los permisos** de Presidente del consejo, Consejero, Aseo y Mantenimiento | Mary |
