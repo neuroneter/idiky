@@ -154,7 +154,8 @@ Daniel decidió (2026-11-23, sobre el docs/23 de Justo) cosas que tocan tu maque
 - **Los roles son estándar y los define BOB** (ADR-0034). Ni la copropiedad ni el propietario inventan permisos: eligen entre
   roles fijos (por ejemplo «Arrendatario · solo vivir» o «Arrendatario · operación completa»), y lo que cada rol puede hacer
   lo dice una sola tabla, igual en todos los edificios. Así todo se comporta igual y se puede auditar.
-- **Los roles en la unidad son cuatro** (RN-366): **propietario · arrendatario · conviviente · invitado**. Lo que en la
+- **Los roles en la unidad son cuatro** (RN-366): **propietario · arrendatario · residente · invitado**. *(El tercero se
+  llamó «conviviente» del 23 al 26 de noviembre; Daniel lo dejó en **«Residente»**, RN-398.)* Lo que en la
   maqueta y en BLOKY se llamaba «administrador de la unidad» ahora es **propietario**, para no confundirlo con el
   Administrador del conjunto.
 - **El visitante entra siempre con la app** (RN-367): se registra **una sola vez** en IDIKY (con su documento y sus datos) y

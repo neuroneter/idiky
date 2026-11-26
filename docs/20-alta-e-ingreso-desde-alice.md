@@ -440,9 +440,12 @@ el Administrador sin unidad. Los roles asignados se suman a los del cargo y a lo
 **Los cargos del equipo se traducen así** (siguen valiendo junto a los roles asignados en «Usuarios»): vigilante y portería → Seguridad; aseo → Aseo;
 mantenimiento y jardinería → Mantenimiento; administración y secretaría → Secretaría; «otro» → sin rol. Las residencias:
 `propietario` → Propietario; `arrendatario` → **su paquete** (`arrendatario_operacion` o `arrendatario_solo_vivir`);
-`conviviente` → Conviviente; `invitado` → Invitado (RN-366, T-147, 2026-11-23).
+`conviviente` → **Residente** (RN-398, 2026-11-26: así se le muestra a la gente; el identificador no cambia); `invitado` → Invitado (RN-366, T-147, 2026-11-23).
 
 ## 5. La unidad: propietario, arrendatario, convivientes, invitados y mascotas (RN-321, RN-366 a RN-369)
+
+> **RN-398 (2026-11-26):** en pantalla, al `conviviente` se le dice **«Residente»**. En este contrato `conviviente` es el
+> identificador que viaja en la API y no cambia; ALICE muestra «Residente».
 
 > **Cambio de contrato del 2026-11-23 (T-147, en BLOKY Dev `bloky-31e8af6`).** Los roles en la unidad ahora son
 > **`propietario` · `arrendatario` · `conviviente` · `invitado`** (RN-366). En las respuestas ya **no** sale `administrador`

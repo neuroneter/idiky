@@ -352,6 +352,21 @@ catálogo.
 
 ---
 
+## 13. Al conviviente se le dice «Residente» — 🟡 listo en BLOKY, falta ALICE (2026-11-26)
+
+Daniel (2026-11-26): *no se le dice conviviente sino residente*. Regla **RN-398**.
+
+- **Qué cambia en ALICE:** solo los **textos**. Donde la app muestre «Conviviente» debe decir **«Residente»** (en «Mi
+  unidad», al agregar a alguien, en los listados y en los mensajes). Los cuatro roles se leen **Propietario · Arrendatario ·
+  Residente · Invitado**.
+- **Qué NO cambia:** el contrato. La API sigue devolviendo y recibiendo `conviviente` (rol de la residencia y rol de
+  `permisos`); `"residente"` se sigue aceptando al crear como nombre viejo. No cambies tipos ni rutas.
+- **Dato de prueba:** el 2026-11-26, a pedido tuyo, a **Juan Luis Almonacid** (propietario de la I1-101 de «Pruebas IDIKY»)
+  se le reinició el primer ingreso en BLOKY Dev: sesiones cerradas y sin marcas de documento, correo ni fecha de nacimiento.
+  **Sus billeteras siguen creadas** (no se pueden deshacer) y su documento registrado es el mismo.
+
+---
+
 ## 12. Daniel respondió tus cuatro preguntas del documento y del invitado — 🟡 listo en el middleware, falta ALICE (2026-11-25)
 
 Tus avisos §14, §16, §17 y §18 ([`daniel.md`](./daniel.md)) ya tienen decisión, y el middleware de BLOKY Dev ya la aplica
