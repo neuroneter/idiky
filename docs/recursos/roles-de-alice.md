@@ -163,6 +163,38 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas. ⁹ El Au
    certificados pero lo debe aprobar el administrador»*).
 5. ✅ **Respondida (Mary, 2026-11-26):** el **Piscinero no necesita nada más** (*«el piscinero no necesita nada más»*): su columna queda como está.
 
+### Los usuarios nuevos (decisión 6) — ⏳ PROPUESTA, por confirmar con Mary
+
+Mismas letras y mismos módulos de arriba. **Pres** Presidente del consejo · **Cons** Consejero ·
+**Aseo** · **Mant** Mantenimiento · **Inmo** Inmobiliaria y operador. El Presidente y el Consejero
+**conservan además lo que tienen como propietarios**.
+
+| Módulo | Pres | Cons | Aseo | Mant | Inmo |
+|---|---|---|---|---|---|
+| 1. Contrato y alta de la copropiedad (BOB) | — | — | — | — | — |
+| 2. Estructura, unidades y parametrización | V | V | — | — | — |
+| 3. Usuarios: crear e inactivar | — | — | — | — | — |
+| 4. Cartera: cuotas, estado de cuenta, pagos y acuerdos | V | V | — | — | S |
+| 5. Paz y salvo y certificados | V | V | — | — | S |
+| 6. Contabilidad (la contable) | V | V | — | — | — |
+| 7. Cuentas claras e informes | V | V | — | — | V |
+| 8. Asambleas: citación, documentos, asistencia y actas | V | V | — | — | Con poder ¹ |
+| 9. Votar y dar poder | Ley | Ley | — | — | Con poder ¹ |
+| 10. Reservas de zonas comunes | V | V | V ¹⁰ | V ¹⁰ | S |
+| 11. PQRS | V | V | — | V E ¹¹ | S |
+| 12. Comunicados, encuestas y calendario | V | V | V | V | V |
+| 13. Visitantes y accesos | — | — | — | — | S |
+| 14. Correspondencia y objetos perdidos | — | — | — | — | s |
+| 15. Minuta y novedades | V | V | S ¹² | S ¹² | — |
+| 16. Trasteos y obras en apartamentos | V | V | — | V | S |
+| 17. Documentos y proyectos del edificio | V | V | — | V | V |
+| 18. Pedir ayuda | — | — | — | — | — |
+| 19. Clasificados entre vecinos | — | — | — | — | — |
+| 20. Vehículos y mascotas | — | — | — | — | — |
+
+¹⁰ Para alistar o cerrar la zona. ¹¹ Las de daños: las ve y las atiende (registra lo que hizo).
+¹² Registra las novedades de su trabajo.
+
 ## 5. Historia
 
 | Fecha | Qué | Quién |
