@@ -10,7 +10,7 @@ import { useSesion } from '../estado/SesionContext'
 import * as sel from '../datos/selectores'
 import { nombreCompleto } from '../datos/selectores'
 import { etiquetaUnidad } from '../dominio/reglas'
-import { capitalizar, iniciales } from '../utilidades/formato'
+import { iniciales } from '../utilidades/formato'
 import { Icono, type NombreIcono } from './Icono'
 import { Logotipo } from './Logotipo'
 import { SiluetaTorres } from './SiluetaTorres'
@@ -18,6 +18,7 @@ import { Modal } from './Modal'
 import { OpcionesTamanoTexto } from './ControlTamanoTexto'
 import { AvisoGlobal } from './Aviso'
 import { biometria } from '../servicios/plataforma'
+import { NOMBRE_USUARIO, moduloDeRutaApp, veModulo, veSolicitudes } from '../dominio/permisos'
 
 /**
  * Cinco pestanas, que es el maximo que caben sin que el texto se parta.
@@ -109,6 +110,13 @@ export function LayoutResidente() {
   const unidadActiva = sel.unidad(bd, sesion.unidadActivaId)
   const misResidencias = sel.residenciasDePersona(bd, sesion.personaId)
   const miRol = misResidencias.find((r) => r.unidadId === sesion.unidadActivaId)?.rol
+  // PN-29 — Solo las pestañas y pantallas que le tocan a este perfil (tabla de Mary).
+  const usuario = sel.usuarioDeSesion(bd, sesion)
+  const pestanas = PESTANAS.filter((p) =>
+    p.ruta === '/app/solicitudes' ? veSolicitudes(usuario) : !moduloDeRutaApp(p.ruta) || veModulo(usuario, moduloDeRutaApp(p.ruta)!),
+  )
+  const moduloActual = moduloDeRutaApp(pathname)
+  const permitida = !moduloActual || veModulo(usuario, moduloActual)
 
 
   return (
@@ -161,11 +169,18 @@ export function LayoutResidente() {
       </header>
 
       <main className="contenido-movil">
-        <Outlet />
+        {permitida ? (
+          <Outlet />
+        ) : (
+          <div className="tarjeta">
+            <strong>Esto no es para tu perfil</strong>
+            <p className="subtitulo">Como {NOMBRE_USUARIO[usuario]}, aquí no tienes nada que hacer. Vuelve al inicio.</p>
+          </div>
+        )}
       </main>
 
       <nav className="nav-inferior">
-        {PESTANAS.map((pestana) => (
+        {pestanas.map((pestana) => (
           <NavLink
             key={pestana.ruta}
             to={pestana.ruta}
@@ -191,7 +206,7 @@ export function LayoutResidente() {
             <div className="columna" style={{ flex: 1 }}>
               <strong>{nombreCompleto(persona)}</strong>
               <span className="subtitulo">
-                {miRol ? `${capitalizar(miRol)} · ` : ''}
+                {miRol ? `${NOMBRE_USUARIO[usuario]} · ` : ''}
                 {unidadActiva ? etiquetaUnidad(unidadActiva) : 'Sin unidad'}
               </span>
               {persona?.email && <span className="subtitulo">{persona.email}</span>}

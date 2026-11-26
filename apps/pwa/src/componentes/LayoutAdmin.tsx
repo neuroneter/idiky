@@ -11,6 +11,7 @@ import { nombreCompleto } from '../datos/selectores'
 import { Logotipo } from './Logotipo'
 import { Icono, type NombreIcono } from './Icono'
 import { AvisoGlobal } from './Aviso'
+import { NOMBRE_USUARIO, cambiaEnModulo, moduloDeRutaConsola, veModulo } from '../dominio/permisos'
 
 const SECCIONES: Array<{ ruta: string; texto: string; icono: NombreIcono; exacta?: boolean }> = [
   { ruta: '/admin', texto: 'Tablero', icono: 'tablero', exacta: true },
@@ -71,6 +72,15 @@ export function LayoutAdmin() {
   const persona = sel.persona(bd, sesion.personaId)
   // CU-A-15 — Un administrador con varios edificios cambia de uno a otro sin salir.
   const edificios = sel.edificiosQueAdministra(bd, sesion.personaId)
+  // PN-29 — Cada cargo ve solo sus secciones; las que solo puede ver, sin botones para cambiar.
+  const usuario = sel.usuarioDeSesion(bd, sesion)
+  const secciones = SECCIONES.filter((s) => {
+    const modulo = moduloDeRutaConsola(s.ruta)
+    return !modulo || veModulo(usuario, modulo)
+  })
+  const moduloActual = moduloDeRutaConsola(pathname)
+  const permitida = !moduloActual || veModulo(usuario, moduloActual)
+  const soloLectura = !!moduloActual && permitida && !cambiaEnModulo(usuario, moduloActual)
 
   return (
     <div className="consola">
@@ -97,7 +107,7 @@ export function LayoutAdmin() {
         </div>
 
         <nav className="lateral__nav">
-          {SECCIONES.map((seccion) => (
+          {secciones.map((seccion) => (
             <NavLink
               key={seccion.ruta}
               to={seccion.ruta}
@@ -112,7 +122,7 @@ export function LayoutAdmin() {
 
         <div className="lateral__pie">
           <div>{nombreCompleto(persona)}</div>
-          <div>Administradora</div>
+          <div>{NOMBRE_USUARIO[usuario]}</div>
         </div>
       </aside>
 
@@ -132,7 +142,23 @@ export function LayoutAdmin() {
         </header>
 
         <div className="consola__contenido">
-          <Outlet />
+          {!permitida ? (
+            <div className="tarjeta">
+              <strong>Esta sección no es para tu perfil</strong>
+              <p className="subtitulo">Como {NOMBRE_USUARIO[usuario]}, entra por el menú de la izquierda a lo que te toca.</p>
+            </div>
+          ) : soloLectura ? (
+            <>
+              <p className="acceso__nota" role="status">
+                Como {NOMBRE_USUARIO[usuario]}, aquí <strong>puedes ver, no cambiar</strong>.
+              </p>
+              <fieldset disabled className="solo-lectura" style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
+                <Outlet />
+              </fieldset>
+            </>
+          ) : (
+            <Outlet />
+          )}
         </div>
       </div>
 

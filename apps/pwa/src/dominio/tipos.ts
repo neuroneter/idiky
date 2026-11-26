@@ -181,7 +181,12 @@ export interface Persona {
  * `familiar`: la familia o el acompañante de quien vive ahí (2026-10-02): vive en
  * la unidad, no vota y no registra a nadie.
  */
-export type RolResidencia = 'propietario' | 'arrendatario' | 'familiar' | 'autorizado'
+/**
+ * El papel de la persona en la unidad. `autorizado` es el **Visitante** de la tabla de Mary (el que se
+ * queda unos días); `inmobiliaria` y `operador` (PN-29, Mary 2026-11-26) no viven en la unidad y solo
+ * ven las unidades que les asignan.
+ */
+export type RolResidencia = 'propietario' | 'arrendatario' | 'familiar' | 'autorizado' | 'inmobiliaria' | 'operador'
 
 /** Vinculo entre una persona y una unidad. Define el rol efectivo (RN-02). */
 /** Por qué se inhabilita a alguien en una unidad. */
@@ -899,7 +904,7 @@ export interface Visitante {
 /** El documento con que se identifica la persona. */
 export type TipoIdentificacion = 'cc' | 'ti' | 'rc' | 'ce' | 'pasaporte'
 
-export type CategoriaRegistro = 'propietario' | 'arrendatario' | 'familiar' | 'visitante'
+export type CategoriaRegistro = 'propietario' | 'arrendatario' | 'familiar' | 'visitante' | 'inmobiliaria' | 'operador'
 
 /**
  * **Cómo se queda** en la unidad (RN-62, RN-68). Se escoge siempre, al crear a
@@ -1794,7 +1799,13 @@ export interface Documento {
   certificadoPagos?: CertificadoPagosCongelado
   /** Quien lo emitio: el residente desde su app (CU-R-12) o la administracion (CU-A-13). */
   emitidoPor?: string
-  estado: 'vigente' | 'anulado'
+  /**
+   * PN-29 — `por_aprobar`: lo preparó el Auxiliar Administrativo y **no sale hasta que lo aprueba el
+   * administrador** (tabla de Mary, 2026-11-26). Mientras tanto no tiene número ni lo ve el propietario.
+   */
+  estado: 'vigente' | 'anulado' | 'por_aprobar'
+  /** PN-29 — Quién lo preparó y quién lo aprobó. */
+  preparacion?: { por: string; en: FechaHoraISO; aprobadoPor?: string; aprobadoEn?: FechaHoraISO }
   /** Un documento no se borra: se anula, con motivo (ADR-0006 §5, O3). */
   anuladoEn?: FechaHoraISO
   anuladoPor?: string
@@ -1853,6 +1864,11 @@ export interface PerfilDemo {
   etiqueta: string
   descripcion: string
   rol: RolUsuario
+  /**
+   * PN-29 — En la consola, el cargo de quien entra (tabla de Mary). Sin dato, es el Administrador
+   * Copropiedad. Decide qué menús ve y qué puede cambiar.
+   */
+  cargo?: CargoConsola
   personaId: string
   copropiedadId: string
   /** Unidad preseleccionada; los admin no tienen. */
@@ -1864,10 +1880,25 @@ export interface PerfilDemo {
   oculto?: boolean
 }
 
+/** PN-29 — Los usuarios que entran a la consola (la de la administración). */
+export type CargoConsola =
+  | 'administrador'
+  | 'delegado'
+  | 'presidente_consejo'
+  | 'consejero'
+  | 'auxiliar_administrativo'
+  | 'contador'
+  | 'revisor_fiscal'
+  | 'piscinero'
+  | 'aseo'
+  | 'mantenimiento'
+
 export interface Sesion {
   perfilId: string
   personaId: string
   rol: RolUsuario
+  /** PN-29 — Copiado del perfil: el cargo en la consola. */
+  cargo?: CargoConsola
   copropiedadId: string
   unidadActivaId?: string
 }

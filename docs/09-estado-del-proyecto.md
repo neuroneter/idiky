@@ -113,6 +113,18 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Mary + IA (Claude) · La tabla de roles y permisos, en la maqueta (PN-29)
+
+La tabla obligatoria de Mary quedó en `apps/pwa/src/dominio/permisos.ts` (18 usuarios × 20 módulos,
+con una prueba que la compara con `recursos/roles-de-alice.md`). La consola y ALICE **muestran a cada
+perfil solo lo suyo**; en la consola, lo que solo puede ver sale con «puedes ver, no cambiar». Perfiles
+nuevos en el demo (semilla 54): Delegada, Presidenta del consejo, Consejero, Auxiliar, Contador,
+Revisora Fiscal, Piscinero, Aseo, Mantenimiento, Inmobiliaria Habitar (301 y 502) y Estadías Medellín
+(602). El **auxiliar prepara** el paz y salvo y el certificado de pagos y **los aprueba el
+administrador** («Te esperan»). El familiar ya no registra visitas. Pruebas: `permisos.spec.ts`, y se
+ajustaron tres que esperaban lo que la tabla ahora prohíbe al familiar. **Pendiente de Mary:** la marca
+de residencia choca con reglas suyas del 2026-10-02 (`recursos/roles-de-alice.md` §4 quater).
+
 ### 2026-11-26 · Mary + IA (Claude) · Roles consolidados con BOB y BLOKY (tabla de roles, decisión 6)
 
 Se comparó la tabla de Mary con el catálogo que siembra el middleware (`Bloky-Idiky`, `develop`,

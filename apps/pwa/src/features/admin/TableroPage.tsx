@@ -24,6 +24,8 @@ import {
 import { formatearDinero, formatearFecha, formatearPeriodo } from '../../utilidades/formato'
 import { ChipPqrs, ChipReserva } from '../../componentes/Etiquetas'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
+import { TableroDelCargo } from './TableroDelCargo'
+import { esAdministracionPlena } from '../../dominio/permisos'
 
 function Indicador({
   etiqueta,
@@ -51,6 +53,9 @@ export function TableroPage() {
   const { bd } = useDatos()
   const { sesion } = useSesion()
   if (!sesion) return null
+  // PN-29 — El tablero completo (cartera, ocupación, lo que espera) es del Administrador y el
+  // Delegado; los demás cargos ven el suyo.
+  if (!esAdministracionPlena(sel.usuarioDeSesion(bd, sesion))) return <TableroDelCargo />
 
   const copropiedadId = sesion.copropiedadId
   const unidades = sel.unidadesDe(bd, copropiedadId)

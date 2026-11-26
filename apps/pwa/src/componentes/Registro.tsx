@@ -63,6 +63,15 @@ export const CATEGORIAS: Record<CategoriaRegistro, { texto: string; ayuda: strin
     texto: 'Visitante',
     ayuda: 'Viene de visita: una tarde, ciertos días de la semana (empleada, niñera) o se queda unos días.',
   },
+  // PN-29 — No viven en la unidad y solo ven las que les asignan (Mary, 2026-11-26).
+  inmobiliaria: {
+    texto: 'Inmobiliaria',
+    ayuda: 'Maneja el arriendo de la unidad: paga la administración, pide el paz y salvo y los trasteos.',
+  },
+  operador: {
+    texto: 'Operador',
+    ayuda: 'Maneja la estadía de la gente en la unidad (huéspedes, visitantes, reservas), sin la plata.',
+  },
 }
 
 /**

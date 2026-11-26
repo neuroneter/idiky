@@ -50,6 +50,7 @@ export function ProveedorSesion({ children }: { children: ReactNode }) {
       perfilId: perfil.id,
       personaId: perfil.personaId,
       rol: perfil.rol,
+      ...(perfil.cargo ? { cargo: perfil.cargo } : {}),
       copropiedadId: perfil.copropiedadId,
       unidadActivaId: perfil.unidadId,
     }

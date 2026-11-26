@@ -67,16 +67,19 @@ test('la administración genera el certificado de pagos por el propietario y ve 
   await expect(page.getByText(/Día 20 · débito PSE/)).toBeVisible()
 })
 
-test('al familiar no se le muestra lo que decide el propietario o el arrendatario (PN-20)', async ({ page }) => {
+test('al familiar no se le muestra lo que decide el propietario o el arrendatario (PN-20, PN-29)', async ({ page }) => {
   await entrarComo(page, /Tomas Restrepo Ossa/)
+  // PN-29 (tabla de Mary): el familiar o acompañante no ve la cartera, ni las solicitudes, ni las asambleas.
+  await expect(page.locator('.nav-inferior')).not.toContainText('Cuenta')
+  await expect(page.locator('.nav-inferior')).not.toContainText('Solicitudes')
+  await expect(page.locator('.nav-inferior')).not.toContainText('Asambleas')
+  await expect(page.locator('.cartera-inicio')).toHaveCount(0)
   await page.goto('/#/app/cuenta')
-  await expect(page.getByText('Valor adeudado').first()).toBeVisible()
-  await expect(page.getByText('Pago programado')).toHaveCount(0)
+  await expect(page.getByText('Esto no es para tu perfil')).toBeVisible()
   await page.goto('/#/app/edificio/encuestas')
   await expect(page.getByRole('button', { name: 'Enviar mi respuesta' })).toHaveCount(0)
   await page.goto('/#/app/unidad/permisos')
-  await expect(page.getByRole('button', { name: 'Pedir permiso de trasteo' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Pedir permiso de obra' })).toHaveCount(0)
+  await expect(page.getByText('Esto no es para tu perfil')).toBeVisible()
   await page.goto('/#/app/proyectos')
   await expect(page.getByRole('button', { name: 'Hacer una pregunta' })).toHaveCount(0)
   await page.goto('/#/app/cuenta/pagos')

@@ -207,6 +207,21 @@ unidades a su cargo**, no el informe de todo el edificio.
 **Operador** maneja la estadía de la gente en la unidad (visitantes y huéspedes, reservas, PQRS), sin
 la plata.
 
+## 4 quater. Cómo quedó en la maqueta (`apps/pwa`, 2026-11-26)
+
+- La tabla está, celda por celda, en `apps/pwa/src/dominio/permisos.ts` (PN-29). Una prueba la compara.
+- El demo tiene un perfil por usuario: Delegada, Presidenta del consejo, Consejero, Auxiliar
+  Administrativa, Contador, Revisora Fiscal, Piscinero, Aseo, Mantenimiento (consola) e Inmobiliaria
+  y Operador (ALICE), además de los que ya había.
+- **Lo que la maqueta todavía no hace**, y el producto sí debe hacer: que el piscinero vea solo las
+  reservas de la piscina (hoy ve todas, sin cambiar); que Aseo y Mantenimiento **registren sus
+  novedades** en la minuta (hoy la ven); que el Mantenimiento atienda las PQRS de daños; la
+  contabilidad es la contable de Jeimy, no la consola.
+- **Pendiente de Mary — la marca de residencia** (ya existe en la maqueta como «condición»): la tabla
+  le da al propietario «Residente Temporal» y al arrendatario «No Residente», y el 2026-10-02 Mary
+  había dicho lo contrario; al Visitante le da «Residente» y no menciona al visitante frecuente
+  (empleada, niñera). Mientras Mary no decida, la maqueta sigue con las reglas del 2026-10-02.
+
 ## 5. Historia
 
 | Fecha | Qué | Quién |
@@ -222,3 +237,4 @@ la plata.
 | 2026-11-26 | Quién crea e inactiva a los cinco usuarios nuevos (decisión 7; en el Excel y aquí) | Mary |
 | 2026-11-26 | Inmobiliaria y Operador, dos roles (decisión 8). **Confirma los permisos** de Presidente del consejo, Consejero, Aseo y Mantenimiento | Mary |
 | 2026-11-26 | Confirma los permisos de la Inmobiliaria (cuentas claras solo de sus unidades) y del Operador. **La tabla queda completa** | Mary |
+| 2026-11-26 | **Aplicada en la maqueta** (PN-29, §4 quater) | IA, con Mary |

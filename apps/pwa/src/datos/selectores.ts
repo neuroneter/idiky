@@ -1,3 +1,5 @@
+import type { UsuarioIdiky } from '../dominio/permisos'
+import type { Sesion } from '../dominio/tipos'
 /**
  * Selectores: consultas puras sobre la base de datos en memoria.
  *
@@ -701,4 +703,16 @@ export function rolEnUnidad(bd: BaseDatos, personaId: string, unidadId?: string)
 export function edificiosQueAdministra(bd: BaseDatos, personaId: string) {
   const ids = new Set(bd.perfilesDemo.filter((p) => p.rol === 'admin' && p.personaId === personaId).map((p) => p.copropiedadId))
   return bd.copropiedades.filter((c) => ids.has(c.id))
+}
+
+/**
+ * PN-29 — Qué usuario de la tabla de Mary es quien entró: en la consola, su cargo (sin cargo, el
+ * Administrador Copropiedad); en portería, Portería; en ALICE, su papel en la unidad activa.
+ */
+export function usuarioDeSesion(bd: BaseDatos, sesion: Pick<Sesion, 'rol' | 'cargo' | 'personaId' | 'unidadActivaId'>): UsuarioIdiky {
+  if (sesion.rol === 'porteria') return 'porteria'
+  if (sesion.rol === 'admin') return sesion.cargo ?? 'administrador'
+  const rol = rolEnUnidad(bd, sesion.personaId, sesion.unidadActivaId)
+  if (rol === 'autorizado') return 'visitante'
+  return rol ?? 'visitante'
 }

@@ -26,7 +26,7 @@ export function CertificadoPagos({ viendo, alVer }: { viendo: string | null; alV
   // PN-20 — El certificado lo pide el propietario o el arrendatario.
   if (!sesion || anios.length === 0 || !decideEnLaUnidad(sel.rolEnUnidad(bd, sesion.personaId, unidadId))) return null
 
-  const emitidos = sel.documentosDeUnidad(bd, unidadId).filter((d) => d.tipo === 'certificado_pagos')
+  const emitidos = sel.documentosDeUnidad(bd, unidadId).filter((d) => d.tipo === 'certificado_pagos' && d.estado !== 'por_aprobar')
   const documento = emitidos.find((d) => d.id === viendo)
 
   return (

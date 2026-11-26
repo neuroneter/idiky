@@ -21,6 +21,8 @@ export function TeEsperan() {
     { cuantos: alertasPendientes(bd.alertasAyuda ?? [], c).length, uno: 'pedido de ayuda sin atender', varios: 'pedidos de ayuda sin atender', a: '/admin/edificio', urgente: true },
     // PN-22 — Las PQRS que vencen en pocos días: se responden antes del plazo.
     { cuantos: delEdificio(bd.pqrs).filter((p) => pqrsPorVencer(p)).length, uno: 'PQRS vence en 3 días o menos', varios: 'PQRS vencen en 3 días o menos', a: '/admin/pqrs', urgente: true },
+    // PN-29 — Lo que preparó el auxiliar espera la aprobación del administrador.
+    { cuantos: delEdificio(bd.documentos).filter((d) => d.estado === 'por_aprobar').length, uno: 'paz y salvo por aprobar', varios: 'paz y salvos por aprobar', a: '/admin/cartera/paz-y-salvo' },
     { cuantos: delEdificio(bd.acuerdosPago).filter((a) => a.estado === 'propuesto').length, uno: 'acuerdo de pago por aprobar', varios: 'acuerdos de pago por aprobar', a: '/admin/cartera' },
     { cuantos: delEdificio(bd.trasteos).filter((t) => t.estado === 'solicitado').length, uno: 'trasteo por aprobar', varios: 'trasteos por aprobar', a: '/admin/edificio' },
     { cuantos: delEdificio(bd.permisosObra).filter((o) => o.estado === 'solicitado').length, uno: 'obra en apartamento por aprobar', varios: 'obras en apartamentos por aprobar', a: '/admin/edificio' },
