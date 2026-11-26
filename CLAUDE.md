@@ -71,6 +71,9 @@ Estado de los dos demos: **v0.1**, sin backend, con datos simulados. El producto
    falta desplegar o decidir.
 1. Leer [`docs/09-estado-del-proyecto.md`](./docs/09-estado-del-proyecto.md) — la bitácora dice dónde quedó todo.
 2. Leer el caso de uso a implementar en [`docs/04-casos-de-uso.md`](./docs/04-casos-de-uso.md).
+2b. Si la tarea toca usuarios, roles, altas o permisos: leer
+   [`docs/recursos/roles-de-alice.md`](./docs/recursos/roles-de-alice.md). **Manda esa tabla**; un
+   cambio se le pregunta a Mary.
 3. Leer [`docs/06-arquitectura.md`](./docs/06-arquitectura.md) — dónde va cada cosa — y, si la
    tarea toca BLOKY, BOB, Jitsi, ALICE o los contratos,
    [`docs/16-mapa-de-repositorios.md`](./docs/16-mapa-de-repositorios.md): el código va en su repositorio.
@@ -79,6 +82,7 @@ Estado de los dos demos: **v0.1**, sin backend, con datos simulados. El producto
 
 | Regla | Motivo |
 |---|---|
+| **Los usuarios y roles de ALICE (y de IDIKY) son los de [`docs/recursos/roles-de-alice.md`](./docs/recursos/roles-de-alice.md)** (Excel original al lado): quién crea y quién inactiva a cada uno, y su marca de residencia. **Si un cambio la contradice o necesitas un rol o una marca distinta, pregúntale a Mary antes de construir.** | Es la definición de Mary (2026-11-26). Vale para todos los repositorios. |
 | **Antes de escribir código, ubica en cuál de los dos productos estás.** Si la tarea es de cartera/contabilidad, casi seguro va en `apps/contable/`. | Ya pasó una vez: se construyó el módulo de Jeimy dentro del producto de Mary. |
 | **Todo acceso a datos pasa por el repositorio** — `apps/pwa/src/datos/repositorio.ts` o `apps/contable/js/repositorio.js`. Ninguna pantalla toca la semilla ni `localStorage`. | Permite cambiar a backend real sin tocar la interfaz (ADR-0003). |
 | **Las reglas de negocio viven en `dominio/`** como funciones puras, numeradas `RN-xx`. Están **duplicadas a propósito** en los dos productos. | Una regla cambia en los dos el mismo día. La definición que manda es `docs/05-modelo-de-datos.md`. |
