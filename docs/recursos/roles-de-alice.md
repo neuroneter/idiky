@@ -79,8 +79,8 @@ contradiga la tabla.
 
 **Cómo se lee:** **G** gestiona todo el edificio (ve, crea, edita y anula) · **V** ve todo el
 edificio · **S** lo de su unidad: lo ve y lo pide · **s** solo ve lo de su unidad · **—** no lo ve:
-**no se le muestra** (Mary, 2026-11-20) · **Soporte** solo con pase de impersonación, que queda
-registrado (ADR-0034).
+**no se le muestra** (Mary, 2026-11-20) · **Soporte** ✅ solo con pase de impersonación, que queda
+registrado (ADR-0034; confirmado por Mary).
 
 Columnas: **AI** Administrador Idiky · **AC** Administrador Copropiedad · **Del** Delegado ·
 **Aux** Auxiliar Administrativo · **Cont** Contador · **RF** Revisor Fiscal · **Port** Portería ·
@@ -117,11 +117,16 @@ de **Residente Temporal**. ⁵ Su pase de entrada. ⁶ Marca el trasteo como rea
 pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas.
 
 **Para que Mary decida:**
-1. ¿El **Administrador Idiky** entra a los datos de la copropiedad solo como **soporte** (con pase y
-   rastro), o los ve siempre?
+1. ✅ **Respondida (Mary, 2026-11-26):** el **Administrador Idiky entra a los datos de la copropiedad
+   solo como soporte**. Llega a toda la información (*«tiene el poder de la información»*), pero
+   antes **abre un pase con el motivo**, y queda quién entró, a qué edificio, cuándo, por qué y qué
+   hizo (ADR-0034). Así IDIKY responde con pruebas si una copropiedad pregunta quién miró sus datos
+   (Ley 1581).
 2. ✅ **Respondida (Mary, 2026-11-26):** el **Auxiliar Administrativo solo ve la cartera** (*«solo ve la cartera»*): no registra pagos, ni acuerdos, ni ajustes.
 3. ✅ **Respondida (Mary, 2026-11-26):** el Familiar o acompañante **no puede reservar zonas comunes ni radicar PQRS** (*«no puede reservar zonas comunes y radicar PQRS»*).
 4. ✅ **Respondida (Mary, 2026-11-26):** el **Revisor Fiscal no ve las PQRS**; si necesita una para su control, se la pide a la administración (opción A).
+6. ¿El **Auxiliar Administrativo** puede **emitir paz y salvos y certificados**, o tampoco? (En la
+   propuesta, sí.)
 5. ✅ **Respondida (Mary, 2026-11-26):** el **Piscinero no necesita nada más** (*«el piscinero no necesita nada más»*): su columna queda como está.
 
 ## 5. Historia
