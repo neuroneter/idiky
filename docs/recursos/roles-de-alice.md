@@ -55,7 +55,7 @@
 
 ## 3. Lo que la tabla todavía no dice — preguntar a Mary
 
-1. **Qué puede hacer cada usuario**: hay una **propuesta** en la §4 bis, por confirmar.
+*(Nada: la tabla quedó completa el 2026-11-26. Lo que choca con otros sistemas está en la §4.)*
 
 ## 4. Lo que hoy choca con la tabla — para que Mary y Daniel lo concilien
 
@@ -70,11 +70,11 @@ contradiga la tabla.
 | `docs/03-actores-y-roles.md` | Residente · Propietario no residente · Administrador · Portería · Consejo | Faltan Auxiliar Administrativo, Contador, Revisor Fiscal y Piscinero; el consejo no es un usuario de la tabla |
 | `docs/23-propietario-arrendatario-y-vinculos.md` (Justo) | Propietario · arrendatario · conviviente · invitado | Lo mismo que la primera fila |
 
-## 4 bis. Qué puede ver y hacer cada usuario — ⏳ PROPUESTA, por confirmar con Mary
+## 4 bis. Qué puede ver y hacer cada usuario — ✅ CONFIRMADA por Mary (2026-11-26)
 
-> **No es obligatoria todavía:** es la propuesta del 2026-11-26 para que Mary la revise. Cuando la
-> confirme, pasa a la §1 y la aplica la matriz de BOB y el middleware (ADR-0034: Ver · Crear ·
-> Editar · Anular, por rol y módulo). **Lo que fija la ley no se configura** (quién vota, quórum,
+> **Es obligatoria desde el 2026-11-26**: Mary respondió las seis dudas (abajo) y confirmó el resto.
+> La aplican la matriz de BOB y el middleware (ADR-0034: Ver · Crear · Editar · Anular, por rol y
+> módulo), ALICE y BLOKY. Un cambio se le pregunta a Mary. **Lo que fija la ley no se configura** (quién vota, quórum,
 > poderes): manda la Ley 675. Las celdas con ✅ ya las confirmó Mary.
 
 **Cómo se lee:** **G** gestiona todo el edificio (ve, crea, edita y anula) · **V** ve todo el
@@ -93,7 +93,7 @@ Columnas: **AI** Administrador Idiky · **AC** Administrador Copropiedad · **De
 | 2. Estructura, unidades y parametrización | Soporte | G | G | V | V | V | — | — | — | — | — | — |
 | 3. Usuarios: crear e inactivar (según la §1) | G | G | G | V | — | — | — | — | S | S | — | — |
 | 4. Cartera: cuotas, estado de cuenta, pagos y acuerdos | Soporte | G | G | V ✅ | G | V | — | — | S | S | — | — |
-| 5. Paz y salvo y certificados | Soporte | G | G | G | G | V | — | — | S | S | — | — |
+| 5. Paz y salvo y certificados | Soporte | G | G | Prepara ✅ ⁹ | G | V | — | — | S | S | — | — |
 | 6. Contabilidad (la contable) | — | V | V | — | G | V | — | — | — | — | — | — |
 | 7. Cuentas claras e informes | — | G | G | V | G | V | — | — | V | V | V | — |
 | 8. Asambleas: citación, documentos, asistencia y actas | Soporte | G | G | V | V | V | — | — | S | s ¹ | — | — |
@@ -114,7 +114,7 @@ Columnas: **AI** Administrador Idiky · **AC** Administrador Copropiedad · **De
 poder** del propietario (RN-30). ² El piscinero, solo lo de la piscina: sus reservas y las novedades
 que registra. ³ Responde las encuestas de su unidad (una por unidad). ⁴ Solo el visitante con marca
 de **Residente Temporal**. ⁵ Su pase de entrada. ⁶ Marca el trasteo como realizado. ⁷ Atiende el
-pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas.
+pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas. ⁹ El Auxiliar Administrativo **prepara** el paz y salvo o el certificado, pero **no sale hasta que lo aprueba el Administrador Copropiedad** (o el Delegado).
 
 **Para que Mary decida:**
 1. ✅ **Respondida (Mary, 2026-11-26):** el **Administrador Idiky entra a los datos de la copropiedad
@@ -125,8 +125,9 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas.
 2. ✅ **Respondida (Mary, 2026-11-26):** el **Auxiliar Administrativo solo ve la cartera** (*«solo ve la cartera»*): no registra pagos, ni acuerdos, ni ajustes.
 3. ✅ **Respondida (Mary, 2026-11-26):** el Familiar o acompañante **no puede reservar zonas comunes ni radicar PQRS** (*«no puede reservar zonas comunes y radicar PQRS»*).
 4. ✅ **Respondida (Mary, 2026-11-26):** el **Revisor Fiscal no ve las PQRS**; si necesita una para su control, se la pide a la administración (opción A).
-6. ¿El **Auxiliar Administrativo** puede **emitir paz y salvos y certificados**, o tampoco? (En la
-   propuesta, sí.)
+6. ✅ **Respondida (Mary, 2026-11-26):** el **Auxiliar Administrativo sí emite paz y salvos y
+   certificados, pero los debe aprobar el administrador** (*«puede emitir paz y salvos y
+   certificados pero lo debe aprobar el administrador»*).
 5. ✅ **Respondida (Mary, 2026-11-26):** el **Piscinero no necesita nada más** (*«el piscinero no necesita nada más»*): su columna queda como está.
 
 ## 5. Historia
@@ -139,3 +140,4 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas.
 | 2026-11-26 | Quién crea al **familiar o acompañante** (en el Excel y aquí) | Mary |
 | 2026-11-26 | Quién crea e inactiva al **Administrador Idiky** (en el Excel y aquí) | Mary |
 | 2026-11-26 | **Propuesta** de qué puede ver y hacer cada usuario (§4 bis), por confirmar | IA, para Mary |
+| 2026-11-26 | Mary responde las seis dudas y **confirma la tabla de permisos** (§4 bis) | Mary |
