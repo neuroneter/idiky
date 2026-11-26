@@ -249,16 +249,15 @@ Amazon (o ya quedó verificada).
 
 ---
 
-## 14. ¿La app puede corregir el documento si no coincide con el de la Administración? — ✅ respondido: sí, una sola vez (Daniel, 2026-11-25)
+## 14. ¿La app puede corregir el documento si no coincide con el de la Administración? — ✅ respondido: sí, una sola vez (Daniel, 2026-11-25; reforzado en llamada 2026-11-26)
 
-> **Decisión (RN-391, RN-393, RN-395):** sí, la persona lo corrige ella misma **una sola vez**, en el momento en que se
-> valida al entrar a ALICE (ya probó el celular con el código), y a la Administración le queda un aviso en BLOKY. **Después
-> ALICE no puede permitir que la misma persona cambie su documento**: se le pide a IDIKY con foto por ambas caras y un
-> código nuevo, e IDIKY lo evalúa. Hecho en el middleware (T-164 y T-165); la pantalla de BOB «Cambios de documento» está
-> desplegada en BOB Dev (versión 0.6.0, con la ficha de verificación). **El permiso no hace falta todavía:** el 2026-11-25 los
-> cuatro usuarios de BOB son Super Admin, que ya la ven; cuando exista un rol más limitado (por ejemplo «Soporte») hay que
-> darle «Revisar cambios de documento» y, si aplica, «Impersonar». Falta probarla con una solicitud real.
-> Contrato en docs/20 §2.
+> **Decisión (RN-391, RN-393, RN-395):** sí. En el **primer ingreso** a ALICE se piden los datos personales; **tienen
+> primacía** sobre cualquier otro (Administración u otra fuente), para corregir malas escrituras del nombre o errores del
+> número de identidad. Se fijan / corrigen **una sola vez**, en ese primer inicio de sesión y **al crear las billeteras**.
+> Al **aceptar**, la app debe **notificar** que esos datos son importantes y que la persona se cerciore de haberlos puesto
+> bien. **Después** no los cambia sola: lo solicita por ALICE (proceso mayor: fotos + código) e IDIKY evalúa; **no** es
+> automático. Aviso a la Administración en BLOKY (RN-393). Middleware T-164/T-165 y BOB «Cambios de documento» (0.6.x) en
+> Dev. Contrato en docs/20 §2. **T-166 (Justo):** el aviso al aceptar y el diálogo de primacía en ALICE.
 
 **Contexto:** en el primer ingreso (pantalla «Confirmar documento»), si el tipo/número no coinciden con
 `directorio.persona`, el middleware responde `409 documento_no_coincide` y ALICE no deja seguir (RN-356).

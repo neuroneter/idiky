@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Justo ↔ Daniel (llamada) · ALICE · Primacía de los datos personales en el primer ingreso (RN-391)
+
+En la llamada acordaron el primer caso del ingreso a **ALICE**:
+
+1. Al **iniciar sesión por primera vez** la app pide los datos personales.
+2. Esos datos **tienen primacía** sobre cualquier otro (p. ej. lo escrito por la Administración): sirven para corregir malas
+   escrituras del nombre o errores en el número de identidad.
+3. Se pueden corregir / fijar **una sola vez**: esa primera vez, **cuando se crean las billeteras**.
+4. Al **aceptar**, hay que **notificar** a la persona que esos datos son importantes y que se cerciore de haberlos puesto bien.
+5. Si más adelante quiere cambiarlos, es un **proceso mayor**: lo **solicita por ALICE**; **no** se aplica solo (RN-395).
+
+**Documentado** en RN-391, docs/20 §0 y §2, avisos `daniel.md` §14 y `justo.md` §12. **Sigue:** T-166 en ALICE (diálogo +
+aviso al aceptar).
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY y BOB · Sesiones de la app, semana en Reuniones y listas por páginas (T-128, T-168, RN-397)
 
 Cinco cosas pequeñas que Daniel pidió cerrar juntas. ALICE no se tocó (es de Justo).

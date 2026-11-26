@@ -44,12 +44,17 @@ identidad de la persona en IDIKY y en la cadena.
 
 | Campo | Quién lo pone | Notas |
 |---|---|---|
-| **Tipo de documento** | Administración al crear; la persona **confirma** en el primer ingreso | Obligatorio; catálogo por país (§1.0) |
-| **Número de documento** | Igual | Obligatorio; debe **coincidir** con el reportado (`documento_no_coincide`, §2) |
-| **Nombre** | Administración; la persona puede completar/ajustar en datos básicos | Obligatorio |
+| **Tipo de documento** | Administración al crear; la persona **confirma o corrige una vez** en el primer ingreso | Obligatorio; catálogo por país (§1.0). **Primacía** de lo que escribe en ALICE (RN-391) |
+| **Número de documento** | Igual | Obligatorio. Si no coincide: diálogo + `corregir: true` (§2). Después queda fijo |
+| **Nombre** | Administración al crear; la persona lo **confirma o corrige una vez** en el primer ingreso | Obligatorio. Misma primacía (RN-391): evita malas escrituras |
 | **Celular** | Administración al crear | Obligatorio; único (arriba). Ingreso con código |
 | **Correo electrónico** | La persona en el primer ingreso, **validado con código** (§2c) | Obligatorio para terminar el primer ingreso (RN-356) |
 | **Fecha de nacimiento** | La persona en datos básicos | **Aprobada** (Justo + Daniel, 2026-11-22, acuerdo telefónico; **RN-192**). Campo `fecha_nacimiento` (`YYYY-MM-DD`) en el directorio. Obligatoria al cerrar el primer ingreso (T-143) |
+
+**Primacía y aviso (RN-391, llamada 2026-11-26):** los datos personales que la persona escribe en el **primer ingreso**
+mandan sobre cualquier otro registro previo. Solo se pueden fijar / corregir **esa vez**, antes de crear las billeteras.
+Al aceptar, ALICE muestra un aviso de que son datos importantes y que revise bien. Un cambio posterior es **solicitud a
+IDIKY por la app** (RN-395), no automático.
 
 Con **tipo + número de documento** (y el secreto de IDIKY) el middleware ya puede calcular `hashIdentidad` y ALICE puede
 **crear las billeteras** (§2b) tras la passkey. Nombre, correo y fecha de nacimiento son del perfil; el correo además es
@@ -140,14 +145,15 @@ Responde:
 - Si el documento **no existe** en el directorio: se le pone a esta persona y se calcula su `hash_identidad` (RN-298).
 - Si **ya existe** (la persona está en otra copropiedad): **se unen** (RN-322). La respuesta trae la persona resultante y
   un **token nuevo** (el anterior queda cerrado).
-- **RN-356 y RN-391 — Si la Administración ya reportó el documento** (hoy es obligatorio al crear a alguien) y el que
-  escribe la persona **no coincide**, responde **`409 documento_no_coincide`** con **`puedeCorregir: true`** y un mensaje
-  para mostrarle. ALICE le pregunta si está segura y, si dice que sí, repite la llamada con **`corregir: true`**: queda el
-  documento que ella escribió, la respuesta es como `GET /api/app/yo` más `documentoCorregido: true`, y a la
-  Administración le queda un aviso. **Es una sola vez** (Daniel, 2026-11-25): al coincidir o al corregir, el documento
-  queda confirmado (`persona.documentoConfirmado: true`) y desde ahí cualquier intento de cambiarlo responde
-  **`409 documento_fijo`** (`puedeCorregir: false`): ALICE **no** debe ofrecer cambiar el documento en el perfil. El cambio
-  se le pide a IDIKY con foto por ambas caras y un código nuevo (RN-395, abajo).
+- **RN-356 y RN-391 — Primacía de lo que escribe la persona** (Daniel 2026-11-25; llamada Justo ↔ Daniel 2026-11-26): en el
+  primer ingreso, **nombre y documento** que pone en ALICE mandan sobre lo de la Administración (malas escrituras, error de
+  cédula, etc.). Si el documento **no coincide**, responde **`409 documento_no_coincide`** con **`puedeCorregir: true`** y
+  un mensaje. ALICE muestra un diálogo claro: que **se cerciore** —esos datos son importantes— y, si acepta, repite con
+  **`corregir: true`**. Queda lo que ella escribió; la respuesta es como `GET /api/app/yo` más `documentoCorregido: true`;
+  aviso a la Administración (RN-393). **Una sola vez**, en ese primer ingreso y **antes de las billeteras**. Al coincidir o
+  al corregir, queda confirmado (`persona.documentoConfirmado: true`); después **`409 documento_fijo`** (`puedeCorregir:
+  false`): **no** ofrecer cambio libre en el perfil. Un cambio con el tiempo se **solicita por ALICE** a IDIKY (fotos +
+  código; RN-395): proceso mayor, **no** automático.
 
 ### Pedirle a IDIKY el cambio de documento (RN-395, T-165) — con Bearer
 
