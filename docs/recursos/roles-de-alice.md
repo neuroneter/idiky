@@ -17,13 +17,18 @@
 | **Administrador Idiky** | No aplica | El **primero** se crea al instalar el sistema (es el dueño); los demás, **otro Administrador Idiky** | **Otro Administrador Idiky**, nunca él mismo; **siempre queda al menos uno activo** |
 | **Administrador Copropiedad** | No aplica | Administrador Idiky | Administrador Idiky |
 | **Delegado** | No aplica | Administrador Idiky | Administrador Idiky, **solo por solicitud directa** a `operaciones@idiky.com`, con el soporte |
+| **Presidente del consejo** | No aplica | *Por confirmar con Mary* | *Por confirmar con Mary* |
+| **Consejero** | No aplica | *Por confirmar con Mary* | *Por confirmar con Mary* |
 | **Portería** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Auxiliar Administrativo** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Contador** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Revisor Fiscal** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Piscinero** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
+| **Aseo** | No aplica | *Por confirmar con Mary* | *Por confirmar con Mary* |
+| **Mantenimiento** | No aplica | *Por confirmar con Mary* | *Por confirmar con Mary* |
 | **Propietario** | Residente · Residente Temporal · No Residente | El Administrador Copropiedad crea **un** propietario; si hay más propietarios, **los crea ese primer propietario** | Igual: el Administrador Copropiedad al primero; los demás, el propietario que creó el Administrador |
 | **Arrendatario** | Residente · Residente Temporal · No Residente | Propietario | Propietario |
+| **Inmobiliaria y operador** | *Por confirmar con Mary* | *Por confirmar con Mary* | *Por confirmar con Mary* |
 | **Visitante** | Residente · Residente Temporal · No Residente | Propietario y arrendatario. **Solo el propietario** puede crear un visitante con marca de **Residente Temporal** | Propietario y arrendatario |
 | **Familiar o acompañante** | Residente · Residente Temporal · No Residente · **Residente Recurrente** | **Propietario o arrendatario** | **Quien lo creó, o el perfil superior a quien lo creó** |
 
@@ -50,12 +55,15 @@
 | 1 | 2026-11-26 | Se incluye al **Delegado** (§1): lo crea el Administrador Idiky y lo inactiva el Administrador Idiky solo por solicitud directa a `operaciones@idiky.com`, con el soporte. **Confirmado por Mary** (*«lo definido para el delegado está okey»*). |
 | 2 | 2026-11-26 | **«Conviviente» no existe** en la legislación ni en la terminología colombiana de propiedad horizontal: *«Conviviente no existe en la legislación o en la terminología colombiana»*. **No se usa** en pantallas, mensajes, documentos ni en el código nuevo. Quien vive en la unidad sin ser propietario ni arrendatario es **Familiar o acompañante** (o Visitante), con su **marca de residencia**. |
 | 3 | 2026-11-26 | **Al familiar o acompañante lo inactiva quien lo creó o el perfil superior a ese** (*«lo inactiva el que lo creó o el perfil superior a este»*). Por ejemplo, si lo creó el arrendatario, lo inactiva el arrendatario o el propietario. **Esta lectura la confirmó Mary** (*«sí, está bien»*). |
+| 6 | 2026-11-26 | **Consolidación con el catálogo de BOB y BLOKY** (§4 ter): queda **Portería** (no «Seguridad»); queda **Auxiliar Administrativo** (no «Secretaría»); se **crea Piscinero**; se **agregan Aseo, Mantenimiento, Presidente del consejo y Consejero**; queda **Arrendatario**, que es el de BLOKY «Arrendatario · solo vivir»; se incluye **Inmobiliaria y operador**, que **reemplaza** a «Arrendatario · operación completa»; queda **Familiar o acompañante** y se **elimina «conviviente»**; queda **Visitante** (no «Invitado»); se **agrega la marca de residencia** como dato. |
 | 4 | 2026-11-26 | **Al familiar o acompañante lo crean el propietario o el arrendatario** (*«lo pueden crear el propietario o arrendatario»*). |
 | 5 | 2026-11-26 | **Administrador Idiky**, el rol más alto (el dueño, el equipo de IDIKY): el primero se crea al instalar el sistema; los demás los crea otro Administrador Idiky. Lo inactiva **otro** Administrador Idiky, nunca él mismo, y **siempre queda al menos uno activo**: así IDIKY nunca queda sin dueño y quien se va o pierde su clave se bloquea el mismo día. Propuesta aceptada por Mary (*«sí, déjalo así»*). |
 
 ## 3. Lo que la tabla todavía no dice — preguntar a Mary
 
-*(Nada: la tabla quedó completa el 2026-11-26. Lo que choca con otros sistemas está en la §4.)*
+1. **Los cinco usuarios nuevos** (decisión 6): quién crea y quién inactiva al Presidente del consejo, al
+   Consejero, a Aseo, a Mantenimiento y a la Inmobiliaria y operador, y la marca de residencia de esta.
+2. **Qué ven y hacen** esos cinco y el Piscinero en la §4 bis (hoy la matriz confirmada no los tiene).
 
 ## 4. Lo que hoy choca con la tabla — para que Mary y Daniel lo concilien
 
@@ -70,7 +78,7 @@ contradiga la tabla.
 | `docs/03-actores-y-roles.md` | Residente · Propietario no residente · Administrador · Portería · Consejo | Faltan Auxiliar Administrativo, Contador, Revisor Fiscal y Piscinero; el consejo no es un usuario de la tabla |
 | `docs/23-propietario-arrendatario-y-vinculos.md` (Justo) | Propietario · arrendatario · conviviente · invitado | Lo mismo que la primera fila |
 
-## 4 ter. La tabla frente al catálogo de BOB y BLOKY — para consolidar
+## 4 ter. La tabla frente al catálogo de BOB y BLOKY — ✅ consolidada por Mary (decisión 6)
 
 Leído el 2026-11-26 en `Bloky-Idiky`, rama `develop` (`apps/bloky-api/src/permisos/inicial.ts`): es
 el catálogo con el que arranca el middleware y que se edita en BOB (RN-333, ADR-0034).
@@ -80,18 +88,18 @@ el catálogo con el que arranca el middleware y que se edita en BOB (RN-333, ADR
 | Administrador Idiky | No está en el catálogo: son los usuarios de Strapi en BOB (el equipo de IDIKY, con el rol de soporte para impersonar) | Nada: queda fuera del catálogo |
 | Administrador Copropiedad | `administrador`, Administrador | Coinciden |
 | Delegado | `delegado`, Delegado | Coinciden |
-| Portería | `seguridad`, Seguridad | El nombre |
-| Auxiliar Administrativo | `secretaria`, Secretaría | El nombre |
+| Portería | `seguridad`, Seguridad | ✅ Queda **Portería** |
+| Auxiliar Administrativo | `secretaria`, Secretaría | ✅ Queda **Auxiliar Administrativo** |
 | Contador | `contador`, Contador | Coinciden |
 | Revisor Fiscal | `revisor_fiscal`, Revisor fiscal | Coinciden |
-| Piscinero | **No existe** | Crearlo, o que sea parte de Mantenimiento |
-| *(no está)* | `aseo`, Aseo · `mantenimiento`, Mantenimiento | Agregarlos a la tabla o retirarlos del catálogo |
-| *(no está)* | `presidente_consejo`, Presidente del consejo · `consejero`, Consejero | Agregarlos a la tabla o retirarlos (PN-28 ya sabe quién está en el consejo) |
+| Piscinero | **No existe** | ✅ **Se crea** |
+| *(no estaba)* | `aseo`, Aseo · `mantenimiento`, Mantenimiento | ✅ **Se agregan** a la tabla |
+| *(no estaba)* | `presidente_consejo`, Presidente del consejo · `consejero`, Consejero | ✅ **Se agregan** a la tabla |
 | Propietario | `propietario`, Propietario | Coinciden |
-| Arrendatario | **Dos**: `arrendatario_operacion` (operación completa) y `arrendatario_solo_vivir` (solo vivir) | Uno solo o los dos paquetes |
-| Familiar o acompañante | `conviviente`, se muestra «Residente» | El nombre y el identificador (decisión 2) |
-| Visitante | `invitado`, Invitado | El nombre |
-| Marca de residencia | **No existe** como dato | Agregarla |
+| Arrendatario | **Dos**: `arrendatario_operacion` (operación completa) y `arrendatario_solo_vivir` (solo vivir) | ✅ **Arrendatario** = «solo vivir»; «operación completa» lo **reemplaza Inmobiliaria y operador** |
+| Familiar o acompañante | `conviviente`, se muestra «Residente» | ✅ Queda **Familiar o acompañante**; **se elimina `conviviente`** |
+| Visitante | `invitado`, Invitado | ✅ Queda **Visitante** |
+| Marca de residencia | **No existe** como dato | ✅ **Se agrega** |
 
 **La matriz sembrada tampoco coincide con la §4 bis.** Por ejemplo, `conviviente` reserva y radica
 PQRS, y `contador` solo ve pagos y paz y salvo. Se concilia cuando Mary cierre la tabla de arriba.
@@ -167,3 +175,4 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas. ⁹ El Au
 | 2026-11-26 | Quién crea e inactiva al **Administrador Idiky** (en el Excel y aquí) | Mary |
 | 2026-11-26 | **Propuesta** de qué puede ver y hacer cada usuario (§4 bis), por confirmar | IA, para Mary |
 | 2026-11-26 | Mary responde las seis dudas y **confirma la tabla de permisos** (§4 bis) | Mary |
+| 2026-11-26 | **Consolida** la tabla con el catálogo de BOB y BLOKY: cinco usuarios nuevos y los nombres que quedan (decisión 6; en el Excel y aquí) | Mary |
