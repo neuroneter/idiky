@@ -118,7 +118,7 @@ coeficiente y un acta que resista revisión.
 Mary: al familiar o acompañante **lo inactiva quien lo creó o el perfil superior a ese** (si lo creó
 el arrendatario, también el propietario). Quedó en el Excel y en
 [`recursos/roles-de-alice.md`](./recursos/roles-de-alice.md). Mary confirmó también lo del Delegado.
-**Actualización (decisión 4):** al familiar o acompañante **lo crean el propietario o el arrendatario**. **Falta:** quién crea e inactiva al Administrador Idiky, y qué puede hacer cada usuario.
+**Actualización (decisión 4):** al familiar o acompañante **lo crean el propietario o el arrendatario**. **Decisión 5:** al **Administrador Idiky** el primero se crea al instalar; los demás los crea e inactiva otro Administrador Idiky, nunca él mismo, y siempre queda al menos uno activo. **Para Daniel:** aplicarlo en BOB. **Falta:** qué puede hacer cada usuario.
 
 ### 2026-11-26 · Mary + IA (Claude) · «Conviviente» no existe (tabla de roles, decisión 2)
 
