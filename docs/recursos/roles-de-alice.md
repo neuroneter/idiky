@@ -43,6 +43,13 @@
   residencia.
 - **Nadie se borra: se inactiva**, siempre con quién y cuándo (regla del proyecto).
 
+## 2 bis. Decisiones de Mary sobre la tabla
+
+| # | Fecha | Decisión |
+|---|---|---|
+| 1 | 2026-11-26 | Se incluye al **Delegado** (§1). |
+| 2 | 2026-11-26 | **«Conviviente» no existe** en la legislación ni en la terminología colombiana de propiedad horizontal: *«Conviviente no existe en la legislación o en la terminología colombiana»*. **No se usa** en pantallas, mensajes, documentos ni en el código nuevo. Quien vive en la unidad sin ser propietario ni arrendatario es **Familiar o acompañante** (o Visitante), con su **marca de residencia**. |
+
 ## 3. Lo que la tabla todavía no dice — preguntar a Mary
 
 1. **Familiar o acompañante:** quién lo crea y quién lo inactiva (las celdas están vacías).
@@ -58,7 +65,7 @@ contradiga la tabla.
 
 | Dónde | Qué dice hoy | Qué dice la tabla |
 |---|---|---|
-| RN-366 y RN-398 (`docs/05-modelo-de-datos.md`), BLOKY y BOB | Cuatro roles en la unidad: Propietario · Arrendatario · **Residente** (identificador `conviviente`) · **Invitado** | **Propietario · Arrendatario · Visitante · Familiar o acompañante**, y «Residente» es una **marca de residencia**, no un rol |
+| RN-366 y RN-398 (`docs/05-modelo-de-datos.md`), BLOKY y BOB | Cuatro roles en la unidad: Propietario · Arrendatario · **Residente** (identificador `conviviente`, que según la decisión 2 **no debe existir**: hay que cambiarlo en la API, la matriz y la base) · **Invitado** | **Propietario · Arrendatario · Visitante · Familiar o acompañante**, y «Residente» es una **marca de residencia**, no un rol |
 | RN-366 | El invitado tiene fechas | El **Visitante** con marca de **Residente Temporal** solo lo crea el propietario |
 | La maqueta `apps/pwa` (`dominio/tipos.ts`, `RolResidencia`) | `propietario` · `arrendatario` · `familiar` · `autorizado` | Falta «Visitante» como usuario de la unidad; «autorizado» no está en la tabla |
 | `docs/03-actores-y-roles.md` | Residente · Propietario no residente · Administrador · Portería · Consejo | Faltan Auxiliar Administrativo, Contador, Revisor Fiscal y Piscinero; el consejo no es un usuario de la tabla |
