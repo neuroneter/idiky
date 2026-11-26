@@ -94,8 +94,9 @@ import { HojaPoder } from '../../componentes/HojaPoder'
 import { HojaActa } from '../../componentes/HojaActa'
 import { Postulaciones } from '../../componentes/Postulaciones'
 import { AntesDeLaAsamblea } from '../../componentes/AntesDeLaAsamblea'
+import { CargosVigentes, ElegidosDelPunto } from '../../componentes/CargosDelEdificio'
 import { RegistrarLlegadaQr } from '../../componentes/EntradaConQr'
-import { CARGOS_ELECCION } from '../../dominio/reglas'
+import { CARGOS_ELECCION, puestosDe } from '../../dominio/reglas'
 import type { CargoEleccion } from '../../dominio/tipos'
 import { CalendarioOrdinaria } from './CalendarioOrdinaria'
 import { RecordatoriosAsambleaTarjeta, RecordatoriosDeLaAsamblea } from './RecordatoriosAsamblea'
@@ -151,6 +152,9 @@ export function AsambleasAdminPage() {
 
       {/* PN-27 — Si salen recordatorios a los propietarios, y cuándo. */}
       <RecordatoriosAsambleaTarjeta />
+
+      {/* PN-28 — Quién está hoy en el consejo, el comité y la revisoría fiscal. */}
+      <CargosVigentes modo="admin" />
 
       {/* RN-211 — Cómo se cuentan los votos en este edificio. Va arriba porque
           decide el resultado de cada votación, y el administrador tiene que
@@ -648,6 +652,8 @@ function DetalleAsamblea({
               <Postulaciones asamblea={asamblea} punto={punto} modo="admin" />
               {/* CU-A-18 — La votación del punto, donde se discute. */}
               <VotacionPunto asamblea={asamblea} punto={punto} />
+              {/* PN-28 — Si fue una elección: quiénes quedaron y si aceptaron. */}
+              <ElegidosDelPunto asamblea={asamblea} punto={punto} modo="admin" />
             </li>
           )
         })}
@@ -1039,7 +1045,7 @@ interface DatosConvocatoria {
   lugar?: string
   enlaceTransmision?: string
   citacion: string
-  ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida; contenidoEconomico?: boolean; eleccion?: CargoEleccion }>
+  ordenDelDia: Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida; contenidoEconomico?: boolean; eleccion?: CargoEleccion; puestos?: number }>
 }
 
 function FormularioConvocatoria({
@@ -1058,7 +1064,7 @@ function FormularioConvocatoria({
   const [enlace, setEnlace] = useState('')
   const [citacion, setCitacion] = useState('')
   const [puntos, setPuntos] = useState<
-    Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida; contenidoEconomico?: boolean; eleccion?: CargoEleccion }>
+    Array<{ titulo: string; descripcion: string; seVota: boolean; mayoria?: MayoriaExigida; contenidoEconomico?: boolean; eleccion?: CargoEleccion; puestos?: number }>
   >([{ titulo: '', descripcion: '', seVota: false }])
   const [error, setError] = useState<string | null>(null)
 
@@ -1306,6 +1312,23 @@ function FormularioConvocatoria({
                 {(Object.keys(CARGOS_ELECCION) as CargoEleccion[]).map((c) => (
                   <option key={c} value={c}>
                     Elección: {CARGOS_ELECCION[c].nombre}
+                  </option>
+                ))}
+              </select>
+            )}
+            {/* PN-28 — Cuántos puestos: consejo y comité, impar de 3 o más; el revisor fiscal es uno. */}
+            {punto.seVota && punto.eleccion && punto.eleccion !== 'revisor_fiscal' && (
+              <select
+                aria-label={`Puestos del punto ${i + 1}`}
+                value={puestosDe(punto)}
+                onChange={(evento) =>
+                  setPuntos(puntos.map((p, j) => (i === j ? { ...p, puestos: Number(evento.target.value) } : p)))
+                }
+                style={{ marginTop: 'var(--e2)' }}
+              >
+                {[3, 5, 7, 9].map((n) => (
+                  <option key={n} value={n}>
+                    Se eligen {n} puestos
                   </option>
                 ))}
               </select>
@@ -2051,6 +2074,8 @@ function VistaActa({
       <div className="previsualizacion-hoja">
         <HojaActa
           acta={{ ...acta, presidenteId, secretarioId, desarrollo }}
+          cargos={bd.cargosElegidos}
+          postulaciones={bd.postulaciones}
           documento={
             acta.documentoId ? bd.documentos.find((d) => d.id === acta.documentoId) : undefined
           }

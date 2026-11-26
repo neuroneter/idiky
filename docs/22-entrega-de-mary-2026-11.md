@@ -30,14 +30,14 @@ maqueta, sin servidor (ver §5).
 | **Trámites** | **Trasteos** (horario, anticipación, depósito y ascensores los parametriza el administrador; sin ascensores no se preguntan). **Obras en el apartamento** con los trabajadores autorizados. **Depósito** recibido, devuelto o retenido con motivo. **Reportar un daño con foto**. | CU-R-40, CU-R-44, CU-R-45, CU-A-37 · PN-06, PN-10, PN-11, PN-13 |
 | **Seguridad y portería** | **Pedir ayuda a portería** desde el inicio. **QR real y escaneable** para visitantes, sin librerías (ADR-0005 actualizado), compartible por WhatsApp; portería lo escanea con la cámara. **Hoy en el edificio** (trasteos, obras, calendario). **Minuta** completa del turno. | CU-R-10, CU-R-43, CU-P-02 · PN-09, PN-12 |
 | **La persona** | **Mis avisos:** por dónde (WhatsApp, SMS, correo o solo la app) y de qué temas. **Mis propiedades:** todas las unidades con lo que se debe en cada una. | CU-R-48, CU-R-01 (A6) · PN-16, PN-18 |
-| **Asambleas ordinarias** (2026-11-23) | Al citar, cada punto dice si es **decisión económica** y si es una **elección**. **Elecciones** con postulaciones (consejo, comité de convivencia, revisor fiscal) y voto en blanco. **Documentos y preguntas antes** de la reunión. **Entrada con QR** al salón. **Calendario legal** de la ordinaria. **Recordatorios automáticos** a los propietarios (2026-11-26) | CU-A-12, CU-A-17, CU-R-20, CU-R-21 · RN-211, PN-23 a PN-27 |
+| **Asambleas ordinarias** (2026-11-23) | Al citar, cada punto dice si es **decisión económica** y si es una **elección**. **Elecciones** con postulaciones (consejo, comité de convivencia, revisor fiscal) y voto en blanco. **Documentos y preguntas antes** de la reunión. **Entrada con QR** al salón. **Calendario legal** de la ordinaria. **Recordatorios automáticos** a los propietarios. **Elegidos y cargos del edificio**, con aceptación y en el acta (2026-11-26) | CU-A-12, CU-A-17, CU-R-20, CU-R-21 · RN-211, PN-23 a PN-28 |
 | **Entre perfiles** | **«Te esperan»** en el tablero de la administración. Al **familiar y al autorizado no se les muestra** lo que decide el propietario o el arrendatario. | PN-20 |
 
 Para probarlo: el demo trae a **María Camila** (propietaria al día), **Andrés** (con cuotas
 vencidas: acuerdos), **Gustavo** (dos propiedades), **Tomás** (familiar), **Jairo** (portería) y
 **Olga** (administración).
 
-**Calidad:** compila, ortografía sin hallazgos, **130 pruebas de navegador pasan**. Ninguna
+**Calidad:** compila, ortografía sin hallazgos, **134 pruebas de navegador pasan**. Ninguna
 dependencia nueva.
 
 ## 3. Lo que le toca a cada uno
@@ -130,6 +130,7 @@ Las fechas las ponen Daniel y Justo según su avance.
 | CU-A-12, CU-R-21 Elecciones | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/Postulaciones.tsx`, `features/admin/VotacionPunto.tsx` | `elecciones.spec.ts` |
 | CU-A-12, CU-R-20 Antes de la asamblea | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/AntesDeLaAsamblea.tsx` | `antes-asamblea.spec.ts` |
 | CU-A-17, CU-R-21 Entrada con QR | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/EntradaConQr.tsx` | `entrada-qr.spec.ts` |
+| CU-A-18, CU-A-20 Elegidos y cargos | `/admin/asambleas`, `/app`, `/app/edificio` | `componentes/CargosDelEdificio.tsx`, `componentes/HojaActa.tsx` | `elegidos.spec.ts` |
 | CU-A-12 Recordatorios de la asamblea | `/admin/asambleas`, `/app/avisos` | `features/admin/RecordatoriosAsamblea.tsx` | `recordatorios-asamblea.spec.ts` |
 | CU-A-12 Calendario de la ordinaria | `/admin/asambleas` | `features/admin/CalendarioOrdinaria.tsx` | `calendario-ordinaria.spec.ts` |
 | CU-R-35, CU-A-31 Pronto pago | `/app/cuenta`, `/admin/cartera` | `componentes/AvisoProntoPago.tsx`, `features/admin/ProntoPagoTarjeta.tsx` | `competir.spec.ts` |

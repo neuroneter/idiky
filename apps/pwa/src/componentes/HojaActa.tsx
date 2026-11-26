@@ -25,6 +25,8 @@ import type {
   Persona,
   Unidad,
   Votacion,
+  CargoElegido,
+  Postulacion,
   Voto,
 } from '../dominio/tipos'
 import { formatearFecha, formatearFechaHora } from '../utilidades/formato'
@@ -32,6 +34,10 @@ import { nombreCompleto } from '../datos/selectores'
 import {
   actaTieneComision,
   contarVotacion,
+  CARGOS_ELECCION,
+  elegidosDeEleccion,
+  postulacionesVigentes,
+  puestosDe,
   decisionAdmisibleEnLaSesion,
   etiquetaUnidad,
   herramientaDeEnlace,
@@ -67,6 +73,8 @@ export function HojaActa({
   unidadesEdificio = 0,
   quorumMinimo,
   actaOriginal,
+  cargos = [],
+  postulaciones = [],
 }: {
   acta: Acta
   documento?: Documento
@@ -87,6 +95,9 @@ export function HojaActa({
   quorumMinimo: number
   /** Si esta acta aclara otra, la original — para citarla. */
   actaOriginal?: Acta
+  /** PN-28 — Los cargos y las postulaciones, para decir quién quedó elegido. */
+  cargos?: CargoElegido[]
+  postulaciones?: Postulacion[]
 }) {
   if (!asamblea) return null
 
@@ -295,7 +306,42 @@ export function HojaActa({
                   ? 'Por ser una decisión de contenido económico, cada voto se ponderó por el coeficiente de la unidad (Ley 675 de 2001, artículo 37).'
                   : 'Conforme al reglamento, la decisión se contó por coeficiente.'}
             </p>
-            <p>
+            {/* PN-28 — En una elección, el acta dice quién quedó, no «se aprueba». */}
+            {punto.eleccion ? (
+              (() => {
+                const puestos = puestosDe(punto)
+                const { elegidos, empate } = elegidosDeEleccion({
+                  conteo,
+                  base,
+                  puestos,
+                  postulaciones: postulacionesVigentes(postulaciones, punto.id),
+                })
+                const cargosDelPunto = cargos.filter((c) => c.votacionId === votacion.id)
+                const respuesta = (nombre: string) => {
+                  const c = cargosDelPunto.find((x) => x.nombre === nombre)
+                  return c?.aceptacion ? 'aceptó el cargo' : c?.declinacion ? 'no aceptó el cargo' : 'pendiente de aceptar el cargo'
+                }
+                return (
+                  <p>
+                    Se eligieron {puestos === 1 ? 'un puesto' : `${puestos} puestos`} de{' '}
+                    {CARGOS_ELECCION[punto.eleccion].nombre.toLowerCase()} ({CARGOS_ELECCION[punto.eleccion].fuente}), por los
+                    más votados.{' '}
+                    <strong>
+                      {!quorum
+                        ? 'La votación no produce efectos por falta de quórum.'
+                        : elegidos.length === 0
+                          ? 'Nadie quedó elegido.'
+                          : `${elegidos.length === 1 ? 'Quedó elegido' : 'Quedaron elegidos'}: ${elegidos
+                              .map((e) => `${e.nombre}${e.matricula ? `, matrícula profesional ${e.matricula}` : ''} (${porUnidad ? votos_(e.valor) : porcentaje(e.valor)}; ${respuesta(e.nombre)})`)
+                              .join('; ')}.`}
+                    </strong>
+                    {quorum && elegidos.length < puestos &&
+                      ` ${empate ? 'Por empate' : 'Por falta de candidatos con votos'}, ${puestos - elegidos.length === 1 ? 'queda un puesto sin asignar' : `quedan ${puestos - elegidos.length} puestos sin asignar`}, que se define conforme al reglamento.`}
+                  </p>
+                )
+              })()
+            ) : (
+              <p>
               Exigiendo este punto{' '}
               {mayoria === 'unanimidad'
                 ? `unanimidad, como lo exige el reglamento: ${porUnidad ? `todas las unidades que integran el conjunto, esto es ${votos_(unidadesNecesarias(resultado.umbral, mayoria))}` : `la totalidad de los coeficientes que integran el conjunto, esto es ${porcentaje(resultado.umbral)}`}`
@@ -318,6 +364,7 @@ export function HojaActa({
               </strong>
               .
             </p>
+            )}
             {!admisible.admisible && (
               <p>
                 Se deja constancia de que, conforme al{' '}

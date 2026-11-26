@@ -113,6 +113,19 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Mary + IA (Claude) · El acta con los elegidos y los cargos del edificio (PN-28)
+
+Al citar una elección se fijan los puestos (consejo y comité: impar de 3 o más; revisor fiscal: 1).
+Al cerrar la votación quedan los más votados (plancha: sus integrantes; empate en el último puesto:
+lo define el reglamento); los anteriores del mismo cargo terminan y al elegido le llega el aviso.
+El elegido acepta o no desde el inicio de ALICE; la administración lo registra por quien es de
+afuera. El acta dice **quién quedó elegido** y si aceptó. En *Tu edificio* y en Asambleas se ve
+quién está hoy en cada cargo; la semilla (versión 53) trae el consejo y la revisora fiscal de la
+ordinaria anterior. Archivos: `componentes/CargosDelEdificio.tsx`, `componentes/HojaActa.tsx`,
+`registrarElegidos` y `responderCargo` en `datos/repositorio.ts`; prueba `elegidos.spec.ts`.
+**Para el abogado:** cociente electoral y suplentes. **Sigue:** los números definitivos de Daniel
+(T-55) para PN-01 a PN-28.
+
 ### 2026-11-26 · Mary + IA (Claude) · Recordatorios de la asamblea (PN-27)
 
 Para llegar al quórum en las ordinarias: con la asamblea convocada, salen solos a cada propietario

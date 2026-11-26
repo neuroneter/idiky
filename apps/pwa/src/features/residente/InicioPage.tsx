@@ -27,6 +27,7 @@ import { Icono } from '../../componentes/Icono'
 import { ChipComunicado, ChipReserva } from '../../componentes/Etiquetas'
 import { BarraAvance, ChipProyecto } from '../../componentes/TableroProyecto'
 import { PermanentesPorAceptar, PoderesPorAceptar } from './PoderesPorAceptar'
+import { MisCargosPorAceptar } from '../../componentes/CargosDelEdificio'
 
 export function InicioPage() {
   const { bd } = useDatos()
@@ -98,6 +99,8 @@ export function InicioPage() {
 
       {/* T-46 — Un poder que me dieron y espera mi respuesta (RN-217). */}
       <PoderesPorAceptar />
+      {/* PN-28 — Si la asamblea lo eligió, que acepte el cargo. */}
+      <MisCargosPorAceptar />
       <PermanentesPorAceptar />
 
       {/* Accesos directos. Solicitudes se queda aqui (Mary, 2026-08-27): lo que

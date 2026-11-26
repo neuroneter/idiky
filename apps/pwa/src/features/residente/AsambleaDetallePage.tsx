@@ -69,6 +69,7 @@ import { HojaActa } from '../../componentes/HojaActa'
 import type { FormaAsistencia, PuntoOrdenDelDia, Votacion } from '../../dominio/tipos'
 import { Postulaciones } from '../../componentes/Postulaciones'
 import { AntesDeLaAsamblea } from '../../componentes/AntesDeLaAsamblea'
+import { ElegidosDelPunto } from '../../componentes/CargosDelEdificio'
 import { MiCodigoDeEntrada } from '../../componentes/EntradaConQr'
 
 function formatearCoeficiente(coeficiente: number): string {
@@ -840,6 +841,8 @@ export function AsambleaDetallePage() {
         <div className={viendoActa ? 'previsualizacion-hoja' : undefined}>
           <HojaActa
             acta={actaAprobada}
+            cargos={bd.cargosElegidos}
+            postulaciones={bd.postulaciones}
             documento={documentoActa}
             copropiedad={sel.copropiedad(bd, sesion.copropiedadId)}
             asamblea={asamblea}
@@ -886,6 +889,8 @@ export function AsambleaDetallePage() {
               <>
                 <div className="separador" />
                 {bloqueVotacion(punto)}
+                {/* PN-28 — Si fue una elección: quiénes quedaron. */}
+                <ElegidosDelPunto asamblea={asamblea} punto={punto} modo="residente" />
               </>
             )}
           </div>

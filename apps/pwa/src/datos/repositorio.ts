@@ -274,6 +274,8 @@ import {
   motivoProntoPagoInvalido,
   respuestaDeUnidad,
 } from '../dominio/reglas'
+import { baseDeVoto, contarVotacion, elegidosDeEleccion, motivoPuestosInvalidos, puestosDe, textoEleccionCargo } from '../dominio/reglas'
+import type { CargoElegido } from '../dominio/tipos'
 import { leerCodigoAsistencia, motivoPostulacionInvalida, motivoRecordatoriosAsambleaInvalidos, poderVigente, recordatorioAsambleaQueToca, recordatoriosAsambleaDe, textoRecordatorioAsamblea, motivoPreguntaAsambleaInvalida, postulacionesVigentes, textoRespuestaAsamblea } from '../dominio/reglas'
 import type { CargoEleccion, Postulacion, PreguntaAsamblea } from '../dominio/tipos'
 import { responsablesDeRegistro, responsablesDeVisita, responsablesDelVinculo, unidadTienePropietario } from './selectores'
@@ -2697,6 +2699,8 @@ export async function convocarAsamblea(
       contenidoEconomico?: boolean
       /** PN-23 — Si el punto es una elección y de qué cargo. */
       eleccion?: CargoEleccion
+      /** PN-28 — Cuántos puestos se eligen. */
+      puestos?: number
     }>
     /** Quien convoca: firma la citacion (RN-219). */
     convocadaPor?: string
@@ -2704,6 +2708,12 @@ export async function convocarAsamblea(
 ): Promise<Resultado<Asamblea>> {
   await esperar()
   const bd = clonar(bdActual)
+  // PN-28 — Los puestos de cada elección, como manda la ley.
+  for (const punto of parametros.ordenDelDia) {
+    if (!punto.seVota || !punto.eleccion) continue
+    const motivoPuestos = motivoPuestosInvalidos(punto.eleccion, puestosDe(punto))
+    if (motivoPuestos) throw new ErrorDeNegocio(`${punto.titulo || 'La elección'}: ${motivoPuestos}`)
+  }
 
   // RN-33 — La ordinaria, con 15 dias calendario; la extraordinaria solo avisa.
   const antelacion = antelacionConvocatoria(parametros)
@@ -2741,7 +2751,7 @@ export async function convocarAsamblea(
       ...(punto.mayoria ? { mayoria: punto.mayoria } : {}),
       ...(punto.seVota && punto.contenidoEconomico !== undefined ? { contenidoEconomico: punto.contenidoEconomico } : {}),
       // PN-23 — Una elección no es económica: se cuenta según el edificio.
-      ...(punto.seVota && punto.eleccion ? { eleccion: punto.eleccion, contenidoEconomico: false } : {}),
+      ...(punto.seVota && punto.eleccion ? { eleccion: punto.eleccion, contenidoEconomico: false, puestos: puestosDe(punto) } : {}),
     })),
     estado: 'convocada',
   }
@@ -3039,6 +3049,8 @@ export async function cerrarVotacion(
   if (votacion.estado !== 'abierta') throw new ErrorDeNegocio('Solo se cierra una votación abierta.')
   votacion.estado = 'cerrada'
   votacion.cerradaEn = ahoraISO()
+  // PN-28 — Si es una elección, quedan registrados los elegidos.
+  registrarElegidos(bd, votacion)
   return persistir(bd, votacion)
 }
 
@@ -3128,6 +3140,10 @@ export async function anularVotacion(
   if (motivo.length < 10) throw new ErrorDeNegocio('Escribe el motivo de la anulación: queda en el acta.')
   votacion.estado = 'anulada'
   votacion.anulacion = { motivo, por: parametros.personaId, en: ahoraISO() }
+  // PN-28 — Los cargos que salieron de esta votación terminan con ella.
+  for (const cargo of bd.cargosElegidos ?? []) {
+    if (cargo.votacionId === votacion.id && !cargo.fin) cargo.fin = { en: ahoraISO(), motivo: `Se anuló la votación: ${motivo}` }
+  }
   return persistir(bd, votacion)
 }
 
@@ -6905,4 +6921,87 @@ export async function configurarRecordatoriosAsamblea(
     cambiadoEn: ahoraISO(),
   }
   return persistir(bd, copropiedad)
+}
+
+// ---------------------------------------------------------------------------
+// Los elegidos y los cargos del edificio — PN-28 (Mary, 2026-11-26)
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-28 — Al cerrar la votación de una elección: quienes salieron elegidos
+ * ocupan el cargo desde el día de la asamblea; los que lo tenían terminan
+ * («lo reemplazó la elección»), y a los elegidos del edificio les llega el aviso.
+ */
+function registrarElegidos(bd: BaseDatos, votacion: Votacion): void {
+  const asamblea = bd.asambleas.find((a) => a.id === votacion.asambleaId)
+  const punto = asamblea?.ordenDelDia.find((p) => p.id === votacion.puntoId)
+  if (!asamblea || !punto?.eleccion) return
+  const copropiedad = bd.copropiedades.find((c) => c.id === asamblea.copropiedadId)
+  const { elegidos } = elegidosDeEleccion({
+    conteo: contarVotacion(votacion, bd.votos),
+    base: baseDeVoto(copropiedad, votacion),
+    puestos: puestosDe(punto),
+    postulaciones: postulacionesVigentes(bd.postulaciones, punto.id),
+  })
+  if (elegidos.length === 0) return
+  bd.cargosElegidos ??= []
+  const ahora = ahoraISO()
+  for (const anterior of bd.cargosElegidos) {
+    if (anterior.copropiedadId === asamblea.copropiedadId && anterior.cargo === punto.eleccion && !anterior.fin) {
+      anterior.fin = { en: ahora, motivo: `Lo reemplazó la elección de la ${asamblea.titulo.toLowerCase()}` }
+    }
+  }
+  const desde = fechaLocalDe(asamblea.fechaHora)
+  for (const elegido of elegidos) {
+    const cargo: CargoElegido = {
+      id: nuevoId('car'),
+      copropiedadId: asamblea.copropiedadId,
+      cargo: punto.eleccion,
+      nombre: elegido.nombre,
+      ...(elegido.personaId ? { personaId: elegido.personaId, unidadId: elegido.unidadId } : {}),
+      ...(elegido.matricula ? { matricula: elegido.matricula } : {}),
+      asambleaId: asamblea.id,
+      puntoId: punto.id,
+      votacionId: votacion.id,
+      desde,
+    }
+    bd.cargosElegidos.push(cargo)
+    if (elegido.personaId) {
+      const persona = bd.personas.find((p) => p.id === elegido.personaId)
+      avisarAPersona(bd, {
+        copropiedadId: asamblea.copropiedadId,
+        personaId: elegido.personaId,
+        texto: textoEleccionCargo({
+          copropiedad: copropiedad?.nombre ?? 'La copropiedad',
+          nombre: persona?.nombres.split(' ')[0] ?? elegido.nombre,
+          cargo: punto.eleccion,
+        }),
+        motivo: 'eleccion_cargo',
+        ahora,
+      })
+    }
+  }
+}
+
+/**
+ * PN-28 — El elegido acepta o no el cargo. Lo hace él desde la app; si es de
+ * afuera (el revisor fiscal) o lo dijo en la sala, lo registra la administración.
+ */
+export async function responderCargo(
+  bdActual: BaseDatos,
+  parametros: { cargoId: string; personaId: string; acepta: boolean },
+): Promise<Resultado<CargoElegido>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const cargo = (bd.cargosElegidos ?? []).find((c) => c.id === parametros.cargoId)
+  if (!cargo || cargo.fin) throw new ErrorDeNegocio('Ese cargo ya no está vigente.')
+  if (cargo.aceptacion || cargo.declinacion) throw new ErrorDeNegocio('Ese cargo ya tiene respuesta.')
+  const admin = esAdministracion(bd, parametros.personaId, cargo.copropiedadId)
+  if (!admin && cargo.personaId !== parametros.personaId) {
+    throw new ErrorDeNegocio('El cargo lo acepta la persona elegida, o la administración por ella.')
+  }
+  const respuesta = { por: parametros.personaId, en: ahoraISO() }
+  if (parametros.acepta) cargo.aceptacion = respuesta
+  else cargo.declinacion = respuesta
+  return persistir(bd, cargo)
 }

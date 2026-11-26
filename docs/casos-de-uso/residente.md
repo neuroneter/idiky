@@ -607,6 +607,8 @@ entrega** la convocatoria en PDF (ADR-0006).
 ---
 
 ### CU-R-21
+
+> **Ampliación 2026-11-26 (PN-28):** si la asamblea lo eligió, le aparece en el inicio para **aceptar o no el cargo**; en *Tu edificio* ve **quién está en el consejo, el comité y la revisoría fiscal** (`componentes/CargosDelEdificio.tsx`).
 ## CU-R-21 — Entrar a la asamblea y marcar mi asistencia
 
 > **Ampliación 2026-11-23:** en la presencial o mixta, el propietario —y el apoderado, por cada unidad que representa— ve **su código QR para entrar** (PN-25, `componentes/EntradaConQr.tsx`). Si un punto es una **elección**, ve a los candidatos con su presentación y, si el cargo se lo permite, **se postula** (PN-23, `componentes/Postulaciones.tsx`). Pruebas: `entrada-qr.spec.ts`, `elecciones.spec.ts`.

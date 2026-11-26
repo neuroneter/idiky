@@ -7,6 +7,7 @@
  */
 
 import type {
+  CargoElegido,
   PreguntaAsamblea,
   CargoEleccion,
   Postulacion,
@@ -5159,4 +5160,96 @@ export function textoRecordatorioAsamblea(p: {
     `${p.copropiedad}: hola, ${p.nombre}. La ${p.asamblea.titulo.toLowerCase()} ${cuando} ` +
     `(${formatearFechaHora(p.asamblea.fechaHora)}). ${donde}${codigo}${poder} Tu voz cuenta.`
   ).replace(/\s+/g, ' ').trim()
+}
+
+// ---------------------------------------------------------------------------
+// Los elegidos y los cargos del edificio — PN-28 · CU-A-18, CU-A-20 (Mary, 2026-11-26)
+// ---------------------------------------------------------------------------
+
+/** PN-28 — Puestos si el administrador no los cambia: consejo y comité, 3 (arts. 53 y 58); revisor fiscal, 1. */
+export const PUESTOS_POR_DEFECTO: Record<CargoEleccion, number> = { consejo: 3, comite_convivencia: 3, revisor_fiscal: 1 }
+
+export function puestosDe(punto: Pick<PuntoOrdenDelDia, 'eleccion' | 'puestos'>): number {
+  if (!punto.eleccion) return 0
+  if (punto.eleccion === 'revisor_fiscal') return 1
+  return punto.puestos ?? PUESTOS_POR_DEFECTO[punto.eleccion]
+}
+
+/** PN-28 — Consejo y comité: un número impar de tres o más (arts. 53 y 58). El revisor fiscal es uno. */
+export function motivoPuestosInvalidos(cargo: CargoEleccion, puestos: number): string | null {
+  if (cargo === 'revisor_fiscal') return puestos === 1 ? null : 'El revisor fiscal es una persona.'
+  if (!Number.isInteger(puestos) || puestos < 3 || puestos % 2 === 0) return 'Son tres o más puestos, en número impar (Ley 675, arts. 53 y 58).'
+  return null
+}
+
+export interface Elegido {
+  nombre: string
+  personaId?: string
+  unidadId?: string
+  matricula?: string
+  /** La opción de la tarjeta por la que salió (el candidato o la plancha). */
+  opcion: string
+  /** Coeficiente o unidades, según la base de la votación. */
+  valor: number
+}
+
+/**
+ * PN-28 — **Quiénes quedan elegidos.** Las opciones se ordenan de más a menos
+ * votos (coeficiente o unidades, según la base de RN-211) y llenan los puestos;
+ * el voto en blanco no elige a nadie. Una **plancha** que sale pone a sus
+ * integrantes en su orden. Si en el último puesto hay **empate**, ese puesto no
+ * se asigna: se define como diga el reglamento. **Para el abogado:** el cociente
+ * electoral, si el reglamento lo pide.
+ */
+export function elegidosDeEleccion(p: {
+  conteo: ConteoVotacion
+  base: BaseDeVoto
+  puestos: number
+  postulaciones: Postulacion[]
+}): { elegidos: Elegido[]; empate: boolean; vacantes: number } {
+  const valor = (o: ConteoOpcion) => (p.base === 'unidad' ? o.unidades : o.coeficiente)
+  const opciones = p.conteo.porOpcion
+    .filter((o) => o.texto !== 'Voto en blanco' && valor(o) > 0)
+    .sort((a, b) => valor(b) - valor(a))
+  const elegidos: Elegido[] = []
+  let empate = false
+  let i = 0
+  while (i < opciones.length && elegidos.length < p.puestos) {
+    // Las que empatan con esta entran juntas o no entran.
+    const grupo = opciones.filter((o) => valor(o) === valor(opciones[i]))
+    const personas = grupo.flatMap((o) => {
+      const postulacion = p.postulaciones.find((x) => x.nombre === o.texto)
+      const nombres = postulacion?.integrantes ?? [o.texto]
+      return nombres.map((nombre, j) => ({
+        nombre,
+        // El candidato de la plancha es el primero; los demás son nombres.
+        ...(j === 0 && postulacion?.personaId ? { personaId: postulacion.personaId, unidadId: postulacion.unidadId } : {}),
+        ...(j === 0 && postulacion?.matricula ? { matricula: postulacion.matricula } : {}),
+        opcion: o.texto,
+        valor: valor(o),
+      }))
+    })
+    if (grupo.length > 1 && elegidos.length + personas.length > p.puestos) {
+      empate = true
+      break
+    }
+    elegidos.push(...personas.slice(0, p.puestos - elegidos.length))
+    i += grupo.length
+  }
+  return { elegidos, empate, vacantes: p.puestos - elegidos.length }
+}
+
+/** PN-28 — Un cargo vigente: no ha terminado ni fue rechazado. */
+export function cargoVigente(cargo: CargoElegido): boolean {
+  return !cargo.fin && !cargo.declinacion
+}
+
+/** PN-28 — Los cargos vigentes de un edificio, por cargo. */
+export function cargosVigentesDe(cargos: CargoElegido[] | undefined, copropiedadId: string): CargoElegido[] {
+  return (cargos ?? []).filter((c) => c.copropiedadId === copropiedadId && cargoVigente(c))
+}
+
+/** PN-28 — El mensaje al elegido. */
+export function textoEleccionCargo(p: { copropiedad: string; nombre: string; cargo: CargoEleccion }): string {
+  return `${p.copropiedad}: ${p.nombre}, la asamblea te eligió para ${CARGOS_ELECCION[p.cargo].nombre.toLowerCase()}. Gracias por ofrecerte. Entra a Idiky para aceptar el cargo.`
 }

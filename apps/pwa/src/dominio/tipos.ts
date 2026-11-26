@@ -1069,6 +1069,7 @@ export type MotivoMensaje =
   | 'respuesta_proyecto'
   | 'respuesta_asamblea'
   | 'recordatorio_asamblea'
+  | 'eleccion_cargo'
   | 'pago_programado'
   | 'permiso_decidido'
   | 'acuerdo_pago'
@@ -1246,6 +1247,32 @@ export interface PuntoOrdenDelDia {
    * Una elección es una decisión no económica: se cuenta según el edificio.
    */
   eleccion?: CargoEleccion
+  /** PN-28 — Cuántos puestos se eligen en este punto (consejo y comité: impar, 3 o más). */
+  puestos?: number
+}
+
+/**
+ * PN-28 — Una persona en un cargo que eligió la asamblea (consejo, comité de
+ * convivencia, revisor fiscal). Nace al cerrar la votación de la elección.
+ * **No se borra**: termina (la reemplaza otra elección, no aceptó, se anuló la
+ * votación), con cuándo y por qué.
+ */
+export interface CargoElegido {
+  id: string
+  copropiedadId: string
+  cargo: CargoEleccion
+  nombre: string
+  personaId?: string
+  unidadId?: string
+  matricula?: string
+  asambleaId: string
+  puntoId: string
+  votacionId: string
+  /** El día de la asamblea que lo eligió. */
+  desde: FechaISO
+  aceptacion?: { por: string; en: FechaHoraISO }
+  declinacion?: { por: string; en: FechaHoraISO }
+  fin?: { en: FechaHoraISO; motivo: string }
 }
 
 /** PN-23 — Los cargos que elige la asamblea (Ley 675 de 2001, arts. 53, 56 y 58). */
@@ -1992,6 +2019,8 @@ export interface BaseDatos {
   acuerdosPago: AcuerdoPago[]
   /** PN-23 — Postulaciones a los cargos que elige la asamblea. */
   postulaciones: Postulacion[]
+  /** PN-28 — Quién ocupa los cargos que elige la asamblea, y quién los ocupó. */
+  cargosElegidos: CargoElegido[]
   accesosSoportes: AccesoSoporte[]
   asambleas: Asamblea[]
   asistencias: Asistencia[]
