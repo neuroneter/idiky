@@ -119,7 +119,7 @@ Se propuso qué ve y hace cada uno de los 12 usuarios en 20 módulos
 ([`recursos/roles-de-alice.md`](./recursos/roles-de-alice.md) §4 bis), **por confirmar**. Mary ya
 respondió tres dudas: el **Familiar o acompañante no reserva zonas comunes ni radica PQRS**, el
 **Piscinero no necesita nada más** que lo de la piscina y el **Auxiliar Administrativo solo ve la
-cartera**. Cuando
+cartera** y el **Revisor Fiscal no ve las PQRS** (las pide a la administración si las necesita). Cuando
 confirme la matriz completa, se aplica en la maqueta (hoy el familiar sí reserva y radica PQRS) y
 pasa a Daniel para la matriz de BOB y el middleware (ADR-0034).
 
