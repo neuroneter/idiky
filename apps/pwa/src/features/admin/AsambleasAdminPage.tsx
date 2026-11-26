@@ -98,6 +98,7 @@ import { RegistrarLlegadaQr } from '../../componentes/EntradaConQr'
 import { CARGOS_ELECCION } from '../../dominio/reglas'
 import type { CargoEleccion } from '../../dominio/tipos'
 import { CalendarioOrdinaria } from './CalendarioOrdinaria'
+import { RecordatoriosAsambleaTarjeta, RecordatoriosDeLaAsamblea } from './RecordatoriosAsamblea'
 import { VotacionPunto } from './VotacionPunto'
 import { SegundaConvocatoria } from './SegundaConvocatoria'
 import { CitacionAsamblea } from './CitacionAsamblea'
@@ -147,6 +148,9 @@ export function AsambleasAdminPage() {
 
       {/* PN-26 — Las fechas de la ley para la ordinaria que viene. */}
       <CalendarioOrdinaria />
+
+      {/* PN-27 — Si salen recordatorios a los propietarios, y cuándo. */}
+      <RecordatoriosAsambleaTarjeta />
 
       {/* RN-211 — Cómo se cuentan los votos en este edificio. Va arriba porque
           decide el resultado de cada votación, y el administrador tiene que
@@ -616,6 +620,8 @@ function DetalleAsamblea({
           </span>
         </div>
       )}
+      {/* PN-27 — Los recordatorios de esta asamblea: lo que salió y lo que sigue. */}
+      <RecordatoriosDeLaAsamblea asamblea={asamblea} />
       {/* PN-25 — En la entrada del salón: leer el QR y la llegada queda registrada. */}
       <RegistrarLlegadaQr asamblea={asamblea} />
       <div className="separador" />

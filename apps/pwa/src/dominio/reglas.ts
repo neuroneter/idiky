@@ -64,7 +64,7 @@ import type {
   BaseDeVoto,
   Copropiedad,
 } from './tipos'
-import { formatearFecha } from '../utilidades/formato'
+import { formatearFecha, formatearFechaHora } from '../utilidades/formato'
 import type {
   AcuerdoPago,
   ObjetoEncontrado,
@@ -4615,6 +4615,7 @@ export const TEXTO_TEMA_AVISO: Record<TemaAviso, { titulo: string; detalle: stri
   pagos: { titulo: 'Pagos', detalle: 'El recordatorio antes de que venza la cuota y las gracias cuando pagas' },
   obras: { titulo: 'Obras del edificio', detalle: 'Cada avance de las obras y proyectos' },
   reservas: { titulo: 'Zonas comunes', detalle: 'El recordatorio de tu reserva y los cierres por mantenimiento' },
+  asambleas: { titulo: 'Asambleas', detalle: 'Los recordatorios antes de la asamblea. La citación te llega siempre: es obligatoria' },
 }
 
 /**
@@ -4633,6 +4634,8 @@ export function temaDelAviso(motivo: MotivoMensaje): TemaAviso | null {
     case 'recordatorio_reserva':
     case 'cierre_zona':
       return 'reservas'
+    case 'recordatorio_asamblea':
+      return 'asambleas'
     default:
       return null
   }
@@ -5080,4 +5083,80 @@ export function calendarioOrdinaria(p: {
       },
     ],
   }
+}
+
+// ---------------------------------------------------------------------------
+// Recordatorios de la asamblea — PN-27 · CU-A-12, CU-R-20 (Mary, 2026-11-26)
+// ---------------------------------------------------------------------------
+
+/** PN-27 — Lo que trae el edificio si el administrador no lo cambia. */
+export const RECORDATORIOS_ASAMBLEA_POR_DEFECTO = { activo: true, dias: [8, 1, 0] }
+
+/** PN-27 — Los días entre los que el administrador escoge. */
+export const DIAS_RECORDATORIO_ASAMBLEA = [15, 8, 3, 1, 0]
+
+export function recordatoriosAsambleaDe(copropiedad?: { recordatoriosAsamblea?: { activo: boolean; dias: number[] } }): {
+  activo: boolean
+  dias: number[]
+} {
+  return copropiedad?.recordatoriosAsamblea ?? RECORDATORIOS_ASAMBLEA_POR_DEFECTO
+}
+
+/** PN-27 — Encendidos, con al menos un día y solo de los que se ofrecen. */
+export function motivoRecordatoriosAsambleaInvalidos(activo: boolean, dias: number[]): string | null {
+  if (!activo) return null
+  if (dias.length === 0) return 'Escoge al menos un día para el recordatorio.'
+  if (dias.some((d) => !DIAS_RECORDATORIO_ASAMBLEA.includes(d))) return 'Ese día no está entre los que se ofrecen.'
+  return null
+}
+
+/**
+ * PN-27 — **Qué recordatorio toca hoy.** Solo con la asamblea convocada. Si hay
+ * varios días pendientes (por ejemplo, se citó tarde), sale **uno solo**, el más
+ * cercano a la reunión, y los demás se dan por pasados: nadie recibe tres
+ * mensajes el mismo día. Devuelve el día que se envía y todos los que se marcan.
+ */
+export function recordatorioAsambleaQueToca(
+  asamblea: Pick<Asamblea, 'estado' | 'fechaHora' | 'recordatorios'>,
+  config: { activo: boolean; dias: number[] },
+  hoy: FechaISO = hoyISO(),
+): { dias: number; marcar: number[] } | null {
+  if (!config.activo || asamblea.estado !== 'convocada') return null
+  const faltan = diasEntre(hoy, fechaLocalDe(asamblea.fechaHora))
+  if (faltan < 0) return null
+  const enviados = new Set((asamblea.recordatorios ?? []).map((r) => r.dias))
+  const vencidos = config.dias.filter((d) => d >= faltan && !enviados.has(d)).sort((a, b) => a - b)
+  if (vencidos.length === 0) return null
+  return { dias: vencidos[0], marcar: vencidos }
+}
+
+/**
+ * PN-27 — El recordatorio, en tono de invitación (no de cobro ni de regaño): la
+ * fecha, dónde, y —si todavía no ha dado poder— que puede darlo desde la app.
+ * El día de la reunión, en la presencial, le recuerda su código para entrar.
+ */
+export function textoRecordatorioAsamblea(p: {
+  copropiedad: string
+  nombre: string
+  asamblea: Pick<Asamblea, 'titulo' | 'fechaHora' | 'modalidad' | 'lugar'>
+  dias: number | 'manual'
+  dioPoder: boolean
+}): string {
+  const cuando =
+    p.dias === 0 ? 'es hoy' : p.dias === 1 ? 'es mañana' : p.dias === 'manual' ? 'se acerca' : `es en ${p.dias} días`
+  const donde =
+    p.asamblea.modalidad === 'virtual'
+      ? 'El enlace para conectarte está en la app.'
+      : p.asamblea.lugar
+        ? `Es en ${p.asamblea.lugar}.`
+        : ''
+  const codigo =
+    p.asamblea.modalidad !== 'virtual' && (p.dias === 0 || p.dias === 1)
+      ? ' Lleva tu celular: en la app está tu código para entrar.'
+      : ''
+  const poder = !p.dioPoder && p.dias !== 0 ? ' Si no puedes ir, puedes dar tu poder desde la app en un minuto.' : ''
+  return (
+    `${p.copropiedad}: hola, ${p.nombre}. La ${p.asamblea.titulo.toLowerCase()} ${cuando} ` +
+    `(${formatearFechaHora(p.asamblea.fechaHora)}). ${donde}${codigo}${poder} Tu voz cuenta.`
+  ).replace(/\s+/g, ' ').trim()
 }
