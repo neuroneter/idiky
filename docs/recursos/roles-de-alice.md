@@ -75,7 +75,7 @@ contradiga la tabla.
 > **No es obligatoria todavía:** es la propuesta del 2026-11-26 para que Mary la revise. Cuando la
 > confirme, pasa a la §1 y la aplica la matriz de BOB y el middleware (ADR-0034: Ver · Crear ·
 > Editar · Anular, por rol y módulo). **Lo que fija la ley no se configura** (quién vota, quórum,
-> poderes): manda la Ley 675.
+> poderes): manda la Ley 675. Las celdas con ✅ ya las confirmó Mary.
 
 **Cómo se lee:** **G** gestiona todo el edificio (ve, crea, edita y anula) · **V** ve todo el
 edificio · **S** lo de su unidad: lo ve y lo pide · **s** solo ve lo de su unidad · **—** no lo ve:
@@ -98,8 +98,8 @@ Columnas: **AI** Administrador Idiky · **AC** Administrador Copropiedad · **De
 | 7. Cuentas claras e informes | — | G | G | V | G | V | — | — | V | V | V | — |
 | 8. Asambleas: citación, documentos, asistencia y actas | Soporte | G | G | V | V | V | — | — | S | s ¹ | — | — |
 | 9. Votar y dar poder | — | — | — | — | — | — | — | — | Ley | Con poder ¹ | — | — |
-| 10. Reservas de zonas comunes | Soporte | G | G | G | — | — | V | V ² | S | S | S | — |
-| 11. PQRS | Soporte | G | G | G | — | V | — | — | S | S | S | — |
+| 10. Reservas de zonas comunes | Soporte | G | G | G | — | — | V | V ² | S | S | — ✅ | — |
+| 11. PQRS | Soporte | G | G | G | — | V | — | — | S | S | — ✅ | — |
 | 12. Comunicados, encuestas y calendario | Soporte | G | G | G | V | V | V | V | V ³ | V ³ | V | V ⁴ |
 | 13. Visitantes y accesos | Soporte | V | V | V | — | — | G | — | S | S | s | s ⁵ |
 | 14. Correspondencia y objetos perdidos | Soporte | G | G | G | — | — | G | — | s | s | s | — |
@@ -120,7 +120,7 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas.
 1. ¿El **Administrador Idiky** entra a los datos de la copropiedad solo como **soporte** (con pase y
    rastro), o los ve siempre?
 2. ¿El **Auxiliar Administrativo** puede **registrar pagos** en la cartera, o solo verla?
-3. ¿El **Familiar o acompañante** puede **reservar** zonas comunes y radicar **PQRS**?
+3. ✅ **Respondida (Mary, 2026-11-26):** el Familiar o acompañante **no puede reservar zonas comunes ni radicar PQRS** (*«no puede reservar zonas comunes y radicar PQRS»*).
 4. ¿El **Revisor Fiscal** ve las **PQRS** (control) o no?
 5. ¿El **Piscinero** necesita algo más que la piscina (por ejemplo, el calendario de mantenimientos)?
 
