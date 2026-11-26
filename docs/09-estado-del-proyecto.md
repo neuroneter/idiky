@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Mary + IA (Claude) · «Conviviente» no existe (tabla de roles, decisión 2)
+
+Mary: *«Conviviente no existe en la legislación o en la terminología colombiana».* Quedó como
+decisión 2 en [`recursos/roles-de-alice.md`](./recursos/roles-de-alice.md) §2 bis: no se usa en
+pantallas, mensajes, documentos ni código nuevo; quien vive en la unidad sin ser propietario ni
+arrendatario es **Familiar o acompañante** (o Visitante), con su marca de residencia. Nota en el
+glosario (`docs/02`). La maqueta `apps/pwa` no usa la palabra. **Para Daniel:** el identificador
+`conviviente` de RN-366/RN-398 (API, matriz de BOB y base de BLOKY) hay que cambiarlo; conciliar con
+Mary junto con el resto de la §4.
+
 ### 2026-11-26 · Mary + IA (Claude) · La tabla de roles de ALICE, en `docs/recursos/`
 
 Mary entregó la tabla de usuarios de ALICE (`docs/recursos/roles-de-alice.xlsx`, transcrita en
