@@ -18,7 +18,72 @@
 
 ---
 
-## 19. Perfiles: visitante (relación + recurrencia) y familia (edad + salida) — ✅ decidido en llamada; ⏳ por construir (2026-11-26)
+## 20. Reiniciar a Juan Luis para probar la primacía del documento (T-166) — ⏳ pedido a Daniel (2026-11-26)
+
+**Contexto:** Justo **no tiene acceso al servidor ni a la base de BLOKY Dev** desde su máquina; tampoco puede ejecutar el SQL
+ni tocar SES. La UI de primacía está en `App-Idiky` `feature/T-166-T-169-perfiles-y-documento`; el middleware de Dev ya
+acepta `corregir: true` (T-164). Para la prueba hace falta **dejar a Juan Luis como si nunca hubiera terminado el primer
+ingreso**, manteniendo el documento que puso la Administración.
+
+**Persona:** Juan Luis Almonacid · `7e4e6cd6-0306-4c1b-b54b-10bf288ff87c` · propietario I1-101 · Pruebas IDIKY  
+**Celular de prueba (sigue el temporal de §13):** `+573104045015`  
+**Documento que debe quedar en Admin (para forzar el diálogo):** CC · `19325950`  
+**Correo de prueba (SES ya verificado, §15):** `sotomadev@gmail.com`
+
+### SQL en BLOKY Dev (esquema `directorio` + sesiones del esquema común)
+
+```sql
+-- 1) Persona: quitar confirmación, correo, billeteras y primer ingreso; dejar documento de Admin.
+UPDATE directorio.persona
+SET
+  documento_confirmado_en = NULL,
+  primer_ingreso_app = NULL,
+  correo = NULL,
+  correo_validado_en = NULL,
+  fecha_nacimiento = NULL,
+  billetera_transaccional = NULL,
+  billetera_financiera = NULL,
+  hash_identidad = NULL,
+  tipo_documento = 'CC',
+  numero_documento = '19325950',
+  nombre = 'Juan Luis Almonacid',
+  celular = '+573104045015',
+  actualizada_en = now()
+WHERE id = '7e4e6cd6-0306-4c1b-b54b-10bf288ff87c'
+  AND nombre = 'Juan Luis Almonacid';
+
+-- 2) Cerrar sesiones de ALICE (tabla `sesion` del esquema común / search_path de BLOKY).
+UPDATE sesion
+SET revocada_en = now()
+WHERE persona_id = '7e4e6cd6-0306-4c1b-b54b-10bf288ff87c'
+  AND revocada_en IS NULL;
+
+-- 3) Solicitudes de cambio de documento (si hubiera alguna pendiente o de prueba).
+DELETE FROM directorio.solicitud_documento_foto
+WHERE solicitud_id IN (
+  SELECT id FROM directorio.solicitud_documento
+  WHERE persona_id = '7e4e6cd6-0306-4c1b-b54b-10bf288ff87c'
+);
+DELETE FROM directorio.solicitud_documento
+WHERE persona_id = '7e4e6cd6-0306-4c1b-b54b-10bf288ff87c';
+```
+
+### Cómo probará Justo (cuando marques ✅)
+
+1. App en la rama `feature/T-166-T-169-perfiles-y-documento`.
+2. Ingreso con celular `3104045015` (CO) → OTP WhatsApp.
+3. En documento: poner **otro número o nombre** distinto de CC `19325950` / Juan Luis → diálogo de primacía → confirmar.
+4. Correo `sotomadev@gmail.com` → datos básicos → billeteras.
+5. Comprobar en BLOKY / directorio que quedó lo que escribió en la app.
+
+**Además (T-169):** merge + desplegar `feature/T-169-perfiles-visitante-familia` (migración 028) para probar después la
+creación de conviviente/invitado con los campos nuevos.
+
+**Al cerrar:** marcar ✅ aquí cuando el SQL esté aplicado (y, si aplica, restaurar el celular …1613 de §13).
+
+---
+
+## 19. Perfiles: visitante (relación + recurrencia) y familia (edad + salida) — ✅ decidido en llamada; 🟡 código en feature (2026-11-26)
 
 **Acuerdo telefónico Justo ↔ Daniel** (RN-398, RN-399, T-169):
 

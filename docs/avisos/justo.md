@@ -352,7 +352,18 @@ catálogo.
 
 ---
 
-## 13. Perfiles de visitante y familia (llamada 2026-11-26) — ✅ decidido; ⏳ por construir (RN-398, RN-399, T-169)
+## 14. Probar primacía del documento con Juan Luis — ⏳ espera a Daniel (2026-11-26)
+
+Justo **no tiene acceso al servidor ni a la base**; el reinicio de Juan Luis (SQL) quedó pedido a Daniel en
+[`daniel.md`](./daniel.md) §20. Mientras tanto:
+
+- Corre el app en `feature/T-166-T-169-perfiles-y-documento`.
+- Celular de prueba: **`3104045015`** (`+573104045015`).
+- Documento “de Admin” a contradecir: **CC · 19325950**.
+- Correo SES: **`sotomadev@gmail.com`** (§15 ✅).
+- Cuando Daniel marque §20 ✅, prueba el diálogo de primacía y luego Mi unidad (hace falta también el deploy de T-169).
+
+## 13. Perfiles de visitante y familia (llamada 2026-11-26) — ✅ decidido; 🟡 código en feature (RN-398, RN-399, T-169)
 
 Con Daniel, sobre **creación de perfiles** en Mi unidad:
 

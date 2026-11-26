@@ -113,6 +113,12 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Justo · Dev · Pedido a Daniel: reiniciar Juan Luis para T-166 (sin acceso al servidor)
+
+Justo no puede entrar a la base ni al servidor desde su máquina. Quedó documentado en [`avisos/daniel.md`](./avisos/daniel.md)
+§20 el SQL para dejar a Juan Luis sin primer ingreso (documento Admin CC 19325950, celular `+573104045015`, correo SES
+`sotomadev@gmail.com`) y el plan de prueba de primacía. Aviso espejo en [`avisos/justo.md`](./avisos/justo.md) §14.
+
 ### 2026-11-26 · Justo · Middleware + ALICE · T-166 y T-169 (primacía documento + perfiles visitante/familia)
 
 Implementación de la llamada del mismo día:
