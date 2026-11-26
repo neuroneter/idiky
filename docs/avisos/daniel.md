@@ -255,8 +255,9 @@ Amazon (o ya quedó verificada).
 > valida al entrar a ALICE (ya probó el celular con el código), y a la Administración le queda un aviso en BLOKY. **Después
 > ALICE no puede permitir que la misma persona cambie su documento**: se le pide a IDIKY con foto por ambas caras y un
 > código nuevo, e IDIKY lo evalúa. Hecho en el middleware (T-164 y T-165); la pantalla de BOB «Cambios de documento» está
-> desplegada en BOB Dev (versión 0.5.0); **falta darle el permiso «Revisar cambios de documento» al rol que revise** y
-> probarla con una solicitud real.
+> desplegada en BOB Dev (versión 0.6.0, con la ficha de verificación). **El permiso no hace falta todavía:** el 2026-11-25 los
+> cuatro usuarios de BOB son Super Admin, que ya la ven; cuando exista un rol más limitado (por ejemplo «Soporte») hay que
+> darle «Revisar cambios de documento» y, si aplica, «Impersonar». Falta probarla con una solicitud real.
 > Contrato en docs/20 §2.
 
 **Contexto:** en el primer ingreso (pantalla «Confirmar documento»), si el tipo/número no coinciden con

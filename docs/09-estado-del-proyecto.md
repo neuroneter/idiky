@@ -113,6 +113,31 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-25 · Daniel + IA (Claude) · BLOKY y BOB · Sesiones de la app, semana en Reuniones y listas por páginas (T-128, T-168, RN-397)
+
+Cinco cosas pequeñas que Daniel pidió cerrar juntas. ALICE no se tocó (es de Justo).
+
+- **Sesiones de ALICE desde BLOKY** (T-128, RN-397): en Unidades → Ver → «Sesiones» de cada persona que ya entró a la app.
+  Se cierra una o todas, con motivo; queda en la bitácora. Migración común 021: las sesiones de la app quedan marcadas.
+- **Unidades y Documentos por páginas** (RN-390): `GET /api/c/:id/unidades/lista` (de a 50; código, estructura, tipo y
+  cómo está conformada) y filtros en `GET …/documentos` (título, tipo, versión digital).
+- **Reuniones por semana**: el calendario se ve por mes o por semana.
+- **Ficha de verificación** (RN-396): los roles del catálogo con su nombre; «1 reunión» en singular. Esto es de BOB y está
+  en `develop` de BOB-Idiky (`8b3eeb7`), **sin desplegar**.
+- **Permisos de BOB**: revisado en BOB Dev. Los cuatro usuarios son Super Admin: no hay a quién darle «Revisar cambios de
+  documento» ni «Impersonar» hasta que exista un rol más limitado.
+
+Bloky-Idiky `develop` `e512680`; BLOKY Dev `b9081f2.bloky-e512680`.
+
+**Verificado:** `npm run probar` («Todo paso», con tres pruebas nuevas), build de BLOKY, del middleware y del panel de BOB;
+en el navegador, con la sesión de Daniel en «Pruebas IDIKY»: Unidades (519 en 11 páginas, buscador), la sesión abierta de
+un residente (sin cerrarla), Documentos y la semana con sus reuniones; por la API en Dev, el cierre de una sesión de prueba
+de Daniel y los filtros.
+**No verificado:** cerrar la sesión de un residente real; las pantallas en celular; lo de BOB en el navegador (no está
+desplegado).
+**De paso:** las pruebas automáticas fallaban de 7 p. m. a medianoche porque tomaban el día en UTC; corregido.
+**Sigue:** desplegar BOB cuando Daniel lo pida; el botón «Sesiones» también en Equipo y Usuarios, si se quiere.
+
 ### 2026-11-25 · Daniel + IA (Claude) · Middleware y BOB · La ficha para verificar antes de aprobar un cambio de documento (T-167, RN-396)
 
 Daniel vio la pantalla de BOB y pidió que quien aprueba tenga con qué verificar: todos los datos de la persona, sus
