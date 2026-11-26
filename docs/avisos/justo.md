@@ -352,6 +352,19 @@ catálogo.
 
 ---
 
+## 13. Perfiles de visitante y familia (llamada 2026-11-26) — ✅ decidido; ⏳ por construir (RN-398, RN-399, T-169)
+
+Con Daniel, sobre **creación de perfiles** en Mi unidad:
+
+1. Habitantes e invitados = **mismo tipo de persona** (ALICE); el visitante es `invitado`.
+2. **Visitante:** primero la **relación** (trabajador · ayudante · familiar · …); luego si hay **horas**, y si es **una vez**
+   o **recurrente** (p. ej. semanal durante meses).
+3. **Familia / conviviente:** siempre **mayor · menor · persona mayor**; si menor o persona mayor → ¿sale solo o hay que
+   **notificar** si sale sin autorización? (seguridad).
+
+Detalle: [`daniel.md`](./daniel.md) §19 · RN-398/399 · T-169. **No hay API todavía**; no inventes campos en ALICE hasta el
+contrato. Mientras, Mi unidad sigue con invitado por días/horas (RN-392) y conviviente simple (T-148).
+
 ## 12. Daniel respondió tus cuatro preguntas del documento y del invitado — 🟡 listo en el middleware, falta ALICE (2026-11-25)
 
 Tus avisos §14, §16, §17 y §18 ([`daniel.md`](./daniel.md)) ya tienen decisión, y el middleware de BLOKY Dev ya la aplica

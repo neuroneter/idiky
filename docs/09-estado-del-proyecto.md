@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Justo ↔ Daniel (llamada) · ALICE · Perfiles: visitante (relación + recurrencia) y familia (edad + salida) (RN-398, RN-399)
+
+Segundo acuerdo de la misma llamada, sobre **creación de perfiles** en la unidad:
+
+1. **Habitantes e invitados = mismo tipo de persona** (cuenta ALICE); el visitante es el rol `invitado` (RN-367).
+2. **Visitante:** al crear, preguntar la **relación / subordinación** (lista: trabajador, ayudante, familiar, …); si es
+   **recurrente**; si se toman **horas**; y si entra **una sola vez** o se **repite** (p. ej. una vez a la semana durante
+   algunos meses) para dar el permiso (RN-398; horas ya en RN-392).
+3. **Familia / conviviente:** siempre preguntar **mayor de edad · menor de edad · persona mayor**. Si es persona mayor o
+   menor: si **puede salir solo** del conjunto o hay que **notificar a alguien** si sale sin autorización (seguridad:
+   Alzheimer, niños, etc.) (RN-399).
+
+**Documentado** en RN-398/399, avisos y T-169. **Por construir** en middleware, ALICE y portería.
+
 ### 2026-11-26 · Justo ↔ Daniel (llamada) · ALICE · Primacía de los datos personales en el primer ingreso (RN-391)
 
 En la llamada acordaron el primer caso del ingreso a **ALICE**:

@@ -18,6 +18,20 @@
 
 ---
 
+## 19. Perfiles: visitante (relación + recurrencia) y familia (edad + salida) — ✅ decidido en llamada; ⏳ por construir (2026-11-26)
+
+**Acuerdo telefónico Justo ↔ Daniel** (RN-398, RN-399, T-169):
+
+| Quién | Qué se pregunta al crear el perfil |
+|---|---|
+| **Invitado / visitante** (mismo tipo de persona que el habitante; rol `invitado`) | **Relación / subordinación** (lista: trabajador, ayudante, familiar, …). Si se toman **horas**. Si es **una sola vez** o **recurrente** (p. ej. una vez a la semana durante algunos meses) |
+| **Familia / conviviente** | Siempre: **mayor de edad · menor de edad · persona mayor**. Si es persona mayor o menor: ¿**puede salir solo** del conjunto o hay que **notificar a alguien** si sale sin autorización? (seguridad: Alzheimer, niños, etc.) |
+
+**Para ti (middleware / portería):** persistir relación, patrón de visita y control de salida; que portería vea y avise.
+**Para Justo (ALICE):** formularios de Mi unidad. No construir hasta acordar el contrato en docs/20 (o hacerlo en T-169).
+
+---
+
 ## 1. Identificadores on-chain = `hashIdentidad` (RN-298) — ✅ hecho en código (2026-10-23); ⏳ redeploy Amoy
 
 **Decisión de producto (ya tuya, RN-298):** la identidad en la cadena es el HMAC del documento, no

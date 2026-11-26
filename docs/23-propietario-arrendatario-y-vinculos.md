@@ -265,6 +265,10 @@ es el mismo usuario (ya con billeteras) con más o menos módulos abiertos en es
 
 ### 7.2 Visitante puntual vs recurrente
 
+> **2026-11-26 (llamada Justo ↔ Daniel → RN-398):** al crear el invitado se elige la **relación** (trabajador, ayudante,
+> familiar, …), si hay **horas**, y si es **una sola vez** o **recurrente** (p. ej. semanal por meses). Misma persona que el
+> habitante (ALICE). **Por construir** (T-169). Familia/conviviente: condición etaria y control de salida → **RN-399**.
+
 | | **Visitante puntual** | **Visitante recurrente / invitado** |
 |---|---|---|
 | Vigencia | Horas o un día | Días, semanas o regla recurrente |
