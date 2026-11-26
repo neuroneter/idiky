@@ -1,5 +1,9 @@
 # 03 — Actores y roles
 
+> ⚠️ **Desde el 2026-11-26 manda [`recursos/roles-de-alice.md`](./recursos/roles-de-alice.md)** (la
+> tabla de usuarios de Mary, con su Excel). Si esta página dice otra cosa, vale la tabla; lo que
+> choca está listado allá (§4). Un cambio a los roles se le pregunta a Mary.
+
 ## 1. Actores
 
 | Actor | Interfaz principal | Descripción |

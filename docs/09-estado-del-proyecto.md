@@ -113,6 +113,18 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Mary + IA (Claude) · La tabla de roles de ALICE, en `docs/recursos/`
+
+Mary entregó la tabla de usuarios de ALICE (`docs/recursos/roles-de-alice.xlsx`, transcrita en
+[`recursos/roles-de-alice.md`](./recursos/roles-de-alice.md)): once usuarios, su marca de residencia
+(Residente, Residente Temporal, No Residente, Residente Recurrente), quién los crea y quién los
+inactiva. **Es obligatoria para todos los repositorios; un cambio se le pregunta a Mary** (quedó en
+`CLAUDE.md`, en el índice `docs/README.md` y en `docs/03`). **Para Daniel y Justo:** choca con
+RN-366/RN-398 (Residente e Invitado como roles; en la tabla «Residente» es una marca, y los usuarios
+de la unidad son Propietario, Arrendatario, Visitante y Familiar o acompañante) — conciliar con
+Mary antes de seguir construyendo sobre esos roles (§4 de la página). **Para Mary:** completar quién
+crea e inactiva al familiar o acompañante y al Administrador Idiky, y decir si el Delegado sigue (§3).
+
 ### 2026-11-26 · Mary + IA (Claude) · El acta con los elegidos y los cargos del edificio (PN-28)
 
 Al citar una elección se fijan los puestos (consejo y comité: impar de 3 o más; revisor fiscal: 1).
