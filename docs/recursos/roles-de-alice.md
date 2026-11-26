@@ -17,18 +17,18 @@
 | **Administrador Idiky** | No aplica | El **primero** se crea al instalar el sistema (es el dueño); los demás, **otro Administrador Idiky** | **Otro Administrador Idiky**, nunca él mismo; **siempre queda al menos uno activo** |
 | **Administrador Copropiedad** | No aplica | Administrador Idiky | Administrador Idiky |
 | **Delegado** | No aplica | Administrador Idiky | Administrador Idiky, **solo por solicitud directa** a `operaciones@idiky.com`, con el soporte |
-| **Presidente del consejo** | No aplica | *Por confirmar con Mary* | *Por confirmar con Mary* |
-| **Consejero** | No aplica | *Por confirmar con Mary* | *Por confirmar con Mary* |
+| **Presidente del consejo** | No aplica | Lo elige el consejo entre sus miembros; lo registra el **Administrador Copropiedad** con el acta del consejo | El Administrador Copropiedad con el acta; termina solo con una nueva elección |
+| **Consejero** | No aplica | Lo elige la **asamblea**: queda registrado al cerrar la votación de la elección (PN-28) | Termina solo con la nueva elección; si renuncia, lo registra el Administrador Copropiedad con el acta |
 | **Portería** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Auxiliar Administrativo** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Contador** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Revisor Fiscal** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Piscinero** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
-| **Aseo** | No aplica | *Por confirmar con Mary* | *Por confirmar con Mary* |
-| **Mantenimiento** | No aplica | *Por confirmar con Mary* | *Por confirmar con Mary* |
+| **Aseo** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
+| **Mantenimiento** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Propietario** | Residente · Residente Temporal · No Residente | El Administrador Copropiedad crea **un** propietario; si hay más propietarios, **los crea ese primer propietario** | Igual: el Administrador Copropiedad al primero; los demás, el propietario que creó el Administrador |
 | **Arrendatario** | Residente · Residente Temporal · No Residente | Propietario | Propietario |
-| **Inmobiliaria y operador** | *Por confirmar con Mary* | *Por confirmar con Mary* | *Por confirmar con Mary* |
+| **Inmobiliaria y operador** | No aplica (no vive en la unidad) | Propietario | Propietario |
 | **Visitante** | Residente · Residente Temporal · No Residente | Propietario y arrendatario. **Solo el propietario** puede crear un visitante con marca de **Residente Temporal** | Propietario y arrendatario |
 | **Familiar o acompañante** | Residente · Residente Temporal · No Residente · **Residente Recurrente** | **Propietario o arrendatario** | **Quien lo creó, o el perfil superior a quien lo creó** |
 
@@ -56,14 +56,13 @@
 | 2 | 2026-11-26 | **«Conviviente» no existe** en la legislación ni en la terminología colombiana de propiedad horizontal: *«Conviviente no existe en la legislación o en la terminología colombiana»*. **No se usa** en pantallas, mensajes, documentos ni en el código nuevo. Quien vive en la unidad sin ser propietario ni arrendatario es **Familiar o acompañante** (o Visitante), con su **marca de residencia**. |
 | 3 | 2026-11-26 | **Al familiar o acompañante lo inactiva quien lo creó o el perfil superior a ese** (*«lo inactiva el que lo creó o el perfil superior a este»*). Por ejemplo, si lo creó el arrendatario, lo inactiva el arrendatario o el propietario. **Esta lectura la confirmó Mary** (*«sí, está bien»*). |
 | 6 | 2026-11-26 | **Consolidación con el catálogo de BOB y BLOKY** (§4 ter): queda **Portería** (no «Seguridad»); queda **Auxiliar Administrativo** (no «Secretaría»); se **crea Piscinero**; se **agregan Aseo, Mantenimiento, Presidente del consejo y Consejero**; queda **Arrendatario**, que es el de BLOKY «Arrendatario · solo vivir»; se incluye **Inmobiliaria y operador**, que **reemplaza** a «Arrendatario · operación completa»; queda **Familiar o acompañante** y se **elimina «conviviente»**; queda **Visitante** (no «Invitado»); se **agrega la marca de residencia** como dato. |
+| 7 | 2026-11-26 | **Quién crea e inactiva a los cinco nuevos**: Presidente del consejo, lo elige el consejo y lo registra el Administrador Copropiedad con el acta; Consejero, lo elige la asamblea (queda al cerrar la votación); Aseo y Mantenimiento, el Administrador Copropiedad; Inmobiliaria y operador, el Propietario (no vive en la unidad). Propuesta aceptada por Mary (*«sí, déjalo así»*). |
 | 4 | 2026-11-26 | **Al familiar o acompañante lo crean el propietario o el arrendatario** (*«lo pueden crear el propietario o arrendatario»*). |
 | 5 | 2026-11-26 | **Administrador Idiky**, el rol más alto (el dueño, el equipo de IDIKY): el primero se crea al instalar el sistema; los demás los crea otro Administrador Idiky. Lo inactiva **otro** Administrador Idiky, nunca él mismo, y **siempre queda al menos uno activo**: así IDIKY nunca queda sin dueño y quien se va o pierde su clave se bloquea el mismo día. Propuesta aceptada por Mary (*«sí, déjalo así»*). |
 
 ## 3. Lo que la tabla todavía no dice — preguntar a Mary
 
-1. **Los cinco usuarios nuevos** (decisión 6): quién crea y quién inactiva al Presidente del consejo, al
-   Consejero, a Aseo, a Mantenimiento y a la Inmobiliaria y operador, y la marca de residencia de esta.
-2. **Qué ven y hacen** esos cinco y el Piscinero en la §4 bis (hoy la matriz confirmada no los tiene).
+1. **Qué ven y hacen** esos cinco y el Piscinero en la §4 bis (hoy la matriz confirmada no los tiene).
 
 ## 4. Lo que hoy choca con la tabla — para que Mary y Daniel lo concilien
 
@@ -176,3 +175,4 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas. ⁹ El Au
 | 2026-11-26 | **Propuesta** de qué puede ver y hacer cada usuario (§4 bis), por confirmar | IA, para Mary |
 | 2026-11-26 | Mary responde las seis dudas y **confirma la tabla de permisos** (§4 bis) | Mary |
 | 2026-11-26 | **Consolida** la tabla con el catálogo de BOB y BLOKY: cinco usuarios nuevos y los nombres que quedan (decisión 6; en el Excel y aquí) | Mary |
+| 2026-11-26 | Quién crea e inactiva a los cinco usuarios nuevos (decisión 7; en el Excel y aquí) | Mary |
