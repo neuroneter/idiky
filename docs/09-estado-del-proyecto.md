@@ -113,6 +113,13 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Mary + IA (Claude) · Quién inactiva al familiar o acompañante (tabla de roles, decisión 3)
+
+Mary: al familiar o acompañante **lo inactiva quien lo creó o el perfil superior a ese** (si lo creó
+el arrendatario, también el propietario). Quedó en el Excel y en
+[`recursos/roles-de-alice.md`](./recursos/roles-de-alice.md). Mary confirmó también lo del Delegado.
+**Falta:** quién crea al familiar o acompañante y al Administrador Idiky.
+
 ### 2026-11-26 · Mary + IA (Claude) · «Conviviente» no existe (tabla de roles, decisión 2)
 
 Mary: *«Conviviente no existe en la legislación o en la terminología colombiana».* Quedó como
