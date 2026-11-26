@@ -182,7 +182,7 @@ Operador **solo ven las unidades que les asignan** (decisión 8). El Presidente 
 | 4. Cartera: cuotas, estado de cuenta, pagos y acuerdos | V | V | — | — | S | — |
 | 5. Paz y salvo y certificados | V | V | — | — | S | — |
 | 6. Contabilidad (la contable) | V | V | — | — | — | — |
-| 7. Cuentas claras e informes | V | V | — | — | V | — |
+| 7. Cuentas claras e informes | V | V | — | — | s ✅ ¹⁴ | — |
 | 8. Asambleas: citación, documentos, asistencia y actas | V | V | — | — | Con poder ¹ | — |
 | 9. Votar y dar poder | Ley | Ley | — | — | Con poder ¹ | — |
 | 10. Reservas de zonas comunes | V | V | V ¹⁰ | V ¹⁰ | S | S |
@@ -199,6 +199,8 @@ Operador **solo ven las unidades que les asignan** (decisión 8). El Presidente 
 
 ¹⁰ Para alistar o cerrar la zona. ¹¹ Las de daños: las ve y las atiende (registra lo que hizo).
 ¹² Registra las novedades de su trabajo. ¹³ Crea y retira a los **visitantes** de las unidades que le asignan (por confirmar con Mary).
+¹⁴ **Mary, 2026-11-26:** en las cuentas claras, la Inmobiliaria **solo ve lo de la unidad o las
+unidades a su cargo**, no el informe de todo el edificio.
 
 **Para que Mary decida:** ¿qué hace distinto el **Operador** de la **Inmobiliaria**? La propuesta supone
 que la **Inmobiliaria** maneja el arriendo (paga la administración, pide paz y salvo, trasteos) y el

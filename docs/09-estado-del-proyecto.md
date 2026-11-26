@@ -121,7 +121,7 @@ Se comparó la tabla de Mary con el catálogo que siembra el middleware (`Bloky-
 Presidente del consejo y Consejero**, **Arrendatario** = «solo vivir», **Inmobiliaria y operador**
 reemplaza a «Arrendatario · operación completa», **Familiar o acompañante** y se **elimina
 `conviviente`**, **Visitante** (no Invitado) y se **agrega la marca de residencia**. En el Excel y en
-la página. **Decisión 7:** quién crea e inactiva a los cinco nuevos (Presidente del consejo y Consejero con el acta y la elección; Aseo y Mantenimiento, el Administrador Copropiedad; Inmobiliaria y operador, el Propietario). **Decisión 8:** **Inmobiliaria** y **Operador** son dos roles distintos y solo ven las unidades que les asignan. Mary **confirmó los permisos** del Presidente del consejo, el Consejero, Aseo y Mantenimiento. **Falta (Mary):** los de la Inmobiliaria y el Operador. **Para Daniel:**
+la página. **Decisión 7:** quién crea e inactiva a los cinco nuevos (Presidente del consejo y Consejero con el acta y la elección; Aseo y Mantenimiento, el Administrador Copropiedad; Inmobiliaria y operador, el Propietario). **Decisión 8:** **Inmobiliaria** y **Operador** son dos roles distintos y solo ven las unidades que les asignan. Mary **confirmó los permisos** del Presidente del consejo, el Consejero, Aseo y Mantenimiento. En las cuentas claras, la **Inmobiliaria solo ve lo de sus unidades**. **Falta (Mary):** confirmar el resto de la Inmobiliaria y el Operador. **Para Daniel:**
 llevarlo al catálogo de BOB y del middleware (cambia RN-333, RN-366, RN-398).
 
 ### 2026-11-26 · Mary + IA (Claude) · Permisos por usuario: propuesta y confirmación (tabla de roles §4 bis)
