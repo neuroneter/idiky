@@ -274,7 +274,7 @@ import {
   motivoProntoPagoInvalido,
   respuestaDeUnidad,
 } from '../dominio/reglas'
-import { leerCodigoAsistencia, motivoPostulacionInvalida, poderVigente, motivoPreguntaAsambleaInvalida, postulacionesVigentes, textoRespuestaAsamblea } from '../dominio/reglas'
+import { leerCodigoAsistencia, motivoPostulacionInvalida, motivoRecordatoriosAsambleaInvalidos, poderVigente, recordatorioAsambleaQueToca, recordatoriosAsambleaDe, textoRecordatorioAsamblea, motivoPreguntaAsambleaInvalida, postulacionesVigentes, textoRespuestaAsamblea } from '../dominio/reglas'
 import type { CargoEleccion, Postulacion, PreguntaAsamblea } from '../dominio/tipos'
 import { responsablesDeRegistro, responsablesDeVisita, responsablesDelVinculo, unidadTienePropietario } from './selectores'
 
@@ -372,6 +372,8 @@ function aplicarProcesosDelSistema(bd: BaseDatos, ahora: Date = new Date()): boo
   if (generarCuotasAutomaticas(bd, momento)) cambio = true
   // RN-226 — Los recordatorios de pago, después: así alcanzan a la cuota recién generada.
   if (enviarRecordatoriosDePago(bd, momento)) cambio = true
+  // PN-27 — Los recordatorios de la asamblea, a los propietarios.
+  if (enviarRecordatoriosDeAsamblea(bd, momento)) cambio = true
   // RN-227 — El poder de cada asamblea para quien tiene apoderado permanente.
   if (aplicarApoderadosPermanentes(bd)) cambio = true
   // PN-02 — Los pagos programados, después de generar la cuota del mes.
@@ -6806,4 +6808,101 @@ export async function registrarLlegadaConCodigo(
     forma: 'presencial',
     ...(poder ? { poderId: poder.id } : {}),
   })
+}
+
+// ---------------------------------------------------------------------------
+// Recordatorios de la asamblea — PN-27 (Mary, 2026-11-26)
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-27 — Le manda el recordatorio a cada propietario del edificio, **una vez
+ * por persona** aunque tenga varias unidades. Si alguna de sus unidades no tiene
+ * poder en curso, le recuerda que puede darlo. Devuelve a cuántas personas salió.
+ */
+function recordarAsamblea(bd: BaseDatos, asamblea: Asamblea, dias: number | 'manual', momento: string): number {
+  const copropiedad = bd.copropiedades.find((c) => c.id === asamblea.copropiedadId)
+  const unidades = bd.unidades.filter((u) => u.copropiedadId === asamblea.copropiedadId)
+  const porPersona = new Map<string, { persona: Persona; sinPoder: boolean }>()
+  for (const unidad of unidades) {
+    const sinPoder = !poderEnCursoDeUnidad(bd.poderes, asamblea.id, unidad.id)
+    for (const persona of propietariosVigentes(bd, unidad.id)) {
+      const previo = porPersona.get(persona.id)
+      porPersona.set(persona.id, { persona, sinPoder: (previo?.sinPoder ?? false) || sinPoder })
+    }
+  }
+  // Se cuentan los mensajes que salieron: a quien apagó el tema no se le manda (PN-16).
+  const antes = bd.mensajes.length
+  for (const { persona, sinPoder } of porPersona.values()) {
+    avisarAPersona(bd, {
+      copropiedadId: asamblea.copropiedadId,
+      personaId: persona.id,
+      texto: textoRecordatorioAsamblea({
+        copropiedad: copropiedad?.nombre ?? 'La copropiedad',
+        nombre: persona.nombres.split(' ')[0],
+        asamblea,
+        dias,
+        dioPoder: !sinPoder,
+      }),
+      motivo: 'recordatorio_asamblea',
+      ahora: momento,
+    })
+  }
+  return bd.mensajes.length - antes
+}
+
+/** PN-27 — El proceso del sistema: el recordatorio que toque hoy, en cada asamblea convocada. */
+function enviarRecordatoriosDeAsamblea(bd: BaseDatos, momento: string = ahoraISO()): boolean {
+  let cambio = false
+  const hoy = fechaLocalDe(momento)
+  for (const asamblea of bd.asambleas) {
+    const copropiedad = bd.copropiedades.find((c) => c.id === asamblea.copropiedadId)
+    const toca = recordatorioAsambleaQueToca(asamblea, recordatoriosAsambleaDe(copropiedad), hoy)
+    if (!toca) continue
+    const personas = recordarAsamblea(bd, asamblea, toca.dias, momento)
+    asamblea.recordatorios = [
+      ...(asamblea.recordatorios ?? []),
+      // El que salió lleva a cuántos; los que se saltaron, cero: así no se repiten.
+      ...toca.marcar.map((d) => ({ dias: d, enviadoEn: momento, personas: d === toca.dias ? personas : 0 })),
+    ]
+    cambio = true
+  }
+  return cambio
+}
+
+/** PN-27 — La administración manda un recordatorio a mano (por ejemplo, si teme que no haya quórum). */
+export async function enviarRecordatorioAsamblea(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; personaId: string },
+): Promise<Resultado<number>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const asamblea = bd.asambleas.find((a) => a.id === parametros.asambleaId)
+  if (!asamblea) throw new ErrorDeNegocio('Esa asamblea no existe.')
+  exigirAdministracion(bd, parametros.personaId, asamblea.copropiedadId, 'Enviar recordatorios')
+  if (asamblea.estado !== 'convocada') throw new ErrorDeNegocio('Los recordatorios son para una asamblea convocada que todavía no empieza.')
+  const momento = ahoraISO()
+  const personas = recordarAsamblea(bd, asamblea, 'manual', momento)
+  asamblea.recordatorios = [...(asamblea.recordatorios ?? []), { dias: 'manual', enviadoEn: momento, personas }]
+  return persistir(bd, personas)
+}
+
+/** PN-27 — Si el edificio manda recordatorios de asamblea, y cuántos días antes. */
+export async function configurarRecordatoriosAsamblea(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; activo: boolean; dias: number[] },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Parametrizar los recordatorios de asamblea')
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  const motivo = motivoRecordatoriosAsambleaInvalidos(parametros.activo, parametros.dias)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  copropiedad.recordatoriosAsamblea = {
+    activo: parametros.activo,
+    dias: [...new Set(parametros.dias)].sort((a, b) => b - a),
+    cambiadoPor: parametros.personaId,
+    cambiadoEn: ahoraISO(),
+  }
+  return persistir(bd, copropiedad)
 }

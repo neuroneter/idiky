@@ -106,6 +106,12 @@ export interface Copropiedad {
    * cuotas (Mary, 2026-11-20). Sin esto, no se permiten.
    */
   acuerdosPago?: { activo: boolean; cuotasMaximas: number; cambiadoPor?: string; cambiadoEn?: FechaHoraISO }
+  /**
+   * PN-27 — Los recordatorios de la asamblea a los propietarios: si se mandan y
+   * cuántos días antes (Mary, 2026-11-26). Sin dato: sí, a los 8 días, el día
+   * anterior y el mismo día.
+   */
+  recordatoriosAsamblea?: { activo: boolean; dias: number[]; cambiadoPor?: string; cambiadoEn?: FechaHoraISO }
   /** CU-A-31 · PN-01 — Descuento por pronto pago de la cuota ordinaria. */
   prontoPago?: ProntoPago
   /**
@@ -1062,6 +1068,7 @@ export type MotivoMensaje =
   | 'agradecimiento_pago'
   | 'respuesta_proyecto'
   | 'respuesta_asamblea'
+  | 'recordatorio_asamblea'
   | 'pago_programado'
   | 'permiso_decidido'
   | 'acuerdo_pago'
@@ -1313,6 +1320,11 @@ export interface Asamblea {
    * todos, sin el nombre de quien preguntó.
    */
   preguntas?: PreguntaAsamblea[]
+  /**
+   * PN-27 — Los recordatorios que ya salieron: cuántos días antes (o `manual`,
+   * si la administración lo mandó a mano), cuándo y a cuántas personas.
+   */
+  recordatorios?: Array<{ dias: number | 'manual'; enviadoEn: FechaHoraISO; personas: number }>
   /**
    * RN-215 — El quórum con que se instaló: la asistencia de ese momento (Mary,
    * 2026-10-11: «la asistencia es el quórum y se verifica al inicio de la
@@ -2283,7 +2295,7 @@ export interface CertificadoPagosCongelado {
 export type CanalAviso = 'whatsapp' | 'sms' | 'correo' | 'app'
 
 /** Los avisos que se pueden apagar. Lo que responde a algo que la persona pidió, no. */
-export type TemaAviso = 'pagos' | 'obras' | 'reservas'
+export type TemaAviso = 'pagos' | 'obras' | 'reservas' | 'asambleas'
 
 export interface PreferenciasAvisos {
   canal: CanalAviso

@@ -113,6 +113,18 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Mary + IA (Claude) · Recordatorios de la asamblea (PN-27)
+
+Para llegar al quórum en las ordinarias: con la asamblea convocada, salen solos a cada propietario
+(uno por persona) **8 días antes, el día anterior y el mismo día**, por el canal que eligió. El
+administrador lo parametriza en Asambleas (Sí/No y los días) y en cada asamblea ve lo que salió,
+el próximo y puede mandar uno a mano. A quien no ha dado poder le recuerda que puede darlo; el día
+anterior y el mismo día de la presencial, que lleve su código QR. En *Mis avisos* es el tema
+«Asambleas» y se puede apagar; la citación no. Archivos: `features/admin/RecordatoriosAsamblea.tsx`,
+proceso `enviarRecordatoriosDeAsamblea` en `datos/repositorio.ts`; prueba
+`recordatorios-asamblea.spec.ts`. **Decisión de Mary:** la pantalla para proyectar en el salón
+queda **para después**. **Para Daniel:** el envío real va por el middleware (correo SES, WhatsApp).
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY y BOB · Sesiones de la app, semana en Reuniones y listas por páginas (T-128, T-168, RN-397)
 
 Cinco cosas pequeñas que Daniel pidió cerrar juntas. ALICE no se tocó (es de Justo).

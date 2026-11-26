@@ -315,6 +315,9 @@ marca las que el residente canceló fuera de plazo (RN-112).
    en blanco. Con la asamblea convocada, la administración publica los **documentos para la
    asamblea** y responde las **preguntas** de los propietarios (PN-24). Arriba de Asambleas, el
    **calendario legal de la ordinaria** dice las fechas de la ley y en qué va cada una (PN-26).
+   Los **recordatorios** a los propietarios salen solos según la parametrización del edificio
+   (por defecto 8 días antes, el día anterior y el mismo día); en cada asamblea convocada se ve lo
+   que salió y el próximo, y se puede mandar uno a mano (PN-27).
 3. El sistema valida la antelación (RN-33; Ley 675, art. 39): la **ordinaria** se cita con al
    menos **15 días calendario** y, si no, no deja convocar; la **extraordinaria** solo avisa,
    porque su plazo lo fija el reglamento. La segunda convocatoria no se mide (art. 41).
