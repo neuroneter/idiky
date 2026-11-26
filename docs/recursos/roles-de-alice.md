@@ -122,7 +122,7 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas.
 2. ¿El **Auxiliar Administrativo** puede **registrar pagos** en la cartera, o solo verla?
 3. ✅ **Respondida (Mary, 2026-11-26):** el Familiar o acompañante **no puede reservar zonas comunes ni radicar PQRS** (*«no puede reservar zonas comunes y radicar PQRS»*).
 4. ¿El **Revisor Fiscal** ve las **PQRS** (control) o no?
-5. ¿El **Piscinero** necesita algo más que la piscina (por ejemplo, el calendario de mantenimientos)?
+5. ✅ **Respondida (Mary, 2026-11-26):** el **Piscinero no necesita nada más** (*«el piscinero no necesita nada más»*): su columna queda como está.
 
 ## 5. Historia
 
