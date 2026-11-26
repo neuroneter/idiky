@@ -25,7 +25,7 @@
 | **Propietario** | Residente · Residente Temporal · No Residente | El Administrador Copropiedad crea **un** propietario; si hay más propietarios, **los crea ese primer propietario** | Igual: el Administrador Copropiedad al primero; los demás, el propietario que creó el Administrador |
 | **Arrendatario** | Residente · Residente Temporal · No Residente | Propietario | Propietario |
 | **Visitante** | Residente · Residente Temporal · No Residente | Propietario y arrendatario. **Solo el propietario** puede crear un visitante con marca de **Residente Temporal** | Propietario y arrendatario |
-| **Familiar o acompañante** | Residente · Residente Temporal · No Residente · **Residente Recurrente** | *(vacío en la tabla)* | **Quien lo creó, o el perfil superior a quien lo creó** |
+| **Familiar o acompañante** | Residente · Residente Temporal · No Residente · **Residente Recurrente** | **Propietario o arrendatario** | **Quien lo creó, o el perfil superior a quien lo creó** |
 
 ## 2. Cómo se lee
 
@@ -50,13 +50,13 @@
 | 1 | 2026-11-26 | Se incluye al **Delegado** (§1): lo crea el Administrador Idiky y lo inactiva el Administrador Idiky solo por solicitud directa a `operaciones@idiky.com`, con el soporte. **Confirmado por Mary** (*«lo definido para el delegado está okey»*). |
 | 2 | 2026-11-26 | **«Conviviente» no existe** en la legislación ni en la terminología colombiana de propiedad horizontal: *«Conviviente no existe en la legislación o en la terminología colombiana»*. **No se usa** en pantallas, mensajes, documentos ni en el código nuevo. Quien vive en la unidad sin ser propietario ni arrendatario es **Familiar o acompañante** (o Visitante), con su **marca de residencia**. |
 | 3 | 2026-11-26 | **Al familiar o acompañante lo inactiva quien lo creó o el perfil superior a ese** (*«lo inactiva el que lo creó o el perfil superior a este»*). Por ejemplo, si lo creó el arrendatario, lo inactiva el arrendatario o el propietario. **Esta lectura la confirmó Mary** (*«sí, está bien»*). |
+| 4 | 2026-11-26 | **Al familiar o acompañante lo crean el propietario o el arrendatario** (*«lo pueden crear el propietario o arrendatario»*). |
 
 ## 3. Lo que la tabla todavía no dice — preguntar a Mary
 
-1. **Familiar o acompañante:** quién lo crea (la celda está vacía). Quién lo inactiva ya está (decisión 3).
-2. **Administrador Idiky:** quién lo crea y quién lo inactiva (es el equipo de IDIKY; las celdas
+1. **Administrador Idiky:** quién lo crea y quién lo inactiva (es el equipo de IDIKY; las celdas
    están vacías).
-3. **Qué puede hacer cada usuario** (la matriz de permisos por usuario): la tabla dice quién crea a
+2. **Qué puede hacer cada usuario** (la matriz de permisos por usuario): la tabla dice quién crea a
    quién, no qué ve cada uno.
 
 ## 4. Lo que hoy choca con la tabla — para que Mary y Daniel lo concilien
@@ -79,3 +79,4 @@ contradiga la tabla.
 | 2026-11-26 | Primera versión, desde `roles-de-alice.xlsx` | Mary |
 | 2026-11-26 | Se agrega el **Delegado** (en el Excel y aquí), con lo que dice `docs/13` §3 | Mary |
 | 2026-11-26 | Quién inactiva al **familiar o acompañante** (en el Excel y aquí) | Mary |
+| 2026-11-26 | Quién crea al **familiar o acompañante** (en el Excel y aquí) | Mary |
