@@ -99,7 +99,7 @@ Columnas: **AI** Administrador Idiky · **AC** Administrador Copropiedad · **De
 | 8. Asambleas: citación, documentos, asistencia y actas | Soporte | G | G | V | V | V | — | — | S | s ¹ | — | — |
 | 9. Votar y dar poder | — | — | — | — | — | — | — | — | Ley | Con poder ¹ | — | — |
 | 10. Reservas de zonas comunes | Soporte | G | G | G | — | — | V | V ² | S | S | — ✅ | — |
-| 11. PQRS | Soporte | G | G | G | — | V | — | — | S | S | — ✅ | — |
+| 11. PQRS | Soporte | G | G | G | — | — ✅ | — | — | S | S | — ✅ | — |
 | 12. Comunicados, encuestas y calendario | Soporte | G | G | G | V | V | V | V | V ³ | V ³ | V | V ⁴ |
 | 13. Visitantes y accesos | Soporte | V | V | V | — | — | G | — | S | S | s | s ⁵ |
 | 14. Correspondencia y objetos perdidos | Soporte | G | G | G | — | — | G | — | s | s | s | — |
@@ -121,7 +121,7 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas.
    rastro), o los ve siempre?
 2. ✅ **Respondida (Mary, 2026-11-26):** el **Auxiliar Administrativo solo ve la cartera** (*«solo ve la cartera»*): no registra pagos, ni acuerdos, ni ajustes.
 3. ✅ **Respondida (Mary, 2026-11-26):** el Familiar o acompañante **no puede reservar zonas comunes ni radicar PQRS** (*«no puede reservar zonas comunes y radicar PQRS»*).
-4. ¿El **Revisor Fiscal** ve las **PQRS** (control) o no?
+4. ✅ **Respondida (Mary, 2026-11-26):** el **Revisor Fiscal no ve las PQRS**; si necesita una para su control, se la pide a la administración (opción A).
 5. ✅ **Respondida (Mary, 2026-11-26):** el **Piscinero no necesita nada más** (*«el piscinero no necesita nada más»*): su columna queda como está.
 
 ## 5. Historia
