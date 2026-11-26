@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Mary + IA (Claude) · Roles consolidados con BOB y BLOKY (tabla de roles, decisión 6)
+
+Se comparó la tabla de Mary con el catálogo que siembra el middleware (`Bloky-Idiky`, `develop`,
+`apps/bloky-api/src/permisos/inicial.ts`) y Mary decidió (§4 ter): **Portería** (no Seguridad),
+**Auxiliar Administrativo** (no Secretaría), se crea **Piscinero**, se agregan **Aseo, Mantenimiento,
+Presidente del consejo y Consejero**, **Arrendatario** = «solo vivir», **Inmobiliaria y operador**
+reemplaza a «Arrendatario · operación completa», **Familiar o acompañante** y se **elimina
+`conviviente`**, **Visitante** (no Invitado) y se **agrega la marca de residencia**. En el Excel y en
+la página. **Falta (Mary):** quién crea e inactiva a los cinco nuevos y sus permisos. **Para Daniel:**
+llevarlo al catálogo de BOB y del middleware (cambia RN-333, RN-366, RN-398).
+
 ### 2026-11-26 · Mary + IA (Claude) · Permisos por usuario: propuesta y confirmación (tabla de roles §4 bis)
 
 Se propuso qué ve y hace cada uno de los 12 usuarios en 20 módulos
