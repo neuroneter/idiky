@@ -123,7 +123,7 @@ inactiva. **Es obligatoria para todos los repositorios; un cambio se le pregunta
 RN-366/RN-398 (Residente e Invitado como roles; en la tabla «Residente» es una marca, y los usuarios
 de la unidad son Propietario, Arrendatario, Visitante y Familiar o acompañante) — conciliar con
 Mary antes de seguir construyendo sobre esos roles (§4 de la página). **Para Mary:** completar quién
-crea e inactiva al familiar o acompañante y al Administrador Idiky, y decir si el Delegado sigue (§3).
+crea e inactiva al familiar o acompañante y al Administrador Idiky, y decir si el Delegado sigue (§3). **Actualización:** Mary incluyó al **Delegado** (lo crea y lo cambia el Administrador Idiky desde BOB, por solicitud a `operaciones@idiky.com`; `docs/13` §3), en el Excel y en la página.
 
 ### 2026-11-26 · Mary + IA (Claude) · El acta con los elegidos y los cargos del edificio (PN-28)
 

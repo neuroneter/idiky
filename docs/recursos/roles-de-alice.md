@@ -16,6 +16,7 @@
 |---|---|---|---|
 | **Administrador Idiky** | No aplica | *(vacío en la tabla)* | *(vacío en la tabla)* |
 | **Administrador Copropiedad** | No aplica | Administrador Idiky | Administrador Idiky |
+| **Delegado** | No aplica | Administrador Idiky | Administrador Idiky, **solo por solicitud directa** a `operaciones@idiky.com`, con el soporte |
 | **Portería** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Auxiliar Administrativo** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Contador** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
@@ -33,6 +34,10 @@
   Temporal**), si no vive ahí (**No Residente**) o, solo para el familiar o acompañante, si
   viene con frecuencia (**Residente Recurrente**). Un propietario, por ejemplo, puede ser residente o
   no residente.
+- **El Delegado** (2026-11-26) es el otro perfil raíz de la copropiedad, junto al Administrador
+  Copropiedad, y no es la misma persona que él. Con consejo de administración, es su presidente; sin
+  consejo, lo nombra la asamblea. Lo crea y lo cambia IDIKY desde BOB
+  ([`docs/13`](../13-bob-copropiedades-y-contratos.md) §3).
 - **Los usuarios de la administración** (Portería, Auxiliar Administrativo, Contador, Revisor Fiscal,
   Piscinero) **los crea y los inactiva el Administrador Copropiedad**, y no llevan marca de
   residencia.
@@ -45,7 +50,6 @@
    están vacías).
 3. **Qué puede hacer cada usuario** (la matriz de permisos por usuario): la tabla dice quién crea a
    quién, no qué ve cada uno.
-4. **El Delegado de BLOKY** no aparece en la tabla: si sigue existiendo, cómo se crea.
 
 ## 4. Lo que hoy choca con la tabla — para que Mary y Daniel lo concilien
 
@@ -65,3 +69,4 @@ contradiga la tabla.
 | Fecha | Qué | Quién |
 |---|---|---|
 | 2026-11-26 | Primera versión, desde `roles-de-alice.xlsx` | Mary |
+| 2026-11-26 | Se agrega el **Delegado** (en el Excel y aquí), con lo que dice `docs/13` §3 | Mary |
