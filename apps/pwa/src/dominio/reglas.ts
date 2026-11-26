@@ -2415,8 +2415,13 @@ const CATEGORIAS_POR_ROL: Record<RolResidencia, readonly CategoriaRegistro[]> = 
   arrendatario: ['familiar', 'visitante'],
   // El familiar mayor de edad registra visitas de un día, y nada más (Mary,
   // 2026-10-02). El menor, a nadie.
-  familiar: ['visitante'],
+  // PN-29 (tabla de Mary, 2026-11-26): al visitante lo crean el propietario y el arrendatario; el
+  // familiar o acompañante ya no registra a nadie (antes, visitas de un día).
+  familiar: [],
   autorizado: [],
+  // PN-29 — La inmobiliaria y el operador crean y retiran visitantes de las unidades que les asignan.
+  inmobiliaria: ['visitante'],
+  operador: ['visitante'],
 }
 
 export function categoriasQuePuedeRegistrar(
@@ -2658,6 +2663,9 @@ const CONDICIONES: Record<CategoriaRegistro, readonly CondicionRegistro[]> = {
   // La familia o el acompañante vive ahí, siempre o un tiempo (2026-10-02).
   familiar: ['residente', 'temporal'],
   visitante: ['no_residente', 'frecuente', 'temporal'],
+  // PN-29 — No viven en la unidad (Mary, 2026-11-26).
+  inmobiliaria: ['no_residente'],
+  operador: ['no_residente'],
 }
 
 export function condicionesPosibles(categoria: CategoriaRegistro): readonly CondicionRegistro[] {

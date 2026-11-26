@@ -8,7 +8,8 @@ import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
-import { emitirCertificadoPagos } from '../../datos/repositorio'
+import { aprobarDocumento, emitirCertificadoPagos } from '../../datos/repositorio'
+import { esAdministracionPlena, nivelEn } from '../../dominio/permisos'
 import { aniosConPagos, etiquetaUnidad } from '../../dominio/reglas'
 import { formatearDinero, formatearFecha } from '../../utilidades/formato'
 import { HojaCertificadoPagos } from '../../componentes/HojaCertificadoPagos'
@@ -23,11 +24,16 @@ export function CertificadosAdminPage() {
   const [anio, setAnio] = useState<number | null>(null)
   const [viendo, setViendo] = useState<string | null>(null)
   if (!sesion) return null
+  // PN-29 — El Auxiliar Administrativo prepara; el administrador o el delegado aprueba.
+  const usuario = sel.usuarioDeSesion(bd, sesion)
+  const prepara = nivelEn(usuario, 'paz_y_salvo') === 'Prep'
+  const aprueba = esAdministracionPlena(usuario)
   const anioElegido = anio && anios.includes(anio) ? anio : anios[0]
   const emitidos = bd.documentos
     .filter((d) => d.tipo === 'certificado_pagos' && d.copropiedadId === sesion.copropiedadId)
     .sort((a, b) => b.numero.localeCompare(a.numero))
-  const documento = emitidos.find((d) => d.id === viendo)
+  const documento = emitidos.find((d) => d.id === viendo && d.estado !== 'por_aprobar')
+  const porAprobar = emitidos.filter((d) => d.estado === 'por_aprobar')
 
   return (
     <div className="pila">
@@ -62,15 +68,50 @@ export function CertificadosAdminPage() {
           disabled={cargando || !anioElegido}
           onClick={async () => {
             const emitido = await ejecutar(
-              (base) => emitirCertificadoPagos(base, { copropiedadId: sesion.copropiedadId, unidadId, anio: anioElegido!, personaId: sesion.personaId }),
-              'Certificado listo.',
+              (base) => emitirCertificadoPagos(base, { copropiedadId: sesion.copropiedadId, unidadId, anio: anioElegido!, personaId: sesion.personaId, porAprobar: prepara }),
+              prepara ? 'Certificado preparado. Sale cuando lo apruebe el administrador.' : 'Certificado listo.',
             )
-            if (emitido) setViendo(emitido.id)
+            if (emitido && !prepara) setViendo(emitido.id)
           }}
         >
-          Generar el certificado
+          {prepara ? 'Preparar el certificado' : 'Generar el certificado'}
         </button>
       </div>
+
+      {/* PN-29 — Lo que preparó el auxiliar: lo aprueba el administrador o el delegado. */}
+      {porAprobar.length > 0 && (
+        <div className="tarjeta tarjeta--alerta">
+          <strong>Por aprobar</strong>
+          <div className="lista lista--compacta" style={{ marginTop: 'var(--e2)' }}>
+            {porAprobar.map((d) => {
+              const u = sel.unidad(bd, d.unidadId)
+              return (
+                <div key={d.id} className="fila">
+                  <span>
+                    {u ? etiquetaUnidad(u) : ''} · año {d.certificadoPagos?.anio} · {formatearDinero(d.certificadoPagos?.total ?? 0)}
+                  </span>
+                  {aprueba ? (
+                    <button
+                      className="boton boton--pequeno boton--primario"
+                      disabled={cargando}
+                      onClick={() =>
+                        void ejecutar(
+                          (base) => aprobarDocumento(base, { documentoId: d.id, personaId: sesion.personaId }),
+                          'Certificado aprobado.',
+                        )
+                      }
+                    >
+                      Aprobar
+                    </button>
+                  ) : (
+                    <span className="chip chip--alerta">Espera al administrador</span>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {emitidos.length > 0 && (
         <div className="tarjeta">
@@ -86,7 +127,9 @@ export function CertificadosAdminPage() {
                     </span>
                     <span className="subtitulo numerico">{formatearDinero(d.certificadoPagos?.total ?? 0)}</span>
                   </div>
-                  <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>Expedido el {formatearFecha(d.emitidoEn)}</span>
+                  <span className="tenue" style={{ fontSize: 'var(--texto-xs)' }}>
+                    {d.estado === 'por_aprobar' ? 'Por aprobar' : `Expedido el ${formatearFecha(d.emitidoEn)}`}
+                  </span>
                 </button>
               )
             })}

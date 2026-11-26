@@ -4763,6 +4763,8 @@ export async function crearRegistroPersona(
         propietario: 'El propietario es residente o no residente: no existe un propietario temporal.',
         arrendatario: 'El arrendatario es residente o temporal: arrienda para vivir ahí.',
         familiar: 'El familiar o acompañante vive ahí: es residente o temporal.',
+        inmobiliaria: 'La inmobiliaria no vive en la unidad.',
+        operador: 'El operador no vive en la unidad.',
       }[parametros.categoria],
     )
   }
@@ -5495,7 +5497,13 @@ export async function emitirEstadoCuenta(
 
 export async function emitirPazYSalvo(
   bdActual: BaseDatos,
-  parametros: { copropiedadId: string; unidadId: string; emitidoPor?: string },
+  parametros: {
+    copropiedadId: string
+    unidadId: string
+    emitidoPor?: string
+    /** PN-29 — Lo prepara el Auxiliar Administrativo: queda por aprobar, sin número. */
+    preparadoPor?: string
+  },
 ): Promise<Resultado<Documento>> {
   await esperar()
   const bd = clonar(bdActual)
@@ -5533,6 +5541,14 @@ export async function emitirPazYSalvo(
     cubiertoHasta: finDePeriodo(ultimoPeriodo),
     ...(parametros.emitidoPor ? { emitidoPor: parametros.emitidoPor } : {}),
     estado: 'vigente',
+  }
+  if (parametros.preparadoPor) {
+    // PN-29 — Sin número hasta que lo apruebe el administrador: el consecutivo no deja huecos.
+    documento.numero = 'Por aprobar'
+    documento.estado = 'por_aprobar'
+    documento.preparacion = { por: parametros.preparadoPor, en: ahoraISO() }
+    bd.documentos.push(documento)
+    return persistir(bd, documento)
   }
   bd.documentos.push(documento)
   bd.consecutivos.pazYSalvo = consecutivo + 1
@@ -6332,7 +6348,14 @@ export async function cerrarDepositoTrasteo(
  */
 export async function emitirCertificadoPagos(
   bdActual: BaseDatos,
-  parametros: { copropiedadId: string; unidadId: string; anio: number; personaId: string },
+  parametros: {
+    copropiedadId: string
+    unidadId: string
+    anio: number
+    personaId: string
+    /** PN-29 — Lo prepara el Auxiliar Administrativo: queda por aprobar, sin número. */
+    porAprobar?: boolean
+  },
 ): Promise<Resultado<Documento>> {
   await esperar()
   const bd = clonar(bdActual)
@@ -6376,6 +6399,13 @@ export async function emitirCertificadoPagos(
     },
     emitidoPor: parametros.personaId,
     estado: 'vigente',
+  }
+  if (parametros.porAprobar) {
+    documento.numero = 'Por aprobar'
+    documento.estado = 'por_aprobar'
+    documento.preparacion = { por: parametros.personaId, en: ahoraISO() }
+    bd.documentos.push(documento)
+    return persistir(bd, documento)
   }
   bd.documentos.push(documento)
   bd.consecutivos.certificadoPagos = consecutivo + 1
@@ -7004,4 +7034,48 @@ export async function responderCargo(
   if (parametros.acepta) cargo.aceptacion = respuesta
   else cargo.declinacion = respuesta
   return persistir(bd, cargo)
+}
+
+// ---------------------------------------------------------------------------
+// Lo que prepara el auxiliar y aprueba el administrador — PN-29 (Mary, 2026-11-26)
+// ---------------------------------------------------------------------------
+
+/** PN-29 — El Administrador Copropiedad o el Delegado: los que aprueban. */
+function esAdministracionPlenaEn(bd: BaseDatos, personaId: string, copropiedadId: string): boolean {
+  return bd.perfilesDemo.some(
+    (p) => p.rol === 'admin' && p.personaId === personaId && p.copropiedadId === copropiedadId && (!p.cargo || p.cargo === 'administrador' || p.cargo === 'delegado'),
+  )
+}
+
+/**
+ * PN-29 — El administrador aprueba el paz y salvo que preparó el auxiliar: recibe su número y el
+ * propietario ya lo ve. Si mientras tanto la unidad quedó debiendo, no se aprueba (RN-26).
+ */
+export async function aprobarDocumento(
+  bdActual: BaseDatos,
+  parametros: { documentoId: string; personaId: string },
+): Promise<Resultado<Documento>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const documento = bd.documentos.find((d) => d.id === parametros.documentoId)
+  if (!documento || documento.estado !== 'por_aprobar') throw new ErrorDeNegocio('Ese documento no está esperando aprobación.')
+  if (!esAdministracionPlenaEn(bd, parametros.personaId, documento.copropiedadId)) {
+    throw new ErrorDeNegocio('Lo aprueba el administrador o el delegado.')
+  }
+  if (documento.tipo === 'paz_y_salvo') {
+    const saldo = calcularSaldo(bd.cuotas.filter((c) => c.unidadId === documento.unidadId))
+    if (saldo > 0) throw new ErrorDeNegocio('La unidad quedó con saldo pendiente: no se puede aprobar el paz y salvo.')
+    const consecutivo = bd.consecutivos.pazYSalvo
+    documento.numero = `PS-${hoyISO().slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`
+    bd.consecutivos.pazYSalvo = consecutivo + 1
+  }
+  if (documento.tipo === 'certificado_pagos') {
+    const consecutivo = bd.consecutivos.certificadoPagos ?? 1
+    documento.numero = `CP-${hoyISO().slice(0, 4)}-${String(consecutivo).padStart(4, '0')}`
+    bd.consecutivos.certificadoPagos = consecutivo + 1
+  }
+  documento.estado = 'vigente'
+  documento.emitidoEn = hoyISO()
+  documento.preparacion = { ...documento.preparacion!, aprobadoPor: parametros.personaId, aprobadoEn: ahoraISO() }
+  return persistir(bd, documento)
 }

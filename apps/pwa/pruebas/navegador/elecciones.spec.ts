@@ -57,9 +57,9 @@ test('la propietaria se postula al consejo desde la app y el familiar no ve el b
 
   await entrarComo(page, /Tomas Restrepo Ossa/)
   await page.goto('/#/app/asambleas/asa-ordinaria-anual')
-  const delFamiliar = page.locator('.tarjeta', { has: page.locator('strong', { hasText: /^Elección del consejo de administración$/ }) })
-  await expect(delFamiliar).toContainText('Gustavo Adolfo Mejia Toro')
-  await expect(delFamiliar.getByRole('button', { name: 'Postularme' })).toHaveCount(0)
+  // PN-29 — El familiar o acompañante no ve las asambleas (tabla de Mary, 2026-11-26).
+  await expect(page.getByText('Esto no es para tu perfil')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Postularme' })).toHaveCount(0)
 })
 
 test('la votación de la elección trae a los candidatos y el voto en blanco (PN-23)', async ({ page }) => {

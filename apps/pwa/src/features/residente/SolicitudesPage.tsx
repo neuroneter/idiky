@@ -13,6 +13,10 @@
  */
 
 import { NavLink, Outlet } from 'react-router-dom'
+import { useDatos } from '../../estado/DatosContext'
+import { useSesion } from '../../estado/SesionContext'
+import * as sel from '../../datos/selectores'
+import { moduloDeRutaApp, veModulo } from '../../dominio/permisos'
 
 /**
  * Sin iconos, a proposito: con tres segmentos en 390 px, el icono le robaba el
@@ -26,10 +30,15 @@ const SEGMENTOS = [
 ]
 
 export function SolicitudesPage() {
+  const { bd } = useDatos()
+  const { sesion } = useSesion()
+  // PN-29 — Solo los segmentos que le tocan al perfil (tabla de Mary, 2026-11-26).
+  const usuario = sesion ? sel.usuarioDeSesion(bd, sesion) : 'propietario'
+  const segmentos = SEGMENTOS.filter((s) => veModulo(usuario, moduloDeRutaApp(`/app/solicitudes/${s.ruta}`)!))
   return (
     <>
       <nav className="segmentos" aria-label="Tipo de solicitud">
-        {SEGMENTOS.map((segmento) => (
+        {segmentos.map((segmento) => (
           <NavLink
             key={segmento.ruta}
             to={segmento.ruta}

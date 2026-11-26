@@ -28,6 +28,7 @@ import { ChipComunicado, ChipReserva } from '../../componentes/Etiquetas'
 import { BarraAvance, ChipProyecto } from '../../componentes/TableroProyecto'
 import { PermanentesPorAceptar, PoderesPorAceptar } from './PoderesPorAceptar'
 import { MisCargosPorAceptar } from '../../componentes/CargosDelEdificio'
+import { veModulo, type ModuloIdiky } from '../../dominio/permisos'
 
 export function InicioPage() {
   const { bd } = useDatos()
@@ -36,6 +37,9 @@ export function InicioPage() {
 
   const unidadId = sesion.unidadActivaId
   const unidad = sel.unidad(bd, unidadId)
+  // PN-29 — Cada perfil ve solo lo que le toca (tabla de Mary, 2026-11-26).
+  const usuario = sel.usuarioDeSesion(bd, sesion)
+  const ve = (modulo: ModuloIdiky) => veModulo(usuario, modulo)
   const cuotas = sel.cuotasDeUnidad(bd, unidadId)
   const saldo = calcularSaldo(cuotas)
   const vencido = calcularSaldoVencido(cuotas)
@@ -78,6 +82,7 @@ export function InicioPage() {
     <>
       {/* Cartera — CU-R-03. Va sobre la zona de marca, sin tarjeta: el monto es
           lo primero que la persona busca y no necesita una caja que lo encierre. */}
+      {ve('cartera') && (
       <Link to="/app/cuenta" className="cartera-inicio">
         <span className="cartera-inicio__etiqueta">
           {saldo === 0 ? 'Tu unidad está al día' : 'Valor adeudado'}
@@ -96,6 +101,7 @@ export function InicioPage() {
           <span className="cartera-inicio__etiqueta">No tienes cuotas pendientes</span>
         )}
       </Link>
+      )}
 
       {/* T-46 — Un poder que me dieron y espera mi respuesta (RN-217). */}
       <PoderesPorAceptar />
@@ -110,12 +116,15 @@ export function InicioPage() {
           destinos distintos. Ahora es **el mismo icono, el mismo nombre y el mismo
           destino** que la pestana. */}
       <div className="accesos">
+        {ve('cartera') && (
         <Link to="/app/cuenta/pagar" className="acceso-directo">
           <span className="acceso-directo__icono">
             <Icono nombre="cuenta" />
           </span>
           Pagar
         </Link>
+        )}
+        {ve('visitantes') && (
         <Link to="/app/visitantes" className="acceso-directo">
           <span className="acceso-directo__icono">
             <Icono nombre="visitantes" />
@@ -125,15 +134,19 @@ export function InicioPage() {
             <span className="acceso-directo__contador">{visitantesVigentes.length}</span>
           )}
         </Link>
+        )}
+        {ve('correspondencia') && (
         <Link to="/app/correspondencia" className="acceso-directo">
           <span className="acceso-directo__icono">
             <Icono nombre="correspondencia" />
           </span>
           Paquetes
-          {correspondenciaPendiente.length > 0 && (
+          {ve('correspondencia') && correspondenciaPendiente.length > 0 && (
             <span className="acceso-directo__contador">{correspondenciaPendiente.length}</span>
           )}
         </Link>
+        )}
+        {(ve('reservas') || ve('pqrs') || ve('paz_y_salvo')) && (
         <Link to="/app/solicitudes" className="acceso-directo">
           <span className="acceso-directo__icono">
             <Icono nombre="solicitudes" />
@@ -141,10 +154,11 @@ export function InicioPage() {
           Solicitudes
           {pendientes > 0 && <span className="acceso-directo__contador">{pendientes}</span>}
         </Link>
+        )}
       </div>
 
       {/* CU-R-43 — Pedir ayuda a portería, a la vista: en una emergencia nadie busca. */}
-      <PedirAyuda />
+      {ve('pedir_ayuda') && <PedirAyuda />}
 
       {/* CU-R-17 — Los teléfonos útiles, a un toque: en una emergencia nadie busca. */}
       <Link to="/app/directorio" className="tarjeta tarjeta--accion tarjeta--plana">
@@ -213,7 +227,7 @@ export function InicioPage() {
 
       {/* Proyectos en marcha — CU-R-32. Va después del comunicado y antes de
           la unidad: es la obra que se está pagando con la cuota de arriba. */}
-      {proyectoEnMarcha && (
+      {ve('documentos') && proyectoEnMarcha && (
         <div className="pila">
           <div className="encabezado-seccion">
             <h2>Obras en marcha</h2>
@@ -265,6 +279,7 @@ export function InicioPage() {
       )}
 
       {/* Proxima reserva — CU-R-05 */}
+      {ve('reservas') && (
       <div className="pila">
         <div className="encabezado-seccion">
           <h2>Tu próxima reserva</h2>
@@ -301,10 +316,11 @@ export function InicioPage() {
           </Link>
         )}
       </div>
+      )}
 
       {/* Proceso sancionatorio — CU-R-29. Va antes que la correspondencia
           porque el paquete espera y el plazo no. */}
-      {procesosPorResponder.length > 0 && (
+      {ve('cartera') && procesosPorResponder.length > 0 && (
         <div className="pila">
           <div className="encabezado-seccion">
             <h2>Te toca responder</h2>

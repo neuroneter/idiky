@@ -15,7 +15,8 @@ import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { anularDocumento, emitirPazYSalvo } from '../../datos/repositorio'
+import { anularDocumento, aprobarDocumento, emitirPazYSalvo } from '../../datos/repositorio'
+import { esAdministracionPlena, nivelEn } from '../../dominio/permisos'
 import { calcularSaldo, etiquetaUnidad } from '../../dominio/reglas'
 import type { Documento } from '../../dominio/tipos'
 import { formatearDinero, formatearFecha } from '../../utilidades/formato'
@@ -37,6 +38,10 @@ export function PazYSalvoAdminPage() {
   if (!sesion) return null
 
   const quien = nombreCompleto(sel.persona(bd, sesion.personaId))
+  // PN-29 — El Auxiliar Administrativo prepara; el administrador o el delegado aprueba.
+  const usuario = sel.usuarioDeSesion(bd, sesion)
+  const prepara = nivelEn(usuario, 'paz_y_salvo') === 'Prep'
+  const aprueba = esAdministracionPlena(usuario)
   const copropiedad = sel.copropiedad(bd, sesion.copropiedadId)
   const administrador = sel.administradorDe(bd)
   const propietariosDe = (unidadId: string) => sel.propietariosDeUnidad(bd, unidadId)
@@ -65,10 +70,16 @@ export function PazYSalvoAdminPage() {
 
   async function emitir(unidadId: string) {
     const documento = await ejecutar(
-      (base) => emitirPazYSalvo(base, { copropiedadId: sesion!.copropiedadId, unidadId, emitidoPor: `${quien} (administración)` }),
-      'Paz y salvo emitido. El propietario también lo ve en su app.',
+      (base) =>
+        emitirPazYSalvo(base, {
+          copropiedadId: sesion!.copropiedadId,
+          unidadId,
+          emitidoPor: `${quien} (administración)`,
+          ...(prepara ? { preparadoPor: sesion!.personaId } : {}),
+        }),
+      prepara ? 'Paz y salvo preparado. Sale cuando lo apruebe el administrador.' : 'Paz y salvo emitido. El propietario también lo ve en su app.',
     )
-    if (documento) setAbierto(documento)
+    if (documento && !prepara) setAbierto(documento)
   }
 
   const unidadAbierta = abierto ? sel.unidad(bd, abierto.unidadId) : undefined
@@ -122,7 +133,7 @@ export function PazYSalvoAdminPage() {
                   <td style={{ textAlign: 'right' }}>
                     {saldo === 0 ? (
                       <button className="boton boton--pequeno boton--primario" disabled={cargando} onClick={() => void emitir(unidad.id)}>
-                        Emitir paz y salvo
+                        {prepara ? 'Preparar paz y salvo' : 'Emitir paz y salvo'}
                       </button>
                     ) : (
                       // A1 — Con saldo no se emite: se muestra la deuda y se va a verla.
@@ -167,7 +178,25 @@ export function PazYSalvoAdminPage() {
                       )}
                     </div>
                     <div className="grupo-botones">
-                      {anulado ? (
+                      {documento.estado === 'por_aprobar' ? (
+                        <>
+                          <span className="chip chip--alerta">Por aprobar</span>
+                          {aprueba && (
+                            <button
+                              className="boton boton--pequeno boton--primario"
+                              disabled={cargando}
+                              onClick={() =>
+                                void ejecutar(
+                                  (base) => aprobarDocumento(base, { documentoId: documento.id, personaId: sesion.personaId }),
+                                  'Paz y salvo aprobado. El propietario ya lo ve en su app.',
+                                )
+                              }
+                            >
+                              Aprobar
+                            </button>
+                          )}
+                        </>
+                      ) : anulado ? (
                         <span className="chip chip--error">Anulado</span>
                       ) : (
                         <>

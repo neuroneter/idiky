@@ -37,7 +37,7 @@ Para probarlo: el demo trae a **María Camila** (propietaria al día), **Andrés
 vencidas: acuerdos), **Gustavo** (dos propiedades), **Tomás** (familiar), **Jairo** (portería) y
 **Olga** (administración).
 
-**Calidad:** compila, ortografía sin hallazgos, **134 pruebas de navegador pasan**. Ninguna
+**Calidad:** compila, ortografía sin hallazgos, **138 pruebas de navegador pasan**. Ninguna
 dependencia nueva.
 
 ## 3. Lo que le toca a cada uno
@@ -130,6 +130,7 @@ Las fechas las ponen Daniel y Justo según su avance.
 | CU-A-12, CU-R-21 Elecciones | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/Postulaciones.tsx`, `features/admin/VotacionPunto.tsx` | `elecciones.spec.ts` |
 | CU-A-12, CU-R-20 Antes de la asamblea | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/AntesDeLaAsamblea.tsx` | `antes-asamblea.spec.ts` |
 | CU-A-17, CU-R-21 Entrada con QR | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/EntradaConQr.tsx` | `entrada-qr.spec.ts` |
+| Roles y permisos (PN-29) | `/admin`, `/app` con cada perfil | `dominio/permisos.ts`, `componentes/LayoutAdmin.tsx`, `componentes/LayoutResidente.tsx`, `features/admin/TableroDelCargo.tsx` | `permisos.spec.ts` |
 | CU-A-18, CU-A-20 Elegidos y cargos | `/admin/asambleas`, `/app`, `/app/edificio` | `componentes/CargosDelEdificio.tsx`, `componentes/HojaActa.tsx` | `elegidos.spec.ts` |
 | CU-A-12 Recordatorios de la asamblea | `/admin/asambleas`, `/app/avisos` | `features/admin/RecordatoriosAsamblea.tsx` | `recordatorios-asamblea.spec.ts` |
 | CU-A-12 Calendario de la ordinaria | `/admin/asambleas` | `features/admin/CalendarioOrdinaria.tsx` | `calendario-ordinaria.spec.ts` |

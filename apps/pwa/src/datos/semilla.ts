@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 53
+export const VERSION_ESQUEMA = 54
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -216,7 +216,37 @@ const residencias: Residencia[] = [
     principal: false,
     reside: false,
   },
+  // PN-29 — La inmobiliaria maneja dos unidades arrendadas y el operador, una (Mary, 2026-11-26):
+  // cada uno solo ve las unidades que le asignan.
+  ...([
+    ['res-inmobiliaria-502', 'per-inmobiliaria', 'uni-torre2-502', 'inmobiliaria'],
+    ['res-inmobiliaria-301', 'per-inmobiliaria', 'uni-torre1-301', 'inmobiliaria'],
+    ['res-operador-602', 'per-operador', 'uni-torre2-602', 'operador'],
+  ] as const).map(([id, personaId, unidadId, rol]) => ({
+    id,
+    personaId,
+    unidadId,
+    rol,
+    desde: `${new Date().getFullYear()}-01-15`,
+    principal: false,
+    reside: false,
+  })),
 ]
+
+/**
+ * PN-29 — El personal y los terceros de la tabla de Mary (2026-11-26). No viven en el edificio:
+ * entran a la consola (los de la administración) o a ALICE (la inmobiliaria y el operador).
+ */
+const PERSONAL: Persona[] = ([
+  ['per-auxiliar', 'Natalia', 'Cifuentes Ramos', '1036987456', 'auxiliar@altosdelbosque.co', '+57 320 555 3030'],
+  ['per-contador', 'Fernando', 'Ospina Lara', '71654987', 'contabilidad@altosdelbosque.co', '+57 320 555 4040'],
+  ['per-revisor', 'Claudia Patricia', 'Mora', '43123987', 'revisoria@contadoresmora.co', '+57 320 555 5050'],
+  ['per-piscinero', 'Wilmer', 'Hurtado Gil', '1017456123', 'piscina@altosdelbosque.co', '+57 320 555 6060'],
+  ['per-aseo', 'Luz Dary', 'Mosquera', '43987123', 'aseo@altosdelbosque.co', '+57 320 555 7070'],
+  ['per-mantenimiento', 'Jhon Fredy', 'Arango', '98654321', 'mantenimiento@altosdelbosque.co', '+57 320 555 8080'],
+  ['per-inmobiliaria', 'Inmobiliaria', 'Habitar S.A.S.', '900456789', 'arriendos@habitar.co', '+57 320 555 9090'],
+  ['per-operador', 'Estadías', 'Medellín S.A.S.', '901234567', 'reservas@estadiasmedellin.co', '+57 320 555 9191'],
+] as const).map(([id, nombres, apellidos, documento, email, telefono]) => ({ id, nombres, apellidos, documento, email, telefono }))
 
 /**
  * El portero del turno de la manana.
@@ -1621,7 +1651,7 @@ export function crearSemilla(): BaseDatos {
       },
     ],
     unidades,
-    personas: [...personas, administrador, portero],
+    personas: [...personas, administrador, portero, ...PERSONAL],
     residencias,
     cuotas,
     pagos,
@@ -1792,6 +1822,44 @@ export function crearSemilla(): BaseDatos {
         rol: 'admin',
         personaId: 'per-admin',
         copropiedadId: COPROPIEDAD_ID,
+      },
+      // PN-29 — Un perfil por cada usuario de la tabla de Mary (2026-11-26): cada uno ve solo lo suyo.
+      ...([
+        ['perfil-delegado', 'Luisa Fernanda Marin', 'Delegada · propietaria de la 201', 'delegado', 'per-3'],
+        ['perfil-presidente', 'Paula Andrea Rojas', 'Presidenta del consejo', 'presidente_consejo', 'per-7'],
+        ['perfil-consejero', 'Ricardo Salazar Nino', 'Consejero', 'consejero', 'per-8'],
+        ['perfil-auxiliar', 'Natalia Cifuentes', 'Auxiliar administrativa', 'auxiliar_administrativo', 'per-auxiliar'],
+        ['perfil-contador', 'Fernando Ospina', 'Contador', 'contador', 'per-contador'],
+        ['perfil-revisor', 'Claudia Patricia Mora', 'Revisora fiscal', 'revisor_fiscal', 'per-revisor'],
+        ['perfil-piscinero', 'Wilmer Hurtado', 'Piscinero', 'piscinero', 'per-piscinero'],
+        ['perfil-aseo', 'Luz Dary Mosquera', 'Aseo', 'aseo', 'per-aseo'],
+        ['perfil-mantenimiento', 'Jhon Fredy Arango', 'Mantenimiento', 'mantenimiento', 'per-mantenimiento'],
+      ] as const).map(([id, etiqueta, descripcion, cargo, personaId]) => ({
+        id,
+        etiqueta,
+        descripcion,
+        rol: 'admin' as const,
+        cargo,
+        personaId,
+        copropiedadId: COPROPIEDAD_ID,
+      })),
+      {
+        id: 'perfil-inmobiliaria',
+        etiqueta: 'Inmobiliaria Habitar',
+        descripcion: 'Inmobiliaria · Torre 1 · 301 y Torre 2 · 502',
+        rol: 'residente',
+        personaId: 'per-inmobiliaria',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre2-502',
+      },
+      {
+        id: 'perfil-operador',
+        etiqueta: 'Estadías Medellín',
+        descripcion: 'Operador · Torre 2 · 602',
+        rol: 'residente',
+        personaId: 'per-operador',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre2-602',
       },
       // CU-A-15 — Olga también administra el Mirador: no sale en la lista de entrada.
       {

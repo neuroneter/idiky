@@ -453,7 +453,7 @@ test("el formulario con familiar, menores y visitante frecuente (RN-60, RN-62)",
   
 })
 
-test("la familia sale con el propietario y el familiar adulto registra visitas (RN-60, RN-65)", async ({ page }) => {
+test("la familia sale con el propietario y el familiar ya no registra a nadie (RN-60, RN-65, PN-29)", async ({ page }) => {
   test.setTimeout(180_000)
   await page.setViewportSize({ width: 420, height: 900 })
   const p = page
@@ -474,7 +474,7 @@ test("la familia sale con el propietario y el familiar adulto registra visitas (
     reg = await autorizar(reg, maria); const famMenor = bd.residencias.find(x=>x.id===reg.residenciaId)
     // 4
     const v = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: famAdulta.personaId, categoria:'visitante', condicion:'no_residente', documento:'4003', vigenciaDesde: hoy, vigenciaHasta: hoy }))
-    out.adultaRegistraVisita = v.estado
+    out.adultaRegistraVisita = typeof v === 'string' ? v : v.estado
     out.adultaVisitaTemporal = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: famAdulta.personaId, categoria:'visitante', condicion:'temporal', documento:'4004', vigenciaDesde: hoy, vigenciaHasta: en(3) }))
     out.adultaFrecuente = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: famAdulta.personaId, categoria:'visitante', condicion:'frecuente', dias:[1], documento:'4005', vigenciaDesde: hoy, vigenciaHasta: en(30) }))
     out.adultaArrendatario = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'3102', creadoPor: famAdulta.personaId, categoria:'arrendatario', condicion:'residente', documento:'4006' }))
@@ -486,10 +486,10 @@ test("la familia sale con el propietario y el familiar adulto registra visitas (
     await intento(()=>repo.desvincularResidente(bd, { residenciaId: resMaria.id, personaId: admin, motivo:'cambio_propietario' }))
     out.familiaSale = !residenciaVigente(bd.residencias.find(x=>x.id===famAdulta.id)) && !residenciaVigente(bd.residencias.find(x=>x.id===famMenor.id))
     out.arrendatarioSigue = residenciaVigente(bd.residencias.find(x=>x.id===arr.id))
-    out.visitaDeLaHijaSigue = bd.visitantes.find(x=>x.id===v.visitanteId).estado
     return { out, famAdulta: famAdulta.personaId }
   })
-  const esp = { adultaRegistraVisita:'autorizado', adultaVisitaTemporal:/^ERR/, adultaFrecuente:/^ERR/, adultaArrendatario:/^ERR/, menorRegistra:/^ERR/, familiaSale:true, arrendatarioSigue:true, visitaDeLaHijaSigue:'revocado' }
+  // PN-29 (tabla de Mary, 2026-11-26): al visitante lo crean el propietario y el arrendatario; el familiar, a nadie.
+  const esp = { adultaRegistraVisita:/^ERR/, adultaVisitaTemporal:/^ERR/, adultaFrecuente:/^ERR/, adultaArrendatario:/^ERR/, menorRegistra:/^ERR/, familiaSale:true, arrendatarioSigue:true }
   for (const [k,v] of Object.entries(esp)) { const ok = v instanceof RegExp ? v.test(String(r.out[k])) : r.out[k]===v; expect.soft(ok, k).toBeTruthy() }
   // UI: la hija mayor entra y registra
   await p.goto(URL); await p.evaluate(async () => { localStorage.clear() }); await p.goto(URL); await p.waitForTimeout(400)
@@ -502,12 +502,8 @@ test("la familia sale con el propietario y el familiar adulto registra visitas (
   })
   await p.evaluate((id) => localStorage.setItem('idiky.demo.sesion', JSON.stringify({ perfilId:'perfil-'+id, personaId:id, rol:'residente', copropiedadId:'cop-1', unidadActivaId:'uni-torre1-402' })), hija)
   await p.goto(URL); await p.reload(); await p.goto(URL+'#/app/unidad/personas'); await p.waitForTimeout(600)
-  const texto = await p.locator('body').textContent()
-  expect.soft(texto.includes('Tú puedes registrar visitas de un día'), 'aviso para el familiar').toBeTruthy()
-  await p.getByRole('button', { name: 'Registrar' }).first().click(); await p.waitForTimeout(200)
-  const tipos = (await p.locator('.opcion-categoria strong').allTextContents()).join('|')
-  const conds = (await p.locator('.segmentos').first().locator('.segmento').allTextContents()).map(t=>t.trim()).join('|')
-  expect.soft(tipos==='Visitante' && conds==='De un día', 'la hija solo registra visitas de un día: ' + tipos + ' ' + conds).toBeTruthy()
+  // PN-29 — Las personas de la unidad no son de su perfil: no se le muestran.
+  await expect(p.getByText('Esto no es para tu perfil')).toBeVisible()
   expect.soft(errores, 'sin errores de página').toEqual([])
 })
 
