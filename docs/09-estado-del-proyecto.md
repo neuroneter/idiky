@@ -125,6 +125,25 @@ proceso `enviarRecordatoriosDeAsamblea` en `datos/repositorio.ts`; prueba
 `recordatorios-asamblea.spec.ts`. **Decisión de Mary:** la pantalla para proyectar en el salón
 queda **para después**. **Para Daniel:** el envío real va por el middleware (correo SES, WhatsApp).
 
+### 2026-11-26 · Daniel + IA (Claude) · BLOKY y BOB · Al conviviente se le dice «Residente» (T-169, RN-398)
+
+Daniel: *no se le dice conviviente sino residente*. Cambia **el nombre que se muestra**, no el identificador.
+
+- **Middleware y BLOKY** (Bloky-Idiky `develop` `4739647`, BLOKY Dev `c9f9138.bloky-4739647`): migración común 022 (el
+  catálogo de roles dice «Residente»); textos de Unidades, Portería y el consejo. La API sigue usando `conviviente`.
+- **BOB** (BOB-Idiky `develop` `77af31f`): la ficha de verificación. **Sin desplegar.**
+- **Documentos:** RN-398, glosario, docs/20, avisos a Justo (§13) y a Mary.
+- **Por qué no se cambió el identificador:** `residente` ya existió como rol y quedó retirado el 2026-11-23; reusarlo
+  mezclaría el rol viejo con el nuevo, y sería el tercer cambio de contrato de «Mi unidad» para ALICE en una semana.
+
+**Además, a pedido de Justo:** se reinició el primer ingreso a ALICE de Juan Luis Almonacid en BLOKY Dev (sesiones
+cerradas; sin marcas de primer ingreso, documento, correo ni fecha de nacimiento), para mostrar el ingreso desde cero. No se
+borró nada; lo anterior quedó en la auditoría del directorio. Sus billeteras siguen creadas.
+
+**Verificado:** `npm run probar` («Todo paso»), build de BLOKY y del middleware, y el nombre del rol en la base de Dev.
+**No verificado:** las pantallas en el navegador; ALICE.
+**Sigue:** Justo cambia los textos de ALICE; desplegar BOB cuando Daniel lo pida.
+
 ### 2026-11-25 · Daniel + IA (Claude) · BLOKY y BOB · Sesiones de la app, semana en Reuniones y listas por páginas (T-128, T-168, RN-397)
 
 Cinco cosas pequeñas que Daniel pidió cerrar juntas. ALICE no se tocó (es de Justo).
