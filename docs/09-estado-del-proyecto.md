@@ -113,7 +113,7 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
-### 2026-11-26 · Mary + IA (Claude) · Propuesta de permisos por usuario (tabla de roles §4 bis)
+### 2026-11-26 · Mary + IA (Claude) · Permisos por usuario: propuesta y confirmación (tabla de roles §4 bis)
 
 Se propuso qué ve y hace cada uno de los 12 usuarios en 20 módulos
 ([`recursos/roles-de-alice.md`](./recursos/roles-de-alice.md) §4 bis), **por confirmar**. Mary ya
@@ -121,7 +121,9 @@ respondió tres dudas: el **Familiar o acompañante no reserva zonas comunes ni 
 **Piscinero no necesita nada más** que lo de la piscina y el **Auxiliar Administrativo solo ve la
 cartera** y el **Revisor Fiscal no ve las PQRS** (las pide a la administración si las necesita). El
 **Administrador Idiky entra a los datos solo como soporte**: con pase, motivo y rastro (ADR-0034).
-**Falta:** si el Auxiliar Administrativo emite paz y salvos y certificados. Cuando
+El **Auxiliar Administrativo prepara paz y salvos y certificados, y los aprueba el administrador**.
+**La tabla de permisos quedó CONFIRMADA y es obligatoria.** **Sigue:** aplicarla en la maqueta y
+que Daniel la lleve a la matriz de BOB y al middleware. Cuando
 confirme la matriz completa, se aplica en la maqueta (hoy el familiar sí reserva y radica PQRS) y
 pasa a Daniel para la matriz de BOB y el middleware (ADR-0034).
 
