@@ -49,7 +49,7 @@
 |---|---|---|
 | 1 | 2026-11-26 | Se incluye al **Delegado** (§1): lo crea el Administrador Idiky y lo inactiva el Administrador Idiky solo por solicitud directa a `operaciones@idiky.com`, con el soporte. **Confirmado por Mary** (*«lo definido para el delegado está okey»*). |
 | 2 | 2026-11-26 | **«Conviviente» no existe** en la legislación ni en la terminología colombiana de propiedad horizontal: *«Conviviente no existe en la legislación o en la terminología colombiana»*. **No se usa** en pantallas, mensajes, documentos ni en el código nuevo. Quien vive en la unidad sin ser propietario ni arrendatario es **Familiar o acompañante** (o Visitante), con su **marca de residencia**. |
-| 3 | 2026-11-26 | **Al familiar o acompañante lo inactiva quien lo creó o el perfil superior a ese** (*«lo inactiva el que lo creó o el perfil superior a este»*). Por ejemplo, si lo creó el arrendatario, lo inactiva el arrendatario o el propietario. |
+| 3 | 2026-11-26 | **Al familiar o acompañante lo inactiva quien lo creó o el perfil superior a ese** (*«lo inactiva el que lo creó o el perfil superior a este»*). Por ejemplo, si lo creó el arrendatario, lo inactiva el arrendatario o el propietario. **Esta lectura la confirmó Mary** (*«sí, está bien»*). |
 
 ## 3. Lo que la tabla todavía no dice — preguntar a Mary
 
