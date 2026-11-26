@@ -62,9 +62,10 @@
 | 4 | 2026-11-26 | **Al familiar o acompañante lo crean el propietario o el arrendatario** (*«lo pueden crear el propietario o arrendatario»*). |
 | 5 | 2026-11-26 | **Administrador Idiky**, el rol más alto (el dueño, el equipo de IDIKY): el primero se crea al instalar el sistema; los demás los crea otro Administrador Idiky. Lo inactiva **otro** Administrador Idiky, nunca él mismo, y **siempre queda al menos uno activo**: así IDIKY nunca queda sin dueño y quien se va o pierde su clave se bloquea el mismo día. Propuesta aceptada por Mary (*«sí, déjalo así»*). |
 
-## 3. Lo que la tabla todavía no dice — preguntar a Mary
+## 3. Lo que la tabla todavía no dice
 
-1. **Qué ven y hacen** esos cinco y el Piscinero en la §4 bis (hoy la matriz confirmada no los tiene).
+*(Nada: la tabla quedó completa el 2026-11-26, con los permisos de todos los usuarios. Lo que choca
+con otros sistemas está en la §4 y la §4 ter.)*
 
 ## 4. Lo que hoy choca con la tabla — para que Mary y Daniel lo concilien
 
@@ -165,11 +166,11 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas. ⁹ El Au
    certificados pero lo debe aprobar el administrador»*).
 5. ✅ **Respondida (Mary, 2026-11-26):** el **Piscinero no necesita nada más** (*«el piscinero no necesita nada más»*): su columna queda como está.
 
-### Los usuarios nuevos (decisión 6) — ✅ Pres, Cons, Aseo y Mant CONFIRMADOS · ⏳ Inmo y Oper por confirmar
+### Los usuarios nuevos (decisión 6) — ✅ CONFIRMADOS por Mary (2026-11-26)
 
 **Mary, 2026-11-26:** *«confirmo los permisos de Presidente del consejo, Consejero, Aseo y
-Mantenimiento»*: esas cuatro columnas son **obligatorias**. Las de la Inmobiliaria y el Operador
-siguen como propuesta. Mismas letras y mismos módulos de arriba. **Pres** Presidente del consejo · **Cons** Consejero ·
+Mantenimiento»*: esas cuatro columnas son **obligatorias**. Después confirmó las de la **Inmobiliaria y el
+Operador** (*«el resto queda así, confirmo»*). **Toda la tabla es obligatoria.** Mismas letras y mismos módulos de arriba. **Pres** Presidente del consejo · **Cons** Consejero ·
 **Aseo** · **Mant** Mantenimiento · **Inmo** Inmobiliaria · **Oper** Operador. La Inmobiliaria y el
 Operador **solo ven las unidades que les asignan** (decisión 8). El Presidente y el Consejero
 **conservan además lo que tienen como propietarios**.
@@ -198,12 +199,11 @@ Operador **solo ven las unidades que les asignan** (decisión 8). El Presidente 
 | 20. Vehículos y mascotas | — | — | — | — | — | s |
 
 ¹⁰ Para alistar o cerrar la zona. ¹¹ Las de daños: las ve y las atiende (registra lo que hizo).
-¹² Registra las novedades de su trabajo. ¹³ Crea y retira a los **visitantes** de las unidades que le asignan (por confirmar con Mary).
+¹² Registra las novedades de su trabajo. ¹³ Crea y retira a los **visitantes** de las unidades que le asignan.
 ¹⁴ **Mary, 2026-11-26:** en las cuentas claras, la Inmobiliaria **solo ve lo de la unidad o las
 unidades a su cargo**, no el informe de todo el edificio.
 
-**Para que Mary decida:** ¿qué hace distinto el **Operador** de la **Inmobiliaria**? La propuesta supone
-que la **Inmobiliaria** maneja el arriendo (paga la administración, pide paz y salvo, trasteos) y el
+**La diferencia (confirmada por Mary):** la **Inmobiliaria** maneja el arriendo (paga la administración, pide paz y salvo, trasteos) y el
 **Operador** maneja la estadía de la gente en la unidad (visitantes y huéspedes, reservas, PQRS), sin
 la plata.
 
@@ -221,3 +221,4 @@ la plata.
 | 2026-11-26 | **Consolida** la tabla con el catálogo de BOB y BLOKY: cinco usuarios nuevos y los nombres que quedan (decisión 6; en el Excel y aquí) | Mary |
 | 2026-11-26 | Quién crea e inactiva a los cinco usuarios nuevos (decisión 7; en el Excel y aquí) | Mary |
 | 2026-11-26 | Inmobiliaria y Operador, dos roles (decisión 8). **Confirma los permisos** de Presidente del consejo, Consejero, Aseo y Mantenimiento | Mary |
+| 2026-11-26 | Confirma los permisos de la Inmobiliaria (cuentas claras solo de sus unidades) y del Operador. **La tabla queda completa** | Mary |
