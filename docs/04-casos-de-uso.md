@@ -23,7 +23,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | ID | Caso de uso | Fase | Estado | Detalle |
 |---|---|---|---|---|
 | CU-R-01 | **Ingresar a la app** (código por SMS o correo, sin clave) | 1 | 🟡 Parcial (el flujo, sin autenticar) | [ver](./casos-de-uso/residente.md#cu-r-01) |
-| CU-R-02 | Ver resumen de mi copropiedad (inicio) | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-02) |
+| CU-R-02 | Ver resumen de mi copropiedad (inicio) | 1 | ✅ Demo (2026-11-26: dice quién quedó elegido en cada cargo, PN-28) (2026-11-26: en una elección, quiénes quedan elegidos y su aceptación, PN-28) | [ver](./casos-de-uso/residente.md#cu-r-02) |
 | CU-R-03 | Consultar estado de cuenta | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-03) |
 | CU-R-04 | Pagar una cuota | 1 | ✅ Demo (simulado) | [ver](./casos-de-uso/residente.md#cu-r-04) |
 | CU-R-05 | Reservar una zona común (incluye el **parqueadero de visitantes**, con la placa, PN-21) | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-05) |
@@ -87,7 +87,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-09 | Registrar correspondencia recibida | 1 | ✅ Demo | [ver](./casos-de-uso/administrador.md#cu-a-09) |
 | CU-A-10 | **Configurar zonas comunes y sus reglas** | 2 | ✅ Demo (crear, editar, cerrar por mantenimiento y desactivar con aviso; costos, depósito y multa por no cancelar; uso exclusivo o compartido; días y horario; aviso masivo del cierre; fotos y especificaciones — RN-104 a RN-117) | [ver](./casos-de-uso/administrador.md#cu-a-10) |
 | CU-A-11 | Cargar presupuesto anual | 3 | ⬜ Pendiente | — |
-| CU-A-12 | **Convocar la asamblea y emitir las citaciones** | 1 | ✅ Demo (2026-10-12: citación con número y código, enviada a cada propietario con constancia, antelación de 15 días para la ordinaria; RN-33, RN-219; 2026-11-23: cada punto que se vota dice al citar si es decisión económica, RN-211; elecciones con postulaciones, PN-23; documentos y preguntas antes de la reunión, PN-24; calendario legal de la ordinaria, PN-26; recordatorios automáticos a los propietarios, PN-27) | [ver](./casos-de-uso/administrador.md#cu-a-12) |
+| CU-A-12 | **Convocar la asamblea y emitir las citaciones** | 1 | ✅ Demo (2026-10-12: citación con número y código, enviada a cada propietario con constancia, antelación de 15 días para la ordinaria; RN-33, RN-219; 2026-11-23: cada punto que se vota dice al citar si es decisión económica, RN-211; elecciones con postulaciones, PN-23; documentos y preguntas antes de la reunión, PN-24; calendario legal de la ordinaria, PN-26; recordatorios automáticos a los propietarios, PN-27; puestos de cada elección, PN-28) | [ver](./casos-de-uso/administrador.md#cu-a-12) |
 | CU-A-13 | **Emitir el paz y salvo** | 1 | ✅ Demo (desde Cartera → Paz y salvo: busca la unidad, ve el saldo, emite, imprime y anula con motivo — RN-26, RN-36) | [ver](./casos-de-uso/administrador.md#cu-a-13) |
 | CU-A-14 | Gestionar proveedores y mantenimientos | 3 | 🟡 Parcial (2026-11-23: proveedores en el directorio, CU-R-17; mantenimientos programados en el calendario, CU-A-35; falta la hoja de vida de equipos con vencimientos y certificados) | — |
 | CU-A-15 | **Administrar varias copropiedades** | 1 | ✅ Demo (2026-11-23: Mary, 2026-11-23, «sí, varios»; selector de edificio en la consola) | — |

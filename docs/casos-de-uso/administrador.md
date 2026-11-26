@@ -469,6 +469,8 @@ coeficiente y se cierra.
 ---
 
 ### CU-A-18
+
+> **Ampliación 2026-11-26 (PN-28):** al cerrar la votación de una elección quedan los **más votados** en los puestos que se fijaron al citar (empate en el último puesto: se define por el reglamento). La administración ve quiénes quedaron y registra si aceptó quien es de afuera o lo dijo en la sala; arriba de Asambleas, **quién está hoy en cada cargo**. Pantalla: `componentes/CargosDelEdificio.tsx`; prueba: `elegidos.spec.ts`.
 ## CU-A-18 — Habilitar, abrir y cerrar una votación
 
 - **Actor principal:** Administrador
@@ -583,6 +585,8 @@ alguien lo impugne.
 ---
 
 ### CU-A-20
+
+> **Ampliación 2026-11-26 (PN-28):** en una elección, el acta dice **quién quedó elegido** en cada cargo, con sus votos y si aceptó, en vez de «se aprueba» (`componentes/HojaActa.tsx`).
 ## CU-A-20 — Levantar el acta de la asamblea
 
 - **Actor principal:** Administrador

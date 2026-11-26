@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 52
+export const VERSION_ESQUEMA = 53
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -1994,6 +1994,38 @@ function construirParaCompetir() {
       },
     ],
     acuerdosPago: [],
+    // PN-28 — El consejo y el revisor fiscal que eligió la ordinaria anterior.
+    cargosElegidos: [
+      ...([
+        ['per-4', 'Jorge Enrique Valencia Ruiz', 'uni-torre1-202'],
+        ['per-7', 'Paula Andrea Rojas Vega', 'uni-torre1-401'],
+        ['per-8', 'Ricardo Salazar Nino', 'uni-torre2-501'],
+      ] as const).map(([personaId, nombre, unidadId], i) => ({
+        id: `car-consejo-${i + 1}`,
+        copropiedadId: COPROPIEDAD_ID,
+        cargo: 'consejo' as const,
+        nombre,
+        personaId,
+        unidadId,
+        asambleaId: ASAMBLEA_CERRADA,
+        puntoId: 'pun-anterior-consejo',
+        votacionId: 'vta-anterior-consejo',
+        desde: sumarDias(hoy, -150),
+        aceptacion: { por: personaId, en: `${sumarDias(hoy, -149)}T15:00:00.000Z` },
+      })),
+      {
+        id: 'car-revisor-1',
+        copropiedadId: COPROPIEDAD_ID,
+        cargo: 'revisor_fiscal' as const,
+        nombre: 'Claudia Patricia Mora',
+        matricula: '45678-T',
+        asambleaId: ASAMBLEA_CERRADA,
+        puntoId: 'pun-anterior-revisor',
+        votacionId: 'vta-anterior-revisor',
+        desde: sumarDias(hoy, -150),
+        aceptacion: { por: 'per-admin', en: `${sumarDias(hoy, -148)}T15:00:00.000Z` },
+      },
+    ],
     // PN-23 — Una postulación al consejo ya recibida: así se ve la elección en el demo.
     postulaciones: [
       {

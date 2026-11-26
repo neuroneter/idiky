@@ -12,6 +12,7 @@ import * as sel from '../../../datos/selectores'
 import { encuestaAbierta, hoyISO, objetoPendiente, respuestaDeUnidad } from '../../../dominio/reglas'
 import { BotonVolver } from '../../../componentes/BotonVolver'
 import { Icono, type NombreIcono } from '../../../componentes/Icono'
+import { CargosVigentes } from '../../../componentes/CargosDelEdificio'
 
 export function EdificioPage() {
   const { bd } = useDatos()
@@ -56,6 +57,8 @@ export function EdificioPage() {
           </Link>
         ))}
       </div>
+      {/* PN-28 — Quién está en el consejo, el comité y la revisoría fiscal. */}
+      <CargosVigentes modo="residente" />
     </div>
   )
 }
