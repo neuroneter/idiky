@@ -92,7 +92,7 @@ Columnas: **AI** Administrador Idiky · **AC** Administrador Copropiedad · **De
 | 1. Contrato y alta de la copropiedad (BOB) | G | V | V | — | — | — | — | — | — | — | — | — |
 | 2. Estructura, unidades y parametrización | Soporte | G | G | V | V | V | — | — | — | — | — | — |
 | 3. Usuarios: crear e inactivar (según la §1) | G | G | G | V | — | — | — | — | S | S | — | — |
-| 4. Cartera: cuotas, estado de cuenta, pagos y acuerdos | Soporte | G | G | V | G | V | — | — | S | S | — | — |
+| 4. Cartera: cuotas, estado de cuenta, pagos y acuerdos | Soporte | G | G | V ✅ | G | V | — | — | S | S | — | — |
 | 5. Paz y salvo y certificados | Soporte | G | G | G | G | V | — | — | S | S | — | — |
 | 6. Contabilidad (la contable) | — | V | V | — | G | V | — | — | — | — | — | — |
 | 7. Cuentas claras e informes | — | G | G | V | G | V | — | — | V | V | V | — |
@@ -119,7 +119,7 @@ pedido de ayuda. ⁸ Modera: retira un aviso que no cumple las normas.
 **Para que Mary decida:**
 1. ¿El **Administrador Idiky** entra a los datos de la copropiedad solo como **soporte** (con pase y
    rastro), o los ve siempre?
-2. ¿El **Auxiliar Administrativo** puede **registrar pagos** en la cartera, o solo verla?
+2. ✅ **Respondida (Mary, 2026-11-26):** el **Auxiliar Administrativo solo ve la cartera** (*«solo ve la cartera»*): no registra pagos, ni acuerdos, ni ajustes.
 3. ✅ **Respondida (Mary, 2026-11-26):** el Familiar o acompañante **no puede reservar zonas comunes ni radicar PQRS** (*«no puede reservar zonas comunes y radicar PQRS»*).
 4. ¿El **Revisor Fiscal** ve las **PQRS** (control) o no?
 5. ✅ **Respondida (Mary, 2026-11-26):** el **Piscinero no necesita nada más** (*«el piscinero no necesita nada más»*): su columna queda como está.
