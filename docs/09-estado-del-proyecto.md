@@ -113,6 +113,20 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-26 · Justo · Middleware + ALICE · T-166 y T-169 (primacía documento + perfiles visitante/familia)
+
+Implementación de la llamada del mismo día:
+
+- **Bloky-Idiky** `feature/T-169-perfiles-visitante-familia`: migración `028` (`relacion_visita`, `patron_visita`,
+  `recurrencia`, `condicion_etaria`, `sale_solo`); reglas RN-398/399; `POST …/invitados` y `…/residentes` (conviviente)
+  guardan y devuelven los campos. Portería / avisos de salida: **después**. `npm run probar` en verde.
+- **App-Idiky** `feature/T-166-T-169-perfiles-y-documento`: aviso de importancia + diálogo de primacía/`corregir: true`
+  (T-166); Mi unidad pide relación, patrón, horas, condición etaria y `saleSolo`.
+- **idiky:** contrato docs/20 §5 actualizado.
+
+**Sigue:** merge a `develop`, desplegar BLOKY Dev (migración 028), probar con Juan Luis; portería para notificar salidas
+(RN-399).
+
 ### 2026-11-26 · Justo ↔ Daniel (llamada) · ALICE · Perfiles: visitante (relación + recurrencia) y familia (edad + salida) (RN-398, RN-399)
 
 Segundo acuerdo de la misma llamada, sobre **creación de perfiles** en la unidad:
@@ -125,7 +139,7 @@ Segundo acuerdo de la misma llamada, sobre **creación de perfiles** en la unida
    menor: si **puede salir solo** del conjunto o hay que **notificar a alguien** si sale sin autorización (seguridad:
    Alzheimer, niños, etc.) (RN-399).
 
-**Documentado** en RN-398/399, avisos y T-169. **Por construir** en middleware, ALICE y portería.
+**Documentado** en RN-398/399, avisos y T-169. **Construido** en middleware + ALICE (portería después).
 
 ### 2026-11-26 · Justo ↔ Daniel (llamada) · ALICE · Primacía de los datos personales en el primer ingreso (RN-391)
 

@@ -460,9 +460,9 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
 | Ruta | Qué hace |
 |---|---|
 | `GET …/residencias` | Quiénes están en la unidad: personas (con rol), mascotas e invitados |
-| `POST …/residentes` `{ nombre, celular, paisCelular?, tipoDocumento, numeroDocumento, paisDocumento?, rol: "propietario" \| "conviviente", aceptarCelularRegistrado? }` | Agrega un conviviente (por defecto) o un copropietario. **Propietario: solo lo crea otro propietario** |
+| `POST …/residentes` `{ nombre, celular, paisCelular?, tipoDocumento, numeroDocumento, paisDocumento?, rol: "propietario" \| "conviviente", condicionEtaria?, saleSolo?, aceptarCelularRegistrado? }` | Agrega un conviviente (por defecto) o un copropietario. **RN-399:** conviviente exige `condicionEtaria` (`mayor_edad` \| `menor_edad` \| `persona_mayor`); si es menor o persona mayor, `saleSolo` (bool). **Propietario: solo lo crea otro propietario** |
 | `POST …/arrendatarios` `{ …lo mismo, desde, hasta, paquete }` | **Solo el propietario** (RN-366, RN-369). `paquete` es un rol fijo de BOB: `GET /api/app/paquetes-de-arrendatario` da la lista (`[{ id, nombre }]`, hoy «Arrendatario · operación completa» y «· solo vivir»). Fechas obligatorias, hasta 5 años |
-| `POST …/invitados` `{ nombre, celular, paisCelular?, tipoDocumento, numeroDocumento, paisDocumento?, desde, hasta, aceptarCelularRegistrado? }` | Agrega un invitado con sus fechas (obligatorias) |
+| `POST …/invitados` `{ nombre, celular, …, desde, hasta, relacionVisita, patronVisita, horaDesde?, horaHasta?, meses?, placa?, aceptarCelularRegistrado? }` | Agrega un invitado. **RN-398:** `relacionVisita` (`trabajador` \| `ayudante` \| `familiar` \| `otro`) y `patronVisita` (`una_vez` \| `recurrente`); si recurrente, `meses` 1…12 (una vez a la semana). **RN-392:** franja opcional |
 | `POST …/mascotas` `{ nombre, especie, foto? }` | Agrega una mascota (perfil, sin ingreso) |
 | `POST …/residencias/:rid/bloquear` · `…/desbloquear` · `…/finalizar` `{ motivo }` | Gestiona a uno de su unidad. **Finalizar es en cadena** (RN-368): también se finalizan los convivientes, invitados y mascotas que esa persona creó |
 
@@ -495,7 +495,8 @@ Prefijo: `/api/app/c/:copropiedadId/unidades/:unidadId`
 > **En BLOKY Dev desde el 2026-11-23** (`bloky-04bee12`). El invitado entra **siempre con ALICE** (RN-367): no hay código de
 > visitante sin app.
 
-**Invitar** — `POST /api/app/c/:copropiedadId/unidades/:unidadId/invitados` `{ nombre, celular, tipoDocumento, numeroDocumento, …, desde, hasta, horaDesde?, horaHasta?, placa? }`.
+**Invitar** — `POST /api/app/c/:copropiedadId/unidades/:unidadId/invitados` `{ nombre, celular, tipoDocumento, numeroDocumento, …, desde, hasta, relacionVisita, patronVisita, meses?, horaDesde?, horaHasta?, placa? }`.
+**RN-398 (llamada 2026-11-26) — relación y patrón.** Obligatorios: `relacionVisita`, `patronVisita`; si `recurrente`, `meses` (1–12). La residencia guarda también `condicionEtaria` / `saleSolo` en convivientes (RN-399).
 **RN-392 (Daniel, 2026-11-25) — días y, si se quiere, horas.** `desde` y `hasta` son días (`AAAA-MM-DD`); `horaDesde` y
 `horaHasta` (`"14:00"`, 24 horas, hora de Colombia) son una franja que vale para **cada día** del rango. Sin ellas es todo
 el día. Van las dos o ninguna, y la salida después de la llegada (`422` con el mensaje si no). Una visita de un rato: el

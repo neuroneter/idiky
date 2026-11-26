@@ -362,8 +362,8 @@ Con Daniel, sobre **creación de perfiles** en Mi unidad:
 3. **Familia / conviviente:** siempre **mayor · menor · persona mayor**; si menor o persona mayor → ¿sale solo o hay que
    **notificar** si sale sin autorización? (seguridad).
 
-Detalle: [`daniel.md`](./daniel.md) §19 · RN-398/399 · T-169. **No hay API todavía**; no inventes campos en ALICE hasta el
-contrato. Mientras, Mi unidad sigue con invitado por días/horas (RN-392) y conviviente simple (T-148).
+Detalle: [`daniel.md`](./daniel.md) §19 · RN-398/399 · T-169 · docs/20 §5. **API y ALICE en ramas feature** (2026-11-26): hay que
+mergear y desplegar BLOKY Dev (migración 028). Portería (avisar si sale quien no puede solo): **después**.
 
 ## 12. Daniel respondió tus cuatro preguntas del documento y del invitado — 🟡 listo en el middleware, falta ALICE (2026-11-25)
 

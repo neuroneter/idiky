@@ -27,8 +27,9 @@
 | **Invitado / visitante** (mismo tipo de persona que el habitante; rol `invitado`) | **Relación / subordinación** (lista: trabajador, ayudante, familiar, …). Si se toman **horas**. Si es **una sola vez** o **recurrente** (p. ej. una vez a la semana durante algunos meses) |
 | **Familia / conviviente** | Siempre: **mayor de edad · menor de edad · persona mayor**. Si es persona mayor o menor: ¿**puede salir solo** del conjunto o hay que **notificar a alguien** si sale sin autorización? (seguridad: Alzheimer, niños, etc.) |
 
-**Para ti (middleware / portería):** persistir relación, patrón de visita y control de salida; que portería vea y avise.
-**Para Justo (ALICE):** formularios de Mi unidad. No construir hasta acordar el contrato en docs/20 (o hacerlo en T-169).
+**Hecho en código (Justo, 2026-11-26):** middleware en `Bloky-Idiky` `feature/T-169-perfiles-visitante-familia` (migración 028 +
+reglas + rutas); ALICE en `App-Idiky` `feature/T-166-T-169-perfiles-y-documento`; contrato en docs/20. **Te toca:** merge a
+`develop` y desplegar BLOKY Dev. **Portería** (avisar si sale quien no puede solo): después.
 
 ---
 
