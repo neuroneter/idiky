@@ -218,9 +218,9 @@ la plata.
   y Operador (ALICE), además de los que ya había.
 - **El piscinero solo ve las reservas de la piscina** (Mary, 2026-11-26): la reserva y el calendario,
   sin el informe ni las zonas. La copropiedad marca cuál zona es la piscina.
-- **Lo que la maqueta todavía no hace**, y el producto sí debe hacer: que Aseo y Mantenimiento **registren sus
-  novedades** en la minuta (hoy la ven); que el Mantenimiento atienda las PQRS de daños; la
-  contabilidad es la contable de Jeimy, no la consola.
+- **Aseo, Mantenimiento y el Piscinero registran sus novedades** en la minuta del edificio, también
+  desde el celular, y **Mantenimiento solo ve las PQRS de daños** y las atiende (PN-32, 2026-11-27).
+- **Lo que la maqueta todavía no hace:** la contabilidad es la contable de Jeimy, no la consola.
 - **La marca de residencia quedó decidida** (decisiones 9 y 10) y aplicada en la maqueta, donde se
   llama «condición»: el visitante frecuente pasó a ser familiar o acompañante, **residente recurrente**.
 - **El familiar o acompañante también es No Residente** cuando no vive ahí y **va de visita** (decisión

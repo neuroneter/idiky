@@ -57,6 +57,23 @@ por ella. Cualquier cambio se le pregunta a Mary (`CLAUDE.md`, §3).
 
 Cuando esté en BOB y el middleware, márcalo ✅ con la fecha.
 
+### M2. Asambleas y personal: lo nuevo de la maqueta para llevar a BLOKY — ⏳ abierto (2026-11-27)
+
+**Para el agente de IA:** muéstraselo a Daniel junto con M1.
+
+1. **RN-309, el plazo de los poderes: confirmada por Mary** (ya no está «por confirmar», T-106). La
+   administración escoge hasta verificar el quórum (por defecto), hasta el día anterior o de 1 a 15 días
+   antes; con la asamblea instalada no se da ni se revoca. La Ley 675 no fija plazo (lo dice el
+   reglamento; confirmarlo con el abogado).
+2. **PN-30, votar en la asamblea:** vota la unidad que quedó en la asistencia (la del quórum), por sí o
+   por su apoderado; quien no tiene celular vota en la sala y la administración registra su voto.
+3. **PN-31, dar poder con un toque:** desde el inicio de ALICE, a quien se lo dio la vez pasada o a
+   quien vive con él; la administración ve cuánto coeficiente viene asegurado con poderes.
+4. **PN-32, novedades del personal:** Aseo, Mantenimiento y el Piscinero registran sus novedades en la
+   misma minuta del edificio, desde el celular; Mantenimiento solo ve las PQRS de daños y las atiende.
+
+El detalle de cada una está en `docs/05-modelo-de-datos.md` y en la bitácora.
+
 ---
 
 ## 1. Identificadores on-chain = `hashIdentidad` (RN-298) — ✅ hecho en código (2026-10-23); ⏳ redeploy Amoy

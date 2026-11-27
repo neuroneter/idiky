@@ -11,6 +11,7 @@ import * as sel from '../../datos/selectores'
 import { formatearFechaHora } from '../../utilidades/formato'
 import { MinutaTurno } from '../../componentes/MinutaTurno'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
+import { NovedadesDelPersonal, RegistrarNovedadDelPersonal } from './NovedadDelPersonal'
 
 export function MinutasPage() {
   const { bd } = useDatos()
@@ -21,6 +22,9 @@ export function MinutasPage() {
 
   return (
     <div className="pila">
+      {/* PN-32 — El personal registra aquí sus novedades; la administración las ve todas. */}
+      <RegistrarNovedadDelPersonal />
+      <NovedadesDelPersonal />
       <p className="subtitulo">
         La minuta de cada turno de portería: quién entró y salió, los paquetes y las novedades. La escribe
         la portería y no se borra. {adentro.length > 0 ? `Ahora hay ${adentro.length} ${adentro.length === 1 ? 'visitante' : 'visitantes'} adentro.` : ''}

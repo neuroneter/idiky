@@ -7,6 +7,7 @@
  */
 
 import type {
+  AreaNovedad,
   PlazoPoderes,
   CargoElegido,
   PreguntaAsamblea,
@@ -5367,4 +5368,37 @@ export function coeficienteConPoder(poderes: Poder[], asambleaId: string, unidad
   const ids = new Set(poderes.filter((x) => x.asambleaId === asambleaId && poderEnCurso(x)).map((x) => x.unidadId))
   const coeficiente = unidades.filter((u) => ids.has(u.id)).reduce((s, u) => s + u.coeficiente, 0)
   return { unidades: ids.size, coeficiente: Number(coeficiente.toFixed(4)) }
+}
+
+// ---------------------------------------------------------------------------
+// Las novedades del personal — PN-32 · CU-P-02 (Mary, 2026-11-27)
+// ---------------------------------------------------------------------------
+
+/** PN-32 — El área de cada cargo que registra novedades. */
+export const AREA_DEL_CARGO: Partial<Record<string, AreaNovedad>> = {
+  aseo: 'aseo',
+  mantenimiento: 'mantenimiento',
+  piscinero: 'piscina',
+}
+
+export const TEXTO_AREA_NOVEDAD: Record<AreaNovedad, string> = {
+  aseo: 'Aseo',
+  mantenimiento: 'Mantenimiento',
+  piscina: 'Piscina',
+}
+
+/**
+ * PN-32 — Lo que pide una novedad del personal: qué pasó (al menos una frase) y dónde. Solo
+ * Mantenimiento la une a una PQRS, y la PQRS tiene que estar abierta.
+ */
+export function motivoNovedadInvalida(p: { area?: AreaNovedad; texto: string; lugar: string; pqrs?: Pick<Pqrs, 'estado'> | null; conPqrs: boolean }): string | null {
+  if (!p.area) return 'Las novedades del personal las registran Aseo, Mantenimiento y el Piscinero.'
+  if (p.texto.trim().length < 10) return 'Cuenta en una frase qué pasó o qué hiciste.'
+  if (p.lugar.trim().length < 3) return 'Escribe dónde fue: torre, piso o zona.'
+  if (p.conPqrs) {
+    if (p.area !== 'mantenimiento') return 'Las PQRS de daños las atiende Mantenimiento.'
+    if (!p.pqrs) return 'Esa PQRS no existe.'
+    if (!pqrsAbierta(p.pqrs as Pqrs)) return 'Esa PQRS ya está resuelta o cerrada.'
+  }
+  return null
 }

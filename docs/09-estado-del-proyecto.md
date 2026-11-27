@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-27 · Mary + IA (Claude) · Las novedades del personal, desde el celular (PN-32)
+
+Mary escogió la opción A: **la misma minuta del edificio**. Aseo, Mantenimiento y el Piscinero
+registran qué pasó o qué hicieron, dónde y una foto, desde la consola o **el celular** (el inicio de su
+perfil abre con el formulario). Las novedades entran al turno de portería en que pasaron, y la
+administración las ve todas. **Mantenimiento solo ve las PQRS de daños** y puede unir su novedad a una:
+quien la radicó ve lo que se hizo y la PQRS pasa a «en gestión». Archivos:
+`features/admin/NovedadDelPersonal.tsx`, `registrarNovedadDelPersonal` en `datos/repositorio.ts`;
+prueba `novedades-personal.spec.ts`. A Daniel se le dejó el aviso **M2** (RN-309 confirmada, PN-30 a
+PN-32) en `avisos/daniel.md`.
+
 ### 2026-11-27 · Mary + IA (Claude) · Dar poder con un toque (PN-31)
 
 Para llegar al quórum en las ordinarias: en el inicio de ALICE, al propietario que no ha dado poder ni
