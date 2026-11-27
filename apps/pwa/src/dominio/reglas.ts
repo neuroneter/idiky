@@ -2668,7 +2668,8 @@ const CONDICIONES: Record<CategoriaRegistro, readonly CondicionRegistro[]> = {
   // La familia o el acompañante vive ahí, siempre o un tiempo (2026-10-02), o viene ciertos días:
   // **residente recurrente** (Mary, 2026-11-26: «visitante frecuente se reemplaza por familiar o
   // acompañante»). En los datos sigue siendo `frecuente`.
-  familiar: ['residente', 'temporal', 'frecuente'],
+  // Y **no residente**: el familiar que no vive ahí y va de visita (Mary, 2026-11-26).
+  familiar: ['residente', 'no_residente', 'temporal', 'frecuente'],
   // PN-29 — Ya no hay visitante frecuente: es de un día o temporal (Mary, 2026-11-26).
   visitante: ['no_residente', 'temporal'],
   // PN-29 — No viven en la unidad (Mary, 2026-11-26).

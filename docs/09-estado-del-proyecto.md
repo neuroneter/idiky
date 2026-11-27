@@ -126,8 +126,8 @@ ajustaron tres que esperaban lo que la tabla ahora prohíbe al familiar. **Despu
 «Piscina» (semilla 55). **Marca de residencia (Mary):** valen sus reglas del 2026-10-02 para propietario, arrendatario y
 visitante, y el **visitante frecuente pasa a ser familiar o acompañante, residente recurrente**
 (`dominio/reglas.ts`, `CONDICIONES` y `saleConCodigo`; se ajustaron cuatro pruebas de `usuarios.spec.ts`
-y una de `reservas.spec.ts` que creaba otra «Piscina»). **Pendiente de Mary:** si el familiar puede ser
-No Residente, como dice la tabla.
+y una de `reservas.spec.ts` que creaba otra «Piscina»). **Decisión 11 (Mary):** el familiar o acompañante también puede ser
+**No Residente**, el que va de visita: tiene la app y no sale en la lista de residentes de portería.
 
 ### 2026-11-26 · Mary + IA (Claude) · Roles consolidados con BOB y BLOKY (tabla de roles, decisión 6)
 

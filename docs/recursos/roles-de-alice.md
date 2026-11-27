@@ -31,7 +31,7 @@
 | **Inmobiliaria** | No aplica (no vive en la unidad); **solo ve las unidades que le asignan** | Propietario | Propietario |
 | **Operador** | No aplica (no vive en la unidad); **solo ve las unidades que le asignan** | Propietario | Propietario |
 | **Visitante** | Residente Temporal · No Residente (de un día) ✅ | Propietario y arrendatario. **Solo el propietario** puede crear un visitante con marca de **Residente Temporal** | Propietario y arrendatario |
-| **Familiar o acompañante** | Residente · Residente Temporal · No Residente ⏳ · **Residente Recurrente** ✅ (viene ciertos días: empleada, niñera) | **Propietario o arrendatario** | **Quien lo creó, o el perfil superior a quien lo creó** |
+| **Familiar o acompañante** | Residente · Residente Temporal · No Residente ✅ (va de visita) · **Residente Recurrente** ✅ (viene ciertos días: empleada, niñera) | **Propietario o arrendatario** | **Quien lo creó, o el perfil superior a quien lo creó** |
 
 ## 2. Cómo se lee
 
@@ -61,6 +61,7 @@
 | 8 | 2026-11-26 | **Inmobiliaria y Operador son dos roles distintos**, y cada uno **solo ve lo de las unidades que le asignan** (*«son dos roles diferentes y solo ven lo de las unidades asignadas»*). Los dos los crea e inactiva el Propietario (decisión 7). |
 | 9 | 2026-11-26 | **Marcas de residencia: valen las reglas de octubre** (*«tienes razón para la 1, 2 y 3, actualizar la tabla; confirmo lo mencionado en octubre»*): el **propietario** es Residente o No Residente (no hay propietario temporal); el **arrendatario** es Residente o Residente Temporal (arrienda para vivir ahí); el **visitante** es de un día (No Residente) o Residente Temporal, nunca Residente. |
 | 10 | 2026-11-26 | **El visitante frecuente se reemplaza por el familiar o acompañante** (*«visitante frecuente se reemplaza por familiar o acompañante»*): quien viene ciertos días (empleada, niñera) es **familiar o acompañante con marca Residente Recurrente**; escoge los días, entra con código esos días y no necesita la app. |
+| 11 | 2026-11-26 | **El familiar o acompañante puede ser No Residente** (*«el familiar puede ir solo de visita, por esta razón puede ser no residente»*): es de la familia, no vive en la unidad y va de visita. |
 | 4 | 2026-11-26 | **Al familiar o acompañante lo crean el propietario o el arrendatario** (*«lo pueden crear el propietario o arrendatario»*). |
 | 5 | 2026-11-26 | **Administrador Idiky**, el rol más alto (el dueño, el equipo de IDIKY): el primero se crea al instalar el sistema; los demás los crea otro Administrador Idiky. Lo inactiva **otro** Administrador Idiky, nunca él mismo, y **siempre queda al menos uno activo**: así IDIKY nunca queda sin dueño y quien se va o pierde su clave se bloquea el mismo día. Propuesta aceptada por Mary (*«sí, déjalo así»*). |
 
@@ -222,9 +223,8 @@ la plata.
   contabilidad es la contable de Jeimy, no la consola.
 - **La marca de residencia quedó decidida** (decisiones 9 y 10) y aplicada en la maqueta, donde se
   llama «condición»: el visitante frecuente pasó a ser familiar o acompañante, **residente recurrente**.
-- ⏳ **Pendiente de Mary:** la tabla le da al familiar o acompañante también **No Residente**; el
-  2026-10-02 Mary había dicho que la familia «vive ahí» (residente o temporal). La maqueta sigue sin
-  No Residente para el familiar hasta que Mary lo confirme.
+- **El familiar o acompañante también es No Residente** cuando no vive ahí y **va de visita** (decisión
+  11): tiene la app, pero no sale en la lista de residentes de la portería.
 
 ## 5. Historia
 
@@ -243,3 +243,4 @@ la plata.
 | 2026-11-26 | Confirma los permisos de la Inmobiliaria (cuentas claras solo de sus unidades) y del Operador. **La tabla queda completa** | Mary |
 | 2026-11-26 | **Aplicada en la maqueta** (PN-29, §4 quater) | IA, con Mary |
 | 2026-11-26 | El piscinero solo ve la piscina; marcas de residencia de octubre; el visitante frecuente pasa a familiar o acompañante, residente recurrente (decisiones 9 y 10) | Mary |
+| 2026-11-26 | El familiar o acompañante también puede ser No Residente (decisión 11) | Mary |
