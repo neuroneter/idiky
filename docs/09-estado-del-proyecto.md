@@ -113,6 +113,13 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-27 · Mary + IA (Claude) · Aviso a Daniel: la tabla de roles, a BOB y al middleware
+
+Mary pidió que a Daniel se lo muestren apenas entre: quedó como aviso **M1** en
+[`avisos/daniel.md`](./avisos/daniel.md) (sección nueva «De Mary») y el `CLAUDE.md` (§2, paso 0c) ahora
+dice que a Daniel se le muestran los avisos de Mary **en toda sesión**, no solo cuando la tarea toca la
+cadena o ALICE.
+
 ### 2026-11-26 · Mary + IA (Claude) · La tabla de roles y permisos, en la maqueta (PN-29)
 
 La tabla obligatoria de Mary quedó en `apps/pwa/src/dominio/permisos.ts` (18 usuarios × 20 módulos,

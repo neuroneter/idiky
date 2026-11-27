@@ -1,7 +1,9 @@
 # Avisos para Daniel — revisión del trabajo de Justo (cadena, contratos, ALICE)
 
-> **Para el agente de IA:** si quien abre la sesión es **Daniel** y pregunta por el estado de la
-> cadena, los contratos o ALICE, muéstrale primero esta página (ítems **abiertos** o **temporales**).
+> **Para el agente de IA:** si quien abre la sesión es **Daniel**, **antes de cualquier tarea**
+> muéstrale los avisos **de Mary** que estén abiertos (sección «De Mary», abajo). Si además pregunta
+> por el estado de la cadena, los contratos o ALICE, muéstrale el resto de la página (ítems
+> **abiertos** o **temporales**).
 > Justo anota aquí lo que dejó a medias, lo temporal y lo que necesita decisión o despliegue tuyo.
 > Cuando lo cierres o lo publiques, márcalo ✅ con la fecha. El detalle del día a día sigue en
 > [`09-estado-del-proyecto.md`](../09-estado-del-proyecto.md).
@@ -15,6 +17,45 @@
 | ⏳ abierto | Falta una decisión o un despliegue tuyo |
 | 🟡 temporal | Sirve hoy; no es el diseño final |
 | ✅ hecho | Ya no bloquea; queda el rastro |
+
+---
+
+## De Mary
+
+### M1. La tabla de usuarios, permisos y marcas de residencia — ⏳ abierto (2026-11-27)
+
+**Para el agente de IA:** muéstrale esto a Daniel en palabras sencillas apenas abra la sesión, y
+pregúntale cuándo lo lleva a BOB y al middleware.
+
+Mary dejó la tabla **completa y obligatoria** en
+[`recursos/roles-de-alice.md`](../recursos/roles-de-alice.md) (con el Excel al lado) y ya está aplicada
+en la maqueta (`apps/pwa/src/dominio/permisos.ts`, PN-29). Hay que llevarla al **catálogo y la matriz
+de BOB y del middleware** (cambia RN-333, RN-366, RN-367 y RN-398) y avisarle a Justo: ALICE se rige
+por ella. Cualquier cambio se le pregunta a Mary (`CLAUDE.md`, §3).
+
+1. **Perfiles** (§4 ter, comparado con `develop`, `apps/bloky-api/src/permisos/inicial.ts`):
+   - se renombran `seguridad` → **Portería**, `secretaria` → **Auxiliar Administrativo**, `invitado` →
+     **Visitante** y `conviviente` → **Familiar o acompañante** (**eliminar `conviviente`**, también como
+     identificador: no existe en la terminología colombiana);
+   - nuevos: **Piscinero**, **Inmobiliaria** y **Operador** (estos dos reemplazan a «Arrendatario ·
+     operación completa» y solo ven las unidades que les asignan);
+   - **Arrendatario** es el actual «Arrendatario · solo vivir»;
+   - se quedan Administrador, Delegado, Presidente del consejo, Consejero, Contador, Revisor fiscal,
+     Aseo, Mantenimiento y Propietario.
+2. **Quién crea e inactiva a cada uno:** §1 (el Delegado lo cambia IDIKY por solicitud a
+   `operaciones@idiky.com`; el Administrador Idiky lo inactiva otro y siempre queda uno activo).
+3. **Permisos:** §4 bis, 18 usuarios × 20 módulos. El Administrador Idiky entra **solo como soporte**;
+   el Auxiliar Administrativo solo ve la cartera y **prepara** paz y salvos y certificados que **aprueba
+   el administrador**; el Revisor Fiscal solo ve y no ve PQRS; el Familiar o acompañante no reserva, no
+   radica PQRS, no ve cartera ni asambleas ni registra a nadie; el Piscinero solo ve la piscina; la
+   Inmobiliaria ve las cuentas claras solo de sus unidades.
+4. **Marca de residencia**, dato nuevo de cada persona en la unidad: Propietario (Residente · No
+   Residente), Arrendatario (Residente · Residente Temporal), Visitante (de un día · Residente Temporal),
+   Familiar o acompañante (Residente · No Residente · Residente Temporal · **Residente Recurrente**).
+   **Ya no hay visitante frecuente:** quien viene ciertos días es familiar o acompañante recurrente,
+   entra con código y no necesita la app.
+
+Cuando esté en BOB y el middleware, márcalo ✅ con la fecha.
 
 ---
 
