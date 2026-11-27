@@ -274,8 +274,9 @@ import {
   motivoProntoPagoInvalido,
   respuestaDeUnidad,
 } from '../dominio/reglas'
+import { AREA_DEL_CARGO, motivoNovedadInvalida, TEXTO_AREA_NOVEDAD } from '../dominio/reglas'
 import { motivoFueraDePlazoPoder, motivoNoVotaSinAsistencia, motivoPlazoPoderesInvalido } from '../dominio/reglas'
-import type { PlazoPoderes } from '../dominio/tipos'
+import type { PlazoPoderes, Soporte } from '../dominio/tipos'
 import { baseDeVoto, contarVotacion, elegidosDeEleccion, motivoPuestosInvalidos, puestosDe, textoEleccionCargo } from '../dominio/reglas'
 import type { CargoElegido } from '../dominio/tipos'
 import { leerCodigoAsistencia, motivoPostulacionInvalida, motivoRecordatoriosAsambleaInvalidos, poderVigente, recordatorioAsambleaQueToca, recordatoriosAsambleaDe, textoRecordatorioAsamblea, motivoPreguntaAsambleaInvalida, postulacionesVigentes, textoRespuestaAsamblea } from '../dominio/reglas'
@@ -7163,4 +7164,51 @@ export async function darPoderEnUnToque(
     documentoApoderado: apoderado.documento,
     telefonoApoderado: apoderado.telefono,
   })
+}
+
+// ---------------------------------------------------------------------------
+// Las novedades del personal — PN-32 (Mary, 2026-11-27)
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-32 — Aseo, Mantenimiento o el Piscinero registran una novedad en la minuta del edificio. Si
+ * Mantenimiento la une a una PQRS de daño, la PQRS recibe el mensaje de lo que se hizo (lo ve quien
+ * la radicó) y pasa a «en gestión»; la cierra la administración.
+ */
+export async function registrarNovedadDelPersonal(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; texto: string; lugar: string; foto?: Soporte; pqrsId?: string },
+): Promise<Resultado<NovedadPorteria>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  const perfil = bd.perfilesDemo.find((p) => p.personaId === parametros.personaId && p.copropiedadId === parametros.copropiedadId && p.rol === 'admin')
+  const area = perfil?.cargo ? AREA_DEL_CARGO[perfil.cargo] : undefined
+  const pqrs = parametros.pqrsId ? bd.pqrs.find((p) => p.id === parametros.pqrsId && p.copropiedadId === parametros.copropiedadId) : undefined
+  const motivo = motivoNovedadInvalida({ area, texto: parametros.texto, lugar: parametros.lugar, pqrs: pqrs ?? null, conPqrs: !!parametros.pqrsId })
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const ahora = ahoraISO()
+  const novedad: NovedadPorteria = {
+    id: nuevoId('nov'),
+    copropiedadId: parametros.copropiedadId,
+    texto: parametros.texto.trim(),
+    registradaEn: ahora,
+    registradaPor: parametros.personaId,
+    area: area!,
+    lugar: parametros.lugar.trim(),
+    ...(parametros.foto ? { foto: parametros.foto } : {}),
+    ...(pqrs ? { pqrsId: pqrs.id } : {}),
+  }
+  bd.novedades = [...(bd.novedades ?? []), novedad]
+  if (pqrs) {
+    const persona = bd.personas.find((p) => p.id === parametros.personaId)
+    pqrs.mensajes.push({
+      id: nuevoId('mpq'),
+      autor: 'administracion',
+      autorNombre: `${TEXTO_AREA_NOVEDAD[area!]} · ${persona ? persona.nombres.split(' ')[0] : ''}`.trim(),
+      texto: `${novedad.texto} (${novedad.lugar})`,
+      fecha: ahora,
+    })
+    if (pqrs.estado === 'abierta') pqrs.estado = 'en_gestion'
+  }
+  return persistir(bd, novedad)
 }

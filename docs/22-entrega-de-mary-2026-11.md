@@ -37,7 +37,7 @@ Para probarlo: el demo trae a **María Camila** (propietaria al día), **Andrés
 vencidas: acuerdos), **Gustavo** (dos propiedades), **Tomás** (familiar), **Jairo** (portería) y
 **Olga** (administración).
 
-**Calidad:** compila, ortografía sin hallazgos, **147 pruebas de navegador pasan**. Ninguna
+**Calidad:** compila, ortografía sin hallazgos, **150 pruebas de navegador pasan**. Ninguna
 dependencia nueva.
 
 ## 3. Lo que le toca a cada uno
@@ -130,6 +130,7 @@ Las fechas las ponen Daniel y Justo según su avance.
 | CU-A-12, CU-R-21 Elecciones | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/Postulaciones.tsx`, `features/admin/VotacionPunto.tsx` | `elecciones.spec.ts` |
 | CU-A-12, CU-R-20 Antes de la asamblea | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/AntesDeLaAsamblea.tsx` | `antes-asamblea.spec.ts` |
 | CU-A-17, CU-R-21 Entrada con QR | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/EntradaConQr.tsx` | `entrada-qr.spec.ts` |
+| Novedades del personal (PN-32) | `/admin/porteria`, `/admin` con Aseo o Mantenimiento | `features/admin/NovedadDelPersonal.tsx` | `novedades-personal.spec.ts` |
 | CU-R-23 Poder con un toque (PN-31) | `/app`, `/admin/asambleas` | `componentes/PoderEnUnToque.tsx` | `poder-en-un-toque.spec.ts` |
 | CU-R-23, CU-A-12 Plazo de los poderes (RN-309) | `/admin/asambleas`, `/app/asambleas/:id` | `features/admin/PlazoPoderesTarjeta.tsx`, `features/residente/AsambleaDetallePage.tsx` | `plazo-poderes.spec.ts` |
 | CU-A-18, CU-R-21 Votar en la asamblea (PN-30) | `/admin/asambleas`, `/app/asambleas/:id` | `features/admin/VotoEnSala.tsx`, `features/residente/AsambleaDetallePage.tsx` | `voto-en-sala.spec.ts` |

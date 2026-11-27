@@ -8,6 +8,7 @@ import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
+import { NovedadesDelPersonal, RegistrarNovedadDelPersonal } from './NovedadDelPersonal'
 import { NOMBRE_USUARIO, cambiaEnModulo, moduloDeRutaConsola, veModulo } from '../../dominio/permisos'
 
 const ENTRADAS: Array<{ ruta: string; texto: string }> = [
@@ -36,6 +37,9 @@ export function TableroDelCargo() {
 
   return (
     <div className="pila">
+      {/* PN-32 — Aseo, Mantenimiento y el Piscinero: lo primero, registrar la novedad (desde el celular). */}
+      <RegistrarNovedadDelPersonal />
+      <NovedadesDelPersonal soloMias />
       <div className="tarjeta">
         <strong>
           Hola, {persona?.nombres.split(' ')[0]}. Entraste como {NOMBRE_USUARIO[usuario]}.

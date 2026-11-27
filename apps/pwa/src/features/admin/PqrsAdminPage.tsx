@@ -31,7 +31,9 @@ export function PqrsAdminPage() {
   if (!sesion) return null
 
   const persona = sel.persona(bd, sesion.personaId)
-  const todas = sel.pqrsDeCopropiedad(bd, sesion.copropiedadId)
+  // PN-32 — Mantenimiento solo ve las PQRS de daños (tabla de Mary, 2026-11-26).
+  const deMantenimiento = sesion.cargo === 'mantenimiento'
+  const todas = sel.pqrsDeCopropiedad(bd, sesion.copropiedadId).filter((p) => !deMantenimiento || p.categoria === 'mantenimiento')
   const listado = todas.filter((solicitud) => {
     if (filtro === 'abiertas') return pqrsAbierta(solicitud)
     if (filtro === 'vencidas') return pqrsFueraDeSla(solicitud)

@@ -258,6 +258,8 @@ marca las que el residente canceló fuera de plazo (RN-112).
 ---
 
 ### CU-A-09
+
+> **Ampliación 2026-11-27 (PN-32):** la minuta del edificio también recibe las **novedades del personal** (Aseo, Mantenimiento, Piscina): dónde, qué pasó y una foto, desde la consola o el celular. Mantenimiento puede unirla a una PQRS de daño. Pantalla: `features/admin/NovedadDelPersonal.tsx`; prueba: `novedades-personal.spec.ts`.
 ## CU-A-09 — Registrar correspondencia recibida
 
 - **Actor principal:** **Portería** (CU-P-01). El administrador la gestiona de respaldo, y es

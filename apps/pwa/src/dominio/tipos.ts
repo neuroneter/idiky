@@ -1993,11 +1993,25 @@ export interface IngresoVisitante {
 export interface NovedadPorteria {
   id: string
   copropiedadId: string
-  turnoId: string
+  /** El turno de portería. Las del personal (PN-32) no tienen: entran a la minuta por la hora. */
+  turnoId?: string
   texto: string
   registradaEn: FechaHoraISO
   registradaPor: string
+  /**
+   * PN-32 — Si la registró el personal (Mary, 2026-11-27): Aseo, Mantenimiento o el Piscinero, en la
+   * **misma minuta del edificio**, desde la consola o el celular.
+   */
+  area?: AreaNovedad
+  /** Dónde: «Torre 2, piso 5», «cuarto de bombas». */
+  lugar?: string
+  foto?: Soporte
+  /** Mantenimiento: la PQRS de daño que atendió con este trabajo. */
+  pqrsId?: string
 }
+
+/** PN-32 — Las áreas del personal que registra novedades. */
+export type AreaNovedad = 'aseo' | 'mantenimiento' | 'piscina'
 
 /** RN-232 — Los grupos del directorio. Los proveedores no los ven todos (RN-233). */
 export type GrupoContacto = 'edificio' | 'emergencias' | 'servicios' | 'proveedores'

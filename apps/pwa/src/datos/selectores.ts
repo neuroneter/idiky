@@ -1,5 +1,6 @@
 import type { UsuarioIdiky } from '../dominio/permisos'
 import type { Sesion } from '../dominio/tipos'
+import { TEXTO_AREA_NOVEDAD } from '../dominio/reglas'
 /**
  * Selectores: consultas puras sobre la base de datos en memoria.
  *
@@ -485,6 +486,10 @@ export function minutaDeTurno(bd: BaseDatos, turno: { id: string; copropiedadId:
   }
   for (const n of bd.novedades ?? []) {
     if (n.turnoId === turno.id) lineas.push({ en: n.registradaEn, tipo: 'novedad', texto: n.texto })
+    // PN-32 — Las del personal entran a la minuta del turno en que pasaron: una sola minuta.
+    else if (!n.turnoId && n.area && n.copropiedadId === turno.copropiedadId && enTurno(n.registradaEn, turno)) {
+      lineas.push({ en: n.registradaEn, tipo: 'novedad', texto: `${TEXTO_AREA_NOVEDAD[n.area]}, ${n.lugar ?? ''}: ${n.texto}` })
+    }
   }
   // PN-09 — Los pedidos de ayuda: cuándo llegaron y cómo se atendieron.
   for (const a of bd.alertasAyuda ?? []) {
@@ -715,4 +720,11 @@ export function usuarioDeSesion(bd: BaseDatos, sesion: Pick<Sesion, 'rol' | 'car
   const rol = rolEnUnidad(bd, sesion.personaId, sesion.unidadActivaId)
   if (rol === 'autorizado') return 'visitante'
   return rol ?? 'visitante'
+}
+
+/** PN-32 — Las novedades del personal (Aseo, Mantenimiento, Piscina), las más nuevas primero. */
+export function novedadesDelPersonal(bd: BaseDatos, copropiedadId: string) {
+  return (bd.novedades ?? [])
+    .filter((n) => n.copropiedadId === copropiedadId && n.area)
+    .sort((a, b) => b.registradaEn.localeCompare(a.registradaEn))
 }
