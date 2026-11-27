@@ -66,9 +66,10 @@ Estado de los dos demos: **v0.1**, sin backend, con datos simulados. El producto
    [`jeimy.md`](./docs/avisos/jeimy.md), en `docs/avisos/`— (temas pendientes para hablar con
    Daniel) y no construyas nada que los contradiga. El de Justo está también en el `CLAUDE.md` de sus
    repositorios.
-0c. **Si quien abre la sesión es Daniel** y la tarea toca cadena, contratos o ALICE, muéstrale
-   [`docs/avisos/daniel.md`](./docs/avisos/daniel.md): qué dejó Justo hecho, qué es temporal y qué
-   falta desplegar o decidir.
+0c. **Si quien abre la sesión es Daniel**, muéstrale primero los avisos **de Mary** que estén abiertos
+   en [`docs/avisos/daniel.md`](./docs/avisos/daniel.md) (sección «De Mary»), sea cual sea la tarea. Y
+   si la tarea toca cadena, contratos o ALICE, también el resto de esa página: qué dejó Justo hecho,
+   qué es temporal y qué falta desplegar o decidir.
 1. Leer [`docs/09-estado-del-proyecto.md`](./docs/09-estado-del-proyecto.md) — la bitácora dice dónde quedó todo.
 2. Leer el caso de uso a implementar en [`docs/04-casos-de-uso.md`](./docs/04-casos-de-uso.md).
 2b. Si la tarea toca usuarios, roles, altas o permisos: leer
