@@ -608,6 +608,8 @@ entrega** la convocatoria en PDF (ADR-0006).
 
 ### CU-R-21
 
+> **Ampliación 2026-11-27 (PN-30):** el propietario vota desde su celular **cuando su llegada quedó registrada** (con su código en la entrada, o al entrar a la reunión virtual); si no, la app le dice que primero registre su llegada.
+
 > **Ampliación 2026-11-26 (PN-28):** si la asamblea lo eligió, le aparece en el inicio para **aceptar o no el cargo**; en *Tu edificio* ve **quién está en el consejo, el comité y la revisoría fiscal** (`componentes/CargosDelEdificio.tsx`).
 ## CU-R-21 — Entrar a la asamblea y marcar mi asistencia
 

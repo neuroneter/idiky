@@ -295,7 +295,16 @@ export function AsambleaDetallePage() {
           </p>
         )}
 
-        {abierta && puedo && !miVoto && (
+        {/* PN-30 — Vota la unidad que está en la asamblea: primero se registra la llegada. */}
+        {abierta && puedo && !miVoto && !miAsistencia && !representada && (
+          <p className="acceso__nota">
+            Para votar, primero registra tu llegada a la asamblea
+            {formas.includes('presencial') ? ': muestra tu código en la entrada del salón' : ''}
+            {formas.includes('virtual') ? (formas.includes('presencial') ? ', o entra a la reunión virtual' : ': entra a la reunión virtual') : ''}.
+          </p>
+        )}
+
+        {abierta && puedo && !miVoto && (miAsistencia || representada) && (
           <div className="lista">
             {/* Representada: las opciones **se ven pero no se pulsan** (Mary,
                 2026-09-10). Esconderlas dejaría a quien dio poder sin saber qué

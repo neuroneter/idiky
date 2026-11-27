@@ -43,6 +43,8 @@ test('la unidad en mora vota, salvo que el reglamento diga otra cosa (RN-221)', 
       try { const res = await f(); bd = res.bd; return res.datos } catch (e) { return 'ERR: ' + (e as Error).message }
     }
     const votar = (unidadId: string, personaId: string) => repo.emitirVoto(bd, { votacionId: 'vta-ex-3', unidadId, personaId, opcionId: 'op-a' })
+    // PN-30 — Vota la unidad que está en la asamblea: Andrés registra su llegada (virtual).
+    await intento(() => repo.marcarAsistencia(bd, { asambleaId: 'asa-extra-cubierta', unidadId: 'uni-torre2-901', personaId: 'per-2', forma: 'virtual' }))
     const porDefecto = !bd.copropiedades.find((c) => c.id === 'cop-1')!.morososNoVotan
     await intento(() => repo.configurarVotoMorosos(bd, { copropiedadId: 'cop-1', personaId: 'per-admin', morososNoVotan: true }))
     const enMora = await intento(() => votar('uni-torre2-901', 'per-2'))
