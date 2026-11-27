@@ -71,6 +71,7 @@ import { Postulaciones } from '../../componentes/Postulaciones'
 import { AntesDeLaAsamblea } from '../../componentes/AntesDeLaAsamblea'
 import { ElegidosDelPunto } from '../../componentes/CargosDelEdificio'
 import { MiCodigoDeEntrada } from '../../componentes/EntradaConQr'
+import { motivoFueraDePlazoPoder, textoPlazoPoderes } from '../../dominio/reglas'
 
 function formatearCoeficiente(coeficiente: number): string {
   return `${coeficiente.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
@@ -123,6 +124,9 @@ export function AsambleaDetallePage() {
     : undefined
   // En curso: vigente **o por validar** (RN-96). El que espera no representa
   // todavia, pero ocupa el lugar: no se ofrece dar otro mientras tanto.
+  // RN-309 — El plazo de los poderes del edificio.
+  const plazoPoderes = sel.copropiedad(bd, sesion.copropiedadId)?.plazoPoderes
+  const fueraDePlazo = motivoFueraDePlazoPoder(asamblea, plazoPoderes)
   const miPoder = poderEnCursoDeUnidad(bd.poderes, asamblea.id, sesion.unidadActivaId ?? '')
   const miPoderEsperando = !!miPoder && poderEsperandoValidacion(miPoder)
   // RN-217, RN-218 — Dado desde la app y le falta un paso: aceptarlo o recibirlo.
@@ -707,6 +711,10 @@ export function AsambleaDetallePage() {
                   </button>
                 </>
               ) : (
+                // RN-309 — Fuera de plazo no se revoca: el poder queda para esta reunión.
+                fueraDePlazo ? (
+                  <span className="subtitulo">El plazo para revocar ya se cerró: el poder queda para esta reunión.</span>
+                ) : (
                 <button
                   className="boton"
                   disabled={cargando}
@@ -719,6 +727,7 @@ export function AsambleaDetallePage() {
                 >
                   Revocar el poder
                 </button>
+                )
               )}
             </div>
           ) : (
@@ -726,7 +735,7 @@ export function AsambleaDetallePage() {
               <strong>¿No puedes asistir?</strong>
               <span className="subtitulo">
                 Puedes dar poder a alguien para que vote por tu unidad. No tiene que vivir aquí
-                ni ser copropietario.
+                ni ser copropietario. Se recibe {textoPlazoPoderes(plazoPoderes)}.
               </span>
               {/* CU-R-31 — El rechazo se muestra con su motivo: es lo que hay
                   que corregir para volver a enviarlo. No se borra (RN-61). */}
@@ -748,6 +757,10 @@ export function AsambleaDetallePage() {
                   . Puedes corregirlo y enviarlo de nuevo.
                 </p>
               )}
+              {/* RN-309 — Fuera de plazo no se ofrece: no se muestra lo que no se puede hacer. */}
+              {fueraDePlazo ? (
+                <p className="acceso__nota">{fueraDePlazo}</p>
+              ) : (
               <div className="grupo-botones">
                 <button className="boton boton--primario" onClick={() => setDandoPoder('app')}>
                   Dar poder
@@ -759,6 +772,7 @@ export function AsambleaDetallePage() {
                   Enviar el poder firmado
                 </button>
               </div>
+              )}
             </div>
           )}
         </div>
