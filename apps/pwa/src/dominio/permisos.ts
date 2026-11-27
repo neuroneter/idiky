@@ -207,3 +207,11 @@ export function moduloDeRutaApp(ruta: string): ModuloIdiky | null {
 export function veSolicitudes(usuario: UsuarioIdiky): boolean {
   return veModulo(usuario, 'reservas') || veModulo(usuario, 'pqrs') || veModulo(usuario, 'paz_y_salvo')
 }
+
+/**
+ * PN-29 — Las zonas cuyas reservas ve el usuario: el **piscinero, solo la piscina** (Mary,
+ * 2026-11-26); los demás, todas las que su nivel le deja ver.
+ */
+export function zonasQueVe<T extends { piscina?: boolean }>(usuario: UsuarioIdiky, zonas: T[]): T[] {
+  return usuario === 'piscinero' ? zonas.filter((z) => z.piscina) : zonas
+}

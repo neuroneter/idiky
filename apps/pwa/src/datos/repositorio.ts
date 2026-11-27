@@ -4751,7 +4751,7 @@ export async function crearRegistroPersona(
   if (parametros.condicion === 'frecuente' && !(parametros.dias && parametros.dias.length > 0)) {
     throw new ErrorDeNegocio('Escoge los días de la semana en que viene.')
   }
-  if (faltaContacto(parametros.categoria, parametros.telefono, parametros.email, parametros.menorDeEdad)) {
+  if (faltaContacto(parametros.categoria, parametros.telefono, parametros.email, parametros.menorDeEdad, parametros.condicion)) {
     throw new ErrorDeNegocio('Escribe el celular o el correo: es a donde le llega el código para entrar a la app.')
   }
 
@@ -4759,10 +4759,10 @@ export async function crearRegistroPersona(
   if (!condicionesPosibles(parametros.categoria).includes(parametros.condicion)) {
     throw new ErrorDeNegocio(
       {
-        visitante: 'Un visitante es de un día, frecuente o temporal; no puede ser residente.',
+        visitante: 'Un visitante es de un día o temporal; no puede ser residente. Quien viene ciertos días es familiar o acompañante, residente recurrente.',
         propietario: 'El propietario es residente o no residente: no existe un propietario temporal.',
         arrendatario: 'El arrendatario es residente o temporal: arrienda para vivir ahí.',
-        familiar: 'El familiar o acompañante vive ahí: es residente o temporal.',
+        familiar: 'El familiar o acompañante es residente, temporal o residente recurrente.',
         inmobiliaria: 'La inmobiliaria no vive en la unidad.',
         operador: 'El operador no vive en la unidad.',
       }[parametros.categoria],

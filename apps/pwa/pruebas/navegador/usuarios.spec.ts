@@ -225,7 +225,8 @@ test("el formulario ofrece solo lo que aplica y el propietario aprueba la estad�
   await p.locator('.opcion-categoria', { has: p.locator('strong', { hasText: /^Arrendatario$/ }) }).click(); await p.waitForTimeout(100)
   check(JSON.stringify(await segs())===JSON.stringify(['Residente','Residente temporal']), 'arrendatario: sin «no residente» ' + await segs())
   await p.locator('.opcion-categoria', { has: p.locator('strong', { hasText: /^Visitante$/ }) }).click(); await p.waitForTimeout(100)
-  check(JSON.stringify(await segs())===JSON.stringify(['De un día','Frecuente','Residente temporal']), 'visitante: de un día, frecuente o temporal ' + await segs())
+  // PN-29 — Ya no hay visitante frecuente: quien viene ciertos días es familiar o acompañante, residente recurrente (Mary, 2026-11-26).
+  check(JSON.stringify(await segs())===JSON.stringify(['De un día','Residente temporal']), 'visitante: de un día o temporal ' + await segs())
   check(await p.getByText('Pedirle las fotos').count()===1, 'la visita de un día ofrece pedir fotos')
   // Sandra, arrendataria: visitante temporal de 10 días
   await entrar('Sandra Milena Ortiz')
@@ -381,8 +382,8 @@ test("familiar, menores, visitante frecuente, fotos en cadena y aviso de fin de 
     reg = await autorizar(reg, sandra); const famSandra = bd.residencias.find(x=>x.id===reg.residenciaId)
     out.arrendatarioRegistraFamilia = famSandra?.rol
     // 3
-    out.frecuenteSinDias = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'', creadoPor: sandra, categoria:'visitante', condicion:'frecuente', dias:[], documento:'3008', vigenciaDesde: hoy, vigenciaHasta: en(60) }))
-    reg = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'', creadoPor: sandra, categoria:'visitante', condicion:'frecuente', dias:[1,2,3,4,5], documento:'3009', vigenciaDesde: hoy, vigenciaHasta: en(60) }))
+    out.frecuenteSinDias = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'', creadoPor: sandra, categoria:'familiar', condicion:'frecuente', dias:[], documento:'3008', vigenciaDesde: hoy, vigenciaHasta: en(60) }))
+    reg = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'', creadoPor: sandra, categoria:'familiar', condicion:'frecuente', dias:[1,2,3,4,5], documento:'3009', vigenciaDesde: hoy, vigenciaHasta: en(60) }))
     out.frecuentePideFotos = reg.estado; const regFrec = reg
     reg = await autorizar(reg, sandra); const vf = bd.visitantes.find(v=>v.id===reg.visitanteId)
     out.frecuente = vf && vf.recurrente && JSON.stringify(vf.dias)
@@ -427,7 +428,7 @@ test("el formulario con familiar, menores y visitante frecuente (RN-60, RN-62)",
   check(opciones==='Propietario|Arrendatario|Familiar o acompañante|Visitante', 'propietario ve cuatro tipos: '+opciones)
   check(await p.getByText('Es menor de edad').count()===0, 'al propietario no se le ofrece «menor de edad»')
   await p.locator('.opcion-categoria', { hasText: 'Familiar' }).click(); await p.waitForTimeout(100)
-  check(await segs()==='Residente|Residente temporal', 'familiar: residente o temporal '+await segs())
+  check(await segs()==='Residente|Residente temporal|Residente recurrente', 'familiar: residente, temporal o recurrente '+await segs())
   const tiposAntes = await p.locator('select[aria-label="Tipo de documento"] option').allTextContents()
   await p.getByText('Es menor de edad').click()
   const tiposDespues = await p.locator('select[aria-label="Tipo de documento"] option').allTextContents()
@@ -441,9 +442,10 @@ test("el formulario con familiar, menores y visitante frecuente (RN-60, RN-62)",
   await p.goto(URL+'#/app/visitantes'); await p.waitForTimeout(300); await p.goto(URL+'#/app/unidad/personas'); await p.waitForTimeout(400)
   await p.getByRole('button', { name: 'Registrar' }).first().click(); await p.waitForTimeout(200)
   await p.locator('.opcion-categoria', { hasText: 'Visitante' }).click(); await p.waitForTimeout(100)
-  check(await segs()==='De un día|Frecuente|Residente temporal', 'visitante: de un día, frecuente o temporal '+await segs())
-  await p.locator('.segmento', { hasText: 'Frecuente' }).click(); await p.waitForTimeout(100)
-  check(await p.getByText('¿Qué días viene?').count()===1, 'el frecuente escoge los días')
+  check(await segs()==='De un día|Residente temporal', 'visitante: de un día o temporal '+await segs())
+  await p.locator('.opcion-categoria', { hasText: 'Familiar' }).click(); await p.waitForTimeout(100)
+  await p.locator('.segmento', { hasText: 'Residente recurrente' }).click(); await p.waitForTimeout(100)
+  check(await p.getByText('¿Qué días viene?').count()===1, 'el residente recurrente escoge los días')
   await entrar('Sandra Milena Ortiz')
   await p.goto(URL+'#/app/unidad/personas'); await p.waitForTimeout(400)
   await p.getByRole('button', { name: 'Registrar' }).first().click(); await p.waitForTimeout(200)
@@ -476,7 +478,7 @@ test("la familia sale con el propietario y el familiar ya no registra a nadie (R
     const v = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: famAdulta.personaId, categoria:'visitante', condicion:'no_residente', documento:'4003', vigenciaDesde: hoy, vigenciaHasta: hoy }))
     out.adultaRegistraVisita = typeof v === 'string' ? v : v.estado
     out.adultaVisitaTemporal = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: famAdulta.personaId, categoria:'visitante', condicion:'temporal', documento:'4004', vigenciaDesde: hoy, vigenciaHasta: en(3) }))
-    out.adultaFrecuente = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: famAdulta.personaId, categoria:'visitante', condicion:'frecuente', dias:[1], documento:'4005', vigenciaDesde: hoy, vigenciaHasta: en(30) }))
+    out.adultaFrecuente = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: famAdulta.personaId, categoria:'familiar', condicion:'frecuente', dias:[1], documento:'4005', vigenciaDesde: hoy, vigenciaHasta: en(30) }))
     out.adultaArrendatario = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'3102', creadoPor: famAdulta.personaId, categoria:'arrendatario', condicion:'residente', documento:'4006' }))
     out.menorRegistra = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: famMenor.personaId, categoria:'visitante', condicion:'no_residente', documento:'4007', vigenciaDesde: hoy, vigenciaHasta: hoy }))
     // 1
@@ -541,7 +543,7 @@ test('el edificio decide si el propietario aprueba las estadías largas del arre
   })
 })
 
-test('al visitante frecuente lo registra quien vive en la unidad, sin aprobación (RN-60, RN-210)', async ({ page }) => {
+test('al residente recurrente (antes visitante frecuente) lo registra quien vive en la unidad, sin aprobación (RN-60, RN-210, PN-29)', async ({ page }) => {
   await page.goto('/')
   const r = await page.evaluate(async () => {
     const repo = await import('/src/datos/repositorio.ts')
@@ -550,7 +552,7 @@ test('al visitante frecuente lo registra quien vive en la unidad, sin aprobació
     const en = (d: number) => new Date(Date.now() + d * 864e5).toISOString().slice(0, 10)
     const frecuente = (creadoPor: string, unidadId: string, documento: string) => ({
       copropiedadId: 'cop-1', unidadId, creadoPor, nombres: 'Empleada', apellidos: 'Frecuente', email: '', telefono: '',
-      categoria: 'visitante', condicion: 'frecuente', dias: [1, 2, 3, 4, 5], documento, vigenciaDesde: hoy, vigenciaHasta: en(90),
+      categoria: 'familiar', condicion: 'frecuente', dias: [1, 2, 3, 4, 5], documento, vigenciaDesde: hoy, vigenciaHasta: en(90),
     })
     const intento = async (p: Record<string, unknown>) => {
       try { const res = await repo.crearRegistroPersona(bd, p as never); bd = res.bd; return res.datos.aprobacionPropietario ? 'espera al propietario' : 'sin aprobación' } catch { return 'bloqueado' }

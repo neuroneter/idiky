@@ -26,12 +26,12 @@
 | **Piscinero** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Aseo** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
 | **Mantenimiento** | No aplica | Administrador Copropiedad | Administrador Copropiedad |
-| **Propietario** | Residente · Residente Temporal · No Residente | El Administrador Copropiedad crea **un** propietario; si hay más propietarios, **los crea ese primer propietario** | Igual: el Administrador Copropiedad al primero; los demás, el propietario que creó el Administrador |
-| **Arrendatario** | Residente · Residente Temporal · No Residente | Propietario | Propietario |
+| **Propietario** | Residente · No Residente ✅ | El Administrador Copropiedad crea **un** propietario; si hay más propietarios, **los crea ese primer propietario** | Igual: el Administrador Copropiedad al primero; los demás, el propietario que creó el Administrador |
+| **Arrendatario** | Residente · Residente Temporal ✅ | Propietario | Propietario |
 | **Inmobiliaria** | No aplica (no vive en la unidad); **solo ve las unidades que le asignan** | Propietario | Propietario |
 | **Operador** | No aplica (no vive en la unidad); **solo ve las unidades que le asignan** | Propietario | Propietario |
-| **Visitante** | Residente · Residente Temporal · No Residente | Propietario y arrendatario. **Solo el propietario** puede crear un visitante con marca de **Residente Temporal** | Propietario y arrendatario |
-| **Familiar o acompañante** | Residente · Residente Temporal · No Residente · **Residente Recurrente** | **Propietario o arrendatario** | **Quien lo creó, o el perfil superior a quien lo creó** |
+| **Visitante** | Residente Temporal · No Residente (de un día) ✅ | Propietario y arrendatario. **Solo el propietario** puede crear un visitante con marca de **Residente Temporal** | Propietario y arrendatario |
+| **Familiar o acompañante** | Residente · Residente Temporal · No Residente ⏳ · **Residente Recurrente** ✅ (viene ciertos días: empleada, niñera) | **Propietario o arrendatario** | **Quien lo creó, o el perfil superior a quien lo creó** |
 
 ## 2. Cómo se lee
 
@@ -59,6 +59,8 @@
 | 6 | 2026-11-26 | **Consolidación con el catálogo de BOB y BLOKY** (§4 ter): queda **Portería** (no «Seguridad»); queda **Auxiliar Administrativo** (no «Secretaría»); se **crea Piscinero**; se **agregan Aseo, Mantenimiento, Presidente del consejo y Consejero**; queda **Arrendatario**, que es el de BLOKY «Arrendatario · solo vivir»; se incluye **Inmobiliaria y operador**, que **reemplaza** a «Arrendatario · operación completa»; queda **Familiar o acompañante** y se **elimina «conviviente»**; queda **Visitante** (no «Invitado»); se **agrega la marca de residencia** como dato. |
 | 7 | 2026-11-26 | **Quién crea e inactiva a los cinco nuevos**: Presidente del consejo, lo elige el consejo y lo registra el Administrador Copropiedad con el acta; Consejero, lo elige la asamblea (queda al cerrar la votación); Aseo y Mantenimiento, el Administrador Copropiedad; Inmobiliaria y operador, el Propietario (no vive en la unidad). Propuesta aceptada por Mary (*«sí, déjalo así»*). |
 | 8 | 2026-11-26 | **Inmobiliaria y Operador son dos roles distintos**, y cada uno **solo ve lo de las unidades que le asignan** (*«son dos roles diferentes y solo ven lo de las unidades asignadas»*). Los dos los crea e inactiva el Propietario (decisión 7). |
+| 9 | 2026-11-26 | **Marcas de residencia: valen las reglas de octubre** (*«tienes razón para la 1, 2 y 3, actualizar la tabla; confirmo lo mencionado en octubre»*): el **propietario** es Residente o No Residente (no hay propietario temporal); el **arrendatario** es Residente o Residente Temporal (arrienda para vivir ahí); el **visitante** es de un día (No Residente) o Residente Temporal, nunca Residente. |
+| 10 | 2026-11-26 | **El visitante frecuente se reemplaza por el familiar o acompañante** (*«visitante frecuente se reemplaza por familiar o acompañante»*): quien viene ciertos días (empleada, niñera) es **familiar o acompañante con marca Residente Recurrente**; escoge los días, entra con código esos días y no necesita la app. |
 | 4 | 2026-11-26 | **Al familiar o acompañante lo crean el propietario o el arrendatario** (*«lo pueden crear el propietario o arrendatario»*). |
 | 5 | 2026-11-26 | **Administrador Idiky**, el rol más alto (el dueño, el equipo de IDIKY): el primero se crea al instalar el sistema; los demás los crea otro Administrador Idiky. Lo inactiva **otro** Administrador Idiky, nunca él mismo, y **siempre queda al menos uno activo**: así IDIKY nunca queda sin dueño y quien se va o pierde su clave se bloquea el mismo día. Propuesta aceptada por Mary (*«sí, déjalo así»*). |
 
@@ -213,14 +215,16 @@ la plata.
 - El demo tiene un perfil por usuario: Delegada, Presidenta del consejo, Consejero, Auxiliar
   Administrativa, Contador, Revisora Fiscal, Piscinero, Aseo, Mantenimiento (consola) e Inmobiliaria
   y Operador (ALICE), además de los que ya había.
-- **Lo que la maqueta todavía no hace**, y el producto sí debe hacer: que el piscinero vea solo las
-  reservas de la piscina (hoy ve todas, sin cambiar); que Aseo y Mantenimiento **registren sus
+- **El piscinero solo ve las reservas de la piscina** (Mary, 2026-11-26): la reserva y el calendario,
+  sin el informe ni las zonas. La copropiedad marca cuál zona es la piscina.
+- **Lo que la maqueta todavía no hace**, y el producto sí debe hacer: que Aseo y Mantenimiento **registren sus
   novedades** en la minuta (hoy la ven); que el Mantenimiento atienda las PQRS de daños; la
   contabilidad es la contable de Jeimy, no la consola.
-- **Pendiente de Mary — la marca de residencia** (ya existe en la maqueta como «condición»): la tabla
-  le da al propietario «Residente Temporal» y al arrendatario «No Residente», y el 2026-10-02 Mary
-  había dicho lo contrario; al Visitante le da «Residente» y no menciona al visitante frecuente
-  (empleada, niñera). Mientras Mary no decida, la maqueta sigue con las reglas del 2026-10-02.
+- **La marca de residencia quedó decidida** (decisiones 9 y 10) y aplicada en la maqueta, donde se
+  llama «condición»: el visitante frecuente pasó a ser familiar o acompañante, **residente recurrente**.
+- ⏳ **Pendiente de Mary:** la tabla le da al familiar o acompañante también **No Residente**; el
+  2026-10-02 Mary había dicho que la familia «vive ahí» (residente o temporal). La maqueta sigue sin
+  No Residente para el familiar hasta que Mary lo confirme.
 
 ## 5. Historia
 
@@ -238,3 +242,4 @@ la plata.
 | 2026-11-26 | Inmobiliaria y Operador, dos roles (decisión 8). **Confirma los permisos** de Presidente del consejo, Consejero, Aseo y Mantenimiento | Mary |
 | 2026-11-26 | Confirma los permisos de la Inmobiliaria (cuentas claras solo de sus unidades) y del Operador. **La tabla queda completa** | Mary |
 | 2026-11-26 | **Aplicada en la maqueta** (PN-29, §4 quater) | IA, con Mary |
+| 2026-11-26 | El piscinero solo ve la piscina; marcas de residencia de octubre; el visitante frecuente pasa a familiar o acompañante, residente recurrente (decisiones 9 y 10) | Mary |

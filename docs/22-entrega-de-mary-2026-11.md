@@ -37,7 +37,7 @@ Para probarlo: el demo trae a **María Camila** (propietaria al día), **Andrés
 vencidas: acuerdos), **Gustavo** (dos propiedades), **Tomás** (familiar), **Jairo** (portería) y
 **Olga** (administración).
 
-**Calidad:** compila, ortografía sin hallazgos, **138 pruebas de navegador pasan**. Ninguna
+**Calidad:** compila, ortografía sin hallazgos, **139 pruebas de navegador pasan**. Ninguna
 dependencia nueva.
 
 ## 3. Lo que le toca a cada uno
