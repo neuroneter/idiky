@@ -101,11 +101,43 @@ test('el código del visitante es un QR real con su patrón de posición (PN-12)
   expect(r.tamano).toBe(21)
   expect(r.finder).toEqual(['1111111', '1011101', '1111111'])
   expect(r.largo).toBe(33)
+  // RN-367, RN-371 — El visitante entra con su ALICE: ahí ve su pase, que cambia cada dos minutos.
+  await entrarComo(page, /Juan Sebastian Restrepo/)
+  await expect(page.getByText('Tu pase para entrar')).toBeVisible()
+  await expect(page.locator('svg[data-qr]')).toBeVisible()
+  // Quien lo invitó ya no comparte un código: le llega la invitación al celular.
   await entrarComo(page, /Maria Camila Restrepo/)
   await page.goto('/#/app/visitantes')
-  await page.locator('.tarjeta--accion, .tarjeta button').first().click().catch(() => {})
-  await expect(page.locator('svg[data-qr]')).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Compartir el código' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Compartir el código' })).toHaveCount(0)
+})
+
+test('el pase vence a los dos minutos y la portería respeta la franja de horas (RN-371, RN-392)', async ({ page }) => {
+  await page.goto('/')
+  const r = await page.evaluate(async () => {
+    const reglas = await import('/src/dominio/reglas.ts')
+    const ahora = Date.now()
+    const pase = reglas.codigoPase('vis-1', ahora)
+    return {
+      vale: reglas.leerPase(pase, ahora + 60_000),
+      vencido: reglas.leerPase(pase, ahora + 3 * 60_000),
+      alterado: reglas.leerPase(pase.replace('vis-1', 'vis-2'), ahora),
+      otroTexto: reglas.leerPase('1023456789', ahora),
+      franjaAlReves: reglas.motivoFranjaInvalida('18:00', '08:00'),
+      soloDesde: reglas.motivoFranjaInvalida('08:00', undefined),
+      sinFranja: reglas.motivoFranjaInvalida(undefined, undefined),
+      fuera: reglas.fueraDeFranja({ horaDesde: '08:00', horaHasta: '12:00' }, '13:30'),
+      dentro: reglas.fueraDeFranja({ horaDesde: '08:00', horaHasta: '12:00' }, '09:15'),
+    }
+  })
+  expect(r.vale).toEqual({ visitanteId: 'vis-1' })
+  expect(r.vencido).toEqual({ motivo: expect.any(String) })
+  expect(r.alterado).toEqual({ motivo: expect.any(String) })
+  expect(r.otroTexto).toBeNull()
+  expect(r.franjaAlReves).toEqual(expect.any(String))
+  expect(r.soloDesde).toEqual(expect.any(String))
+  expect(r.sinFranja).toBeNull()
+  expect(r.fuera).toBe(true)
+  expect(r.dentro).toBe(false)
 })
 
 test('la administración parametriza horario, anticipación y ascensores de trasteo (PN-10)', async ({ page }) => {

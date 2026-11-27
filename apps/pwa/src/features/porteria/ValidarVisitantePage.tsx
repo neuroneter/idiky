@@ -17,7 +17,7 @@ import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
-import { estadoRealVisitante, etiquetaUnidad, hoyISO } from '../../dominio/reglas'
+import { estadoRealVisitante, etiquetaUnidad, fueraDeFranja, hoyISO, leerPase } from '../../dominio/reglas'
 import { formatearFecha, formatearFechaHora } from '../../utilidades/formato'
 import { Icono } from '../../componentes/Icono'
 import { ChipVisitante } from '../../componentes/Etiquetas'
@@ -35,8 +35,8 @@ import { registrarEntrada } from '../../datos/repositorio'
 const VEREDICTO: Record<Visitante['estado'], { pasa: boolean; titulo: string; razon: string }> = {
   activo: {
     pasa: true,
-    titulo: 'Código válido',
-    razon: 'Está dentro de su vigencia. Puedes autorizar el ingreso.',
+    titulo: 'Pase válido',
+    razon: 'Está dentro de su vigencia y de su franja. Puedes autorizar el ingreso.',
   },
   programado: {
     pasa: false,
@@ -45,8 +45,8 @@ const VEREDICTO: Record<Visitante['estado'], { pasa: boolean; titulo: string; ra
   },
   vencido: {
     pasa: false,
-    titulo: 'Código vencido',
-    razon: 'La autorización ya terminó. El residente puede generar una nueva.',
+    titulo: 'Autorización vencida',
+    razon: 'La autorización ya terminó. El residente puede darle una nueva.',
   },
   revocado: {
     pasa: false,
@@ -60,9 +60,25 @@ export function ValidarVisitantePage() {
   const [codigo, setCodigo] = useState('')
   const [buscado, setBuscado] = useState<string | null>(null)
 
-  const visitante = buscado ? sel.visitantePorCodigo(bd, buscado) : undefined
+  // RN-371, RN-372 — El pase que cambia (QR de su ALICE) o, de respaldo, el documento.
+  const pase = buscado ? leerPase(buscado, Date.now()) : null
+  const motivoPase = pase && 'motivo' in pase ? pase.motivo : undefined
+  const visitante = !buscado
+    ? undefined
+    : pase && 'visitanteId' in pase
+      ? bd.visitantes.find((v) => v.id === pase.visitanteId)
+      : !pase
+        ? sel.visitantePorDocumento(bd, buscado)
+        : undefined
   const estado = visitante ? estadoRealVisitante(visitante, hoyISO()) : undefined
-  const veredicto = estado ? VEREDICTO[estado] : undefined
+  // RN-392 — Fuera de su franja de horas no entra.
+  const horaActual = new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: 'America/Bogota' })
+  const fuera = !!visitante && estado === 'activo' && fueraDeFranja(visitante, horaActual)
+  const veredicto = estado
+    ? fuera
+      ? { pasa: false, titulo: 'Fuera de horario', razon: `Su autorización es de ${visitante!.horaDesde} a ${visitante!.horaHasta}. No registres la entrada.` }
+      : VEREDICTO[estado]
+    : undefined
   const unidad = visitante ? sel.unidad(bd, visitante.unidadId) : undefined
   const autorizo = visitante ? sel.persona(bd, visitante.personaId) : undefined
 
@@ -82,18 +98,18 @@ export function ValidarVisitantePage() {
           }}
         />
         <div className="campo">
-          <label htmlFor="codigo">Código del visitante</label>
+          <label htmlFor="codigo">Pase o documento del visitante</label>
           <input
             id="codigo"
             className="campo-numeros"
             style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}
             value={codigo}
             onChange={(evento) => setCodigo(evento.target.value)}
-            placeholder="VIS-0000"
+            placeholder="Escanea su pase o escribe su documento"
             autoComplete="off"
           />
           <span className="ayuda-campo">
-            Escríbelo como lo trae en el teléfono. No importan mayúsculas ni espacios.
+            El pase es el QR de su app y cambia cada dos minutos. Si no puede abrirlo, escribe su documento.
           </span>
         </div>
         <button className="boton boton--primario boton--bloque" type="submit">
@@ -102,12 +118,18 @@ export function ValidarVisitantePage() {
         </button>
       </form>
 
-      {buscado && !visitante && (
+      {buscado && !visitante && motivoPase && (
+        <div className="tarjeta tarjeta--alerta">
+          <strong>{motivoPase}</strong>
+        </div>
+      )}
+
+      {buscado && !visitante && !motivoPase && (
         <div className="tarjeta tarjeta--alerta">
           <div className="tarjeta__cuerpo" style={{ alignItems: 'flex-start' }}>
             <Icono nombre="alerta" tamano={22} />
             <div className="columna">
-              <strong>Ese código no existe</strong>
+              <strong>No hay un visitante autorizado con ese pase o documento</strong>
               <span className="subtitulo">
                 Revisa que esté completo. Si el visitante insiste, llama al residente antes de
                 autorizar: la app no conoce esa autorización.
@@ -196,7 +218,7 @@ function VigentesHoy() {
               <th>Visitante</th>
               <th>Documento</th>
               <th>Unidad</th>
-              <th>Código</th>
+              <th>Horario</th>
             </tr>
           </thead>
           <tbody>
@@ -210,7 +232,7 @@ function VigentesHoy() {
                   </td>
                   <td className="suave numerico">{visitante.documento}</td>
                   <td className="suave">{unidad ? etiquetaUnidad(unidad) : '—'}</td>
-                  <td className="numerico">{visitante.codigo}</td>
+                  <td className="numerico">{visitante.horaDesde ? `${visitante.horaDesde} a ${visitante.horaHasta}` : 'Todo el día'}</td>
                 </tr>
               )
             })}

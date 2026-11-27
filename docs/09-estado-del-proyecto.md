@@ -113,6 +113,23 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-27 · Mary + IA (Claude) · La maqueta se alinea con BLOKY (PN-33, PN-28, decisiones 12 a 17)
+
+Mary comparó la maqueta con lo que Daniel mostró de BLOKY y decidió (`docs/recursos/roles-de-alice.md` §2 bis):
+
+- **El visitante entra con su ALICE** y muestra un **pase que cambia cada dos minutos** (RN-367, RN-371). Quien lo
+  invita ya no comparte código. En el demo: Juan Sebastian Restrepo, visitante de la 402 (`componentes/MiPase.tsx`).
+  La portería lee el pase o, de respaldo, el documento (`features/porteria/ValidarVisitantePage.tsx`).
+- **Por días y una franja de horas opcional**, sin días de la semana (RN-392), también para el residente recurrente.
+- **Celular obligatorio** para todo adulto (con nombre y documento). Pendiente: el país del celular.
+- **Mantenimiento ve toda la bandeja de PQRS** (RN-380), no solo las de daños.
+- **Los cargos se cargan a mano** al empezar con una copropiedad, además de salir de la elección (PN-28,
+  `cargarCargoManual`).
+- **«Residente» es una marca, no un usuario.** Queda por conciliar con Daniel si el familiar invita visitantes
+  (BLOKY RN-370 sí; la tabla de Mary no): mientras tanto manda la tabla.
+
+Semilla v56. 152 pruebas pasan.
+
 ### 2026-11-27 · Mary + IA (Claude) · Las novedades del personal, desde el celular (PN-32)
 
 Mary escogió la opción A: **la misma minuta del edificio**. Aseo, Mantenimiento y el Piscinero

@@ -2582,9 +2582,12 @@ export function faltaContacto(
 ): boolean {
   // Al menor no se le exige (2026-10-02): muchas veces no tiene celular ni correo.
   if (menorDeEdad) return false
-  // PN-29 — El residente recurrente entra con código los días que viene: no necesita la app.
-  if (condicion === 'frecuente') return false
-  return categoria !== 'visitante' && !telefono.trim() && !email.trim()
+  void condicion
+  void categoria
+  // RN-353, RN-367 (BLOKY, adoptadas por Mary el 2026-11-27): toda persona adulta tiene **celular**,
+  // también el visitante y el residente recurrente: entran con su ALICE y su cuenta de IDIKY.
+  void email
+  return !telefono.trim()
 }
 
 /**
@@ -4925,6 +4928,32 @@ export function motivoPostulacionInvalida(p: {
   return null
 }
 
+/**
+ * PN-28 — Cargar a mano a quien ya está en un cargo (Mary, 2026-11-27): al empezar el contrato con
+ * una copropiedad, el consejo, el comité y el revisor fiscal ya fueron elegidos antes de IDIKY. Pide lo
+ * mismo que la elección: al consejo, un propietario (art. 53); al comité, propietario o arrendatario
+ * (art. 58); al revisor fiscal, su matrícula (art. 56). Y que no esté ya en ese cargo.
+ */
+export function motivoCargoManualInvalido(p: {
+  cargo: CargoEleccion
+  nombre: string
+  rol?: RolResidencia
+  matricula?: string
+  desde: string
+  hoy: string
+  yaEnElCargo: boolean
+}): string | null {
+  if (!p.nombre.trim()) return 'Escribe o elige a la persona.'
+  if (p.cargo === 'consejo' && p.rol !== 'propietario') return 'Al consejo de administración van los propietarios (Ley 675, art. 53).'
+  if (p.cargo === 'comite_convivencia' && p.rol !== 'propietario' && p.rol !== 'arrendatario') {
+    return 'Al comité de convivencia van propietarios y arrendatarios.'
+  }
+  if (p.cargo === 'revisor_fiscal' && !(p.matricula ?? '').trim()) return 'Escribe la matrícula profesional del contador (art. 56).'
+  if (!p.desde || p.desde > p.hoy) return 'Escribe desde cuándo está en el cargo: una fecha de hoy o de antes.'
+  if (p.yaEnElCargo) return 'Esa persona ya está en ese cargo.'
+  return null
+}
+
 /** PN-23 — Las opciones de la votación de una elección: cada postulación y el voto en blanco. */
 export function opcionesDeEleccion(postulaciones: Postulacion[]): string[] {
   return [...postulaciones.map((p) => p.nombre), 'Voto en blanco']
@@ -5401,4 +5430,53 @@ export function motivoNovedadInvalida(p: { area?: AreaNovedad; texto: string; lu
     if (!pqrsAbierta(p.pqrs as Pqrs)) return 'Esa PQRS ya está resuelta o cerrada.'
   }
   return null
+}
+
+// ---------------------------------------------------------------------------
+// El visitante con su app, su pase y su franja — RN-367, RN-371, RN-392 (BLOKY; adoptadas por Mary,
+// 2026-11-27)
+// ---------------------------------------------------------------------------
+
+/** RN-392 — La franja va completa o no va, y la salida es después de la llegada. */
+export function motivoFranjaInvalida(desde?: string, hasta?: string): string | null {
+  if (!desde && !hasta) return null
+  if (!desde || !hasta) return 'La franja de horas va completa: desde y hasta.'
+  if (hasta <= desde) return 'La hora de salida es después de la de llegada.'
+  return null
+}
+
+/** RN-392 — Si a esta hora (HH:MM) está fuera de su franja. Sin franja, nunca. */
+export function fueraDeFranja(visitante: Pick<Visitante, 'horaDesde' | 'horaHasta'>, hora: string): boolean {
+  if (!visitante.horaDesde || !visitante.horaHasta) return false
+  return hora < visitante.horaDesde || hora > visitante.horaHasta
+}
+
+/** RN-371 — El pase vence a los dos minutos. */
+export const VIGENCIA_PASE_MS = 2 * 60 * 1000
+
+/** Firma del demo: no es criptografía, es para que el pase no se pueda armar a mano (en el producto firma el middleware). */
+function firmaDemo(texto: string): string {
+  let h = 5381
+  for (let i = 0; i < texto.length; i++) h = ((h << 5) + h + texto.charCodeAt(i)) >>> 0
+  return h.toString(36).toUpperCase()
+}
+
+/**
+ * RN-371 — **El pase de entrada es un QR que cambia**: lleva el visitante y el momento en que se pidió,
+ * firmado; vence a los dos minutos. Lo pide la persona en su ALICE: no se reenvía ni sirve una foto
+ * de después.
+ */
+export function codigoPase(visitanteId: string, emitidoMs: number): string {
+  return `IDIKY|PASE|${visitanteId}|${emitidoMs}|${firmaDemo(`${visitanteId}|${emitidoMs}|demo`)}`
+}
+
+/** RN-371 — Lee un pase: el visitante si la firma cuadra y no ha vencido; si no, el motivo. */
+export function leerPase(texto: string, ahoraMs: number): { visitanteId: string } | { motivo: string } | null {
+  const partes = texto.trim().split('|')
+  if (partes.length !== 5 || partes[0] !== 'IDIKY' || partes[1] !== 'PASE') return null
+  const [, , visitanteId, emitido, firma] = partes
+  if (firmaDemo(`${visitanteId}|${emitido}|demo`) !== firma) return { motivo: 'Ese pase no es válido.' }
+  const edad = ahoraMs - Number(emitido)
+  if (!(edad >= 0) || edad > VIGENCIA_PASE_MS) return { motivo: 'El pase venció: pídele que lo abra de nuevo en su app.' }
+  return { visitanteId }
 }

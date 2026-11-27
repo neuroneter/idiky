@@ -237,7 +237,7 @@ test("el formulario ofrece solo lo que aplica y el propietario aprueba la estad�
   const fin = new Date(new Date(AHORA_PRUEBAS).getTime()+10*864e5).toISOString().slice(0,10)
   const fechas = p.locator('input[type="date"]'); await fechas.nth(1).fill(fin); await p.waitForTimeout(100)
   check(await p.getByText('el propietario tiene que aprobar').count()===1, 'aviso de aprobación del propietario')
-  await p.locator('#nombres').fill('Tia'); await p.locator('#apellidos').fill('Larga Estadia'); await p.locator('#documento').fill('77889900')
+  await p.locator('#nombres').fill('Tia'); await p.locator('#apellidos').fill('Larga Estadia'); await p.locator('#documento').fill('77889900'); await p.locator('#telefono').fill('3105556677')
   await p.getByRole('button', { name: 'Crear el registro' }).click(); await p.waitForTimeout(700)
   check(await p.getByText('Espera al propietario').count()>=1, 'el detalle dice que espera al propietario')
   check(await p.getByRole('button', { name: 'Autorizar el registro' }).count()===0, 'Sandra no puede autorizar todavía')
@@ -268,7 +268,8 @@ test("cambiar condición y fecha, inhabilitar en cadena y contacto obligatorio (
     const b301 = { ...b402, unidadId:'uni-torre1-301' }
     out.propietarioTemporal = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'3001', creadoPor: maria, categoria:'propietario', condicion:'temporal', documento:'2001', vigenciaDesde: hoy, vigenciaHasta: en(9) }))
     out.sinContacto = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: maria, categoria:'arrendatario', condicion:'residente', documento:'2002' }))
-    out.visitaSinContacto = (await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: maria, categoria:'visitante', condicion:'no_residente', documento:'2003', vigenciaDesde: hoy, vigenciaHasta: hoy }))).estado
+    // RN-367 — También al visitante: entra con su app, y el código le llega al celular (Mary, 2026-11-27).
+    out.visitaSinContacto = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: maria, categoria:'visitante', condicion:'no_residente', documento:'2003', vigenciaDesde: hoy, vigenciaHasta: hoy }))
     const resMaria = bd.residencias.find(x=>x.personaId===maria && residenciaVigente(x))
     const c1 = await intento(()=>repo.cambiarEstadia(bd, { residenciaId: resMaria.id, personaId: maria, condicion:'no_residente' }))
     out.mariaNoResidente = c1.reside === false && c1.cambios?.length === 1
@@ -292,12 +293,12 @@ test("cambiar condición y fecha, inhabilitar en cadena y contacto obligatorio (
     out.noAprobado = c5.hasta === en(10) && !!c5.cambioNoAprobado && !c5.cambioPendiente
     out.visitanteDeUnDia = await intento(()=>repo.cambiarEstadia(bd, { residenciaId: vis.id, personaId: sandra, condicion:'no_residente' }))
     // 2: la cadena para la visita de un día y para el temporal
-    reg = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'', creadoPor: sandra, categoria:'visitante', condicion:'no_residente', documento:'2006', vigenciaDesde: en(1), vigenciaHasta: en(1) }))
+    reg = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'3011', creadoPor: sandra, categoria:'visitante', condicion:'no_residente', documento:'2006', vigenciaDesde: en(1), vigenciaHasta: en(1) }))
     const visita = bd.visitantes.find(v=>v.id===reg.visitanteId)
     out.jorgeRevoca = await intento(()=>repo.revocarVisitante(bd, { visitanteId: visita.id, personaId: jorge }))
     out.gustavoRevoca = (await intento(()=>repo.revocarVisitante(bd, { visitanteId: visita.id, personaId: gustavo }))).estado
     // 1: sale Sandra y salen sus visitantes
-    reg = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'', creadoPor: sandra, categoria:'visitante', condicion:'no_residente', documento:'2007', vigenciaDesde: en(2), vigenciaHasta: en(2) }))
+    reg = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'3012', creadoPor: sandra, categoria:'visitante', condicion:'no_residente', documento:'2007', vigenciaDesde: en(2), vigenciaHasta: en(2) }))
     const visita2 = reg.visitanteId
     const resSandra = bd.residencias.find(x=>x.personaId===sandra && residenciaVigente(x))
     await intento(()=>repo.desvincularResidente(bd, { residenciaId: resSandra.id, personaId: admin }))
@@ -305,7 +306,7 @@ test("cambiar condición y fecha, inhabilitar en cadena y contacto obligatorio (
     out.visitaRevocada = bd.visitantes.find(v=>v.id===visita2).estado
     return out
   })
-  const esp = { propietarioTemporal:/^ERR/, sinContacto:/^ERR/, visitaSinContacto:'autorizado', mariaNoResidente:true, mariaTemporal:/^ERR/, arrendatarioATemporal:true, arrendatarioNoResidente:/^ERR/, ajenoCambia:/^ERR/, alargarPide:true, avisoDueno:true, aprobado:true, avisoSandra:true, noAprobado:true, visitanteDeUnDia:/^ERR/, jorgeRevoca:/^ERR/, gustavoRevoca:'revocado', temporalSale:true, visitaRevocada:'revocado' }
+  const esp = { propietarioTemporal:/^ERR/, sinContacto:/^ERR/, visitaSinContacto:/^ERR/, mariaNoResidente:true, mariaTemporal:/^ERR/, arrendatarioATemporal:true, arrendatarioNoResidente:/^ERR/, ajenoCambia:/^ERR/, alargarPide:true, avisoDueno:true, aprobado:true, avisoSandra:true, noAprobado:true, visitanteDeUnDia:/^ERR/, jorgeRevoca:/^ERR/, gustavoRevoca:'revocado', temporalSale:true, visitaRevocada:'revocado' }
   for (const [k,v] of Object.entries(esp)) { const ok = v instanceof RegExp ? v.test(String(r[k])) : r[k]===v; expect.soft(ok, k).toBeTruthy() }
 })
 
@@ -331,7 +332,7 @@ test("«Cambiar» en pantalla y aprobación del propietario (RN-60, RN-68)", asy
   await p.locator('.opcion-categoria', { has: p.locator('strong', { hasText: /^Arrendatario$/ }) }).click()
   await p.locator('#nombres').fill('Sin'); await p.locator('#apellidos').fill('Contacto'); await p.locator('#documento').fill('99112233')
   await p.getByRole('button', { name: 'Crear el registro' }).click(); await p.waitForTimeout(300)
-  check(await p.getByText('Escribe el celular o el correo').count()===1, 'exige celular o correo')
+  check(await p.getByText(/Escribe el celular/).count()===1, 'exige el celular')
   // cambio pendiente para Gustavo, preparado por el repositorio
   await p.evaluate(async () => {
     const repo = await import('/src/datos/repositorio.ts'); let bd = await repo.cargar()
@@ -383,14 +384,14 @@ test("familiar, menores, visitante frecuente, fotos en cadena y aviso de fin de 
     reg = await autorizar(reg, sandra); const famSandra = bd.residencias.find(x=>x.id===reg.residenciaId)
     out.arrendatarioRegistraFamilia = famSandra?.rol
     // 3
-    out.frecuenteSinDias = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'', creadoPor: sandra, categoria:'familiar', condicion:'frecuente', dias:[], documento:'3008', vigenciaDesde: hoy, vigenciaHasta: en(60) }))
-    reg = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'', creadoPor: sandra, categoria:'familiar', condicion:'frecuente', dias:[1,2,3,4,5], documento:'3009', vigenciaDesde: hoy, vigenciaHasta: en(60) }))
+    // RN-392 — Por días y, si se quiere, por horas; ya no por días de la semana (Mary, 2026-11-27).
+    out.frecuenteFranjaAlReves = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'3008', creadoPor: sandra, categoria:'familiar', condicion:'frecuente', horaDesde:'17:00', horaHasta:'07:00', documento:'3008', vigenciaDesde: hoy, vigenciaHasta: en(60) }))
+    reg = await intento(()=>repo.crearRegistroPersona(bd, { ...b301, telefono:'3009', creadoPor: sandra, categoria:'familiar', condicion:'frecuente', horaDesde:'07:00', horaHasta:'17:00', documento:'3009', vigenciaDesde: hoy, vigenciaHasta: en(60) }))
     out.frecuentePideFotos = reg.estado; const regFrec = reg
     reg = await autorizar(reg, sandra); const vf = bd.visitantes.find(v=>v.id===reg.visitanteId)
-    out.frecuente = vf && vf.recurrente && JSON.stringify(vf.dias)
+    out.frecuente = vf && vf.recurrente && `${vf.horaDesde}-${vf.horaHasta}`
     const domingo = (()=>{ const d=new Date(); d.setDate(d.getDate()+((7-d.getDay())%7||7)); return d.toISOString().slice(0,10) })()
-    const lunes = en(0) && (()=>{ const d=new Date(`${domingo}T12:00:00`); d.setDate(d.getDate()+1); return d.toISOString().slice(0,10) })()
-    out.domingo = estadoRealVisitante(vf, domingo); out.lunes = estadoRealVisitante(vf, lunes)
+    out.domingo = estadoRealVisitante(vf, domingo)
     // 4
     out.gustavoVeFotos = (await intento(()=>repo.registrarAccesoSoportes(bd, { registroId: regFrec.id, personaId: gustavo }))).registroId ? 'ok' : 'no'
     out.jorgeVeFotos = await intento(()=>repo.registrarAccesoSoportes(bd, { registroId: regFrec.id, personaId: jorge }))
@@ -408,7 +409,7 @@ test("familiar, menores, visitante frecuente, fotos en cadena y aviso de fin de 
     out.frecuenteSale = bd.visitantes.find(v=>v.id===vf.id).estado
     return out
   })
-  const esp = { familiar:'familiar/true', familiarNoRegistra:false, familiarNoResidente:'esperando_soportes', adultoSinContacto:/^ERR/, menorSinContacto:'esperando_soportes', tiAdulto:/^ERR/, propietarioMenor:/^ERR/, arrendatarioRegistraFamilia:'familiar', frecuenteSinDias:/^ERR/, frecuentePideFotos:'esperando_soportes', frecuente:'[1,2,3,4,5]', domingo:'programado', lunes:'activo', gustavoVeFotos:'ok', jorgeVeFotos:/^ERR/, avisoFin:1, avisoFinNoRepite:1, familiaSale:true, frecuenteSale:'revocado' }
+  const esp = { familiar:'familiar/true', familiarNoRegistra:false, familiarNoResidente:'esperando_soportes', adultoSinContacto:/^ERR/, menorSinContacto:'esperando_soportes', tiAdulto:/^ERR/, propietarioMenor:/^ERR/, arrendatarioRegistraFamilia:'familiar', frecuenteFranjaAlReves:/^ERR/, frecuentePideFotos:'esperando_soportes', frecuente:'07:00-17:00', domingo:'activo', gustavoVeFotos:'ok', jorgeVeFotos:/^ERR/, avisoFin:1, avisoFinNoRepite:1, familiaSale:true, frecuenteSale:'revocado' }
   for (const [k,v] of Object.entries(esp)) { const ok = v instanceof RegExp ? v.test(String(r[k])) : r[k]===v; expect.soft(ok, k).toBeTruthy() }
 })
 
@@ -447,7 +448,7 @@ test("el formulario con familiar, menores y visitante frecuente (RN-60, RN-62)",
   check(await segs()==='De un día|Residente temporal', 'visitante: de un día o temporal '+await segs())
   await p.locator('.opcion-categoria', { hasText: 'Familiar' }).click(); await p.waitForTimeout(100)
   await p.locator('.segmento', { hasText: 'Residente recurrente' }).click(); await p.waitForTimeout(100)
-  check(await p.getByText('¿Qué días viene?').count()===1, 'el residente recurrente escoge los días')
+  check(await p.locator('#franja-desde').count()===1 && await p.getByText('¿Qué días viene?').count()===0, 'el residente recurrente: por días y, si quiere, por horas')
   await entrar('Sandra Milena Ortiz')
   await p.goto(URL+'#/app/unidad/personas'); await p.waitForTimeout(400)
   await p.getByRole('button', { name: 'Registrar' }).first().click(); await p.waitForTimeout(200)
@@ -553,8 +554,8 @@ test('al residente recurrente (antes visitante frecuente) lo registra quien vive
     const hoy = new Date().toISOString().slice(0, 10)
     const en = (d: number) => new Date(Date.now() + d * 864e5).toISOString().slice(0, 10)
     const frecuente = (creadoPor: string, unidadId: string, documento: string) => ({
-      copropiedadId: 'cop-1', unidadId, creadoPor, nombres: 'Empleada', apellidos: 'Frecuente', email: '', telefono: '',
-      categoria: 'familiar', condicion: 'frecuente', dias: [1, 2, 3, 4, 5], documento, vigenciaDesde: hoy, vigenciaHasta: en(90),
+      copropiedadId: 'cop-1', unidadId, creadoPor, nombres: 'Empleada', apellidos: 'Frecuente', email: '', telefono: '3001234567',
+      categoria: 'familiar', condicion: 'frecuente', horaDesde: '07:00', horaHasta: '17:00', documento, vigenciaDesde: hoy, vigenciaHasta: en(90),
     })
     const intento = async (p: Record<string, unknown>) => {
       try { const res = await repo.crearRegistroPersona(bd, p as never); bd = res.bd; return res.datos.aprobacionPropietario ? 'espera al propietario' : 'sin aprobación' } catch { return 'bloqueado' }

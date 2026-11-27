@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 55
+export const VERSION_ESQUEMA = 56
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -246,6 +246,8 @@ const PERSONAL: Persona[] = ([
   ['per-mantenimiento', 'Jhon Fredy', 'Arango', '98654321', 'mantenimiento@altosdelbosque.co', '+57 320 555 8080'],
   ['per-inmobiliaria', 'Inmobiliaria', 'Habitar S.A.S.', '900456789', 'arriendos@habitar.co', '+57 320 555 9090'],
   ['per-operador', 'Estadías', 'Medellín S.A.S.', '901234567', 'reservas@estadiasmedellin.co', '+57 320 555 9191'],
+  // RN-367 — El visitante de la 402 tiene su cuenta de IDIKY: con ella ve su pase en ALICE.
+  ['per-visitante', 'Juan Sebastian', 'Restrepo', '1023456789', '', '+57 311 555 4545'],
 ] as const).map(([id, nombres, apellidos, documento, email, telefono]) => ({ id, nombres, apellidos, documento, email, telefono }))
 
 /**
@@ -1112,6 +1114,10 @@ function construirVisitantes(): Visitante[] {
       vigenciaHasta: sumarDias(hoy, 2),
       codigo: 'IDK-4F7Q2',
       recurrente: false,
+      // RN-367, RN-392 — Entra con su ALICE y de 8 a. m. a 8 p. m. (adoptadas por Mary, 2026-11-27).
+      horaDesde: '08:00',
+      horaHasta: '20:00',
+      personaVisitanteId: 'per-visitante',
       estado: 'activo',
       creadoEn: `${sumarDias(hoy, -1)}T19:00:00.000Z`,
     },
@@ -1869,6 +1875,15 @@ export function crearSemilla(): BaseDatos {
         personaId: 'per-inmobiliaria',
         copropiedadId: COPROPIEDAD_ID,
         unidadId: 'uni-torre2-502',
+      },
+      {
+        id: 'perfil-visitante',
+        etiqueta: 'Juan Sebastian Restrepo',
+        descripcion: 'Visitante de la 402 · ve su pase en la app',
+        rol: 'residente',
+        personaId: 'per-visitante',
+        copropiedadId: COPROPIEDAD_ID,
+        unidadId: 'uni-torre1-402',
       },
       {
         id: 'perfil-operador',

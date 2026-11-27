@@ -11,11 +11,12 @@
  *   fiscal. Lo ven todos: es transparencia.
  */
 
+import { useState } from 'react'
 import { useDatos } from '../estado/DatosContext'
 import { useSesion } from '../estado/SesionContext'
 import * as sel from '../datos/selectores'
-import { responderCargo } from '../datos/repositorio'
-import { CARGOS_ELECCION, cargoVigente, cargosVigentesDe, puestosDe, votacionVigente } from '../dominio/reglas'
+import { cargarCargoManual, responderCargo } from '../datos/repositorio'
+import { CARGOS_ELECCION, cargoVigente, cargosVigentesDe, hoyISO, puestosDe, residenciaVigente, votacionVigente } from '../dominio/reglas'
 import type { Asamblea, CargoElegido, CargoEleccion, PuntoOrdenDelDia } from '../dominio/tipos'
 import { formatearFecha } from '../utilidades/formato'
 
@@ -127,6 +128,7 @@ export function CargosVigentes({ modo }: { modo: 'residente' | 'admin' }) {
                       {unidad && <span className="tenue"> · {unidad.torre}, {unidad.tipo} {unidad.numero}</span>}
                       {c.matricula && <span className="tenue"> · matrícula {c.matricula}</span>}
                       <span className="tenue"> · desde el {formatearFecha(c.desde)}</span>
+                      {c.origen === 'manual' && <span className="tenue"> · cargado a mano</span>}
                       {!c.aceptacion && <span className="tenue"> · falta que acepte</span>}
                     </span>
                     {modo === 'admin' && <BotonesRespuesta cargo={c} admin />}
@@ -137,6 +139,106 @@ export function CargosVigentes({ modo }: { modo: 'residente' | 'admin' }) {
           </div>
         )
       })}
+      {modo === 'admin' && <CargarCargoManual />}
+    </div>
+  )
+}
+
+/**
+ * PN-28 — Cargar a mano a quien ya está en un cargo (Mary, 2026-11-27): al empezar el contrato con la
+ * copropiedad, el consejo, el comité y el revisor fiscal que ya venían. Después los cambia la elección.
+ */
+function CargarCargoManual() {
+  const { bd, ejecutar, cargando } = useDatos()
+  const { sesion } = useSesion()
+  const [abierto, setAbierto] = useState(false)
+  const [cargo, setCargo] = useState<CargoEleccion>('consejo')
+  const [miembro, setMiembro] = useState('')
+  const [nombre, setNombre] = useState('')
+  const [matricula, setMatricula] = useState('')
+  const [desde, setDesde] = useState(hoyISO())
+  if (!sesion) return null
+  if (!abierto) {
+    return (
+      <button className="boton boton--secundario boton--pequeno" style={{ marginTop: 'var(--e3)' }} onClick={() => setAbierto(true)}>
+        Agregar a quien ya está en un cargo
+      </button>
+    )
+  }
+  const roles = cargo === 'consejo' ? ['propietario'] : ['propietario', 'arrendatario']
+  // Las personas de las unidades que pueden ir a ese cargo: «personaId|unidadId».
+  const opciones = sel.unidadesDe(bd, sesion.copropiedadId).flatMap((u) =>
+    sel
+      .residenciasDeUnidad(bd, u.id)
+      .filter((r) => roles.includes(r.rol) && residenciaVigente(r))
+      .map((r) => {
+        const persona = sel.persona(bd, r.personaId)
+        return persona ? { valor: `${persona.id}|${u.id}`, texto: `${persona.nombres} ${persona.apellidos} · ${u.torre}, ${u.tipo} ${u.numero}` } : null
+      })
+      .filter((o): o is { valor: string; texto: string } => !!o),
+  )
+  const [miembroId, unidadId] = miembro.split('|')
+  async function guardar() {
+    if (!sesion) return
+    const ok = await ejecutar(
+      (base) =>
+        cargarCargoManual(base, {
+          copropiedadId: sesion.copropiedadId,
+          personaId: sesion.personaId,
+          cargo,
+          ...(cargo === 'revisor_fiscal' ? { nombre, matricula } : { miembroId: miembroId || undefined, unidadId }),
+          desde,
+        }),
+      'Listo: quedó en el cargo.',
+    )
+    if (ok) {
+      setMiembro('')
+      setNombre('')
+      setMatricula('')
+    }
+  }
+  return (
+    <div className="tarjeta tarjeta--plana" style={{ marginTop: 'var(--e3)' }}>
+      <strong>Agregar a quien ya está en un cargo</strong>
+      <p className="subtitulo">Para empezar con los que ya venían. Después los cambia la elección en la asamblea.</p>
+      <label className="campo">
+        <span>Cargo</span>
+        <select id="cargo-manual" value={cargo} onChange={(e) => { setCargo(e.target.value as CargoEleccion); setMiembro('') }}>
+          {(Object.keys(CARGOS_ELECCION) as CargoEleccion[]).map((c) => (
+            <option key={c} value={c}>{CARGOS_ELECCION[c].nombre}</option>
+          ))}
+        </select>
+      </label>
+      {cargo === 'revisor_fiscal' ? (
+        <>
+          <label className="campo">
+            <span>Nombre del contador</span>
+            <input id="cargo-manual-nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
+          </label>
+          <label className="campo">
+            <span>Matrícula profesional</span>
+            <input id="cargo-manual-matricula" value={matricula} onChange={(e) => setMatricula(e.target.value)} />
+          </label>
+        </>
+      ) : (
+        <label className="campo">
+          <span>Persona</span>
+          <select id="cargo-manual-persona" value={miembro} onChange={(e) => setMiembro(e.target.value)}>
+            <option value="">Elige…</option>
+            {opciones.map((o) => (
+              <option key={o.valor} value={o.valor}>{o.texto}</option>
+            ))}
+          </select>
+        </label>
+      )}
+      <label className="campo">
+        <span>Desde cuándo está en el cargo</span>
+        <input id="cargo-manual-desde" type="date" value={desde} max={hoyISO()} onChange={(e) => setDesde(e.target.value)} />
+      </label>
+      <div className="fila" style={{ justifyContent: 'flex-start', gap: 'var(--e2)' }}>
+        <button className="boton boton--pequeno" disabled={cargando} onClick={() => void guardar()}>Agregar</button>
+        <button className="boton boton--secundario boton--pequeno" onClick={() => setAbierto(false)}>Cerrar</button>
+      </div>
     </div>
   )
 }

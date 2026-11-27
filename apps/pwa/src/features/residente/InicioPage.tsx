@@ -29,6 +29,7 @@ import { BarraAvance, ChipProyecto } from '../../componentes/TableroProyecto'
 import { PermanentesPorAceptar, PoderesPorAceptar } from './PoderesPorAceptar'
 import { MisCargosPorAceptar } from '../../componentes/CargosDelEdificio'
 import { PoderEnUnToque } from '../../componentes/PoderEnUnToque'
+import { MiPase } from '../../componentes/MiPase'
 import { veModulo, type ModuloIdiky } from '../../dominio/permisos'
 
 export function InicioPage() {
@@ -103,6 +104,9 @@ export function InicioPage() {
         )}
       </Link>
       )}
+
+      {/* RN-367, RN-371 — Si es visitante: su pase, un QR que cambia cada dos minutos. */}
+      <MiPase />
 
       {/* T-46 — Un poder que me dieron y espera mi respuesta (RN-217). */}
       <PoderesPorAceptar />

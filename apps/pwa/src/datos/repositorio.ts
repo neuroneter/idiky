@@ -274,9 +274,11 @@ import {
   motivoProntoPagoInvalido,
   respuestaDeUnidad,
 } from '../dominio/reglas'
+import { motivoFranjaInvalida } from '../dominio/reglas'
 import { AREA_DEL_CARGO, motivoNovedadInvalida, TEXTO_AREA_NOVEDAD } from '../dominio/reglas'
 import { motivoFueraDePlazoPoder, motivoNoVotaSinAsistencia, motivoPlazoPoderesInvalido } from '../dominio/reglas'
 import type { PlazoPoderes, Soporte } from '../dominio/tipos'
+import { cargosVigentesDe, motivoCargoManualInvalido } from '../dominio/reglas'
 import { baseDeVoto, contarVotacion, elegidosDeEleccion, motivoPuestosInvalidos, puestosDe, textoEleccionCargo } from '../dominio/reglas'
 import type { CargoElegido } from '../dominio/tipos'
 import { leerCodigoAsistencia, motivoPostulacionInvalida, motivoRecordatoriosAsambleaInvalidos, poderVigente, recordatorioAsambleaQueToca, recordatoriosAsambleaDe, textoRecordatorioAsamblea, motivoPreguntaAsambleaInvalida, postulacionesVigentes, textoRespuestaAsamblea } from '../dominio/reglas'
@@ -4709,8 +4711,11 @@ export async function crearRegistroPersona(
     condicion: CondicionRegistro
     /** Solo la visita de un día: si quien registra le pide las fotos (RN-57). */
     pedirFotos?: boolean
-    /** Solo el visitante frecuente: los días de la semana en que viene. */
+    /** Solo el visitante frecuente: los días de la semana en que viene. Ya no se ofrece (RN-392). */
     dias?: number[]
+    /** RN-392 — La franja de horas opcional del visitante o del residente recurrente. */
+    horaDesde?: string
+    horaHasta?: string
     menorDeEdad?: boolean
     tipoIdentificacion?: TipoIdentificacion
     nombres: string
@@ -4759,12 +4764,11 @@ export async function crearRegistroPersona(
   if (parametros.tipoIdentificacion && TIPOS_IDENTIFICACION[parametros.tipoIdentificacion].soloMenores && !parametros.menorDeEdad) {
     throw new ErrorDeNegocio('La tarjeta de identidad y el registro civil son documentos de menores de edad.')
   }
-  // El visitante frecuente dice qué días viene.
-  if (parametros.condicion === 'frecuente' && !(parametros.dias && parametros.dias.length > 0)) {
-    throw new ErrorDeNegocio('Escoge los días de la semana en que viene.')
-  }
+  // RN-392 — Por días y, si se quiere, por horas: la franja va completa.
+  const franja = motivoFranjaInvalida(parametros.horaDesde, parametros.horaHasta)
+  if (franja) throw new ErrorDeNegocio(franja)
   if (faltaContacto(parametros.categoria, parametros.telefono, parametros.email, parametros.menorDeEdad, parametros.condicion)) {
-    throw new ErrorDeNegocio('Escribe el celular o el correo: es a donde le llega el código para entrar a la app.')
+    throw new ErrorDeNegocio('Escribe el celular: es a donde le llega el código para entrar a la app (RN-353).')
   }
 
   // RN-68 — El visitante no es residente: quien vive ahí no es una visita.
@@ -4884,6 +4888,25 @@ export async function crearRegistroPersona(
   return persistir(bd, registro)
 }
 
+/**
+ * RN-367 — La persona del directorio que es el visitante: la misma si ya existe con ese documento;
+ * si no, nace con nombre, documento y celular, y con ellos entra a ALICE una sola vez.
+ */
+function personaDelVisitante(bd: BaseDatos, registro: RegistroPersona): string {
+  const existente = bd.personas.find((p) => p.documento && p.documento === registro.documento)
+  if (existente) return existente.id
+  const persona: Persona = {
+    id: nuevoId('per'),
+    nombres: registro.nombres,
+    apellidos: registro.apellidos,
+    documento: registro.documento,
+    email: registro.email ?? '',
+    telefono: registro.telefono ?? '',
+  }
+  bd.personas.push(persona)
+  return persona.id
+}
+
 /** El visitante que sale de un registro. Comparte forma con el que se autoriza. */
 function crearVisitanteDeRegistro(bd: BaseDatos, registro: RegistroPersona): Visitante {
   const visitante: Visitante = {
@@ -4896,9 +4919,11 @@ function crearVisitanteDeRegistro(bd: BaseDatos, registro: RegistroPersona): Vis
     vigenciaDesde: registro.vigenciaDesde ?? hoyISO(),
     vigenciaHasta: registro.vigenciaHasta ?? hoyISO(),
     codigo: generarCodigoVisitante(),
-    // El frecuente entra los días escogidos hasta su fecha (2026-10-02).
+    // RN-392 — Por días y, si se quiere, por horas (ya no por días de la semana).
     recurrente: registro.condicion === 'frecuente',
-    dias: registro.condicion === 'frecuente' ? registro.dias : undefined,
+    ...(registro.horaDesde && registro.horaHasta ? { horaDesde: registro.horaDesde, horaHasta: registro.horaHasta } : {}),
+    // RN-367 — El visitante entra con su ALICE: su persona en el directorio.
+    personaVisitanteId: personaDelVisitante(bd, registro),
     estado: 'activo',
     creadoEn: ahoraISO(),
     registroId: registro.id,
@@ -7006,6 +7031,7 @@ function registrarElegidos(bd: BaseDatos, votacion: Votacion): void {
       nombre: elegido.nombre,
       ...(elegido.personaId ? { personaId: elegido.personaId, unidadId: elegido.unidadId } : {}),
       ...(elegido.matricula ? { matricula: elegido.matricula } : {}),
+      origen: 'eleccion',
       asambleaId: asamblea.id,
       puntoId: punto.id,
       votacionId: votacion.id,
@@ -7049,6 +7075,68 @@ export async function responderCargo(
   const respuesta = { por: parametros.personaId, en: ahoraISO() }
   if (parametros.acepta) cargo.aceptacion = respuesta
   else cargo.declinacion = respuesta
+  return persistir(bd, cargo)
+}
+
+/**
+ * PN-28 — La administración carga a mano a quien ya está en un cargo (Mary, 2026-11-27): al empezar
+ * el contrato con la copropiedad, los del consejo, el comité y el revisor fiscal que ya venían. Quedan
+ * aceptados (ya están ejerciendo) y la próxima elección de ese cargo los reemplaza como a los demás.
+ */
+export async function cargarCargoManual(
+  bdActual: BaseDatos,
+  parametros: {
+    copropiedadId: string
+    personaId: string
+    cargo: CargoEleccion
+    /** La persona de una unidad (consejo y comité). */
+    miembroId?: string
+    unidadId?: string
+    /** El revisor fiscal, que no vive en el edificio. */
+    nombre?: string
+    matricula?: string
+    desde: string
+  },
+): Promise<Resultado<CargoElegido>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  if (!esAdministracion(bd, parametros.personaId, parametros.copropiedadId)) {
+    throw new ErrorDeNegocio('Los cargos los carga la administración.')
+  }
+  const miembro = parametros.miembroId ? bd.personas.find((p) => p.id === parametros.miembroId) : undefined
+  const nombre = miembro ? `${miembro.nombres} ${miembro.apellidos}` : (parametros.nombre ?? '').trim()
+  const rol =
+    miembro && parametros.unidadId
+      ? bd.residencias.find((r) => r.personaId === miembro.id && r.unidadId === parametros.unidadId && residenciaVigente(r))?.rol
+      : undefined
+  bd.cargosElegidos ??= []
+  const yaEnElCargo = cargosVigentesDe(bd.cargosElegidos, parametros.copropiedadId).some(
+    (c) => c.cargo === parametros.cargo && (miembro ? c.personaId === miembro.id : c.nombre.toLowerCase() === nombre.toLowerCase()),
+  )
+  const motivo = motivoCargoManualInvalido({
+    cargo: parametros.cargo,
+    nombre,
+    rol,
+    matricula: parametros.matricula,
+    desde: parametros.desde,
+    hoy: hoyISO(),
+    yaEnElCargo,
+  })
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  const ahora = ahoraISO()
+  const cargo: CargoElegido = {
+    id: nuevoId('car'),
+    copropiedadId: parametros.copropiedadId,
+    cargo: parametros.cargo,
+    nombre,
+    ...(miembro ? { personaId: miembro.id, unidadId: parametros.unidadId } : {}),
+    ...(parametros.matricula?.trim() ? { matricula: parametros.matricula.trim() } : {}),
+    origen: 'manual',
+    cargadoPor: parametros.personaId,
+    desde: parametros.desde,
+    aceptacion: { por: parametros.personaId, en: ahora },
+  }
+  bd.cargosElegidos.push(cargo)
   return persistir(bd, cargo)
 }
 

@@ -76,6 +76,20 @@ El detalle de cada una está en `docs/05-modelo-de-datos.md` y en la bitácora.
 
 ---
 
+### M3. Mary alinea la maqueta con BLOKY — ⏳ abierto (2026-11-27)
+
+Mary revisó lo que mostraste de BLOKY y decidió (detalle en `docs/recursos/roles-de-alice.md` §2 bis, decisiones 12 a 17):
+
+- **Se toma lo de BLOKY:** el visitante entra con su ALICE (RN-367), el pase es un QR que cambia cada dos
+  minutos (RN-371), la autorización va por días y franja de horas, sin días de la semana (RN-392), celular y
+  documento obligatorios al crear a cualquiera, y Mantenimiento con toda la bandeja de PQRS (RN-380).
+- **Se agrega a BLOKY:** cargar **a mano** a los del consejo, el comité y el revisor fiscal al empezar el
+  contrato con una copropiedad, además de la elección (PN-28 en `docs/05`).
+- **Por conciliar contigo:** en BLOKY (RN-370) el «Residente» (para Mary, el **Familiar o acompañante**:
+  «Residente» es una marca, no un usuario) crea invitados; en su tabla el familiar **no** registra a nadie.
+  Mary lo decide; mientras tanto manda su tabla.
+- **Pendiente:** el país del celular al crear personas (la maqueta asume +57).
+
 ## 1. Identificadores on-chain = `hashIdentidad` (RN-298) — ✅ hecho en código (2026-10-23); ⏳ redeploy Amoy
 
 **Decisión de producto (ya tuya, RN-298):** la identidad en la cadena es el HMAC del documento, no

@@ -728,3 +728,12 @@ export function novedadesDelPersonal(bd: BaseDatos, copropiedadId: string) {
     .filter((n) => n.copropiedadId === copropiedadId && n.area)
     .sort((a, b) => b.registradaEn.localeCompare(a.registradaEn))
 }
+
+/** RN-372 — De respaldo, la portería busca al visitante por su documento: el autorizado más reciente. */
+export function visitantePorDocumento(bd: BaseDatos, documento: string): Visitante | undefined {
+  const limpio = documento.trim().replace(/[.\s]/g, '')
+  if (!limpio) return undefined
+  return bd.visitantes
+    .filter((v) => v.documento.replace(/[.\s]/g, '') === limpio)
+    .sort((a, b) => b.creadoEn.localeCompare(a.creadoEn))[0]
+}

@@ -336,6 +336,11 @@ a la reserva al crearla, así que si la zona cambia después, la reserva conserv
 - **Actor principal:** Residente
 - **Resultado esperado:** Portería puede validar el ingreso del visitante sin llamar al residente.
 
+> **2026-11-27 (Mary, alineado con BLOKY, PN-33):** el visitante **entra con su ALICE** (RN-367): le llega
+> la invitación al celular y en portería muestra su **pase, un QR que cambia cada dos minutos** (RN-371).
+> El residente ya no comparte un código. Se autoriza **por días y, si se quiere, por una franja de
+> horas**, sin días de la semana (RN-392). El celular es obligatorio. Los pasos 3 y 4 de abajo quedan así.
+
 **Flujo principal**
 1. El residente registra nombre, documento y vigencia (fecha única o rango).
 2. Indica si el visitante ingresa con vehículo (placa) — opcional.

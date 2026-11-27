@@ -25,11 +25,9 @@ export function RegistrarNovedadDelPersonal() {
   if (!sesion) return null
   const area = sesion.cargo ? AREA_DEL_CARGO[sesion.cargo] : undefined
   if (!area) return null
-  // Mantenimiento atiende las PQRS de daños que siguen abiertas.
+  // Mantenimiento atiende las PQRS abiertas: ve toda la bandeja (RN-380; Mary, 2026-11-27).
   const deDanos =
-    area === 'mantenimiento'
-      ? bd.pqrs.filter((p) => p.copropiedadId === sesion.copropiedadId && p.categoria === 'mantenimiento' && pqrsAbierta(p))
-      : []
+    area === 'mantenimiento' ? bd.pqrs.filter((p) => p.copropiedadId === sesion.copropiedadId && pqrsAbierta(p)) : []
 
   return (
     <div className="tarjeta">

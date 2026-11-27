@@ -40,9 +40,9 @@ test('desde el celular, Mantenimiento registra lo que hizo y atiende la PQRS de 
   await expect(page.getByText('Novedad registrada en la minuta.')).toBeVisible()
   await expect(page.getByText(/Tus novedades/)).toBeVisible()
   await expect(page.getByText(new RegExp(`atendió la ${radicado}`))).toBeVisible()
-  // Mantenimiento solo ve las PQRS de daños.
+  // Mantenimiento ve toda la bandeja de PQRS, como en BLOKY (RN-380; Mary, 2026-11-27).
   await page.goto('/#/admin/pqrs')
-  await expect(page.locator('.consola__contenido')).not.toContainText('Convivencia')
+  await expect(page.locator('.consola__contenido')).toContainText('Convivencia')
 
   await entrarComo(page, /Olga Lucia Henao/)
   await page.goto('/#/admin/porteria')

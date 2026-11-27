@@ -144,3 +144,44 @@ test('al citar una elección del consejo se escogen los puestos (PN-28)', async 
   await page.getByLabel('Elección del punto 1').selectOption('revisor_fiscal')
   await expect(page.getByLabel('Puestos del punto 1')).toHaveCount(0)
 })
+
+test('la administración carga a mano a los que ya estaban en un cargo (PN-28)', async ({ page }) => {
+  await page.goto('/')
+  const r = await page.evaluate(async () => {
+    const repo = await import('/src/datos/repositorio.ts')
+    let bd = await repo.cargar()
+    const hoy = new Date().toISOString().slice(0, 10)
+    const base = { copropiedadId: 'cop-1', personaId: 'per-admin', desde: '2025-03-15' }
+    const intento = async (p: Record<string, unknown>) => {
+      try { const res = await repo.cargarCargoManual(bd, { ...base, ...p } as never); bd = res.bd; return res.datos } catch (e) { return `ERR: ${(e as Error).message}` }
+    }
+    const consejera = await intento({ cargo: 'consejo', miembroId: 'per-1', unidadId: 'uni-torre1-402' })
+    return {
+      consejera: typeof consejera === 'string' ? consejera : `${consejera.origen}/${!!consejera.aceptacion}`,
+      repetida: await intento({ cargo: 'consejo', miembroId: 'per-1', unidadId: 'uni-torre1-402' }),
+      arrendatariaAlConsejo: await intento({ cargo: 'consejo', miembroId: 'per-5', unidadId: 'uni-torre1-301' }),
+      arrendatariaAlComite: typeof (await intento({ cargo: 'comite_convivencia', miembroId: 'per-5', unidadId: 'uni-torre1-301' })),
+      revisorSinMatricula: await intento({ cargo: 'revisor_fiscal', nombre: 'Pedro Contador' }),
+      fechaFutura: await intento({ cargo: 'comite_convivencia', miembroId: 'per-1', unidadId: 'uni-torre1-402', desde: '2099-01-01' }),
+      propietariaNoCarga: await repo.cargarCargoManual(bd, { ...base, personaId: 'per-1', cargo: 'revisor_fiscal', nombre: 'X', matricula: '1', desde: hoy }).then(() => 'ok', (e) => `ERR: ${e.message}`),
+    }
+  })
+  expect(r.consejera).toBe('manual/true')
+  expect(r.repetida).toMatch(/ya está en ese cargo/)
+  expect(r.arrendatariaAlConsejo).toMatch(/propietarios/)
+  expect(r.arrendatariaAlComite).toBe('object')
+  expect(r.revisorSinMatricula).toMatch(/matrícula/)
+  expect(r.fechaFutura).toMatch(/fecha/)
+  expect(r.propietariaNoCarga).toMatch(/administración/)
+
+  await entrarComo(page, /Olga Lucia Henao/)
+  await page.goto('/#/admin/asambleas')
+  await page.getByRole('button', { name: 'Agregar a quien ya está en un cargo' }).click()
+  await page.locator('#cargo-manual').selectOption('revisor_fiscal')
+  await page.locator('#cargo-manual-nombre').fill('Hernando Rojas Pinzón')
+  await page.locator('#cargo-manual-matricula').fill('45123-T')
+  await page.getByRole('button', { name: 'Agregar', exact: true }).click()
+  await expect(page.getByText('Listo: quedó en el cargo.')).toBeVisible()
+  await expect(page.getByText(/Hernando Rojas Pinzón/)).toBeVisible()
+  await expect(page.getByText(/cargado a mano/).first()).toBeVisible()
+})

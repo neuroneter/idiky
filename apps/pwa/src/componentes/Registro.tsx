@@ -30,7 +30,7 @@ import {
   esperaAlPropietario,
   faltaContacto,
   admiteMenor,
-  NOMBRES_DIAS,
+  motivoFranjaInvalida,
   TIPOS_IDENTIFICACION,
   requiereAprobacionPropietario,
   etiquetaUnidad,
@@ -168,7 +168,9 @@ export function FormularioRegistro({
   const [condicion, setCondicion] = useState<CondicionRegistro>(soloDeUnDia ? 'no_residente' : condicionesPosibles(categoria)[0])
   const [pedirFotos, setPedirFotos] = useState(false)
   /** El visitante frecuente: qué días viene (0 = domingo). */
-  const [dias, setDias] = useState<number[]>([1, 2, 3, 4, 5])
+  // RN-392 — La franja de horas opcional (BLOKY): una visita de un rato o el horario de la empleada.
+  const [horaDesde, setHoraDesde] = useState('')
+  const [horaHasta, setHoraHasta] = useState('')
   const [menor, setMenor] = useState(false)
   const [tipoIdentificacion, setTipoIdentificacion] = useState<TipoIdentificacion>('cc')
   const [nombres, setNombres] = useState('')
@@ -229,8 +231,9 @@ export function FormularioRegistro({
       return
     }
     // RN-60 — Sin celular ni correo no hay a dónde mandarle el código de entrada.
-    if (condicion === 'frecuente' && dias.length === 0) {
-      setError('Escoge los días de la semana en que viene.')
+    const franjaMal = motivoFranjaInvalida(horaDesde || undefined, horaHasta || undefined)
+    if (franjaMal) {
+      setError(franjaMal)
       return
     }
     if (TIPOS_IDENTIFICACION[tipoIdentificacion].soloMenores && !menor) {
@@ -238,7 +241,7 @@ export function FormularioRegistro({
       return
     }
     if (faltaContacto(categoria, telefono, email, menor, condicion)) {
-      setError('Escribe el celular o el correo: es a donde le llega el código para entrar a la app.')
+      setError('Escribe el celular: es a donde le llega el código para entrar a la app.')
       return
     }
     if (unidades && !unidadId) {
@@ -249,7 +252,7 @@ export function FormularioRegistro({
       categoria,
       condicion,
       pedirFotos: unDia ? pedirFotos : undefined,
-      dias: condicion === 'frecuente' ? dias : undefined,
+      ...(horaDesde && horaHasta ? { horaDesde, horaHasta } : {}),
       menorDeEdad: menor || undefined,
       tipoIdentificacion,
       nombres: nombres.trim(),
@@ -470,24 +473,17 @@ export function FormularioRegistro({
           </div>
         )}
 
-        {/* El visitante frecuente: los días en que entra (2026-10-02). */}
-        {condicion === 'frecuente' && (
-          <div className="campo">
-            <label>¿Qué días viene?</label>
-            <div className="segmentos" style={{ flexWrap: 'wrap' }}>
-              {NOMBRES_DIAS.map((nombre, dia) => (
-                <button
-                  key={nombre}
-                  type="button"
-                  className="segmento"
-                  aria-current={dias.includes(dia) ? 'page' : undefined}
-                  onClick={() => setDias((antes) => (antes.includes(dia) ? antes.filter((d) => d !== dia) : [...antes, dia].sort()))}
-                >
-                  {nombre}
-                </button>
-              ))}
+        {/* RN-392 — Por días y, si se quiere, por horas: la franja vale para cada día. */}
+        {(categoria === 'visitante' || condicion === 'frecuente') && (
+          <div className="fila-campos">
+            <div className="campo">
+              <label htmlFor="franja-desde">Desde la hora (opcional)</label>
+              <input id="franja-desde" type="time" value={horaDesde} onChange={(e) => setHoraDesde(e.target.value)} />
             </div>
-            <span className="ayuda-campo">Entra con su código solo esos días, hasta la fecha de fin.</span>
+            <div className="campo">
+              <label htmlFor="franja-hasta">Hasta la hora</label>
+              <input id="franja-hasta" type="time" value={horaHasta} onChange={(e) => setHoraHasta(e.target.value)} />
+            </div>
           </div>
         )}
 

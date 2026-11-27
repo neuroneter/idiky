@@ -67,7 +67,9 @@ test('el portero abre el turno, registra la entrada y la administración lee la 
   await expect(page.getByText('No hay visitantes adentro.')).toBeVisible()
 
   await page.goto('/#/porteria/visitantes')
-  await page.getByLabel('Código del visitante').fill('IDK-4F7Q2')
+  // RN-371 — Lee el pase de la app del visitante (el QR que cambia cada dos minutos).
+  const pase = await page.evaluate(async () => (await import('/src/dominio/reglas.ts')).codigoPase('vis-1', Date.now()))
+  await page.getByLabel('Pase o documento del visitante').fill(pase)
   await page.getByRole('button', { name: 'Validar' }).click()
   await page.getByRole('button', { name: 'Entró' }).click()
   await expect(page.getByText(/Ya está adentro/)).toBeVisible()
