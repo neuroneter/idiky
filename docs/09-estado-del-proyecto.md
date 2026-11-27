@@ -125,8 +125,8 @@ Mary comparó la maqueta con lo que Daniel mostró de BLOKY y decidió (`docs/re
 - **Mantenimiento ve toda la bandeja de PQRS** (RN-380), no solo las de daños.
 - **Los cargos se cargan a mano** al empezar con una copropiedad, además de salir de la elección (PN-28,
   `cargarCargoManual`).
-- **«Residente» es una marca, no un usuario.** Queda por conciliar con Daniel si el familiar invita visitantes
-  (BLOKY RN-370 sí; la tabla de Mary no): mientras tanto manda la tabla.
+- **«Residente» es una marca, no un usuario.** **El familiar o acompañante no crea visitantes** (decisión 18):
+  solo el propietario y el arrendatario. BLOKY (RN-370) lo debe ajustar; quedó en el aviso M3 de Daniel.
 
 Semilla v56. 152 pruebas pasan.
 
