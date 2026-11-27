@@ -5445,6 +5445,43 @@ export function motivoFranjaInvalida(desde?: string, hasta?: string): string | n
   return null
 }
 
+/**
+ * PN-34 — El país del celular (Mary, 2026-11-27: decisión 14 de roles-de-alice.md). El propietario
+ * que vive afuera o el visitante extranjero registran su número con el indicativo de su país; por
+ * defecto, Colombia. Colombia pide 10 cifras que empiezan por 3; los demás, entre 6 y 12 cifras.
+ */
+export const PAISES_CELULAR: Array<{ codigo: string; nombre: string; indicativo: string }> = [
+  { codigo: 'CO', nombre: 'Colombia', indicativo: '+57' },
+  { codigo: 'US', nombre: 'Estados Unidos', indicativo: '+1' },
+  { codigo: 'CA', nombre: 'Canadá', indicativo: '+1' },
+  { codigo: 'ES', nombre: 'España', indicativo: '+34' },
+  { codigo: 'MX', nombre: 'México', indicativo: '+52' },
+  { codigo: 'PA', nombre: 'Panamá', indicativo: '+507' },
+  { codigo: 'VE', nombre: 'Venezuela', indicativo: '+58' },
+  { codigo: 'EC', nombre: 'Ecuador', indicativo: '+593' },
+  { codigo: 'PE', nombre: 'Perú', indicativo: '+51' },
+  { codigo: 'CL', nombre: 'Chile', indicativo: '+56' },
+  { codigo: 'AR', nombre: 'Argentina', indicativo: '+54' },
+  { codigo: 'BR', nombre: 'Brasil', indicativo: '+55' },
+]
+
+/** PN-34 — Si el celular no sirve para ese país. Vacío no se revisa aquí (lo revisa `faltaContacto`). */
+export function motivoCelularInvalido(pais: string, numero: string): string | null {
+  const cifras = numero.replace(/[\s.-]/g, '')
+  if (!cifras) return null
+  if (!/^\d+$/.test(cifras)) return 'El celular lleva solo números, sin el indicativo del país.'
+  if (pais === 'CO') return /^3\d{9}$/.test(cifras) ? null : 'El celular de Colombia tiene 10 números y empieza por 3.'
+  return cifras.length >= 6 && cifras.length <= 12 ? null : 'Revisa el celular: tiene entre 6 y 12 números.'
+}
+
+/** PN-34 — El celular como se guarda: con el indicativo del país adelante («+57 3001234567»). */
+export function celularConPais(pais: string, numero: string): string {
+  const cifras = numero.replace(/[\s.-]/g, '')
+  if (!cifras) return ''
+  const indicativo = PAISES_CELULAR.find((p) => p.codigo === pais)?.indicativo ?? '+57'
+  return `${indicativo} ${cifras}`
+}
+
 /** RN-392 — Si a esta hora (HH:MM) está fuera de su franja. Sin franja, nunca. */
 export function fueraDeFranja(visitante: Pick<Visitante, 'horaDesde' | 'horaHasta'>, hora: string): boolean {
   if (!visitante.horaDesde || !visitante.horaHasta) return false

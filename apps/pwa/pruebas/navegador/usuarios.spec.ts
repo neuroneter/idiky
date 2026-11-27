@@ -5,7 +5,7 @@
  * Pruebas de Mary, traídas al repositorio el 2026-10-02 (T-42, ADR-0020). Corren
  * con el reloj fijo de `./base` (viernes 2026-10-09, 10:00, Bogotá).
  */
-import { AHORA_PRUEBAS, expect, test } from './base'
+import { AHORA_PRUEBAS, entrarComo, expect, test } from './base'
 
 test("quién registra a quién y quién ve los soportes (RN-60, RN-63, RN-67)", async ({ page }) => {
   test.setTimeout(180_000)
@@ -584,4 +584,39 @@ test('la administradora ve y cambia la opción en Registros (RN-210)', async ({ 
   await expect(tarjeta.getByRole('button', { name: 'No hace falta' })).toHaveAttribute('aria-current', 'page')
   const guardado = await page.evaluate(() => JSON.parse(localStorage.getItem('idiky.demo.bd') ?? '{}').copropiedades[0].aprobacionPropietario)
   expect(guardado).toBe(false)
+})
+
+test('el celular se registra con el país, Colombia por defecto (PN-34)', async ({ page }) => {
+  await page.goto('/')
+  const r = await page.evaluate(async () => {
+    const reglas = await import('/src/dominio/reglas.ts')
+    return {
+      coBueno: reglas.motivoCelularInvalido('CO', '300 123 4567'),
+      coCorto: reglas.motivoCelularInvalido('CO', '30012'),
+      coFijo: reglas.motivoCelularInvalido('CO', '6044445566'),
+      usBueno: reglas.motivoCelularInvalido('US', '3055551234'),
+      letras: reglas.motivoCelularInvalido('ES', '612abc'),
+      guardado: reglas.celularConPais('ES', '612 34 56 78'),
+      vacio: reglas.celularConPais('CO', ''),
+    }
+  })
+  expect(r).toEqual({
+    coBueno: null, coCorto: expect.stringMatching(/10 números/), coFijo: expect.stringMatching(/empieza por 3/),
+    usBueno: null, letras: expect.stringMatching(/solo números/), guardado: '+34 612345678', vacio: '',
+  })
+
+  await entrarComo(page, /Maria Camila Restrepo/)
+  await page.goto('/#/app/unidad/personas')
+  await page.getByRole('button', { name: 'Registrar' }).first().click()
+  await page.locator('.opcion-categoria', { hasText: 'Visitante' }).click()
+  await expect(page.getByLabel('País del celular')).toHaveValue('CO')
+  await page.locator('#nombres').fill('Kevin')
+  await page.locator('#apellidos').fill('Smith')
+  await page.locator('#documento').fill('X1234567')
+  await page.locator('#telefono').fill('3055551234')
+  await page.getByLabel('País del celular').selectOption('US')
+  await page.getByRole('button', { name: 'Autorizar la visita' }).click()
+  await expect(page.getByText('Kevin Smith').first()).toBeVisible()
+  const guardado = await page.evaluate(() => localStorage.getItem('idiky.demo.bd') ?? '')
+  expect(guardado).toContain('+1 3055551234')
 })

@@ -31,6 +31,9 @@ import {
   faltaContacto,
   admiteMenor,
   motivoFranjaInvalida,
+  celularConPais,
+  motivoCelularInvalido,
+  PAISES_CELULAR,
   TIPOS_IDENTIFICACION,
   requiereAprobacionPropietario,
   etiquetaUnidad,
@@ -178,6 +181,8 @@ export function FormularioRegistro({
   const [documento, setDocumento] = useState('')
   const [email, setEmail] = useState('')
   const [telefono, setTelefono] = useState('')
+  // PN-34 — El país del celular; por defecto, Colombia.
+  const [paisCelular, setPaisCelular] = useState('CO')
   const [desde, setDesde] = useState(hoyISO())
   const [hasta, setHasta] = useState(sumarDias(hoyISO(), 30))
   const [placa, setPlaca] = useState('')
@@ -244,6 +249,11 @@ export function FormularioRegistro({
       setError('Escribe el celular: es a donde le llega el código para entrar a la app.')
       return
     }
+    const celularMal = motivoCelularInvalido(paisCelular, telefono)
+    if (celularMal) {
+      setError(celularMal)
+      return
+    }
     if (unidades && !unidadId) {
       setError('Escoge la unidad a la que entra.')
       return
@@ -259,7 +269,7 @@ export function FormularioRegistro({
       apellidos: apellidos.trim(),
       documento: documento.trim(),
       email: email.trim(),
-      telefono: telefono.trim(),
+      telefono: celularConPais(paisCelular, telefono),
       vigenciaDesde: desde,
       // La visita entra y sale el mismo dia (RN-62).
       vigenciaHasta: unDia ? desde : conVigencia ? hasta : undefined,
@@ -343,7 +353,7 @@ export function FormularioRegistro({
                 : condicion === 'frecuente'
                   ? 'Viene ciertos días de la semana hasta una fecha. Sube sus fotos y entra con su código esos días.'
                   : categoria === 'visitante'
-                  ? 'Viene un solo día y entra con un código para la portería.'
+                  ? 'Viene un solo día: le llega la invitación al celular y entra con el pase de su app.'
                   : categoria === 'familiar'
                   ? 'Es de la familia pero no vive aquí: va de visita. Tiene la app, pero no aparece en la lista de residentes de la portería.'
                   : 'Tiene la unidad arrendada o vacía. Sigue siendo propietario —vota, recibe la cuota y registra gente—, pero no aparece en la lista de la portería.'}
@@ -405,20 +415,36 @@ export function FormularioRegistro({
           <span className="ayuda-campo">
             {conSoportes
               ? 'Con este número y el código que sale al terminar, la persona abre su registro para adjuntar las fotos.'
-              : 'Es lo que la portería le pide en la entrada, junto con su código.'}
+              : 'Si el pase de su app no abre, la portería lo busca con este documento.'}
           </span>
         </div>
 
-        <div className="fila-campos">
-          <div className="campo">
+        <div className="campo">
             <label htmlFor="telefono">Celular</label>
-            <input
-              id="telefono"
-              inputMode="tel"
-              value={telefono}
-              onChange={(e) => setTelefono(e.target.value)}
-            />
+            <div style={{ display: 'flex', gap: 'var(--e2)' }}>
+              <select
+                id="pais-celular"
+                aria-label="País del celular"
+                value={paisCelular}
+                onChange={(e) => setPaisCelular(e.target.value)}
+                style={{ flex: '0 0 9rem', minWidth: 0 }}
+              >
+                {PAISES_CELULAR.map((p) => (
+                  <option key={p.codigo} value={p.codigo}>
+                    {p.nombre} {p.indicativo}
+                  </option>
+                ))}
+              </select>
+              <input
+                id="telefono"
+                inputMode="tel"
+                value={telefono}
+                onChange={(e) => setTelefono(e.target.value)}
+                style={{ flex: 1, minWidth: 0 }}
+              />
+            </div>
           </div>
+        <div className="fila-campos">
           <div className="campo">
             <label htmlFor="email">Correo</label>
             <input
