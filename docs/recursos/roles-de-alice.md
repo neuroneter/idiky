@@ -64,7 +64,7 @@
 | 11 | 2026-11-26 | **El familiar o acompañante puede ser No Residente** (*«el familiar puede ir solo de visita, por esta razón puede ser no residente»*): es de la familia, no vive en la unidad y va de visita. |
 | 12 | 2026-11-27 | **Con BLOKY, el visitante entra con su ALICE** (*«del 1 al 3 toma lo de BLOKY»*; RN-367): le llega la invitación al celular, entra a su app y en portería muestra su **pase**, un QR que **cambia cada dos minutos** (RN-371). Quien lo invita ya no comparte un código. |
 | 13 | 2026-11-27 | **Al visitante y al residente recurrente se les autoriza por días y, si se quiere, por una franja de horas** (RN-392), **sin días de la semana**. Cambia lo de «escoge los días» de la decisión 10. |
-| 14 | 2026-11-27 | **Para crear a cualquier persona se pide siempre nombre, celular, tipo y número de documento**, como en BLOKY (*«5 y 6 como lo tiene BLOKY»*). Solo el menor de edad puede ir sin celular. El país del celular queda pendiente (la maqueta asume +57). |
+| 14 | 2026-11-27 | **Para crear a cualquier persona se pide siempre nombre, celular, tipo y número de documento**, como en BLOKY (*«5 y 6 como lo tiene BLOKY»*). Solo el menor de edad puede ir sin celular. El celular se registra con su **país**, Colombia por defecto (PN-34). |
 | 15 | 2026-11-27 | **Mantenimiento ve toda la bandeja de PQRS** (RN-380), como en BLOKY; antes solo las de daños (nota ¹¹). |
 | 16 | 2026-11-27 | **Los cargos del edificio se cargan a mano o salen de la elección** (*«al iniciar un contrato con una copropiedad, los del consejo se deben cargar manual»*): la administración agrega a los que ya estaban (consejo, comité, revisor fiscal); la siguiente elección los reemplaza. |
 | 17 | 2026-11-27 | **«Residente» es una marca, no un usuario** (*«tú tienes un perfil con el nombre residente y eso es una marca»*): en IDIKY los usuarios son los de §1 y «Residente» es la marca de residencia de cada uno. Lo que BLOKY llama usuario «Residente» es el **Familiar o acompañante** de esta tabla. |
@@ -263,3 +263,5 @@ la plata.
 | 2026-11-26 | El familiar o acompañante también puede ser No Residente (decisión 11) | Mary |
 | 2026-11-27 | Se alinea con BLOKY: visitante con app y pase que cambia, franja de horas, datos obligatorios, Mantenimiento con toda la bandeja y cargos cargados a mano (decisiones 12 a 17) | Mary |
 | 2026-11-27 | El familiar o acompañante no crea visitantes (decisión 18) | Mary |
+| 2026-11-27 | **Excel al día**: filas de Consejero, Revisor Fiscal, Visitante y Familiar, y hoja nueva «Decisiones» (12 a 18) | Mary + IA |
+| 2026-11-27 | El celular se registra con su **país** (Colombia por defecto; decisión 14, PN-34) | Mary |

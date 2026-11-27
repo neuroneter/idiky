@@ -88,7 +88,7 @@ Mary revisó lo que mostraste de BLOKY y decidió (detalle en `docs/recursos/rol
 - **Cambia en BLOKY (decisión 18 de Mary):** en BLOKY (RN-370) el «Residente» (para Mary, el **Familiar o
   acompañante**: «Residente» es una marca, no un usuario) crea invitados. **Mary decidió que no**: *«el
   familiar no puede crear visitantes»*. Al visitante lo crean solo el Propietario y el Arrendatario.
-- **Pendiente:** el país del celular al crear personas (la maqueta asume +57).
+- **Hecho en la maqueta:** el celular se registra con su país, Colombia por defecto (PN-34), como ya lo hace BLOKY.
 
 ## 1. Identificadores on-chain = `hashIdentidad` (RN-298) — ✅ hecho en código (2026-10-23); ⏳ redeploy Amoy
 

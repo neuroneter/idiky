@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-27 · Mary + IA (Claude) · El país del celular (PN-34) y el Excel de roles al día
+
+- **El celular se registra con su país**, Colombia por defecto (`componentes/Registro.tsx`, `dominio/reglas.ts`):
+  Colombia pide 10 números que empiezan por 3; se guarda con el indicativo («+1 3055551234»). Los textos del
+  registro ya no hablan del «código» del visitante sino del pase de su app.
+- **El Excel `docs/recursos/roles-de-alice.xlsx` quedó al día**: filas de Consejero, Revisor Fiscal, Visitante
+  y Familiar, y una hoja nueva «Decisiones» con las 12 a 18.
+
+153 pruebas pasan.
+
 ### 2026-11-27 · Mary + IA (Claude) · La maqueta se alinea con BLOKY (PN-33, PN-28, decisiones 12 a 17)
 
 Mary comparó la maqueta con lo que Daniel mostró de BLOKY y decidió (`docs/recursos/roles-de-alice.md` §2 bis):
@@ -121,7 +131,7 @@ Mary comparó la maqueta con lo que Daniel mostró de BLOKY y decidió (`docs/re
   invita ya no comparte código. En el demo: Juan Sebastian Restrepo, visitante de la 402 (`componentes/MiPase.tsx`).
   La portería lee el pase o, de respaldo, el documento (`features/porteria/ValidarVisitantePage.tsx`).
 - **Por días y una franja de horas opcional**, sin días de la semana (RN-392), también para el residente recurrente.
-- **Celular obligatorio** para todo adulto (con nombre y documento). Pendiente: el país del celular.
+- **Celular obligatorio** para todo adulto (con nombre y documento).
 - **Mantenimiento ve toda la bandeja de PQRS** (RN-380), no solo las de daños.
 - **Los cargos se cargan a mano** al empezar con una copropiedad, además de salir de la elección (PN-28,
   `cargarCargoManual`).

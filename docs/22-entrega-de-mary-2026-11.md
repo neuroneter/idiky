@@ -37,7 +37,7 @@ Para probarlo: el demo trae a **María Camila** (propietaria al día), **Andrés
 vencidas: acuerdos), **Gustavo** (dos propiedades), **Tomás** (familiar), **Jairo** (portería) y
 **Olga** (administración).
 
-**Calidad:** compila, ortografía sin hallazgos, **152 pruebas de navegador pasan**. Ninguna
+**Calidad:** compila, ortografía sin hallazgos, **153 pruebas de navegador pasan**. Ninguna
 dependencia nueva.
 
 ## 3. Lo que le toca a cada uno
@@ -131,6 +131,7 @@ Las fechas las ponen Daniel y Justo según su avance.
 | CU-A-12, CU-R-20 Antes de la asamblea | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/AntesDeLaAsamblea.tsx` | `antes-asamblea.spec.ts` |
 | CU-A-17, CU-R-21 Entrada con QR | `/admin/asambleas`, `/app/asambleas/:id` | `componentes/EntradaConQr.tsx` | `entrada-qr.spec.ts` |
 | Visitante con su app y pase que cambia (PN-33) | `/app` con Juan Sebastian Restrepo, `/porteria/visitantes` | `componentes/MiPase.tsx`, `features/porteria/ValidarVisitantePage.tsx` | `permisos-qr.spec.ts`, `porteria.spec.ts` |
+| País del celular (PN-34) | `/app/unidad/personas` → Registrar | `componentes/Registro.tsx` | `usuarios.spec.ts` |
 | Cargos cargados a mano (PN-28) | `/admin/asambleas` | `componentes/CargosDelEdificio.tsx` | `elegidos.spec.ts` |
 | Novedades del personal (PN-32) | `/admin/porteria`, `/admin` con Aseo o Mantenimiento | `features/admin/NovedadDelPersonal.tsx` | `novedades-personal.spec.ts` |
 | CU-R-23 Poder con un toque (PN-31) | `/app`, `/admin/asambleas` | `componentes/PoderEnUnToque.tsx` | `poder-en-un-toque.spec.ts` |
