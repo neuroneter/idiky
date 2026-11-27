@@ -570,6 +570,8 @@ export interface ZonaComun {
    * cualquier zona, pero pide la placa del visitante y portería la ve ese día.
    */
   parqueaderoVisitantes?: boolean
+  /** PN-29 — Es la piscina: el piscinero solo ve las reservas de esta zona (Mary, 2026-11-26). */
+  piscina?: boolean
   /**
    * Fotos de la zona, para reservar viendo como es (RN-104, Mary 2026-10-01).
    * Configuracion, no registro: se agregan y se quitan desde la consola. Hasta

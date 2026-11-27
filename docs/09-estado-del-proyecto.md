@@ -122,8 +122,12 @@ nuevos en el demo (semilla 54): Delegada, Presidenta del consejo, Consejero, Aux
 Revisora Fiscal, Piscinero, Aseo, Mantenimiento, Inmobiliaria Habitar (301 y 502) y Estadías Medellín
 (602). El **auxiliar prepara** el paz y salvo y el certificado de pagos y **los aprueba el
 administrador** («Te esperan»). El familiar ya no registra visitas. Pruebas: `permisos.spec.ts`, y se
-ajustaron tres que esperaban lo que la tabla ahora prohíbe al familiar. **Pendiente de Mary:** la marca
-de residencia choca con reglas suyas del 2026-10-02 (`recursos/roles-de-alice.md` §4 quater).
+ajustaron tres que esperaban lo que la tabla ahora prohíbe al familiar. **Después (Mary):** el **piscinero solo ve las reservas de la piscina**; el demo tiene ahora la zona
+«Piscina» (semilla 55). **Marca de residencia (Mary):** valen sus reglas del 2026-10-02 para propietario, arrendatario y
+visitante, y el **visitante frecuente pasa a ser familiar o acompañante, residente recurrente**
+(`dominio/reglas.ts`, `CONDICIONES` y `saleConCodigo`; se ajustaron cuatro pruebas de `usuarios.spec.ts`
+y una de `reservas.spec.ts` que creaba otra «Piscina»). **Pendiente de Mary:** si el familiar puede ser
+No Residente, como dice la tabla.
 
 ### 2026-11-26 · Mary + IA (Claude) · Roles consolidados con BOB y BLOKY (tabla de roles, decisión 6)
 

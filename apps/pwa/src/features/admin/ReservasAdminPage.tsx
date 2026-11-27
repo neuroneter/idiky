@@ -9,7 +9,7 @@
  */
 
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
@@ -34,6 +34,7 @@ import { formatearDinero, formatearFecha } from '../../utilidades/formato'
 import { CerrarReservaHoja } from './CerrarReservaHoja'
 import { Modal } from '../../componentes/Modal'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
+import { zonasQueVe } from '../../dominio/permisos'
 import { ChipReserva } from '../../componentes/Etiquetas'
 import type { Reserva } from '../../dominio/tipos'
 
@@ -41,8 +42,22 @@ type Filtro = 'pendientes' | 'por_cerrar' | 'proximas' | 'todas'
 
 /** Las pestañas de Reservas. Son navegación, no filtros: cada una tiene su ruta. */
 export function ReservasSeccionAdmin() {
+  const { bd } = useDatos()
+  const { sesion } = useSesion()
+  const { pathname } = useLocation()
+  // PN-29 — El piscinero solo ve las reservas y el calendario de la piscina: ni el informe ni las zonas.
+  const piscinero = !!sesion && sel.usuarioDeSesion(bd, sesion) === 'piscinero'
+  if (piscinero && (pathname.startsWith('/admin/reservas/informe') || pathname.startsWith('/admin/reservas/zonas'))) {
+    return (
+      <div className="tarjeta">
+        <strong>Esta sección no es para tu perfil</strong>
+        <p className="subtitulo">Como Piscinero, ves las reservas y el calendario de la piscina.</p>
+      </div>
+    )
+  }
   return (
     <>
+      {piscinero && <p className="subtitulo">Solo las reservas de la piscina.</p>}
       <nav className="segmentos" aria-label="Reservas">
         <NavLink to="/admin/reservas" end className="segmento">
           Reservas
@@ -50,12 +65,16 @@ export function ReservasSeccionAdmin() {
         <NavLink to="/admin/reservas/calendario" className="segmento">
           Calendario
         </NavLink>
-        <NavLink to="/admin/reservas/informe" className="segmento">
-          Informe
-        </NavLink>
-        <NavLink to="/admin/reservas/zonas" className="segmento">
-          Zonas comunes
-        </NavLink>
+        {!piscinero && (
+          <>
+            <NavLink to="/admin/reservas/informe" className="segmento">
+              Informe
+            </NavLink>
+            <NavLink to="/admin/reservas/zonas" className="segmento">
+              Zonas comunes
+            </NavLink>
+          </>
+        )}
       </nav>
       <Outlet />
     </>
@@ -77,7 +96,9 @@ export function ReservasAdminPage() {
   if (!sesion) return null
 
   const hoy = hoyISO()
-  const reservas = sel.reservasDeCopropiedad(bd, sesion.copropiedadId).filter((reserva) => {
+  // PN-29 — El piscinero, solo la piscina.
+  const zonasVisibles = new Set(zonasQueVe(sel.usuarioDeSesion(bd, sesion), sel.zonasDe(bd, sesion.copropiedadId)).map((z) => z.id))
+  const reservas = sel.reservasDeCopropiedad(bd, sesion.copropiedadId).filter((reserva) => zonasVisibles.has(reserva.zonaId)).filter((reserva) => {
     if (filtro === 'pendientes') return reserva.estado === 'solicitada'
     // RN-129 — Solo las que mueven plata: las demás se cierran solas.
     if (filtro === 'por_cerrar') return puedeCerrarReserva(reserva) && reservaMueveDinero(reserva, sel.zona(bd, reserva.zonaId))

@@ -76,7 +76,7 @@ import { hoyISO, numeroRecibo, sumarDias, vencimientoDelPeriodo } from '../domin
 // 36 — vehículos y mascotas de las unidades (CU-R-15, RN-230, RN-231).
 // 37 — el directorio de teléfonos útiles y el consejo de administración (CU-R-17, RN-232, RN-233).
 // 38 — portería: turnos, ingresos y novedades; un turno de ayer cerrado con su entrega (RN-234 a RN-237).
-export const VERSION_ESQUEMA = 54
+export const VERSION_ESQUEMA = 55
 
 const COPROPIEDAD_ID = 'cop-1'
 
@@ -416,6 +416,24 @@ const zonasComunes: ZonaComun[] = [
     cupoMensualPorUnidad: 8,
     modoUso: 'compartido',
     parqueaderoVisitantes: true,
+  },
+  // PN-29 — La piscina: el piscinero ve solo sus reservas (Mary, 2026-11-26).
+  {
+    id: 'zon-piscina',
+    copropiedadId: COPROPIEDAD_ID,
+    nombre: 'Piscina',
+    descripcion: 'Piscina para adultos y niños, con zona húmeda.',
+    icono: 'gimnasio',
+    especificaciones: 'Ducha antes de entrar\nMenores de 12 años solo con un adulto\nSe cierra los lunes para mantenimiento',
+    aforo: 15,
+    requiereAprobacion: false,
+    horaInicio: '08:00',
+    horaFin: '20:00',
+    duracionBloqueHoras: 2,
+    anticipacionMinimaHoras: 2,
+    cupoMensualPorUnidad: 12,
+    modoUso: 'compartido',
+    piscina: true,
   },
 ]
 

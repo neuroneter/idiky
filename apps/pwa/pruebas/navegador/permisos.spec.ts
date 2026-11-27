@@ -105,3 +105,25 @@ test('la inmobiliaria y el operador solo ven lo de sus unidades (PN-29)', async 
   await expect(segmentos).toContainText('PQRS')
   await expect(segmentos).not.toContainText('Paz y salvo')
 })
+
+test('el piscinero solo ve las reservas de la piscina (PN-29)', async ({ page }) => {
+  await page.goto('/')
+  const r = await page.evaluate(async () => {
+    const p = await import('/src/dominio/permisos.ts')
+    const zonas = [{ id: 'a', piscina: true }, { id: 'b' }]
+    return { piscinero: p.zonasQueVe('piscinero', zonas).map((z) => z.id), admin: p.zonasQueVe('administrador', zonas).length }
+  })
+  expect(r).toEqual({ piscinero: ['a'], admin: 2 })
+
+  await entrarComo(page, /Wilmer Hurtado/)
+  await page.goto('/#/admin/reservas/calendario')
+  const segmentos = page.getByRole('navigation', { name: 'Reservas' })
+  await expect(segmentos).toContainText('Calendario')
+  await expect(segmentos).not.toContainText('Informe')
+  await expect(segmentos).not.toContainText('Zonas comunes')
+  await expect(page.getByText('Solo las reservas de la piscina.')).toBeVisible()
+  await expect(page.locator('.consola__contenido')).toContainText('Piscina')
+  await expect(page.locator('.consola__contenido')).not.toContainText('Salón social')
+  await page.goto('/#/admin/reservas/informe')
+  await expect(page.getByText('Esta sección no es para tu perfil')).toBeVisible()
+})

@@ -35,6 +35,7 @@ import { formatearFecha } from '../../utilidades/formato'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipReserva } from '../../componentes/Etiquetas'
 import { Modal } from '../../componentes/Modal'
+import { zonasQueVe } from '../../dominio/permisos'
 
 const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic']
 
@@ -59,7 +60,8 @@ function estiloCelda(celda: CeldaCalendario, compartida: boolean, aforo: number,
 export function CalendarioZonasPage() {
   const { bd } = useDatos()
   const { sesion } = useSesion()
-  const zonas = sesion ? sel.zonasDe(bd, sesion.copropiedadId).filter(zonaActiva) : []
+  // PN-29 — El piscinero, solo la piscina.
+  const zonas = sesion ? zonasQueVe(sel.usuarioDeSesion(bd, sesion), sel.zonasDe(bd, sesion.copropiedadId).filter(zonaActiva)) : []
   const [zonaId, setZonaId] = useState(zonas[0]?.id ?? '')
   const [lunes, setLunes] = useState(lunesDeLaSemana(hoyISO()))
   /** La casilla que el administrador abrió para ver quién la tiene. */

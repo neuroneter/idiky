@@ -57,11 +57,11 @@ export const CATEGORIAS: Record<CategoriaRegistro, { texto: string; ayuda: strin
   },
   familiar: {
     texto: 'Familiar o acompañante',
-    ayuda: 'Vive con el propietario o el arrendatario: pareja, hijos, padres. No vota ni registra a nadie.',
+    ayuda: 'Vive con el propietario o el arrendatario (pareja, hijos, padres) o viene ciertos días (empleada, niñera). No vota ni registra a nadie.',
   },
   visitante: {
     texto: 'Visitante',
-    ayuda: 'Viene de visita: una tarde, ciertos días de la semana (empleada, niñera) o se queda unos días.',
+    ayuda: 'Viene de visita: una tarde o se queda unos días.',
   },
   // PN-29 — No viven en la unidad y solo ven las que les asignan (Mary, 2026-11-26).
   inmobiliaria: {
@@ -81,7 +81,8 @@ export const CATEGORIAS: Record<CategoriaRegistro, { texto: string; ayuda: strin
 export function textoCondicion(categoria: CategoriaRegistro, condicion: CondicionRegistro): string {
   if (condicion === 'residente') return 'Residente'
   if (condicion === 'temporal') return 'Residente temporal'
-  if (condicion === 'frecuente') return 'Frecuente'
+  // PN-29 — El que viene ciertos días: «Residente recurrente» (tabla de Mary, 2026-11-26).
+  if (condicion === 'frecuente') return 'Residente recurrente'
   return categoria === 'visitante' ? 'De un día' : 'No residente'
 }
 
@@ -236,7 +237,7 @@ export function FormularioRegistro({
       setError('La tarjeta de identidad y el registro civil son documentos de menores de edad.')
       return
     }
-    if (faltaContacto(categoria, telefono, email, menor)) {
+    if (faltaContacto(categoria, telefono, email, menor, condicion)) {
       setError('Escribe el celular o el correo: es a donde le llega el código para entrar a la app.')
       return
     }

@@ -2545,7 +2545,9 @@ export function categoriaDeResidencia(residencia: Pick<Residencia, 'rol'>): Cate
  * frecuente (2026-10-02). El frecuente entra los días escogidos hasta su fecha.
  */
 export function saleConCodigo(clase: Pick<RegistroPersona, 'categoria' | 'condicion'>): boolean {
-  return clase.categoria === 'visitante' && (clase.condicion === 'no_residente' || clase.condicion === 'frecuente')
+  // PN-29 — El residente recurrente (el familiar o acompañante que viene ciertos días) entra con
+  // código esos días, como antes el visitante frecuente.
+  return (clase.categoria === 'visitante' && clase.condicion === 'no_residente') || clase.condicion === 'frecuente'
 }
 
 /** Cómo se queda hoy, leído del vínculo vigente (RN-62, RN-68). */
@@ -2574,9 +2576,12 @@ export function faltaContacto(
   telefono: string,
   email: string,
   menorDeEdad = false,
+  condicion?: CondicionRegistro,
 ): boolean {
   // Al menor no se le exige (2026-10-02): muchas veces no tiene celular ni correo.
   if (menorDeEdad) return false
+  // PN-29 — El residente recurrente entra con código los días que viene: no necesita la app.
+  if (condicion === 'frecuente') return false
   return categoria !== 'visitante' && !telefono.trim() && !email.trim()
 }
 
@@ -2660,9 +2665,12 @@ const CONDICIONES: Record<CategoriaRegistro, readonly CondicionRegistro[]> = {
   // «No existe un propietario temporal» (Mary, 2026-10-02).
   propietario: ['residente', 'no_residente'],
   arrendatario: ['residente', 'temporal'],
-  // La familia o el acompañante vive ahí, siempre o un tiempo (2026-10-02).
-  familiar: ['residente', 'temporal'],
-  visitante: ['no_residente', 'frecuente', 'temporal'],
+  // La familia o el acompañante vive ahí, siempre o un tiempo (2026-10-02), o viene ciertos días:
+  // **residente recurrente** (Mary, 2026-11-26: «visitante frecuente se reemplaza por familiar o
+  // acompañante»). En los datos sigue siendo `frecuente`.
+  familiar: ['residente', 'temporal', 'frecuente'],
+  // PN-29 — Ya no hay visitante frecuente: es de un día o temporal (Mary, 2026-11-26).
+  visitante: ['no_residente', 'temporal'],
   // PN-29 — No viven en la unidad (Mary, 2026-11-26).
   inmobiliaria: ['no_residente'],
   operador: ['no_residente'],
