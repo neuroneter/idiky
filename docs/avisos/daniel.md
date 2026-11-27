@@ -85,9 +85,9 @@ Mary revisó lo que mostraste de BLOKY y decidió (detalle en `docs/recursos/rol
   documento obligatorios al crear a cualquiera, y Mantenimiento con toda la bandeja de PQRS (RN-380).
 - **Se agrega a BLOKY:** cargar **a mano** a los del consejo, el comité y el revisor fiscal al empezar el
   contrato con una copropiedad, además de la elección (PN-28 en `docs/05`).
-- **Por conciliar contigo:** en BLOKY (RN-370) el «Residente» (para Mary, el **Familiar o acompañante**:
-  «Residente» es una marca, no un usuario) crea invitados; en su tabla el familiar **no** registra a nadie.
-  Mary lo decide; mientras tanto manda su tabla.
+- **Cambia en BLOKY (decisión 18 de Mary):** en BLOKY (RN-370) el «Residente» (para Mary, el **Familiar o
+  acompañante**: «Residente» es una marca, no un usuario) crea invitados. **Mary decidió que no**: *«el
+  familiar no puede crear visitantes»*. Al visitante lo crean solo el Propietario y el Arrendatario.
 - **Pendiente:** el país del celular al crear personas (la maqueta asume +57).
 
 ## 1. Identificadores on-chain = `hashIdentidad` (RN-298) — ✅ hecho en código (2026-10-23); ⏳ redeploy Amoy
