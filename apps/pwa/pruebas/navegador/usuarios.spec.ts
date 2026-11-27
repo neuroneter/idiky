@@ -372,7 +372,8 @@ test("familiar, menores, visitante frecuente, fotos en cadena y aviso de fin de 
     reg = await autorizar(reg, maria); const fam = bd.residencias.find(x=>x.id===reg.residenciaId)
     out.familiar = fam.rol + '/' + fam.reside
     out.familiarNoRegistra = puedeRegistrar('familiar', 'visitante', false, 'temporal')
-    out.familiarNoResidente = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'3002', creadoPor: maria, categoria:'familiar', condicion:'no_residente', documento:'3002' }))
+    // PN-29 — El familiar que va de visita: No residente (Mary, 2026-11-26).
+    out.familiarNoResidente = (await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'3002', creadoPor: maria, categoria:'familiar', condicion:'no_residente', documento:'3002' }))).estado
     // 2
     out.adultoSinContacto = await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: maria, categoria:'familiar', condicion:'residente', documento:'3003' }))
     out.menorSinContacto = (await intento(()=>repo.crearRegistroPersona(bd, { ...b402, telefono:'', creadoPor: maria, categoria:'familiar', condicion:'residente', menorDeEdad:true, tipoIdentificacion:'ti', documento:'3004' }))).estado
@@ -407,7 +408,7 @@ test("familiar, menores, visitante frecuente, fotos en cadena y aviso de fin de 
     out.frecuenteSale = bd.visitantes.find(v=>v.id===vf.id).estado
     return out
   })
-  const esp = { familiar:'familiar/true', familiarNoRegistra:false, familiarNoResidente:/^ERR/, adultoSinContacto:/^ERR/, menorSinContacto:'esperando_soportes', tiAdulto:/^ERR/, propietarioMenor:/^ERR/, arrendatarioRegistraFamilia:'familiar', frecuenteSinDias:/^ERR/, frecuentePideFotos:'esperando_soportes', frecuente:'[1,2,3,4,5]', domingo:'programado', lunes:'activo', gustavoVeFotos:'ok', jorgeVeFotos:/^ERR/, avisoFin:1, avisoFinNoRepite:1, familiaSale:true, frecuenteSale:'revocado' }
+  const esp = { familiar:'familiar/true', familiarNoRegistra:false, familiarNoResidente:'esperando_soportes', adultoSinContacto:/^ERR/, menorSinContacto:'esperando_soportes', tiAdulto:/^ERR/, propietarioMenor:/^ERR/, arrendatarioRegistraFamilia:'familiar', frecuenteSinDias:/^ERR/, frecuentePideFotos:'esperando_soportes', frecuente:'[1,2,3,4,5]', domingo:'programado', lunes:'activo', gustavoVeFotos:'ok', jorgeVeFotos:/^ERR/, avisoFin:1, avisoFinNoRepite:1, familiaSale:true, frecuenteSale:'revocado' }
   for (const [k,v] of Object.entries(esp)) { const ok = v instanceof RegExp ? v.test(String(r[k])) : r[k]===v; expect.soft(ok, k).toBeTruthy() }
 })
 
@@ -428,7 +429,8 @@ test("el formulario con familiar, menores y visitante frecuente (RN-60, RN-62)",
   check(opciones==='Propietario|Arrendatario|Familiar o acompañante|Visitante', 'propietario ve cuatro tipos: '+opciones)
   check(await p.getByText('Es menor de edad').count()===0, 'al propietario no se le ofrece «menor de edad»')
   await p.locator('.opcion-categoria', { hasText: 'Familiar' }).click(); await p.waitForTimeout(100)
-  check(await segs()==='Residente|Residente temporal|Residente recurrente', 'familiar: residente, temporal o recurrente '+await segs())
+  // PN-29 — El familiar que va de visita es No residente (Mary, 2026-11-26).
+  check(await segs()==='Residente|No residente|Residente temporal|Residente recurrente', 'familiar: residente, no residente, temporal o recurrente '+await segs())
   const tiposAntes = await p.locator('select[aria-label="Tipo de documento"] option').allTextContents()
   await p.getByText('Es menor de edad').click()
   const tiposDespues = await p.locator('select[aria-label="Tipo de documento"] option').allTextContents()

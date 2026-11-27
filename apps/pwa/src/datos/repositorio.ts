@@ -4762,7 +4762,7 @@ export async function crearRegistroPersona(
         visitante: 'Un visitante es de un día o temporal; no puede ser residente. Quien viene ciertos días es familiar o acompañante, residente recurrente.',
         propietario: 'El propietario es residente o no residente: no existe un propietario temporal.',
         arrendatario: 'El arrendatario es residente o temporal: arrienda para vivir ahí.',
-        familiar: 'El familiar o acompañante es residente, temporal o residente recurrente.',
+        familiar: 'El familiar o acompañante es residente, no residente, temporal o residente recurrente.',
         inmobiliaria: 'La inmobiliaria no vive en la unidad.',
         operador: 'El operador no vive en la unidad.',
       }[parametros.categoria],

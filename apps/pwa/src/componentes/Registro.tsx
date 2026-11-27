@@ -341,6 +341,8 @@ export function FormularioRegistro({
                   ? 'Viene ciertos días de la semana hasta una fecha. Sube sus fotos y entra con su código esos días.'
                   : categoria === 'visitante'
                   ? 'Viene un solo día y entra con un código para la portería.'
+                  : categoria === 'familiar'
+                  ? 'Es de la familia pero no vive aquí: va de visita. Tiene la app, pero no aparece en la lista de residentes de la portería.'
                   : 'Tiene la unidad arrendada o vacía. Sigue siendo propietario —vota, recibe la cuota y registra gente—, pero no aparece en la lista de la portería.'}
           </span>
         </div>
