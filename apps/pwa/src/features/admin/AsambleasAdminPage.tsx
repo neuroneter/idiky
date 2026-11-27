@@ -99,6 +99,7 @@ import { RegistrarLlegadaQr } from '../../componentes/EntradaConQr'
 import { CARGOS_ELECCION, puestosDe } from '../../dominio/reglas'
 import type { CargoEleccion } from '../../dominio/tipos'
 import { CalendarioOrdinaria } from './CalendarioOrdinaria'
+import { PlazoPoderesTarjeta } from './PlazoPoderesTarjeta'
 import { RecordatoriosAsambleaTarjeta, RecordatoriosDeLaAsamblea } from './RecordatoriosAsamblea'
 import { VotacionPunto } from './VotacionPunto'
 import { SegundaConvocatoria } from './SegundaConvocatoria'
@@ -263,6 +264,9 @@ export function AsambleasAdminPage() {
           ))}
         </span>
       </div>
+
+      {/* RN-309 — Hasta cuándo se dan y se revocan los poderes. */}
+      <PlazoPoderesTarjeta />
 
       {/* RN-220 — Cuántos poderes puede llevar una persona. La ley no fija tope
           (RN-30); si el reglamento lo hace, se configura aquí y Idiky lo aplica. */}

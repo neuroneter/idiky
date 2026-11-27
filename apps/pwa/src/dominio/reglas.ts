@@ -7,6 +7,7 @@
  */
 
 import type {
+  PlazoPoderes,
   CargoElegido,
   PreguntaAsamblea,
   CargoEleccion,
@@ -5289,4 +5290,43 @@ export function motivoNoVotaSinAsistencia(asistencias: Asistencia[], asambleaId:
 /** PN-30 — Las unidades que están en la asamblea y todavía no votan este punto. */
 export function presentesSinVotar(asistencias: Asistencia[], asambleaId: string, votos: Voto[], votacionId: string): Asistencia[] {
   return asistencias.filter((a) => a.asambleaId === asambleaId && !yaVoto(votos, votacionId, a.unidadId))
+}
+
+// ---------------------------------------------------------------------------
+// El plazo de los poderes — RN-309 (Daniel, 2026-11-03; confirmada por Mary, 2026-11-27)
+// ---------------------------------------------------------------------------
+
+/** RN-309 — Sin dato, los poderes se reciben hasta que se verifica el quórum. */
+export const PLAZO_PODERES_POR_DEFECTO: PlazoPoderes = { tipo: 'hasta_quorum' }
+
+/** RN-309 — El plazo en palabras, para quien da el poder y para la consola. */
+export function textoPlazoPoderes(plazo: PlazoPoderes = PLAZO_PODERES_POR_DEFECTO): string {
+  if (plazo.tipo === 'dia_anterior') return 'hasta el día anterior a la asamblea'
+  if (plazo.tipo === 'dias_antes') return `hasta ${plazo.dias} ${plazo.dias === 1 ? 'día' : 'días'} antes de la asamblea`
+  return 'hasta que se verifica el quórum, al instalar la asamblea'
+}
+
+/** RN-309 — Días antes: de 1 a 15 (más que eso es más que la antelación de la citación). */
+export function motivoPlazoPoderesInvalido(plazo: PlazoPoderes): string | null {
+  if (plazo.tipo !== 'dias_antes') return null
+  if (!Number.isInteger(plazo.dias) || plazo.dias < 1 || plazo.dias > 15) return 'Escoge entre 1 y 15 días antes de la asamblea.'
+  return null
+}
+
+/**
+ * RN-309 — **Si todavía se puede dar o revocar un poder.** Nunca con la asamblea instalada (es la
+ * ventana de la reunión): el poder que no se revocó antes queda para esa reunión. Antes de eso,
+ * según el plazo del edificio.
+ */
+export function motivoFueraDePlazoPoder(
+  asamblea: Pick<Asamblea, 'estado' | 'fechaHora'>,
+  plazo: PlazoPoderes = PLAZO_PODERES_POR_DEFECTO,
+  hoy: FechaISO = hoyISO(),
+): string | null {
+  const cerrado = `El plazo de los poderes para esta asamblea ya se cerró (${textoPlazoPoderes(plazo)}).`
+  if (asamblea.estado !== 'convocada') return cerrado
+  const dia = fechaLocalDe(asamblea.fechaHora)
+  if (plazo.tipo === 'dia_anterior' && hoy >= dia) return cerrado
+  if (plazo.tipo === 'dias_antes' && hoy > sumarDias(dia, -plazo.dias)) return cerrado
+  return null
 }

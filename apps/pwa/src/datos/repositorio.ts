@@ -274,7 +274,8 @@ import {
   motivoProntoPagoInvalido,
   respuestaDeUnidad,
 } from '../dominio/reglas'
-import { motivoNoVotaSinAsistencia } from '../dominio/reglas'
+import { motivoFueraDePlazoPoder, motivoNoVotaSinAsistencia, motivoPlazoPoderesInvalido } from '../dominio/reglas'
+import type { PlazoPoderes } from '../dominio/tipos'
 import { baseDeVoto, contarVotacion, elegidosDeEleccion, motivoPuestosInvalidos, puestosDe, textoEleccionCargo } from '../dominio/reglas'
 import type { CargoElegido } from '../dominio/tipos'
 import { leerCodigoAsistencia, motivoPostulacionInvalida, motivoRecordatoriosAsambleaInvalidos, poderVigente, recordatorioAsambleaQueToca, recordatoriosAsambleaDe, textoRecordatorioAsamblea, motivoPreguntaAsambleaInvalida, postulacionesVigentes, textoRespuestaAsamblea } from '../dominio/reglas'
@@ -3440,6 +3441,9 @@ function prepararPoder(
   if (asamblea.estado === 'cerrada' || asamblea.estado === 'cancelada') {
     throw new ErrorDeNegocio('Esa asamblea ya terminó: no admite poderes nuevos.')
   }
+  // RN-309 — Dentro del plazo que fijó el edificio (Mary, 2026-11-27).
+  const fueraDePlazo = motivoFueraDePlazoPoder(asamblea, bd.copropiedades.find((c) => c.id === asamblea.copropiedadId)?.plazoPoderes)
+  if (fueraDePlazo) throw new ErrorDeNegocio(fueraDePlazo)
 
   const unidad = bd.unidades.find((u) => u.id === parametros.unidadId)
   if (!unidad) throw new ErrorDeNegocio('Esa unidad no existe.')
@@ -4497,6 +4501,12 @@ export async function revocarPoder(
   const poder = bd.poderes.find((p) => p.id === parametros.poderId)
   if (!poder) throw new ErrorDeNegocio('Ese poder no existe.')
   if (poder.revocadoEn) throw new ErrorDeNegocio('Ese poder ya estaba revocado.')
+  // RN-309 — Tampoco se revoca fuera de plazo: si no se revocó antes, queda para esa reunión.
+  const asambleaDelPoder = bd.asambleas.find((a) => a.id === poder.asambleaId)
+  if (asambleaDelPoder) {
+    const fuera = motivoFueraDePlazoPoder(asambleaDelPoder, bd.copropiedades.find((c) => c.id === asambleaDelPoder.copropiedadId)?.plazoPoderes)
+    if (fuera) throw new ErrorDeNegocio(`${fuera} El poder queda para esta reunión.`)
+  }
 
   poder.revocadoEn = ahoraISO()
   // Si Idiky emitio el documento, se anula con el: un poder revocado cuyo papel
@@ -7115,4 +7125,20 @@ export async function registrarVotoEnSala(
   const voto = bd.votos.find((v) => v.id === datos.id)!
   voto.enSala = { registradoPor: parametros.personaId }
   return persistir(bd, voto)
+}
+
+/** RN-309 — La administración fija hasta cuándo se dan y se revocan los poderes. */
+export async function configurarPlazoPoderes(
+  bdActual: BaseDatos,
+  parametros: { copropiedadId: string; personaId: string; plazo: PlazoPoderes },
+): Promise<Resultado<Copropiedad>> {
+  await esperar()
+  const bd = clonar(bdActual)
+  exigirAdministracion(bd, parametros.personaId, parametros.copropiedadId, 'Fijar el plazo de los poderes')
+  const copropiedad = bd.copropiedades.find((c) => c.id === parametros.copropiedadId)
+  if (!copropiedad) throw new ErrorDeNegocio('Esa copropiedad no existe.')
+  const motivo = motivoPlazoPoderesInvalido(parametros.plazo)
+  if (motivo) throw new ErrorDeNegocio(motivo)
+  copropiedad.plazoPoderes = parametros.plazo
+  return persistir(bd, copropiedad)
 }

@@ -113,6 +113,16 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-27 · Mary + IA (Claude) · El plazo de los poderes (RN-309, confirmada)
+
+Mary preguntó si por norma se puede dar poder el mismo día. La Ley 675 no fija plazo (art. 37): lo dice
+el reglamento. Mary **confirmó RN-309 de Daniel** con un parámetro del edificio: hasta verificar el
+quórum (por defecto), hasta el día anterior o de 1 a 15 días antes; con la asamblea instalada, nunca.
+Vale para dar el poder (app, foto y papel) y para revocarlo. Archivos:
+`features/admin/PlazoPoderesTarjeta.tsx`, `motivoFueraDePlazoPoder` en `dominio/reglas.ts`; prueba
+`plazo-poderes.spec.ts`. **Para Daniel:** RN-309 ya no está «por confirmar» (T-106). **Para el abogado:**
+confirmar que la ley no fija plazo.
+
 ### 2026-11-27 · Mary + IA (Claude) · Votar en la asamblea: la unidad presente, desde el celular o en la sala (PN-30)
 
 El propietario ya votaba desde la app, pero **la app dejaba votar a cualquiera aunque no estuviera en la

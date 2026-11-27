@@ -61,6 +61,12 @@ export interface Copropiedad {
    */
   topePoderes?: number
   /**
+   * RN-309 — Hasta cuándo se dan y se revocan los poderes de una asamblea (Daniel, 2026-11-03;
+   * **confirmada por Mary, 2026-11-27**). La Ley 675 no fija plazo: lo dice el reglamento, y la
+   * administración lo escoge. Sin dato, hasta que se verifica el quórum.
+   */
+  plazoPoderes?: PlazoPoderes
+  /**
    * RN-221 — Si el reglamento no deja votar a las unidades en mora (Mary,
    * 2026-10-13). Ausente o `false` = votan: es la regla general (Ley 675,
    * art. 37); la restriccion solo vale si el reglamento la trae (Corte
@@ -1886,6 +1892,9 @@ export interface PerfilDemo {
    */
   oculto?: boolean
 }
+
+/** RN-309 — El plazo de los poderes: el día anterior, hasta verificar el quórum o N días antes. */
+export type PlazoPoderes = { tipo: 'hasta_quorum' } | { tipo: 'dia_anterior' } | { tipo: 'dias_antes'; dias: number }
 
 /** PN-29 — Los usuarios que entran a la consola (la de la administración). */
 export type CargoConsola =
