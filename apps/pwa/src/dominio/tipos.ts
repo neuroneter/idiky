@@ -884,8 +884,19 @@ export interface Visitante {
   /** Codigo que presenta el visitante en porteria (RN-16, RN-17). */
   codigo: string
   recurrente: boolean
-  /** El visitante frecuente: los días de la semana en que entra (0 = domingo). */
+  /** El visitante frecuente: los días de la semana en que entra (0 = domingo). Ya no se ofrece (RN-392). */
   dias?: number[]
+  /**
+   * RN-392 (BLOKY, adoptada por Mary el 2026-11-27) — La franja de horas opcional que vale para cada
+   * día de la vigencia; va completa o no va. Fuera de ella no entra.
+   */
+  horaDesde?: string
+  horaHasta?: string
+  /**
+   * RN-367 — El visitante entra con **su ALICE** y una cuenta de IDIKY: la persona del directorio que
+   * es este visitante. En su app ve su pase.
+   */
+  personaVisitanteId?: string
   estado: EstadoVisitante
   creadoEn: FechaHoraISO
   /** Registro que lo origino (CU-R-27). Los de la semilla no tienen. */
@@ -977,6 +988,9 @@ export interface RegistroPersona {
   pedirFotos?: boolean
   /** Días de la semana en que viene el visitante frecuente (0 = domingo). */
   dias?: number[]
+  /** RN-392 — La franja de horas opcional del visitante y del residente recurrente. */
+  horaDesde?: string
+  horaHasta?: string
   /**
    * Menor de edad (2026-10-02): no se le exige celular ni correo, y su documento
    * puede ser tarjeta de identidad o registro civil.
@@ -1278,10 +1292,17 @@ export interface CargoElegido {
   personaId?: string
   unidadId?: string
   matricula?: string
-  asambleaId: string
-  puntoId: string
-  votacionId: string
-  /** El día de la asamblea que lo eligió. */
+  /**
+   * PN-28 — `eleccion`: lo eligió la asamblea (trae asamblea, punto y votación). `manual`: lo cargó
+   * la administración al empezar el contrato con la copropiedad, con los que ya estaban (Mary, 2026-11-27).
+   */
+  origen?: 'eleccion' | 'manual'
+  asambleaId?: string
+  puntoId?: string
+  votacionId?: string
+  /** Quién lo cargó a mano (origen `manual`). */
+  cargadoPor?: string
+  /** El día de la asamblea que lo eligió, o desde cuándo está en el cargo (manual). */
   desde: FechaISO
   aceptacion?: { por: string; en: FechaHoraISO }
   declinacion?: { por: string; en: FechaHoraISO }

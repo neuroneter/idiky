@@ -5,7 +5,6 @@
  * El codigo se muestra como QR real y escaneable (ADR-0005, actualizado el 2026-11-20).
  */
 
-import { CompartirCodigo } from './CompartirCodigo'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useDatos } from '../../estado/DatosContext'
@@ -16,7 +15,6 @@ import { NOMBRES_DIAS, estadoRealVisitante, hoyISO, puedeInhabilitar, sumarDias 
 import { formatearFecha } from '../../utilidades/formato'
 import { Modal } from '../../componentes/Modal'
 import { Icono } from '../../componentes/Icono'
-import { CodigoVisual } from '../../componentes/CodigoVisual'
 import { BotonVolver } from '../../componentes/BotonVolver'
 import { EstadoVacio } from '../../componentes/EstadoVacio'
 import { ChipVisitante } from '../../componentes/Etiquetas'
@@ -110,6 +108,7 @@ export function VisitantesPage() {
                       {visitante.vigenciaDesde === visitante.vigenciaHasta
                         ? formatearFecha(visitante.vigenciaDesde)
                         : `${formatearFecha(visitante.vigenciaDesde)} a ${formatearFecha(visitante.vigenciaHasta)}`}
+                      {visitante.horaDesde ? ` · de ${visitante.horaDesde} a ${visitante.horaHasta}` : ''}
                       {visitante.dias?.length ? ` · ${visitante.dias.map((d) => NOMBRES_DIAS[d]).join(', ')}` : ''}
                     </span>
                   </div>
@@ -120,7 +119,7 @@ export function VisitantesPage() {
                         className="boton boton--pequeno"
                         onClick={() => setVerCodigo(visitante.id)}
                       >
-                        Ver código
+                        Ver
                       </button>
                     )}
                   </div>
@@ -189,31 +188,27 @@ export function VisitantesPage() {
             </div>
           </div>
           <button className="boton boton--primario boton--bloque" disabled={cargando} onClick={autorizar}>
-            Generar código de acceso
+            Autorizar
           </button>
         </Modal>
       )}
 
       {visitanteEnDetalle && (
         <Modal
-          titulo="Código de acceso"
-          descripcion={`Comparte este codigo con ${visitanteEnDetalle.nombre}.`}
+          titulo={visitanteEnDetalle.nombre}
+          descripcion="Entra con su propia app de IDIKY (RN-367)."
           onCerrar={() => setVerCodigo(null)}
         >
           <div style={{ textAlign: 'center' }}>
-            <CodigoVisual codigo={visitanteEnDetalle.codigo} />
-            <div className="dato-grande" style={{ marginTop: 'var(--e3)', letterSpacing: '0.06em' }}>
-              {visitanteEnDetalle.codigo}
-            </div>
-            <p className="subtitulo" style={{ marginTop: 'var(--e2)' }}>
-              Valido hasta el {formatearFecha(visitanteEnDetalle.vigenciaHasta)}
-              {visitanteEnDetalle.dias?.length
-                ? `, solo los ${visitanteEnDetalle.dias.map((d) => NOMBRES_DIAS[d]).join(', ')}`
-                : ''}
+            {/* RN-367, RN-371 — Ya no hay código que compartir: le llega la invitación a su celular, entra
+                a su ALICE y muestra su pase, un QR que cambia cada dos minutos. */}
+            <p className="subtitulo">
+              Le llegó la invitación a su celular. Entra a su app de IDIKY y muestra en portería su pase: un QR
+              que cambia cada dos minutos.
             </p>
-            <CompartirCodigo visitante={visitanteEnDetalle} edificio={sel.copropiedad(bd, sesion.copropiedadId)?.nombre ?? 'el edificio'} />
-            <p className="ayuda-campo" style={{ marginTop: 'var(--e2)' }}>
-              Portería escanea el QR o escribe el código.
+            <p className="subtitulo" style={{ marginTop: 'var(--e2)' }}>
+              Válido hasta el {formatearFecha(visitanteEnDetalle.vigenciaHasta)}
+              {visitanteEnDetalle.horaDesde ? `, de ${visitanteEnDetalle.horaDesde} a ${visitanteEnDetalle.horaHasta}` : ''}
             </p>
             {estadoRealVisitante(visitanteEnDetalle) === 'activo' &&
               puedeInhabilitar({

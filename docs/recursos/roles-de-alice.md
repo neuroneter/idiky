@@ -62,6 +62,12 @@
 | 9 | 2026-11-26 | **Marcas de residencia: valen las reglas de octubre** (*«tienes razón para la 1, 2 y 3, actualizar la tabla; confirmo lo mencionado en octubre»*): el **propietario** es Residente o No Residente (no hay propietario temporal); el **arrendatario** es Residente o Residente Temporal (arrienda para vivir ahí); el **visitante** es de un día (No Residente) o Residente Temporal, nunca Residente. |
 | 10 | 2026-11-26 | **El visitante frecuente se reemplaza por el familiar o acompañante** (*«visitante frecuente se reemplaza por familiar o acompañante»*): quien viene ciertos días (empleada, niñera) es **familiar o acompañante con marca Residente Recurrente**; escoge los días, entra con código esos días y no necesita la app. |
 | 11 | 2026-11-26 | **El familiar o acompañante puede ser No Residente** (*«el familiar puede ir solo de visita, por esta razón puede ser no residente»*): es de la familia, no vive en la unidad y va de visita. |
+| 12 | 2026-11-27 | **Con BLOKY, el visitante entra con su ALICE** (*«del 1 al 3 toma lo de BLOKY»*; RN-367): le llega la invitación al celular, entra a su app y en portería muestra su **pase**, un QR que **cambia cada dos minutos** (RN-371). Quien lo invita ya no comparte un código. |
+| 13 | 2026-11-27 | **Al visitante y al residente recurrente se les autoriza por días y, si se quiere, por una franja de horas** (RN-392), **sin días de la semana**. Cambia lo de «escoge los días» de la decisión 10. |
+| 14 | 2026-11-27 | **Para crear a cualquier persona se pide siempre nombre, celular, tipo y número de documento**, como en BLOKY (*«5 y 6 como lo tiene BLOKY»*). Solo el menor de edad puede ir sin celular. El país del celular queda pendiente (la maqueta asume +57). |
+| 15 | 2026-11-27 | **Mantenimiento ve toda la bandeja de PQRS** (RN-380), como en BLOKY; antes solo las de daños (nota ¹¹). |
+| 16 | 2026-11-27 | **Los cargos del edificio se cargan a mano o salen de la elección** (*«al iniciar un contrato con una copropiedad, los del consejo se deben cargar manual»*): la administración agrega a los que ya estaban (consejo, comité, revisor fiscal); la siguiente elección los reemplaza. |
+| 17 | 2026-11-27 | **«Residente» es una marca, no un usuario** (*«tú tienes un perfil con el nombre residente y eso es una marca»*): en IDIKY los usuarios son los de §1 y «Residente» es la marca de residencia de cada uno. Lo que BLOKY llama usuario «Residente» es el **Familiar o acompañante** de esta tabla. |
 | 4 | 2026-11-26 | **Al familiar o acompañante lo crean el propietario o el arrendatario** (*«lo pueden crear el propietario o arrendatario»*). |
 | 5 | 2026-11-26 | **Administrador Idiky**, el rol más alto (el dueño, el equipo de IDIKY): el primero se crea al instalar el sistema; los demás los crea otro Administrador Idiky. Lo inactiva **otro** Administrador Idiky, nunca él mismo, y **siempre queda al menos uno activo**: así IDIKY nunca queda sin dueño y quien se va o pierde su clave se bloquea el mismo día. Propuesta aceptada por Mary (*«sí, déjalo así»*). |
 
@@ -201,7 +207,7 @@ Operador **solo ven las unidades que les asignan** (decisión 8). El Presidente 
 | 19. Clasificados entre vecinos | — | — | — | — | — | — |
 | 20. Vehículos y mascotas | — | — | — | — | — | s |
 
-¹⁰ Para alistar o cerrar la zona. ¹¹ Las de daños: las ve y las atiende (registra lo que hizo).
+¹⁰ Para alistar o cerrar la zona. ¹¹ Ve toda la bandeja y atiende las de daños (registra lo que hizo). Hasta el 2026-11-27 eran solo las de daños (decisión 15).
 ¹² Registra las novedades de su trabajo. ¹³ Crea y retira a los **visitantes** de las unidades que le asignan.
 ¹⁴ **Mary, 2026-11-26:** en las cuentas claras, la Inmobiliaria **solo ve lo de la unidad o las
 unidades a su cargo**, no el informe de todo el edificio.
@@ -219,12 +225,23 @@ la plata.
 - **El piscinero solo ve las reservas de la piscina** (Mary, 2026-11-26): la reserva y el calendario,
   sin el informe ni las zonas. La copropiedad marca cuál zona es la piscina.
 - **Aseo, Mantenimiento y el Piscinero registran sus novedades** en la minuta del edificio, también
-  desde el celular, y **Mantenimiento solo ve las PQRS de daños** y las atiende (PN-32, 2026-11-27).
+  desde el celular, y **Mantenimiento ve todas las PQRS** y atiende las de daños (PN-32; decisión 15).
+- **El visitante tiene su ALICE** (decisión 12): en el demo, Juan Sebastian Restrepo, visitante de la 402,
+  ve en su inicio el pase que cambia cada dos minutos, y la portería lo lee (o, de respaldo, busca su
+  documento). La autorización va por días y una franja de horas opcional (decisión 13).
+- **La administración agrega a mano a quien ya está en un cargo** (decisión 16), en Asambleas.
 - **Lo que la maqueta todavía no hace:** la contabilidad es la contable de Jeimy, no la consola.
 - **La marca de residencia quedó decidida** (decisiones 9 y 10) y aplicada en la maqueta, donde se
   llama «condición»: el visitante frecuente pasó a ser familiar o acompañante, **residente recurrente**.
 - **El familiar o acompañante también es No Residente** cuando no vive ahí y **va de visita** (decisión
   11): tiene la app, pero no sale en la lista de residentes de la portería.
+
+## 4 quinquies. Por conciliar con Daniel (2026-11-27)
+
+- **¿El familiar o acompañante puede invitar visitantes?** La tabla dice que al Visitante lo crean el
+  Propietario y el Arrendatario, y que el familiar no registra a nadie. En BLOKY (RN-370), su
+  «Residente», que es el familiar o acompañante de esta tabla (decisión 17), sí crea invitados.
+  **Mientras Mary no diga otra cosa, manda la tabla**: el familiar no invita.
 
 ## 5. Historia
 
@@ -244,3 +261,4 @@ la plata.
 | 2026-11-26 | **Aplicada en la maqueta** (PN-29, §4 quater) | IA, con Mary |
 | 2026-11-26 | El piscinero solo ve la piscina; marcas de residencia de octubre; el visitante frecuente pasa a familiar o acompañante, residente recurrente (decisiones 9 y 10) | Mary |
 | 2026-11-26 | El familiar o acompañante también puede ser No Residente (decisión 11) | Mary |
+| 2026-11-27 | Se alinea con BLOKY: visitante con app y pase que cambia, franja de horas, datos obligatorios, Mantenimiento con toda la bandeja y cargos cargados a mano (decisiones 12 a 17) | Mary |

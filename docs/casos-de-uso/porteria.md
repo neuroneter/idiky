@@ -55,6 +55,10 @@ consola, de respaldo (CU-A-09). Lo recibido y lo entregado queda en **la minuta 
 - **Precondiciones:** El residente generó el código (CU-R-10).
 - **Disparador:** El visitante llega a la entrada.
 
+> **2026-11-27 (Mary, alineado con BLOKY, PN-33):** la portería lee el **pase** de la ALICE del visitante
+> (vence a los dos minutos: si venció, le pide abrirlo de nuevo) o, de respaldo, **busca su documento**.
+> Si llega fuera de su franja de horas, ve «Fuera de horario» y no registra la entrada.
+
 > **2026-11-20 (revisión entre perfiles):** «Hoy en el edificio» muestra también lo que la
 > administración programó para hoy (cortes, fumigaciones, mantenimientos), y la **minuta del turno**
 > registra los pedidos de ayuda y cómo se atendieron, los trasteos hechos con su depósito, y los

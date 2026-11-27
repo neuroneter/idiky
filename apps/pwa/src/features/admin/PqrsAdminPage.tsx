@@ -31,9 +31,8 @@ export function PqrsAdminPage() {
   if (!sesion) return null
 
   const persona = sel.persona(bd, sesion.personaId)
-  // PN-32 — Mantenimiento solo ve las PQRS de daños (tabla de Mary, 2026-11-26).
-  const deMantenimiento = sesion.cargo === 'mantenimiento'
-  const todas = sel.pqrsDeCopropiedad(bd, sesion.copropiedadId).filter((p) => !deMantenimiento || p.categoria === 'mantenimiento')
+  // RN-380 — Mantenimiento ve toda la bandeja de PQRS, como en BLOKY (Mary, 2026-11-27).
+  const todas = sel.pqrsDeCopropiedad(bd, sesion.copropiedadId)
   const listado = todas.filter((solicitud) => {
     if (filtro === 'abiertas') return pqrsAbierta(solicitud)
     if (filtro === 'vencidas') return pqrsFueraDeSla(solicitud)
