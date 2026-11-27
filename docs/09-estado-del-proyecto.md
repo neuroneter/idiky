@@ -113,6 +113,15 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-27 · Mary + IA (Claude) · Dar poder con un toque (PN-31)
+
+Para llegar al quórum en las ordinarias: en el inicio de ALICE, al propietario que no ha dado poder ni
+llegado le sale «¿No puedes ir a la asamblea?» con un toque para dárselo a quien se lo dio la vez
+pasada o a quien vive con él, o a otra persona; respeta el plazo de RN-309. En la consola, antes de la
+reunión, se ve cuánto coeficiente viene asegurado con poderes frente al quórum. Archivos:
+`componentes/PoderEnUnToque.tsx`, `darPoderEnUnToque` en `datos/repositorio.ts`; prueba
+`poder-en-un-toque.spec.ts`.
+
 ### 2026-11-27 · Mary + IA (Claude) · El plazo de los poderes (RN-309, confirmada)
 
 Mary preguntó si por norma se puede dar poder el mismo día. La Ley 675 no fija plazo (art. 37): lo dice

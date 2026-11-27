@@ -5330,3 +5330,41 @@ export function motivoFueraDePlazoPoder(
   if (plazo.tipo === 'dias_antes' && hoy > sumarDias(dia, -plazo.dias)) return cerrado
   return null
 }
+
+// ---------------------------------------------------------------------------
+// Dar poder con un toque — PN-31 · CU-R-23, CU-A-21 (Mary, 2026-11-27)
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-31 — A quién se le ofrece dar el poder con un toque: **a quien se lo dio la vez pasada** y a
+ * los adultos que viven en la unidad (familiar o acompañante, arrendatario), sin repetir y sin quien
+ * lo otorga. La ley deja que el apoderado sea cualquier persona (RN-30); esto solo ahorra escribir.
+ */
+export function candidatosApoderado(p: {
+  poderes: Poder[]
+  residencias: Array<Pick<Residencia, 'personaId' | 'unidadId' | 'rol'> & { cierre?: unknown }>
+  unidadId: string
+  otorgadoPor: string
+}): Array<{ personaId: string; motivo: 'la_vez_pasada' | 'vive_aqui' }> {
+  const salida: Array<{ personaId: string; motivo: 'la_vez_pasada' | 'vive_aqui' }> = []
+  const ultimo = [...p.poderes]
+    .filter((x) => x.unidadId === p.unidadId && x.otorgadoPor === p.otorgadoPor && !x.permanente)
+    .sort((a, b) => (b.registradoEn ?? '').localeCompare(a.registradoEn ?? ''))[0]
+  if (ultimo && ultimo.apoderadoId !== p.otorgadoPor) salida.push({ personaId: ultimo.apoderadoId, motivo: 'la_vez_pasada' })
+  for (const r of p.residencias) {
+    if (r.unidadId !== p.unidadId || r.cierre || r.personaId === p.otorgadoPor) continue
+    if (r.rol !== 'familiar' && r.rol !== 'arrendatario') continue
+    if (!salida.some((s) => s.personaId === r.personaId)) salida.push({ personaId: r.personaId, motivo: 'vive_aqui' })
+  }
+  return salida.slice(0, 3)
+}
+
+/**
+ * PN-31 — **Lo que ya está asegurado antes de la reunión**: las unidades que dieron poder (en curso,
+ * no revocado). Con eso la administración sabe si el quórum está cerca o si hay que insistir.
+ */
+export function coeficienteConPoder(poderes: Poder[], asambleaId: string, unidades: Array<Pick<Unidad, 'id' | 'coeficiente'>>): { unidades: number; coeficiente: number } {
+  const ids = new Set(poderes.filter((x) => x.asambleaId === asambleaId && poderEnCurso(x)).map((x) => x.unidadId))
+  const coeficiente = unidades.filter((u) => ids.has(u.id)).reduce((s, u) => s + u.coeficiente, 0)
+  return { unidades: ids.size, coeficiente: Number(coeficiente.toFixed(4)) }
+}

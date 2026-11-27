@@ -7142,3 +7142,25 @@ export async function configurarPlazoPoderes(
   copropiedad.plazoPoderes = parametros.plazo
   return persistir(bd, copropiedad)
 }
+
+// ---------------------------------------------------------------------------
+// Dar poder con un toque — PN-31 (Mary, 2026-11-27)
+// ---------------------------------------------------------------------------
+
+/** PN-31 — El poder a una persona que ya está en el directorio: sin escribir sus datos otra vez. */
+export async function darPoderEnUnToque(
+  bdActual: BaseDatos,
+  parametros: { asambleaId: string; unidadId: string; otorgadoPor: string; apoderadoId: string },
+): Promise<Resultado<Poder>> {
+  const apoderado = bdActual.personas.find((p) => p.id === parametros.apoderadoId)
+  if (!apoderado) throw new ErrorDeNegocio('Esa persona no está en el directorio.')
+  return otorgarPoder(bdActual, {
+    asambleaId: parametros.asambleaId,
+    unidadId: parametros.unidadId,
+    otorgadoPor: parametros.otorgadoPor,
+    nombresApoderado: apoderado.nombres,
+    apellidosApoderado: apoderado.apellidos,
+    documentoApoderado: apoderado.documento,
+    telefonoApoderado: apoderado.telefono,
+  })
+}

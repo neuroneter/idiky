@@ -16,7 +16,7 @@
 import { useState } from 'react'
 import { useDatos } from '../../estado/DatosContext'
 import { useSesion } from '../../estado/SesionContext'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import * as sel from '../../datos/selectores'
 import { nombreCompleto } from '../../datos/selectores'
 import {
@@ -83,7 +83,9 @@ export function AsambleaDetallePage() {
   const { asambleaId } = useParams()
   // `null` cerrado; `'app'` lo otorga aqui (CU-R-23); `'foto'` envia el papel
   // firmado (CU-R-31). Un solo formulario, dos respaldos distintos.
-  const [dandoPoder, setDandoPoder] = useState<null | 'app' | 'foto'>(null)
+  // PN-31 — Desde el inicio («A otra persona») llega con el formulario abierto.
+  const [busqueda] = useSearchParams()
+  const [dandoPoder, setDandoPoder] = useState<null | 'app' | 'foto'>(busqueda.get('dar-poder') ? 'app' : null)
   const [viendoHoja, setViendoHoja] = useState(false)
   const [viendoCitacion, setViendoCitacion] = useState(false)
   const [viendoActa, setViendoActa] = useState(false)
@@ -808,7 +810,7 @@ export function AsambleaDetallePage() {
         </div>
       )}
 
-      {dandoPoder && unidad && (
+      {dandoPoder && unidad && !miPoder && !fueraDePlazo && (
         <FormularioDarPoder
           modo={dandoPoder}
           unidad={etiquetaUnidad(unidad)}

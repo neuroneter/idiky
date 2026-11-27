@@ -28,6 +28,7 @@ import { ChipComunicado, ChipReserva } from '../../componentes/Etiquetas'
 import { BarraAvance, ChipProyecto } from '../../componentes/TableroProyecto'
 import { PermanentesPorAceptar, PoderesPorAceptar } from './PoderesPorAceptar'
 import { MisCargosPorAceptar } from '../../componentes/CargosDelEdificio'
+import { PoderEnUnToque } from '../../componentes/PoderEnUnToque'
 import { veModulo, type ModuloIdiky } from '../../dominio/permisos'
 
 export function InicioPage() {
@@ -107,6 +108,8 @@ export function InicioPage() {
       <PoderesPorAceptar />
       {/* PN-28 — Si la asamblea lo eligió, que acepte el cargo. */}
       <MisCargosPorAceptar />
+      {/* PN-31 — Si no puede ir a la asamblea, que dé su poder con un toque. */}
+      {ve('asambleas') && <PoderEnUnToque />}
       <PermanentesPorAceptar />
 
       {/* Accesos directos. Solicitudes se queda aqui (Mary, 2026-08-27): lo que
