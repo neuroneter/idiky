@@ -44,7 +44,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-R-20 | **Recibir la citación a asamblea** | 1 | ✅ Demo (ve e imprime la citación que le llegó, CU-A-12; 2026-11-23: lee los documentos y pregunta antes de la reunión, PN-24). Confirmar asistencia **no se pide** (Mary, 2026-10-12) | [ver](./casos-de-uso/residente.md#cu-r-20) |
 | CU-R-21 | **Entrar a la asamblea y marcar mi asistencia** | 1 | ✅ Demo (2026-11-23: código QR para entrar al salón, PN-25; postularse a una elección, PN-23) | [ver](./casos-de-uso/residente.md#cu-r-21) |
 | CU-R-22 | ~~Otorgar poder a otro copropietario~~ | — | ⛔ Retirado (2026-10-02, puesta al día del catálogo): lo cubren CU-R-23 —dar poder desde la app—, CU-R-31 —enviar el papel en foto— y CU-A-19 —registrarlo en papel—. Lo que dejaba abierto (tope y firma) son preguntas jurídicas de §3 bis | [ver](./casos-de-uso/residente.md#cu-r-22) |
-| CU-R-23 | **Dar poder para que otro vote por mi unidad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-23) |
+| CU-R-23 | **Dar poder para que otro vote por mi unidad** | 1 | ✅ Demo (2026-11-27: plazo de los poderes, RN-309; poder con un toque desde el inicio, PN-31) | [ver](./casos-de-uso/residente.md#cu-r-23) |
 | CU-R-24 | **Consultar mi coeficiente de copropiedad** | 1 | ✅ Demo | [ver](./casos-de-uso/residente.md#cu-r-24) |
 | CU-R-25 | ~~Activar mi cuenta o recuperar mi contraseña~~ | 1 | ⛔ Retirado (2026-10-01: sin clave no hay nada que activar ni recuperar; ver CU-R-01) | [ver](./casos-de-uso/residente.md#cu-r-25) |
 | CU-R-26 | **Ajustar el tamaño de la letra** | 1 | ✅ Demo · ✅ BLOKY (en la puerta, 2026-09-21) | [ver](./casos-de-uso/residente.md#cu-r-26) |

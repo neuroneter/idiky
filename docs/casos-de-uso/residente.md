@@ -698,6 +698,8 @@ curso es **mixta**, así que se ven las dos formas de asistir.
 ### CU-R-23
 
 > **Ampliación 2026-11-27 (RN-309):** el poder se da y se revoca **dentro del plazo que fija el edificio** (por defecto, hasta que se verifica el quórum); la app lo dice junto al botón y, fuera de plazo, no ofrece darlo ni revocarlo: el poder queda para esa reunión.
+>
+> **Ampliación 2026-11-27 (PN-31):** en el **inicio** sale «¿No puedes ir a la asamblea?» con un toque para darle el poder a quien se lo dio la vez pasada o a quien vive con él, o «A otra persona» (abre el formulario). Pantalla: `componentes/PoderEnUnToque.tsx`; prueba: `poder-en-un-toque.spec.ts`.
 ## ~~CU-R-23 — Recibir y ejercer poderes de otros copropietarios~~ (versión anterior)
 
 > 🔄 **Esta es la primera versión de CU-R-23, reemplazada.** El número quedó para **«Dar poder

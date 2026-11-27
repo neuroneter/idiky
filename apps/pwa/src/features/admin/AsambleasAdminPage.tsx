@@ -96,7 +96,7 @@ import { Postulaciones } from '../../componentes/Postulaciones'
 import { AntesDeLaAsamblea } from '../../componentes/AntesDeLaAsamblea'
 import { CargosVigentes, ElegidosDelPunto } from '../../componentes/CargosDelEdificio'
 import { RegistrarLlegadaQr } from '../../componentes/EntradaConQr'
-import { CARGOS_ELECCION, puestosDe } from '../../dominio/reglas'
+import { CARGOS_ELECCION, coeficienteConPoder, puestosDe } from '../../dominio/reglas'
 import type { CargoEleccion } from '../../dominio/tipos'
 import { CalendarioOrdinaria } from './CalendarioOrdinaria'
 import { PlazoPoderesTarjeta } from './PlazoPoderesTarjeta'
@@ -678,6 +678,17 @@ function DetalleAsamblea({
             </button>
           </div>
           <p className="subtitulo">
+            {/* PN-31 — Antes de la reunión: cuánto coeficiente ya viene asegurado con poderes. */}
+            {asamblea.estado === 'convocada' && (() => {
+              const conPoder = coeficienteConPoder(bd.poderes, asamblea.id, sel.unidadesDe(bd, asamblea.copropiedadId))
+              return (
+                <strong style={{ display: 'block', marginBottom: 'var(--e1)' }}>
+                  Con los poderes que han llegado: {conPoder.unidades} {conPoder.unidades === 1 ? 'unidad' : 'unidades'},{' '}
+                  {conPoder.coeficiente.toLocaleString('es-CO')} % del coeficiente. El quórum pide más del{' '}
+                  {(sel.copropiedad(bd, asamblea.copropiedadId)?.quorumMinimo ?? 50).toLocaleString('es-CO')} %.
+                </strong>
+              )
+            })()}
             La asamblea es de propietarios; el poder es lo que deja entrar a quien no lo es
             (RN-30). Aquí se registran los que llegan <strong>en papel</strong>; los que el
             propietario otorga desde su app aparecen solos, y los que <strong>envía en foto</strong>{' '}
