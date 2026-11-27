@@ -5270,3 +5270,23 @@ export function cargosVigentesDe(cargos: CargoElegido[] | undefined, copropiedad
 export function textoEleccionCargo(p: { copropiedad: string; nombre: string; cargo: CargoEleccion }): string {
   return `${p.copropiedad}: ${p.nombre}, la asamblea te eligió para ${CARGOS_ELECCION[p.cargo].nombre.toLowerCase()}. Gracias por ofrecerte. Entra a Idiky para aceptar el cargo.`
 }
+
+// ---------------------------------------------------------------------------
+// Votar en la asamblea — PN-30 · CU-R-21, CU-A-18 (Mary, 2026-11-27)
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-30 — **Solo vota la unidad que está en la asamblea**: la que registró su llegada (presencial,
+ * con su código, o virtual) o está representada por quien llegó con poder. Así se vota desde el
+ * celular en el salón sin que nadie vote desde la casa en una reunión presencial (Ley 675, art. 45:
+ * deciden los presentes y representados).
+ */
+export function motivoNoVotaSinAsistencia(asistencias: Asistencia[], asambleaId: string, unidadId: string): string | null {
+  if (asistenciaDeUnidad(asistencias, asambleaId, unidadId)) return null
+  return 'Primero registra tu llegada a la asamblea: votan las unidades presentes o representadas.'
+}
+
+/** PN-30 — Las unidades que están en la asamblea y todavía no votan este punto. */
+export function presentesSinVotar(asistencias: Asistencia[], asambleaId: string, votos: Voto[], votacionId: string): Asistencia[] {
+  return asistencias.filter((a) => a.asambleaId === asambleaId && !yaVoto(votos, votacionId, a.unidadId))
+}

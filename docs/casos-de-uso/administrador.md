@@ -470,6 +470,8 @@ coeficiente y se cierra.
 
 ### CU-A-18
 
+> **Ampliación 2026-11-27 (PN-30):** con la votación abierta, «**Votos en la sala**» dice cuántas unidades presentes faltan por votar y deja registrar el voto de quien no tiene celular (unidad y opción). Solo cuentan las unidades que quedaron en la asistencia. Pantalla: `features/admin/VotoEnSala.tsx`; prueba: `voto-en-sala.spec.ts`.
+
 > **Ampliación 2026-11-26 (PN-28):** al cerrar la votación de una elección quedan los **más votados** en los puestos que se fijaron al citar (empate en el último puesto: se define por el reglamento). La administración ve quiénes quedaron y registra si aceptó quien es de afuera o lo dijo en la sala; arriba de Asambleas, **quién está hoy en cada cargo**. Pantalla: `componentes/CargosDelEdificio.tsx`; prueba: `elegidos.spec.ts`.
 ## CU-A-18 — Habilitar, abrir y cerrar una votación
 

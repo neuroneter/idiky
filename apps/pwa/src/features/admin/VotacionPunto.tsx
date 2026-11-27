@@ -23,6 +23,7 @@ import { useSesion } from '../../estado/SesionContext'
 import * as sel from '../../datos/selectores'
 import { abrirVotacion, anularVotacion, cerrarVotacion, prepararVotacion } from '../../datos/repositorio'
 import {
+  decisionAdmisibleEnLaSesion,
   CARGOS_ELECCION,
   opcionesDeEleccion,
   postulacionesVigentes,
@@ -38,6 +39,7 @@ import {
   unidadesNecesarias,
 } from '../../dominio/reglas'
 import type { Asamblea, PuntoOrdenDelDia } from '../../dominio/tipos'
+import { VotoEnSala } from './VotoEnSala'
 
 function porcentaje(valor: number): string {
   return `${valor.toFixed(4).replace(/0+$/, '').replace(/\.$/, '')} %`
@@ -249,6 +251,8 @@ export function VotacionPunto({ asamblea, punto }: { asamblea: Asamblea; punto: 
           >
             Cerrar la votación
           </button>
+          {/* PN-30 — Quien vota en la sala sin celular, si esta sesión puede decidir el punto (RN-94). */}
+          {decisionAdmisibleEnLaSesion(asamblea, punto).admisible && <VotoEnSala votacion={votacion} />}
         </div>
       )}
 

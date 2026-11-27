@@ -93,7 +93,7 @@ y es prioritario**. Los casos de uso en **negrita** son los que el equipo pidió
 | CU-A-15 | **Administrar varias copropiedades** | 1 | ✅ Demo (2026-11-23: Mary, 2026-11-23, «sí, varios»; selector de edificio en la consola) | — |
 | CU-A-16 | Exportar informes (cartera, PQRS) | 2 | ✅ Demo (2026-11-23: «Descargar a Excel» en Cartera y en la bandeja de PQRS) | — |
 | CU-A-17 | **Instalar la asamblea y llevar la asistencia** | 1 | ✅ Demo (2026-11-23: registrar la llegada con el QR, PN-25) | [ver](./casos-de-uso/administrador.md#cu-a-17) |
-| CU-A-18 | **Habilitar, abrir y cerrar una votación** | 1 | ✅ Demo (2026-11-26: en una elección, quiénes quedan elegidos y su aceptación, PN-28) | [ver](./casos-de-uso/administrador.md#cu-a-18) |
+| CU-A-18 | **Habilitar, abrir y cerrar una votación** | 1 | ✅ Demo (2026-11-26: en una elección, quiénes quedan elegidos y su aceptación, PN-28; 2026-11-27: vota la unidad presente y el voto en la sala, PN-30) | [ver](./casos-de-uso/administrador.md#cu-a-18) |
 | CU-A-19 | **Registrar un poder en papel y dar de alta a quien lo ejerce** | 1 | ✅ Demo (registra, valida el que llega en foto, muestra el acumulado y **aplica el tope de poderes por persona si el edificio lo configuró**, RN-220) | [ver](./casos-de-uso/administrador.md#cu-a-19) |
 | CU-A-20 | **Levantar el acta de la asamblea** | 1 | ✅ Demo (2026-11-26: dice quién quedó elegido en cada cargo, PN-28) | [ver](./casos-de-uso/administrador.md#cu-a-20) |
 | CU-A-21 | **Corregir los coeficientes mal cargados** | 1 | ✅ Demo (2026-10-13: no se cambian; se corrige un error con motivo, suma 100 % y sin asamblea instalada, con historial; RN-222) | [ver](./casos-de-uso/administrador.md#cu-a-21) |

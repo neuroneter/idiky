@@ -274,6 +274,7 @@ import {
   motivoProntoPagoInvalido,
   respuestaDeUnidad,
 } from '../dominio/reglas'
+import { motivoNoVotaSinAsistencia } from '../dominio/reglas'
 import { baseDeVoto, contarVotacion, elegidosDeEleccion, motivoPuestosInvalidos, puestosDe, textoEleccionCargo } from '../dominio/reglas'
 import type { CargoElegido } from '../dominio/tipos'
 import { leerCodigoAsistencia, motivoPostulacionInvalida, motivoRecordatoriosAsambleaInvalidos, poderVigente, recordatorioAsambleaQueToca, recordatoriosAsambleaDe, textoRecordatorioAsamblea, motivoPreguntaAsambleaInvalida, postulacionesVigentes, textoRespuestaAsamblea } from '../dominio/reglas'
@@ -5384,6 +5385,10 @@ export async function emitirVoto(
   )
   if (mora) throw new ErrorDeNegocio(mora)
 
+  // PN-30 — Vota la unidad que está en la asamblea (Mary, 2026-11-27).
+  const sinAsistencia = motivoNoVotaSinAsistencia(bd.asistencias, votacion.asambleaId, unidad.id)
+  if (sinAsistencia) throw new ErrorDeNegocio(sinAsistencia)
+
   // **Quien puede votar por esta unidad: el propietario, o su apoderado.** Si hay
   // poder, vota solo el apoderado: quien lo otorgó ya no vota esa unidad (RN-32).
   //
@@ -7078,4 +7083,36 @@ export async function aprobarDocumento(
   documento.emitidoEn = hoyISO()
   documento.preparacion = { ...documento.preparacion!, aprobadoPor: parametros.personaId, aprobadoEn: ahoraISO() }
   return persistir(bd, documento)
+}
+
+// ---------------------------------------------------------------------------
+// El voto en la sala — PN-30 (Mary, 2026-11-27)
+// ---------------------------------------------------------------------------
+
+/**
+ * PN-30 — En el salón, quien no tiene celular vota de viva voz o con la mano, y la administración
+ * lo registra por él. El voto es de quien asistió por la unidad —el propietario o su apoderado—, con
+ * las mismas reglas de siempre (mora, poder, un voto por unidad), y queda marcado «en sala».
+ */
+export async function registrarVotoEnSala(
+  bdActual: BaseDatos,
+  parametros: { votacionId: string; unidadId: string; opcionId: string; personaId: string },
+): Promise<Resultado<Voto>> {
+  const votacion = bdActual.votaciones.find((v) => v.id === parametros.votacionId)
+  if (!votacion) throw new ErrorDeNegocio('La votacion no existe.')
+  const asamblea = bdActual.asambleas.find((a) => a.id === votacion.asambleaId)
+  if (!asamblea || !esAdministracion(bdActual, parametros.personaId, asamblea.copropiedadId)) {
+    throw new ErrorDeNegocio('El voto en la sala lo registra la administración.')
+  }
+  const asistencia = bdActual.asistencias.find((a) => a.asambleaId === asamblea.id && a.unidadId === parametros.unidadId)
+  if (!asistencia) throw new ErrorDeNegocio('Esa unidad no registró su llegada: no puede votar.')
+  const { bd, datos } = await emitirVoto(bdActual, {
+    votacionId: votacion.id,
+    unidadId: parametros.unidadId,
+    personaId: asistencia.personaId,
+    opcionId: parametros.opcionId,
+  })
+  const voto = bd.votos.find((v) => v.id === datos.id)!
+  voto.enSala = { registradoPor: parametros.personaId }
+  return persistir(bd, voto)
 }

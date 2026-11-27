@@ -113,6 +113,17 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-27 · Mary + IA (Claude) · Votar en la asamblea: la unidad presente, desde el celular o en la sala (PN-30)
+
+El propietario ya votaba desde la app, pero **la app dejaba votar a cualquiera aunque no estuviera en la
+asistencia**. Mary: *«una de las primeras cosas que se hace al iniciar la asamblea es verificar el
+quórum»*; ahora la app sigue ese orden: **vota la unidad que quedó en la asistencia** (por sí o por
+su apoderado); quien llega tarde registra su llegada y vota. **Quien no tiene celular vota en la
+sala** y la administración registra su voto («Votos en la sala», con las unidades presentes que faltan).
+Archivos: `features/admin/VotoEnSala.tsx`, `registrarVotoEnSala` en `datos/repositorio.ts`,
+`motivoNoVotaSinAsistencia` en `dominio/reglas.ts`; prueba `voto-en-sala.spec.ts` (se ajustó
+`configuracion-asamblea.spec.ts`, que votaba sin registrar la llegada).
+
 ### 2026-11-27 · Mary + IA (Claude) · Aviso a Daniel: la tabla de roles, a BOB y al middleware
 
 Mary pidió que a Daniel se lo muestren apenas entre: quedó como aviso **M1** en

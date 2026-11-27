@@ -1756,6 +1756,11 @@ export interface Voto {
   /** Copiado al votar: si el coeficiente cambia, la votacion cerrada no (RN-37). */
   coeficiente: number
   fecha: FechaHoraISO
+  /**
+   * PN-30 — Lo votó en el salón quien no tiene celular, y lo registró la administración
+   * (Mary, 2026-11-27). El voto sigue siendo de quien asistió por la unidad (`emitidoPor`).
+   */
+  enSala?: { registradoPor: string }
 }
 
 // ---------------------------------------------------------------------------
