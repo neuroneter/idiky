@@ -18,16 +18,23 @@ BLOKY Dev:**
 - Ya existen **Piscinero**, **Inmobiliaria** y **Operador**.
 - El **Arrendatario** crea a sus familiares y visitantes.
 
-**Falta** (segunda parte): la marca de residencia, asignarle unidades a la Inmobiliaria y al Operador, y el resto de la
-tabla de permisos (el personal y los módulos que BLOKY todavía no tiene).
+- **La marca de residencia ya existe** (RN-400): Residente, No Residente, Residente Temporal y Residente Recurrente, con lo
+  que admite cada usuario según tu tabla. El arrendatario nace Residente y el visitante No Residente; al propietario y al
+  familiar o acompañante se les pregunta. Solo el propietario deja a un visitante como Residente Temporal.
 
-**Dos preguntas:**
+**Falta:** asignarle unidades a la Inmobiliaria y al Operador, y el resto de la tabla de permisos (el personal y los
+módulos que BLOKY todavía no tiene).
+
+**Tres preguntas:**
 
 1. A la gente ya se le muestra «Visitante», «Portería» y «Auxiliar Administrativo», pero por dentro el sistema los sigue
    guardando como `invitado`, `seguridad` y `secretaria` (nadie lo ve). ¿Basta con eso, o también hay que cambiarlos por
    dentro como se hizo con «conviviente»?
 2. En tu tabla la **Inmobiliaria** ve las asambleas «con poder». ¿Sin poder no ve nada de la asamblea, o ve la citación y
    los documentos y solo necesita el poder para votar?
+3. Un visitante autorizado por **varios días** (hoy se puede, con franja de horas): ¿sigue siendo «No Residente», o desde
+   cierto número de días debe ser «Residente Temporal» y entonces solo lo crea el propietario? Hoy el sistema no lo decide
+   por las fechas: vale la marca que escoja quien lo crea.
 
 ---
 

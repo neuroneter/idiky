@@ -444,8 +444,17 @@ mantenimiento y jardinería → Mantenimiento; administración y secretaría →
 
 ## 5. La unidad: propietario, arrendatario, convivientes, invitados y mascotas (RN-321, RN-366 a RN-369)
 
-> **RN-398 (2026-11-26):** en pantalla, al `conviviente` se le dice **«Residente»**. En este contrato `conviviente` es el
-> identificador que viaja en la API y no cambia; ALICE muestra «Residente».
+> **RN-399 (2026-11-28), reemplaza lo del 26:** el rol `conviviente` ya no existe. La API devuelve **`familiar`** («Familiar
+> o acompañante») y al crear todavía acepta `conviviente` y `residente`. `invitado` se muestra «Visitante». El familiar o
+> acompañante tiene `visitantes: ["ver"]`: no invita.
+>
+> **RN-400 (2026-11-28), la marca de residencia.** Cada residencia trae **`marca`**: `"residente"` · `"no_residente"` ·
+> `"temporal"` · `"recurrente"` · `null` (sin definir). Al crear (`POST …/residentes`, `…/arrendatarios`, `…/invitados`) se
+> puede mandar `marca`; si no viene, el arrendatario nace `residente`, el visitante `no_residente` y los demás `null`.
+> Lo que admite cada rol: propietario `residente`/`no_residente`; arrendatario `residente`/`temporal`; invitado
+> `no_residente`/`temporal`; familiar, las cuatro. Otra cosa responde `422 invalido`. **Un visitante `temporal` solo lo crea
+> el propietario** (`403 solo_propietario`). Para cambiarla: **`PUT …/unidades/:unidadId/residencias/:rid/marca`**
+> `{ marca }` → `{ residencias }` (pide `mi_unidad: editar`; a un propietario o a un arrendatario, solo el propietario).
 
 > **Cambio de contrato del 2026-11-23 (T-147, en BLOKY Dev `bloky-31e8af6`).** Los roles en la unidad ahora son
 > **`propietario` · `arrendatario` · `conviviente` · `invitado`** (RN-366). En las respuestas ya **no** sale `administrador`

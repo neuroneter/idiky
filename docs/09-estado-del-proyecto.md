@@ -113,6 +113,22 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-28 · Daniel + IA (Claude) · Middleware y BLOKY · La marca de residencia (T-170, RN-400)
+
+Segunda entrega de la tabla de Mary: la marca de residencia como dato de cada persona en la unidad.
+
+- **Middleware** (Bloky-Idiky `develop` `979d760`, BLOKY Dev `5e82f55.bloky-979d760`; migración de copropiedad 029):
+  columna `residencia.marca`; qué admite cada rol y con qué nace (`dominio/reglas.ts`); ALICE la manda al crear y la cambia
+  (`PUT …/residencias/:rid/marca`); solo el propietario deja a un visitante como Residente Temporal.
+- **BLOKY:** en la ficha de la unidad, cada persona muestra su marca y la Administración la cambia.
+- **Rango nuevo de reglas:** RN-400 … RN-449 (el anterior se agotó en RN-399).
+
+**Verificado:** `npm run probar` («Todo paso», dos pruebas nuevas), build de BLOKY y del middleware; en «Pruebas IDIKY» por
+la API: marcas que el rol no admite 422, cambio válido 200 y visible en la lista de unidades; se dejó como estaba.
+**No verificado:** las rutas de ALICE con una persona real; la pantalla en el navegador.
+**Falta de T-170:** unidades de la Inmobiliaria y el Operador; el resto de la matriz §4 bis; quién inactiva al familiar;
+desplegar BOB; ALICE. Tres preguntas a Mary en su página de avisos (§7).
+
 ### 2026-11-28 · Daniel + IA (Claude) · Middleware, BLOKY y BOB · La tabla de roles de Mary, primera parte (T-170, RN-399)
 
 Daniel aprobó llevar la tabla de Mary (`docs/recursos/roles-de-alice.md`, aviso M1) a BOB y al middleware.

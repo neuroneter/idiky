@@ -366,8 +366,13 @@ catálogo.
   `403`. Tampoco tiene `reservas`, `pqrs`, `pagos`, `paz_y_salvo` ni `asambleas`: esconde esas entradas.
 - **El Arrendatario** (`arrendatario_solo_vivir`, ahora se muestra «Arrendatario») **gestiona Mi unidad**: crea familiares
   y visitantes.
-- **Viene después (no lo construyas todavía):** la marca de residencia de cada persona, y que «Arrendatario · operación
-  completa» lo reemplacen la Inmobiliaria y el Operador.
+- **La marca de residencia ya está en BLOKY Dev (RN-400):** cada residencia trae `marca` (`residente`, `no_residente`,
+  `temporal`, `recurrente` o `null` = sin definir). Mándala al crear y cámbiala con
+  `PUT …/unidades/:unidadId/residencias/:rid/marca`. Qué admite cada rol y los errores: docs/20 §5. **Al propietario y al
+  familiar o acompañante hay que preguntarles** (nacen sin definir); un visitante «Residente Temporal» solo lo crea el
+  propietario.
+- **Viene después (no lo construyas todavía):** que «Arrendatario · operación completa» lo reemplacen la Inmobiliaria y el
+  Operador.
 
 ---
 

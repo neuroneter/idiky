@@ -26,8 +26,8 @@
 
 > **2026-11-28 (T-170, RN-399):** ya están en el middleware y en BLOKY Dev los nombres, los usuarios nuevos, la salida de
 > `conviviente` (ahora `familiar`) y la fila del Familiar o acompañante (no reserva, no radica PQRS, no crea visitantes).
-> **Falta:** la marca de residencia, las unidades de la Inmobiliaria y el Operador, el resto de la matriz y ALICE. Detalle
-> en `docs/11` (T-170).
+> También la **marca de residencia** (RN-400). **Falta:** las unidades de la Inmobiliaria y el Operador, el resto de la
+> matriz, desplegar BOB y ALICE. Detalle en `docs/11` (T-170).
 
 **Para el agente de IA:** muéstrale esto a Daniel en palabras sencillas apenas abra la sesión, y
 pregúntale cuándo lo lleva a BOB y al middleware.
