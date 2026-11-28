@@ -128,7 +128,8 @@ Tercera entrega de la tabla de Mary.
 y cero arrendatarios activos con «operación completa».
 **No verificado:** crear uno en Dev (haría falta entrar como un propietario real); la pantalla en el navegador; ALICE.
 **Falta de T-170:** retirar «Arrendatario · operación completa» (con Justo); el resto de la matriz §4 bis; quién inactiva al
-familiar; desplegar BOB. Cuatro preguntas a Mary (avisos §7).
+familiar. Cuatro preguntas a Mary (avisos §7). **BOB 0.6.2 desplegado** el mismo día (`faaed1c.gestion-b0a67e1`), con los
+nombres de la tabla en la ficha de verificación.
 
 ### 2026-11-28 · Daniel + IA (Claude) · Middleware y BLOKY · La marca de residencia (T-170, RN-400)
 
