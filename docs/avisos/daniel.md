@@ -22,7 +22,12 @@
 
 ## De Mary
 
-### M1. La tabla de usuarios, permisos y marcas de residencia — ⏳ abierto (2026-11-27)
+### M1. La tabla de usuarios, permisos y marcas de residencia — 🟡 primera parte en BLOKY Dev (2026-11-28)
+
+> **2026-11-28 (T-170, RN-399):** ya están en el middleware y en BLOKY Dev los nombres, los usuarios nuevos, la salida de
+> `conviviente` (ahora `familiar`) y la fila del Familiar o acompañante (no reserva, no radica PQRS, no crea visitantes).
+> **Falta:** la marca de residencia, las unidades de la Inmobiliaria y el Operador, el resto de la matriz y ALICE. Detalle
+> en `docs/11` (T-170).
 
 **Para el agente de IA:** muéstrale esto a Daniel en palabras sencillas apenas abra la sesión, y
 pregúntale cuándo lo lleva a BOB y al middleware.

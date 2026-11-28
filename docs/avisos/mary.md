@@ -7,6 +7,30 @@
 
 ---
 
+## 7. Tu tabla de roles ya empezó a llegar a BLOKY — ⏳ dos preguntas para ti (2026-11-28)
+
+Daniel aprobó llevar tu tabla (`docs/recursos/roles-de-alice.md`) a BOB y al middleware. **La primera parte ya está en
+BLOKY Dev:**
+
+- «Conviviente» ya no existe, tampoco por dentro: es **Familiar o acompañante**. No reserva, no radica PQRS, no ve cartera
+  ni asambleas y **no crea visitantes** (tu decisión 18).
+- Los nombres quedaron como los tuyos: **Portería**, **Auxiliar Administrativo**, **Visitante** y **Arrendatario**.
+- Ya existen **Piscinero**, **Inmobiliaria** y **Operador**.
+- El **Arrendatario** crea a sus familiares y visitantes.
+
+**Falta** (segunda parte): la marca de residencia, asignarle unidades a la Inmobiliaria y al Operador, y el resto de la
+tabla de permisos (el personal y los módulos que BLOKY todavía no tiene).
+
+**Dos preguntas:**
+
+1. A la gente ya se le muestra «Visitante», «Portería» y «Auxiliar Administrativo», pero por dentro el sistema los sigue
+   guardando como `invitado`, `seguridad` y `secretaria` (nadie lo ve). ¿Basta con eso, o también hay que cambiarlos por
+   dentro como se hizo con «conviviente»?
+2. En tu tabla la **Inmobiliaria** ve las asambleas «con poder». ¿Sin poder no ve nada de la asamblea, o ve la citación y
+   los documentos y solo necesita el poder para votar?
+
+---
+
 ## 6. Lo que cambió hoy en BLOKY y la maqueta debería reflejar — ⏳ para revisar (2026-11-21)
 
 Daniel construyó en BLOKY (el producto real) reglas nuevas que tocan pantallas de tu demo (consola del administrador y

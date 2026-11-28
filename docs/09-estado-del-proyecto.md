@@ -113,6 +113,27 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-28 · Daniel + IA (Claude) · Middleware, BLOKY y BOB · La tabla de roles de Mary, primera parte (T-170, RN-399)
+
+Daniel aprobó llevar la tabla de Mary (`docs/recursos/roles-de-alice.md`, aviso M1) a BOB y al middleware.
+
+- **Catálogo** (migración común 023): `conviviente` se retira y nace `familiar` (Familiar o acompañante); Seguridad →
+  Portería, Secretaría → Auxiliar Administrativo, Invitado → Visitante, «Arrendatario · solo vivir» → Arrendatario; nuevos
+  Piscinero, Inmobiliaria y Operador.
+- **Matriz:** el familiar o acompañante solo ve (no reserva, no radica PQRS, no crea visitantes: decisión 18); el
+  Arrendatario gestiona Mi unidad; el Piscinero ve reservas y cartelera.
+- **Residencias** (migración de copropiedad 028): el rol `conviviente` pasa a `familiar`.
+- **Reemplaza RN-398 y T-169** (del 26: «al conviviente se le dice Residente»): «Residente» es una marca, no un usuario.
+
+Bloky-Idiky `develop` `ab973aa`; BLOKY Dev `c75876c.bloky-ab973aa`; BOB-Idiky `develop` `183bbda`, sin desplegar.
+
+**Verificado:** `npm run probar` («Todo paso»), build de BLOKY, del middleware y del panel de BOB; leído en la base de Dev
+el catálogo, la fila del familiar y que no queda ninguna residencia con el rol viejo.
+**No verificado:** las pantallas en el navegador; ALICE (le cambia el contrato de «Mi unidad»: aviso 14 a Justo).
+**Falta (segunda parte):** la marca de residencia; unidades de la Inmobiliaria y el Operador; el resto de la matriz §4 bis;
+quién inactiva al familiar. **El rango RN-350…399 se agotó**: hace falta uno nuevo. Dos preguntas a Mary en su página de
+avisos (§7).
+
 ### 2026-11-27 · Mary + IA (Claude) · El país del celular (PN-34) y el Excel de roles al día
 
 - **El celular se registra con su país**, Colombia por defecto (`componentes/Registro.tsx`, `dominio/reglas.ts`):

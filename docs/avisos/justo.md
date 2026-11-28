@@ -352,7 +352,26 @@ catálogo.
 
 ---
 
-## 13. Al conviviente se le dice «Residente» — 🟡 listo en BLOKY, falta ALICE (2026-11-26)
+## 14. Cambia el contrato de «Mi unidad»: `conviviente` ahora es `familiar` — 🟡 listo en BLOKY Dev, falta ALICE (2026-11-28)
+
+**Reemplaza el aviso 13.** Mary definió la tabla de usuarios que manda para todos los repositorios
+([`recursos/roles-de-alice.md`](../recursos/roles-de-alice.md)); Daniel la aprobó y la primera parte ya está en BLOKY Dev
+(T-170, **RN-399**). Léela antes de seguir con «Mi unidad».
+
+- **El rol de la residencia y el de `permisos` ya no es `conviviente`: es `familiar`** y se muestra **«Familiar o
+  acompañante»**. «Residente» **no** es un usuario: será una marca (segunda parte). Al crear (`POST …/residentes`) la API
+  todavía acepta `conviviente` y `residente`, pero **siempre devuelve `familiar`**. Cambia los tipos y los textos de ALICE.
+- **`invitado` se muestra «Visitante»** (el identificador y las rutas `…/invitados` no cambian).
+- **El familiar o acompañante ya no invita:** en `permisos` tiene `visitantes: ["ver"]`; `POST …/invitados` le responde
+  `403`. Tampoco tiene `reservas`, `pqrs`, `pagos`, `paz_y_salvo` ni `asambleas`: esconde esas entradas.
+- **El Arrendatario** (`arrendatario_solo_vivir`, ahora se muestra «Arrendatario») **gestiona Mi unidad**: crea familiares
+  y visitantes.
+- **Viene después (no lo construyas todavía):** la marca de residencia de cada persona, y que «Arrendatario · operación
+  completa» lo reemplacen la Inmobiliaria y el Operador.
+
+---
+
+## 13. Al conviviente se le dice «Residente» — ↩️ reemplazado por el 14 (2026-11-28)
 
 Daniel (2026-11-26): *no se le dice conviviente sino residente*. Regla **RN-398**.
 
