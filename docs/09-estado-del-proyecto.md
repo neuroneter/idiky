@@ -113,6 +113,23 @@ coeficiente y un acta que resista revisión.
 
 > Formato: fecha · quién · qué se hizo · qué sigue. **Las entradas nuevas van arriba.**
 
+### 2026-11-28 · Daniel + IA (Claude) · Middleware y BLOKY · La Inmobiliaria y el Operador de una unidad (T-170, RN-401)
+
+Tercera entrega de la tabla de Mary.
+
+- **Diseño:** son una residencia más de la unidad, con rol `inmobiliaria` u `operador`. Por eso «solo ven las unidades que
+  les asignan» sale solo: los permisos de ALICE ya se calculan unidad por unidad.
+- **Middleware** (Bloky-Idiky `develop` `90afe66`, BLOKY Dev `cd044ec.bloky-90afe66`; migración común 024, de copropiedad
+  030): `POST …/encargados`, solo el propietario; sin marca; no cuentan como personas de la unidad; permisos de la §4 bis.
+  Retirar o bloquear a un visitante pasa al módulo Visitantes.
+- **BLOKY:** en la ficha de la unidad salen aparte, en «Inmobiliaria y operador».
+
+**Verificado:** `npm run probar` («Todo paso», una prueba nueva), builds; leído en Dev: permisos, regla de roles de la unidad
+y cero arrendatarios activos con «operación completa».
+**No verificado:** crear uno en Dev (haría falta entrar como un propietario real); la pantalla en el navegador; ALICE.
+**Falta de T-170:** retirar «Arrendatario · operación completa» (con Justo); el resto de la matriz §4 bis; quién inactiva al
+familiar; desplegar BOB. Cuatro preguntas a Mary (avisos §7).
+
 ### 2026-11-28 · Daniel + IA (Claude) · Middleware y BLOKY · La marca de residencia (T-170, RN-400)
 
 Segunda entrega de la tabla de Mary: la marca de residencia como dato de cada persona en la unidad.

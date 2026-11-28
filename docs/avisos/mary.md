@@ -22,10 +22,13 @@ BLOKY Dev:**
   que admite cada usuario según tu tabla. El arrendatario nace Residente y el visitante No Residente; al propietario y al
   familiar o acompañante se les pregunta. Solo el propietario deja a un visitante como Residente Temporal.
 
-**Falta:** asignarle unidades a la Inmobiliaria y al Operador, y el resto de la tabla de permisos (el personal y los
-módulos que BLOKY todavía no tiene).
+- **La Inmobiliaria y el Operador ya funcionan** (RN-401): los pone y los retira el propietario en su unidad, no viven ahí
+  y solo ven las unidades donde los pusieron. La Inmobiliaria ve y paga la cartera y pide paz y salvo; el Operador, no. Los
+  dos crean y retiran visitantes, reservan y radican PQRS.
 
-**Tres preguntas:**
+**Falta:** el resto de la tabla de permisos (el personal y los módulos que BLOKY todavía no tiene).
+
+**Cuatro preguntas:**
 
 1. A la gente ya se le muestra «Visitante», «Portería» y «Auxiliar Administrativo», pero por dentro el sistema los sigue
    guardando como `invitado`, `seguridad` y `secretaria` (nadie lo ve). ¿Basta con eso, o también hay que cambiarlos por
@@ -35,6 +38,8 @@ módulos que BLOKY todavía no tiene).
 3. Un visitante autorizado por **varios días** (hoy se puede, con franja de horas): ¿sigue siendo «No Residente», o desde
    cierto número de días debe ser «Residente Temporal» y entonces solo lo crea el propietario? Hoy el sistema no lo decide
    por las fechas: vale la marca que escoja quien lo crea.
+4. La persona de la **Inmobiliaria** o el **Operador**, cuando va al edificio: ¿la portería la deja entrar como a alguien de
+   la unidad (con su pase), o debe entrar como visitante? Hoy la portería la ve como «Inmobiliaria» u «Operador», vigente.
 
 ---
 

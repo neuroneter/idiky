@@ -371,8 +371,13 @@ catálogo.
   `PUT …/unidades/:unidadId/residencias/:rid/marca`. Qué admite cada rol y los errores: docs/20 §5. **Al propietario y al
   familiar o acompañante hay que preguntarles** (nacen sin definir); un visitante «Residente Temporal» solo lo crea el
   propietario.
-- **Viene después (no lo construyas todavía):** que «Arrendatario · operación completa» lo reemplacen la Inmobiliaria y el
-  Operador.
+- **La Inmobiliaria y el Operador ya están en BLOKY Dev (RN-401):** el propietario los pone en su unidad con
+  `POST …/unidades/:unidadId/encargados` (`rol: "inmobiliaria" | "operador"`). No viven ahí, no llevan marca y solo ven las
+  unidades donde los pusieron. Contrato en docs/20 §5. Bloquear o finalizar a un **visitante** pide ahora el permiso
+  `visitantes`.
+- **Viene después (avísame antes de tocarlo):** «Arrendatario · operación completa» se va a retirar del catálogo, porque
+  lo reemplazan la Inmobiliaria y el Operador. Hoy `GET /api/app/paquetes-de-arrendatario` todavía lo devuelve; cuando se
+  retire quedará un solo paquete, «Arrendatario».
 
 ---
 

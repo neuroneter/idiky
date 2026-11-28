@@ -455,6 +455,14 @@ mantenimiento y jardinería → Mantenimiento; administración y secretaría →
 > `no_residente`/`temporal`; familiar, las cuatro. Otra cosa responde `422 invalido`. **Un visitante `temporal` solo lo crea
 > el propietario** (`403 solo_propietario`). Para cambiarla: **`PUT …/unidades/:unidadId/residencias/:rid/marca`**
 > `{ marca }` → `{ residencias }` (pide `mi_unidad: editar`; a un propietario o a un arrendatario, solo el propietario).
+>
+> **RN-401 (2026-11-28), la Inmobiliaria y el Operador.** **`POST …/unidades/:unidadId/encargados`**
+> `{ rol: "inmobiliaria" | "operador", nombre, celular, paisCelular?, tipoDocumento, numeroDocumento, paisDocumento?, aceptarCelularRegistrado? }`
+> → `201 { residencias, yaExistia }`. **Solo el propietario** (`403 solo_propietario`); mismos errores que al agregar a
+> cualquier persona. Salen en `residencias` con `rol` `inmobiliaria` u `operador` y `marca: null` (no llevan marca: mandarla
+> responde `422`). Se retiran con la ruta de siempre (`…/residencias/:rid/finalizar`), también solo el propietario. Quien
+> entra como Inmobiliaria u Operador ve esa unidad en sus `lugares` con sus `permisos` (la Inmobiliaria trae `pagos` y
+> `paz_y_salvo`; el Operador no). **Bloquear o finalizar a un visitante pide ahora `visitantes`**, no `mi_unidad`.
 
 > **Cambio de contrato del 2026-11-23 (T-147, en BLOKY Dev `bloky-31e8af6`).** Los roles en la unidad ahora son
 > **`propietario` · `arrendatario` · `conviviente` · `invitado`** (RN-366). En las respuestas ya **no** sale `administrador`
